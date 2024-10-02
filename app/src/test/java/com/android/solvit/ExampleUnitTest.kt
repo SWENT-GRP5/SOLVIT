@@ -1,4 +1,4 @@
-package com.android.sample
+package com.android.solvit
 
 import org.junit.Assert.*
 import org.junit.Test
