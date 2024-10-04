@@ -1,17 +1,18 @@
 plugins {
+    jacoco
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
     alias(libs.plugins.ktfmt)
     alias(libs.plugins.sonar)
-    id("jacoco")
+    alias(libs.plugins.gms)
 }
 
 android {
-    namespace = "com.android.sample"
+    namespace = "com.android.solvit"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.android.sample"
+        applicationId = "com.android.solvit"
         minSdk = 29
         targetSdk = 34
         versionCode = 1
@@ -42,26 +43,32 @@ android {
         jacocoVersion = "0.8.8"
     }
 
-    buildFeatures {
-        compose = true
-    }
 
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.4.2"
-    }
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
 
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.1"
+    }
+
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
     }
 
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            merges += "META-INF/LICENSE.md"
+            merges += "META-INF/LICENSE-notice.md"
+            excludes += "META-INF/LICENSE-notice.md"
+            excludes += "META-INF/LICENSE.md"
+            excludes += "META-INF/LICENSE"
+            excludes += "META-INF/LICENSE.txt"
+            excludes += "META-INF/NOTICE"
+            excludes += "META-INF/NOTICE.txt"
         }
     }
 
@@ -70,7 +77,19 @@ android {
             isIncludeAndroidResources = true
             isReturnDefaultValues = true
         }
+        packaging {
+            jniLibs {
+                useLegacyPackaging = true
+            }
+        }
     }
+
+    buildFeatures {
+        compose = true
+        buildConfig = true
+    }
+
+
 
     // Robolectric needs to be run only in debug. But its tests are placed in the shared source set (test)
     // The next lines transfers the src/test/* from shared to the testDebug one
@@ -113,38 +132,84 @@ fun DependencyHandlerScope.globalTestImplementation(dep: Any) {
 }
 
 dependencies {
+    implementation(libs.core.ktx)
     implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.material)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(platform(libs.compose.bom))
-    testImplementation(libs.junit)
-    globalTestImplementation(libs.androidx.junit)
-    globalTestImplementation(libs.androidx.espresso.core)
+        implementation(libs.androidx.lifecycle.runtime.ktx)
+        implementation(libs.androidx.activity.compose)
+        implementation(libs.androidx.appcompat)
+        implementation(libs.androidx.constraintlayout)
+        implementation(libs.androidx.fragment.ktx)
+        implementation(libs.kotlinx.serialization.json)
+
+
+
+
 
     // ------------- Jetpack Compose ------------------
-    val composeBom = platform(libs.compose.bom)
+    val composeBom = platform(libs.androidx.compose.bom)
     implementation(composeBom)
     globalTestImplementation(composeBom)
 
-    implementation(libs.compose.ui)
-    implementation(libs.compose.ui.graphics)
-    // Material Design 3
-    implementation(libs.compose.material3)
-    // Integration with activities
-    implementation(libs.compose.activity)
+    implementation(libs.androidx.ui)
+    implementation(libs.androidx.ui.tooling.preview)
+    implementation(libs.androidx.ui.graphics)
+    implementation(libs.androidx.material)
+    implementation(libs.androidx.material3)
+    implementation(platform(libs.androidx.compose.bom))
+    testImplementation(libs.test.core.ktx)
+    debugImplementation(libs.androidx.ui.tooling)
+    debugImplementation(libs.androidx.ui.test.manifest)
+    implementation(libs.material)
+
+    // Navigation
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.navigation.fragment.ktx)
+    implementation(libs.androidx.navigation.ui.ktx)
+
+    // Google Service and Maps
+    implementation(libs.play.services.maps)
+    implementation(libs.maps.compose)
+    implementation(libs.maps.compose.utils)
+    implementation(libs.play.services.auth)
+
+    // Firebase
+    implementation(libs.firebase.database.ktx)
+    implementation(libs.firebase.firestore)
+    implementation(libs.firebase.ui.auth)
+    implementation(libs.firebase.auth.ktx)
+    implementation(libs.firebase.auth)
+
+    // Networking with OkHttp
+    implementation(libs.okhttp)
+
+    // Testing Unit
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.mockk)
+    androidTestImplementation(libs.mockk.android)
+    androidTestImplementation(libs.mockk.agent)
+    testImplementation(libs.json)
+
     // Integration with ViewModels
     implementation(libs.compose.viewmodel)
-    // Android Studio Preview support
-    implementation(libs.compose.preview)
-    debugImplementation(libs.compose.tooling)
+
     // UI Tests
-    globalTestImplementation(libs.compose.test.junit)
-    debugImplementation(libs.compose.test.manifest)
+    globalTestImplementation(libs.androidx.junit)
+    globalTestImplementation(libs.androidx.espresso.core)
+        androidTestImplementation(libs.androidx.espresso.intents)
+        globalTestImplementation(libs.androidx.ui.test.junit4)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+        testImplementation(libs.mockito.core)
+        testImplementation(libs.mockito.inline)
+        testImplementation(libs.mockito.kotlin)
+        androidTestImplementation(libs.mockito.android)
+        androidTestImplementation(libs.mockito.kotlin)
+        testImplementation(libs.robolectric)
+
 
     // --------- Kaspresso test framework ----------
     globalTestImplementation(libs.kaspresso)
-    globalTestImplementation(libs.kaspresso.compose)
+    globalTestImplementation(libs.kaspresso.compose.support)
+    androidTestImplementation(libs.kaspresso.allure.support)
 
     // ----------       Robolectric     ------------
     testImplementation(libs.robolectric)
