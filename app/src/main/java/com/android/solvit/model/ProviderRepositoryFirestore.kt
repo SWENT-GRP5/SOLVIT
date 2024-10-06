@@ -2,7 +2,6 @@ package com.android.solvit.model
 
 import android.util.Log
 import com.google.android.gms.tasks.Task
-import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -64,28 +63,22 @@ class ProviderRepositoryFirestore(private val db:FirebaseFirestore) : ProviderRe
         onFailure: (Exception) -> Unit
     ) {
 
-        if(service !=null){
-             val collectionRef =  db.collection(collectionPath).whereEqualTo("service",service.toString())
-            collectionRef.get().addOnCompleteListener{task->
-                if(task.isSuccessful){
-                    val providers = task.result?.mapNotNull { document -> convertDoc(document) } ?: emptyList()
-                    onSuccess(providers)
-                }else{
-                    Log.e("ProviderRepositoryFirestore", "failed to get Providers")
-                    task.exception?.let {onFailure(it)}
-                }}
+        val query = if(service !=null){
+            db.collection(collectionPath).whereEqualTo("service",service.toString())
         }else{
-             val collectionRef =  db.collection(collectionPath)
-                collectionRef.get().addOnCompleteListener{task->
-                    if(task.isSuccessful){
-                        val providers = task.result?.mapNotNull { document -> convertDoc(document) } ?: emptyList()
-                        onSuccess(providers)
-                    }else{
-                        Log.e("ProviderRepositoryFirestore", "failed to get Providers")
-                        task.exception?.let {onFailure(it)}
+            db.collection(collectionPath)
+        }
+        query.get().addOnCompleteListener{task->
+            if(task.isSuccessful){
+                val providers = task.result?.mapNotNull { document -> convertDoc(document) } ?: emptyList()
+                onSuccess(providers)
+            }else{
+                Log.e("ProviderRepositoryFirestore", "failed to get Providers")
+                task.exception?.let {onFailure(it)}
+            }
         }
 
-    }}}
+    }
 
     private fun performFirestoreOperation(
         task : Task<Void>,
