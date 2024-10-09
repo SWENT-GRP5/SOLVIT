@@ -140,9 +140,7 @@ dependencies {
         implementation(libs.androidx.constraintlayout)
         implementation(libs.androidx.fragment.ktx)
         implementation(libs.kotlinx.serialization.json)
-
-
-
+    implementation(libs.androidx.navigation.runtime.ktx)
 
 
     // ------------- Jetpack Compose ------------------
