@@ -141,4 +141,28 @@ class EditRequestScreenTest {
     composeTestRule.onNodeWithTag("inputRequestTitle").performClick()
     composeTestRule.onNodeWithTag("serviceTypeMenu").assertDoesNotExist()
   }
+
+  @Test
+  fun deleteButton_triggersDeleteAction() {
+    composeTestRule.setContent { EditRequestScreen(serviceRequestViewModel, locationViewModel) }
+
+    composeTestRule.onNodeWithTag("deleteRequestButton").performClick()
+
+    Mockito.verify(serviceRequestRepository).deleteServiceRequestById(any(), any(), any())
+  }
+
+  @Test
+  fun deleteButton_logsErrorOnFailure() {
+    composeTestRule.setContent { EditRequestScreen(serviceRequestViewModel, locationViewModel) }
+
+    Mockito.`when`(serviceRequestRepository.deleteServiceRequestById(any(), any(), any()))
+        .thenAnswer { invocation ->
+          val onError = invocation.getArgument<(String) -> Unit>(2)
+          onError("Error")
+        }
+
+    composeTestRule.onNodeWithTag("deleteRequestButton").performClick()
+
+    Mockito.verify(serviceRequestRepository).deleteServiceRequestById(any(), any(), any())
+  }
 }
