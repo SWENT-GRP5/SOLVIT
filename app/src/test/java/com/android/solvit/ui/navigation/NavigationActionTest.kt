@@ -28,8 +28,10 @@ class NavigationActionTest {
 
   @Test
   fun navigateToCallsController1() {
-    navigationActions.navigateTo(TopLevelDestinations.HOME)
-    verify(navHostController).navigate(eq(Route.HOME), any<NavOptionsBuilder.() -> Unit>())
+
+    navigationActions.navigateTo(TopLevelDestinations.SERVICES)
+    verify(navHostController).navigate(eq(Route.SERVICES), any<NavOptionsBuilder.() -> Unit>())
+
 
     navigationActions.navigateTo(Route.ORDER)
     verify(navHostController).navigate(Route.ORDER)
@@ -51,8 +53,9 @@ class NavigationActionTest {
 
   @Test
   fun navigateToCallsController() {
-    navigationActions.navigateTo(TopLevelDestinations.HOME)
-    verify(navHostController).navigate(eq(Route.HOME), any<NavOptionsBuilder.() -> Unit>())
+
+    navigationActions.navigateTo(TopLevelDestinations.SERVICES)
+    verify(navHostController).navigate(eq(Route.SERVICES), any<NavOptionsBuilder.() -> Unit>())
 
     navigationActions.navigateTo(TopLevelDestinations.REQUEST)
     verify(navHostController).navigate(eq(Route.REQUEST), any<NavOptionsBuilder.() -> Unit>())

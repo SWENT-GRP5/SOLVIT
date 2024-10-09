@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavController
 
 object Route {
-  const val HOME = "Overview"
+  const val SERVICES = "Overview"
   const val REQUEST = "Map"
   const val MESSAGE = "Message"
   const val PROFILE = "Profile"
@@ -20,7 +20,9 @@ object Route {
 data class TopLevelDestination(val route: String, val icon: ImageVector, val textId: String)
 
 object TopLevelDestinations {
-  val HOME = TopLevelDestination(route = Route.HOME, icon = Icons.Outlined.Home, textId = "Home")
+
+  val SERVICES =
+      TopLevelDestination(route = Route.SERVICES, icon = Icons.Outlined.Home, textId = "Home")
 
   val MESSAGE =
       TopLevelDestination(
@@ -36,7 +38,7 @@ object TopLevelDestinations {
 
 val LIST_TOP_LEVEL_DESTINATION =
     listOf(
-        TopLevelDestinations.HOME,
+        TopLevelDestinations.SERVICES,
         TopLevelDestinations.MESSAGE,
         TopLevelDestinations.REQUEST,
         TopLevelDestinations.ORDER,
