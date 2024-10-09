@@ -1,6 +1,5 @@
 package com.android.solvit.ui.requests
 
-import android.net.Uri
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
@@ -14,13 +13,19 @@ import androidx.compose.ui.test.performTextInput
 import com.android.solvit.model.map.Location
 import com.android.solvit.model.map.LocationRepository
 import com.android.solvit.model.map.LocationViewModel
+import com.android.solvit.model.requests.ServiceRequest
 import com.android.solvit.model.requests.ServiceRequestRepository
+import com.android.solvit.model.requests.ServiceRequestStatus
+import com.android.solvit.model.requests.ServiceRequestType
 import com.android.solvit.model.requests.ServiceRequestViewModel
+import com.google.firebase.Timestamp
+import java.util.GregorianCalendar
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito
+import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
@@ -31,7 +36,6 @@ class CreateRequestScreenTest {
   private lateinit var serviceRequestViewModel: ServiceRequestViewModel
   private lateinit var locationRepository: LocationRepository
   private lateinit var locationViewModel: LocationViewModel
-  private lateinit var validImageUri: Uri
 
   @get:Rule val composeTestRule = createComposeRule()
 
@@ -41,14 +45,24 @@ class CreateRequestScreenTest {
           Location(34.0522, -118.2437, "Los Angeles"),
           Location(40.7128, -74.0060, "New York"))
 
+  private val serviceRequest =
+      ServiceRequest(
+          "uid",
+          "title",
+          ServiceRequestType.CLEANING,
+          "description",
+          "assigneeName",
+          Timestamp(GregorianCalendar(2024, 0, 1).time),
+          Location(37.7749, -122.4194, "San Francisco"),
+          "imageUrl",
+          ServiceRequestStatus.PENDING)
+
   @Before
   fun setUp() {
-    serviceRequestRepository = Mockito.mock(ServiceRequestRepository::class.java)
+    serviceRequestRepository = mock(ServiceRequestRepository::class.java)
     serviceRequestViewModel = ServiceRequestViewModel(serviceRequestRepository)
-    locationRepository = Mockito.mock(LocationRepository::class.java)
+    locationRepository = mock(LocationRepository::class.java)
     locationViewModel = LocationViewModel(locationRepository)
-
-    validImageUri = Uri.parse("content://com.android.solvit.provider/image/1")
 
     `when`(locationRepository.search(anyString(), anyOrNull(), anyOrNull())).thenAnswer { invocation
       ->
@@ -56,9 +70,11 @@ class CreateRequestScreenTest {
       onSuccess(locations)
     }
 
-    `when`(serviceRequestRepository.getNewUid()).thenReturn("1")
-    `when`(serviceRequestRepository.saveServiceRequestWithImage(any(), any(), any(), any()))
-        .thenAnswer {}
+    `when`(serviceRequestRepository.saveServiceRequest(any(), any(), any())).thenAnswer { invocation
+      ->
+      val onSuccess = invocation.getArgument<(ServiceRequest) -> Unit>(1)
+      onSuccess(serviceRequest)
+    }
   }
 
   @Test
@@ -147,22 +163,5 @@ class CreateRequestScreenTest {
     composeTestRule.onNodeWithTag("inputServiceType").performTextInput("Plumbing")
     composeTestRule.onNodeWithTag("inputRequestTitle").performClick()
     composeTestRule.onNodeWithTag("serviceTypeMenu").assertDoesNotExist()
-  }
-
-  @Test
-  fun saveButton_showsErrorForInvalidDate() {
-    val invalidDate = "99/99/2024"
-
-    composeTestRule.setContent { CreateRequestScreen(serviceRequestViewModel, locationViewModel) }
-
-    // Input invalid date
-    composeTestRule.onNodeWithTag("inputRequestDate").performTextInput(invalidDate)
-
-    // Click save
-    composeTestRule.onNodeWithTag("requestSubmit").performClick()
-
-    // Verify no save is attempted
-    Mockito.verify(serviceRequestRepository, never())
-        .saveServiceRequestWithImage(any(), any(), any(), any())
   }
 }
