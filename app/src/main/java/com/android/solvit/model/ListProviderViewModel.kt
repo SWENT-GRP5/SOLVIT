@@ -1,67 +1,83 @@
 package com.android.solvit.model
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-class ListProviderViewModel(private val repository: ProviderRepository): ViewModel() {
-    private val _uiState = MutableStateFlow<List<Provider>>(emptyList())
-    val providersList : StateFlow<List<Provider>> = _uiState
+class ListProviderViewModel(private val repository: ProviderRepository) : ViewModel() {
+  private val _uiState = MutableStateFlow<List<Provider>>(emptyList())
+  val providersList: StateFlow<List<Provider>> = _uiState
 
-    private val _selectedService = MutableStateFlow<Services?>(null)
-    val selectedService : StateFlow<Services?> = _selectedService
+  private val _selectedService = MutableStateFlow<Services?>(null)
+  val selectedService: StateFlow<Services?> = _selectedService
 
-    private val _selectedProvider = MutableStateFlow<Provider?>(null)
-    val selectedProvider : StateFlow<Provider?> = _selectedProvider
+  private val _selectedProvider = MutableStateFlow<Provider?>(null)
+  val selectedProvider: StateFlow<Provider?> = _selectedProvider
 
-    companion object {
-        val Factory: ViewModelProvider.Factory =
-            object : ViewModelProvider.Factory {
-                @Suppress("UNCHECKED_CAST")
-                override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                    return ListProviderViewModel(
-                        repository = ProviderRepositoryFirestore(FirebaseFirestore.getInstance()))
-                            as T
-                }
-            }
-    }
-    fun getNewUid(): String {
-        return repository.getNewUid()
-    }
+  private val _providersListFiltered = MutableStateFlow<List<Provider>>(emptyList())
+  val providersListFiltered: StateFlow<List<Provider>> = _providersListFiltered
 
-    fun addProvider(
-        provider: Provider,
+  companion object {
+    val Factory: ViewModelProvider.Factory =
+        object : ViewModelProvider.Factory {
+          @Suppress("UNCHECKED_CAST")
+          override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            return ListProviderViewModel(
+                repository = ProviderRepositoryFirestore(FirebaseFirestore.getInstance()))
+                as T
+          }
+        }
+  }
 
-    ) {
-        repository.addProvider(provider, onSuccess = {getProviders()}, onFailure = {})
-    }
+  init {
+    repository.init { getProviders() }
+  }
 
-    fun deleteProvider(
-        provider: Provider,
-    ) {
-        repository.deleteProvider(provider, onSuccess = {getProviders()}, onFailure = {})
-    }
+  fun getNewUid(): String {
+    return repository.getNewUid()
+  }
 
-    fun updateProvider(
-        provider: Provider,
+  fun addProvider(
+      provider: Provider,
+  ) {
+    repository.addProvider(
+        provider,
+        onSuccess = { getProviders() },
+        onFailure = { Log.e("add Provider", "failed to add Provider") })
+  }
 
-    ) {
-        repository.updateProvider(provider, onSuccess = {getProviders()}, onFailure = {})
-    }
+  fun deleteProvider(
+      provider: Provider,
+  ) {
+    repository.deleteProvider(provider, onSuccess = { getProviders() }, onFailure = {})
+  }
 
-    fun getProviders(
-    ) {
-        repository.getProviders(_selectedService.value, onSuccess = {
-            providers -> _uiState.value = providers
+  fun updateProvider(
+      provider: Provider,
+  ) {
+    repository.updateProvider(provider, onSuccess = { getProviders() }, onFailure = {})
+  }
 
-        }, onFailure = {})
-    }
+  fun getProviders() {
+    repository.getProviders(
+        _selectedService.value,
+        onSuccess = { providers ->
+          _uiState.value = providers
+          _providersListFiltered.value = providers
+        },
+        onFailure = { Log.e("getProviders", "failed to get Providers") })
+  }
 
-    fun filterProviders(
-        filter : (Provider) -> Boolean
-    ){
-        _uiState.value = _uiState.value.filter (filter)
-    }
+  fun filterProviders(filter: (Provider) -> Boolean) {
+    Log.e("ListProviderViewModelBefore", "${_providersListFiltered.value}.")
+    _providersListFiltered.value = _uiState.value.filter(filter)
+    Log.e("ListProviderViewModelAfter", "${_providersListFiltered.value}.")
+  }
+
+  fun applyFilters() {
+    _uiState.value = _providersListFiltered.value
+  }
 }
