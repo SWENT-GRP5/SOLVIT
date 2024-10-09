@@ -86,6 +86,10 @@ class ListProviderViewModel(private val repository: ProviderRepository) : ViewMo
 
   }
 
+  fun selectService(service: Services?) {
+        _selectedService.value = service
+  }
+
   fun applyFilters() {
     _uiState.value = _providersListFiltered.value
   }

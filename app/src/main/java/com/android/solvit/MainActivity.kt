@@ -9,6 +9,16 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+
+import com.android.solvit.model.provider.ListProviderViewModel
+import com.android.solvit.ui.navigation.NavigationActions
+import com.android.solvit.ui.navigation.Route
+import com.android.solvit.ui.overview.SelectProviderScreen
+import com.android.solvit.ui.services.ServicesScreen
 import com.android.solvit.ui.theme.SampleAppTheme
 
 class MainActivity : ComponentActivity() {
@@ -18,7 +28,9 @@ class MainActivity : ComponentActivity() {
     setContent {
       SampleAppTheme {
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-          SolvitApp()
+
+          SolvItApp()
+
         }
       }
     }
@@ -26,8 +38,22 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun SolvitApp() {
-  Text(text = "Hello, World!")
+
+fun SolvItApp() {
+  val navController = rememberNavController()
+  val navigationActions = NavigationActions(navController)
+  val listProviderViewModel =
+      viewModel<ListProviderViewModel>(factory = ListProviderViewModel.Factory)
+
+  NavHost(navController = navController, startDestination = Route.SERVICES) {
+    composable(Route.SERVICES) { ServicesScreen(navigationActions, listProviderViewModel) }
+    composable(Route.PROVIDERS){ SelectProviderScreen(listProviderViewModel,navigationActions)}
+    composable(Route.MESSAGE) { Text("Not implemented yet") }
+    composable(Route.REQUEST) { Text("Not implemented yet") }
+    composable(Route.ORDER) { Text("Not implemented yet") }
+    composable(Route.PROFILE) { Text("Not implemented yet") }
+  }
+
 }
 
 /*
