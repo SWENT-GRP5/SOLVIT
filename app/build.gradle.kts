@@ -1,3 +1,6 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     jacoco
     alias(libs.plugins.androidApplication)
@@ -11,12 +14,22 @@ android {
     namespace = "com.android.solvit"
     compileSdk = 34
 
+    // Load the API key from local.properties
+    val localProperties = Properties()
+    val localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        localProperties.load(FileInputStream(localPropertiesFile))
+    }
+
+    val mapsApiKey: String = localProperties.getProperty("MAPS_API_KEY") ?: ""
+
     defaultConfig {
         applicationId = "com.android.solvit"
         minSdk = 29
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
+        manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -140,9 +153,8 @@ dependencies {
         implementation(libs.androidx.constraintlayout)
         implementation(libs.androidx.fragment.ktx)
         implementation(libs.kotlinx.serialization.json)
-
-
-
+    implementation(libs.firebase.storage.ktx)
+    implementation(libs.play.services.location)
 
 
     // ------------- Jetpack Compose ------------------
@@ -160,6 +172,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation(libs.material)
+    implementation(libs.coil.compose)
 
     // Navigation
     implementation(libs.androidx.navigation.compose)
