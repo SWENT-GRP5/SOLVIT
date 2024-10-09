@@ -56,9 +56,9 @@ class EditRequestScreenTest {
   fun displayAllComponents() {
     composeTestRule.setContent { EditRequestScreen(serviceRequestViewModel) }
 
-    composeTestRule.onNodeWithTag("editRequestScreen").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("editRequestTitle").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("editRequestTitle").assertTextEquals("Edit your request")
+    composeTestRule.onNodeWithTag("screenTitle").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("screenTitle").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("screenTitle").assertTextEquals("Edit your request")
     composeTestRule.onNodeWithTag("requestSubmit").assertIsDisplayed()
     composeTestRule.onNodeWithTag("requestSubmit").assertTextEquals("Save Edits")
     composeTestRule.onNodeWithTag("deleteRequestButton").assertIsDisplayed()

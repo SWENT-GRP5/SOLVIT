@@ -65,9 +65,9 @@ class CreateRequestScreenTest {
   fun displayAllComponents() {
     composeTestRule.setContent { CreateRequestScreen(serviceRequestViewModel, locationViewModel) }
 
-    composeTestRule.onNodeWithTag("createRequestScreen").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("createRequestTitle").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("createRequestTitle").assertTextEquals("Create a new request")
+    composeTestRule.onNodeWithTag("screenTitle").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("screenTitle").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("screenTitle").assertTextEquals("Create a new request")
     composeTestRule.onNodeWithTag("requestSubmit").assertIsDisplayed()
     composeTestRule.onNodeWithTag("requestSubmit").assertTextEquals("Submit Request")
 
