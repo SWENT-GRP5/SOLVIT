@@ -20,6 +20,9 @@ class ListProviderViewModel(private val repository: ProviderRepository) : ViewMo
   private val _providersListFiltered = MutableStateFlow<List<Provider>>(emptyList())
   val providersListFiltered: StateFlow<List<Provider>> = _providersListFiltered
 
+  private val filters = listOf("Price","Languages","Rating")
+  private val activeFilters = mutableMapOf<String,(Provider)->Boolean>()
+
   companion object {
     val Factory: ViewModelProvider.Factory =
         object : ViewModelProvider.Factory {
@@ -50,9 +53,9 @@ class ListProviderViewModel(private val repository: ProviderRepository) : ViewMo
   }
 
   fun deleteProvider(
-      provider: Provider,
+      uid : String,
   ) {
-    repository.deleteProvider(provider, onSuccess = { getProviders() }, onFailure = {})
+    repository.deleteProvider(uid, onSuccess = { getProviders() }, onFailure = {})
   }
 
   fun updateProvider(
@@ -71,14 +74,22 @@ class ListProviderViewModel(private val repository: ProviderRepository) : ViewMo
         onFailure = { Log.e("getProviders", "failed to get Providers") })
   }
 
-  fun filterProviders(filter: (Provider) -> Boolean) {
-    repository.filterProviders { _providersListFiltered.value = _uiState.value.filter(filter) }
-    Log.e("ListProviderViewModelBefore", "${_providersListFiltered.value}.")
-    _providersListFiltered.value = _uiState.value.filter(filter)
-    Log.e("ListProviderViewModelAfter", "${_providersListFiltered.value}.")
+  fun filterProviders(filter: (Provider) -> Boolean,filterField : String) {
+
+      activeFilters[filterField] = filter
+    repository.filterProviders {
+        _providersListFiltered.value = _uiState.value.filter{
+            provider -> activeFilters.values.all { filterA -> filterA(provider) }
+        }
+
+    }
+
   }
 
   fun applyFilters() {
     _uiState.value = _providersListFiltered.value
   }
+    fun refreshFilters(){
+        getProviders()
+    }
 }

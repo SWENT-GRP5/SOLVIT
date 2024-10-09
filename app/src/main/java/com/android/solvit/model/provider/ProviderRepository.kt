@@ -8,7 +8,7 @@ interface ProviderRepository {
 
   fun addProvider(provider: Provider, onSuccess: () -> Unit, onFailure: (Exception) -> Unit)
 
-  fun deleteProvider(provider: Provider, onSuccess: () -> Unit, onFailure: (Exception) -> Unit)
+  fun deleteProvider(uid: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit)
 
   fun updateProvider(provider: Provider, onSuccess: () -> Unit, onFailure: (Exception) -> Unit)
 

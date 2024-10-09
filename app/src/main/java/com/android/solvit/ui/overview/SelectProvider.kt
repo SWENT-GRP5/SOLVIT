@@ -59,13 +59,16 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.android.solvit.R
+import com.android.solvit.model.map.Location
 import com.android.solvit.model.provider.Language
 import com.android.solvit.model.provider.ListProviderViewModel
 import com.android.solvit.model.provider.Provider
+import com.android.solvit.model.provider.Services
+import com.google.firebase.Timestamp
 import kotlinx.coroutines.launch
 
 @Composable
-fun spTopAppBar(listProviderViewModel: ListProviderViewModel) {
+fun SpTopAppBar(listProviderViewModel: ListProviderViewModel) {
   Box(modifier = Modifier.fillMaxWidth().testTag("topAppBar")) {
     Image(
         modifier = Modifier.fillMaxWidth().height(200.dp),
@@ -77,6 +80,22 @@ fun spTopAppBar(listProviderViewModel: ListProviderViewModel) {
         verticalAlignment = Alignment.CenterVertically) {
           IconButton(
               onClick = {
+                  /*val prvd1 =
+                      Provider(
+                          listProviderViewModel.getNewUid(),
+                          "Omar",
+                          Services.PLUMBER,
+                          "https://firebasestorage.googleapis.com/v0/b/solvit-14cc1.appspot.com/o/serviceRequestImages%2F588d3bd9-bcb7-47bc-9911-61fae59eaece.jpg?alt=media&token=5f747f33-9732-4b90-9b34-55e28732ebc3",
+                          Location(0.0,0.0,"EPFL"),
+                          "Experiment plumber with a huge background experience",
+                          true,
+                          4.0,
+                          20.0,
+                          Timestamp.now(),
+                          listOf(Language.ARABIC,Language.GERMAN,Language.SPANISH,Language.FRENCH)
+                      )
+
+                  listProviderViewModel.addProvider(prvd1)*/
                 // TODO navigationAction.goBack
               }) {
                 Icon(
@@ -116,8 +135,8 @@ fun spTopAppBar(listProviderViewModel: ListProviderViewModel) {
 }
 
 @Composable
-fun spFilter(display: () -> Unit) {
-  val filters = listOf("filter1", "filter2", "filter3") // TODO update with decided list of filters
+fun SpFilter(display: () -> Unit,listProviderViewModel: ListProviderViewModel) {
+  val filters = listOf("Top Rates", "Top Prices", "Time") // TODO update with decided list of filters
   Row(
       modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("filterBar"),
       verticalAlignment = Alignment.CenterVertically) {
@@ -147,7 +166,10 @@ fun spFilter(display: () -> Unit) {
         Spacer(Modifier.weight(1f))
         Image(
             modifier =
-                Modifier.clickable { display() }
+                Modifier.clickable {
+                    listProviderViewModel.refreshFilters()
+                    display()
+                }
                     .padding(1.dp)
                     .width(18.dp)
                     .height(18.dp)
@@ -159,7 +181,7 @@ fun spFilter(display: () -> Unit) {
 }
 
 @Composable
-fun title(title: String) {
+fun Title(title: String) {
   Row(modifier = Modifier.padding(16.dp)) {
     Text(
         modifier = Modifier.width(73.dp).height(22.dp),
@@ -174,7 +196,7 @@ fun title(title: String) {
 }
 
 @Composable
-fun note(note: String = "5") {
+fun Note(note: String = "5") {
 
   Box(
       modifier =
@@ -200,7 +222,7 @@ fun note(note: String = "5") {
 }
 
 @Composable
-fun displayPopularProviders(providers: List<Provider>) {
+fun DisplayPopularProviders(providers: List<Provider>) {
 
   LazyRow(
       modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("popularProviders"),
@@ -242,7 +264,7 @@ fun displayPopularProviders(providers: List<Provider>) {
                           color = Color(0xFFFFFFFF),
                       ))
               Spacer(Modifier.width(40.dp))
-              note(provider.rating.toString())
+              Note(provider.rating.toString())
             }
       }
     }
@@ -250,7 +272,7 @@ fun displayPopularProviders(providers: List<Provider>) {
 }
 
 @Composable
-fun listProviders(providers: List<Provider>) {
+fun ListProviders(providers: List<Provider>) {
   LazyColumn(
       modifier = Modifier.fillMaxWidth().testTag("providersList"),
       verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -282,7 +304,7 @@ fun listProviders(providers: List<Provider>) {
                             textAlign = TextAlign.Center,
                         ))
                 Spacer(Modifier.weight(1f))
-                note(provider.rating.toString())
+                Note(provider.rating.toString())
               }
               Spacer(Modifier.height(12.dp))
               Text(
@@ -302,7 +324,7 @@ fun listProviders(providers: List<Provider>) {
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun priceFilter(listProviderViewModel: ListProviderViewModel) {
+fun PriceFilter(listProviderViewModel: ListProviderViewModel) {
   var minPrice by remember { mutableStateOf("min") }
   var maxPrice by remember { mutableStateOf("max") }
   var sliderPosition by remember { mutableStateOf(0f..100f) }
@@ -318,9 +340,9 @@ fun priceFilter(listProviderViewModel: ListProviderViewModel) {
             val minPriceValue = it.toDoubleOrNull()
             if (minPriceValue != null) {
               listProviderViewModel.filterProviders(
-                  filter = { provider -> provider.price >= minPriceValue })
+                  filter = { provider -> provider.price >= minPriceValue },"Price")
             } else {
-              listProviderViewModel.filterProviders(filter = { provider -> provider.price >= 0 })
+              listProviderViewModel.filterProviders(filter = { provider -> provider.price >= 0 },"Price")
             }
           },
           modifier =
@@ -338,9 +360,9 @@ fun priceFilter(listProviderViewModel: ListProviderViewModel) {
             val maxPriceValue = it.toDoubleOrNull()
             val minPriceValue = minPrice.toDoubleOrNull()
             if (maxPriceValue != null && minPriceValue != null && minPriceValue < maxPriceValue) {
-              listProviderViewModel.filterProviders { prvd -> maxPriceValue >= prvd.price }
+              listProviderViewModel.filterProviders ({ prvd -> maxPriceValue >= prvd.price },"Price")
             } else {
-              listProviderViewModel.filterProviders(filter = { provider -> provider.price >= 0 })
+              listProviderViewModel.filterProviders(filter = { provider -> provider.price >= 0 },"Price")
             }
           },
           modifier =
@@ -362,7 +384,7 @@ fun priceFilter(listProviderViewModel: ListProviderViewModel) {
 }
 
 @Composable
-fun filterSubText(text: String) {
+fun FilterSubText(text: String) {
   Text(
       text = text,
       style =
@@ -384,8 +406,10 @@ fun filterStringFields(
     elem: String,
     listProviderViewModel: ListProviderViewModel,
     filterAction: (Provider) -> Boolean,
-    defaultFilterAction: (Provider) -> Boolean
+    defaultFilterAction: (Provider) -> Boolean,
+    filterField : String
 ) {
+
 
   val newIconsPressed = iconsPressed.toMutableList().apply { set(idx, !iconsPressed[idx]) }
 
@@ -397,24 +421,26 @@ fun filterStringFields(
   val newSelectedFields =
       selectedFields.toMutableList().apply { if (newIconsPressed[idx]) add(elem) else remove(elem) }
 
+    updateStateField(newSelectedFields)
+    updateStateIconsPressed(newIconsPressed)
+    updateStateIconsColor(newIconsColor)
   if (newIconsPressed[idx]) {
-    listProviderViewModel.filterProviders { provider -> filterAction(provider) }
-  } else {
+    listProviderViewModel.filterProviders ({ provider -> filterAction(provider) },filterField)
+  }
+  else {
     if (newSelectedFields.isNotEmpty()) {
-      listProviderViewModel.filterProviders { provider -> filterAction(provider) }
+      listProviderViewModel.filterProviders ({ provider -> filterAction(provider) },filterField)
     } else {
-      listProviderViewModel.filterProviders { provider -> defaultFilterAction(provider) }
+      listProviderViewModel.filterProviders ({ provider -> defaultFilterAction(provider) },filterField)
     }
   }
 
-  updateStateField(newSelectedFields)
-  updateStateIconsPressed(newIconsPressed)
-  updateStateIconsColor(newIconsColor)
+
 }
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalLayoutApi::class)
 @Composable
-fun moFilter(list: List<String>, listProviderViewModel: ListProviderViewModel) {
+fun MoFilter(list: List<String>, listProviderViewModel: ListProviderViewModel) {
   var selectedFields by remember { mutableStateOf(mutableListOf<String>()) }
   var iconsPressed by remember { mutableStateOf(List(list.size) { false }.toMutableList()) }
   var iconsColor by remember { mutableStateOf(List(list.size) { Color.White }.toMutableList()) }
@@ -448,7 +474,7 @@ fun moFilter(list: List<String>, listProviderViewModel: ListProviderViewModel) {
                           .intersect(prvd.languages.toSet())
                           .isNotEmpty()
                     },
-                    { prvd -> prvd.languages.isNotEmpty() })
+                    { prvd -> prvd.languages.isNotEmpty() },"Language")
               }) {
             Text(text = list[idx], fontSize = 18.sp, modifier = Modifier.padding(3.dp))
           }
@@ -458,7 +484,7 @@ fun moFilter(list: List<String>, listProviderViewModel: ListProviderViewModel) {
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun ratingFilter(list: List<String>, listProviderViewModel: ListProviderViewModel) {
+fun RatingFilter(list: List<String>, listProviderViewModel: ListProviderViewModel) {
   var selectedFields by remember { mutableStateOf(mutableListOf<String>()) }
   var iconsPressed by remember { mutableStateOf(List(list.size) { false }.toMutableList()) }
   var colors by remember { mutableStateOf(List(list.size) { Color.White }.toMutableList()) }
@@ -492,7 +518,7 @@ fun ratingFilter(list: List<String>, listProviderViewModel: ListProviderViewMode
                           { prvd ->
                             selectedFields.map { u -> u.toDouble() }.contains(prvd.rating)
                           },
-                          { prvd -> prvd.rating >= 1.0 })
+                          { prvd -> prvd.rating >= 1.0 },"Rating")
                     }) {
                   Image(
                       modifier = Modifier.padding(1.90667.dp).width(16.dp).height(16.dp),
@@ -508,7 +534,7 @@ fun ratingFilter(list: List<String>, listProviderViewModel: ListProviderViewMode
 }
 
 @Composable
-fun applyButton(listProviderViewModel: ListProviderViewModel) {
+fun ApplyButton(listProviderViewModel: ListProviderViewModel,display: () -> Unit) {
   val filteredList by listProviderViewModel.providersListFiltered.collectAsState()
   Box(
       modifier =
@@ -521,7 +547,12 @@ fun applyButton(listProviderViewModel: ListProviderViewModel) {
                               listOf(
                                   Color(android.graphics.Color.parseColor("#EFEBDE")),
                                   Color(android.graphics.Color.parseColor("#4D5652")))),
-                  shape = RoundedCornerShape(50)),
+                  shape = RoundedCornerShape(50)).clickable {
+                      listProviderViewModel.applyFilters()
+                        display()
+
+
+              },
   ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally, // Center horizontally
@@ -543,7 +574,7 @@ fun applyButton(listProviderViewModel: ListProviderViewModel) {
 }
 
 @Composable
-fun filter(hide: () -> Unit, listProviderViewModel: ListProviderViewModel) {
+fun filter(hide: () -> Unit, listProviderViewModel: ListProviderViewModel,display :()->Unit) {
   Column(
       modifier = Modifier.fillMaxWidth().testTag("filterSheet"),
       verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -556,25 +587,21 @@ fun filter(hide: () -> Unit, listProviderViewModel: ListProviderViewModel) {
                     fontWeight = FontWeight(600),
                     color = Color(0xFF000000),
                 ))
-        filterSubText("Price")
-        priceFilter(listProviderViewModel)
-        filterSubText("Delivery Time")
-        // moFilter(
-        // listOf("Any", "Up to 24 hours", "Up to 3 days", "Up to 7 days"),
-        // listProviderViewModel) // TODO
-        filterSubText("Languages")
-        moFilter(
+        FilterSubText("Price")
+        PriceFilter(listProviderViewModel)
+        FilterSubText("Languages")
+        MoFilter(
             listOf("French", "English", "German", "Arabic", "Italian", "Spanish"),
             listProviderViewModel)
-        filterSubText("Rating")
-        ratingFilter(listOf("5", "4", "3", "2", "1"), listProviderViewModel)
-        applyButton(listProviderViewModel)
+        FilterSubText("Rating")
+        RatingFilter(listOf("5", "4", "3", "2", "1"), listProviderViewModel)
+        ApplyButton(listProviderViewModel,display)
       }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun selectProviderScreen(
+fun  SelectProviderScreen(
     listProviderViewModel: ListProviderViewModel =
         viewModel(factory = ListProviderViewModel.Factory)
 ) {
@@ -583,14 +610,14 @@ fun selectProviderScreen(
   val sheetState = rememberModalBottomSheetState()
   val scope = rememberCoroutineScope()
   Log.e("Select Provider Screen", "providers : $providers")
-  Scaffold(modifier = Modifier.fillMaxSize(), topBar = { spTopAppBar(listProviderViewModel) }) {
+  Scaffold(modifier = Modifier.fillMaxSize(), topBar = { SpTopAppBar(listProviderViewModel) }) {
       paddingValues ->
     Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
-      spFilter(display = { displayFilters = true })
-      title("Popular")
-      displayPopularProviders(providers)
-      title("See All")
-      listProviders(providers)
+      SpFilter(display = { displayFilters = true },listProviderViewModel)
+      Title("Popular")
+      DisplayPopularProviders(providers)
+      Title("See All")
+      ListProviders(providers)
     }
     if (displayFilters) {
       ModalBottomSheet(onDismissRequest = { displayFilters = false }, sheetState = sheetState) {
@@ -604,7 +631,7 @@ fun selectProviderScreen(
                     }
                   }
             },
-            listProviderViewModel)
+            listProviderViewModel,{displayFilters = false})
       }
     }
   }
