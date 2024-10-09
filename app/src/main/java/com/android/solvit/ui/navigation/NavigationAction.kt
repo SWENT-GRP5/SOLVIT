@@ -12,9 +12,9 @@ import androidx.navigation.NavController
 object Route {
   const val HOME = "Overview"
   const val REQUEST = "Map"
-  const val MESSAGE = "Auth"
+  const val MESSAGE = "Message"
   const val PROFILE = "Profile"
-  const val ORDER = "Settings"
+  const val ORDER = "Order"
 }
 
 data class TopLevelDestination(val route: String, val icon: ImageVector, val textId: String)
@@ -54,7 +54,10 @@ open class NavigationActions(
    */
   open fun navigateTo(destination: TopLevelDestination) {
     navController.navigate(destination.route) {
-      popUpTo(navController.graph.startDestinationId) { saveState = true }
+      popUpTo(navController.graph.startDestinationId) {
+        saveState = true
+        inclusive = true
+      }
       launchSingleTop = true
       restoreState = true
     }

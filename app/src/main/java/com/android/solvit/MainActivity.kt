@@ -18,7 +18,7 @@ class MainActivity : ComponentActivity() {
     setContent {
       SampleAppTheme {
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-          Greeting()
+          SolvitApp()
         }
       }
     }
@@ -26,9 +26,10 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun Greeting() {
+fun SolvitApp() {
   Text(text = "Hello, World!")
 }
+
 /*
 @Composable
 fun Greeting() {
