@@ -38,7 +38,7 @@ class BottomNavigationMenuTest {
             onTabSelect = {}, tabList = LIST_TOP_LEVEL_DESTINATION, selectedItem = "home")
       }
 
-      val tab = TopLevelDestinations.HOME.textId
+      val tab = TopLevelDestinations.SERVICES.textId
 
       // Verify the button is displayed
       composeTestRule.onNodeWithTag("bottomNavigationMenu").assertIsDisplayed()
@@ -50,7 +50,7 @@ class BottomNavigationMenuTest {
       var selectedTab: TopLevelDestination? = null
       val tabList =
           listOf(
-              TopLevelDestinations.HOME,
+              TopLevelDestinations.SERVICES,
               TopLevelDestinations.REQUEST,
               TopLevelDestinations.MESSAGE,
               TopLevelDestinations.PROFILE,
@@ -60,14 +60,14 @@ class BottomNavigationMenuTest {
         BottomNavigationMenu(
             onTabSelect = { selectedTab = it },
             tabList = tabList,
-            selectedItem = TopLevelDestinations.HOME.route)
+            selectedItem = TopLevelDestinations.SERVICES.route)
       }
 
       // Simulate click on the "Request" tab
-      composeTestRule.onNodeWithTag(TopLevelDestinations.HOME.textId).performClick()
+      composeTestRule.onNodeWithTag(TopLevelDestinations.SERVICES.textId).performClick()
 
       // Verify that the selected tab is "Request"
-      assert(selectedTab == TopLevelDestinations.HOME)
+      assert(selectedTab == TopLevelDestinations.SERVICES)
     }
   }
 }
