@@ -4,11 +4,11 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
-import com.android.solvit.model.Language
-import com.android.solvit.model.ListProviderViewModel
-import com.android.solvit.model.Provider
-import com.android.solvit.model.ProviderRepository
-import com.android.solvit.model.Services
+import com.android.solvit.model.provider.Language
+import com.android.solvit.model.provider.ListProviderViewModel
+import com.android.solvit.model.provider.Provider
+import com.android.solvit.model.provider.ProviderRepository
+import com.android.solvit.model.provider.Services
 import com.android.solvit.model.map.Location
 import com.google.firebase.Timestamp
 import org.junit.Before

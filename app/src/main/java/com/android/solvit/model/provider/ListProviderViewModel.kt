@@ -1,4 +1,4 @@
-package com.android.solvit.model
+package com.android.solvit.model.provider
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
@@ -26,7 +26,8 @@ class ListProviderViewModel(private val repository: ProviderRepository) : ViewMo
           @Suppress("UNCHECKED_CAST")
           override fun <T : ViewModel> create(modelClass: Class<T>): T {
             return ListProviderViewModel(
-                repository = ProviderRepositoryFirestore(FirebaseFirestore.getInstance()))
+                repository = ProviderRepositoryFirestore(FirebaseFirestore.getInstance())
+            )
                 as T
           }
         }
