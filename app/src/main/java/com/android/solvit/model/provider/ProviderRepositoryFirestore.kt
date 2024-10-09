@@ -80,6 +80,11 @@ class ProviderRepositoryFirestore(private val db: FirebaseFirestore) : ProviderR
         db.collection(collectionPath).document(provider.uid).set(provider), onSuccess, onFailure)
   }
 
+  override fun filterProviders(filter: () -> Unit) {
+    // TODO("Not yet implemented")
+    filter()
+  }
+
   override fun getProviders(
       service: Services?,
       onSuccess: (List<Provider>) -> Unit,

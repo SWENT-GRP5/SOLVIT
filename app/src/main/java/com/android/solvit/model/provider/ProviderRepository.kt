@@ -17,4 +17,6 @@ interface ProviderRepository {
       onSuccess: (List<Provider>) -> Unit,
       onFailure: (Exception) -> Unit
   )
+
+  fun filterProviders(filter: () -> Unit)
 }
