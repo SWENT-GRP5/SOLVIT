@@ -24,10 +24,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Icon
-import androidx.compose.material.RangeSlider
-import androidx.compose.material.Text
+import androidx.compose.material3.Icon
+import androidx.compose.material3.RangeSlider
+import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -59,16 +58,14 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.android.solvit.R
-import com.android.solvit.model.map.Location
 import com.android.solvit.model.provider.Language
 import com.android.solvit.model.provider.ListProviderViewModel
 import com.android.solvit.model.provider.Provider
-import com.android.solvit.model.provider.Services
-import com.google.firebase.Timestamp
+import com.android.solvit.ui.navigation.NavigationActions
 import kotlinx.coroutines.launch
 
 @Composable
-fun SpTopAppBar(listProviderViewModel: ListProviderViewModel) {
+fun SpTopAppBar(navigationActions: NavigationActions) {
   Box(modifier = Modifier.fillMaxWidth().testTag("topAppBar")) {
     Image(
         modifier = Modifier.fillMaxWidth().height(200.dp),
@@ -80,23 +77,7 @@ fun SpTopAppBar(listProviderViewModel: ListProviderViewModel) {
         verticalAlignment = Alignment.CenterVertically) {
           IconButton(
               onClick = {
-                  /*val prvd1 =
-                      Provider(
-                          listProviderViewModel.getNewUid(),
-                          "Omar",
-                          Services.PLUMBER,
-                          "https://firebasestorage.googleapis.com/v0/b/solvit-14cc1.appspot.com/o/serviceRequestImages%2F588d3bd9-bcb7-47bc-9911-61fae59eaece.jpg?alt=media&token=5f747f33-9732-4b90-9b34-55e28732ebc3",
-                          Location(0.0,0.0,"EPFL"),
-                          "Experiment plumber with a huge background experience",
-                          true,
-                          4.0,
-                          20.0,
-                          Timestamp.now(),
-                          listOf(Language.ARABIC,Language.GERMAN,Language.SPANISH,Language.FRENCH)
-                      )
-
-                  listProviderViewModel.addProvider(prvd1)*/
-                // TODO navigationAction.goBack
+                navigationActions.goBack()
               }) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -135,7 +116,7 @@ fun SpTopAppBar(listProviderViewModel: ListProviderViewModel) {
 }
 
 @Composable
-fun SpFilter(display: () -> Unit,listProviderViewModel: ListProviderViewModel) {
+fun SpFilterBar(display: () -> Unit,listProviderViewModel: ListProviderViewModel) {
   val filters = listOf("Top Rates", "Top Prices", "Time") // TODO update with decided list of filters
   Row(
       modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("filterBar"),
@@ -147,8 +128,7 @@ fun SpFilter(display: () -> Unit,listProviderViewModel: ListProviderViewModel) {
           items(filters) { filter ->
             Box(
                 modifier =
-                    Modifier.width(94.dp)
-                        .height(39.dp)
+                    Modifier.fillMaxWidth()
                         .background(
                             brush =
                                 Brush.horizontalGradient(
@@ -292,7 +272,7 @@ fun ListProviders(providers: List<Provider>) {
                 contentDescription = "provider image",
                 contentScale = ContentScale.Crop)
             Column(modifier = Modifier.weight(1f).padding(10.dp)) {
-              Row() {
+              Row {
                 Text(
                     text = provider.name,
                     style =
@@ -322,7 +302,7 @@ fun ListProviders(providers: List<Provider>) {
   }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
+
 @Composable
 fun PriceFilter(listProviderViewModel: ListProviderViewModel) {
   var minPrice by remember { mutableStateOf("min") }
@@ -438,12 +418,13 @@ fun filterStringFields(
 
 }
 
-@OptIn(ExperimentalMaterialApi::class, ExperimentalLayoutApi::class)
+
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun MoFilter(list: List<String>, listProviderViewModel: ListProviderViewModel) {
-  var selectedFields by remember { mutableStateOf(mutableListOf<String>()) }
-  var iconsPressed by remember { mutableStateOf(List(list.size) { false }.toMutableList()) }
-  var iconsColor by remember { mutableStateOf(List(list.size) { Color.White }.toMutableList()) }
+fun LanguageFilterField(list: List<String>, listProviderViewModel: ListProviderViewModel) {
+  var selectedFields by remember { mutableStateOf(listOf<String>()) }
+  var iconsPressed by remember { mutableStateOf(List(list.size) { false }) }
+  var iconsColor by remember { mutableStateOf(List(list.size) { Color(0xFFF6F6F6) }) }
   Log.e("COLORS", "$iconsColor")
   Log.e("Icons Pressed", "$iconsPressed")
 
@@ -454,14 +435,14 @@ fun MoFilter(list: List<String>, listProviderViewModel: ListProviderViewModel) {
   ) {
     repeat(list.size) { idx ->
       Box(
-          Modifier.background(color = iconsColor[idx])
+          Modifier.background(color = iconsColor[idx],shape = RoundedCornerShape(size = 8.dp))
               .testTag("filterAct")
               .padding(8.dp)
               .clickable {
                 filterStringFields(
-                    selectedFields,
-                    iconsPressed,
-                    iconsColor,
+                    selectedFields.toMutableList(),
+                    iconsPressed.toMutableList(),
+                    iconsColor.toMutableList(),
                     { a -> selectedFields = a.toMutableList() },
                     { b -> iconsPressed = b.toMutableList() },
                     { c -> iconsColor = c.toMutableList() },
@@ -484,10 +465,10 @@ fun MoFilter(list: List<String>, listProviderViewModel: ListProviderViewModel) {
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun RatingFilter(list: List<String>, listProviderViewModel: ListProviderViewModel) {
-  var selectedFields by remember { mutableStateOf(mutableListOf<String>()) }
-  var iconsPressed by remember { mutableStateOf(List(list.size) { false }.toMutableList()) }
-  var colors by remember { mutableStateOf(List(list.size) { Color.White }.toMutableList()) }
+fun RatingFilterField(list: List<String>, listProviderViewModel: ListProviderViewModel) {
+  var selectedFields by remember { mutableStateOf(listOf<String>()) }
+  var iconsPressed by remember { mutableStateOf(List(list.size) { false }) }
+  var colors by remember { mutableStateOf(List(list.size) { Color(0xFFF6F6F6) }) }
 
   FlowRow(
       Modifier.padding(20.dp).fillMaxWidth(),
@@ -497,8 +478,9 @@ fun RatingFilter(list: List<String>, listProviderViewModel: ListProviderViewMode
     repeat(list.size) { idx ->
       Box(
           modifier =
-              Modifier.width(46.dp)
-                  .height(24.dp)
+              Modifier
+                  .width(55.dp)
+                  .height(30.dp)
                   .background(color = colors[idx], shape = RoundedCornerShape(size = 59.dp))
                   .testTag("filterRating")) {
             Row(
@@ -506,9 +488,9 @@ fun RatingFilter(list: List<String>, listProviderViewModel: ListProviderViewMode
                 modifier =
                     Modifier.clickable {
                       filterStringFields(
-                          selectedFields,
-                          iconsPressed,
-                          colors,
+                          selectedFields.toMutableList(),
+                          iconsPressed.toMutableList(),
+                          colors.toMutableList(),
                           { a -> selectedFields = a.toMutableList() },
                           { b -> iconsPressed = b.toMutableList() },
                           { c -> colors = c.toMutableList() },
@@ -574,7 +556,7 @@ fun ApplyButton(listProviderViewModel: ListProviderViewModel,display: () -> Unit
 }
 
 @Composable
-fun filter(hide: () -> Unit, listProviderViewModel: ListProviderViewModel,display :()->Unit) {
+fun FilterComposable(hide: () -> Unit, listProviderViewModel: ListProviderViewModel,display :()->Unit) {
   Column(
       modifier = Modifier.fillMaxWidth().testTag("filterSheet"),
       verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -590,11 +572,11 @@ fun filter(hide: () -> Unit, listProviderViewModel: ListProviderViewModel,displa
         FilterSubText("Price")
         PriceFilter(listProviderViewModel)
         FilterSubText("Languages")
-        MoFilter(
+        LanguageFilterField(
             listOf("French", "English", "German", "Arabic", "Italian", "Spanish"),
             listProviderViewModel)
         FilterSubText("Rating")
-        RatingFilter(listOf("5", "4", "3", "2", "1"), listProviderViewModel)
+        RatingFilterField(listOf("5", "4", "3", "2", "1"), listProviderViewModel)
         ApplyButton(listProviderViewModel,display)
       }
 }
@@ -603,25 +585,28 @@ fun filter(hide: () -> Unit, listProviderViewModel: ListProviderViewModel,displa
 @Composable
 fun  SelectProviderScreen(
     listProviderViewModel: ListProviderViewModel =
-        viewModel(factory = ListProviderViewModel.Factory)
+        viewModel(factory = ListProviderViewModel.Factory),
+    navigationActions: NavigationActions
 ) {
   val providers by listProviderViewModel.providersList.collectAsState()
   var displayFilters by remember { mutableStateOf(false) }
   val sheetState = rememberModalBottomSheetState()
   val scope = rememberCoroutineScope()
   Log.e("Select Provider Screen", "providers : $providers")
-  Scaffold(modifier = Modifier.fillMaxSize(), topBar = { SpTopAppBar(listProviderViewModel) }) {
+  Scaffold(modifier = Modifier.fillMaxSize(), topBar = { SpTopAppBar(navigationActions) }) {
       paddingValues ->
     Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
-      SpFilter(display = { displayFilters = true },listProviderViewModel)
+      SpFilterBar(display = { displayFilters = true },listProviderViewModel)
       Title("Popular")
       DisplayPopularProviders(providers)
       Title("See All")
       ListProviders(providers)
     }
     if (displayFilters) {
-      ModalBottomSheet(onDismissRequest = { displayFilters = false }, sheetState = sheetState) {
-        filter(
+      ModalBottomSheet(onDismissRequest = { displayFilters = false }, sheetState = sheetState,
+          containerColor = Color.White
+          ) {
+        FilterComposable (
             {
               scope
                   .launch { sheetState.hide() }
