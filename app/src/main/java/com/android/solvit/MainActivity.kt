@@ -22,7 +22,6 @@ import com.android.solvit.ui.services.ServicesScreen
 import com.android.solvit.ui.theme.SampleAppTheme
 
 class MainActivity : ComponentActivity() {
-
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContent {
