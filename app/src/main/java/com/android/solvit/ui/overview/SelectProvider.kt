@@ -326,7 +326,8 @@ fun priceFilter(listProviderViewModel: ListProviderViewModel) {
           modifier =
               Modifier.weight(1f)
                   .background(Color(0xFFE0E0E0), RoundedCornerShape(8.dp))
-                  .padding(16.dp),
+                  .padding(16.dp)
+                  .testTag("minPrice"),
           singleLine = true,
           keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
 
@@ -345,7 +346,8 @@ fun priceFilter(listProviderViewModel: ListProviderViewModel) {
           modifier =
               Modifier.weight(1f)
                   .background(Color(0xFFE0E0E0), RoundedCornerShape(8.dp))
-                  .padding(16.dp),
+                  .padding(16.dp)
+                  .testTag("maxPrice"),
           singleLine = true,
           keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
     }
@@ -426,25 +428,28 @@ fun moFilter(list: List<String>, listProviderViewModel: ListProviderViewModel) {
   ) {
     repeat(list.size) { idx ->
       Box(
-          Modifier.background(color = iconsColor[idx]).padding(8.dp).clickable {
-            filterStringFields(
-                selectedFields,
-                iconsPressed,
-                iconsColor,
-                { a -> selectedFields = a.toMutableList() },
-                { b -> iconsPressed = b.toMutableList() },
-                { c -> iconsColor = c.toMutableList() },
-                idx,
-                list[idx],
-                listProviderViewModel,
-                { prvd ->
-                  selectedFields
-                      .map { u -> Language.valueOf(u.uppercase()) }
-                      .intersect(prvd.languages.toSet())
-                      .isNotEmpty()
-                },
-                { prvd -> prvd.languages.isNotEmpty() })
-          }) {
+          Modifier.background(color = iconsColor[idx])
+              .testTag("filterAct")
+              .padding(8.dp)
+              .clickable {
+                filterStringFields(
+                    selectedFields,
+                    iconsPressed,
+                    iconsColor,
+                    { a -> selectedFields = a.toMutableList() },
+                    { b -> iconsPressed = b.toMutableList() },
+                    { c -> iconsColor = c.toMutableList() },
+                    idx,
+                    list[idx],
+                    listProviderViewModel,
+                    { prvd ->
+                      selectedFields
+                          .map { u -> Language.valueOf(u.uppercase()) }
+                          .intersect(prvd.languages.toSet())
+                          .isNotEmpty()
+                    },
+                    { prvd -> prvd.languages.isNotEmpty() })
+              }) {
             Text(text = list[idx], fontSize = 18.sp, modifier = Modifier.padding(3.dp))
           }
     }
@@ -468,7 +473,8 @@ fun ratingFilter(list: List<String>, listProviderViewModel: ListProviderViewMode
           modifier =
               Modifier.width(46.dp)
                   .height(24.dp)
-                  .background(color = colors[idx], shape = RoundedCornerShape(size = 59.dp))) {
+                  .background(color = colors[idx], shape = RoundedCornerShape(size = 59.dp))
+                  .testTag("filterRating")) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier =
@@ -553,9 +559,9 @@ fun filter(hide: () -> Unit, listProviderViewModel: ListProviderViewModel) {
         filterSubText("Price")
         priceFilter(listProviderViewModel)
         filterSubText("Delivery Time")
-        moFilter(
-            listOf("Any", "Up to 24 hours", "Up to 3 days", "Up to 7 days"),
-            listProviderViewModel) // TODO
+        // moFilter(
+        // listOf("Any", "Up to 24 hours", "Up to 3 days", "Up to 7 days"),
+        // listProviderViewModel) // TODO
         filterSubText("Languages")
         moFilter(
             listOf("French", "English", "German", "Arabic", "Italian", "Spanish"),

@@ -26,8 +26,7 @@ class ListProviderViewModel(private val repository: ProviderRepository) : ViewMo
           @Suppress("UNCHECKED_CAST")
           override fun <T : ViewModel> create(modelClass: Class<T>): T {
             return ListProviderViewModel(
-                repository = ProviderRepositoryFirestore(FirebaseFirestore.getInstance())
-            )
+                repository = ProviderRepositoryFirestore(FirebaseFirestore.getInstance()))
                 as T
           }
         }
@@ -73,6 +72,7 @@ class ListProviderViewModel(private val repository: ProviderRepository) : ViewMo
   }
 
   fun filterProviders(filter: (Provider) -> Boolean) {
+    repository.filterProviders { _providersListFiltered.value = _uiState.value.filter(filter) }
     Log.e("ListProviderViewModelBefore", "${_providersListFiltered.value}.")
     _providersListFiltered.value = _uiState.value.filter(filter)
     Log.e("ListProviderViewModelAfter", "${_providersListFiltered.value}.")
