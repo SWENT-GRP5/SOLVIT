@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
@@ -60,9 +59,9 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.android.solvit.R
-import com.android.solvit.model.Language
-import com.android.solvit.model.ListProviderViewModel
-import com.android.solvit.model.Provider
+import com.android.solvit.model.provider.Language
+import com.android.solvit.model.provider.ListProviderViewModel
+import com.android.solvit.model.provider.Provider
 import kotlinx.coroutines.launch
 
 @Composable

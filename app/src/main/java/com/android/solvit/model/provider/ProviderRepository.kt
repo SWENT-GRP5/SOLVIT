@@ -1,4 +1,4 @@
-package com.android.solvit.model
+package com.android.solvit.model.provider
 
 interface ProviderRepository {
 

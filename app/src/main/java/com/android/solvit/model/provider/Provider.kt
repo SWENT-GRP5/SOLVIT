@@ -1,4 +1,4 @@
-package com.android.solvit.model
+package com.android.solvit.model.provider
 
 import com.android.solvit.model.map.Location
 import com.google.firebase.Timestamp
