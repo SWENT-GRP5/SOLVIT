@@ -26,7 +26,9 @@ class MainActivity : ComponentActivity() {
     setContent {
       SampleAppTheme {
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+
           SolvItApp()
+
         }
       }
     }
@@ -34,6 +36,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
+
 fun SolvItApp() {
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
@@ -47,6 +50,7 @@ fun SolvItApp() {
     composable(Route.ORDER) { Text("Not implemented yet") }
     composable(Route.PROFILE) { Text("Not implemented yet") }
   }
+
 }
 
 /*

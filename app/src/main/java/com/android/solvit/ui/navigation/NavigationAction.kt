@@ -20,6 +20,7 @@ object Route {
 data class TopLevelDestination(val route: String, val icon: ImageVector, val textId: String)
 
 object TopLevelDestinations {
+
   val SERVICES =
       TopLevelDestination(route = Route.SERVICES, icon = Icons.Outlined.Home, textId = "Home")
 
