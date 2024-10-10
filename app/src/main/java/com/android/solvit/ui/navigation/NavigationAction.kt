@@ -19,6 +19,11 @@ object Route {
   const val PROVIDERS = "Providers"
   const val MAP = "Map"
 }
+object Screen {
+
+    const val PROFILE = "Profile Screen"
+    const val EDIT_PROFILE = "EditProfile Screen"
+}
 
 data class TopLevelDestination(val route: String, val icon: ImageVector, val textId: String)
 
