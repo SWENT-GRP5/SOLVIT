@@ -15,6 +15,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,19 +27,26 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import com.android.solvit.model.provider.ListProviderViewModel
+import com.android.solvit.ui.navigation.BottomNavigationMenu
+import com.android.solvit.ui.navigation.LIST_TOP_LEVEL_DESTINATION
+import com.android.solvit.ui.navigation.NavigationActions
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.Circle
 import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 
 @Composable
-fun MapScreen() {
+fun MapScreen(providerViewModel: ListProviderViewModel, navigationActions: NavigationActions) {
   val context = LocalContext.current
   val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
   var userLocation by remember { mutableStateOf<LatLng?>(null) }
+  val providers by providerViewModel.providersList.collectAsState()
 
   // Location permission launcher
   val locationPermissionLauncher =
@@ -87,6 +95,16 @@ fun MapScreen() {
           GoogleMap(
               modifier = Modifier.fillMaxSize().testTag("googleMap"),
               cameraPositionState = cameraPositionState) {
+                providers.forEach { provider ->
+                  Marker(
+                      state =
+                          MarkerState(
+                              position =
+                                  LatLng(provider.location.latitude, provider.location.longitude)),
+                      title = provider.name,
+                      snippet = provider.description,
+                  )
+                }
 
                 // Display a marker at the user's location if it's available
                 userLocation?.let {
@@ -105,7 +123,14 @@ fun MapScreen() {
                 }
               }
         }
-      })
+      },
+      bottomBar = {
+        BottomNavigationMenu(
+            onTabSelect = { route -> navigationActions.navigateTo(route) },
+            tabList = LIST_TOP_LEVEL_DESTINATION,
+            selectedItem = navigationActions.currentRoute())
+      },
+  )
 }
 
 @SuppressLint("MissingPermission")

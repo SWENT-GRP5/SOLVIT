@@ -17,11 +17,13 @@ import com.android.solvit.model.requests.ServiceRequest
 import com.android.solvit.model.requests.ServiceRequestStatus
 import com.android.solvit.model.requests.ServiceRequestType
 import com.android.solvit.model.requests.ServiceRequestViewModel
+import com.android.solvit.ui.navigation.NavigationActions
 import com.google.firebase.Timestamp
 import java.util.Calendar
 
 @Composable
 fun EditRequestScreen(
+    navigationActions: NavigationActions,
     requestViewModel: ServiceRequestViewModel =
         viewModel(factory = ServiceRequestViewModel.Factory),
     locationViewModel: LocationViewModel = viewModel(factory = LocationViewModel.Factory)
@@ -38,7 +40,7 @@ fun EditRequestScreen(
                   2.3200410217200766,
                   "Paris, Île-de-France, France métropolitaine, France"),
           status = ServiceRequestStatus.PENDING,
-          uid = "gIoUWJGkTgLHgA7qts59",
+          uid = "mhwyv3zrecEyhILYK0Kx",
           type = ServiceRequestType.PLUMBING,
           imageUrl =
               "https://firebasestorage.googleapis.com/v0/b/solvit-14cc1.appspot.com/o/serviceRequestImages%2F588d3bd9-bcb7-47bc-9911-61fae59eaece.jpg?alt=media&token=5f747f33-9732-4b90-9b34-55e28732ebc3"))
@@ -73,6 +75,7 @@ fun EditRequestScreen(
   val localContext = LocalContext.current
 
   RequestScreen(
+      navigationActions = navigationActions,
       screenTitle = "Edit your request",
       title = title,
       onTitleChange = { title = it },
@@ -83,7 +86,10 @@ fun EditRequestScreen(
       showDropdownType = showDropdownType,
       onShowDropdownTypeChange = { showDropdownType = it },
       filteredServiceTypes = filteredServiceTypes,
-      onServiceTypeSelected = { selectedServiceType = it },
+      onServiceTypeSelected = {
+        typeQuery = it.name
+        selectedServiceType = it
+      },
       locationQuery = locationQuery,
       onLocationQueryChange = { locationViewModel.setQuery(it) },
       selectedRequest = request,
@@ -114,7 +120,13 @@ fun EditRequestScreen(
                     uid = request.uid,
                     type = selectedServiceType,
                     imageUrl = selectedImageUri.toString())
-            requestViewModel.saveServiceRequestWithImage(serviceRequest, selectedImageUri!!)
+            if (selectedImageUri != null) {
+              requestViewModel.saveServiceRequestWithImage(serviceRequest, selectedImageUri!!)
+              navigationActions.goBack()
+            } else {
+              requestViewModel.saveServiceRequest(serviceRequest)
+              navigationActions.goBack()
+            }
             return@RequestScreen
           } catch (_: NumberFormatException) {}
         }

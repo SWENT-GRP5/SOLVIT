@@ -45,6 +45,7 @@ import com.android.solvit.model.map.Location
 import com.android.solvit.model.requests.ServiceRequest
 import com.android.solvit.model.requests.ServiceRequestType
 import com.android.solvit.model.requests.ServiceRequestViewModel
+import com.android.solvit.ui.navigation.NavigationActions
 import java.util.Locale
 
 @Composable
@@ -256,14 +257,18 @@ fun ImagePicker(
 }
 
 @Composable
-fun DeleteButton(request: ServiceRequest, requestViewModel: ServiceRequestViewModel) {
+fun DeleteButton(
+    request: ServiceRequest,
+    requestViewModel: ServiceRequestViewModel,
+    navigationActions: NavigationActions
+) {
   Button(
       modifier = Modifier.testTag("deleteRequestButton").fillMaxWidth().height(40.dp),
       colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
       onClick = {
         try {
           requestViewModel.deleteServiceRequestById(request.uid)
-          // navigationActions.navigateTo(Screen.OVERVIEW)
+          navigationActions.goBack()
         } catch (e: Exception) {
           Log.e("EditRequestScreen", "Error deleting request", e)
         }

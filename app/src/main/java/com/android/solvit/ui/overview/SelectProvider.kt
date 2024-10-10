@@ -24,15 +24,15 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Icon
-import androidx.compose.material3.RangeSlider
-import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -75,14 +75,11 @@ fun SpTopAppBar(navigationActions: NavigationActions) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(16.dp),
         verticalAlignment = Alignment.CenterVertically) {
-          IconButton(
-              onClick = {
-                navigationActions.goBack()
-              }) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Go Back Option")
-              }
+          IconButton(onClick = { navigationActions.goBack() }) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = "Go Back Option")
+          }
 
           Spacer(Modifier.weight(1f))
 
@@ -116,8 +113,9 @@ fun SpTopAppBar(navigationActions: NavigationActions) {
 }
 
 @Composable
-fun SpFilterBar(display: () -> Unit,listProviderViewModel: ListProviderViewModel) {
-  val filters = listOf("Top Rates", "Top Prices", "Time") // TODO update with decided list of filters
+fun SpFilterBar(display: () -> Unit, listProviderViewModel: ListProviderViewModel) {
+  val filters =
+      listOf("Top Rates", "Top Prices", "Time") // TODO update with decided list of filters
   Row(
       modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("filterBar"),
       verticalAlignment = Alignment.CenterVertically) {
@@ -147,9 +145,9 @@ fun SpFilterBar(display: () -> Unit,listProviderViewModel: ListProviderViewModel
         Image(
             modifier =
                 Modifier.clickable {
-                    listProviderViewModel.refreshFilters()
-                    display()
-                }
+                      listProviderViewModel.refreshFilters()
+                      display()
+                    }
                     .padding(1.dp)
                     .width(18.dp)
                     .height(18.dp)
@@ -302,7 +300,6 @@ fun ListProviders(providers: List<Provider>) {
   }
 }
 
-
 @Composable
 fun PriceFilter(listProviderViewModel: ListProviderViewModel) {
   var minPrice by remember { mutableStateOf("min") }
@@ -320,9 +317,10 @@ fun PriceFilter(listProviderViewModel: ListProviderViewModel) {
             val minPriceValue = it.toDoubleOrNull()
             if (minPriceValue != null) {
               listProviderViewModel.filterProviders(
-                  filter = { provider -> provider.price >= minPriceValue },"Price")
+                  filter = { provider -> provider.price >= minPriceValue }, "Price")
             } else {
-              listProviderViewModel.filterProviders(filter = { provider -> provider.price >= 0 },"Price")
+              listProviderViewModel.filterProviders(
+                  filter = { provider -> provider.price >= 0 }, "Price")
             }
           },
           modifier =
@@ -340,9 +338,11 @@ fun PriceFilter(listProviderViewModel: ListProviderViewModel) {
             val maxPriceValue = it.toDoubleOrNull()
             val minPriceValue = minPrice.toDoubleOrNull()
             if (maxPriceValue != null && minPriceValue != null && minPriceValue < maxPriceValue) {
-              listProviderViewModel.filterProviders ({ prvd -> maxPriceValue >= prvd.price },"Price")
+              listProviderViewModel.filterProviders(
+                  { prvd -> maxPriceValue >= prvd.price }, "Price")
             } else {
-              listProviderViewModel.filterProviders(filter = { provider -> provider.price >= 0 },"Price")
+              listProviderViewModel.filterProviders(
+                  filter = { provider -> provider.price >= 0 }, "Price")
             }
           },
           modifier =
@@ -387,9 +387,8 @@ fun filterStringFields(
     listProviderViewModel: ListProviderViewModel,
     filterAction: (Provider) -> Boolean,
     defaultFilterAction: (Provider) -> Boolean,
-    filterField : String
+    filterField: String
 ) {
-
 
   val newIconsPressed = iconsPressed.toMutableList().apply { set(idx, !iconsPressed[idx]) }
 
@@ -401,23 +400,20 @@ fun filterStringFields(
   val newSelectedFields =
       selectedFields.toMutableList().apply { if (newIconsPressed[idx]) add(elem) else remove(elem) }
 
-    updateStateField(newSelectedFields)
-    updateStateIconsPressed(newIconsPressed)
-    updateStateIconsColor(newIconsColor)
+  updateStateField(newSelectedFields)
+  updateStateIconsPressed(newIconsPressed)
+  updateStateIconsColor(newIconsColor)
   if (newIconsPressed[idx]) {
-    listProviderViewModel.filterProviders ({ provider -> filterAction(provider) },filterField)
-  }
-  else {
+    listProviderViewModel.filterProviders({ provider -> filterAction(provider) }, filterField)
+  } else {
     if (newSelectedFields.isNotEmpty()) {
-      listProviderViewModel.filterProviders ({ provider -> filterAction(provider) },filterField)
+      listProviderViewModel.filterProviders({ provider -> filterAction(provider) }, filterField)
     } else {
-      listProviderViewModel.filterProviders ({ provider -> defaultFilterAction(provider) },filterField)
+      listProviderViewModel.filterProviders(
+          { provider -> defaultFilterAction(provider) }, filterField)
     }
   }
-
-
 }
-
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -435,7 +431,7 @@ fun LanguageFilterField(list: List<String>, listProviderViewModel: ListProviderV
   ) {
     repeat(list.size) { idx ->
       Box(
-          Modifier.background(color = iconsColor[idx],shape = RoundedCornerShape(size = 8.dp))
+          Modifier.background(color = iconsColor[idx], shape = RoundedCornerShape(size = 8.dp))
               .testTag("filterAct")
               .padding(8.dp)
               .clickable {
@@ -455,7 +451,8 @@ fun LanguageFilterField(list: List<String>, listProviderViewModel: ListProviderV
                           .intersect(prvd.languages.toSet())
                           .isNotEmpty()
                     },
-                    { prvd -> prvd.languages.isNotEmpty() },"Language")
+                    { prvd -> prvd.languages.isNotEmpty() },
+                    "Language")
               }) {
             Text(text = list[idx], fontSize = 18.sp, modifier = Modifier.padding(3.dp))
           }
@@ -478,8 +475,7 @@ fun RatingFilterField(list: List<String>, listProviderViewModel: ListProviderVie
     repeat(list.size) { idx ->
       Box(
           modifier =
-              Modifier
-                  .width(55.dp)
+              Modifier.width(55.dp)
                   .height(30.dp)
                   .background(color = colors[idx], shape = RoundedCornerShape(size = 59.dp))
                   .testTag("filterRating")) {
@@ -500,7 +496,8 @@ fun RatingFilterField(list: List<String>, listProviderViewModel: ListProviderVie
                           { prvd ->
                             selectedFields.map { u -> u.toDouble() }.contains(prvd.rating)
                           },
-                          { prvd -> prvd.rating >= 1.0 },"Rating")
+                          { prvd -> prvd.rating >= 1.0 },
+                          "Rating")
                     }) {
                   Image(
                       modifier = Modifier.padding(1.90667.dp).width(16.dp).height(16.dp),
@@ -516,7 +513,7 @@ fun RatingFilterField(list: List<String>, listProviderViewModel: ListProviderVie
 }
 
 @Composable
-fun ApplyButton(listProviderViewModel: ListProviderViewModel,display: () -> Unit) {
+fun ApplyButton(listProviderViewModel: ListProviderViewModel, display: () -> Unit) {
   val filteredList by listProviderViewModel.providersListFiltered.collectAsState()
   Box(
       modifier =
@@ -529,11 +526,10 @@ fun ApplyButton(listProviderViewModel: ListProviderViewModel,display: () -> Unit
                               listOf(
                                   Color(android.graphics.Color.parseColor("#EFEBDE")),
                                   Color(android.graphics.Color.parseColor("#4D5652")))),
-                  shape = RoundedCornerShape(50)).clickable {
-                      listProviderViewModel.applyFilters()
-                        display()
-
-
+                  shape = RoundedCornerShape(50))
+              .clickable {
+                listProviderViewModel.applyFilters()
+                display()
               },
   ) {
     Column(
@@ -556,7 +552,11 @@ fun ApplyButton(listProviderViewModel: ListProviderViewModel,display: () -> Unit
 }
 
 @Composable
-fun FilterComposable(hide: () -> Unit, listProviderViewModel: ListProviderViewModel,display :()->Unit) {
+fun FilterComposable(
+    hide: () -> Unit,
+    listProviderViewModel: ListProviderViewModel,
+    display: () -> Unit
+) {
   Column(
       modifier = Modifier.fillMaxWidth().testTag("filterSheet"),
       verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -577,13 +577,13 @@ fun FilterComposable(hide: () -> Unit, listProviderViewModel: ListProviderViewMo
             listProviderViewModel)
         FilterSubText("Rating")
         RatingFilterField(listOf("5", "4", "3", "2", "1"), listProviderViewModel)
-        ApplyButton(listProviderViewModel,display)
+        ApplyButton(listProviderViewModel, display)
       }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun  SelectProviderScreen(
+fun SelectProviderScreen(
     listProviderViewModel: ListProviderViewModel =
         viewModel(factory = ListProviderViewModel.Factory),
     navigationActions: NavigationActions
@@ -596,28 +596,30 @@ fun  SelectProviderScreen(
   Scaffold(modifier = Modifier.fillMaxSize(), topBar = { SpTopAppBar(navigationActions) }) {
       paddingValues ->
     Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
-      SpFilterBar(display = { displayFilters = true },listProviderViewModel)
+      SpFilterBar(display = { displayFilters = true }, listProviderViewModel)
       Title("Popular")
       DisplayPopularProviders(providers)
       Title("See All")
       ListProviders(providers)
     }
     if (displayFilters) {
-      ModalBottomSheet(onDismissRequest = { displayFilters = false }, sheetState = sheetState,
-          containerColor = Color.White
-          ) {
-        FilterComposable (
-            {
-              scope
-                  .launch { sheetState.hide() }
-                  .invokeOnCompletion {
-                    if (!sheetState.isVisible) {
-                      displayFilters = false
-                    }
-                  }
-            },
-            listProviderViewModel,{displayFilters = false})
-      }
+      ModalBottomSheet(
+          onDismissRequest = { displayFilters = false },
+          sheetState = sheetState,
+          containerColor = Color.White) {
+            FilterComposable(
+                {
+                  scope
+                      .launch { sheetState.hide() }
+                      .invokeOnCompletion {
+                        if (!sheetState.isVisible) {
+                          displayFilters = false
+                        }
+                      }
+                },
+                listProviderViewModel,
+                { displayFilters = false })
+          }
     }
   }
 }

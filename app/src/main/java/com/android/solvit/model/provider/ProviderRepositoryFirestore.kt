@@ -62,11 +62,7 @@ class ProviderRepositoryFirestore(private val db: FirebaseFirestore) : ProviderR
         db.collection(collectionPath).document(provider.uid).set(provider), onSuccess, onFailure)
   }
 
-  override fun deleteProvider(
-      uid: String,
-      onSuccess: () -> Unit,
-      onFailure: (Exception) -> Unit
-  ) {
+  override fun deleteProvider(uid: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
     performFirestoreOperation(
         db.collection(collectionPath).document(uid).delete(), onSuccess, onFailure)
   }

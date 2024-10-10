@@ -35,10 +35,12 @@ import com.android.solvit.model.map.Location
 import com.android.solvit.model.requests.ServiceRequest
 import com.android.solvit.model.requests.ServiceRequestType
 import com.android.solvit.model.requests.ServiceRequestViewModel
+import com.android.solvit.ui.navigation.NavigationActions
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RequestScreen(
+    navigationActions: NavigationActions,
     screenTitle: String,
     title: String,
     onTitleChange: (String) -> Unit,
@@ -73,7 +75,7 @@ fun RequestScreen(
             title = { Text(screenTitle, Modifier.testTag("screenTitle")) },
             navigationIcon = {
               IconButton(
-                  onClick = { /*navigationActions.goBack()*/},
+                  onClick = { navigationActions.goBack() },
                   modifier = Modifier.testTag("goBackButton")) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
@@ -137,7 +139,10 @@ fun RequestScreen(
                         }
                   }
               if (selectedRequest != null) {
-                DeleteButton(request = selectedRequest, requestViewModel = requestViewModel)
+                DeleteButton(
+                    request = selectedRequest,
+                    requestViewModel = requestViewModel,
+                    navigationActions)
               }
             }
       })

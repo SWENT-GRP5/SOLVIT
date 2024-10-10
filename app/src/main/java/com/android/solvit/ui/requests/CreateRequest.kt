@@ -19,10 +19,12 @@ import com.android.solvit.model.requests.ServiceRequestStatus
 import com.android.solvit.model.requests.ServiceRequestType
 import com.android.solvit.model.requests.ServiceRequestViewModel
 import com.android.solvit.model.requests.loadBitmapFromUri
+import com.android.solvit.ui.navigation.NavigationActions
 import com.google.firebase.Timestamp
 
 @Composable
 fun CreateRequestScreen(
+    navigationActions: NavigationActions,
     requestViewModel: ServiceRequestViewModel =
         viewModel(factory = ServiceRequestViewModel.Factory),
     locationViewModel: LocationViewModel = viewModel(factory = LocationViewModel.Factory)
@@ -45,6 +47,7 @@ fun CreateRequestScreen(
   val localContext = LocalContext.current
 
   RequestScreen(
+      navigationActions = navigationActions,
       screenTitle = "Create a new request",
       title = title,
       onTitleChange = { title = it },
@@ -55,7 +58,10 @@ fun CreateRequestScreen(
       showDropdownType = showDropdownType,
       onShowDropdownTypeChange = { showDropdownType = it },
       filteredServiceTypes = filteredServiceTypes,
-      onServiceTypeSelected = { selectedServiceType = it },
+      onServiceTypeSelected = {
+        typeQuery = it.name
+        selectedServiceType = it
+      },
       locationQuery = locationQuery,
       onLocationQueryChange = { locationViewModel.setQuery(it) },
       selectedRequest = null,
@@ -89,7 +95,13 @@ fun CreateRequestScreen(
                     uid = requestViewModel.getNewUid(),
                     type = selectedServiceType,
                     imageUrl = null)
-            requestViewModel.saveServiceRequestWithImage(serviceRequest, selectedImageUri!!)
+            if (selectedImageUri != null) {
+              requestViewModel.saveServiceRequestWithImage(serviceRequest, selectedImageUri!!)
+              navigationActions.goBack()
+            } else {
+              requestViewModel.saveServiceRequest(serviceRequest)
+              navigationActions.goBack()
+            }
             return@RequestScreen
           } catch (_: NumberFormatException) {}
         }

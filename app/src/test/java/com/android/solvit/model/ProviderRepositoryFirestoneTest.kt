@@ -37,9 +37,18 @@ class ProviderRepositoryFirestoneTest {
   private lateinit var providerRepositoryFirestore: ProviderRepositoryFirestore
 
   private val provider =
-    Provider(
-      "test", "test", Services.PLUMBER, "",
-      Location(0.0,0.0,"EPFL"),"",false, 0.0, 0.0, Timestamp.now(), emptyList())
+      Provider(
+          "test",
+          "test",
+          Services.PLUMBER,
+          "",
+          Location(0.0, 0.0, "EPFL"),
+          "",
+          false,
+          0.0,
+          0.0,
+          Timestamp.now(),
+          emptyList())
 
   @Before
   fun setUp() {
