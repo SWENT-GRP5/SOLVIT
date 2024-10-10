@@ -27,7 +27,7 @@ class ProfileViewModel(private val repository: FirebaseRepositoryImp) : ViewMode
            )
        )
    )
-    val userProfile: StateFlow<List<UserProfile>> = _userProfile.asStateFlow()
+    var userProfile: StateFlow<List<UserProfile>> = _userProfile.asStateFlow()
 
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> get() = _isLoading

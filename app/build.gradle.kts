@@ -199,6 +199,7 @@ dependencies {
         testImplementation(libs.mockito.core)
         testImplementation(libs.mockito.inline)
         testImplementation(libs.mockito.kotlin)
+        testImplementation("io.mockk:mockk:1.12.0")
         androidTestImplementation(libs.mockito.android)
         androidTestImplementation(libs.mockito.kotlin)
         testImplementation(libs.robolectric)

@@ -35,10 +35,8 @@ class MainActivity : ComponentActivity() {
 
         NavHost(navController = navController, startDestination = Route.PROFILE) {
 
-            navigation(
-                startDestination = Screen.PROFILE,
-                route = Route.PROFILE,
-            ) {
+            navigation(startDestination = Screen.PROFILE,route = Route.PROFILE)
+            {
             composable(Screen.PROFILE) {
                 ProfileScreen(viewModel = viewModel, navigationActions)
             }
