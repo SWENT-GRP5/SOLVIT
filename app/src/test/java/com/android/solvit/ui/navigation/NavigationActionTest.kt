@@ -57,7 +57,8 @@ class NavigationActionTest {
     verify(navHostController).navigate(eq(Route.SERVICES), any<NavOptionsBuilder.() -> Unit>())
 
     navigationActions.navigateTo(TopLevelDestinations.CREATE_REQUEST)
-    verify(navHostController).navigate(eq(Route.CREATE_REQUEST), any<NavOptionsBuilder.() -> Unit>())
+    verify(navHostController)
+        .navigate(eq(Route.CREATE_REQUEST), any<NavOptionsBuilder.() -> Unit>())
 
     navigationActions.navigateTo(TopLevelDestinations.MESSAGE)
     verify(navHostController).navigate(eq(Route.MESSAGE), any<NavOptionsBuilder.() -> Unit>())
