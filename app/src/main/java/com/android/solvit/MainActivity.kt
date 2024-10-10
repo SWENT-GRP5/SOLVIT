@@ -64,10 +64,7 @@ fun SolvItApp() {
     composable(Route.EDIT_REQUEST) { EditRequestScreen(navigationActions) }
     composable(Route.MAP) { MapScreen(listProviderViewModel, navigationActions) }
     composable(Route.ORDER) { EditRequestScreen(navigationActions) } // This line can be replace when the OrderScreen is implemented
-    navigation(
-          startDestination = Screen.PROFILE,
-          route = Route.PROFILE,
-      ) {
+    navigation(startDestination = Screen.PROFILE, route = Route.PROFILE) {
           composable(Screen.PROFILE) { ProfileScreen(viewModel = viewModel, navigationActions) }
           composable(Screen.EDIT_PROFILE) { EditProfileScreen(viewModel = viewModel, navigationActions) }
       }
