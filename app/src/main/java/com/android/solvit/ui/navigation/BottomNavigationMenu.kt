@@ -1,15 +1,24 @@
 package com.android.solvit.ui.navigation
 
+//noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-//noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material3.*
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -57,7 +66,7 @@ fun BottomNavigationMenu(
                         )
 
                     // Main downward curve
-                    quadraticTo(
+                    quadraticBezierTo(
                         size.width * 0.5f,
                         70.dp.toPx(), // Control point for a deep curve, more to the left
                         size.width * 0.6f,
@@ -97,7 +106,7 @@ fun BottomNavigationMenu(
                     .clip(RoundedCornerShape(30.dp)), // Rounded edges of the strip
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically) {
-              val filteredTabList = tabList.filter { it.route != Route.REQUEST }
+              val filteredTabList = tabList.filter { it.route != Route.CREATE_REQUEST }
               filteredTabList.forEachIndexed { index, tab ->
                 if (index == tabList.size / 2) {
                   Spacer(modifier = Modifier.weight(1.7f)) // Leave space for the central button
@@ -112,12 +121,12 @@ fun BottomNavigationMenu(
 
         // Central "+" button above the red strip
         FloatingActionButton(
-            onClick = { onTabSelect(TopLevelDestinations.REQUEST) },
+            onClick = { onTabSelect(TopLevelDestinations.CREATE_REQUEST) },
             modifier =
                 Modifier.size(70.dp)
                     .offset(y = (-10).dp) // Larger size for the central button
                     .align(Alignment.TopCenter)
-                    .testTag(TopLevelDestinations.REQUEST.toString()), // Centered position
+                    .testTag(TopLevelDestinations.CREATE_REQUEST.toString()), // Centered position
             shape = CircleShape,
             containerColor = Color.Red // Central button color (red like in the image)
             ) {
