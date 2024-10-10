@@ -10,6 +10,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavController
 
 object Route {
+    const val AUTH = "Auth"
   const val SERVICES = "Overview"
   const val REQUEST = "Map"
   const val MESSAGE = "Message"

@@ -20,6 +20,7 @@ import com.android.solvit.ui.navigation.Route
 import com.android.solvit.ui.overview.SelectProviderScreen
 import com.android.solvit.ui.services.ServicesScreen
 import com.android.solvit.ui.theme.SampleAppTheme
+import com.github.se.bootcamp.ui.authentication.SignInScreen
 
 class MainActivity : ComponentActivity() {
 
@@ -45,7 +46,8 @@ fun SolvItApp() {
   val listProviderViewModel =
       viewModel<ListProviderViewModel>(factory = ListProviderViewModel.Factory)
 
-  NavHost(navController = navController, startDestination = Route.SERVICES) {
+  NavHost(navController = navController, startDestination = Route.AUTH) {
+    composable(Route.AUTH){ SignInScreen(navigationActions)}
     composable(Route.SERVICES) { ServicesScreen(navigationActions, listProviderViewModel) }
     composable(Route.PROVIDERS){ SelectProviderScreen(listProviderViewModel,navigationActions)}
     composable(Route.MESSAGE) { Text("Not implemented yet") }
