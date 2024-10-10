@@ -1,6 +1,10 @@
 package com.android.solvit.model
 
 import androidx.test.core.app.ApplicationProvider
+import com.android.solvit.model.map.Location
+import com.android.solvit.model.provider.Provider
+import com.android.solvit.model.provider.ProviderRepositoryFirestore
+import com.android.solvit.model.provider.Services
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.FirebaseApp
 import com.google.firebase.Timestamp
@@ -33,8 +37,9 @@ class ProviderRepositoryFirestoneTest {
   private lateinit var providerRepositoryFirestore: ProviderRepositoryFirestore
 
   private val provider =
-      Provider(
-          "test", "test", Services.PLUMBER, emptyList(), 0.0, 0.0, Timestamp.now(), emptyList())
+    Provider(
+      "test", "test", Services.PLUMBER, "",
+      Location(0.0,0.0,"EPFL"),"",false, 0.0, 0.0, Timestamp.now(), emptyList())
 
   @Before
   fun setUp() {
@@ -68,7 +73,7 @@ class ProviderRepositoryFirestoneTest {
   @Test
   fun deleteProvider() {
     `when`(mockDocumentReference.delete()).thenReturn(Tasks.forResult(null))
-    providerRepositoryFirestore.deleteProvider(provider, {}, {})
+    providerRepositoryFirestore.deleteProvider(provider.uid, {}, {})
     verify(mockDocumentReference).delete()
   }
 

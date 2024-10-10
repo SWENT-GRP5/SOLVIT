@@ -4,8 +4,8 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
-import com.android.solvit.model.ListProviderViewModel
-import com.android.solvit.model.ProviderRepository
+import com.android.solvit.model.provider.ListProviderViewModel
+import com.android.solvit.model.provider.ProviderRepository
 import com.android.solvit.ui.navigation.NavigationActions
 import org.junit.Before
 import org.junit.Rule

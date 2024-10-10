@@ -13,9 +13,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.android.solvit.model.ListProviderViewModel
+
+import com.android.solvit.model.provider.ListProviderViewModel
 import com.android.solvit.ui.navigation.NavigationActions
 import com.android.solvit.ui.navigation.Route
+import com.android.solvit.ui.overview.SelectProviderScreen
 import com.android.solvit.ui.services.ServicesScreen
 import com.android.solvit.ui.theme.SampleAppTheme
 
@@ -45,6 +47,7 @@ fun SolvItApp() {
 
   NavHost(navController = navController, startDestination = Route.SERVICES) {
     composable(Route.SERVICES) { ServicesScreen(navigationActions, listProviderViewModel) }
+    composable(Route.PROVIDERS){ SelectProviderScreen(listProviderViewModel,navigationActions)}
     composable(Route.MESSAGE) { Text("Not implemented yet") }
     composable(Route.REQUEST) { Text("Not implemented yet") }
     composable(Route.ORDER) { Text("Not implemented yet") }

@@ -33,11 +33,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.android.solvit.model.ListProviderViewModel
+import com.android.solvit.model.provider.ListProviderViewModel
 import com.android.solvit.model.services.SearchServicesViewModel
 import com.android.solvit.ui.navigation.BottomNavigationMenu
 import com.android.solvit.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.android.solvit.ui.navigation.NavigationActions
+import com.android.solvit.ui.navigation.Route
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -89,6 +90,7 @@ fun ServicesScreen(
                           searchResults[index],
                           onClick = {
                             listProviderViewModel.selectService(searchResults[index].service)
+                              navigationActions.navigateTo(Route.PROVIDERS)
                             /*TODO*/
                           })
                     }

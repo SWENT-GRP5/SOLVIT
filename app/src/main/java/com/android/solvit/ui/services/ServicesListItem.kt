@@ -1,7 +1,7 @@
 package com.android.solvit.ui.services
 
 import com.android.solvit.R
-import com.android.solvit.model.Services
+import com.android.solvit.model.provider.Services
 
 data class ServicesListItem(
     val service: Services,

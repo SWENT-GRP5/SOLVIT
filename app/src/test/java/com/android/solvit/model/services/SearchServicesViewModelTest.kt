@@ -1,6 +1,6 @@
 package com.android.solvit.model.services
 
-import com.android.solvit.model.Services
+import com.android.solvit.model.provider.Services
 import com.android.solvit.ui.services.SERVICES_LIST
 import org.junit.Before
 import org.junit.Test

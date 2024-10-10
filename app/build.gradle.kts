@@ -211,6 +211,9 @@ dependencies {
 
     // ----------       Robolectric     ------------
     testImplementation(libs.robolectric)
+
+    // ----------       Load Images from URL     ------------
+    implementation("io.coil-kt:coil-compose:2.4.0")
 }
 
 tasks.withType<Test> {

@@ -15,6 +15,7 @@ object Route {
   const val MESSAGE = "Message"
   const val PROFILE = "Profile"
   const val ORDER = "Order"
+    const val PROVIDERS = "Providers"
 }
 
 data class TopLevelDestination(val route: String, val icon: ImageVector, val textId: String)

@@ -1,5 +1,10 @@
 package com.android.solvit.model
 
+import com.android.solvit.model.map.Location
+import com.android.solvit.model.provider.ListProviderViewModel
+import com.android.solvit.model.provider.Provider
+import com.android.solvit.model.provider.ProviderRepository
+import com.android.solvit.model.provider.Services
 import com.google.firebase.Timestamp
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.MatcherAssert.assertThat
@@ -22,7 +27,8 @@ class ListProviderViewModelTest {
     listProviderViewModel = ListProviderViewModel(providerRepository)
     provider =
         Provider(
-            "test", "test", Services.PLUMBER, emptyList(), 0.0, 0.0, Timestamp.now(), emptyList())
+            "test", "test", Services.PLUMBER, "",
+          Location(0.0,0.0,"EPFL"),"",false, 0.0, 0.0, Timestamp.now(), emptyList())
   }
 
   @Test
@@ -39,8 +45,8 @@ class ListProviderViewModelTest {
 
   @Test
   fun deleteProvider() {
-    listProviderViewModel.deleteProvider(provider)
-    verify(providerRepository).deleteProvider(eq(provider), any(), any())
+    listProviderViewModel.deleteProvider(provider.uid)
+    verify(providerRepository).deleteProvider(eq(provider.uid), any(), any())
   }
 
   @Test
