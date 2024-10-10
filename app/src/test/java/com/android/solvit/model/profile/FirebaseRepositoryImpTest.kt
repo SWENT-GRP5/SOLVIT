@@ -1,7 +1,5 @@
 package com.android.solvit.model.profile
 
-
-
 import android.os.Looper
 import androidx.test.core.app.ApplicationProvider
 import com.android.solvit.repository.FirebaseRepositoryImp
@@ -25,90 +23,87 @@ import org.robolectric.Shadows.shadowOf
 @RunWith(RobolectricTestRunner::class)
 class FirebaseRepositoryImpTest {
 
-    @Mock private lateinit var mockFirestore: FirebaseFirestore
-    @Mock private lateinit var mockDocumentReference: DocumentReference
-    @Mock private lateinit var mockCollectionReference: CollectionReference
-    @Mock private lateinit var mockDocumentSnapshot: DocumentSnapshot
-    @Mock private lateinit var mockQuerySnapshot: QuerySnapshot
+  @Mock private lateinit var mockFirestore: FirebaseFirestore
+  @Mock private lateinit var mockDocumentReference: DocumentReference
+  @Mock private lateinit var mockCollectionReference: CollectionReference
+  @Mock private lateinit var mockDocumentSnapshot: DocumentSnapshot
+  @Mock private lateinit var mockQuerySnapshot: QuerySnapshot
 
-    private lateinit var firebaseRepository: FirebaseRepositoryImp
+  private lateinit var firebaseRepository: FirebaseRepositoryImp
 
-    private val testUserProfile = UserProfile(
-        uid = "12345",
-        name = "John Doe",
-        username = "johndoe",
-        email = "john.doe@example.com",
-        phone = "+1234567890",
-        address = "Chemin des Triaudes"
-    )
+  private val testUserProfile =
+      UserProfile(
+          uid = "12345",
+          name = "John Doe",
+          username = "johndoe",
+          email = "john.doe@example.com",
+          phone = "+1234567890",
+          address = "Chemin des Triaudes")
 
-    @Before
-    fun setUp() {
-        MockitoAnnotations.openMocks(this)
+  @Before
+  fun setUp() {
+    MockitoAnnotations.openMocks(this)
 
-        if (FirebaseApp.getApps(ApplicationProvider.getApplicationContext()).isEmpty()) {
-            FirebaseApp.initializeApp(ApplicationProvider.getApplicationContext())
-        }
-
-        firebaseRepository = FirebaseRepositoryImp(mockFirestore)
-
-        `when`(mockFirestore.collection(any())).thenReturn(mockCollectionReference)
-        `when`(mockCollectionReference.document(any())).thenReturn(mockDocumentReference)
-        `when`(mockCollectionReference.document()).thenReturn(mockDocumentReference)
+    if (FirebaseApp.getApps(ApplicationProvider.getApplicationContext()).isEmpty()) {
+      FirebaseApp.initializeApp(ApplicationProvider.getApplicationContext())
     }
 
-    @Test
-    fun getNewUid_returnsDocumentId() {
-        `when`(mockDocumentReference.id).thenReturn("12345")
-        val newUid = firebaseRepository.getNewUid()
-        assert(newUid == "12345")
-    }
+    firebaseRepository = FirebaseRepositoryImp(mockFirestore)
 
-    @Test
-    fun getUserProfile_callsFirestoreCollection() {
+    `when`(mockFirestore.collection(any())).thenReturn(mockCollectionReference)
+    `when`(mockCollectionReference.document(any())).thenReturn(mockDocumentReference)
+    `when`(mockCollectionReference.document()).thenReturn(mockDocumentReference)
+  }
 
-        `when`(mockCollectionReference.get()).thenReturn(Tasks.forResult(mockQuerySnapshot))
+  @Test
+  fun getNewUid_returnsDocumentId() {
+    `when`(mockDocumentReference.id).thenReturn("12345")
+    val newUid = firebaseRepository.getNewUid()
+    assert(newUid == "12345")
+  }
 
+  @Test
+  fun getUserProfile_callsFirestoreCollection() {
 
-        `when`(mockQuerySnapshot.documents).thenReturn(listOf())
+    `when`(mockCollectionReference.get()).thenReturn(Tasks.forResult(mockQuerySnapshot))
 
+    `when`(mockQuerySnapshot.documents).thenReturn(listOf())
 
-        firebaseRepository.getUserProfile(
-            onSuccess = {
-                // Do nothing; we just want to verify that the 'documents' field was accessed
-            },
-            onFailure = { fail("Failure callback should not be called") }
-        )
+    firebaseRepository.getUserProfile(
+        onSuccess = {
+          // Do nothing; we just want to verify that the 'documents' field was accessed
+        },
+        onFailure = { fail("Failure callback should not be called") })
 
-        verify(timeout(100)) { (mockQuerySnapshot).documents }
-    }
+    verify(timeout(100)) { (mockQuerySnapshot).documents }
+  }
 
-    @Test
-    fun updateUserProfile_callsFirestoreSet() {
-        `when`(mockDocumentReference.set(any())).thenReturn(Tasks.forResult(null))
+  @Test
+  fun updateUserProfile_callsFirestoreSet() {
+    `when`(mockDocumentReference.set(any())).thenReturn(Tasks.forResult(null))
 
-        firebaseRepository.updateUserProfile(testUserProfile,
-            onSuccess = { /* Do nothing; success is expected */ },
-            onFailure = { fail("Failure callback should not be called") }
-        )
+    firebaseRepository.updateUserProfile(
+        testUserProfile,
+        onSuccess = { /* Do nothing; success is expected */},
+        onFailure = { fail("Failure callback should not be called") })
 
-        shadowOf(Looper.getMainLooper()).idle()
+    shadowOf(Looper.getMainLooper()).idle()
 
-        verify(mockDocumentReference).set(any())
-    }
+    verify(mockDocumentReference).set(any())
+  }
 
-    @Test
-    fun deleteUserProfile_callsFirestoreDelete() {
+  @Test
+  fun deleteUserProfile_callsFirestoreDelete() {
 
-        `when`(mockDocumentReference.delete()).thenReturn(Tasks.forResult(null))
+    `when`(mockDocumentReference.delete()).thenReturn(Tasks.forResult(null))
 
-        firebaseRepository.deleteUserProfile("12345",
-            onSuccess = { /* Do nothing; success is expected */ },
-            onFailure = { fail("Failure callback should not be called") }
-        )
+    firebaseRepository.deleteUserProfile(
+        "12345",
+        onSuccess = { /* Do nothing; success is expected */},
+        onFailure = { fail("Failure callback should not be called") })
 
-        shadowOf(Looper.getMainLooper()).idle()
+    shadowOf(Looper.getMainLooper()).idle()
 
-        verify(mockDocumentReference).delete()
-    }
+    verify(mockDocumentReference).delete()
+  }
 }
