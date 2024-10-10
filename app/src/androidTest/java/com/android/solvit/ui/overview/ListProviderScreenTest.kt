@@ -7,12 +7,14 @@ import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import androidx.navigation.NavController
 import com.android.solvit.model.map.Location
 import com.android.solvit.model.provider.Language
 import com.android.solvit.model.provider.ListProviderViewModel
 import com.android.solvit.model.provider.Provider
 import com.android.solvit.model.provider.ProviderRepository
 import com.android.solvit.model.provider.Services
+import com.android.solvit.ui.navigation.NavigationActions
 import com.google.firebase.Timestamp
 import org.junit.Before
 import org.junit.Rule
@@ -25,6 +27,8 @@ import org.mockito.kotlin.verify
 class ListProviderScreenTest {
   private lateinit var providerRepository: ProviderRepository
   private lateinit var listProviderViewModel: ListProviderViewModel
+  private lateinit var navController: NavController
+  private lateinit var navigationActions: NavigationActions
 
   @get:Rule val composeTestRule = createComposeRule()
 
@@ -46,6 +50,9 @@ class ListProviderScreenTest {
   fun setUp() {
     providerRepository = mock(ProviderRepository::class.java)
     listProviderViewModel = ListProviderViewModel(providerRepository)
+    navController = mock(NavController::class.java)
+    navigationActions = NavigationActions(navController)
+
     `when`(listProviderViewModel.getProviders()).then {
       it.getArgument<(List<Provider>) -> Unit>(0)(listOf(provider))
     }
@@ -53,7 +60,7 @@ class ListProviderScreenTest {
 
   @Test
   fun hasRequiredElements() {
-    composeTestRule.setContent { selectProviderScreen(listProviderViewModel) }
+    composeTestRule.setContent { SelectProviderScreen(listProviderViewModel, navigationActions) }
     composeTestRule.onNodeWithTag("topAppBar").assertIsDisplayed()
     composeTestRule.onNodeWithTag("filterBar").assertIsDisplayed()
     /*composeTestRule.waitUntil (
@@ -70,7 +77,7 @@ class ListProviderScreenTest {
 
   @Test
   fun filterProviderCallsFilterScreen() {
-    composeTestRule.setContent { selectProviderScreen(listProviderViewModel) }
+    composeTestRule.setContent { SelectProviderScreen(listProviderViewModel, navigationActions) }
     composeTestRule.onNodeWithTag("filterOption").assertIsDisplayed()
     composeTestRule.onNodeWithTag("filterOption").performClick()
     composeTestRule.onNodeWithTag("filterSheet").assertIsDisplayed()
@@ -78,7 +85,7 @@ class ListProviderScreenTest {
 
   @Test
   fun filterAction() {
-    composeTestRule.setContent { selectProviderScreen(listProviderViewModel) }
+    composeTestRule.setContent { SelectProviderScreen(listProviderViewModel, navigationActions) }
     composeTestRule.onNodeWithTag("filterOption").assertIsDisplayed()
     composeTestRule.onNodeWithTag("filterOption").performClick()
     composeTestRule.onNodeWithTag("filterSheet").assertIsDisplayed()

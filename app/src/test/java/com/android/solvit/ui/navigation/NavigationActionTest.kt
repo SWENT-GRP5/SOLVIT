@@ -32,7 +32,6 @@ class NavigationActionTest {
     navigationActions.navigateTo(TopLevelDestinations.SERVICES)
     verify(navHostController).navigate(eq(Route.SERVICES), any<NavOptionsBuilder.() -> Unit>())
 
-
     navigationActions.navigateTo(Route.ORDER)
     verify(navHostController).navigate(Route.ORDER)
   }
@@ -46,9 +45,9 @@ class NavigationActionTest {
   @Test
   fun currentRouteWorksWithDestination1() {
     `when`(navHostController.currentDestination).thenReturn(navigationDestination)
-    `when`(navigationDestination.route).thenReturn(Route.REQUEST)
+    `when`(navigationDestination.route).thenReturn(Route.CREATE_REQUEST)
 
-    assertThat(navigationActions.currentRoute(), `is`(Route.REQUEST))
+    assertThat(navigationActions.currentRoute(), `is`(Route.CREATE_REQUEST))
   }
 
   @Test
@@ -57,8 +56,9 @@ class NavigationActionTest {
     navigationActions.navigateTo(TopLevelDestinations.SERVICES)
     verify(navHostController).navigate(eq(Route.SERVICES), any<NavOptionsBuilder.() -> Unit>())
 
-    navigationActions.navigateTo(TopLevelDestinations.REQUEST)
-    verify(navHostController).navigate(eq(Route.REQUEST), any<NavOptionsBuilder.() -> Unit>())
+    navigationActions.navigateTo(TopLevelDestinations.CREATE_REQUEST)
+    verify(navHostController)
+        .navigate(eq(Route.CREATE_REQUEST), any<NavOptionsBuilder.() -> Unit>())
 
     navigationActions.navigateTo(TopLevelDestinations.MESSAGE)
     verify(navHostController).navigate(eq(Route.MESSAGE), any<NavOptionsBuilder.() -> Unit>())
@@ -77,8 +77,8 @@ class NavigationActionTest {
   fun currentRouteWorksWithDestination() {
     val navDestination = mock(NavDestination::class.java)
     `when`(navHostController.currentDestination).thenReturn(navDestination)
-    `when`(navDestination.route).thenReturn(Route.REQUEST)
+    `when`(navDestination.route).thenReturn(Route.CREATE_REQUEST)
 
-    assertThat(navigationActions.currentRoute(), `is`(Route.REQUEST))
+    assertThat(navigationActions.currentRoute(), `is`(Route.CREATE_REQUEST))
   }
 }
