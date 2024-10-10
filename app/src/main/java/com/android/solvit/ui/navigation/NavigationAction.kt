@@ -15,6 +15,12 @@ object Route {
   const val MESSAGE = "Message"
   const val PROFILE = "Profile"
   const val ORDER = "Order"
+    const val EDIT_PROFILE ="EditProfile"
+}
+object Screen {
+
+    const val PROFILE = "Profile Screen"
+    const val EDIT_PROFILE = "EditProfile Screen"
 }
 
 data class TopLevelDestination(val route: String, val icon: ImageVector, val textId: String)
@@ -32,6 +38,7 @@ object TopLevelDestinations {
   val PROFILE =
       TopLevelDestination(
           route = Route.PROFILE, icon = Icons.Outlined.AccountCircle, textId = "Profile")
+
 }
 
 val LIST_TOP_LEVEL_DESTINATION =
