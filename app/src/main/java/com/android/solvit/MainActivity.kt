@@ -16,10 +16,13 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navigation
 
 import com.android.solvit.model.provider.ListProviderViewModel
+import com.android.solvit.ui.map.MapScreen
 import com.android.solvit.ui.navigation.NavigationActions
 import com.android.solvit.ui.navigation.Route
 import com.android.solvit.ui.navigation.Screen
 import com.android.solvit.ui.overview.SelectProviderScreen
+import com.android.solvit.ui.requests.CreateRequestScreen
+import com.android.solvit.ui.requests.EditRequestScreen
 import com.android.solvit.ui.screens.profile.EditProfileScreen
 import com.android.solvit.ui.screens.profile.ProfileScreen
 import com.android.solvit.ui.screens.profile.ProfileViewModel
@@ -33,7 +36,9 @@ class MainActivity : ComponentActivity() {
     setContent {
       SampleAppTheme {
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+
           SolvItApp()
+
         }
       }
     }
@@ -55,18 +60,19 @@ fun SolvItApp() {
     composable(Route.SERVICES) { ServicesScreen(navigationActions, listProviderViewModel) }
     composable(Route.PROVIDERS){ SelectProviderScreen(listProviderViewModel,navigationActions)}
     composable(Route.MESSAGE) { Text("Not implemented yet") }
-    composable(Route.REQUEST) { Text("Not implemented yet") }
-    composable(Route.ORDER) { Text("Not implemented yet") }
+    composable(Route.CREATE_REQUEST) { CreateRequestScreen(navigationActions) }
+    composable(Route.EDIT_REQUEST) { EditRequestScreen(navigationActions) }
+    composable(Route.MAP) { MapScreen(listProviderViewModel, navigationActions) }
+    composable(Route.ORDER) { EditRequestScreen(navigationActions) } // This line can be replace when the OrderScreen is implemented
     navigation(
-      startDestination = Screen.PROFILE,
-      route = Route.PROFILE,
-    ) {
-      composable(Screen.PROFILE) { ProfileScreen(viewModel = viewModel, navigationActions) }
-      composable(Screen.EDIT_PROFILE) { EditProfileScreen(viewModel = viewModel, navigationActions) }
-    }
-
-
-}}
+          startDestination = Screen.PROFILE,
+          route = Route.PROFILE,
+      ) {
+          composable(Screen.PROFILE) { ProfileScreen(viewModel = viewModel, navigationActions) }
+          composable(Screen.EDIT_PROFILE) { EditProfileScreen(viewModel = viewModel, navigationActions) }
+      }
+  }
+}
 
 /*
 @Composable

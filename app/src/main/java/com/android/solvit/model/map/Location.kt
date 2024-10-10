@@ -1,3 +1,3 @@
 package com.android.solvit.model.map
 
-data class Location(val latitude: Double, val longitude: Double, val name: String)
+data class Location(var latitude: Double, var longitude: Double, var name: String)

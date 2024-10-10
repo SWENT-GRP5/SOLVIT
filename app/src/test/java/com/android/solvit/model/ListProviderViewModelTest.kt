@@ -27,8 +27,17 @@ class ListProviderViewModelTest {
     listProviderViewModel = ListProviderViewModel(providerRepository)
     provider =
         Provider(
-            "test", "test", Services.PLUMBER, "",
-          Location(0.0,0.0,"EPFL"),"",false, 0.0, 0.0, Timestamp.now(), emptyList())
+            "test",
+            "test",
+            Services.PLUMBER,
+            "",
+            Location(0.0, 0.0, "EPFL"),
+            "",
+            false,
+            0.0,
+            0.0,
+            Timestamp.now(),
+            emptyList())
   }
 
   @Test

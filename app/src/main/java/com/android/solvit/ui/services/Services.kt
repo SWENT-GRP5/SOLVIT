@@ -90,7 +90,7 @@ fun ServicesScreen(
                           searchResults[index],
                           onClick = {
                             listProviderViewModel.selectService(searchResults[index].service)
-                              navigationActions.navigateTo(Route.PROVIDERS)
+                            navigationActions.navigateTo(Route.PROVIDERS)
                             /*TODO*/
                           })
                     }
