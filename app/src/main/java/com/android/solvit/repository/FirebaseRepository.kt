@@ -13,7 +13,7 @@ interface FirebaseRepository {
 
     fun getCurrentUserEmail(): String?
 
-    fun deleteUserProfile(onComplete: (Boolean) -> Unit)
+    fun deleteUserProfile(id: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit)
 
     fun getCurrentUserPhoneNumber(): String?
 

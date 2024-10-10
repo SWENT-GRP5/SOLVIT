@@ -54,14 +54,11 @@ class FirebaseRepositoryImp(private val db: FirebaseFirestore):FirebaseRepositor
 
 
 
-    override fun deleteUserProfile(onComplete: (Boolean) -> Unit) {
-        val uid = auth.currentUser?.uid ?: return
-        firestore.collection("users").document(uid)
-            .delete()
-            .addOnCompleteListener { task ->
-                onComplete(task.isSuccessful)
-            }
+    override fun deleteUserProfile(id: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+        performFirestoreOperation(
+            db.collection(collectionPath).document(id).delete(), onSuccess, onFailure)
     }
+
 
     override fun getCurrentUserEmail(): String? {
         return auth.currentUser?.email
@@ -92,17 +89,22 @@ class FirebaseRepositoryImp(private val db: FirebaseFirestore):FirebaseRepositor
         return try {
             val uid = document.id
             val name = document.getString("name") ?: return null
+            val username = document.getString("username") ?: return null
             val email= document.getString("email") ?: return null
             val phone= document.getString("phone") ?: return null
+            val address=document.getString("address") ?: return null
+
 
 
             UserProfile(
                 uid = uid,
                 name = name,
-               email=email,
-                phone=phone)
+                username=username,
+                email=email,
+                phone=phone,
+                address=address)
         } catch (e: Exception) {
-            Log.e("TodosRepositoryFirestore", "Error converting document to ToDo", e)
+            Log.e("RepositoryFirestore", "Error converting document to UserProfile", e)
             null
         }
     }

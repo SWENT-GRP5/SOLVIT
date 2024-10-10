@@ -22,8 +22,10 @@ class ProfileViewModel(private val repository: FirebaseRepositoryImp) : ViewMode
            UserProfile(
                uid = "12345",    // Hardcoded UID
                name = "John Doe", // Hardcoded Name
+               username= "johndoe", // Hardcoded username
                email = "john.doe@example.com", // Hardcoded Email
-               phone = "+1234567890" // Hardcoded Phone Number
+               phone = "+1234567890" ,// Hardcoded Phone Number
+               address= "Chemin des Triaudes"// Hardcoded Address
            )
        )
    )
@@ -46,19 +48,7 @@ class ProfileViewModel(private val repository: FirebaseRepositoryImp) : ViewMode
     }
 
 
-    fun loadUserProfile() {
-        _isLoading.value = true
-        repository.getUserProfile(
-            onSuccess = {
-                _userProfile.value = it
-                _isLoading.value = false
-            },
-            onFailure = {
-                _error.value = it.message
-                _isLoading.value = false
-            }
-        )
-    }
+
 
 
 
@@ -73,14 +63,8 @@ class ProfileViewModel(private val repository: FirebaseRepositoryImp) : ViewMode
     _userProfile.value = listOf(profile)
     }
 
-    fun deleteUserProfile() {
-        _isLoading.value = true
-        repository.deleteUserProfile { isSuccess ->
-            if (!isSuccess) {
-                _error.value = "Failed to delete profile"
-            }
-            _isLoading.value = false
-        }
+    fun deleteUserProfile(id:String) {
+        repository.deleteUserProfile(id = id, onSuccess = { getUserProfile() }, onFailure = {})
     }
 
 
