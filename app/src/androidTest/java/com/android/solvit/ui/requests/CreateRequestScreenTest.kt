@@ -10,6 +10,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
+import androidx.navigation.NavController
 import com.android.solvit.model.map.Location
 import com.android.solvit.model.map.LocationRepository
 import com.android.solvit.model.map.LocationViewModel
@@ -18,6 +19,7 @@ import com.android.solvit.model.requests.ServiceRequestRepository
 import com.android.solvit.model.requests.ServiceRequestStatus
 import com.android.solvit.model.requests.ServiceRequestType
 import com.android.solvit.model.requests.ServiceRequestViewModel
+import com.android.solvit.ui.navigation.NavigationActions
 import com.google.firebase.Timestamp
 import java.util.GregorianCalendar
 import org.junit.Before
@@ -36,6 +38,8 @@ class CreateRequestScreenTest {
   private lateinit var serviceRequestViewModel: ServiceRequestViewModel
   private lateinit var locationRepository: LocationRepository
   private lateinit var locationViewModel: LocationViewModel
+  private lateinit var navController: NavController
+  private lateinit var navigationActions: NavigationActions
 
   @get:Rule val composeTestRule = createComposeRule()
 
@@ -63,6 +67,8 @@ class CreateRequestScreenTest {
     serviceRequestViewModel = ServiceRequestViewModel(serviceRequestRepository)
     locationRepository = mock(LocationRepository::class.java)
     locationViewModel = LocationViewModel(locationRepository)
+    navController = mock(NavController::class.java)
+    navigationActions = NavigationActions(navController)
 
     `when`(locationRepository.search(anyString(), anyOrNull(), anyOrNull())).thenAnswer { invocation
       ->
@@ -75,11 +81,15 @@ class CreateRequestScreenTest {
       val onSuccess = invocation.getArgument<(ServiceRequest) -> Unit>(1)
       onSuccess(serviceRequest)
     }
+
+    `when`(serviceRequestRepository.getNewUid()).thenAnswer { "1" }
   }
 
   @Test
   fun displayAllComponents() {
-    composeTestRule.setContent { CreateRequestScreen(serviceRequestViewModel, locationViewModel) }
+    composeTestRule.setContent {
+      CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
+    }
 
     composeTestRule.onNodeWithTag("screenTitle").assertIsDisplayed()
     composeTestRule.onNodeWithTag("screenTitle").assertIsDisplayed()
@@ -97,7 +107,9 @@ class CreateRequestScreenTest {
 
   @Test
   fun doesNotSubmitWithInvalidDate() {
-    composeTestRule.setContent { CreateRequestScreen(serviceRequestViewModel, locationViewModel) }
+    composeTestRule.setContent {
+      CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
+    }
 
     composeTestRule.onNodeWithTag("inputRequestDate").performTextClearance()
     composeTestRule.onNodeWithTag("inputRequestDate").performTextInput("notadate")
@@ -108,7 +120,9 @@ class CreateRequestScreenTest {
 
   @Test
   fun locationMenuExpandsWithInput() {
-    composeTestRule.setContent { CreateRequestScreen(serviceRequestViewModel, locationViewModel) }
+    composeTestRule.setContent {
+      CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
+    }
 
     composeTestRule.onNodeWithTag("inputRequestAddress").performTextInput("USA")
     composeTestRule.waitUntil { locationViewModel.locationSuggestions.value.isNotEmpty() }
@@ -120,7 +134,9 @@ class CreateRequestScreenTest {
 
   @Test
   fun locationSelectionFromDropdown() {
-    composeTestRule.setContent { CreateRequestScreen(serviceRequestViewModel, locationViewModel) }
+    composeTestRule.setContent {
+      CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
+    }
 
     composeTestRule.onNodeWithTag("inputRequestAddress").performTextInput("USA")
     composeTestRule.waitUntil { locationViewModel.locationSuggestions.value.isNotEmpty() }
@@ -132,7 +148,9 @@ class CreateRequestScreenTest {
 
   @Test
   fun serviceTypeDropdown_showsFilteredResults() {
-    composeTestRule.setContent { CreateRequestScreen(serviceRequestViewModel, locationViewModel) }
+    composeTestRule.setContent {
+      CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
+    }
 
     composeTestRule.onNodeWithTag("inputServiceType").performTextInput("Plumbing")
     composeTestRule.onNodeWithTag("serviceTypeMenu").assertExists()
@@ -141,7 +159,9 @@ class CreateRequestScreenTest {
 
   @Test
   fun serviceTypeDropdown_closesOnSelection() {
-    composeTestRule.setContent { CreateRequestScreen(serviceRequestViewModel, locationViewModel) }
+    composeTestRule.setContent {
+      CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
+    }
 
     composeTestRule.onNodeWithTag("inputServiceType").performTextInput("Plumbing")
     composeTestRule.onNodeWithTag("serviceTypeResult").performClick()
@@ -150,7 +170,9 @@ class CreateRequestScreenTest {
 
   @Test
   fun serviceTypeDropdown_showsNoResultsMessage() {
-    composeTestRule.setContent { CreateRequestScreen(serviceRequestViewModel, locationViewModel) }
+    composeTestRule.setContent {
+      CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
+    }
 
     composeTestRule.onNodeWithTag("inputServiceType").performTextInput("NonExistentType")
     composeTestRule.onNodeWithTag("serviceTypeResult").assert(hasText("Other"))
@@ -158,10 +180,24 @@ class CreateRequestScreenTest {
 
   @Test
   fun serviceTypeDropdown_closesOnFocusLost() {
-    composeTestRule.setContent { CreateRequestScreen(serviceRequestViewModel, locationViewModel) }
+    composeTestRule.setContent {
+      CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
+    }
 
     composeTestRule.onNodeWithTag("inputServiceType").performTextInput("Plumbing")
     composeTestRule.onNodeWithTag("inputRequestTitle").performClick()
     composeTestRule.onNodeWithTag("serviceTypeMenu").assertDoesNotExist()
+  }
+
+  @Test
+  fun doesNotSubmitWithInvalidTitle() {
+    composeTestRule.setContent {
+      CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
+    }
+
+    composeTestRule.onNodeWithTag("inputRequestTitle").performTextClearance()
+    composeTestRule.onNodeWithTag("requestSubmit").performClick()
+
+    Mockito.verify(serviceRequestRepository, never()).saveServiceRequest(any(), any(), any())
   }
 }

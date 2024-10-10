@@ -102,6 +102,7 @@ fun MapScreen(providerViewModel: ListProviderViewModel, navigationActions: Navig
                               position =
                                   LatLng(provider.location.latitude, provider.location.longitude)),
                       title = provider.name,
+                      tag = "marker${provider.uid}",
                       snippet = provider.description,
                   )
                 }
