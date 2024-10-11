@@ -25,16 +25,11 @@ import org.robolectric.Shadows
 @RunWith(RobolectricTestRunner::class)
 class UserRepositoryFirestoreTest {
 
-  @Mock
-  private lateinit var mockFirestore: FirebaseFirestore
-  @Mock
-  private lateinit var mockDocumentReference: DocumentReference
-  @Mock
-  private lateinit var mockCollectionReference: CollectionReference
-  @Mock
-  private lateinit var mockDocumentSnapshot: DocumentSnapshot
-  @Mock
-  private lateinit var mockQuerySnapshot: QuerySnapshot
+  @Mock private lateinit var mockFirestore: FirebaseFirestore
+  @Mock private lateinit var mockDocumentReference: DocumentReference
+  @Mock private lateinit var mockCollectionReference: CollectionReference
+  @Mock private lateinit var mockDocumentSnapshot: DocumentSnapshot
+  @Mock private lateinit var mockQuerySnapshot: QuerySnapshot
 
   private lateinit var firebaseRepository: UserRepositoryFirestore
 
@@ -45,15 +40,14 @@ class UserRepositoryFirestoreTest {
           username = "johndoe",
           email = "john.doe@example.com",
           phone = "+1234567890",
-          address = "Chemin des Triaudes"
-      )
+          address = "Chemin des Triaudes")
 
   @Before
   fun setUp() {
-      MockitoAnnotations.openMocks(this)
+    MockitoAnnotations.openMocks(this)
 
     if (FirebaseApp.getApps(ApplicationProvider.getApplicationContext()).isEmpty()) {
-        FirebaseApp.initializeApp(ApplicationProvider.getApplicationContext())
+      FirebaseApp.initializeApp(ApplicationProvider.getApplicationContext())
     }
 
     firebaseRepository = UserRepositoryFirestore(mockFirestore)
@@ -83,7 +77,7 @@ class UserRepositoryFirestoreTest {
         },
         onFailure = { TestCase.fail("Failure callback should not be called") })
 
-      verify(timeout(100)) { (mockQuerySnapshot).documents }
+    verify(timeout(100)) { (mockQuerySnapshot).documents }
   }
 
   @Test

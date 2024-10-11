@@ -35,14 +35,13 @@ class ListProviderViewModelTest {
             0.0,
             0.0,
             Timestamp.now(),
-            emptyList()
-        )
+            emptyList())
   }
 
   @Test
   fun getNewUid() {
     Mockito.`when`(providerRepository.getNewUid()).thenReturn("test uid")
-      MatcherAssert.assertThat(listProviderViewModel.getNewUid(), CoreMatchers.`is`("test uid"))
+    MatcherAssert.assertThat(listProviderViewModel.getNewUid(), CoreMatchers.`is`("test uid"))
   }
 
   @Test
@@ -79,9 +78,7 @@ class ListProviderViewModelTest {
   @Test
   fun selectService() {
     listProviderViewModel.selectService(Services.PLUMBER)
-      MatcherAssert.assertThat(
-          listProviderViewModel.selectedService.value,
-          CoreMatchers.`is`(Services.PLUMBER)
-      )
+    MatcherAssert.assertThat(
+        listProviderViewModel.selectedService.value, CoreMatchers.`is`(Services.PLUMBER))
   }
 }

@@ -17,8 +17,7 @@ class ServicesScreenTest {
   private lateinit var navigationActions: NavigationActions
   private lateinit var listProviderViewModel: ListProviderViewModel
 
-  @get:Rule
-  val composeTestRule = createComposeRule()
+  @get:Rule val composeTestRule = createComposeRule()
 
   @Before
   fun setUp() {

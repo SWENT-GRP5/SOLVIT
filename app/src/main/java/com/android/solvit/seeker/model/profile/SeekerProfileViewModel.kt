@@ -24,8 +24,7 @@ class SeekerProfileViewModel(private val repository: UserRepositoryFirestore) : 
                   email = "john.doe@example.com", // Hardcoded Email
                   phone = "+1234567890", // Hardcoded Phone Number
                   address = "Chemin des Triaudes" // Hardcoded Address
-                  )
-          ))
+                  )))
   val seekerProfile: StateFlow<List<SeekerProfile>> = _seekerProfile.asStateFlow()
 
   private val _isLoading = MutableLiveData<Boolean>()

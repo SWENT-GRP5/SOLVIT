@@ -42,7 +42,10 @@ import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 
 @Composable
-fun SeekerMapScreen(providerViewModel: ListProviderViewModel, navigationActions: NavigationActions) {
+fun SeekerMapScreen(
+    providerViewModel: ListProviderViewModel,
+    navigationActions: NavigationActions
+) {
   val context = LocalContext.current
   val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
   var userLocation by remember { mutableStateOf<LatLng?>(null) }

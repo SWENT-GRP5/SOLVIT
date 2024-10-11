@@ -32,16 +32,14 @@ class SeekerBottomNavigationMenuTest {
   @RunWith(AndroidJUnit4::class)
   class MyComposeEspressoTest {
 
-    @get:Rule
-    val composeTestRule = createComposeRule()
+    @get:Rule val composeTestRule = createComposeRule()
 
     @Test
     fun testMyComposableWithEspresso() {
       // Set the Compose content for testing
       composeTestRule.setContent {
-          SeekerBottomNavigationMenu(
-              onTabSelect = {}, tabList = LIST_TOP_LEVEL_DESTINATION, selectedItem = "home"
-          )
+        SeekerBottomNavigationMenu(
+            onTabSelect = {}, tabList = LIST_TOP_LEVEL_DESTINATION, selectedItem = "home")
       }
 
       val tab = TopLevelDestinations.SERVICES.textId
@@ -60,15 +58,13 @@ class SeekerBottomNavigationMenuTest {
               TopLevelDestinations.CREATE_REQUEST,
               TopLevelDestinations.MESSAGE,
               TopLevelDestinations.PROFILE,
-              TopLevelDestinations.ORDER
-          )
+              TopLevelDestinations.ORDER)
 
       composeTestRule.setContent {
-          SeekerBottomNavigationMenu(
-              onTabSelect = { selectedTab = it },
-              tabList = tabList,
-              selectedItem = TopLevelDestinations.SERVICES.route
-          )
+        SeekerBottomNavigationMenu(
+            onTabSelect = { selectedTab = it },
+            tabList = tabList,
+            selectedItem = TopLevelDestinations.SERVICES.route)
       }
 
       // Simulate click on the "Request" tab

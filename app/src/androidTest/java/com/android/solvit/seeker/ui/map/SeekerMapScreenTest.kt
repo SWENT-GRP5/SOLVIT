@@ -29,8 +29,7 @@ class SeekerMapScreenTest {
   private lateinit var navController: NavController
   private lateinit var navigationActions: NavigationActions
 
-  @get:Rule
-  val composeTestRule = createComposeRule()
+  @get:Rule val composeTestRule = createComposeRule()
 
   private val testProviders =
       listOf(
@@ -45,8 +44,7 @@ class SeekerMapScreenTest {
               description = "Test Description 1",
               languages = listOf(Language.ARABIC, Language.ENGLISH),
               deliveryTime = Timestamp(0, 0),
-              popular = true
-          ),
+              popular = true),
           Provider(
               uid = "2",
               name = "Test Provider 2",
@@ -58,9 +56,7 @@ class SeekerMapScreenTest {
               description = "Test Description 2",
               languages = listOf(Language.ARABIC, Language.ENGLISH),
               deliveryTime = Timestamp(0, 0),
-              popular = true
-          )
-      )
+              popular = true))
 
   @Before
   fun setUp() {

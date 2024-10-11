@@ -41,8 +41,7 @@ class EditRequestScreenTest {
       listOf(
           Location(37.7749, -122.4194, "San Francisco"),
           Location(34.0522, -118.2437, "Los Angeles"),
-          Location(40.7128, -74.0060, "New York")
-      )
+          Location(40.7128, -74.0060, "New York"))
 
   @Before
   fun setUp() {

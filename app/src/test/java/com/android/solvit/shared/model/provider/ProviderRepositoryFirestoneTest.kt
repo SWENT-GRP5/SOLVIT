@@ -27,14 +27,10 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class ProviderRepositoryFirestoneTest {
 
-  @Mock
-  private lateinit var mockFirestore: FirebaseFirestore
-  @Mock
-  private lateinit var mockDocumentReference: DocumentReference
-  @Mock
-  private lateinit var mockCollectionReference: CollectionReference
-  @Mock
-  private lateinit var mockQuerySnapshot: QuerySnapshot
+  @Mock private lateinit var mockFirestore: FirebaseFirestore
+  @Mock private lateinit var mockDocumentReference: DocumentReference
+  @Mock private lateinit var mockCollectionReference: CollectionReference
+  @Mock private lateinit var mockQuerySnapshot: QuerySnapshot
 
   private lateinit var providerRepositoryFirestore: ProviderRepositoryFirestore
 
@@ -50,16 +46,15 @@ class ProviderRepositoryFirestoneTest {
           0.0,
           0.0,
           Timestamp.now(),
-          emptyList()
-      )
+          emptyList())
 
   @Before
   fun setUp() {
-      MockitoAnnotations.openMocks(this)
+    MockitoAnnotations.openMocks(this)
 
     // Initialize Firebase if necessary
     if (FirebaseApp.getApps(ApplicationProvider.getApplicationContext()).isEmpty()) {
-        FirebaseApp.initializeApp(ApplicationProvider.getApplicationContext())
+      FirebaseApp.initializeApp(ApplicationProvider.getApplicationContext())
     }
 
     providerRepositoryFirestore = ProviderRepositoryFirestore(mockFirestore)
@@ -72,10 +67,7 @@ class ProviderRepositoryFirestoneTest {
   @Test
   fun getNewUid() {
     Mockito.`when`(mockDocumentReference.id).thenReturn("test uid")
-      MatcherAssert.assertThat(
-          providerRepositoryFirestore.getNewUid(),
-          CoreMatchers.`is`("test uid")
-      )
+    MatcherAssert.assertThat(providerRepositoryFirestore.getNewUid(), CoreMatchers.`is`("test uid"))
   }
 
   @Test

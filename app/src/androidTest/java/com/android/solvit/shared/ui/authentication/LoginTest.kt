@@ -15,8 +15,7 @@ import org.mockito.Mockito
 
 @RunWith(AndroidJUnit4::class)
 class LoginTest : TestCase() {
-  @get:Rule
-  val composeTestRule = createComposeRule()
+  @get:Rule val composeTestRule = createComposeRule()
   private lateinit var navigationActions: NavigationActions
 
   // The IntentsTestRule simply calls Intents.init() before the @Test block

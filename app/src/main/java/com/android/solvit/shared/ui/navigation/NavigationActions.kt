@@ -53,8 +53,7 @@ val LIST_TOP_LEVEL_DESTINATION =
         TopLevelDestinations.MESSAGE,
         TopLevelDestinations.CREATE_REQUEST,
         TopLevelDestinations.ORDER,
-        TopLevelDestinations.PROFILE
-    )
+        TopLevelDestinations.PROFILE)
 
 open class NavigationActions(
     private val navController: NavController,

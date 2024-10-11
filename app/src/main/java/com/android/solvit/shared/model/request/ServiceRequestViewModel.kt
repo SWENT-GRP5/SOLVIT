@@ -28,8 +28,7 @@ open class ServiceRequestViewModel(private val repository: ServiceRequestReposit
           @Suppress("UNCHECKED_CAST")
           override fun <T : ViewModel> create(modelClass: Class<T>): T {
             return ServiceRequestViewModel(
-                ServiceRequestRepositoryFirebase(Firebase.firestore, Firebase.storage)
-            )
+                ServiceRequestRepositoryFirebase(Firebase.firestore, Firebase.storage))
                 as T
           }
         }

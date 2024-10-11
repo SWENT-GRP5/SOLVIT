@@ -15,9 +15,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.android.solvit.R
-import com.android.solvit.shared.ui.navigation.NavigationActions
-import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.seeker.model.profile.SeekerProfile
+import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
+import com.android.solvit.shared.ui.navigation.NavigationActions
 
 /*
 @OptIn(ExperimentalMaterial3Api::class)
@@ -230,7 +230,10 @@ fun EditProfileScreen(
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
-fun EditSeekerProfileScreen(viewModel: SeekerProfileViewModel, navigationActions: NavigationActions) {
+fun EditSeekerProfileScreen(
+    viewModel: SeekerProfileViewModel,
+    navigationActions: NavigationActions
+) {
   // Collect the user profile from the StateFlow
   val userProfile by viewModel.seekerProfile.collectAsState()
 
@@ -330,8 +333,7 @@ fun EditSeekerProfileScreen(viewModel: SeekerProfileViewModel, navigationActions
                           username = username,
                           email = email,
                           phone = phone,
-                          address = address)
-                  )
+                          address = address))
                 }
                 navigationActions.goBack()
               },

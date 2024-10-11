@@ -29,8 +29,7 @@ class ListProviderScreenTest {
   private lateinit var navController: NavController
   private lateinit var navigationActions: NavigationActions
 
-  @get:Rule
-  val composeTestRule = createComposeRule()
+  @get:Rule val composeTestRule = createComposeRule()
 
   private val provider =
       Provider(
@@ -44,8 +43,7 @@ class ListProviderScreenTest {
           5.0,
           25.0,
           Timestamp.now(),
-          listOf(Language.FRENCH, Language.ENGLISH, Language.ARABIC, Language.SPANISH)
-      )
+          listOf(Language.FRENCH, Language.ENGLISH, Language.ARABIC, Language.SPANISH))
 
   @Before
   fun setUp() {

@@ -46,10 +46,8 @@ class NavigationActionsTest {
     Mockito.`when`(navHostController.currentDestination).thenReturn(navigationDestination)
     Mockito.`when`(navigationDestination.route).thenReturn(Route.CREATE_REQUEST)
 
-      MatcherAssert.assertThat(
-          navigationActions.currentRoute(),
-          CoreMatchers.`is`(Route.CREATE_REQUEST)
-      )
+    MatcherAssert.assertThat(
+        navigationActions.currentRoute(), CoreMatchers.`is`(Route.CREATE_REQUEST))
   }
 
   @Test
@@ -84,9 +82,7 @@ class NavigationActionsTest {
     Mockito.`when`(navHostController.currentDestination).thenReturn(navDestination)
     Mockito.`when`(navDestination.route).thenReturn(Route.CREATE_REQUEST)
 
-      MatcherAssert.assertThat(
-          navigationActions.currentRoute(),
-          CoreMatchers.`is`(Route.CREATE_REQUEST)
-      )
+    MatcherAssert.assertThat(
+        navigationActions.currentRoute(), CoreMatchers.`is`(Route.CREATE_REQUEST))
   }
 }

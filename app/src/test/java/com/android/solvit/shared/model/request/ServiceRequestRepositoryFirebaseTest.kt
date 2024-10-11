@@ -12,6 +12,7 @@ import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
+import com.google.firebase.storage.FirebaseStorage
 import junit.framework.TestCase
 import org.junit.Assert
 import org.junit.Before
@@ -27,20 +28,13 @@ import org.robolectric.Shadows
 @RunWith(RobolectricTestRunner::class)
 class ServiceRequestRepositoryFirebaseTest {
 
-  @Mock
-  private lateinit var mockAuth: FirebaseAuth
-  @Mock
-  private lateinit var mockFirestore: FirebaseFirestore
-  @Mock
-  private lateinit var mockStorage: FirebaseStorage
-  @Mock
-  private lateinit var mockDocumentReference: DocumentReference
-  @Mock
-  private lateinit var mockCollectionReference: CollectionReference
-  @Mock
-  private lateinit var mockDocumentSnapshot: DocumentSnapshot
-  @Mock
-  private lateinit var mockToDoQuerySnapshot: QuerySnapshot
+  @Mock private lateinit var mockAuth: FirebaseAuth
+  @Mock private lateinit var mockFirestore: FirebaseFirestore
+  @Mock private lateinit var mockStorage: FirebaseStorage
+  @Mock private lateinit var mockDocumentReference: DocumentReference
+  @Mock private lateinit var mockCollectionReference: CollectionReference
+  @Mock private lateinit var mockDocumentSnapshot: DocumentSnapshot
+  @Mock private lateinit var mockToDoQuerySnapshot: QuerySnapshot
 
   private lateinit var serviceRequestRepositoryFirebase: ServiceRequestRepositoryFirebase
 
@@ -54,16 +48,15 @@ class ServiceRequestRepositoryFirebaseTest {
           location = Location(name = "EPFL", latitude = 0.0, longitude = 0.0),
           imageUrl = null,
           type = ServiceRequestType.CLEANING,
-          status = ServiceRequestStatus.PENDING
-      )
+          status = ServiceRequestStatus.PENDING)
 
   @Before
   fun setUp() {
-      MockitoAnnotations.openMocks(this)
+    MockitoAnnotations.openMocks(this)
 
     // Initialize Firebase if necessary
     if (FirebaseApp.getApps(ApplicationProvider.getApplicationContext()).isEmpty()) {
-        FirebaseApp.initializeApp(ApplicationProvider.getApplicationContext())
+      FirebaseApp.initializeApp(ApplicationProvider.getApplicationContext())
     }
     serviceRequestRepositoryFirebase = ServiceRequestRepositoryFirebase(mockFirestore, mockStorage)
 
@@ -79,7 +72,7 @@ class ServiceRequestRepositoryFirebaseTest {
     var onSuccessCalled = false
     serviceRequestRepositoryFirebase.init { onSuccessCalled = true }
 
-      Assert.assertFalse(onSuccessCalled)
+    Assert.assertFalse(onSuccessCalled)
   }
 
   @Test
@@ -147,7 +140,7 @@ class ServiceRequestRepositoryFirebaseTest {
     val result = serviceRequestRepositoryFirebase.documentToServiceRequest(mockDocumentSnapshot)
 
     // Check that a valid ServiceRequest object is returned
-      Assert.assertNotNull(result)
+    Assert.assertNotNull(result)
     assert(result?.uid == "1")
     assert(result?.title == "Test Request")
     assert(result?.description == "Test Description")
@@ -164,6 +157,6 @@ class ServiceRequestRepositoryFirebaseTest {
     val result = serviceRequestRepositoryFirebase.documentToServiceRequest(mockDocumentSnapshot)
 
     // Check that null is returned due to missing required fields
-      Assert.assertNull(result)
+    Assert.assertNull(result)
   }
 }

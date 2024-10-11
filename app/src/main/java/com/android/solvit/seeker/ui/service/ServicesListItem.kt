@@ -16,5 +16,4 @@ val SERVICES_LIST =
         ServicesListItem(Services.CARPENTER, R.drawable.carpenter),
         ServicesListItem(Services.PHOTOGRAPHER, R.drawable.photographer),
         ServicesListItem(Services.PERSONAL_TRAINER, R.drawable.personal_trainer),
-        ServicesListItem(Services.HAIR_STYLIST, R.drawable.hair_stylist)
-    )
+        ServicesListItem(Services.HAIR_STYLIST, R.drawable.hair_stylist))

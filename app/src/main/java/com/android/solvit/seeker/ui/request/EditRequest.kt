@@ -43,8 +43,7 @@ fun EditRequestScreen(
           uid = "gIoUWJGkTgLHgA7qts59",
           type = ServiceRequestType.PLUMBING,
           imageUrl =
-              "https://firebasestorage.googleapis.com/v0/b/solvit-14cc1.appspot.com/o/serviceRequestImages%2F588d3bd9-bcb7-47bc-9911-61fae59eaece.jpg?alt=media&token=5f747f33-9732-4b90-9b34-55e28732ebc3")
-  )
+              "https://firebasestorage.googleapis.com/v0/b/solvit-14cc1.appspot.com/o/serviceRequestImages%2F588d3bd9-bcb7-47bc-9911-61fae59eaece.jpg?alt=media&token=5f747f33-9732-4b90-9b34-55e28732ebc3"))
 
   val request = requestViewModel.selectedRequest.value ?: return
   var title by remember { mutableStateOf(request.title) }
