@@ -38,7 +38,6 @@ class BottomNavigationMenuTest {
             onTabSelect = {}, tabList = LIST_TOP_LEVEL_DESTINATION, selectedItem = "home")
       }
 
-
       val tab = TopLevelDestinations.SERVICES.textId
 
       // Verify the button is displayed
@@ -51,9 +50,8 @@ class BottomNavigationMenuTest {
       var selectedTab: TopLevelDestination? = null
       val tabList =
           listOf(
-
               TopLevelDestinations.SERVICES,
-              TopLevelDestinations.REQUEST,
+              TopLevelDestinations.CREATE_REQUEST,
               TopLevelDestinations.MESSAGE,
               TopLevelDestinations.PROFILE,
               TopLevelDestinations.ORDER)
@@ -62,7 +60,6 @@ class BottomNavigationMenuTest {
         BottomNavigationMenu(
             onTabSelect = { selectedTab = it },
             tabList = tabList,
-
             selectedItem = TopLevelDestinations.SERVICES.route)
       }
 
@@ -71,7 +68,6 @@ class BottomNavigationMenuTest {
 
       // Verify that the selected tab is "Request"
       assert(selectedTab == TopLevelDestinations.SERVICES)
-
     }
   }
 }

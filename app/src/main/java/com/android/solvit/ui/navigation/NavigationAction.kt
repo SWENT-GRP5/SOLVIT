@@ -12,11 +12,19 @@ import androidx.navigation.NavController
 object Route {
   const val AUTH = "Auth"
   const val SERVICES = "Overview"
-  const val REQUEST = "Map"
+  const val CREATE_REQUEST = "Create request"
+  const val EDIT_REQUEST = "Edit request"
   const val MESSAGE = "Message"
   const val PROFILE = "Profile"
   const val ORDER = "Order"
   const val PROVIDERS = "Providers"
+  const val MAP = "Map"
+}
+
+object Screen {
+
+  const val PROFILE = "Profile Screen"
+  const val EDIT_PROFILE = "EditProfile Screen"
 }
 
 data class TopLevelDestination(val route: String, val icon: ImageVector, val textId: String)
@@ -29,8 +37,9 @@ object TopLevelDestinations {
   val MESSAGE =
       TopLevelDestination(
           route = Route.MESSAGE, icon = Icons.Outlined.MailOutline, textId = "Message")
-  val REQUEST =
-      TopLevelDestination(route = Route.REQUEST, icon = Icons.Outlined.Create, textId = "Request")
+  val CREATE_REQUEST =
+      TopLevelDestination(
+          route = Route.CREATE_REQUEST, icon = Icons.Outlined.Create, textId = "Request")
   val ORDER =
       TopLevelDestination(route = Route.ORDER, icon = Icons.Outlined.Menu, textId = "Settings")
   val PROFILE =
@@ -42,7 +51,7 @@ val LIST_TOP_LEVEL_DESTINATION =
     listOf(
         TopLevelDestinations.SERVICES,
         TopLevelDestinations.MESSAGE,
-        TopLevelDestinations.REQUEST,
+        TopLevelDestinations.CREATE_REQUEST,
         TopLevelDestinations.ORDER,
         TopLevelDestinations.PROFILE)
 
