@@ -58,7 +58,7 @@ fun TitleWithIcon() {
           )
       // Icon overlaying the "it" text, aligned at the top right
       Image(
-          painter = painterResource(id = R.drawable.arrowdown), // Replace with your check vector
+          painter = painterResource(id = R.drawable.check_arrow), // Replace with your check vector
           contentDescription = "Checkmark",
           modifier =
               Modifier.size(24.dp)
@@ -96,7 +96,7 @@ fun SignInScreen(navigationActions: NavigationActions) {
         ) {
           // App Logo Image
           Image(
-              painter = painterResource(id = R.drawable.plumber), // Ensure this drawable exists
+              painter = painterResource(id = R.drawable.solvit_logo), // Ensure this drawable exists
               contentDescription = "App Logo",
               modifier = Modifier.size(250.dp))
 
@@ -148,7 +148,7 @@ fun GoogleSignInButton(onSignInClick: () -> Unit) {
             modifier = Modifier.fillMaxWidth()) {
               // Load the Google logo from resources
               Image(
-                  painter = painterResource(id = R.drawable.error),
+                  painter = painterResource(id = R.drawable.google_logo),
                   contentDescription = "Google Logo",
                   modifier =
                       Modifier.size(30.dp) // Size of the Google logo
