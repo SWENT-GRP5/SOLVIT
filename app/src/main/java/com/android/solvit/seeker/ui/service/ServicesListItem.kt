@@ -1,7 +1,7 @@
 package com.android.solvit.seeker.ui.service
 
 import com.android.solvit.R
-import com.android.solvit.shared.model.provider.Services
+import com.android.solvit.shared.model.service.Services
 
 data class ServicesListItem(val service: Services, val image: Int)
 

@@ -23,7 +23,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows
 
 @RunWith(RobolectricTestRunner::class)
-class FirebaseRepositoryImpTest {
+class UserRepositoryFirestoreTest {
 
   @Mock
   private lateinit var mockFirestore: FirebaseFirestore
@@ -36,10 +36,10 @@ class FirebaseRepositoryImpTest {
   @Mock
   private lateinit var mockQuerySnapshot: QuerySnapshot
 
-  private lateinit var firebaseRepository: FirebaseRepositoryImp
+  private lateinit var firebaseRepository: UserRepositoryFirestore
 
-  private val testUserProfile =
-      UserProfile(
+  private val testSeekerProfile =
+      SeekerProfile(
           uid = "12345",
           name = "John Doe",
           username = "johndoe",
@@ -56,7 +56,7 @@ class FirebaseRepositoryImpTest {
         FirebaseApp.initializeApp(ApplicationProvider.getApplicationContext())
     }
 
-    firebaseRepository = FirebaseRepositoryImp(mockFirestore)
+    firebaseRepository = UserRepositoryFirestore(mockFirestore)
 
     Mockito.`when`(mockFirestore.collection(any())).thenReturn(mockCollectionReference)
     Mockito.`when`(mockCollectionReference.document(any())).thenReturn(mockDocumentReference)
@@ -91,7 +91,7 @@ class FirebaseRepositoryImpTest {
     Mockito.`when`(mockDocumentReference.set(any())).thenReturn(Tasks.forResult(null))
 
     firebaseRepository.updateUserProfile(
-        testUserProfile,
+        testSeekerProfile,
         onSuccess = { /* Do nothing; success is expected */},
         onFailure = { TestCase.fail("Failure callback should not be called") })
 

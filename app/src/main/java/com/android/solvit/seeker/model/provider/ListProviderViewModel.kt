@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.provider.ProviderRepository
 import com.android.solvit.shared.model.provider.ProviderRepositoryFirestore
-import com.android.solvit.shared.model.provider.Services
+import com.android.solvit.shared.model.service.Services
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

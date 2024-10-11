@@ -2,6 +2,7 @@ package com.android.solvit.shared.model.provider
 
 import androidx.test.core.app.ApplicationProvider
 import com.android.solvit.shared.model.map.Location
+import com.android.solvit.shared.model.service.Services
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.FirebaseApp
 import com.google.firebase.Timestamp

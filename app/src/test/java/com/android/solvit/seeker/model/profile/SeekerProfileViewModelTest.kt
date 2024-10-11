@@ -8,13 +8,13 @@ import org.mockito.Mockito.*
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 
-class ProfileViewModelTest {
+class SeekerProfileViewModelTest {
 
-  private lateinit var profileViewModel: ProfileViewModel
-  private lateinit var firebaseRepository: FirebaseRepositoryImp
+  private lateinit var seekerProfileViewModel: SeekerProfileViewModel
+  private lateinit var firebaseRepository: UserRepositoryFirestore
 
   val testProfile =
-      UserProfile(
+      SeekerProfile(
           uid = "12345",
           name = "John Doe",
           username = "johndoe",
@@ -24,15 +24,15 @@ class ProfileViewModelTest {
 
   @Before
   fun setUp() {
-    firebaseRepository = mock(FirebaseRepositoryImp::class.java)
-    profileViewModel = ProfileViewModel(firebaseRepository)
+    firebaseRepository = mock(UserRepositoryFirestore::class.java)
+    seekerProfileViewModel = SeekerProfileViewModel(firebaseRepository)
   }
 
   @Test
   fun getNewUidCallsRepository() {
 
     `when`(firebaseRepository.getNewUid()).thenReturn("12345")
-    val newUid = profileViewModel.getNewUid()
+    val newUid = seekerProfileViewModel.getNewUid()
     assertThat(newUid, `is`("12345"))
     verify(firebaseRepository).getNewUid()
   }
@@ -40,15 +40,15 @@ class ProfileViewModelTest {
   @Test
   fun getUserProfileCallsRepository() {
 
-    profileViewModel.getUserProfile()
+    seekerProfileViewModel.getUserProfile()
     verify(firebaseRepository).getUserProfile(any(), any())
   }
 
   @Test
   fun updateUserProfileUpdatesLocalProfile() {
 
-    profileViewModel.updateUserProfile(testProfile)
-    val updatedProfile = profileViewModel.userProfile.value
+    seekerProfileViewModel.updateUserProfile(testProfile)
+    val updatedProfile = seekerProfileViewModel.seekerProfile.value
     assertThat(updatedProfile[0], `is`(testProfile))
   }
 
@@ -56,7 +56,7 @@ class ProfileViewModelTest {
   fun deleteUserProfileCallsRepository() {
 
     doNothing().`when`(firebaseRepository).deleteUserProfile(eq(testProfile.uid), any(), any())
-    profileViewModel.deleteUserProfile(testProfile.uid)
+    seekerProfileViewModel.deleteUserProfile(testProfile.uid)
     verify(firebaseRepository).deleteUserProfile(eq(testProfile.uid), any(), any())
   }
 }

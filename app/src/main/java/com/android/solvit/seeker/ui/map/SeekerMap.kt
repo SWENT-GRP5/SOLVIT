@@ -28,7 +28,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
-import com.android.solvit.seeker.ui.navigation.BottomNavigationMenu
+import com.android.solvit.seeker.ui.navigation.SeekerBottomNavigationMenu
 import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -42,7 +42,7 @@ import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 
 @Composable
-fun MapScreen(providerViewModel: ListProviderViewModel, navigationActions: NavigationActions) {
+fun SeekerMapScreen(providerViewModel: ListProviderViewModel, navigationActions: NavigationActions) {
   val context = LocalContext.current
   val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
   var userLocation by remember { mutableStateOf<LatLng?>(null) }
@@ -126,7 +126,7 @@ fun MapScreen(providerViewModel: ListProviderViewModel, navigationActions: Navig
         }
       },
       bottomBar = {
-        BottomNavigationMenu(
+        SeekerBottomNavigationMenu(
             onTabSelect = { route -> navigationActions.navigateTo(route) },
             tabList = LIST_TOP_LEVEL_DESTINATION,
             selectedItem = navigationActions.currentRoute())

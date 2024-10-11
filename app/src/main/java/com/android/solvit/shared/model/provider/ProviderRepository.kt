@@ -1,5 +1,7 @@
 package com.android.solvit.shared.model.provider
 
+import com.android.solvit.shared.model.service.Services
+
 interface ProviderRepository {
 
   fun init(onSuccess: () -> Unit)

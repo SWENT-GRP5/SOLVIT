@@ -9,8 +9,9 @@ import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.provider.Language
 import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.provider.ProviderRepository
-import com.android.solvit.shared.model.provider.Services
+import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.firebase.Timestamp
 import org.junit.Before
 import org.junit.Rule
@@ -19,7 +20,7 @@ import org.mockito.Mockito
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 
-class MapScreenTest {
+class SeekerMapScreenTest {
   private lateinit var context: Context
   private lateinit var location: Location
   private lateinit var fusedLocationClient: FusedLocationProviderClient
@@ -80,7 +81,7 @@ class MapScreenTest {
 
   @Test
   fun markersAreDisplayedAndHaveCorrectLocation() {
-    composeTestRule.setContent { MapScreen(listProviderViewModel, navigationActions) }
+    composeTestRule.setContent { SeekerMapScreen(listProviderViewModel, navigationActions) }
 
     listProviderViewModel.providersList.value.forEach() { provider ->
       composeTestRule.onNodeWithTag("marker${provider.uid}")

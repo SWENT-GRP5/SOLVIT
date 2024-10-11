@@ -16,8 +16,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.android.solvit.R
 import com.android.solvit.shared.ui.navigation.NavigationActions
-import com.android.solvit.seeker.model.profile.ProfileViewModel
-import com.android.solvit.seeker.model.profile.UserProfile
+import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
+import com.android.solvit.seeker.model.profile.SeekerProfile
 
 /*
 @OptIn(ExperimentalMaterial3Api::class)
@@ -230,9 +230,9 @@ fun EditProfileScreen(
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
-fun EditProfileScreen(viewModel: ProfileViewModel, navigationActions: NavigationActions) {
+fun EditSeekerProfileScreen(viewModel: SeekerProfileViewModel, navigationActions: NavigationActions) {
   // Collect the user profile from the StateFlow
-  val userProfile by viewModel.userProfile.collectAsState()
+  val userProfile by viewModel.seekerProfile.collectAsState()
 
   // Assuming a single user profile (adjust as needed)
   val currentProfile = userProfile.firstOrNull()
@@ -324,7 +324,7 @@ fun EditProfileScreen(viewModel: ProfileViewModel, navigationActions: Navigation
                 currentProfile?.let { profile ->
                   // Update the profile with the new values
                   viewModel.updateUserProfile(
-                      UserProfile(
+                      SeekerProfile(
                           uid = profile.uid, // Use the existing UID
                           name = fullName,
                           username = username,

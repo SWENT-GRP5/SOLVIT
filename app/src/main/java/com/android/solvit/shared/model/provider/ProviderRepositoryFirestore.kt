@@ -2,6 +2,7 @@ package com.android.solvit.shared.model.provider
 
 import android.util.Log
 import com.android.solvit.shared.model.map.Location
+import com.android.solvit.shared.model.service.Services
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot

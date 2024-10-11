@@ -8,7 +8,7 @@ import com.google.firebase.auth.auth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 
-class FirebaseRepositoryImp(private val db: FirebaseFirestore) : FirebaseRepository {
+class UserRepositoryFirestore(private val db: FirebaseFirestore) : UserRepository {
   private val auth = FirebaseAuth.getInstance()
   private val firestore = FirebaseFirestore.getInstance()
   private val collectionPath = "user"
@@ -26,7 +26,7 @@ class FirebaseRepositoryImp(private val db: FirebaseFirestore) : FirebaseReposit
   }
 
   override fun getUserProfile(
-      onSuccess: (List<UserProfile>) -> Unit,
+      onSuccess: (List<SeekerProfile>) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
     Log.d("RepositoryFirestore", "getUserProfile")
@@ -44,7 +44,7 @@ class FirebaseRepositoryImp(private val db: FirebaseFirestore) : FirebaseReposit
   }
 
   override fun updateUserProfile(
-      profile: UserProfile,
+      profile: SeekerProfile,
       onSuccess: () -> Unit,
       onFailure: (Exception) -> Unit
   ) {
@@ -86,7 +86,7 @@ class FirebaseRepositoryImp(private val db: FirebaseFirestore) : FirebaseReposit
     }
   }
 
-  private fun documentToUser(document: DocumentSnapshot): UserProfile? {
+  private fun documentToUser(document: DocumentSnapshot): SeekerProfile? {
     return try {
       val uid = document.id
       val name = document.getString("name") ?: return null
@@ -95,7 +95,7 @@ class FirebaseRepositoryImp(private val db: FirebaseFirestore) : FirebaseReposit
       val phone = document.getString("phone") ?: return null
       val address = document.getString("address") ?: return null
 
-      UserProfile(
+      SeekerProfile(
           uid = uid,
           name = name,
           username = username,

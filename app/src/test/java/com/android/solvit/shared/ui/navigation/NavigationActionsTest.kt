@@ -11,7 +11,7 @@ import org.mockito.Mockito
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 
-class NavigationActionTest {
+class NavigationActionsTest {
 
   private lateinit var navigationDestination: NavDestination
   private lateinit var navHostController: NavHostController

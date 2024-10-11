@@ -1,4 +1,4 @@
-package com.github.se.bootcamp.ui.authentication
+package com.android.solvit.shared.ui.authentication
 
 import android.content.Intent
 import android.util.Log

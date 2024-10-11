@@ -33,7 +33,7 @@ import com.android.solvit.shared.ui.navigation.TopLevelDestination
 import com.android.solvit.shared.ui.navigation.TopLevelDestinations
 
 @Composable
-fun BottomNavigationMenu(
+fun SeekerBottomNavigationMenu(
     onTabSelect: (TopLevelDestination) -> Unit,
     tabList: List<TopLevelDestination>,
     selectedItem: String

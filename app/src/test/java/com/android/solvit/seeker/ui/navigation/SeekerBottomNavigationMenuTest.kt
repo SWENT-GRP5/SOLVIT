@@ -18,7 +18,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mockito
 
 @RunWith(Enclosed::class)
-class BottomNavigationMenuTest {
+class SeekerBottomNavigationMenuTest {
 
   private lateinit var navController: NavController
   private lateinit var navigationActions: NavigationActions
@@ -39,7 +39,7 @@ class BottomNavigationMenuTest {
     fun testMyComposableWithEspresso() {
       // Set the Compose content for testing
       composeTestRule.setContent {
-          BottomNavigationMenu(
+          SeekerBottomNavigationMenu(
               onTabSelect = {}, tabList = LIST_TOP_LEVEL_DESTINATION, selectedItem = "home"
           )
       }
@@ -64,7 +64,7 @@ class BottomNavigationMenuTest {
           )
 
       composeTestRule.setContent {
-          BottomNavigationMenu(
+          SeekerBottomNavigationMenu(
               onTabSelect = { selectedTab = it },
               tabList = tabList,
               selectedItem = TopLevelDestinations.SERVICES.route

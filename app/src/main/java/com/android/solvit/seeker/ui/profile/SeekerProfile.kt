@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.dp
 import com.android.solvit.R
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
-import com.android.solvit.seeker.model.profile.ProfileViewModel
+import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 
 /*
 @Composable
@@ -249,9 +249,9 @@ fun ProfileOptionItem(optionName: String, onClick: () -> Unit = {}) {
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
-fun ProfileScreen(viewModel: ProfileViewModel, navigationActions: NavigationActions) {
+fun SeekerProfileScreen(viewModel: SeekerProfileViewModel, navigationActions: NavigationActions) {
   // Collect the user profile from the StateFlow
-  val userProfile by viewModel.userProfile.collectAsState()
+  val userProfile by viewModel.seekerProfile.collectAsState()
 
   // Display the profile information if it's available
   userProfile.firstOrNull()?.let { profile ->

@@ -1,6 +1,7 @@
 package com.android.solvit.shared.model.provider
 
 import com.android.solvit.shared.model.map.Location
+import com.android.solvit.shared.model.service.Services
 import com.google.firebase.Timestamp
 
 data class Provider(

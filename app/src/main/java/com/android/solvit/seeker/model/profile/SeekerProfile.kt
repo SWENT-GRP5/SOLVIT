@@ -1,6 +1,6 @@
 package com.android.solvit.seeker.model.profile
 
-data class UserProfile(
+data class SeekerProfile(
     val uid: String,
     val name: String = "",
     val username: String = "",

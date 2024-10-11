@@ -10,14 +10,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class ProfileViewModel(private val repository: FirebaseRepositoryImp) : ViewModel() {
+class SeekerProfileViewModel(private val repository: UserRepositoryFirestore) : ViewModel() {
 
   // private val _userProfile = MutableStateFlow<List<UserProfile>>(emptyList())
   // hardcode
-  private val _userProfile =
+  private val _seekerProfile =
       MutableStateFlow(
           listOf(
-              UserProfile(
+              SeekerProfile(
                   uid = "12345", // Hardcoded UID
                   name = "John Doe", // Hardcoded Name
                   username = "johndoe", // Hardcoded username
@@ -26,7 +26,7 @@ class ProfileViewModel(private val repository: FirebaseRepositoryImp) : ViewMode
                   address = "Chemin des Triaudes" // Hardcoded Address
                   )
           ))
-  val userProfile: StateFlow<List<UserProfile>> = _userProfile.asStateFlow()
+  val seekerProfile: StateFlow<List<SeekerProfile>> = _seekerProfile.asStateFlow()
 
   private val _isLoading = MutableLiveData<Boolean>()
   val isLoading: LiveData<Boolean>
@@ -41,7 +41,7 @@ class ProfileViewModel(private val repository: FirebaseRepositoryImp) : ViewMode
   }
 
   fun getUserProfile() {
-    repository.getUserProfile(onSuccess = { _userProfile.value = it }, onFailure = {})
+    repository.getUserProfile(onSuccess = { _seekerProfile.value = it }, onFailure = {})
   }
 
   /*fun updateUserProfile(profile: UserProfile) {
@@ -50,8 +50,8 @@ class ProfileViewModel(private val repository: FirebaseRepositoryImp) : ViewMode
 
    */
 
-  fun updateUserProfile(profile: UserProfile) {
-    _userProfile.value = listOf(profile)
+  fun updateUserProfile(profile: SeekerProfile) {
+    _seekerProfile.value = listOf(profile)
   }
 
   fun deleteUserProfile(id: String) {
@@ -64,7 +64,7 @@ class ProfileViewModel(private val repository: FirebaseRepositoryImp) : ViewMode
         object : ViewModelProvider.Factory {
           @Suppress("UNCHECKED_CAST")
           override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return ProfileViewModel(FirebaseRepositoryImp(Firebase.firestore)) as T
+            return SeekerProfileViewModel(UserRepositoryFirestore(Firebase.firestore)) as T
           }
         }
   }
