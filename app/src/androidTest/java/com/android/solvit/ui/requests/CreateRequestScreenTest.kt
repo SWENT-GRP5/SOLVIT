@@ -91,7 +91,7 @@ class CreateRequestScreenTest {
       CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
     }
 
-    composeTestRule.onNodeWithTag("screenTtle").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("screenTitle").assertIsDisplayed()
     composeTestRule.onNodeWithTag("screenTitle").assertIsDisplayed()
     composeTestRule.onNodeWithTag("screenTitle").assertTextEquals("Create a new request")
     composeTestRule.onNodeWithTag("requestSubmit").assertIsDisplayed()
