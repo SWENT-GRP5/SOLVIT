@@ -1,6 +1,32 @@
 package com.android.solvit.ui.requests
 
-/*
+import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertTextEquals
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextClearance
+import androidx.compose.ui.test.performTextInput
+import androidx.navigation.NavController
+import com.android.solvit.model.map.Location
+import com.android.solvit.model.map.LocationRepository
+import com.android.solvit.model.map.LocationViewModel
+import com.android.solvit.model.requests.ServiceRequestRepository
+import com.android.solvit.model.requests.ServiceRequestViewModel
+import com.android.solvit.ui.navigation.NavigationActions
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
+import org.mockito.ArgumentMatchers.anyString
+import org.mockito.Mockito
+import org.mockito.Mockito.mock
+import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.never
+
 class EditRequestScreenTest {
   private lateinit var serviceRequestRepository: ServiceRequestRepository
   private lateinit var serviceRequestViewModel: ServiceRequestViewModel
@@ -201,4 +227,3 @@ class EditRequestScreenTest {
     Mockito.verify(serviceRequestRepository).saveServiceRequest(any(), any(), any())
   }
 }
-*/
