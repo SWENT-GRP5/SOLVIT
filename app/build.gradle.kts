@@ -130,8 +130,10 @@ sonar {
     if (localPropertiesFile.exists()) {
         localProperties.load(FileInputStream(localPropertiesFile))
     }
-    val sonarProjectKey : String = localProperties.getProperty("sonar_project_Key") ?: ""
-    val sonarOrganization : String = localProperties.getProperty("sonar_organization") ?: ""
+    val sonarProjectKey : String = localProperties.getProperty("sonar_project_Key") ?:
+     System.getenv("SONAR_PROJECT_KEY") ?: ""
+    val sonarOrganization : String = localProperties.getProperty("sonar_organization") ?:
+     System.getenv("SONAR_ORGANIZATION") ?: ""
     properties {
         property("sonar.projectKey", sonarProjectKey)
         property("sonar.organization", sonarOrganization)
