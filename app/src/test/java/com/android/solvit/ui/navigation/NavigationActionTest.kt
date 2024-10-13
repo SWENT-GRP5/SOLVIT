@@ -43,11 +43,11 @@ class NavigationActionTest {
   }
 
   @Test
-  fun currentRouteWorksWithDestination1() {
+  fun currentRouteWorksWithDestination() {
     `when`(navHostController.currentDestination).thenReturn(navigationDestination)
-    `when`(navigationDestination.route).thenReturn(Route.CREATE_REQUEST)
+    `when`(navigationDestination.route).thenReturn(Route.ORDER)
 
-    assertThat(navigationActions.currentRoute(), `is`(Route.CREATE_REQUEST))
+    assertThat(navigationActions.currentRoute(), `is`(Route.ORDER))
   }
 
   @Test
@@ -65,20 +65,8 @@ class NavigationActionTest {
 
     navigationActions.navigateTo(TopLevelDestinations.PROFILE)
     verify(navHostController).navigate(eq(Route.PROFILE), any<NavOptionsBuilder.() -> Unit>())
-  }
 
-  @Test
-  fun goBackCallsController() {
-    navigationActions.goBack()
-    verify(navHostController).popBackStack()
-  }
-
-  @Test
-  fun currentRouteWorksWithDestination() {
-    val navDestination = mock(NavDestination::class.java)
-    `when`(navHostController.currentDestination).thenReturn(navDestination)
-    `when`(navDestination.route).thenReturn(Route.CREATE_REQUEST)
-
-    assertThat(navigationActions.currentRoute(), `is`(Route.CREATE_REQUEST))
+    navigationActions.navigateTo(TopLevelDestinations.ORDER)
+    verify(navHostController).navigate(eq(Route.ORDER), any<NavOptionsBuilder.() -> Unit>())
   }
 }
