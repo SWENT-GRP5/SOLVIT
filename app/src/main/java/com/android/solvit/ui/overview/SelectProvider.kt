@@ -62,7 +62,6 @@ import com.android.solvit.model.provider.Language
 import com.android.solvit.model.provider.ListProviderViewModel
 import com.android.solvit.model.provider.Provider
 import com.android.solvit.ui.navigation.NavigationActions
-import kotlinx.coroutines.launch
 
 @Composable
 fun SpTopAppBar(navigationActions: NavigationActions) {
@@ -180,7 +179,8 @@ fun Note(note: String = "5") {
       modifier =
           Modifier.width(46.dp)
               .height(24.dp)
-              .background(color = Color(0xFF4D5652), shape = RoundedCornerShape(size = 59.dp))) {
+              .background(color = Color(0xFF4D5652), shape = RoundedCornerShape(size = 59.dp))
+              .testTag("Rating")) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             // part has to be modified we can add function here
@@ -517,7 +517,8 @@ fun ApplyButton(listProviderViewModel: ListProviderViewModel, display: () -> Uni
   val filteredList by listProviderViewModel.providersListFiltered.collectAsState()
   Box(
       modifier =
-          Modifier.width(249.dp)
+          Modifier.testTag("applyFilterButton")
+              .width(249.dp)
               .height(43.dp)
               .background(
                   brush =
@@ -552,11 +553,7 @@ fun ApplyButton(listProviderViewModel: ListProviderViewModel, display: () -> Uni
 }
 
 @Composable
-fun FilterComposable(
-    hide: () -> Unit,
-    listProviderViewModel: ListProviderViewModel,
-    display: () -> Unit
-) {
+fun FilterComposable(listProviderViewModel: ListProviderViewModel, display: () -> Unit) {
   Column(
       modifier = Modifier.fillMaxWidth().testTag("filterSheet"),
       verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -607,18 +604,7 @@ fun SelectProviderScreen(
           onDismissRequest = { displayFilters = false },
           sheetState = sheetState,
           containerColor = Color.White) {
-            FilterComposable(
-                {
-                  scope
-                      .launch { sheetState.hide() }
-                      .invokeOnCompletion {
-                        if (!sheetState.isVisible) {
-                          displayFilters = false
-                        }
-                      }
-                },
-                listProviderViewModel,
-                { displayFilters = false })
+            FilterComposable(listProviderViewModel, { displayFilters = false })
           }
     }
   }
