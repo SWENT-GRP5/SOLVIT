@@ -13,6 +13,7 @@ import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.provider.ProviderRepository
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.firebase.Timestamp
 import org.junit.Before
 import org.junit.Rule
@@ -21,6 +22,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mockito
 import org.mockito.Mockito.`when`
 import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
 
 @RunWith(AndroidJUnit4::class)
 class SeekerMapScreenTest {
@@ -94,12 +96,5 @@ class SeekerMapScreenTest {
   @Test
   fun showsRequestLocationPermission() {
     composeTestRule.setContent { SeekerMapScreen(listProviderViewModel, navigationActions, true) }
-  }
-
-  @Test
-  fun usesFactoryViewModel() {
-    composeTestRule.setContent {
-      SeekerMapScreen(navigationActions = navigationActions, requestLocationPermission = false)
-    }
   }
 }

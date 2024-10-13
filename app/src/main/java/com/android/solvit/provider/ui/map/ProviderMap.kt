@@ -17,6 +17,8 @@ import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
+import java.util.Calendar
+import java.util.GregorianCalendar
 
 @Composable
 fun ProviderMapScreen(
@@ -45,11 +47,21 @@ fun ProviderMapScreen(
   // Create markers with detailed information for each request
   val requestMarkers =
       requests.map { request ->
+          val dueDate =
+              request.dueDate.let {
+                  val calendar = GregorianCalendar()
+                  calendar.time = request.dueDate.toDate()
+                  return@let "${calendar.get(Calendar.DAY_OF_MONTH)}/${calendar.get(Calendar.MONTH) + 1}/${
+                      calendar.get(
+                          Calendar.YEAR
+                      )
+                  }"
+              }
         MarkerData(
             location =
                 LatLng(request.location?.latitude ?: 0.0, request.location?.longitude ?: 0.0),
             title = request.title,
-            snippet = "${request.description} - Deadline: ${request.dueDate}",
+            snippet = "${request.description} - Deadline: $dueDate",
             tag = "requestMarker-${request.uid}")
       }
 
