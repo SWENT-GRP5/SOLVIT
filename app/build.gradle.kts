@@ -126,8 +126,12 @@ android {
 
 sonar {
     val localProperties = Properties()
-    val sonarProjectKey: String = "SWENT-GRP5_SOLVIT"
-    val sonarOrganization: String = "swent-grp5"
+    val localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        localProperties.load(FileInputStream(localPropertiesFile))
+    }
+    val sonarProjectKey : String = localProperties.getProperty("sonar_project_Key")
+    val sonarOrganization : String = localProperties.getProperty("sonar_organization")
     properties {
         property("sonar.projectKey", sonarProjectKey)
         property("sonar.organization", sonarOrganization)
