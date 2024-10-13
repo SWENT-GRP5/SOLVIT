@@ -14,20 +14,20 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navigation
-import com.android.solvit.model.provider.ListProviderViewModel
-import com.android.solvit.ui.map.MapScreen
-import com.android.solvit.ui.navigation.NavigationActions
-import com.android.solvit.ui.navigation.Route
-import com.android.solvit.ui.navigation.Screen
-import com.android.solvit.ui.overview.SelectProviderScreen
-import com.android.solvit.ui.requests.CreateRequestScreen
-import com.android.solvit.ui.requests.EditRequestScreen
-import com.android.solvit.ui.screens.profile.EditProfileScreen
-import com.android.solvit.ui.screens.profile.ProfileScreen
-import com.android.solvit.ui.screens.profile.ProfileViewModel
-import com.android.solvit.ui.services.ServicesScreen
-import com.android.solvit.ui.theme.SampleAppTheme
-import com.github.se.bootcamp.ui.authentication.SignInScreen
+import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
+import com.android.solvit.seeker.model.provider.ListProviderViewModel
+import com.android.solvit.seeker.ui.map.SeekerMapScreen
+import com.android.solvit.seeker.ui.profile.EditSeekerProfileScreen
+import com.android.solvit.seeker.ui.profile.SeekerProfileScreen
+import com.android.solvit.seeker.ui.provider.SelectProviderScreen
+import com.android.solvit.seeker.ui.request.CreateRequestScreen
+import com.android.solvit.seeker.ui.request.EditRequestScreen
+import com.android.solvit.seeker.ui.service.ServicesScreen
+import com.android.solvit.shared.ui.authentication.SignInScreen
+import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.android.solvit.shared.ui.navigation.Route
+import com.android.solvit.shared.ui.navigation.Screen
+import com.android.solvit.shared.ui.theme.SampleAppTheme
 
 class MainActivity : ComponentActivity() {
 
@@ -49,7 +49,7 @@ fun SolvItApp() {
   val navigationActions = NavigationActions(navController)
   val listProviderViewModel =
       viewModel<ListProviderViewModel>(factory = ListProviderViewModel.Factory)
-  val viewModel: ProfileViewModel = viewModel(factory = ProfileViewModel.Factory)
+  val viewModel: SeekerProfileViewModel = viewModel(factory = SeekerProfileViewModel.Factory)
 
   NavHost(navController = navController, startDestination = Route.AUTH) {
     composable(Route.AUTH) { SignInScreen(navigationActions) }
@@ -58,14 +58,14 @@ fun SolvItApp() {
     composable(Route.MESSAGE) { Text("Not implemented yet") }
     composable(Route.CREATE_REQUEST) { CreateRequestScreen(navigationActions) }
     composable(Route.EDIT_REQUEST) { EditRequestScreen(navigationActions) }
-    composable(Route.MAP) { MapScreen(listProviderViewModel, navigationActions) }
+    composable(Route.MAP) { SeekerMapScreen(listProviderViewModel, navigationActions) }
     composable(Route.ORDER) {
       EditRequestScreen(navigationActions)
     } // This line can be replace when the OrderScreen is implemented
     navigation(startDestination = Screen.PROFILE, route = Route.PROFILE) {
-      composable(Screen.PROFILE) { ProfileScreen(viewModel = viewModel, navigationActions) }
+      composable(Screen.PROFILE) { SeekerProfileScreen(viewModel = viewModel, navigationActions) }
       composable(Screen.EDIT_PROFILE) {
-        EditProfileScreen(viewModel = viewModel, navigationActions)
+        EditSeekerProfileScreen(viewModel = viewModel, navigationActions)
       }
     }
   }
