@@ -1,4 +1,4 @@
-package com.android.solvit.shared.ui.authentication
+package com.android.solvit.ui.authentication
 
 import android.content.Intent
 import android.util.Log

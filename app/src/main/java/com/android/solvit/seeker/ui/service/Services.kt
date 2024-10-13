@@ -82,7 +82,7 @@ fun ServicesScreen(
                   colors = SearchBarDefaults.colors(containerColor = Color.White)) {}
               LazyVerticalGrid(
                   columns = GridCells.Fixed(2),
-                  modifier = Modifier.padding(padding).testTag("servicesGrid"),
+                  modifier = Modifier.testTag("servicesGrid"),
                   verticalArrangement = Arrangement.spacedBy(16.dp),
                   horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                     items(searchResults.size) { index ->

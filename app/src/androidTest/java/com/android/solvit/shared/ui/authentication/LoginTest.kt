@@ -1,17 +1,26 @@
-package com.android.solvit.shared.ui.authentication
+package com.github.se.bootcamp.ui.authentication
+
+// ***************************************************************************** //
+// ***                                                                       *** //
+// *** THIS FILE WILL BE OVERWRITTEN DURING GRADING. IT SHOULD BE LOCATED IN *** //
+// *** `app/src/androidTest/java/com/github/se/bootcamp/authentication/`.    *** //
+// *** DO **NOT** IMPLEMENT YOUR OWN TESTS IN THIS FILE                      *** //
+// ***                                                                       *** //
+// ***************************************************************************** //
 
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.android.solvit.ui.authentication.SignInScreen
+import com.android.solvit.ui.navigation.NavigationActions
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito
+import org.mockito.Mockito.mock
 
 @RunWith(AndroidJUnit4::class)
 class LoginTest : TestCase() {
@@ -25,7 +34,7 @@ class LoginTest : TestCase() {
   @Before
   fun setUp() {
 
-    navigationActions = Mockito.mock(NavigationActions::class.java)
+    navigationActions = mock(NavigationActions::class.java)
   }
 
   @Test
