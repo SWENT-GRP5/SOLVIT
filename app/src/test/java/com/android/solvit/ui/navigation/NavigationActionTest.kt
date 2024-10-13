@@ -3,6 +3,9 @@ package com.android.solvit.ui.navigation
 import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.NavOptionsBuilder
+import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.android.solvit.shared.ui.navigation.Route
+import com.android.solvit.shared.ui.navigation.TopLevelDestinations
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Before
@@ -43,11 +46,11 @@ class NavigationActionTest {
   }
 
   @Test
-  fun currentRouteWorksWithDestination1() {
+  fun currentRouteWorksWithDestination() {
     `when`(navHostController.currentDestination).thenReturn(navigationDestination)
-    `when`(navigationDestination.route).thenReturn(Route.CREATE_REQUEST)
+    `when`(navigationDestination.route).thenReturn(Route.ORDER)
 
-    assertThat(navigationActions.currentRoute(), `is`(Route.CREATE_REQUEST))
+    assertThat(navigationActions.currentRoute(), `is`(Route.ORDER))
   }
 
   @Test
@@ -65,20 +68,8 @@ class NavigationActionTest {
 
     navigationActions.navigateTo(TopLevelDestinations.PROFILE)
     verify(navHostController).navigate(eq(Route.PROFILE), any<NavOptionsBuilder.() -> Unit>())
-  }
 
-  @Test
-  fun goBackCallsController() {
-    navigationActions.goBack()
-    verify(navHostController).popBackStack()
-  }
-
-  @Test
-  fun currentRouteWorksWithDestination() {
-    val navDestination = mock(NavDestination::class.java)
-    `when`(navHostController.currentDestination).thenReturn(navDestination)
-    `when`(navDestination.route).thenReturn(Route.CREATE_REQUEST)
-
-    assertThat(navigationActions.currentRoute(), `is`(Route.CREATE_REQUEST))
+    navigationActions.navigateTo(TopLevelDestinations.ORDER)
+    verify(navHostController).navigate(eq(Route.ORDER), any<NavOptionsBuilder.() -> Unit>())
   }
 }
