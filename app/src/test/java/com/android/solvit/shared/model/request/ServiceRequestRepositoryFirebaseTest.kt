@@ -169,7 +169,6 @@ class ServiceRequestRepositoryFirebaseTest {
     `when`(mockDocumentSnapshot.getString("type")).thenReturn("CLEANING")
     `when`(mockDocumentSnapshot.getString("status")).thenReturn("PENDING")
 
-
     val result = serviceRequestRepositoryFirebase.documentToServiceRequest(mockDocumentSnapshot)
 
     // Check that a valid ServiceRequest object is returned
