@@ -129,8 +129,8 @@ test-core-ktx = { group = "androidx.test", name = "core-ktx", version.ref = "and
 firebase-storage-ktx = { group = "com.google.firebase", name = "firebase-storage-ktx", version.ref = "firebaseStorageKtx" }
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
 androidx-navigation-runtime-ktx = { group = "androidx.navigation", name = "navigation-runtime-ktx", version.ref = "navigationRuntimeKtx" }
-testng = { group = "org.testng", name = "testng", version.ref = "testng" }
 androidx-navigation-testing = { group = "androidx.navigation", name = "navigation-testing", version.ref = "navigationTesting" }
+testng = { group = "org.testng", name = "testng", version.ref = "testng" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
