@@ -4,7 +4,9 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.maps.model.LatLng
@@ -60,5 +62,21 @@ class MapScreenTest {
     }
 
     assert(receivedLocation == null)
+  }
+
+  @Test
+  fun mapContentDisplayed() {
+    val markerData =
+        MarkerData(
+            location = LatLng(37.7749, -122.4194),
+            title = "Test Title",
+            snippet = "Test Snippet",
+            tag = "testTag")
+
+    composeTestRule.setContent {
+      MapContent(userLocation = LatLng(37.7749, -122.4194), markers = listOf(markerData))
+    }
+
+    composeTestRule.onNodeWithTag("googleMap").assertIsDisplayed()
   }
 }
