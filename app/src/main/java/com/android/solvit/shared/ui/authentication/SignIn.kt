@@ -146,9 +146,7 @@ fun SignInScreen(navigationActions: NavigationActions) {
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        Text(
-            text = "Sign in to continue",
-            color = Color.Black)
+        Text(text = "Sign in to continue", color = Color.Black)
 
         Spacer(modifier = Modifier.height(20.dp))
 

@@ -60,15 +60,14 @@ class SignInScreenTest {
 
   @Test
   fun performClick() {
-    composeTestRule.setContent {
-      SignInScreen(mockNavigationActions)
-    }
+    composeTestRule.setContent { SignInScreen(mockNavigationActions) }
 
     // Test that the checkbox is clickable and can toggle between states
     composeTestRule.onNodeWithTag("rememberMeCheckbox").performClick()
     composeTestRule.onNodeWithTag("forgotPasswordLink").performClick()
     composeTestRule.onNodeWithTag("signInButton").performClick()
-    composeTestRule.onNodeWithTag("googleSignInButton").performClick() }
+    composeTestRule.onNodeWithTag("googleSignInButton").performClick()
+  }
 
   suspend fun signInWithFirebase(
       account: GoogleSignInAccount,

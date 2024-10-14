@@ -54,7 +54,11 @@ fun OpeningScreen(navigationActions: NavigationActions) {
               fontSize = 60.sp,
               modifier = Modifier.testTag("appName"))
           Spacer(modifier = Modifier.height(175.dp))
-          Text(text = "Your Problem, Our Priority", fontSize = 18.sp, color = Color(102, 102, 102), modifier = Modifier.testTag("tagline"))
+          Text(
+              text = "Your Problem, Our Priority",
+              fontSize = 18.sp,
+              color = Color(102, 102, 102),
+              modifier = Modifier.testTag("tagline"))
           Text(
               text = "Tap to Continue",
               fontSize = 18.sp,

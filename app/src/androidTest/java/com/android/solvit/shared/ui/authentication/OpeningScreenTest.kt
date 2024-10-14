@@ -35,7 +35,7 @@ class OpeningScreenTest {
     composeTestRule.setContent { OpeningScreen(mockNavigationActions) }
 
     // Perform click on "Tap to Continue" and verify navigation to Sign In screen
-    composeTestRule.onNodeWithTag("Bottom tapToContinue").performClick()
+    composeTestRule.onNodeWithTag("ctaButton").performClick()
 
     // Verify that the navigation action was triggered
     Mockito.verify(mockNavigationActions).navigateTo(Screen.SIGN_IN)
