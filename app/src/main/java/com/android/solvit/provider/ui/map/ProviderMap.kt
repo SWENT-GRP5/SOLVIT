@@ -25,12 +25,16 @@ fun ProviderMapScreen(
     navigationActions: NavigationActions,
     requestLocationPermission: Boolean = true
 ) {
+  // Get the current context
   val context = LocalContext.current
+  // Initialize the FusedLocationProviderClient
   val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
+  // State to hold the user's location
   var userLocation by remember { mutableStateOf<LatLng?>(null) }
+  // Collect the service requests from the ViewModel
   val requests by serviceRequestViewModel.requests.collectAsState()
 
-  // Allows to bypass location permission for testing
+  // Request location permission if required
   if (requestLocationPermission) {
     RequestLocationPermission(context, fusedLocationClient) { location -> userLocation = location }
   } else {
@@ -38,7 +42,7 @@ fun ProviderMapScreen(
     userLocation = LatLng(37.7749, -122.4194) // Example mocked location
   }
 
-  // Create markers with detailed information for each provider
+  // Create markers with detailed information for each request
   val requestMarkers =
       requests.map { request ->
         MarkerData(
@@ -49,6 +53,7 @@ fun ProviderMapScreen(
             tag = "requestMarker-${request.uid}")
       }
 
+  // Display the map screen with the user's location and request markers
   MapScreen(
       userLocation = userLocation,
       markers = requestMarkers,
