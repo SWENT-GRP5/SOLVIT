@@ -126,7 +126,7 @@ class ServiceRequestRepositoryFirebaseTest {
   fun documentToServiceRequest_validDocumentSnapshot_returnsServiceRequest() {
     // Set up mock DocumentSnapshot
     Mockito.`when`(mockDocumentSnapshot.id).thenReturn("1")
-    Mockito.`when`(mockDocumentSnapshot.getString("name")).thenReturn("Test Request")
+    Mockito.`when`(mockDocumentSnapshot.getString("title")).thenReturn("Test Request")
     Mockito.`when`(mockDocumentSnapshot.getString("description")).thenReturn("Test Description")
     Mockito.`when`(mockDocumentSnapshot.getString("assigneeName")).thenReturn("Test Assignee")
     Mockito.`when`(mockDocumentSnapshot.getTimestamp("dueDate")).thenReturn(Timestamp.now())
