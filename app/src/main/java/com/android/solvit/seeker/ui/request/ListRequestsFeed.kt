@@ -34,6 +34,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -67,11 +70,11 @@ fun RequestsTopBar() {
       horizontalArrangement = Arrangement.SpaceBetween,
       verticalAlignment = Alignment.CenterVertically,
   ) {
-    IconButton(onClick = { TODO() }) {
+    IconButton(modifier = Modifier.testTag("MenuOption"), onClick = { TODO() }) {
       Icon(imageVector = Icons.Default.Menu, contentDescription = "Menu Option")
     }
 
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    Row(modifier = Modifier.testTag("SloganIcon"), verticalAlignment = Alignment.CenterVertically) {
       Text(
           text = "Solv",
           style =
@@ -98,10 +101,11 @@ fun RequestsTopBar() {
 
 @Composable
 fun SearchBar() {
+  var userResearch by remember { mutableStateOf("") }
   Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
     BasicTextField(
         value = "",
-        onValueChange = { TODO() },
+        onValueChange = { userResearch = it },
         singleLine = true,
         textStyle = TextStyle(color = Color.Gray, fontSize = 16.sp),
         modifier =
@@ -115,7 +119,8 @@ fun SearchBar() {
                     shape = RoundedCornerShape(size = 8.dp))
                 .width(265.dp)
                 .height(32.99994.dp)
-                .background(color = Color(0xFFFFFFFF), shape = RoundedCornerShape(size = 8.dp))) {
+                .background(color = Color(0xFFFFFFFF), shape = RoundedCornerShape(size = 8.dp))
+                .testTag("SearchBar")) {
           Row(verticalAlignment = Alignment.CenterVertically) {
             Image(
                 modifier = Modifier.width(14.dp).height(15.dp),
@@ -142,7 +147,7 @@ fun SearchBar() {
 @Composable
 fun TitleScreen() {
   Box(
-      modifier = Modifier.padding(16.dp).fillMaxWidth(),
+      modifier = Modifier.padding(16.dp).fillMaxWidth().testTag("TitleScreen"),
   ) {
     Text(
         text = "Find Your Seeker",
@@ -172,7 +177,7 @@ fun TitleScreen() {
 @Composable
 fun ListRequests(requests: List<ServiceRequest>) {
   LazyColumn(
-      modifier = Modifier.fillMaxSize(),
+      modifier = Modifier.fillMaxSize().testTag("requests"),
       contentPadding = PaddingValues(16.dp),
       verticalArrangement = Arrangement.spacedBy(8.dp)) {
         items(requests) { request ->
@@ -316,14 +321,15 @@ fun ListRequestsFeedScreen(
 
   Log.e("ListRequestsFeed", "$requests")
   Scaffold(
-      modifier = Modifier.fillMaxSize(),
+      modifier = Modifier.fillMaxSize().testTag("ListRequestsScreen"),
       topBar = { RequestsTopBar() },
       content = { paddingValues ->
         Column(
             modifier =
                 Modifier.fillMaxSize()
                     .padding(paddingValues)
-                    .background(color = Color(0xFFF6F6F6))) {
+                    .background(color = Color(0xFFF6F6F6))
+                    .testTag("ScreenContent")) {
               SearchBar()
               Spacer(Modifier.height(15.dp))
               TitleScreen()
