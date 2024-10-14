@@ -2,6 +2,7 @@ package com.android.solvit.ui.requests
 
 import android.annotation.SuppressLint
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -48,6 +49,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -67,15 +69,18 @@ import com.android.solvit.shared.model.service.Services
 // Composable function representing the top bar with a menu, slogan, and notifications icon
 @Composable
 fun RequestsTopBar() {
+  val context = LocalContext.current
   Row(
       modifier = Modifier.testTag("RequestsTopBar").fillMaxWidth(),
       horizontalArrangement = Arrangement.SpaceBetween,
       verticalAlignment = Alignment.CenterVertically,
   ) {
     // Menu button
-    IconButton(modifier = Modifier.testTag("MenuOption"), onClick = { TODO() }) {
-      Icon(imageVector = Icons.Default.Menu, contentDescription = "Menu Option")
-    }
+    IconButton(
+        modifier = Modifier.testTag("MenuOption"),
+        onClick = { Toast.makeText(context, "Not Yet Implemented", Toast.LENGTH_LONG).show() }) {
+          Icon(imageVector = Icons.Default.Menu, contentDescription = "Menu Option")
+        }
 
     // Display the app's slogan
     Row(modifier = Modifier.testTag("SloganIcon"), verticalAlignment = Alignment.CenterVertically) {
@@ -98,9 +103,10 @@ fun RequestsTopBar() {
     }
 
     // Notifications button
-    IconButton(onClick = { TODO() }) {
-      Icon(imageVector = Icons.Default.Notifications, contentDescription = "Notifications")
-    }
+    IconButton(
+        onClick = { Toast.makeText(context, "Not Yet Implemented", Toast.LENGTH_LONG).show() }) {
+          Icon(imageVector = Icons.Default.Notifications, contentDescription = "Notifications")
+        }
   }
 }
 
@@ -108,10 +114,13 @@ fun RequestsTopBar() {
 @Composable
 fun SearchBar() {
   var userResearch by remember { mutableStateOf("") }
+  val context = LocalContext.current
   Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
     BasicTextField(
         value = "",
-        onValueChange = { userResearch = it },
+        onValueChange = {
+          Toast.makeText(context, "Not Yet Implemented", Toast.LENGTH_LONG).show()
+        },
         singleLine = true,
         textStyle = TextStyle(color = Color.Gray, fontSize = 16.sp),
         modifier =
@@ -291,6 +300,7 @@ fun ListRequests(requests: List<ServiceRequest>) {
 // A composable for the interaction bar, showing options to comment, share, and reply
 @Composable
 fun InteractionBar(text: String, icon: Int) {
+  val context = LocalContext.current
   Column(horizontalAlignment = Alignment.CenterHorizontally) {
     Text(
         text = text,
@@ -299,13 +309,16 @@ fun InteractionBar(text: String, icon: Int) {
         fontWeight = FontWeight(500),
         color = Color(0xFF585C60))
 
-    IconButton(onClick = { /* Handle comment click EPIC 3*/}) {
-      Image(
-          modifier = Modifier.padding(0.dp).width(21.dp).height(18.90004.dp),
-          painter = painterResource(id = icon),
-          contentDescription = text,
-          contentScale = ContentScale.Crop)
-    }
+    IconButton(
+        onClick = { /* Handle comment click EPIC 3*/
+          Toast.makeText(context, "Not Yet Implemented !", Toast.LENGTH_LONG).show()
+        }) {
+          Image(
+              modifier = Modifier.padding(0.dp).width(21.dp).height(18.90004.dp),
+              painter = painterResource(id = icon),
+              contentDescription = text,
+              contentScale = ContentScale.Crop)
+        }
   }
 }
 
@@ -398,12 +411,17 @@ fun FilterChip(label: String, isSelected: Boolean, onSelected: (Boolean) -> Unit
   val backgroundColor = if (isSelected) Color(0xFFFFFAF5) else Color(0xFFFFFFFF)
   val borderTextColor = if (isSelected) Color(0xFF00C853) else Color(0xFFAFAFAF)
 
+  val context = LocalContext.current
   Box(
       modifier =
           Modifier.padding(8.dp)
               .border(1.dp, borderTextColor, shape = RoundedCornerShape(50))
               .background(backgroundColor, shape = RoundedCornerShape(50))
-              .clickable { onSelected(!isSelected) } // Toggle selection state
+              .clickable {
+                onSelected(!isSelected)
+                if (label == "Near To Me")
+                    Toast.makeText(context, "Not Yet Implemented", Toast.LENGTH_LONG).show()
+              } // Toggle selection state
               .padding(12.dp, 6.dp), // Add some padding inside the chip
       contentAlignment = Alignment.Center) {
         // Manage Service Special Cases to have a dropDownMenu
