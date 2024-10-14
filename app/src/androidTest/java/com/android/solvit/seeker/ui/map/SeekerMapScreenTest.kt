@@ -19,6 +19,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito
+import org.mockito.Mockito.`when`
 import org.mockito.kotlin.any
 
 @RunWith(AndroidJUnit4::class)
@@ -64,7 +65,7 @@ class SeekerMapScreenTest {
     navController = Mockito.mock(NavController::class.java)
     navigationActions = NavigationActions(navController)
 
-    Mockito.`when`(providerRepository.getProviders(any(), any(), any())).thenAnswer { invocation ->
+    `when`(providerRepository.getProviders(any(), any(), any())).thenAnswer { invocation ->
       val onSuccess = invocation.getArgument<(List<Provider>) -> Unit>(0)
       onSuccess(testProviders)
     }
@@ -87,6 +88,18 @@ class SeekerMapScreenTest {
       composeTestRule.onNodeWithTag("providerMarker-${provider.uid}").assertIsDisplayed()
       composeTestRule.onNodeWithText(provider.name).assertIsDisplayed()
       composeTestRule.onNodeWithText(provider.description).assertIsDisplayed()
+    }
+  }
+
+  @Test
+  fun showsRequestLocationPermission() {
+    composeTestRule.setContent { SeekerMapScreen(listProviderViewModel, navigationActions, true) }
+  }
+
+  @Test
+  fun usesFactoryViewModel() {
+    composeTestRule.setContent {
+      SeekerMapScreen(navigationActions = navigationActions, requestLocationPermission = false)
     }
   }
 }
