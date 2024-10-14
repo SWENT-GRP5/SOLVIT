@@ -34,7 +34,7 @@ fun OpeningScreen(navigationActions: NavigationActions) {
           Image(
               painter = painterResource(id = R.drawable.logosolvit_firstpage),
               contentDescription = null,
-              modifier = Modifier.size(200.dp).testTag("loginImage"))
+              modifier = Modifier.size(200.dp).testTag("appLogo"))
           Spacer(modifier = Modifier.height(7.dp))
           Text(
               text =
@@ -52,9 +52,9 @@ fun OpeningScreen(navigationActions: NavigationActions) {
                                     color = Color(64, 165, 72), fontWeight = FontWeight.Bold)))
                   },
               fontSize = 60.sp,
-              modifier = Modifier.testTag("SolvitText"))
+              modifier = Modifier.testTag("appName"))
           Spacer(modifier = Modifier.height(175.dp))
-          Text(text = "Your Problem, Our Priority", fontSize = 18.sp, color = Color(102, 102, 102))
+          Text(text = "Your Problem, Our Priority", fontSize = 18.sp, color = Color(102, 102, 102), modifier = Modifier.testTag("tagline"))
           Text(
               text = "Tap to Continue",
               fontSize = 18.sp,
@@ -62,7 +62,7 @@ fun OpeningScreen(navigationActions: NavigationActions) {
               color = Color(0, 200, 83),
               modifier =
                   Modifier.clickable { navigationActions.navigateTo(Screen.SIGN_IN) }
-                      .testTag("Bottom tapToContinue"))
+                      .testTag("ctaButton"))
         }
   }
 }

@@ -7,6 +7,19 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.android.gms.tasks.Task
+import com.google.firebase.Firebase
+import com.google.firebase.auth.AuthCredential
+import com.google.firebase.auth.AuthResult
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.auth.auth
+import junit.framework.TestCase.assertEquals
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.tasks.await
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -24,16 +37,16 @@ class SignInScreenTest {
     composeTestRule.setContent { SignInScreen(mockNavigationActions) }
 
     // Test the display of UI components
+    composeTestRule.onNodeWithTag("backButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("loginImage").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("WelcomeText").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("SignInText").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("welcomeText").assertIsDisplayed()
     composeTestRule.onNodeWithTag("emailInput").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("passwordInput").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("rememberMeText").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("forgotPasswordText").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("password").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("rememberMeCheckbox").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("forgotPasswordLink").assertIsDisplayed()
     composeTestRule.onNodeWithTag("signInButton").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("loginButton").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("Bottom signUp").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("googleSignInButton").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("signUpLink").assertIsDisplayed()
   }
 
   @Test
@@ -42,35 +55,66 @@ class SignInScreenTest {
 
     // Test email input
     composeTestRule.onNodeWithTag("emailInput").performTextInput("test@example.com")
-    composeTestRule.onNodeWithTag("passwordInput").performTextInput("password123")
+    composeTestRule.onNodeWithTag("password").performTextInput("password123")
   }
 
   @Test
-  fun testRememberMeCheckbox_togglesCorrectly() {
-    composeTestRule.setContent { SignInScreen(mockNavigationActions) }
+  fun performClick() {
+    composeTestRule.setContent {
+      SignInScreen(mockNavigationActions)
+    }
 
     // Test that the checkbox is clickable and can toggle between states
-    composeTestRule.onNodeWithTag("rememberMeText").performClick()
-    composeTestRule.onNodeWithTag("rememberMeText").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("rememberMeCheckbox").performClick()
+    composeTestRule.onNodeWithTag("forgotPasswordLink").performClick()
+    composeTestRule.onNodeWithTag("signInButton").performClick()
+    composeTestRule.onNodeWithTag("googleSignInButton").performClick() }
+
+  suspend fun signInWithFirebase(
+      account: GoogleSignInAccount,
+      onAuthComplete: (AuthResult) -> Unit,
+      onAuthError: (Exception) -> Unit
+  ) {
+    try {
+      val idToken = account.idToken ?: throw IllegalArgumentException("Google ID token is null")
+      val credential = GoogleAuthProvider.getCredential(idToken, null)
+      val authResult = Firebase.auth.signInWithCredential(credential).await()
+      onAuthComplete(authResult)
+    } catch (e: Exception) {
+      onAuthError(e)
+    }
   }
 
-  @Test
-  fun testForgotPasswordClickableText_isClickable() {
-    composeTestRule.setContent { SignInScreen(mockNavigationActions) }
-
-    // Test Forgot Password clickable text
-    composeTestRule.onNodeWithTag("forgotPasswordText").performClick()
-
-    // No action is verified, as the VM is not implemented
-  }
+  private val mockGoogleSignInAccount = Mockito.mock(GoogleSignInAccount::class.java)
 
   @Test
-  fun testGoBackButton_isClickable() {
-    composeTestRule.setContent { SignInScreen(mockNavigationActions) }
+  fun testsigninerrorwithFirebase() = runBlocking {
+    val auth = Mockito.mock(FirebaseAuth::class.java)
+    val mockCredential = Mockito.mock(AuthCredential::class.java)
 
-    // Perform click on Go Back button
-    composeTestRule.onNodeWithTag("goBackButton", useUnmergedTree = true).performClick()
+    // Mock the account ID token
+    Mockito.`when`(mockGoogleSignInAccount.idToken).thenReturn("test_token")
+    val firebaseAuthException =
+        FirebaseAuthInvalidCredentialsException(
+            "ERROR",
+            "The supplied auth credential is incorrect, malformed or has expired. [ Unable to parse Google id_token: test_token ]")
+    // Create a variable to track the result
+    var result: AuthResult? = null
+    var exception: Exception? = null
 
-    // No action is verified, as the VM is not yet implemented
+    // Mock the Task to throw an exception
+    val mockTask = Mockito.mock(Task::class.java) as Task<AuthResult>
+    Mockito.`when`(mockTask.isSuccessful).thenReturn(false)
+    Mockito.`when`(mockTask.exception).thenReturn(firebaseAuthException)
+    Mockito.`when`(auth.signInWithCredential(mockCredential)).thenReturn(mockTask)
+
+    signInWithFirebase(
+        account = mockGoogleSignInAccount,
+        onAuthComplete = { authResult -> result = authResult },
+        onAuthError = { e -> exception = e })
+    // Assert that an exception was thrown and no auth result was received
+    assertEquals(null, result)
+    assertTrue(exception is FirebaseAuthInvalidCredentialsException)
+    assertEquals(firebaseAuthException.message, exception?.message)
   }
 }

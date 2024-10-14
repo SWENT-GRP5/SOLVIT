@@ -109,11 +109,11 @@ fun SignInScreen(navigationActions: NavigationActions) {
                 Icon(
                     Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "goBackButton",
-                    modifier = Modifier.testTag("goBackButton"))
+                    modifier = Modifier.testTag("backButton"))
               }
             },
-            modifier = Modifier.testTag("topAppBar"),
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = backgroundColor))
+            colors = TopAppBarDefaults.topAppBarColors(containerColor = backgroundColor),
+            modifier = Modifier.testTag("backButton"))
       },
       content = { padding ->
         Column(
@@ -142,14 +142,13 @@ fun SignInScreen(navigationActions: NavigationActions) {
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold,
             color = Color(0, 153, 255),
-            modifier = Modifier.testTag("WelcomeText"))
+            modifier = Modifier.testTag("welcomeText"))
 
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
             text = "Sign in to continue",
-            color = Color.Black,
-            modifier = Modifier.testTag("SignInText"))
+            color = Color.Black)
 
         Spacer(modifier = Modifier.height(20.dp))
 
@@ -201,7 +200,7 @@ fun SignInScreen(navigationActions: NavigationActions) {
               }
             },
             shape = RoundedCornerShape(8.dp),
-            modifier = Modifier.fillMaxWidth().testTag("passwordInput"),
+            modifier = Modifier.fillMaxWidth().testTag("password"),
             colors =
                 TextFieldDefaults.outlinedTextFieldColors(
                     focusedBorderColor = Color(0xFF5AC561), // Green color when focused
@@ -225,14 +224,14 @@ fun SignInScreen(navigationActions: NavigationActions) {
                             checkmarkColor = Color.White,
                             uncheckedColor = Color(90, 197, 97),
                             checkedColor = Color(90, 197, 97)))
-                Text(text = " Remember me", modifier = Modifier.testTag("rememberMeText"))
+                Text(text = " Remember me", modifier = Modifier.testTag("rememberMeCheckbox"))
               }
 
               ClickableText(
                   text = AnnotatedString("Forgot password?"),
                   onClick = { /* Forgot password logic */},
                   style = TextStyle(color = Color.Gray, textDecoration = TextDecoration.Underline),
-                  modifier = Modifier.testTag("forgotPasswordText"))
+                  modifier = Modifier.testTag("forgotPasswordLink"))
             }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -285,10 +284,10 @@ fun SignInScreen(navigationActions: NavigationActions) {
           Text("I'm new user, ", color = Color.Gray)
           ClickableText(
               text = AnnotatedString("Sign up"),
-              onClick = { // TODO("Sign up logic")
+              onClick = { // TODO("Sign up logic"),
               },
               style = TextStyle(color = Color.Blue, textDecoration = TextDecoration.Underline),
-              modifier = Modifier.testTag("Bottom signUp"))
+              modifier = Modifier.testTag("signUpLink"))
         }
       }
 }
@@ -303,7 +302,7 @@ fun GoogleSignInButton(onSignInClick: () -> Unit) {
       modifier =
           Modifier.padding(8.dp)
               .height(48.dp) // Adjust height as needed
-              .testTag("loginButton")) {
+              .testTag("googleSignInButton")) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center,

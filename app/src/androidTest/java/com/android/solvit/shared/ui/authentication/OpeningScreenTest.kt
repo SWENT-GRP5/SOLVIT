@@ -24,9 +24,10 @@ class OpeningScreenTest {
     composeTestRule.setContent { OpeningScreen(mockNavigationActions) }
 
     // Test the display of UI components
-    composeTestRule.onNodeWithTag("loginImage").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("SolvitText").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("Bottom tapToContinue").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("appLogo").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("appName").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("tagline").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("ctaButton").assertIsDisplayed()
   }
 
   @Test
