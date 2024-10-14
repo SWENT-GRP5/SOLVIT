@@ -34,7 +34,7 @@ fun ProviderMapScreen(
   // Collect the service requests from the ViewModel
   val requests by serviceRequestViewModel.requests.collectAsState()
 
-  // Request location permission if required
+  // Allows to bypass location permission for testing
   if (requestLocationPermission) {
     RequestLocationPermission(context, fusedLocationClient) { location -> userLocation = location }
   } else {
@@ -42,7 +42,7 @@ fun ProviderMapScreen(
     userLocation = LatLng(37.7749, -122.4194) // Example mocked location
   }
 
-  // Create markers with detailed information for each request
+  // Create markers with detailed information for each provider
   val requestMarkers =
       requests.map { request ->
         MarkerData(
