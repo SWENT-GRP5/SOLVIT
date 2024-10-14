@@ -24,9 +24,13 @@ fun SeekerMapScreen(
     navigationActions: NavigationActions,
     requestLocationPermission: Boolean = true
 ) {
+  // Get the current context
   val context = LocalContext.current
+  // Initialize the FusedLocationProviderClient
   val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
+  // State to hold the user's location
   var userLocation by remember { mutableStateOf<LatLng?>(null) }
+  // Collect the list of providers from the ViewModel
   val providers by providerViewModel.providersList.collectAsState()
 
   // Allows to bypass location permission for testing
