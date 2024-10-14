@@ -63,6 +63,7 @@ import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.google.firebase.Timestamp
 import java.util.Calendar
 
+// Composable function representing the top bar with a menu, slogan, and notifications icon
 @Composable
 fun RequestsTopBar() {
   Row(
@@ -70,10 +71,12 @@ fun RequestsTopBar() {
       horizontalArrangement = Arrangement.SpaceBetween,
       verticalAlignment = Alignment.CenterVertically,
   ) {
+    // Menu button
     IconButton(modifier = Modifier.testTag("MenuOption"), onClick = { TODO() }) {
       Icon(imageVector = Icons.Default.Menu, contentDescription = "Menu Option")
     }
 
+    // Display the app's slogan
     Row(modifier = Modifier.testTag("SloganIcon"), verticalAlignment = Alignment.CenterVertically) {
       Text(
           text = "Solv",
@@ -93,12 +96,14 @@ fun RequestsTopBar() {
               ))
     }
 
+    // Notifications button
     IconButton(onClick = { TODO() }) {
       Icon(imageVector = Icons.Default.Notifications, contentDescription = "Notifications")
     }
   }
 }
 
+// Composable function representing the search bar with a text input field
 @Composable
 fun SearchBar() {
   var userResearch by remember { mutableStateOf("") }
@@ -121,6 +126,7 @@ fun SearchBar() {
                 .height(32.99994.dp)
                 .background(color = Color(0xFFFFFFFF), shape = RoundedCornerShape(size = 8.dp))
                 .testTag("SearchBar")) {
+          // Placeholder text in the search bar
           Row(verticalAlignment = Alignment.CenterVertically) {
             Image(
                 modifier = Modifier.width(14.dp).height(15.dp),
@@ -144,6 +150,7 @@ fun SearchBar() {
   }
 }
 
+// Composable function that displays the title screen text and an accompanying image
 @Composable
 fun TitleScreen() {
   Box(
@@ -174,6 +181,7 @@ fun TitleScreen() {
   }
 }
 
+// Displays a list of service requests using LazyColumn
 @Composable
 fun ListRequests(requests: List<ServiceRequest>) {
   LazyColumn(
@@ -193,7 +201,7 @@ fun ListRequests(requests: List<ServiceRequest>) {
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically) {
 
-                      // User Image
+                      // Profile picture
                       Image(
                           painter =
                               painterResource(
@@ -204,7 +212,7 @@ fun ListRequests(requests: List<ServiceRequest>) {
                           modifier = Modifier.size(50.dp).clip(CircleShape))
 
                       Spacer(modifier = Modifier.width(8.dp))
-                      // User Info
+                      // Assignee information
                       Column(modifier = Modifier.weight(1f)) {
                         Text(
                             text = request.assigneeName,
@@ -226,7 +234,7 @@ fun ListRequests(requests: List<ServiceRequest>) {
                     }
 
                 Spacer(modifier = Modifier.height(8.dp))
-
+                // Request description
                 Text(
                     text = request.description,
                     style =
@@ -239,6 +247,7 @@ fun ListRequests(requests: List<ServiceRequest>) {
                         ))
 
                 Spacer(modifier = Modifier.height(8.dp))
+                // Display image related to the request
                 AsyncImage(
                     modifier =
                         Modifier.width(237.dp)
@@ -262,6 +271,7 @@ fun ListRequests(requests: List<ServiceRequest>) {
 
                 Spacer(modifier = Modifier.height(8.dp))
 
+                // Interaction bar for comments, sharing, and replying
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween) {
@@ -274,6 +284,7 @@ fun ListRequests(requests: List<ServiceRequest>) {
       }
 }
 
+// A composable for the interaction bar, showing options to comment, share, and reply
 @Composable
 fun InteractionBar(text: String, icon: Int) {
   Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -294,6 +305,7 @@ fun InteractionBar(text: String, icon: Int) {
   }
 }
 
+// Main screen displaying the list of requests with the top bar, search bar, and title
 @Composable
 fun ListRequestsFeedScreen(
     serviceRequestViewModel: ServiceRequestViewModel =

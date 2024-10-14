@@ -20,11 +20,13 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
 import org.mockito.kotlin.any
 
+// Test class for ListServicesRequestsScreen functionality
 class ListServicesRequestsScreenTest {
   private lateinit var serviceRequestRepository: ServiceRequestRepository
   private lateinit var serviceRequestViewModel: ServiceRequestViewModel
   @get:Rule val composeTestRule = createComposeRule()
 
+  // Example service request data used for testing
   val request =
       listOf(
           ServiceRequest(
@@ -49,24 +51,31 @@ class ListServicesRequestsScreenTest {
     serviceRequestViewModel = ServiceRequestViewModel(serviceRequestRepository)
     composeTestRule.setContent { ListRequestsFeedScreen(serviceRequestViewModel) }
 
+    // Mocking the getServiceRequests function to return the pre-defined request list
     `when`(serviceRequestRepository.getServiceRequests(any(), any())).thenAnswer {
       val onSuccess = it.getArgument<(List<ServiceRequest>) -> Unit>(0)
       onSuccess(request) // Simulate success
     }
 
+    // Fetch service requests via the ViewModel
     serviceRequestViewModel.getServiceRequests()
   }
 
+  // Test to check if all important UI components are displayed
   @Test
   fun allComponentsAreDisplayed() {
+    // Verify if the main screen container is displayed
     composeTestRule.onNodeWithTag("ListRequestsScreen").isDisplayed()
 
+    // Check if the top bar is displayed
     composeTestRule.onNodeWithTag("RequestsTopBar").isDisplayed()
 
+    // Verify the presence of the main screen content
     composeTestRule.onNodeWithTag("ScreenContent")
     composeTestRule.onNodeWithTag("MenuOption").isDisplayed()
     composeTestRule.onNodeWithTag("SloganIcon").isDisplayed()
 
+    // Ensure the search bar is visible
     composeTestRule.onNodeWithTag("SearchBar").isDisplayed()
 
     composeTestRule.onNodeWithTag("TitleScreen").isDisplayed()
@@ -74,9 +83,11 @@ class ListServicesRequestsScreenTest {
     composeTestRule.onNodeWithTag("requests").isDisplayed()
   }
 
+  // Test the functionality of the search bar
   @Test
   fun testSearchBar() {
+    // Simulate user input in the search bar with the text "French"
     composeTestRule.onNodeWithTag("SearchBar").performTextInput("French")
-    // TODO complete the test when implement searching functionnality
+    // TODO: complete the test when implement searching functionnality
   }
 }
