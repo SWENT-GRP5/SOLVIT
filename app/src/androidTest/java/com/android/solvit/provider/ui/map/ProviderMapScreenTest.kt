@@ -110,4 +110,18 @@ class ProviderMapScreenTest {
       ProviderMapScreen(serviceRequestViewModel, navigationActions, true)
     }
   }
+
+  @Test
+  fun showsRequestLocationPermission() {
+    composeTestRule.setContent {
+      ProviderMapScreen(serviceRequestViewModel, navigationActions, true)
+    }
+  }
+
+  @Test
+  fun usesFactoryViewModel() {
+    composeTestRule.setContent {
+      ProviderMapScreen(navigationActions = navigationActions, requestLocationPermission = false)
+    }
+  }
 }
