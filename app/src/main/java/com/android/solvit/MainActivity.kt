@@ -22,11 +22,12 @@ import com.android.solvit.seeker.ui.provider.SelectProviderScreen
 import com.android.solvit.seeker.ui.request.CreateRequestScreen
 import com.android.solvit.seeker.ui.request.EditRequestScreen
 import com.android.solvit.seeker.ui.service.ServicesScreen
+import com.android.solvit.shared.ui.authentication.OpeningScreen
+import com.android.solvit.shared.ui.authentication.SignInScreen
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.navigation.Screen
 import com.android.solvit.shared.ui.theme.SampleAppTheme
-import com.android.solvit.ui.authentication.SignInScreen
 import com.android.solvit.ui.message.MessageScreen
 
 class MainActivity : ComponentActivity() {
@@ -51,8 +52,9 @@ fun SolvItApp() {
       viewModel<ListProviderViewModel>(factory = ListProviderViewModel.Factory)
   val viewModel: SeekerProfileViewModel = viewModel(factory = SeekerProfileViewModel.Factory)
 
-  NavHost(navController = navController, startDestination = Route.MESSAGE) {
-    composable(Route.AUTH) { SignInScreen(navigationActions) }
+  NavHost(navController = navController, startDestination = Route.AUTH) {
+    composable(Route.AUTH) { OpeningScreen(navigationActions) }
+    composable(Screen.SIGN_IN) { SignInScreen(navigationActions) }
     composable(Route.SERVICES) { ServicesScreen(navigationActions, listProviderViewModel) }
     composable(Route.PROVIDERS) { SelectProviderScreen(listProviderViewModel, navigationActions) }
     composable(Route.MESSAGE) { MessageScreen(navigationActions) }
