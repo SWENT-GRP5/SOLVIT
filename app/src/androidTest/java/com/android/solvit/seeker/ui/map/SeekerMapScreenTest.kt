@@ -3,7 +3,9 @@ package com.android.solvit.seeker.ui.map
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.navigation.NavController
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.provider.Language
@@ -15,69 +17,76 @@ import com.google.firebase.Timestamp
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mockito
 import org.mockito.kotlin.any
 
+@RunWith(AndroidJUnit4::class)
 class SeekerMapScreenTest {
-    private lateinit var providerRepository: ProviderRepository
-    private lateinit var listProviderViewModel: ListProviderViewModel
-    private lateinit var navController: NavController
-    private lateinit var navigationActions: NavigationActions
+  private lateinit var providerRepository: ProviderRepository
+  private lateinit var listProviderViewModel: ListProviderViewModel
+  private lateinit var navController: NavController
+  private lateinit var navigationActions: NavigationActions
 
-    @get:Rule
-    val composeTestRule = createComposeRule()
+  @get:Rule val composeTestRule = createComposeRule()
 
-    private val testProviders =
-        listOf(
-            Provider(
-                uid = "1",
-                name = "Test Provider 1",
-                service = Services.WRITER,
-                imageUrl = "https://example",
-                location = Location(0.0, 0.0, "Test Location 1"),
-                rating = 4.5,
-                price = 10.0,
-                description = "Test Description 1",
-                languages = listOf(Language.ARABIC, Language.ENGLISH),
-                deliveryTime = Timestamp(0, 0),
-                popular = true
-            ),
-            Provider(
-                uid = "2",
-                name = "Test Provider 2",
-                service = Services.WRITER,
-                imageUrl = "https://example",
-                location = Location(10.0, 10.0, "Test Location 2"),
-                rating = 4.5,
-                price = 10.0,
-                description = "Test Description 2",
-                languages = listOf(Language.ARABIC, Language.ENGLISH),
-                deliveryTime = Timestamp(0, 0),
-                popular = true
-            )
-        )
+  private val testProviders =
+      listOf(
+          Provider(
+              uid = "1",
+              name = "Test Provider 1",
+              service = Services.WRITER,
+              imageUrl = "https://example",
+              location = Location(0.0, 0.0, "Test Location 1"),
+              rating = 4.5,
+              price = 10.0,
+              description = "Test Description 1",
+              languages = listOf(Language.ARABIC, Language.ENGLISH),
+              deliveryTime = Timestamp(0, 0),
+              popular = true),
+          Provider(
+              uid = "2",
+              name = "Test Provider 2",
+              service = Services.WRITER,
+              imageUrl = "https://example",
+              location = Location(10.0, 10.0, "Test Location 2"),
+              rating = 4.5,
+              price = 10.0,
+              description = "Test Description 2",
+              languages = listOf(Language.ARABIC, Language.ENGLISH),
+              deliveryTime = Timestamp(0, 0),
+              popular = true))
 
-    @Before
-    fun setUp() {
-        providerRepository = Mockito.mock(ProviderRepository::class.java)
-        listProviderViewModel = ListProviderViewModel(providerRepository)
-        navController = Mockito.mock(NavController::class.java)
-        navigationActions = NavigationActions(navController)
+  @Before
+  fun setUp() {
+    providerRepository = Mockito.mock(ProviderRepository::class.java)
+    listProviderViewModel = ListProviderViewModel(providerRepository)
+    navController = Mockito.mock(NavController::class.java)
+    navigationActions = NavigationActions(navController)
 
-        Mockito.`when`(providerRepository.getProviders(any(), any(), any()))
-            .thenAnswer { invocation ->
-                val onSuccess = invocation.getArgument<(List<Provider>) -> Unit>(0)
-                onSuccess(testProviders)
-            }
+    Mockito.`when`(providerRepository.getProviders(any(), any(), any())).thenAnswer { invocation ->
+      val onSuccess = invocation.getArgument<(List<Provider>) -> Unit>(0)
+      onSuccess(testProviders)
     }
+  }
 
-    @Test
-    fun hasRequiredElements() {
-        composeTestRule.setContent { SeekerMapScreen(listProviderViewModel, navigationActions) }
+  @Test
+  fun hasRequiredElements() {
+    composeTestRule.setContent { SeekerMapScreen(listProviderViewModel, navigationActions, false) }
 
-        composeTestRule.onNodeWithTag("mapScreen").assertIsDisplayed()
-        composeTestRule.onNodeWithTag("googleMap").assertIsDisplayed()
-        composeTestRule.onNodeWithTag("bottomNavigationMenu").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("mapScreen").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("googleMap").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("bottomNavigationMenu").assertIsDisplayed()
+  }
+
+  @Test
+  fun displaysProvidersOnMap() {
+    composeTestRule.setContent { SeekerMapScreen(listProviderViewModel, navigationActions, false) }
+
+    listProviderViewModel.providersList.value.forEach { provider ->
+      composeTestRule.onNodeWithTag("providerMarker-${provider.uid}").assertIsDisplayed()
+      composeTestRule.onNodeWithText(provider.name).assertIsDisplayed()
+      composeTestRule.onNodeWithText(provider.description).assertIsDisplayed()
     }
-
+  }
 }

@@ -38,7 +38,7 @@ import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 
 @Composable
-fun MapScreen(userLocation: LatLng?, markers: List<LatLng>, bottomBar: @Composable () -> Unit) {
+fun MapScreen(userLocation: LatLng?, markers: List<MarkerData>, bottomBar: @Composable () -> Unit) {
   Scaffold(
       content = { paddingValues ->
         Column(
@@ -58,7 +58,7 @@ fun MapScreen(userLocation: LatLng?, markers: List<LatLng>, bottomBar: @Composab
 }
 
 @Composable
-fun MapContent(userLocation: LatLng?, markers: List<LatLng>, modifier: Modifier = Modifier) {
+fun MapContent(userLocation: LatLng?, markers: List<MarkerData>, modifier: Modifier = Modifier) {
   val cameraPositionState = rememberCameraPositionState()
 
   // Update camera position when userLocation changes
@@ -69,9 +69,12 @@ fun MapContent(userLocation: LatLng?, markers: List<LatLng>, modifier: Modifier 
   GoogleMap(
       modifier = modifier.fillMaxSize().testTag("googleMap"),
       cameraPositionState = cameraPositionState) {
-        markers.forEach { position ->
+        markers.forEach { markerData ->
           Marker(
-              state = MarkerState(position = position), title = "Marker", snippet = "Description")
+              state = MarkerState(position = markerData.location),
+              title = markerData.title,
+              snippet = markerData.snippet,
+              tag = markerData.tag)
         }
 
         // Display a marker at the user's location if it's available
@@ -83,7 +86,8 @@ fun MapContent(userLocation: LatLng?, markers: List<LatLng>, modifier: Modifier 
               tag = "userLocation",
               icon = customIcon,
               draggable = false,
-          )}
+          )
+        }
       }
 }
 
@@ -137,3 +141,10 @@ fun bitmapDescriptorFromVector(context: Context, vectorResId: Int): BitmapDescri
   }
   return null
 }
+
+data class MarkerData(
+    val location: LatLng, // Position of the marker
+    val title: String, // Name of the marker
+    val snippet: String, // Additional info like description
+    val tag: String // Unique identifier for the marker
+)
