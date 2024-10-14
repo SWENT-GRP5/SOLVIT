@@ -11,6 +11,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.solvit.seeker.ui.navigation.SeekerBottomNavigationMenu
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.ui.map.MapScreen
+import com.android.solvit.shared.ui.map.MarkerData
 import com.android.solvit.shared.ui.map.RequestLocationPermission
 import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.android.solvit.shared.ui.navigation.NavigationActions
@@ -21,19 +22,36 @@ import com.google.android.gms.maps.model.LatLng
 fun ProviderMapScreen(
     serviceRequestViewModel: ServiceRequestViewModel =
         viewModel(factory = ServiceRequestViewModel.Factory),
-    navigationActions: NavigationActions
+    navigationActions: NavigationActions,
+    requestLocationPermission: Boolean = true
 ) {
   val context = LocalContext.current
   val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
   var userLocation by remember { mutableStateOf<LatLng?>(null) }
   val requests by serviceRequestViewModel.requests.collectAsState()
 
-  RequestLocationPermission(context, fusedLocationClient) { location -> userLocation = location }
+  // Allows to bypass location permission for testing
+  if (requestLocationPermission) {
+    RequestLocationPermission(context, fusedLocationClient) { location -> userLocation = location }
+  } else {
+    // Mock location if permission is bypassed
+    userLocation = LatLng(37.7749, -122.4194) // Example mocked location
+  }
 
-  val markers = requests.map { LatLng(it.location?.latitude ?: 0.0, it.location?.longitude ?: 0.0) }
+  // Create markers with detailed information for each provider
+  val requestMarkers =
+      requests.map { request ->
+        MarkerData(
+            location =
+                LatLng(request.location?.latitude ?: 0.0, request.location?.longitude ?: 0.0),
+            title = request.title,
+            snippet = "${request.description} - Deadline: ${request.dueDate}",
+            tag = "requestMarker-${request.uid}")
+      }
+
   MapScreen(
       userLocation = userLocation,
-      markers = markers,
+      markers = requestMarkers,
       bottomBar = {
         SeekerBottomNavigationMenu(
             onTabSelect = { route -> navigationActions.navigateTo(route) },
