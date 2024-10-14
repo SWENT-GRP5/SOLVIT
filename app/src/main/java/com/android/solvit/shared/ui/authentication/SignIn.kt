@@ -1,5 +1,6 @@
-package com.android.solvit.ui.authentication
+package com.android.solvit.shared.ui.authentication
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.util.Log
 import android.widget.Toast
@@ -9,22 +10,56 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.ClickableText
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.android.solvit.R
@@ -40,38 +75,16 @@ import com.google.firebase.auth.auth
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
-@Composable
-fun TitleWithIcon() {
-  Row(verticalAlignment = Alignment.CenterVertically) {
-    Text(
-        modifier = Modifier.testTag("loginTitle"),
-        text = "Solv",
-        fontSize = 80.sp,
-        fontWeight = FontWeight.Bold,
-        color = Color.Black)
-    Box {
-      Text(
-          text = "it",
-          fontSize = 80.sp,
-          fontWeight = FontWeight.Bold,
-          color = Color(android.graphics.Color.parseColor("#3DFC9A")) // Green color for "it"
-          )
-      // Icon overlaying the "it" text, aligned at the top right
-      Image(
-          painter = painterResource(id = R.drawable.check_arrow), // Replace with your check vector
-          contentDescription = "Checkmark",
-          modifier =
-              Modifier.size(24.dp)
-                  .offset(x = 12.dp, y = -8.dp) // Position the icon at the top right
-          )
-    }
-  }
-}
-
+@SuppressLint("InvalidColorHexValue")
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SignInScreen(navigationActions: NavigationActions) {
-  val context = LocalContext.current
+  var email by remember { mutableStateOf("") }
+  var password by remember { mutableStateOf("") }
+  var passwordVisible by remember { mutableStateOf(false) }
+  var isChecked by remember { mutableStateOf(false) }
 
+  val context = LocalContext.current
   val launcher =
       rememberFirebaseAuthLauncher(
           onAuthComplete = { result ->
@@ -84,64 +97,210 @@ fun SignInScreen(navigationActions: NavigationActions) {
             Toast.makeText(context, "Login Failed!", Toast.LENGTH_LONG).show()
           })
   val token = stringResource(R.string.default_web_client_id)
-  // The main container for the screen
+
+  val backgroundColor = Color(0xFFFFFFFF) // White background color
 
   Scaffold(
-      modifier = Modifier.fillMaxSize(),
+      topBar = {
+        TopAppBar(
+            title = { Text("") },
+            navigationIcon = {
+              IconButton(onClick = { navigationActions.goBack() }) {
+                Icon(
+                    Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "goBackButton",
+                    modifier = Modifier.testTag("backButton"))
+              }
+            },
+            colors = TopAppBarDefaults.topAppBarColors(containerColor = backgroundColor),
+            modifier = Modifier.testTag("backButton"))
+      },
       content = { padding ->
         Column(
-            modifier = Modifier.fillMaxSize().padding(padding),
+            modifier = Modifier.fillMaxSize().padding(padding).background(backgroundColor),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-        ) {
-          // App Logo Image
-          Image(
-              painter = painterResource(id = R.drawable.solvit_logo), // Ensure this drawable exists
-              contentDescription = "App Logo",
-              modifier = Modifier.size(250.dp))
-
-          Spacer(modifier = Modifier.height(16.dp))
-
-          // Welcome Text
-          /*Text(
-          modifier = Modifier.testTag("loginTitle"),
-          text = "Welcome",
-          style =
-          MaterialTheme.typography.headlineLarge.copy(fontSize = 57.sp, lineHeight = 64.sp),
-          fontWeight = FontWeight.Bold,
-          // center the text
-
-          textAlign = TextAlign.Center)*/
-          TitleWithIcon()
-
-          Spacer(modifier = Modifier.height(48.dp))
-
-          // Authenticate With Google Button
-          GoogleSignInButton(
-              onSignInClick = {
-                val gso =
-                    GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                        .requestIdToken(token)
-                        .requestEmail()
-                        .build()
-                val googleSignInClient = GoogleSignIn.getClient(context, gso)
-                launcher.launch(googleSignInClient.signInIntent)
-              })
-        }
+            verticalArrangement = Arrangement.Center) {
+              // Your existing content here
+            }
       })
+
+  // Main Layout
+  Column(
+      modifier = Modifier.fillMaxSize().padding(16.dp),
+      horizontalAlignment = Alignment.CenterHorizontally,
+      verticalArrangement = Arrangement.Center) {
+        Image(
+            painter = painterResource(id = R.drawable.sign_in), // Replace with your check vector
+            contentDescription = "Checkmark",
+            modifier = Modifier.size(240.dp).testTag("loginImage"))
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        // Welcome text
+        Text(
+            text = "Welcome!",
+            fontSize = 28.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color(0, 153, 255),
+            modifier = Modifier.testTag("welcomeText"))
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(text = "Sign in to continue", color = Color.Black)
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        // Email input
+        OutlinedTextField(
+            value = email,
+            onValueChange = { email = it },
+            label = { Text("Email") },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth().testTag("emailInput"),
+            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Email),
+            leadingIcon = {
+              Icon(
+                  painter = painterResource(id = android.R.drawable.ic_dialog_email),
+                  contentDescription = "Email Icon",
+                  tint = Color(90, 197, 97))
+            },
+            shape = RoundedCornerShape(8.dp),
+            colors =
+                TextFieldDefaults.outlinedTextFieldColors(
+                    focusedBorderColor = Color(0xFF5AC561), // Green color when focused
+                    unfocusedBorderColor = Color(0xFF5AC561) // Green color when not focused
+                    ))
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Password input
+        OutlinedTextField(
+            value = password,
+            onValueChange = { password = it },
+            label = { Text("Password") },
+            singleLine = true,
+            visualTransformation =
+                if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            leadingIcon = {
+              Icon(Icons.Default.Lock, contentDescription = "Email Icon", tint = Color(90, 197, 97))
+            },
+            trailingIcon = {
+              val image =
+                  if (passwordVisible) painterResource(id = android.R.drawable.ic_menu_view)
+                  else painterResource(id = android.R.drawable.ic_secure)
+
+              IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                Icon(
+                    painter = image,
+                    contentDescription = null,
+                    tint = Color(90, 197, 97),
+                    modifier = Modifier.size(24.dp))
+              }
+            },
+            shape = RoundedCornerShape(8.dp),
+            modifier = Modifier.fillMaxWidth().testTag("password"),
+            colors =
+                TextFieldDefaults.outlinedTextFieldColors(
+                    focusedBorderColor = Color(0xFF5AC561), // Green color when focused
+                    unfocusedBorderColor = Color(0xFF5AC561) // Green color when not focused
+                    ))
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Remember me & Forgot password
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically) {
+              Row(verticalAlignment = Alignment.CenterVertically) {
+                Checkbox(
+                    checked = isChecked,
+                    onCheckedChange = { isChecked = it },
+                    modifier = Modifier.size(24.dp),
+                    colors =
+                        CheckboxDefaults.colors(
+                            checkmarkColor = Color.White,
+                            uncheckedColor = Color(90, 197, 97),
+                            checkedColor = Color(90, 197, 97)))
+                Text(text = " Remember me", modifier = Modifier.testTag("rememberMeCheckbox"))
+              }
+
+              ClickableText(
+                  text = AnnotatedString("Forgot password?"),
+                  onClick = { /* Forgot password logic */},
+                  style = TextStyle(color = Color.Gray, textDecoration = TextDecoration.Underline),
+                  modifier = Modifier.testTag("forgotPasswordLink"))
+            }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Sign in button
+        Button(
+            onClick = { // TODO("Sign in logic")
+            },
+            colors =
+                ButtonDefaults.buttonColors(
+                    containerColor = Color.Transparent // Transparent to show the gradient
+                    ),
+            shape = RoundedCornerShape(25.dp), // Adjust the corner radius as needed
+            modifier =
+                Modifier.fillMaxWidth()
+                    .height(50.dp)
+                    .background(
+                        brush =
+                            Brush.horizontalGradient(
+                                colors =
+                                    listOf(Color(0, 200, 83), Color(0, 153, 255)) // Gradient colors
+                                ),
+                        shape = RoundedCornerShape(25.dp))
+                    .testTag("signInButton")) {
+              Text("Sign in", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text("OR", color = Color.Gray)
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Google sign in button
+        GoogleSignInButton(
+            onSignInClick = {
+              val gso =
+                  GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                      .requestIdToken(token)
+                      .requestEmail()
+                      .build()
+              val googleSignInClient = GoogleSignIn.getClient(context, gso)
+              launcher.launch(googleSignInClient.signInIntent)
+            })
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        // New user sign up
+        Row(verticalAlignment = Alignment.CenterVertically) {
+          Text("I'm new user, ", color = Color.Gray)
+          ClickableText(
+              text = AnnotatedString("Sign up"),
+              onClick = { // TODO("Sign up logic"),
+              },
+              style = TextStyle(color = Color.Blue, textDecoration = TextDecoration.Underline),
+              modifier = Modifier.testTag("signUpLink"))
+        }
+      }
 }
 
 @Composable
 fun GoogleSignInButton(onSignInClick: () -> Unit) {
   Button(
       onClick = onSignInClick,
-      colors = ButtonDefaults.buttonColors(containerColor = Color.White), // Button color
+      colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent), // Button color
       shape = RoundedCornerShape(50), // Circular edges for the button
       border = BorderStroke(1.dp, Color.LightGray),
       modifier =
           Modifier.padding(8.dp)
               .height(48.dp) // Adjust height as needed
-              .testTag("loginButton")) {
+              .testTag("googleSignInButton")) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center,
