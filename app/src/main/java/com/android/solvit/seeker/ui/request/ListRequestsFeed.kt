@@ -1,5 +1,6 @@
 package com.android.solvit.ui.requests
 
+import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -36,7 +37,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -60,14 +60,9 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.android.solvit.R
-import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.request.ServiceRequest
-import com.android.solvit.shared.model.request.ServiceRequestStatus
-import com.android.solvit.shared.model.request.ServiceRequestType
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.service.Services
-import com.google.firebase.Timestamp
-import java.util.Calendar
 
 // Composable function representing the top bar with a menu, slogan, and notifications icon
 @Composable
@@ -197,7 +192,10 @@ fun ListRequests(requests: List<ServiceRequest>) {
         items(requests) { request ->
           Column(
               modifier =
-                  Modifier.fillMaxWidth().padding(8.dp).background(color = Color(0xFFFAFAFA))) {
+                  Modifier.fillMaxWidth()
+                      .padding(8.dp)
+                      .background(color = Color(0xFFFAFAFA))
+                      .testTag("ServiceRequest")) {
                 HorizontalDivider(
                     Modifier.border(width = 2.dp, color = Color(0xFFE0E0E0))
                         .padding(2.dp)
@@ -311,76 +309,62 @@ fun InteractionBar(text: String, icon: Int) {
   }
 }
 
+@SuppressLint("SuspiciousIndentation")
 @Composable
 fun FilterBar(
     selectedService: String,
-    selectedFilters : Set<String>,
-    onSelectedService : (String) -> Unit,
-    onFilterChange : (String,Boolean) -> Unit
-){
+    selectedFilters: Set<String>,
+    onSelectedService: (String) -> Unit,
+    onFilterChange: (String, Boolean) -> Unit
+) {
 
-    // TODO near to me locate in function of user location
-    val filters = listOf("Service","Near To Me","Due Time")
+  // TODO near to me locate in function of user location
+  val filters = listOf("Service", "Near To Me", "Due Time")
 
-
-        LazyRow (
-            horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.Start),
-            verticalAlignment = Alignment.Top,
-        ) {
-
-            items(filters.size){idx ->
-
-                val filter = filters[idx]
-                if(filter == "Service"){
-                    ServiceChip(
-                        selectedService,
-                        onServiceSelected = {
-                                u->
-                            onSelectedService(u)
-                            onFilterChange("Service",true)
-                        }
-                    )
-                }else{
-                    val isSelected = selectedFilters.contains(filter)
-                    FilterChip(
-                        filter,
-                        isSelected = isSelected,
-                        onSelected = {selected ->
-                            onFilterChange(filter,selected)
-                        }
-                    )
-
-                }
-
-
-
-            }
-
-        }
-
-
-
+  LazyRow(
+      modifier = Modifier.testTag("FilterBar"),
+      horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.Start),
+      verticalAlignment = Alignment.Top,
+  ) {
+    items(filters.size) { idx ->
+      val filter = filters[idx]
+      if (filter == "Service") {
+        ServiceChip(
+            selectedService,
+            onServiceSelected = { u ->
+              onSelectedService(u)
+              onFilterChange("Service", true)
+            })
+      } else {
+        val isSelected = selectedFilters.contains(filter)
+        FilterChip(
+            filter,
+            isSelected = isSelected,
+            onSelected = { selected -> onFilterChange(filter, selected) })
+      }
+    }
+  }
 }
 
 @Composable
 fun ServiceChip(
-    selectedService : String,
+    selectedService: String,
     onServiceSelected: (String) -> Unit,
-    ){
+) {
 
-    var selectedText by remember { mutableStateOf(selectedService) }
-    var showDropdown by remember { mutableStateOf(false) }
-    val backgroundColor = if(selectedText != "Service") Color(0xFFFFFAF5) else Color(0xFFFFFFFF)
-    val borderTextColor = if(selectedText != "Service") Color(0xFF00C853) else Color(0xFFAFAFAF)
-    Box(
-        modifier = Modifier
-            .padding(8.dp)
-            .border(1.dp, borderTextColor, shape = RoundedCornerShape(50))
-            .background(backgroundColor, shape = RoundedCornerShape(50))
-            .clickable { showDropdown = !showDropdown } // Toggle selection state
-            .padding(12.dp, 6.dp), // Add some padding inside the chip
-        contentAlignment = Alignment.Center
-    ) {
+  var selectedText by remember { mutableStateOf(selectedService) }
+  var showDropdown by remember { mutableStateOf(false) }
+  val backgroundColor = if (selectedText != "Service") Color(0xFFFFFAF5) else Color(0xFFFFFFFF)
+  val borderTextColor = if (selectedText != "Service") Color(0xFF00C853) else Color(0xFFAFAFAF)
+  Box(
+      modifier =
+          Modifier.testTag("ServiceChip")
+              .padding(8.dp)
+              .border(1.dp, borderTextColor, shape = RoundedCornerShape(50))
+              .background(backgroundColor, shape = RoundedCornerShape(50))
+              .clickable { showDropdown = !showDropdown } // Toggle selection state
+              .padding(12.dp, 6.dp), // Add some padding inside the chip
+      contentAlignment = Alignment.Center) {
         Text(
             text = selectedText,
             fontSize = 16.sp,
@@ -389,66 +373,50 @@ fun ServiceChip(
             fontWeight = FontWeight(400),
             color = borderTextColor,
         )
+      }
+
+  if (showDropdown) {
+    DropdownMenu(expanded = showDropdown, onDismissRequest = { showDropdown = false }) {
+      Services.entries.forEach { service ->
+        val serviceName = service.name.replace("_", " ")
+        DropdownMenuItem(
+            modifier = Modifier.testTag(serviceName),
+            text = { Text(serviceName) },
+            onClick = {
+              selectedText = serviceName
+              onServiceSelected(serviceName)
+              showDropdown = false
+            },
+        )
+      }
     }
-
-    if (showDropdown){
-        DropdownMenu(
-            expanded = showDropdown,
-            onDismissRequest = {showDropdown = false}
-        ) {
-            Services.entries.forEach { service ->
-                val serviceName =
-                    service.name.replace("_"," ")
-                DropdownMenuItem (
-                    text = {
-                        Text(serviceName)
-                    },
-                    onClick = {
-
-                        selectedText = serviceName
-                        onServiceSelected(serviceName)
-                    showDropdown= false},
-
-                )
-
-            }
-        }
-    }
-
+  }
 }
-//Filter Chip
+// Filter Chip
 @Composable
-fun FilterChip(label : String,
-               isSelected : Boolean,
-               onSelected : (Boolean) -> Unit){
-    val backgroundColor = if(isSelected) Color(0xFFFFFAF5) else Color(0xFFFFFFFF)
-    val borderTextColor = if(isSelected) Color(0xFF00C853) else Color(0xFFAFAFAF)
+fun FilterChip(label: String, isSelected: Boolean, onSelected: (Boolean) -> Unit) {
+  val backgroundColor = if (isSelected) Color(0xFFFFFAF5) else Color(0xFFFFFFFF)
+  val borderTextColor = if (isSelected) Color(0xFF00C853) else Color(0xFFAFAFAF)
 
-    Box(
-        modifier = Modifier
-            .padding(8.dp)
-            .border(1.dp, borderTextColor, shape = RoundedCornerShape(50))
-            .background(backgroundColor, shape = RoundedCornerShape(50))
-            .clickable { onSelected(!isSelected) } // Toggle selection state
-            .padding(12.dp, 6.dp), // Add some padding inside the chip
-        contentAlignment = Alignment.Center
-    ){
-        //Manage Service Special Cases to have a dropDownMenu
-            Text(
-                text = label,
-                fontSize = 16.sp,
-                lineHeight = 34.sp,
-                fontFamily = FontFamily(Font(R.font.donegal_one)),
-                fontWeight = FontWeight(400),
-                color = borderTextColor,
-            )
-
-        }
-
-
-    }
-
-
+  Box(
+      modifier =
+          Modifier.padding(8.dp)
+              .border(1.dp, borderTextColor, shape = RoundedCornerShape(50))
+              .background(backgroundColor, shape = RoundedCornerShape(50))
+              .clickable { onSelected(!isSelected) } // Toggle selection state
+              .padding(12.dp, 6.dp), // Add some padding inside the chip
+      contentAlignment = Alignment.Center) {
+        // Manage Service Special Cases to have a dropDownMenu
+        Text(
+            text = label,
+            fontSize = 16.sp,
+            lineHeight = 34.sp,
+            fontFamily = FontFamily(Font(R.font.donegal_one)),
+            fontWeight = FontWeight(400),
+            color = borderTextColor,
+        )
+      }
+}
 
 // Main screen displaying the list of requests with the top bar, search bar, and title
 @Composable
@@ -457,28 +425,9 @@ fun ListRequestsFeedScreen(
         viewModel(factory = ServiceRequestViewModel.Factory)
 ) {
   val requests by serviceRequestViewModel.requests.collectAsState()
-    val selectedFilters = remember { mutableStateOf(setOf<String>()) }
-    var selectedService by remember { mutableStateOf("Service") }
-
-
+  val selectedFilters = remember { mutableStateOf(setOf<String>()) }
+  var selectedService by remember { mutableStateOf("Service") }
   serviceRequestViewModel.getServiceRequests()
-  val request =
-      listOf(
-          ServiceRequest(
-              title = "Bathtub leak",
-              description = "I hit my bath too hard and now it's leaking",
-              assigneeName = "Nathan",
-              dueDate = Timestamp(Calendar.getInstance().time),
-              location =
-                  Location(
-                      48.8588897,
-                      2.3200410217200766,
-                      "Paris, Île-de-France, France métropolitaine, France"),
-              status = ServiceRequestStatus.PENDING,
-              uid = "gIoUWJGkTgLHgA7qts59",
-              type = ServiceRequestType.PLUMBING,
-              imageUrl =
-                  "https://firebasestorage.googleapis.com/v0/b/solvit-14cc1.appspot.com/o/serviceRequestImages%2F588d3bd9-bcb7-47bc-9911-61fae59eaece.jpg?alt=media&token=5f747f33-9732-4b90-9b34-55e28732ebc3"))
 
   Log.e("ListRequestsFeed", "${selectedFilters.value}")
   Scaffold(
@@ -494,35 +443,33 @@ fun ListRequestsFeedScreen(
               SearchBar()
               Spacer(Modifier.height(15.dp))
               TitleScreen()
-            FilterBar(
-                selectedService,
-                selectedFilters.value,
-                onSelectedService = {service -> selectedService =service},
-                onFilterChange = {filter,isSelected ->
-                    if(isSelected){
-                        Log.e("TETEEEEETSS","$filter selected")
-                        selectedFilters.value += filter
-                    }else{
-                        selectedFilters.value -= filter
+              FilterBar(
+                  selectedService,
+                  selectedFilters.value,
+                  onSelectedService = { service -> selectedService = service },
+                  onFilterChange = { filter, isSelected ->
+                    if (isSelected) {
+                      Log.e("TETEEEEETSS", "$filter selected")
+                      selectedFilters.value += filter
+                    } else {
+                      selectedFilters.value -= filter
                     }
-                }
-
-
-            )
-            var filteredRequest = requests.filter { serviceRequest ->
-                var condition = true
-                if(selectedFilters.value.contains("Service")){
-                    condition = condition && serviceRequest.type.toString().uppercase() == selectedService
-                }
-                if (selectedFilters.value.contains("Near To Me")){
-                    //TODO
-                }
-                condition
-
-            }
-            if (selectedFilters.value.contains("DueDate")){
-                filteredRequest =filteredRequest.sortedBy { it.dueDate.toDate().time }
-            }
+                  })
+              var filteredRequest =
+                  requests.filter { serviceRequest ->
+                    var condition = true
+                    if (selectedFilters.value.contains("Service")) {
+                      condition =
+                          condition && serviceRequest.type.toString().uppercase() == selectedService
+                    }
+                    if (selectedFilters.value.contains("Near To Me")) {
+                      // TODO
+                    }
+                    condition
+                  }
+              if (selectedFilters.value.contains("DueDate")) {
+                filteredRequest = filteredRequest.sortedBy { it.dueDate.toDate().time }
+              }
               ListRequests(filteredRequest)
             }
       })
