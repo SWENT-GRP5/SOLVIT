@@ -1,3 +1,5 @@
+// FICHIER A SUPPRIMER QUAND LES MESSAGES SERONT IMPLEMENTES
+
 package com.android.solvit.ui.message
 
 import androidx.compose.foundation.layout.Box

@@ -37,7 +37,7 @@ fun SeekerBottomNavigationMenu(
               },
               selected = tab.route == selectedItem,
               onClick = { onTabSelect(tab) },
-              modifier = Modifier.clip(RoundedCornerShape(50.dp)).testTag(tab.route))
+              modifier = Modifier.clip(RoundedCornerShape(50.dp)).testTag(tab.textId))
         }
       },
   )
