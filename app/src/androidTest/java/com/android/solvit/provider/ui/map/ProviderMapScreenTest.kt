@@ -13,6 +13,8 @@ import com.android.solvit.shared.model.request.ServiceRequestType
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.google.firebase.Timestamp
+import java.util.Calendar
+import java.util.GregorianCalendar
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -39,7 +41,7 @@ class ProviderMapScreenTest {
               location = Location(0.0, 0.0, "Test Location 1"),
               status = ServiceRequestStatus.PENDING,
               imageUrl = "https://example",
-              dueDate = Timestamp(0, 0)),
+              dueDate = Timestamp(GregorianCalendar(2021, 1, 1).time)),
           ServiceRequest(
               uid = "2",
               title = "Test Request 2",
@@ -49,7 +51,7 @@ class ProviderMapScreenTest {
               location = Location(10.0, 10.0, "Test Location 2"),
               status = ServiceRequestStatus.PENDING,
               imageUrl = "https://example",
-              dueDate = Timestamp(0, 0)))
+              dueDate = Timestamp(GregorianCalendar(2022, 12, 31).time)))
 
   @Before
   fun setUp() {
@@ -82,10 +84,23 @@ class ProviderMapScreenTest {
     }
 
     serviceRequestViewModel.requests.value.forEach { request ->
+      val dueDate =
+          request.dueDate.let {
+            val calendar = GregorianCalendar()
+            calendar.time = request.dueDate.toDate()
+            return@let "${calendar.get(Calendar.DAY_OF_MONTH)}/${calendar.get(Calendar.MONTH) + 1}/${
+                        calendar.get(
+                            Calendar.YEAR
+                        )
+                    }"
+          }
       composeTestRule.onNodeWithTag("requestMarker-${request.uid}").assertIsDisplayed()
       composeTestRule.onNodeWithText(request.title).assertIsDisplayed()
       composeTestRule.onNodeWithText(request.description).assertIsDisplayed()
       composeTestRule.onNodeWithText(request.assigneeName).assertIsDisplayed()
+      composeTestRule
+          .onNodeWithText("${request.description} - Deadline: $dueDate")
+          .assertIsDisplayed()
     }
   }
 
