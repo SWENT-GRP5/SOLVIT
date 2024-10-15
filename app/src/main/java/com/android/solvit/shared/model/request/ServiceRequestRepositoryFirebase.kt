@@ -4,10 +4,10 @@ import android.net.Uri
 import android.util.Log
 import com.android.solvit.shared.model.map.Location
 import com.google.android.gms.tasks.Task
-import com.google.firebase.auth.ktx.auth
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import java.util.UUID
@@ -111,7 +111,7 @@ class ServiceRequestRepositoryFirebase(
     return try {
       ServiceRequest(
           uid = document.id,
-          title = document.getString("name") ?: return null,
+          title = document.getString("title") ?: return null,
           description = document.getString("description") ?: return null,
           assigneeName = document.getString("assigneeName") ?: return null,
           dueDate = document.getTimestamp("dueDate") ?: return null,

@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.jetbrainsKotlinAndroid)
     alias(libs.plugins.ktfmt)
     alias(libs.plugins.sonar)
+    //id("org.sonarqube") version "5.1.0.4882"
     alias(libs.plugins.gms)
 }
 
@@ -124,10 +125,18 @@ android {
 }
 
 sonar {
+    val localProperties = Properties()
+    val localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        localProperties.load(FileInputStream(localPropertiesFile))
+    }
+    val sonarProjectKey : String = localProperties.getProperty("sonar_project_Key") ?:
+     System.getenv("SONAR_PROJECT_KEY") ?: ""
+    val sonarOrganization : String = localProperties.getProperty("sonar_organization") ?:
+     System.getenv("SONAR_ORGANIZATION") ?: ""
     properties {
-        property("sonar.projectKey", "gf_android-sample")
-        property("sonar.projectName", "Android-Sample")
-        property("sonar.organization", "gabrielfleischer")
+        property("sonar.projectKey", sonarProjectKey)
+        property("sonar.organization", sonarOrganization)
         property("sonar.host.url", "https://sonarcloud.io")
         // Comma-separated paths to the various directories containing the *.xml JUnit report files. Each path may be absolute or relative to the project base directory.
         property("sonar.junit.reportPaths", "${project.layout.buildDirectory.get()}/test-results/testDebugunitTest/")
@@ -156,6 +165,7 @@ dependencies {
     implementation(libs.androidx.navigation.runtime.ktx)
     implementation(libs.firebase.storage.ktx)
     implementation(libs.play.services.location)
+    implementation(libs.androidx.navigation.testing)
 
 
     // ------------- Jetpack Compose ------------------
