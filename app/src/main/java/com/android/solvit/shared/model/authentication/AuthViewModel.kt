@@ -48,26 +48,26 @@ class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
     _password.value = password
   }
 
-  fun loginWithEmailAndPassword() {
+  fun loginWithEmailAndPassword(onSuccess: () -> Unit, onFailure: () -> Unit) {
     authRepository.loginWithEmailAndPassword(
-        email.value, password.value, { _user.value = it }, { _user.value = null })
+        email.value, password.value, { _user.value = it; onSuccess() }, { _user.value = null; onFailure() })
   }
 
-  fun signInWithGoogle(account: GoogleSignInAccount) {
-    authRepository.signInWithGoogle(account, { _user.value = it }, { _user.value = null })
+  fun signInWithGoogle(account: GoogleSignInAccount, onSuccess: () -> Unit, onFailure: () -> Unit) {
+    authRepository.signInWithGoogle(account, { _user.value = it; onSuccess() }, { _user.value = null; onFailure() })
   }
 
-  fun registerWithEmailAndPassword() {
+  fun registerWithEmailAndPassword(onSuccess: () -> Unit, onFailure: () -> Unit) {
     authRepository.registerWithEmailAndPassword(
-        role.value, email.value, password.value, { _user.value = it }, { _user.value = null })
+        role.value, email.value, password.value, { _user.value = it; onSuccess() }, { _user.value = null; onFailure() })
   }
 
-  fun registerWithGoogle(account: GoogleSignInAccount) {
+  fun registerWithGoogle(account: GoogleSignInAccount, onSuccess: () -> Unit, onFailure: () -> Unit) {
     authRepository.registerWithGoogle(
-        account, role.value, { _user.value = it }, { _user.value = null })
+        account, role.value, { _user.value = it; onSuccess() }, { _user.value = null; onFailure() })
   }
 
-  fun logout() {
-    authRepository.logout { _user.value = null }
+  fun logout(onSuccess: () -> Unit) {
+    authRepository.logout { _user.value = null; onSuccess() }
   }
 }
