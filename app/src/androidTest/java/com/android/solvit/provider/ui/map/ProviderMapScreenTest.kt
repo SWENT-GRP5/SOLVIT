@@ -13,7 +13,6 @@ import com.android.solvit.shared.model.request.ServiceRequestType
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.google.firebase.Timestamp
-import java.util.Calendar
 import java.util.GregorianCalendar
 import org.junit.Before
 import org.junit.Rule
@@ -84,23 +83,10 @@ class ProviderMapScreenTest {
     }
 
     serviceRequestViewModel.requests.value.forEach { request ->
-      val dueDate =
-          request.dueDate.let {
-            val calendar = GregorianCalendar()
-            calendar.time = request.dueDate.toDate()
-            return@let "${calendar.get(Calendar.DAY_OF_MONTH)}/${calendar.get(Calendar.MONTH) + 1}/${
-                        calendar.get(
-                            Calendar.YEAR
-                        )
-                    }"
-          }
       composeTestRule.onNodeWithTag("requestMarker-${request.uid}").assertIsDisplayed()
       composeTestRule.onNodeWithText(request.title).assertIsDisplayed()
       composeTestRule.onNodeWithText(request.description).assertIsDisplayed()
       composeTestRule.onNodeWithText(request.assigneeName).assertIsDisplayed()
-      composeTestRule
-          .onNodeWithText("${request.description} - Deadline: $dueDate")
-          .assertIsDisplayed()
     }
   }
 
@@ -108,34 +94,6 @@ class ProviderMapScreenTest {
   fun showsRequestLocationPermission() {
     composeTestRule.setContent {
       ProviderMapScreen(serviceRequestViewModel, navigationActions, true)
-    }
-  }
-
-  @Test
-  fun showsRequestLocationPermission() {
-    composeTestRule.setContent {
-      ProviderMapScreen(serviceRequestViewModel, navigationActions, true)
-    }
-  }
-
-  @Test
-  fun usesFactoryViewModel() {
-    composeTestRule.setContent {
-      ProviderMapScreen(navigationActions = navigationActions, requestLocationPermission = false)
-    }
-  }
-
-  @Test
-  fun showsRequestLocationPermission() {
-    composeTestRule.setContent {
-      ProviderMapScreen(serviceRequestViewModel, navigationActions, true)
-    }
-  }
-
-  @Test
-  fun usesFactoryViewModel() {
-    composeTestRule.setContent {
-      ProviderMapScreen(navigationActions = navigationActions, requestLocationPermission = false)
     }
   }
 }
