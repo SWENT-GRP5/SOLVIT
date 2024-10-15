@@ -71,7 +71,7 @@ class UserRepositoryFirestoreTest {
 
     Mockito.`when`(mockQuerySnapshot.documents).thenReturn(listOf())
 
-    firebaseRepository.getUserProfile(
+    firebaseRepository.getUsersProfile(
         onSuccess = {
           // Do nothing; we just want to verify that the 'documents' field was accessed
         },

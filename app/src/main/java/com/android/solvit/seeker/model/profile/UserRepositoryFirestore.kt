@@ -26,10 +26,34 @@ class UserRepositoryFirestore(private val db: FirebaseFirestore) : UserRepositor
   }
 
   override fun getUserProfile(
+      uid: String,
+      onSuccess: (SeekerProfile) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    Log.d("RepositoryFirestore", "getUsersProfile")
+    db.collection(collectionPath).document(uid).get().addOnCompleteListener { document ->
+      if (document.isSuccessful) {
+
+        val user = documentToUser(document.result)
+        if (user != null) {
+          onSuccess(user)
+        } else {
+          Log.e("RepositoryFirestore", "Error getting user")
+        }
+      } else {
+        document.exception?.let { e ->
+          Log.e("RepositoryFirestore", "Error getting documents", e)
+          onFailure(e)
+        }
+      }
+    }
+  }
+
+  override fun getUsersProfile(
       onSuccess: (List<SeekerProfile>) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    Log.d("RepositoryFirestore", "getUserProfile")
+    Log.d("RepositoryFirestore", "getUsersProfile")
     db.collection(collectionPath).get().addOnCompleteListener { task ->
       if (task.isSuccessful) {
         val user = task.result?.mapNotNull { document -> documentToUser(document) } ?: emptyList()
@@ -44,6 +68,15 @@ class UserRepositoryFirestore(private val db: FirebaseFirestore) : UserRepositor
   }
 
   override fun updateUserProfile(
+      profile: SeekerProfile,
+      onSuccess: () -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    performFirestoreOperation(
+        db.collection(collectionPath).document(profile.uid).set(profile), onSuccess, onFailure)
+  }
+
+  override fun addUserProfile(
       profile: SeekerProfile,
       onSuccess: () -> Unit,
       onFailure: (Exception) -> Unit
