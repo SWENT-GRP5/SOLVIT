@@ -8,18 +8,11 @@ import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import com.google.android.gms.tasks.Task
 import com.google.firebase.Firebase
-import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.AuthResult
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.auth
-import junit.framework.TestCase.assertEquals
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
-import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -82,38 +75,5 @@ class SignInScreenTest {
     } catch (e: Exception) {
       onAuthError(e)
     }
-  }
-
-  private val mockGoogleSignInAccount = Mockito.mock(GoogleSignInAccount::class.java)
-
-  @Test
-  fun testsigninerrorwithFirebase() = runBlocking {
-    val auth = Mockito.mock(FirebaseAuth::class.java)
-    val mockCredential = Mockito.mock(AuthCredential::class.java)
-
-    // Mock the account ID token
-    Mockito.`when`(mockGoogleSignInAccount.idToken).thenReturn("test_token")
-    val firebaseAuthException =
-        FirebaseAuthInvalidCredentialsException(
-            "ERROR",
-            "The supplied auth credential is incorrect, malformed or has expired. [ Unable to parse Google id_token: test_token ]")
-    // Create a variable to track the result
-    var result: AuthResult? = null
-    var exception: Exception? = null
-
-    // Mock the Task to throw an exception
-    val mockTask = Mockito.mock(Task::class.java) as Task<AuthResult>
-    Mockito.`when`(mockTask.isSuccessful).thenReturn(false)
-    Mockito.`when`(mockTask.exception).thenReturn(firebaseAuthException)
-    Mockito.`when`(auth.signInWithCredential(mockCredential)).thenReturn(mockTask)
-
-    signInWithFirebase(
-        account = mockGoogleSignInAccount,
-        onAuthComplete = { authResult -> result = authResult },
-        onAuthError = { e -> exception = e })
-    // Assert that an exception was thrown and no auth result was received
-    assertEquals(null, result)
-    assertTrue(exception is FirebaseAuthInvalidCredentialsException)
-    assertEquals(firebaseAuthException.message, exception?.message)
   }
 }

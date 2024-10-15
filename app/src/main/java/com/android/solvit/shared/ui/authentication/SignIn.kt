@@ -65,6 +65,7 @@ import androidx.compose.ui.unit.sp
 import com.android.solvit.R
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
+import com.android.solvit.shared.ui.navigation.Screen
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
@@ -282,8 +283,7 @@ fun SignInScreen(navigationActions: NavigationActions) {
           Text("I'm new user, ", color = Color.Gray)
           ClickableText(
               text = AnnotatedString("Sign up"),
-              onClick = { // TODO("Sign up logic"),
-              },
+              onClick = { navigationActions.navigateTo(Screen.SIGN_UP) },
               style = TextStyle(color = Color.Blue, textDecoration = TextDecoration.Underline),
               modifier = Modifier.testTag("signUpLink"))
         }

@@ -26,6 +26,7 @@ object Screen {
   const val PROFILE = "Profile Screen"
   const val EDIT_PROFILE = "EditProfile Screen"
   const val SIGN_IN = "Sign In"
+  const val SIGN_UP = "Sign Up"
 }
 
 data class TopLevelDestination(val route: String, val icon: ImageVector, val textId: String)
