@@ -1,9 +1,12 @@
 package com.android.solvit.ui.requests
 
+import android.annotation.SuppressLint
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,6 +21,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -26,6 +30,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -43,6 +49,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -55,26 +62,25 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.android.solvit.R
-import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.request.ServiceRequest
-import com.android.solvit.shared.model.request.ServiceRequestStatus
-import com.android.solvit.shared.model.request.ServiceRequestType
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
-import com.google.firebase.Timestamp
-import java.util.Calendar
+import com.android.solvit.shared.model.service.Services
 
 // Composable function representing the top bar with a menu, slogan, and notifications icon
 @Composable
 fun RequestsTopBar() {
+  val context = LocalContext.current
   Row(
       modifier = Modifier.testTag("RequestsTopBar").fillMaxWidth(),
       horizontalArrangement = Arrangement.SpaceBetween,
       verticalAlignment = Alignment.CenterVertically,
   ) {
     // Menu button
-    IconButton(modifier = Modifier.testTag("MenuOption"), onClick = { TODO() }) {
-      Icon(imageVector = Icons.Default.Menu, contentDescription = "Menu Option")
-    }
+    IconButton(
+        modifier = Modifier.testTag("MenuOption"),
+        onClick = { Toast.makeText(context, "Not Yet Implemented", Toast.LENGTH_LONG).show() }) {
+          Icon(imageVector = Icons.Default.Menu, contentDescription = "Menu Option")
+        }
 
     // Display the app's slogan
     Row(modifier = Modifier.testTag("SloganIcon"), verticalAlignment = Alignment.CenterVertically) {
@@ -97,9 +103,10 @@ fun RequestsTopBar() {
     }
 
     // Notifications button
-    IconButton(onClick = { TODO() }) {
-      Icon(imageVector = Icons.Default.Notifications, contentDescription = "Notifications")
-    }
+    IconButton(
+        onClick = { Toast.makeText(context, "Not Yet Implemented", Toast.LENGTH_LONG).show() }) {
+          Icon(imageVector = Icons.Default.Notifications, contentDescription = "Notifications")
+        }
   }
 }
 
@@ -107,10 +114,13 @@ fun RequestsTopBar() {
 @Composable
 fun SearchBar() {
   var userResearch by remember { mutableStateOf("") }
+  val context = LocalContext.current
   Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
     BasicTextField(
         value = "",
-        onValueChange = { userResearch = it },
+        onValueChange = {
+          Toast.makeText(context, "Not Yet Implemented", Toast.LENGTH_LONG).show()
+        },
         singleLine = true,
         textStyle = TextStyle(color = Color.Gray, fontSize = 16.sp),
         modifier =
@@ -191,7 +201,10 @@ fun ListRequests(requests: List<ServiceRequest>) {
         items(requests) { request ->
           Column(
               modifier =
-                  Modifier.fillMaxWidth().padding(8.dp).background(color = Color(0xFFFAFAFA))) {
+                  Modifier.fillMaxWidth()
+                      .padding(8.dp)
+                      .background(color = Color(0xFFFAFAFA))
+                      .testTag("ServiceRequest")) {
                 HorizontalDivider(
                     Modifier.border(width = 2.dp, color = Color(0xFFE0E0E0))
                         .padding(2.dp)
@@ -287,6 +300,7 @@ fun ListRequests(requests: List<ServiceRequest>) {
 // A composable for the interaction bar, showing options to comment, share, and reply
 @Composable
 fun InteractionBar(text: String, icon: Int) {
+  val context = LocalContext.current
   Column(horizontalAlignment = Alignment.CenterHorizontally) {
     Text(
         text = text,
@@ -295,14 +309,138 @@ fun InteractionBar(text: String, icon: Int) {
         fontWeight = FontWeight(500),
         color = Color(0xFF585C60))
 
-    IconButton(onClick = { /* Handle comment click EPIC 3*/}) {
-      Image(
-          modifier = Modifier.padding(0.dp).width(21.dp).height(18.90004.dp),
-          painter = painterResource(id = icon),
-          contentDescription = text,
-          contentScale = ContentScale.Crop)
+    IconButton(
+        onClick = { /* Handle comment click EPIC 3*/
+          Toast.makeText(context, "Not Yet Implemented !", Toast.LENGTH_LONG).show()
+        }) {
+          Image(
+              modifier = Modifier.padding(0.dp).width(21.dp).height(18.90004.dp),
+              painter = painterResource(id = icon),
+              contentDescription = text,
+              contentScale = ContentScale.Crop)
+        }
+  }
+}
+
+// Composable for filter bar
+@SuppressLint("SuspiciousIndentation")
+@Composable
+fun FilterBar(
+    selectedService: String,
+    selectedFilters: Set<String>,
+    onSelectedService: (String) -> Unit,
+    onFilterChange: (String, Boolean) -> Unit
+) {
+
+  // For the moment we chose to have 3 filters, it can ameliorated later
+  // TODO near to me locate in function of user location
+  val filters = listOf("Service", "Near To Me", "Due Time")
+
+  // LazyRow containing filters
+  LazyRow(
+      modifier = Modifier.testTag("FilterBar"),
+      horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.Start),
+      verticalAlignment = Alignment.Top,
+  ) {
+    items(filters.size) { idx ->
+      val filter = filters[idx]
+      // Calling special chip when it's Service to have a dropdown menu with different possible
+      // services
+      if (filter == "Service") {
+        ServiceChip(
+            selectedService,
+            onServiceSelected = { u ->
+              onSelectedService(u)
+              onFilterChange("Service", true)
+            })
+        // Calling a lambda filter Chip
+      } else {
+        val isSelected = selectedFilters.contains(filter)
+        FilterChip(
+            filter,
+            isSelected = isSelected,
+            onSelected = { selected -> onFilterChange(filter, selected) })
+      }
     }
   }
+}
+// Composable for service chip
+@Composable
+fun ServiceChip(
+    selectedService: String,
+    onServiceSelected: (String) -> Unit,
+) {
+
+  var selectedText by remember { mutableStateOf(selectedService) }
+  var showDropdown by remember { mutableStateOf(false) }
+  val backgroundColor = if (selectedText != "Service") Color(0xFFFFFAF5) else Color(0xFFFFFFFF)
+  val borderTextColor = if (selectedText != "Service") Color(0xFF00C853) else Color(0xFFAFAFAF)
+  // Box containing "Service" or a specific service if selected
+  Box(
+      modifier =
+          Modifier.testTag("ServiceChip")
+              .padding(8.dp)
+              .border(1.dp, borderTextColor, shape = RoundedCornerShape(50))
+              .background(backgroundColor, shape = RoundedCornerShape(50))
+              .clickable { showDropdown = !showDropdown } // Toggle selection state
+              .padding(12.dp, 6.dp), // Add some padding inside the chip
+      contentAlignment = Alignment.Center) {
+        Text(
+            text = selectedText,
+            fontSize = 16.sp,
+            lineHeight = 34.sp,
+            fontFamily = FontFamily(Font(R.font.donegal_one)),
+            fontWeight = FontWeight(400),
+            color = borderTextColor,
+        )
+      }
+
+  // DropDown Menu to list different possible services
+  if (showDropdown) {
+    DropdownMenu(expanded = showDropdown, onDismissRequest = { showDropdown = false }) {
+      Services.entries.forEach { service ->
+        val serviceName = service.name.replace("_", " ")
+        DropdownMenuItem(
+            modifier = Modifier.testTag(serviceName),
+            text = { Text(serviceName) },
+            onClick = {
+              selectedText = serviceName
+              onServiceSelected(serviceName)
+              showDropdown = false
+            },
+        )
+      }
+    }
+  }
+}
+// Filter Chip
+@Composable
+fun FilterChip(label: String, isSelected: Boolean, onSelected: (Boolean) -> Unit) {
+  val backgroundColor = if (isSelected) Color(0xFFFFFAF5) else Color(0xFFFFFFFF)
+  val borderTextColor = if (isSelected) Color(0xFF00C853) else Color(0xFFAFAFAF)
+
+  val context = LocalContext.current
+  Box(
+      modifier =
+          Modifier.padding(8.dp)
+              .border(1.dp, borderTextColor, shape = RoundedCornerShape(50))
+              .background(backgroundColor, shape = RoundedCornerShape(50))
+              .clickable {
+                onSelected(!isSelected)
+                if (label == "Near To Me")
+                    Toast.makeText(context, "Not Yet Implemented", Toast.LENGTH_LONG).show()
+              } // Toggle selection state
+              .padding(12.dp, 6.dp), // Add some padding inside the chip
+      contentAlignment = Alignment.Center) {
+        Text(
+            text = label,
+            fontSize = 16.sp,
+            lineHeight = 34.sp,
+            fontFamily = FontFamily(Font(R.font.donegal_one)),
+            fontWeight = FontWeight(400),
+            color = borderTextColor,
+        )
+      }
 }
 
 // Main screen displaying the list of requests with the top bar, search bar, and title
@@ -312,26 +450,11 @@ fun ListRequestsFeedScreen(
         viewModel(factory = ServiceRequestViewModel.Factory)
 ) {
   val requests by serviceRequestViewModel.requests.collectAsState()
+  val selectedFilters = remember { mutableStateOf(setOf<String>()) }
+  var selectedService by remember { mutableStateOf("Service") }
   serviceRequestViewModel.getServiceRequests()
-  val request =
-      listOf(
-          ServiceRequest(
-              title = "Bathtub leak",
-              description = "I hit my bath too hard and now it's leaking",
-              assigneeName = "Nathan",
-              dueDate = Timestamp(Calendar.getInstance().time),
-              location =
-                  Location(
-                      48.8588897,
-                      2.3200410217200766,
-                      "Paris, Île-de-France, France métropolitaine, France"),
-              status = ServiceRequestStatus.PENDING,
-              uid = "gIoUWJGkTgLHgA7qts59",
-              type = ServiceRequestType.PLUMBING,
-              imageUrl =
-                  "https://firebasestorage.googleapis.com/v0/b/solvit-14cc1.appspot.com/o/serviceRequestImages%2F588d3bd9-bcb7-47bc-9911-61fae59eaece.jpg?alt=media&token=5f747f33-9732-4b90-9b34-55e28732ebc3"))
 
-  Log.e("ListRequestsFeed", "$requests")
+  Log.e("ListRequestsFeed", "${selectedFilters.value}")
   Scaffold(
       modifier = Modifier.fillMaxSize().testTag("ListRequestsScreen"),
       topBar = { RequestsTopBar() },
@@ -345,7 +468,36 @@ fun ListRequestsFeedScreen(
               SearchBar()
               Spacer(Modifier.height(15.dp))
               TitleScreen()
-              ListRequests(request)
+              FilterBar(
+                  selectedService,
+                  selectedFilters.value,
+                  onSelectedService = { service -> selectedService = service },
+                  onFilterChange = { filter, isSelected ->
+                    // add or delete filters to selected filters  onClick
+                    if (isSelected) {
+                      selectedFilters.value += filter
+                    } else {
+                      selectedFilters.value -= filter
+                    }
+                  })
+              // Filter requests
+              var filteredRequest =
+                  requests.filter { serviceRequest ->
+                    var condition = true
+                    if (selectedFilters.value.contains("Service")) {
+                      condition =
+                          condition && serviceRequest.type.toString().uppercase() == selectedService
+                    }
+                    if (selectedFilters.value.contains("Near To Me")) {
+                      // TODO
+                    }
+                    condition
+                  }
+              // Sort requests on due time
+              if (selectedFilters.value.contains("Due Time")) {
+                filteredRequest = filteredRequest.sortedBy { it.dueDate.toDate().time }
+              }
+              ListRequests(filteredRequest)
             }
       })
 }

@@ -2,7 +2,9 @@ package com.android.solvit.seeker.ui.request
 
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.request.ServiceRequest
@@ -43,6 +45,21 @@ class ListServicesRequestsScreenTest {
               uid = "gIoUWJGkTgLHgA7qts59",
               type = ServiceRequestType.PLUMBING,
               imageUrl =
+                  "https://firebasestorage.googleapis.com/v0/b/solvit-14cc1.appspot.com/o/serviceRequestImages%2F588d3bd9-bcb7-47bc-9911-61fae59eaece.jpg?alt=media&token=5f747f33-9732-4b90-9b34-55e28732ebc3"),
+          ServiceRequest(
+              title = "Bathtub leak",
+              description = "I hit my bath too hard and now it's leaking",
+              assigneeName = "Nathan",
+              dueDate = Timestamp(Calendar.getInstance().time),
+              location =
+                  Location(
+                      48.8588897,
+                      2.3200410217200766,
+                      "Paris, Île-de-France, France métropolitaine, France"),
+              status = ServiceRequestStatus.PENDING,
+              uid = "gIoUWJGkTgLHgA7qts59",
+              type = ServiceRequestType.TUTOR,
+              imageUrl =
                   "https://firebasestorage.googleapis.com/v0/b/solvit-14cc1.appspot.com/o/serviceRequestImages%2F588d3bd9-bcb7-47bc-9911-61fae59eaece.jpg?alt=media&token=5f747f33-9732-4b90-9b34-55e28732ebc3"))
 
   @Before
@@ -78,9 +95,14 @@ class ListServicesRequestsScreenTest {
     // Ensure the search bar is visible
     composeTestRule.onNodeWithTag("SearchBar").isDisplayed()
 
+    // Ensure that title is visible
     composeTestRule.onNodeWithTag("TitleScreen").isDisplayed()
 
+    // Ensure that services requests are displayed
     composeTestRule.onNodeWithTag("requests").isDisplayed()
+
+    // Ensure that filtering bar is displayed
+    composeTestRule.onNodeWithTag("FilterBar").isDisplayed()
   }
 
   // Test the functionality of the search bar
@@ -89,5 +111,19 @@ class ListServicesRequestsScreenTest {
     // Simulate user input in the search bar with the text "French"
     composeTestRule.onNodeWithTag("SearchBar").performTextInput("French")
     // TODO: complete the test when implement searching functionnality
+  }
+
+  @Test
+  fun testFilterServices() {
+    assert(composeTestRule.onAllNodesWithTag("FilterBar").fetchSemanticsNodes().isNotEmpty())
+    // Perform Service Filtering
+    composeTestRule.onNodeWithTag("ServiceChip").isDisplayed()
+    composeTestRule.onNodeWithTag("ServiceChip").performClick()
+    // Choose to keep only tutors
+    composeTestRule.onNodeWithTag("TUTOR").isDisplayed()
+    composeTestRule.onNodeWithTag("TUTOR").performClick()
+
+    // Check that only tutor service request is displayed on the screen
+    assert(composeTestRule.onAllNodesWithTag("ServiceRequest").fetchSemanticsNodes().size == 1)
   }
 }
