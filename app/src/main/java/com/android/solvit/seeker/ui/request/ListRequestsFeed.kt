@@ -322,6 +322,7 @@ fun InteractionBar(text: String, icon: Int) {
   }
 }
 
+// Composable for filter bar
 @SuppressLint("SuspiciousIndentation")
 @Composable
 fun FilterBar(
@@ -331,9 +332,11 @@ fun FilterBar(
     onFilterChange: (String, Boolean) -> Unit
 ) {
 
+  // For the moment we chose to have 3 filters, it can ameliorated later
   // TODO near to me locate in function of user location
   val filters = listOf("Service", "Near To Me", "Due Time")
 
+  // LazyRow containing filters
   LazyRow(
       modifier = Modifier.testTag("FilterBar"),
       horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.Start),
@@ -341,6 +344,8 @@ fun FilterBar(
   ) {
     items(filters.size) { idx ->
       val filter = filters[idx]
+      // Calling special chip when it's Service to have a dropdown menu with different possible
+      // services
       if (filter == "Service") {
         ServiceChip(
             selectedService,
@@ -348,6 +353,7 @@ fun FilterBar(
               onSelectedService(u)
               onFilterChange("Service", true)
             })
+        // Calling a lambda filter Chip
       } else {
         val isSelected = selectedFilters.contains(filter)
         FilterChip(
@@ -358,7 +364,7 @@ fun FilterBar(
     }
   }
 }
-
+// Composable for service chip
 @Composable
 fun ServiceChip(
     selectedService: String,
@@ -369,6 +375,7 @@ fun ServiceChip(
   var showDropdown by remember { mutableStateOf(false) }
   val backgroundColor = if (selectedText != "Service") Color(0xFFFFFAF5) else Color(0xFFFFFFFF)
   val borderTextColor = if (selectedText != "Service") Color(0xFF00C853) else Color(0xFFAFAFAF)
+  // Box containing "Service" or a specific service if selected
   Box(
       modifier =
           Modifier.testTag("ServiceChip")
@@ -388,6 +395,7 @@ fun ServiceChip(
         )
       }
 
+  // DropDown Menu to list different possible services
   if (showDropdown) {
     DropdownMenu(expanded = showDropdown, onDismissRequest = { showDropdown = false }) {
       Services.entries.forEach { service ->
@@ -424,7 +432,6 @@ fun FilterChip(label: String, isSelected: Boolean, onSelected: (Boolean) -> Unit
               } // Toggle selection state
               .padding(12.dp, 6.dp), // Add some padding inside the chip
       contentAlignment = Alignment.Center) {
-        // Manage Service Special Cases to have a dropDownMenu
         Text(
             text = label,
             fontSize = 16.sp,
@@ -466,13 +473,14 @@ fun ListRequestsFeedScreen(
                   selectedFilters.value,
                   onSelectedService = { service -> selectedService = service },
                   onFilterChange = { filter, isSelected ->
+                    // add or delete filters to selected filters  onClick
                     if (isSelected) {
-                      Log.e("TETEEEEETSS", "$filter selected")
                       selectedFilters.value += filter
                     } else {
                       selectedFilters.value -= filter
                     }
                   })
+              // Filter requests
               var filteredRequest =
                   requests.filter { serviceRequest ->
                     var condition = true
@@ -485,7 +493,8 @@ fun ListRequestsFeedScreen(
                     }
                     condition
                   }
-              if (selectedFilters.value.contains("DueDate")) {
+              // Sort requests on due time
+              if (selectedFilters.value.contains("Due Time")) {
                 filteredRequest = filteredRequest.sortedBy { it.dueDate.toDate().time }
               }
               ListRequests(filteredRequest)
