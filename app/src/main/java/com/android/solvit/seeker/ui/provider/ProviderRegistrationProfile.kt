@@ -85,9 +85,10 @@ fun ProviderRegistrationScreen(
               horizontalArrangement = Arrangement.SpaceBetween,
               verticalAlignment = Alignment.CenterVertically) {
                 // Back Button
-                IconButton(onClick = { navigationActions.goBack() },Modifier.testTag("goBackButton")) {
-                  Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.Black)
-                }
+                IconButton(
+                    onClick = { navigationActions.goBack() }, Modifier.testTag("goBackButton")) {
+                      Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.Black)
+                    }
                 Spacer(modifier = Modifier.width(8.dp))
 
                 Stepper(currentStep = currentStep, isFormComplete)
@@ -100,12 +101,14 @@ fun ProviderRegistrationScreen(
                 painter = painterResource(id = R.drawable.app_logo), // Update with your logo
                 contentDescription = "App Logo",
                 modifier =
-                    Modifier.testTag("signUpIcon").size(150.dp) // Adjust the size as per your logo
+                    Modifier.testTag("signUpIcon")
+                        .size(150.dp) // Adjust the size as per your logo
                         .align(Alignment.CenterHorizontally))
             Text(
                 text = "Sign Up as a Professional",
                 style = MaterialTheme.typography.h6,
-                modifier = Modifier.testTag("signUpProfessionalTitle").align(Alignment.CenterHorizontally))
+                modifier =
+                    Modifier.testTag("signUpProfessionalTitle").align(Alignment.CenterHorizontally))
 
             Spacer(modifier = Modifier.height(16.dp))
             // Full Name
@@ -208,7 +211,8 @@ fun ProviderRegistrationScreen(
                     currentStep = 2
                   }
                 },
-                modifier = Modifier.fillMaxWidth().height(60.dp).testTag("completeRegistrationButton"),
+                modifier =
+                    Modifier.fillMaxWidth().height(60.dp).testTag("completeRegistrationButton"),
                 enabled = isFormComplete,
                 shape = RoundedCornerShape(12.dp),
                 colors =
@@ -229,14 +233,18 @@ fun ProviderRegistrationScreen(
                   Text(
                       text = "Set Your Preferences",
                       style = MaterialTheme.typography.h6,
-                      modifier = Modifier.align(Alignment.CenterHorizontally).testTag("preferencesTitle"),
+                      modifier =
+                          Modifier.align(Alignment.CenterHorizontally).testTag("preferencesTitle"),
                       textAlign = TextAlign.Center // Center the text
                       )
                   Spacer(modifier = Modifier.height(16.dp))
                   Image(
                       painter = painterResource(id = R.drawable.providerpref),
                       contentDescription = "Completion Image",
-                      modifier = Modifier.size(300.dp).testTag("preferencesIllustration").align(Alignment.CenterHorizontally))
+                      modifier =
+                          Modifier.size(300.dp)
+                              .testTag("preferencesIllustration")
+                              .align(Alignment.CenterHorizontally))
                   Spacer(modifier = Modifier.height(20.dp))
                   Text(
                       text = "This feature is not implemented yet.",
@@ -265,7 +273,8 @@ fun ProviderRegistrationScreen(
             Text(
                 text = "You're All Set!",
                 style = MaterialTheme.typography.h6,
-                modifier = Modifier.align(Alignment.CenterHorizontally).testTag("confirmationTitle"))
+                modifier =
+                    Modifier.align(Alignment.CenterHorizontally).testTag("confirmationTitle"))
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -274,7 +283,8 @@ fun ProviderRegistrationScreen(
                 contentDescription = "Completion Image",
                 modifier =
                     Modifier.size(200.dp)
-                        .align(Alignment.CenterHorizontally).testTag("celebrationIllustration") // Adjust size as needed
+                        .align(Alignment.CenterHorizontally)
+                        .testTag("celebrationIllustration") // Adjust size as needed
                 )
             Spacer(modifier = Modifier.height(100.dp))
             // Completion message
@@ -284,10 +294,12 @@ fun ProviderRegistrationScreen(
                         "You're ready to start offering your services to customers." +
                         "Start connecting with customers, respond to requests, and grow your business on Solvit.",
                 style = MaterialTheme.typography.body1,
-                modifier = Modifier.align(Alignment.CenterHorizontally).testTag("successMessageText"), // Add horizontal padding
+                modifier =
+                    Modifier.align(Alignment.CenterHorizontally)
+                        .testTag("successMessageText"), // Add horizontal padding
                 textAlign = TextAlign.Center)
 
-              Spacer(modifier = Modifier.height(30.dp))
+            Spacer(modifier = Modifier.height(30.dp))
 
             Button(
                 onClick = {
@@ -338,7 +350,7 @@ fun Stepper(currentStep: Int, isFormComplete: Boolean) {
 @Composable
 fun StepCircle(stepNumber: Int, isCompleted: Boolean, label: String) {
   // Use a Column to stack the circle and the label vertically
-     val testTag = "stepCircle-$stepNumber-${if (isCompleted) "completed" else "incomplete"}"
+  val testTag = "stepCircle-$stepNumber-${if (isCompleted) "completed" else "incomplete"}"
   Column(
       horizontalAlignment = Alignment.CenterHorizontally,
       verticalArrangement = Arrangement.Center,
@@ -361,7 +373,6 @@ fun StepCircle(stepNumber: Int, isCompleted: Boolean, label: String) {
             text = label,
             color = Color.Black,
             style = MaterialTheme.typography.body2,
-            modifier = Modifier.padding(top = 4.dp)
-            )
+            modifier = Modifier.padding(top = 4.dp))
       }
 }
