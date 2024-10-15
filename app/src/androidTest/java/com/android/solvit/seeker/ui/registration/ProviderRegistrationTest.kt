@@ -3,7 +3,6 @@ package com.android.solvit.seeker.ui.registration
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
-import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -63,7 +62,7 @@ class ProviderRegistrationTest {
     composeTestRule.onNodeWithTag("completeRegistrationButton").performClick()
 
     // Now check for the complete registration button
-     //composeTestRule.onNodeWithTag("completeRegistrationButton").assertIsDisplayed().assertTextEquals("Complete registration")
+    // composeTestRule.onNodeWithTag("completeRegistrationButton").assertIsDisplayed().assertTextEquals("Complete registration")
 
   }
 
