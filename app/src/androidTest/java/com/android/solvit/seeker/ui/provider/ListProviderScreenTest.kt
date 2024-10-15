@@ -37,6 +37,8 @@ class ListProviderScreenTest {
           "Hassan",
           Services.TUTOR,
           "image",
+          "",
+          "",
           Location(0.0, 0.0, "EPFL"),
           "Serious tutor giving courses in MATHS",
           true,

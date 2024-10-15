@@ -2,27 +2,29 @@ package com.android.solvit.seeker.model.profile
 
 import android.util.Log
 import com.google.android.gms.tasks.Task
-import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.auth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 
-class UserRepositoryFirestore(private val db: FirebaseFirestore) : UserRepository {
-  private val auth = FirebaseAuth.getInstance()
-  private val firestore = FirebaseFirestore.getInstance()
+open class UserRepositoryFirestore(private val db: FirebaseFirestore) : UserRepository {
+
   private val collectionPath = "user"
 
   override fun init(onSuccess: () -> Unit) {
-    Firebase.auth.addAuthStateListener {
-      if (it.currentUser != null) {
-        onSuccess()
-      }
-    }
+    FirebaseAuth.getInstance().addAuthStateListener { onSuccess() }
   }
 
   override fun getNewUid(): String {
     return db.collection(collectionPath).document().id
+  }
+
+  override fun addUserProfile(
+      profile: SeekerProfile,
+      onSuccess: () -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    performFirestoreOperation(
+        db.collection(collectionPath).document(profile.uid).set(profile), onSuccess, onFailure)
   }
 
   override fun getUserProfile(
@@ -59,14 +61,6 @@ class UserRepositoryFirestore(private val db: FirebaseFirestore) : UserRepositor
   ) {
     performFirestoreOperation(
         db.collection(collectionPath).document(id).delete(), onSuccess, onFailure)
-  }
-
-  override fun getCurrentUserEmail(): String? {
-    return auth.currentUser?.email
-  }
-
-  override fun getCurrentUserPhoneNumber(): String? {
-    return auth.currentUser?.phoneNumber
   }
 
   private fun performFirestoreOperation(

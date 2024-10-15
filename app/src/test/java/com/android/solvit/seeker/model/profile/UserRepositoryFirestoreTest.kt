@@ -1,6 +1,5 @@
 package com.android.solvit.seeker.model.profile
 
-import android.os.Looper
 import androidx.test.core.app.ApplicationProvider
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.FirebaseApp
@@ -10,6 +9,8 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
 import junit.framework.TestCase
+import org.hamcrest.CoreMatchers
+import org.hamcrest.MatcherAssert
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -17,10 +18,9 @@ import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
-import org.mockito.kotlin.timeout
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.Shadows
 
 @RunWith(RobolectricTestRunner::class)
 class UserRepositoryFirestoreTest {
@@ -58,54 +58,37 @@ class UserRepositoryFirestoreTest {
   }
 
   @Test
-  fun getNewUid_returnsDocumentId() {
+  fun getNewUid() {
     Mockito.`when`(mockDocumentReference.id).thenReturn("12345")
-    val newUid = firebaseRepository.getNewUid()
-    assert(newUid == "12345")
+    MatcherAssert.assertThat(firebaseRepository.getNewUid(), CoreMatchers.`is`("12345"))
   }
 
   @Test
-  fun getUserProfile_callsFirestoreCollection() {
-
+  fun getUserProfile() {
     Mockito.`when`(mockCollectionReference.get()).thenReturn(Tasks.forResult(mockQuerySnapshot))
-
     Mockito.`when`(mockQuerySnapshot.documents).thenReturn(listOf())
-
-    firebaseRepository.getUserProfile(
-        onSuccess = {
-          // Do nothing; we just want to verify that the 'documents' field was accessed
-        },
-        onFailure = { TestCase.fail("Failure callback should not be called") })
-
-    verify(timeout(100)) { (mockQuerySnapshot).documents }
+    firebaseRepository.getUserProfile({}, { TestCase.fail("Should not fail") })
+    verify(mockCollectionReference).get()
   }
 
   @Test
-  fun updateUserProfile_callsFirestoreSet() {
+  fun updateUserProfile() {
     Mockito.`when`(mockDocumentReference.set(any())).thenReturn(Tasks.forResult(null))
-
-    firebaseRepository.updateUserProfile(
-        testSeekerProfile,
-        onSuccess = { /* Do nothing; success is expected */},
-        onFailure = { TestCase.fail("Failure callback should not be called") })
-
-    Shadows.shadowOf(Looper.getMainLooper()).idle()
-
-    verify(mockDocumentReference).set(any())
+    firebaseRepository.updateUserProfile(testSeekerProfile, {}, {})
+    verify(mockDocumentReference).set(eq(testSeekerProfile))
   }
 
   @Test
-  fun deleteUserProfile_callsFirestoreDelete() {
-
+  fun deleteUserProfile() {
     Mockito.`when`(mockDocumentReference.delete()).thenReturn(Tasks.forResult(null))
-
-    firebaseRepository.deleteUserProfile(
-        "12345",
-        onSuccess = { /* Do nothing; success is expected */},
-        onFailure = { TestCase.fail("Failure callback should not be called") })
-
-    Shadows.shadowOf(Looper.getMainLooper()).idle()
-
+    firebaseRepository.deleteUserProfile(testSeekerProfile.uid, {}, {})
     verify(mockDocumentReference).delete()
+  }
+
+  @Test
+  fun addUserProfile() {
+    Mockito.`when`(mockDocumentReference.set(any())).thenReturn(Tasks.forResult(null))
+    firebaseRepository.addUserProfile(testSeekerProfile, {}, {})
+    verify(mockDocumentReference).set(eq(testSeekerProfile))
   }
 }

@@ -1,7 +1,6 @@
 package com.android.solvit.seeker.model.profile
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.google.firebase.Firebase
@@ -12,49 +11,43 @@ import kotlinx.coroutines.flow.asStateFlow
 
 class SeekerProfileViewModel(private val repository: UserRepositoryFirestore) : ViewModel() {
 
-  // private val _userProfile = MutableStateFlow<List<UserProfile>>(emptyList())
-  // hardcode
-  private val _seekerProfile =
-      MutableStateFlow(
-          listOf(
-              SeekerProfile(
-                  uid = "12345", // Hardcoded UID
-                  name = "John Doe", // Hardcoded Name
-                  username = "johndoe", // Hardcoded username
-                  email = "john.doe@example.com", // Hardcoded Email
-                  phone = "+1234567890", // Hardcoded Phone Number
-                  address = "Chemin des Triaudes" // Hardcoded Address
-                  )))
+  private val _seekerProfile = MutableStateFlow<List<SeekerProfile>>(emptyList())
+
   val seekerProfile: StateFlow<List<SeekerProfile>> = _seekerProfile.asStateFlow()
 
-  private val _isLoading = MutableLiveData<Boolean>()
-  val isLoading: LiveData<Boolean>
-    get() = _isLoading
-
-  private val _error = MutableLiveData<String>()
-  val error: LiveData<String>
-    get() = _error
+  init {
+    repository.init { getUserProfile() }
+  }
 
   fun getNewUid(): String {
     return repository.getNewUid()
   }
 
   fun getUserProfile() {
-    repository.getUserProfile(onSuccess = { _seekerProfile.value = it }, onFailure = {})
+    repository.getUserProfile(
+        onSuccess = { _seekerProfile.value = it },
+        onFailure = { Log.e("get UserProfile", "failed to get UserProfile") })
   }
 
-  /*fun updateUserProfile(profile: UserProfile) {
-      repository.updateUserProfile(profile= profile , onSuccess = {  getUserProfile() }, onFailure = {})
+  fun addUserProfile(profile: SeekerProfile) {
+    repository.addUserProfile(
+        profile = profile,
+        onSuccess = { getUserProfile() },
+        onFailure = { Log.e("add User", "failed to add User") })
   }
-
-   */
 
   fun updateUserProfile(profile: SeekerProfile) {
-    _seekerProfile.value = listOf(profile)
+    repository.updateUserProfile(
+        profile = profile,
+        onSuccess = { getUserProfile() },
+        onFailure = { Log.e("update User", "failed to update User") })
   }
 
   fun deleteUserProfile(id: String) {
-    repository.deleteUserProfile(id = id, onSuccess = { getUserProfile() }, onFailure = {})
+    repository.deleteUserProfile(
+        id = id,
+        onSuccess = { getUserProfile() },
+        onFailure = { Log.e("delete User", "failed to delete User") })
   }
 
   // create factory

@@ -39,17 +39,14 @@ class SeekerProfileViewModelTest {
 
   @Test
   fun getUserProfileCallsRepository() {
-
     seekerProfileViewModel.getUserProfile()
     verify(firebaseRepository).getUserProfile(any(), any())
   }
 
   @Test
   fun updateUserProfileUpdatesLocalProfile() {
-
     seekerProfileViewModel.updateUserProfile(testProfile)
-    val updatedProfile = seekerProfileViewModel.seekerProfile.value
-    assertThat(updatedProfile[0], `is`(testProfile))
+    verify(firebaseRepository).updateUserProfile(eq(testProfile), any(), any())
   }
 
   @Test
@@ -58,5 +55,11 @@ class SeekerProfileViewModelTest {
     doNothing().`when`(firebaseRepository).deleteUserProfile(eq(testProfile.uid), any(), any())
     seekerProfileViewModel.deleteUserProfile(testProfile.uid)
     verify(firebaseRepository).deleteUserProfile(eq(testProfile.uid), any(), any())
+  }
+
+  @Test
+  fun addUserProfileCallsRepository() {
+    seekerProfileViewModel.addUserProfile(testProfile)
+    verify(firebaseRepository).addUserProfile(eq(testProfile), any(), any())
   }
 }
