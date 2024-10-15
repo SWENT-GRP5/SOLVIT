@@ -24,6 +24,7 @@ import com.android.solvit.seeker.ui.request.EditRequestScreen
 import com.android.solvit.seeker.ui.service.ServicesScreen
 import com.android.solvit.shared.ui.authentication.OpeningScreen
 import com.android.solvit.shared.ui.authentication.SignInScreen
+import com.android.solvit.shared.ui.authentication.SignUpScreen
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.navigation.Screen
@@ -55,6 +56,7 @@ fun SolvItApp() {
   NavHost(navController = navController, startDestination = Route.AUTH) {
     composable(Route.AUTH) { OpeningScreen(navigationActions) }
     composable(Screen.SIGN_IN) { SignInScreen(navigationActions) }
+    composable(Screen.SIGN_UP) { SignUpScreen(navigationActions) }
     composable(Route.SERVICES) { ServicesScreen(navigationActions, listProviderViewModel) }
     composable(Route.PROVIDERS) { SelectProviderScreen(listProviderViewModel, navigationActions) }
     composable(Route.MESSAGE) { MessageScreen(navigationActions) }
