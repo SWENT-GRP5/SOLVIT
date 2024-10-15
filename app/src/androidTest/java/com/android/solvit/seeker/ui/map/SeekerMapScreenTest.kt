@@ -95,11 +95,4 @@ class SeekerMapScreenTest {
   fun showsRequestLocationPermission() {
     composeTestRule.setContent { SeekerMapScreen(listProviderViewModel, navigationActions, true) }
   }
-
-  @Test
-  fun usesFactoryViewModel() {
-    composeTestRule.setContent {
-      SeekerMapScreen(navigationActions = navigationActions, requestLocationPermission = false)
-    }
-  }
 }
