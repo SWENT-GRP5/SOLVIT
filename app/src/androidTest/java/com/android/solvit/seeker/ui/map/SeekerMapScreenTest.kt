@@ -13,7 +13,6 @@ import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.provider.ProviderRepository
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
-import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.firebase.Timestamp
 import org.junit.Before
 import org.junit.Rule
