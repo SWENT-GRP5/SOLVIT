@@ -52,7 +52,7 @@ fun SolvItApp() {
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
   val listProviderViewModel =
-    viewModel<ListProviderViewModel>(factory = ListProviderViewModel.Factory)
+      viewModel<ListProviderViewModel>(factory = ListProviderViewModel.Factory)
   val viewModel: SeekerProfileViewModel = viewModel(factory = SeekerProfileViewModel.Factory)
 
   NavHost(navController = navController, startDestination = Route.AUTH) {
