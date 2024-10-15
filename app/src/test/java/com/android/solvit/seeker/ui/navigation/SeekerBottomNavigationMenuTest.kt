@@ -1,6 +1,22 @@
 package com.android.solvit.seeker.ui.navigation
-
 /*
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
+import androidx.navigation.NavController
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION
+import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.android.solvit.shared.ui.navigation.TopLevelDestination
+import com.android.solvit.shared.ui.navigation.TopLevelDestinations
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
+import org.junit.experimental.runners.Enclosed
+import org.junit.runner.RunWith
+import org.mockito.Mockito
+
 @RunWith(Enclosed::class)
 class SeekerBottomNavigationMenuTest {
 
@@ -17,7 +33,6 @@ class SeekerBottomNavigationMenuTest {
   class MyComposeEspressoTest {
 
     @get:Rule val composeTestRule = createComposeRule()
-
 
     @Test
     fun testMyComposableWithEspresso() {
