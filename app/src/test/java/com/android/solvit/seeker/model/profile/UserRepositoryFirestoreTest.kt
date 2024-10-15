@@ -16,6 +16,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
 import org.mockito.kotlin.timeout
@@ -142,5 +143,29 @@ class UserRepositoryFirestoreTest {
     Shadows.shadowOf(Looper.getMainLooper()).idle()
 
     verify(mockDocumentReference).delete()
+  }
+
+  @Test
+  fun documentToUser_success() {
+    // Mock a DocumentSnapshot
+
+    // Simulate the document having all the necessary fields
+    `when`(mockDocumentSnapshot.id).thenReturn("12345")
+    `when`(mockDocumentSnapshot.getString("name")).thenReturn("John Doe")
+    `when`(mockDocumentSnapshot.getString("username")).thenReturn("johndoe")
+    `when`(mockDocumentSnapshot.getString("email")).thenReturn("john.doe@example.com")
+    `when`(mockDocumentSnapshot.getString("phone")).thenReturn("+1234567890")
+    `when`(mockDocumentSnapshot.getString("address")).thenReturn("Chemin des Triaudes")
+
+    // Call the helper method
+    val profile = firebaseRepository.documentToUser(mockDocumentSnapshot)
+
+    // Assert that the profile was correctly created
+    assertEquals("12345", profile?.uid)
+    assertEquals("John Doe", profile?.name)
+    assertEquals("johndoe", profile?.username)
+    assertEquals("john.doe@example.com", profile?.email)
+    assertEquals("+1234567890", profile?.phone)
+    assertEquals("Chemin des Triaudes", profile?.address)
   }
 }

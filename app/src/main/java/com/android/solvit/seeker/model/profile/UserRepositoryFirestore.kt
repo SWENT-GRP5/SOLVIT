@@ -119,7 +119,7 @@ class UserRepositoryFirestore(private val db: FirebaseFirestore) : UserRepositor
     }
   }
 
-  private fun documentToUser(document: DocumentSnapshot): SeekerProfile? {
+  fun documentToUser(document: DocumentSnapshot): SeekerProfile? {
     return try {
       val uid = document.id
       val name = document.getString("name") ?: return null

@@ -47,6 +47,7 @@ class SeekerProfileViewModelTest {
   fun getUsersProfileCallsRepository() {
 
     seekerProfileViewModel.getUsersProfile()
+
     verify(firebaseRepository).getUsersProfile(any(), any())
   }
 
