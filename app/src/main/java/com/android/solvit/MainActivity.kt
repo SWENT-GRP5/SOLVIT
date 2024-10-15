@@ -82,18 +82,3 @@ fun SolvItApp() {
     }
   }
 }
-
-/*
-@Composable
-fun Greeting() {
-  val navController = rememberNavController()
-  val navigationActions = NavigationActions(navController)
-
-  NavHost(navController = navController, startDestination = Route.HOME) {
-    composable(Route.HOME) { HomeScreen(navigationActions) }
-    composable(Route.MESSAGE) { MessageScreen(navigationActions) }
-    composable(Route.REQUEST) { RequestScreen(navigationActions) }
-    composable(Route.ORDER) { OrderScreen(navigationActions) }
-    composable(Route.PROFILE) { ProfileScreen(navigationActions) }
-  }
-}*/

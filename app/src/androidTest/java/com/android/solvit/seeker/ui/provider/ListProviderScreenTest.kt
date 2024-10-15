@@ -106,16 +106,9 @@ class ListProviderScreenTest {
 
   @Test
   fun filterAction() {
-    composeTestRule.setContent { SelectProviderScreen(listProviderViewModel, navigationActions) }
     composeTestRule.onNodeWithTag("filterOption").assertIsDisplayed()
     composeTestRule.onNodeWithTag("filterOption").performClick()
     composeTestRule.onNodeWithTag("filterSheet").assertIsDisplayed()
-    composeTestRule.waitUntil(
-        timeoutMillis = 10000L,
-        condition = {
-          composeTestRule.onAllNodesWithTag("filterAct").fetchSemanticsNodes().isNotEmpty() &&
-              composeTestRule.onAllNodesWithTag("filterRating").fetchSemanticsNodes().isNotEmpty()
-        })
     composeTestRule.onAllNodesWithTag("filterAct")[0].assertIsDisplayed()
     composeTestRule.onAllNodesWithTag("filterAct")[0].performClick()
     composeTestRule.onAllNodesWithTag("filterAct")[0].performClick()
