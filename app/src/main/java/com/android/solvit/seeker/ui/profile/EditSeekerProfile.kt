@@ -11,6 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -79,7 +80,7 @@ fun EditSeekerProfileScreen(
               value = fullName,
               onValueChange = { fullName = it },
               label = { Text("Full Name") },
-              modifier = Modifier.fillMaxWidth())
+              modifier = Modifier.fillMaxWidth().testTag("profileName"))
 
           Spacer(modifier = Modifier.height(16.dp))
 
@@ -88,7 +89,7 @@ fun EditSeekerProfileScreen(
               value = username,
               onValueChange = { username = it },
               label = { Text("Username") },
-              modifier = Modifier.fillMaxWidth())
+              modifier = Modifier.fillMaxWidth().testTag("profileUsername"))
 
           Spacer(modifier = Modifier.height(16.dp))
 
@@ -97,7 +98,7 @@ fun EditSeekerProfileScreen(
               value = email,
               onValueChange = { email = it },
               label = { Text("Email") },
-              modifier = Modifier.fillMaxWidth())
+              modifier = Modifier.fillMaxWidth().testTag("profileEmail"))
 
           Spacer(modifier = Modifier.height(16.dp))
 
@@ -106,7 +107,7 @@ fun EditSeekerProfileScreen(
               value = phone,
               onValueChange = { phone = it },
               label = { Text("Phone Number") },
-              modifier = Modifier.fillMaxWidth())
+              modifier = Modifier.fillMaxWidth().testTag("profilePhone"))
 
           Spacer(modifier = Modifier.height(16.dp))
 
@@ -115,7 +116,7 @@ fun EditSeekerProfileScreen(
               value = address,
               onValueChange = { address = it },
               label = { Text("Address") },
-              modifier = Modifier.fillMaxWidth())
+              modifier = Modifier.fillMaxWidth().testTag("profileAddress"))
 
           Spacer(modifier = Modifier.height(16.dp))
 

@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 class SeekerProfileViewModel(
-    private val repository: UserRepositoryFirestore,
+    private val repository: UserRepository,
 ) : ViewModel() {
 
   // private val _userProfile = MutableStateFlow<List<UserProfile>>(emptyList())

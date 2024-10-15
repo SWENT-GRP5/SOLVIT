@@ -10,6 +10,7 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
 import junit.framework.TestCase
+import junit.framework.TestCase.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -66,6 +67,40 @@ class UserRepositoryFirestoreTest {
 
   @Test
   fun getUserProfile_callsFirestoreCollection() {
+    Mockito.`when`(mockDocumentReference.get()).thenReturn(Tasks.forResult(mockDocumentSnapshot))
+
+    Mockito.`when`(mockDocumentSnapshot.exists()).thenReturn(true)
+    // Mock the document snapshot to return data
+    Mockito.`when`(mockDocumentSnapshot.exists()).thenReturn(true)
+    Mockito.`when`(mockDocumentSnapshot.id).thenReturn(testSeekerProfile.uid)
+    Mockito.`when`(mockDocumentSnapshot.getString("name")).thenReturn(testSeekerProfile.name)
+    Mockito.`when`(mockDocumentSnapshot.getString("username"))
+        .thenReturn(testSeekerProfile.username)
+    Mockito.`when`(mockDocumentSnapshot.getString("email")).thenReturn(testSeekerProfile.email)
+    Mockito.`when`(mockDocumentSnapshot.getString("phone")).thenReturn(testSeekerProfile.phone)
+    Mockito.`when`(mockDocumentSnapshot.getString("address")).thenReturn(testSeekerProfile.address)
+
+    firebaseRepository.getUserProfile(
+        uid = "12345",
+        onSuccess = { profile ->
+          assertEquals(testSeekerProfile, profile) // Ensure correct profile is returned
+        },
+        onFailure = { TestCase.fail("Failure callback should not be called") })
+
+    verify(mockDocumentReference).get()
+  }
+
+  @Test
+  fun updateUserProfileTest() {
+    Mockito.`when`(mockDocumentReference.set(any())).thenReturn(Tasks.forResult(null))
+    firebaseRepository.updateUserProfile(
+        profile = testSeekerProfile, onSuccess = {}, onFailure = {})
+    Shadows.shadowOf(Looper.getMainLooper()).idle()
+    verify(mockDocumentReference).set(testSeekerProfile)
+  }
+
+  @Test
+  fun getUsersProfile_callsFirestoreCollection() {
 
     Mockito.`when`(mockCollectionReference.get()).thenReturn(Tasks.forResult(mockQuerySnapshot))
 
