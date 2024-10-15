@@ -13,6 +13,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.solvit.R
 import com.android.solvit.seeker.model.profile.SeekerProfile
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
@@ -23,7 +24,7 @@ import com.android.solvit.shared.ui.navigation.NavigationActions
 fun EditSeekerProfileScreen(
     viewModel: SeekerProfileViewModel,
     navigationActions: NavigationActions,
-    authViewModel: AuthViewModel
+    authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory)
 ) {
   // Collect the user profile from the StateFlow
   val user by authViewModel.user.collectAsState()
