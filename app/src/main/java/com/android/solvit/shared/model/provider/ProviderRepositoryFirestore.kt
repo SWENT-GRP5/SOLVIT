@@ -28,11 +28,15 @@ class ProviderRepositoryFirestore(private val db: FirebaseFirestore) : ProviderR
       val price = doc.getDouble("price") ?: return null
       val deliveryTime = doc.getTimestamp("deliveryTime") ?: return null
       val languages = (doc.get("languages") as List<*>).map { Language.valueOf(it as String) }
+      val companyName = doc.getString("companyName") ?: ""
+      val phone = doc.getString("phone") ?: ""
       return Provider(
           doc.id,
           name,
           service,
           imageUrl,
+          companyName,
+          phone,
           location,
           description,
           popular,
