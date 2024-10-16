@@ -1,5 +1,6 @@
-package com.android.solvit.seeker.ui.map
+package com.android.solvit.provider.ui.map
 
+import android.icu.util.GregorianCalendar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -8,8 +9,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.seeker.ui.navigation.SeekerBottomNavigationMenu
+import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.ui.map.MapScreen
 import com.android.solvit.shared.ui.map.MarkerData
 import com.android.solvit.shared.ui.map.RequestLocationPermission
@@ -17,10 +18,12 @@ import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
+import java.util.Calendar
 
 @Composable
-fun SeekerMapScreen(
-    providerViewModel: ListProviderViewModel = viewModel(factory = ListProviderViewModel.Factory),
+fun ProviderMapScreen(
+    serviceRequestViewModel: ServiceRequestViewModel =
+        viewModel(factory = ServiceRequestViewModel.Factory),
     navigationActions: NavigationActions,
     requestLocationPermission: Boolean = true
 ) {
@@ -30,8 +33,8 @@ fun SeekerMapScreen(
   val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
   // State to hold the user's location
   var userLocation by remember { mutableStateOf<LatLng?>(null) }
-  // Collect the list of providers from the ViewModel
-  val providers by providerViewModel.providersList.collectAsState()
+  // Collect the service requests from the ViewModel
+  val requests by serviceRequestViewModel.requests.collectAsState()
 
   // Allows to bypass location permission for testing
   if (requestLocationPermission) {
@@ -42,19 +45,24 @@ fun SeekerMapScreen(
   }
 
   // Create markers with detailed information for each provider
-  val providerMarkers =
-      providers.map { provider ->
+  val requestMarkers =
+      requests.map { request ->
+        val dueDate =
+            with(GregorianCalendar().apply { time = request.dueDate.toDate() }) {
+              "${get(Calendar.DAY_OF_MONTH)}/${get(Calendar.MONTH) + 1}/${get(Calendar.YEAR)}"
+            }
         MarkerData(
-            location = LatLng(provider.location.latitude, provider.location.longitude),
-            title = provider.name,
-            snippet = "${provider.description} - Rating: ${provider.rating}",
-            tag = "providerMarker-${provider.uid}")
+            location =
+                LatLng(request.location?.latitude ?: 0.0, request.location?.longitude ?: 0.0),
+            title = request.title,
+            snippet = "${request.description} - Deadline: $dueDate",
+            tag = "requestMarker-${request.uid}")
       }
 
-  // Display the map with user location and provider markers
+  // Display the map screen with the user's location and request markers
   MapScreen(
       userLocation = userLocation,
-      markers = providerMarkers,
+      markers = requestMarkers,
       bottomBar = {
         SeekerBottomNavigationMenu(
             onTabSelect = { route -> navigationActions.navigateTo(route) },

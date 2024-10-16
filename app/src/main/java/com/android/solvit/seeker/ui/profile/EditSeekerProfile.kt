@@ -1,252 +1,71 @@
 package com.android.solvit.seeker.ui.profile
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.*
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Text
+import androidx.compose.material.TextButton
+import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.solvit.R
 import com.android.solvit.seeker.model.profile.SeekerProfile
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
+import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
 
-/*
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun EditProfileScreen(
-    viewModel: ProfileViewModel,
-    navigationActions: NavigationActions
-) {
-    // Collect the user profile from the StateFlow
-    val userProfile by viewModel.userProfile.collectAsState()
-
-    // Assuming a single user profile (adjust as needed)
-    val currentProfile = userProfile.firstOrNull()
-
-    // Initialize fields with existing user data
-    var name by remember { mutableStateOf(currentProfile?.name ?: "") }
-    var email by remember { mutableStateOf(currentProfile?.email ?: "") }
-    var phone by remember { mutableStateOf(currentProfile?.phone ?: "") }
-
-    Scaffold(
-        modifier = Modifier.testTag("editScreen"),
-        topBar = {
-            TopAppBar(
-                title = { Text("Edit Profile", modifier = Modifier.testTag("editTodoTitle")) },
-                navigationIcon = {
-                    IconButton(
-                        modifier = Modifier.testTag("goBackButton"),
-                        onClick = { navigationActions.goBack() }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back")
-                    }
-                })
-        },
-        content = { paddingValues ->
-            Column(
-                modifier = Modifier
-                    .padding(paddingValues)
-                    .fillMaxSize()
-                    .padding(16.dp)
-            ) {
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Name Input
-                TextField(
-                    value = name,
-                    onValueChange = { name = it },
-                    label = { Text("Name") }
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Email Input
-                TextField(
-                    value = email,
-                    onValueChange = { email = it },
-                    label = { Text("Email") }
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Phone Input
-                TextField(
-                    value = phone,
-                    onValueChange = { phone = it },
-                    label = { Text("Phone") }
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Save Changes Button
-                Button(onClick = {
-                    currentProfile?.let { profile ->
-                        // Update the profile with the new values
-                        viewModel.updateUserProfile(
-                            UserProfile(
-                                uid = profile.uid, // Ensure to use the existing uid
-                                name = name,
-                                email = email,
-                                phone = phone
-                            )
-                        )
-                    }
-                    navigationActions.goBack()
-                }) {
-                    Text("Save Changes")
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Cancel Button to go back without saving
-                Button(onClick = {
-                    navigationActions.goBack() // Navigate back to the ProfileScreen without saving
-                }) {
-                    Text("Cancel")
-                }
-            }
-        }
-    )
-}
-*/
-
-/*
-@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
-@Composable
-fun EditProfileScreen(
-    viewModel: ProfileViewModel,
-    navigationActions: NavigationActions
-) {
-    // Collect the user profile from the StateFlow
-    val userProfile by viewModel.userProfile.collectAsState()
-
-    // Assuming a single user profile (adjust as needed)
-    val currentProfile = userProfile.firstOrNull()
-
-    // Initialize fields with existing user data
-    var name by remember { mutableStateOf(currentProfile?.name ?: "") }
-    var email by remember { mutableStateOf(currentProfile?.email ?: "") }
-    var phone by remember { mutableStateOf(currentProfile?.phone ?: "") }
-
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Edit Profile") },
-                navigationIcon = {
-                    IconButton(onClick = { navigationActions.goBack() }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
-                    }
-                }
-            )
-        }
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-        ) {
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Profile Picture
-            Image(
-                painter = painterResource(id = R.drawable.empty_profile_img), // Replace with actual profile image later
-                contentDescription = "Profile Picture",
-                modifier = Modifier
-                    .size(100.dp)
-                    .clip(CircleShape)
-                    .border(2.dp, Color.Gray, CircleShape)
-                    .padding(bottom = 16.dp)
-            )
-            TextButton(onClick = { /* Handle change picture */ }) {
-                Text("Change Picture")
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Username Input
-            OutlinedTextField(
-                value = name,
-                onValueChange = { name = it },
-                label = { Text("Username") },
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Email Input
-            OutlinedTextField(
-                value = email,
-                onValueChange = { email = it },
-                label = { Text("Email Id") },
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Phone Input
-            OutlinedTextField(
-                value = phone,
-                onValueChange = { phone = it },
-                label = { Text("Phone Number") },
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Update Button
-            Button(
-                onClick = {
-                    currentProfile?.let { profile ->
-                        // Update the profile with the new values
-                        viewModel.updateUserProfile(
-                            UserProfile(
-                                uid = profile.uid, // Use the existing UID
-                                name = name,
-                                email = email,
-                                phone = phone
-                            )
-                        )
-                    }
-                    navigationActions.goBack()
-                },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Update")
-            }
-        }
-    }
-}
-*/
-
-@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun EditSeekerProfileScreen(
     viewModel: SeekerProfileViewModel,
-    navigationActions: NavigationActions
+    navigationActions: NavigationActions,
+    authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory)
 ) {
   // Collect the user profile from the StateFlow
+  val user by authViewModel.user.collectAsState()
   val userProfile by viewModel.seekerProfile.collectAsState()
+  user?.let { viewModel.getUserProfile(it.uid) }
+  // viewModel.getUserProfile("fRTusprXsOfd3bS7RD4z44xpLZh1")
 
-  // Assuming a single user profile (adjust as needed)
-  val currentProfile = userProfile.firstOrNull()
+  var fullName by remember { mutableStateOf("") }
+  var username by remember { mutableStateOf("") }
+  var email by remember { mutableStateOf("") }
+  var phone by remember { mutableStateOf("") }
+  var address by remember { mutableStateOf("") }
 
-  // Initialize fields with existing user data
-  var fullName by remember { mutableStateOf(currentProfile?.name ?: "") }
-  var username by remember { mutableStateOf(currentProfile?.username ?: "") }
-  var email by remember { mutableStateOf(currentProfile?.email ?: "") }
-  var phone by remember { mutableStateOf(currentProfile?.phone ?: "") }
-  var address by remember { mutableStateOf(currentProfile?.address ?: "") }
-
+  LaunchedEffect(userProfile) {
+    fullName = userProfile.name ?: ""
+    username = userProfile.username ?: ""
+    email = userProfile.email ?: ""
+    phone = userProfile.phone ?: ""
+    address = userProfile.address ?: ""
+  }
   Scaffold(
       topBar = {
         TopAppBar(
@@ -257,7 +76,7 @@ fun EditSeekerProfileScreen(
                 Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
               }
             })
-      }) {
+      }) { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
           Spacer(modifier = Modifier.height(16.dp))
 
@@ -281,7 +100,7 @@ fun EditSeekerProfileScreen(
               value = fullName,
               onValueChange = { fullName = it },
               label = { Text("Full Name") },
-              modifier = Modifier.fillMaxWidth())
+              modifier = Modifier.fillMaxWidth().testTag("profileName"))
 
           Spacer(modifier = Modifier.height(16.dp))
 
@@ -290,7 +109,7 @@ fun EditSeekerProfileScreen(
               value = username,
               onValueChange = { username = it },
               label = { Text("Username") },
-              modifier = Modifier.fillMaxWidth())
+              modifier = Modifier.fillMaxWidth().testTag("profileUsername"))
 
           Spacer(modifier = Modifier.height(16.dp))
 
@@ -299,7 +118,7 @@ fun EditSeekerProfileScreen(
               value = email,
               onValueChange = { email = it },
               label = { Text("Email") },
-              modifier = Modifier.fillMaxWidth())
+              modifier = Modifier.fillMaxWidth().testTag("profileEmail"))
 
           Spacer(modifier = Modifier.height(16.dp))
 
@@ -308,7 +127,7 @@ fun EditSeekerProfileScreen(
               value = phone,
               onValueChange = { phone = it },
               label = { Text("Phone Number") },
-              modifier = Modifier.fillMaxWidth())
+              modifier = Modifier.fillMaxWidth().testTag("profilePhone"))
 
           Spacer(modifier = Modifier.height(16.dp))
 
@@ -317,14 +136,14 @@ fun EditSeekerProfileScreen(
               value = address,
               onValueChange = { address = it },
               label = { Text("Address") },
-              modifier = Modifier.fillMaxWidth())
+              modifier = Modifier.fillMaxWidth().testTag("profileAddress"))
 
           Spacer(modifier = Modifier.height(16.dp))
 
           // Save Button
           Button(
               onClick = {
-                currentProfile?.let { profile ->
+                userProfile?.let { profile ->
                   // Update the profile with the new values
                   viewModel.updateUserProfile(
                       SeekerProfile(

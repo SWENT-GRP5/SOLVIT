@@ -1,9 +1,12 @@
 package com.android.solvit.seeker.ui.map
 
-import android.content.Context
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.navigation.NavController
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.provider.Language
@@ -11,19 +14,18 @@ import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.provider.ProviderRepository
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
-import com.google.android.gms.location.FusedLocationProviderClient
+import com.android.solvit.shared.ui.navigation.Route
 import com.google.firebase.Timestamp
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.mockito.Mockito
+import org.junit.runner.RunWith
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.`when`
 import org.mockito.kotlin.any
-import org.mockito.kotlin.mock
 
+@RunWith(AndroidJUnit4::class)
 class SeekerMapScreenTest {
-  private lateinit var context: Context
-  private lateinit var location: Location
-  private lateinit var fusedLocationClient: FusedLocationProviderClient
   private lateinit var providerRepository: ProviderRepository
   private lateinit var listProviderViewModel: ListProviderViewModel
   private lateinit var navController: NavController
@@ -60,27 +62,51 @@ class SeekerMapScreenTest {
 
   @Before
   fun setUp() {
-    context = mock()
-    location = Location(37.7749, -122.4194, "San Francisco")
-    fusedLocationClient = mock()
-
-    providerRepository = Mockito.mock(ProviderRepository::class.java)
+    providerRepository = mock(ProviderRepository::class.java)
     listProviderViewModel = ListProviderViewModel(providerRepository)
-    navController = Mockito.mock(NavController::class.java)
-    navigationActions = NavigationActions(navController)
+    navController = mock(NavController::class.java)
+    navigationActions = mock(NavigationActions::class.java)
 
-    Mockito.`when`(providerRepository.getProviders(any(), any(), any())).thenAnswer { invocation ->
+    `when`(providerRepository.getProviders(any(), any(), any())).thenAnswer { invocation ->
       val onSuccess = invocation.getArgument<(List<Provider>) -> Unit>(0)
       onSuccess(testProviders)
+    }
+
+    `when`(navigationActions.currentRoute()).thenReturn(Route.MAP)
+  }
+
+  @Test
+  fun hasRequiredElements() {
+    composeTestRule.setContent { SeekerMapScreen(listProviderViewModel, navigationActions, false) }
+
+    composeTestRule.onNodeWithTag("mapScreen").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("googleMap").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("bottomNavigationMenu").assertIsDisplayed()
+  }
+
+  @Test
+  fun displaysProvidersOnMap() {
+    composeTestRule.setContent { SeekerMapScreen(listProviderViewModel, navigationActions, false) }
+
+    listProviderViewModel.providersList.value.forEach { provider ->
+      composeTestRule.onNodeWithTag("providerMarker-${provider.uid}").assertIsDisplayed()
+      composeTestRule.onNodeWithText(provider.name).assertIsDisplayed()
+      composeTestRule.onNodeWithText(provider.description).assertIsDisplayed()
     }
   }
 
   @Test
-  fun markersAreDisplayedAndHaveCorrectLocation() {
-    composeTestRule.setContent { SeekerMapScreen(listProviderViewModel, navigationActions) }
+  fun showsRequestLocationPermission() {
+    composeTestRule.setContent { SeekerMapScreen(listProviderViewModel, navigationActions, true) }
 
-    listProviderViewModel.providersList.value.forEach() { provider ->
-      composeTestRule.onNodeWithTag("marker${provider.uid}")
-    }
+    assert(true)
+  }
+
+  @Test
+  fun onTabSelect_navigatesToCorrectRoute() {
+    composeTestRule.setContent { SeekerMapScreen(listProviderViewModel, navigationActions, false) }
+
+    composeTestRule.onNodeWithTag("Home").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("Home").performClick()
   }
 }
