@@ -61,14 +61,19 @@ import com.android.solvit.R
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.shared.model.provider.Language
 import com.android.solvit.shared.model.provider.Provider
+import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
 
 @Composable
-fun SpTopAppBar(navigationActions: NavigationActions) {
+fun SpTopAppBar(navigationActions: NavigationActions, selectedService: Services?) {
   Box(modifier = Modifier.fillMaxWidth().testTag("topAppBar")) {
     Image(
         modifier = Modifier.fillMaxWidth().height(200.dp),
-        painter = painterResource(id = R.drawable.plumbier), // TODO Link each service to an image
+        painter =
+            painterResource(
+                id =
+                    ServicesImages().serviceMap.get(selectedService)
+                        ?: R.drawable.error), // TODO Link each service to an image
         contentDescription = "image description",
         contentScale = ContentScale.FillBounds)
     Row(
@@ -586,26 +591,28 @@ fun SelectProviderScreen(
     navigationActions: NavigationActions
 ) {
   val providers by listProviderViewModel.providersList.collectAsState()
+  val selectedService by listProviderViewModel.selectedService.collectAsState()
   var displayFilters by remember { mutableStateOf(false) }
   val sheetState = rememberModalBottomSheetState()
   val scope = rememberCoroutineScope()
   Log.e("Select Provider Screen", "providers : $providers")
-  Scaffold(modifier = Modifier.fillMaxSize(), topBar = { SpTopAppBar(navigationActions) }) {
-      paddingValues ->
-    Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
-      SpFilterBar(display = { displayFilters = true }, listProviderViewModel)
-      Title("Popular")
-      DisplayPopularProviders(providers)
-      Title("See All")
-      ListProviders(providers)
-    }
-    if (displayFilters) {
-      ModalBottomSheet(
-          onDismissRequest = { displayFilters = false },
-          sheetState = sheetState,
-          containerColor = Color.White) {
-            FilterComposable(listProviderViewModel) { displayFilters = false }
-          }
-    }
-  }
+  Scaffold(
+      modifier = Modifier.fillMaxSize(),
+      topBar = { SpTopAppBar(navigationActions, selectedService) }) { paddingValues ->
+        Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
+          SpFilterBar(display = { displayFilters = true }, listProviderViewModel)
+          Title("Popular")
+          DisplayPopularProviders(providers)
+          Title("See All")
+          ListProviders(providers)
+        }
+        if (displayFilters) {
+          ModalBottomSheet(
+              onDismissRequest = { displayFilters = false },
+              sheetState = sheetState,
+              containerColor = Color.White) {
+                FilterComposable(listProviderViewModel) { displayFilters = false }
+              }
+        }
+      }
 }
