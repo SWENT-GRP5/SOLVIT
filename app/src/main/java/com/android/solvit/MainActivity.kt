@@ -19,6 +19,8 @@ import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.seeker.ui.map.SeekerMapScreen
 import com.android.solvit.seeker.ui.profile.EditSeekerProfileScreen
 import com.android.solvit.seeker.ui.profile.SeekerProfileScreen
+import com.android.solvit.seeker.ui.profile.SeekerRegistrationScreen
+import com.android.solvit.seeker.ui.provider.ProviderRegistrationScreen
 import com.android.solvit.seeker.ui.provider.SelectProviderScreen
 import com.android.solvit.seeker.ui.request.CreateRequestScreen
 import com.android.solvit.seeker.ui.request.EditRequestScreen
@@ -73,6 +75,12 @@ fun SolvItApp() {
       composable(Screen.EDIT_PROFILE) {
         EditSeekerProfileScreen(viewModel = viewModel, navigationActions)
       }
+    }
+    composable(Screen.PROVIDER_REGISTRATION_PROFILE) {
+      ProviderRegistrationScreen(viewModel = listProviderViewModel, navigationActions)
+    }
+    composable(Screen.SEEKER_REGISTRATION_PROFILE) {
+      SeekerRegistrationScreen(viewModel = viewModel, navigationActions)
     }
   }
 }
