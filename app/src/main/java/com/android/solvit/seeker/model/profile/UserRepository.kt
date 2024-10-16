@@ -21,9 +21,5 @@ interface UserRepository {
 
   fun addUserProfile(profile: SeekerProfile, onSuccess: () -> Unit, onFailure: (Exception) -> Unit)
 
-  fun getCurrentUserEmail(): String?
-
   fun deleteUserProfile(id: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit)
-
-  fun getCurrentUserPhoneNumber(): String?
 }

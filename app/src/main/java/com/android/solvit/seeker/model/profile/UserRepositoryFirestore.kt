@@ -94,14 +94,6 @@ class UserRepositoryFirestore(private val db: FirebaseFirestore) : UserRepositor
         db.collection(collectionPath).document(id).delete(), onSuccess, onFailure)
   }
 
-  override fun getCurrentUserEmail(): String? {
-    return auth.currentUser?.email
-  }
-
-  override fun getCurrentUserPhoneNumber(): String? {
-    return auth.currentUser?.phoneNumber
-  }
-
   private fun performFirestoreOperation(
       task: Task<Void>,
       onSuccess: () -> Unit,
