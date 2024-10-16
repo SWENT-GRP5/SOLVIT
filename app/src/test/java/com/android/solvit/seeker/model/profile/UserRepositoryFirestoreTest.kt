@@ -2,6 +2,7 @@ package com.android.solvit.seeker.model.profile
 
 import android.os.Looper
 import androidx.test.core.app.ApplicationProvider
+import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.FirebaseApp
 import com.google.firebase.firestore.CollectionReference
@@ -32,6 +33,7 @@ class UserRepositoryFirestoreTest {
   @Mock private lateinit var mockCollectionReference: CollectionReference
   @Mock private lateinit var mockDocumentSnapshot: DocumentSnapshot
   @Mock private lateinit var mockQuerySnapshot: QuerySnapshot
+  @Mock private lateinit var mockTaskFailure: Task<DocumentSnapshot>
 
   private lateinit var firebaseRepository: UserRepositoryFirestore
 
@@ -72,7 +74,7 @@ class UserRepositoryFirestoreTest {
 
     Mockito.`when`(mockDocumentSnapshot.exists()).thenReturn(true)
     // Mock the document snapshot to return data
-    Mockito.`when`(mockDocumentSnapshot.exists()).thenReturn(true)
+
     Mockito.`when`(mockDocumentSnapshot.id).thenReturn(testSeekerProfile.uid)
     Mockito.`when`(mockDocumentSnapshot.getString("name")).thenReturn(testSeekerProfile.name)
     Mockito.`when`(mockDocumentSnapshot.getString("username"))
@@ -92,10 +94,39 @@ class UserRepositoryFirestoreTest {
   }
 
   @Test
+  fun getUserProfileFail() {
+    // Mocking a failed task scenario
+    val mockException = Exception("Firestore error")
+
+    // Simulate failure by setting isSuccessful to false and providing an exception
+    Mockito.`when`(mockTaskFailure.isSuccessful).thenReturn(false)
+    Mockito.`when`(mockTaskFailure.exception).thenReturn(mockException)
+
+    Mockito.`when`(mockDocumentReference.get()).thenReturn(mockTaskFailure)
+
+    // Call the method and verify failure callback is invoked
+    firebaseRepository.getUserProfile(
+        uid = "12345",
+        onSuccess = { TestCase.fail("Success callback should not be called") },
+        onFailure = { e ->
+          assertEquals(
+              mockException, e) // Ensure the failure callback is called with the right exception
+        })
+  }
+
+  @Test
   fun updateUserProfileTest() {
     Mockito.`when`(mockDocumentReference.set(any())).thenReturn(Tasks.forResult(null))
     firebaseRepository.updateUserProfile(
         profile = testSeekerProfile, onSuccess = {}, onFailure = {})
+    Shadows.shadowOf(Looper.getMainLooper()).idle()
+    verify(mockDocumentReference).set(testSeekerProfile)
+  }
+
+  @Test
+  fun addUserProfileTest() {
+    Mockito.`when`(mockDocumentReference.set(any())).thenReturn(Tasks.forResult(null))
+    firebaseRepository.addUserProfile(profile = testSeekerProfile, onSuccess = {}, onFailure = {})
     Shadows.shadowOf(Looper.getMainLooper()).idle()
     verify(mockDocumentReference).set(testSeekerProfile)
   }

@@ -57,6 +57,12 @@ class SeekerProfileViewModelTest {
     verify(firebaseRepository).getUserProfile(any(), any(), any())
   }
 
+  @Test
+  fun addUserProfielCallsRepository() {
+    seekerProfileViewModel.addUserProfile(testProfile)
+    verify(firebaseRepository).addUserProfile(any(), any(), any())
+  }
+
   /*
   @Test
   fun updateUserProfileUpdatesLocalProfile() {
