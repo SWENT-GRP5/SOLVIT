@@ -23,7 +23,6 @@ import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
 import org.mockito.kotlin.any
-import org.mockito.kotlin.mock
 
 @RunWith(AndroidJUnit4::class)
 class SeekerMapScreenTest {
