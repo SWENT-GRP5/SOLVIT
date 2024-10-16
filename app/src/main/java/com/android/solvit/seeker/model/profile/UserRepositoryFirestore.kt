@@ -28,10 +28,34 @@ open class UserRepositoryFirestore(private val db: FirebaseFirestore) : UserRepo
   }
 
   override fun getUserProfile(
+      uid: String,
+      onSuccess: (SeekerProfile) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    Log.d("RepositoryFirestore", "getUsersProfile")
+    db.collection(collectionPath).document(uid).get().addOnCompleteListener { document ->
+      if (document.isSuccessful) {
+
+        val user = documentToUser(document.result)
+        if (user != null) {
+          onSuccess(user)
+        } else {
+          Log.e("RepositoryFirestore", "Error getting user")
+        }
+      } else {
+        document.exception?.let { e ->
+          Log.e("RepositoryFirestore", "Error getting documents", e)
+          onFailure(e)
+        }
+      }
+    }
+  }
+
+  override fun getUsersProfile(
       onSuccess: (List<SeekerProfile>) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    Log.d("RepositoryFirestore", "getUserProfile")
+    Log.d("RepositoryFirestore", "getUsersProfile")
     db.collection(collectionPath).get().addOnCompleteListener { task ->
       if (task.isSuccessful) {
         val user = task.result?.mapNotNull { document -> documentToUser(document) } ?: emptyList()
@@ -80,7 +104,7 @@ open class UserRepositoryFirestore(private val db: FirebaseFirestore) : UserRepo
     }
   }
 
-  private fun documentToUser(document: DocumentSnapshot): SeekerProfile? {
+  fun documentToUser(document: DocumentSnapshot): SeekerProfile? {
     return try {
       val uid = document.id
       val name = document.getString("name") ?: return null

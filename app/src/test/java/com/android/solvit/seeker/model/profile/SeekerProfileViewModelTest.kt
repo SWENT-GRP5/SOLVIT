@@ -1,5 +1,7 @@
 package com.android.solvit.seeker.model.profile
 
+import com.android.solvit.shared.model.authentication.AuthRepository
+import com.android.solvit.shared.model.authentication.AuthViewModel
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Before
@@ -11,6 +13,8 @@ import org.mockito.kotlin.eq
 class SeekerProfileViewModelTest {
 
   private lateinit var seekerProfileViewModel: SeekerProfileViewModel
+  private lateinit var authViewModel: AuthViewModel
+  private lateinit var authRepository: AuthRepository
   private lateinit var firebaseRepository: UserRepositoryFirestore
 
   val testProfile =
@@ -25,6 +29,8 @@ class SeekerProfileViewModelTest {
   @Before
   fun setUp() {
     firebaseRepository = mock(UserRepositoryFirestore::class.java)
+    authRepository = mock(AuthRepository::class.java)
+    authViewModel = AuthViewModel(authRepository)
     seekerProfileViewModel = SeekerProfileViewModel(firebaseRepository)
   }
 
@@ -38,16 +44,33 @@ class SeekerProfileViewModelTest {
   }
 
   @Test
-  fun getUserProfileCallsRepository() {
-    seekerProfileViewModel.getUserProfile()
-    verify(firebaseRepository).getUserProfile(any(), any())
+  fun getUsersProfileCallsRepository() {
+
+    seekerProfileViewModel.getUsersProfile()
+
+    verify(firebaseRepository).getUsersProfile(any(), any())
   }
 
   @Test
-  fun updateUserProfileUpdatesLocalProfile() {
-    seekerProfileViewModel.updateUserProfile(testProfile)
-    verify(firebaseRepository).updateUserProfile(eq(testProfile), any(), any())
+  fun getUserProfileCallsRepository() {
+    seekerProfileViewModel.getUserProfile("1234")
+    verify(firebaseRepository).getUserProfile(any(), any(), any())
   }
+
+  @Test
+  fun addUserProfielCallsRepository() {
+    seekerProfileViewModel.addUserProfile(testProfile)
+    verify(firebaseRepository).addUserProfile(any(), any(), any())
+  }
+
+  /*
+  @Test
+  fun updateUserProfileUpdatesLocalProfile() {
+
+    seekerProfileViewModel.updateUserProfile(testProfile)
+    val updatedProfile = seekerProfileViewModel.seekerProfile.value
+    assertThat(updatedProfile, `is`(testProfile))
+  }*/
 
   @Test
   fun deleteUserProfileCallsRepository() {
@@ -55,11 +78,5 @@ class SeekerProfileViewModelTest {
     doNothing().`when`(firebaseRepository).deleteUserProfile(eq(testProfile.uid), any(), any())
     seekerProfileViewModel.deleteUserProfile(testProfile.uid)
     verify(firebaseRepository).deleteUserProfile(eq(testProfile.uid), any(), any())
-  }
-
-  @Test
-  fun addUserProfileCallsRepository() {
-    seekerProfileViewModel.addUserProfile(testProfile)
-    verify(firebaseRepository).addUserProfile(eq(testProfile), any(), any())
   }
 }

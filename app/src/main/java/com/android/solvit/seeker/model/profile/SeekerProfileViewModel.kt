@@ -1,54 +1,35 @@
 package com.android.solvit.seeker.model.profile
 
 import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 
-class SeekerProfileViewModel(private val repository: UserRepositoryFirestore) : ViewModel() {
+class SeekerProfileViewModel(
+    private val repository: UserRepository,
+) : ViewModel() {
 
-  private val _seekerProfile = MutableStateFlow<List<SeekerProfile>>(emptyList())
+  // private val _userProfile = MutableStateFlow<List<UserProfile>>(emptyList())
+  // hardcode
+  private val _seekerProfile =
+      MutableStateFlow<SeekerProfile>(
+          SeekerProfile(
+              uid = "", // Hardcoded UID
+              name = "", // Hardcoded Name
+              username = "", // Hardcoded username
+              email = "", // Hardcoded Email
+              phone = "", // Hardcoded Phone Number
+              address = "" // Hardcoded Address
+              ))
+  val seekerProfile: StateFlow<SeekerProfile> = _seekerProfile
 
-  val seekerProfile: StateFlow<List<SeekerProfile>> = _seekerProfile.asStateFlow()
-
-  init {
-    repository.init { getUserProfile() }
-  }
-
-  fun getNewUid(): String {
-    return repository.getNewUid()
-  }
-
-  fun getUserProfile() {
-    repository.getUserProfile(
-        onSuccess = { _seekerProfile.value = it },
-        onFailure = { Log.e("get UserProfile", "failed to get UserProfile") })
-  }
-
-  fun addUserProfile(profile: SeekerProfile) {
-    repository.addUserProfile(
-        profile = profile,
-        onSuccess = { getUserProfile() },
-        onFailure = { Log.e("add User", "failed to add User") })
-  }
-
-  fun updateUserProfile(profile: SeekerProfile) {
-    repository.updateUserProfile(
-        profile = profile,
-        onSuccess = { getUserProfile() },
-        onFailure = { Log.e("update User", "failed to update User") })
-  }
-
-  fun deleteUserProfile(id: String) {
-    repository.deleteUserProfile(
-        id = id,
-        onSuccess = { getUserProfile() },
-        onFailure = { Log.e("delete User", "failed to delete User") })
-  }
+  private val _seekerProfileList = MutableStateFlow<List<SeekerProfile>>(emptyList())
+  val seekerProfileList: StateFlow<List<SeekerProfile>> = _seekerProfileList
 
   // create factory
   companion object {
@@ -56,8 +37,49 @@ class SeekerProfileViewModel(private val repository: UserRepositoryFirestore) : 
         object : ViewModelProvider.Factory {
           @Suppress("UNCHECKED_CAST")
           override fun <T : ViewModel> create(modelClass: Class<T>): T {
+
             return SeekerProfileViewModel(UserRepositoryFirestore(Firebase.firestore)) as T
           }
         }
+  }
+
+  private val _isLoading = MutableLiveData<Boolean>()
+  val isLoading: LiveData<Boolean>
+    get() = _isLoading
+
+  private val _error = MutableLiveData<String>()
+  val error: LiveData<String>
+    get() = _error
+
+  fun getNewUid(): String {
+    return repository.getNewUid()
+  }
+
+  init {
+    repository.init { getUsersProfile() }
+  }
+
+  fun getUserProfile(uid: String) {
+
+    repository.getUserProfile(
+        uid,
+        onSuccess = { _seekerProfile.value = it },
+        onFailure = { Log.e("SeekerProfileViewModel", "Failed to get user profile") })
+  }
+
+  fun getUsersProfile() {
+    repository.getUsersProfile(onSuccess = { _seekerProfileList.value = it }, onFailure = {})
+  }
+
+  fun addUserProfile(profile: SeekerProfile) {
+    repository.addUserProfile(profile, onSuccess = { getUsersProfile() }, onFailure = {})
+  }
+
+  fun updateUserProfile(profile: SeekerProfile) {
+    repository.updateUserProfile(profile, onSuccess = { getUsersProfile() }, onFailure = {})
+  }
+
+  fun deleteUserProfile(id: String) {
+    repository.deleteUserProfile(id = id, onSuccess = { getUsersProfile() }, onFailure = {})
   }
 }
