@@ -13,6 +13,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navigation
+import com.android.solvit.provider.ui.calendar.ProviderCalendarScreen
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.seeker.ui.map.SeekerMapScreen
@@ -66,6 +67,7 @@ fun SolvItApp() {
     composable(Route.ORDER) {
       EditRequestScreen(navigationActions)
     } // This line can be replace when the OrderScreen is implemented
+    composable(Screen.CALENDAR) { ProviderCalendarScreen(navigationActions = navigationActions) }
     navigation(startDestination = Screen.PROFILE, route = Route.PROFILE) {
       composable(Screen.PROFILE) { SeekerProfileScreen(viewModel = viewModel, navigationActions) }
       composable(Screen.EDIT_PROFILE) {
