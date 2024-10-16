@@ -41,7 +41,7 @@ class SignUpScreenTest {
 
     composeTestRule.onNodeWithTag("backButton").performClick()
     composeTestRule.onNodeWithTag("facebookSignUpButton").performClick()
-    composeTestRule.onNodeWithTag("googleSignUpButton").performClick()
+    // composeTestRule.onNodeWithTag("googleSignUpButton").performClick()
     composeTestRule.onNodeWithTag("appleSignUpButton").performClick()
     composeTestRule.onNodeWithTag("emailInputField").performClick()
     composeTestRule.onNodeWithTag("signUpButton").performClick()

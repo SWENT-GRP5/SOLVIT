@@ -1,6 +1,7 @@
 package com.android.solvit.seeker.ui.profile
 
 import android.annotation.SuppressLint
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -51,6 +52,8 @@ import com.android.solvit.seeker.model.profile.SeekerProfile
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
@@ -290,20 +293,28 @@ fun SeekerRegistrationScreen(
 
             Button(
                 onClick = {
-                  // Complete registration and navigate
-                  if (user != null) {
+                  val onSuccess: () -> Unit = {
                     val newUserProfile =
                         SeekerProfile(
-                            uid = user!!.uid,
+                            uid = Firebase.auth.currentUser!!.uid,
                             name = fullName,
                             phone = phone,
                             address = address,
                             email = email)
                     viewModel.addUserProfile(newUserProfile)
-                    authViewModel.setPassword(password)
+                    Log.e("SeekerRegistrationScreen", "User profile added")
                   }
-
-                  navigationActions.goBack() // Navigate after saving
+                  // Complete registration and navigate
+                  if (authViewModel.googleAccount.value == null) {
+                    authViewModel.setPassword(password)
+                    authViewModel.registerWithEmailAndPassword(
+                        onSuccess,
+                        {},
+                    )
+                  } else {
+                    authViewModel.registerWithGoogle(onSuccess, {})
+                  }
+                  // navigationActions.goBack() // Navigate after saving
                 },
                 modifier = Modifier.fillMaxWidth().testTag("exploreServicesButton"),
                 colors =
