@@ -272,7 +272,7 @@ fun SeekerProfileScreen(viewModel: SeekerProfileViewModel, navigationActions: Na
   val userProfile by viewModel.seekerProfile.collectAsState()
 
   // Display the profile information if it's available
-  userProfile.firstOrNull()?.let { profile ->
+  userProfile.let { profile ->
     Scaffold(
         topBar = {
           TopAppBar(
