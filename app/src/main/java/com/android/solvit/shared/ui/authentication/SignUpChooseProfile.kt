@@ -26,13 +26,17 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.solvit.R
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
 
 @Composable
-fun SignUpChooseProfile(navigationActions: NavigationActions, authViewModel: AuthViewModel) {
+fun SignUpChooseProfile(
+    navigationActions: NavigationActions,
+    authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory)
+) {
   Column(
       modifier = Modifier.fillMaxSize().background(Color(0xFFFFFFFF)),
       horizontalAlignment = Alignment.CenterHorizontally) {

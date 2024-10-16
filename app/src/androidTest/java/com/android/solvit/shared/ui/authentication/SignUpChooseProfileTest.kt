@@ -5,8 +5,6 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.android.solvit.shared.model.authentication.AuthRepository
-import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import org.junit.Rule
 import org.junit.Test
@@ -20,12 +18,10 @@ class SignUpChooseProfileTest {
   @get:Rule val composeTestRule = createComposeRule()
 
   private val mockNavigationActions = mock(NavigationActions::class.java)
-  private val mockAuthRepository = mock(AuthRepository::class.java)
-  private val authViewModel = AuthViewModel(mockAuthRepository)
 
   @Test
   fun signUpChooseProfile_displaysAllComponents() {
-    composeTestRule.setContent { SignUpChooseProfile(mockNavigationActions, authViewModel) }
+    composeTestRule.setContent { SignUpChooseProfile(mockNavigationActions) }
 
     composeTestRule.onNodeWithTag("backButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("roleIllustration").assertIsDisplayed()
@@ -37,7 +33,7 @@ class SignUpChooseProfileTest {
 
   @Test
   fun signUpChooseProfile_performClick() {
-    composeTestRule.setContent { SignUpChooseProfile(mockNavigationActions, authViewModel) }
+    composeTestRule.setContent { SignUpChooseProfile(mockNavigationActions) }
 
     composeTestRule.onNodeWithTag("backButton").performClick()
     composeTestRule.onNodeWithTag("customerButton").performClick()
