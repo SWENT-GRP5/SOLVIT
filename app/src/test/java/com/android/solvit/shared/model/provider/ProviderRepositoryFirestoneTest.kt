@@ -40,6 +40,8 @@ class ProviderRepositoryFirestoneTest {
           "test",
           Services.PLUMBER,
           "",
+          "",
+          "",
           Location(0.0, 0.0, "EPFL"),
           "",
           false,

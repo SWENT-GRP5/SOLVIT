@@ -60,11 +60,11 @@ fun EditSeekerProfileScreen(
   var address by remember { mutableStateOf("") }
 
   LaunchedEffect(userProfile) {
-    fullName = userProfile.name ?: ""
-    username = userProfile.username ?: ""
-    email = userProfile.email ?: ""
-    phone = userProfile.phone ?: ""
-    address = userProfile.address ?: ""
+    fullName = userProfile.name
+    username = userProfile.username
+    email = userProfile.email
+    phone = userProfile.phone
+    address = userProfile.address
   }
   Scaffold(
       topBar = {
