@@ -43,7 +43,7 @@ import com.android.solvit.shared.ui.navigation.NavigationActions
 
 @Composable
 fun EditSeekerProfileScreen(
-    viewModel: SeekerProfileViewModel,
+    viewModel: SeekerProfileViewModel = viewModel(factory = SeekerProfileViewModel.Factory),
     navigationActions: NavigationActions,
     authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory)
 ) {
@@ -51,7 +51,6 @@ fun EditSeekerProfileScreen(
   val user by authViewModel.user.collectAsState()
   val userProfile by viewModel.seekerProfile.collectAsState()
   user?.let { viewModel.getUserProfile(it.uid) }
-  // viewModel.getUserProfile("fRTusprXsOfd3bS7RD4z44xpLZh1")
 
   var fullName by remember { mutableStateOf("") }
   var username by remember { mutableStateOf("") }
@@ -143,11 +142,11 @@ fun EditSeekerProfileScreen(
           // Save Button
           Button(
               onClick = {
-                userProfile?.let { profile ->
+                userProfile.let { profile ->
                   // Update the profile with the new values
                   viewModel.updateUserProfile(
                       SeekerProfile(
-                          uid = profile.uid, // Use the existing UID
+                          uid = userProfile.uid, // Use the existing UID
                           name = fullName,
                           username = username,
                           email = email,
