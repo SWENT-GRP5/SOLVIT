@@ -1,5 +1,10 @@
 package com.android.solvit.shared.ui.authentication
 
+import android.content.Intent
+import androidx.activity.compose.ManagedActivityResultLauncher
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -15,12 +20,15 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -30,12 +38,24 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.android.solvit.R
+import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.android.solvit.shared.ui.navigation.Screen
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SignUpScreen(navigationActions: NavigationActions) {
+fun SignUpScreen(navigationActions: NavigationActions, authViewModel: AuthViewModel) {
   val email = remember { mutableStateOf("") }
+
+  val context = LocalContext.current
+  val launcher =
+      googleRegisterLauncher(
+          authViewModel, { navigationActions.navigateTo(Screen.SIGN_UP_CHOOSE_ROLE) }, {})
+  val token = stringResource(R.string.default_web_client_id)
 
   Column(
       modifier = Modifier.fillMaxWidth().background(Color(0xFFFFFFFF)).padding(horizontal = 16.dp),
@@ -73,7 +93,16 @@ fun SignUpScreen(navigationActions: NavigationActions) {
             "googleSignUpButton",
             Color.White,
             Color.Black,
-            Color.Gray) { /* Google sign up */}
+            Color.Gray) {
+              authViewModel.setRole("seeker")
+              val gso =
+                  GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                      .requestIdToken(token)
+                      .requestEmail()
+                      .build()
+              val googleSignInClient = GoogleSignIn.getClient(context, gso)
+              launcher.launch(googleSignInClient.signInIntent)
+            }
         VerticalSpacer(height = 10.dp)
         SocialSignUpButton(
             "Sign Up with Apple",
@@ -89,7 +118,12 @@ fun SignUpScreen(navigationActions: NavigationActions) {
             "Enter your email address", email.value, onValueChange = { email.value = it })
         VerticalSpacer(height = 50.dp)
 
-        SignUpButton()
+        SignUpButton {
+          if (email.value.isNotEmpty()) {
+            authViewModel.setEmail(email.value)
+            navigationActions.navigateTo(Screen.SIGN_UP_CHOOSE_ROLE)
+          }
+        }
         VerticalSpacer(height = 16.dp)
 
         AlreadyHaveAccountText()
@@ -132,7 +166,7 @@ fun CustomOutlinedTextField(label: String, value: String, onValueChange: (String
 }
 
 @Composable
-fun SignUpButton() {
+fun SignUpButton(onClick: () -> Unit) {
   Box(
       modifier =
           Modifier.fillMaxWidth()
@@ -142,7 +176,7 @@ fun SignUpButton() {
                       Brush.horizontalGradient(
                           colors = listOf(Color(0, 200, 81), Color(0, 153, 255))),
                   shape = RoundedCornerShape(8.dp))
-              .clickable { /* TODO: Sign up */}
+              .clickable { onClick() }
               .testTag("signUpButton"),
       contentAlignment = Alignment.Center) {
         Text("Sign up", color = Color.White, fontWeight = FontWeight.Bold)
@@ -197,4 +231,26 @@ fun SocialSignUpButton(
               Spacer(Modifier.size(25.dp))
             }
       }
+}
+
+@Composable
+fun googleRegisterLauncher(
+    authViewModel: AuthViewModel,
+    onSuccess: () -> Unit,
+    onFailure: () -> Unit
+): ManagedActivityResultLauncher<Intent, ActivityResult> {
+  val scope = rememberCoroutineScope()
+  return rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+      result ->
+    val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+    try {
+      val account = task.getResult(ApiException::class.java)!!
+      scope.launch {
+        authViewModel.setGoogleAccount(account)
+        onSuccess()
+      }
+    } catch (e: ApiException) {
+      onFailure()
+    }
+  }
 }
