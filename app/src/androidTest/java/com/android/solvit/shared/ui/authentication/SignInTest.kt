@@ -6,8 +6,6 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.android.solvit.shared.model.authentication.AuthRepository
-import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.firebase.Firebase
@@ -26,12 +24,10 @@ class SignInScreenTest {
   @get:Rule val composeTestRule = createComposeRule()
 
   private val mockNavigationActions = Mockito.mock(NavigationActions::class.java)
-  private val mockAuthRepository = Mockito.mock(AuthRepository::class.java)
-  private val authViewModel = AuthViewModel(mockAuthRepository)
 
   @Test
   fun testSignInScreen_displaysAllComponents() {
-    composeTestRule.setContent { SignInScreen(mockNavigationActions, authViewModel) }
+    composeTestRule.setContent { SignInScreen(mockNavigationActions) }
 
     // Test the display of UI components
     composeTestRule.onNodeWithTag("backButton").assertIsDisplayed()
@@ -48,7 +44,7 @@ class SignInScreenTest {
 
   @Test
   fun testSignInScreen_emailAndPasswordInput() {
-    composeTestRule.setContent { SignInScreen(mockNavigationActions, authViewModel) }
+    composeTestRule.setContent { SignInScreen(mockNavigationActions) }
 
     // Test email input
     composeTestRule.onNodeWithTag("emailInput").performTextInput("test@example.com")
@@ -57,7 +53,7 @@ class SignInScreenTest {
 
   @Test
   fun performClick() {
-    composeTestRule.setContent { SignInScreen(mockNavigationActions, authViewModel) }
+    composeTestRule.setContent { SignInScreen(mockNavigationActions) }
 
     // Test that the checkbox is clickable and can toggle between states
     composeTestRule.onNodeWithTag("rememberMeCheckbox").performClick()
