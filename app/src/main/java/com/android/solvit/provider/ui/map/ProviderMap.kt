@@ -48,14 +48,8 @@ fun ProviderMapScreen(
   val requestMarkers =
       requests.map { request ->
         val dueDate =
-            request.dueDate.let {
-              val calendar = GregorianCalendar()
-              calendar.time = request.dueDate.toDate()
-              return@let "${calendar.get(Calendar.DAY_OF_MONTH)}/${calendar.get(Calendar.MONTH) + 1}/${
-                  calendar.get(
-                      Calendar.YEAR
-                  )
-              }"
+            with(GregorianCalendar().apply { time = request.dueDate.toDate() }) {
+              "${get(Calendar.DAY_OF_MONTH)}/${get(Calendar.MONTH) + 1}/${get(Calendar.YEAR)}"
             }
         MarkerData(
             location =
