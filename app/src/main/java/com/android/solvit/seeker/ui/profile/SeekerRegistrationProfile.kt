@@ -31,6 +31,7 @@ import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -48,13 +49,15 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.solvit.R
 import com.android.solvit.seeker.model.profile.SeekerProfile
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
+import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun SeekerRegistrationScreen(
     viewModel: SeekerProfileViewModel = viewModel(factory = SeekerProfileViewModel.Factory),
-    navigationActions: NavigationActions
+    navigationActions: NavigationActions,
+    authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory)
 ) {
   var fullName by remember { mutableStateOf("") }
   // var username by remember { mutableStateOf("") }
@@ -63,6 +66,10 @@ fun SeekerRegistrationScreen(
   var password by remember { mutableStateOf("") }
   var confirmPassword by remember { mutableStateOf("") }
   var showPasswordMismatchMessage by remember { mutableStateOf(false) }
+  // represent the current authentified user
+  val user by authViewModel.user.collectAsState()
+  // represent the email of the current user
+  val email by authViewModel.email.collectAsState()
 
   // Step tracking: Role, Details, Preferences
   var currentStep by remember { mutableStateOf(1) }
@@ -284,13 +291,18 @@ fun SeekerRegistrationScreen(
             Button(
                 onClick = {
                   // Complete registration and navigate
-                  val newUserProfile =
-                      SeekerProfile(
-                          uid = viewModel.getNewUid(),
-                          name = fullName,
-                          phone = phone,
-                          address = address)
-                  viewModel.addUserProfile(newUserProfile)
+                  if (user != null) {
+                    val newUserProfile =
+                        SeekerProfile(
+                            uid = user!!.uid,
+                            name = fullName,
+                            phone = phone,
+                            address = address,
+                            email = email)
+                    viewModel.addUserProfile(newUserProfile)
+                    authViewModel.setPassword(password)
+                  }
+
                   navigationActions.goBack() // Navigate after saving
                 },
                 modifier = Modifier.fillMaxWidth().testTag("exploreServicesButton"),
