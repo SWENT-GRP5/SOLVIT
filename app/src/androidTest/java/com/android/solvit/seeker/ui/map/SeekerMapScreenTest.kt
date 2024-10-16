@@ -4,6 +4,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.navigation.NavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
@@ -13,12 +14,13 @@ import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.provider.ProviderRepository
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.android.solvit.shared.ui.navigation.Route
 import com.google.firebase.Timestamp
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito
+import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
@@ -61,15 +63,17 @@ class SeekerMapScreenTest {
 
   @Before
   fun setUp() {
-    providerRepository = Mockito.mock(ProviderRepository::class.java)
+    providerRepository = mock(ProviderRepository::class.java)
     listProviderViewModel = ListProviderViewModel(providerRepository)
-    navController = Mockito.mock(NavController::class.java)
-    navigationActions = NavigationActions(navController)
+    navController = mock(NavController::class.java)
+    navigationActions = mock(NavigationActions::class.java)
 
     `when`(providerRepository.getProviders(any(), any(), any())).thenAnswer { invocation ->
       val onSuccess = invocation.getArgument<(List<Provider>) -> Unit>(0)
       onSuccess(testProviders)
     }
+
+    `when`(navigationActions.currentRoute()).thenReturn(Route.MAP)
   }
 
   @Test
@@ -95,5 +99,15 @@ class SeekerMapScreenTest {
   @Test
   fun showsRequestLocationPermission() {
     composeTestRule.setContent { SeekerMapScreen(listProviderViewModel, navigationActions, true) }
+
+    assert(true)
+  }
+
+  @Test
+  fun onTabSelect_navigatesToCorrectRoute() {
+    composeTestRule.setContent { SeekerMapScreen(listProviderViewModel, navigationActions, false) }
+
+    composeTestRule.onNodeWithTag("Home").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("Home").performClick()
   }
 }

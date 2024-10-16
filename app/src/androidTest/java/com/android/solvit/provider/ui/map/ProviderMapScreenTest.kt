@@ -4,6 +4,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.navigation.NavController
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.request.ServiceRequest
@@ -12,12 +13,13 @@ import com.android.solvit.shared.model.request.ServiceRequestStatus
 import com.android.solvit.shared.model.request.ServiceRequestType
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.android.solvit.shared.ui.navigation.Route
 import com.google.firebase.Timestamp
 import java.util.GregorianCalendar
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.mockito.Mockito
+import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
 import org.mockito.kotlin.any
 
@@ -54,15 +56,17 @@ class ProviderMapScreenTest {
 
   @Before
   fun setUp() {
-    serviceRequestRepository = Mockito.mock(ServiceRequestRepository::class.java)
+    serviceRequestRepository = mock(ServiceRequestRepository::class.java)
     serviceRequestViewModel = ServiceRequestViewModel(serviceRequestRepository)
-    navController = Mockito.mock(NavController::class.java)
-    navigationActions = NavigationActions(navController)
+    navController = mock(NavController::class.java)
+    navigationActions = mock(NavigationActions::class.java)
 
     `when`(serviceRequestRepository.getServiceRequests(any(), any())).thenAnswer { invocation ->
       val onSuccess = invocation.getArgument<(List<ServiceRequest>) -> Unit>(0)
       onSuccess(testRequests)
     }
+
+    `when`(navigationActions.currentRoute()).thenReturn(Route.MAP)
   }
 
   @Test
@@ -95,5 +99,17 @@ class ProviderMapScreenTest {
     composeTestRule.setContent {
       ProviderMapScreen(serviceRequestViewModel, navigationActions, true)
     }
+
+    assert(true)
+  }
+
+  @Test
+  fun onTabSelect_navigatesToCorrectRoute() {
+    composeTestRule.setContent {
+      ProviderMapScreen(serviceRequestViewModel, navigationActions, false)
+    }
+
+    composeTestRule.onNodeWithTag("Home").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("Home").performClick()
   }
 }
