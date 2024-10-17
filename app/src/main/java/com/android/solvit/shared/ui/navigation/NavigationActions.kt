@@ -29,6 +29,7 @@ object Screen {
   const val SIGN_UP_CHOOSE_ROLE = "Choose Role Screen"
   const val SEEKER_REGISTRATION_PROFILE = "Seeker registration"
   const val PROVIDER_REGISTRATION_PROFILE = "Provider registration"
+  const val CALENDAR = "Calendar"
 }
 
 data class TopLevelDestination(val route: String, val icon: ImageVector, val textId: String)
