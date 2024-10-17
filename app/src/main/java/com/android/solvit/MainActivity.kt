@@ -14,6 +14,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navigation
+import com.android.solvit.provider.ui.calendar.ProviderCalendarScreen
 import com.android.solvit.provider.ui.map.ProviderMapScreen
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
@@ -64,14 +65,15 @@ fun SolvItApp() {
   val seekerProfileViewModel =
       viewModel<SeekerProfileViewModel>(factory = SeekerProfileViewModel.Factory)
 
-  if (user.value == null) {
+  ProviderUI(authViewModel, listProviderViewModel, seekerProfileViewModel)
+  /*if (user.value == null) {
     SharedUI(authViewModel, listProviderViewModel, seekerProfileViewModel)
   } else {
     when (user.value!!.role) {
       "seeker" -> SeekerUI(authViewModel, listProviderViewModel, seekerProfileViewModel)
       "provider" -> ProviderUI(authViewModel, listProviderViewModel, seekerProfileViewModel)
     }
-  }
+  }*/
 }
 
 @Composable
@@ -139,5 +141,6 @@ fun ProviderUI(
       ListRequestsFeedScreen(navigationActions = navigationActions)
     }
     composable(Route.MAP_OF_SEEKERS) { ProviderMapScreen(navigationActions = navigationActions) }
+    composable(Screen.CALENDAR) { ProviderCalendarScreen(navigationActions = navigationActions) }
   }
 }

@@ -212,7 +212,10 @@ fun SignInScreen(
               Row(verticalAlignment = Alignment.CenterVertically) {
                 Checkbox(
                     checked = isChecked,
-                    onCheckedChange = { isChecked = it },
+                    onCheckedChange = {
+                      isChecked = it
+                      Toast.makeText(context, "Not implemented yet", Toast.LENGTH_LONG).show()
+                    },
                     modifier = Modifier.size(24.dp),
                     colors =
                         CheckboxDefaults.colors(
@@ -224,7 +227,9 @@ fun SignInScreen(
 
               ClickableText(
                   text = AnnotatedString("Forgot password?"),
-                  onClick = { /* Forgot password logic */},
+                  onClick = {
+                    Toast.makeText(context, "Not implemented yet", Toast.LENGTH_LONG).show()
+                  },
                   style = TextStyle(color = Color.Gray, textDecoration = TextDecoration.Underline),
                   modifier = Modifier.testTag("forgotPasswordLink"))
             }
