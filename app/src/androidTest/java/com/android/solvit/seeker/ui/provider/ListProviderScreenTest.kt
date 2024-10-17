@@ -92,9 +92,11 @@ class ListProviderScreenTest {
               composeTestRule.onNodeWithTag("popularProviders").isDisplayed() &&
               composeTestRule.onAllNodesWithTag("Rating").fetchSemanticsNodes().isNotEmpty()
         })
+    composeTestRule.onNodeWithTag("serviceImage").assertIsDisplayed()
     composeTestRule.onNodeWithTag("popularProviders").assertIsDisplayed()
     composeTestRule.onNodeWithTag("providersList").assertIsDisplayed()
     composeTestRule.onAllNodesWithTag("Rating")[0].assertIsDisplayed()
+    composeTestRule.onAllNodesWithTag("filterIcon").fetchSemanticsNodes().isNotEmpty()
   }
 
   @Test
@@ -129,6 +131,7 @@ class ListProviderScreenTest {
           composeTestRule.onAllNodesWithTag("popularProviders").fetchSemanticsNodes().isNotEmpty()
         })
     assert(composeTestRule.onAllNodesWithTag("popularProviders").fetchSemanticsNodes().size == 1)
+    composeTestRule.onAllNodesWithTag("filterIcon")[0].performClick()
 
     // verify(providerRepository).filterProviders(any())
   }
