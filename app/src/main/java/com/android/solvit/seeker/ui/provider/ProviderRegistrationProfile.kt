@@ -1,7 +1,6 @@
 package com.android.solvit.seeker.ui.provider
 
 import android.annotation.SuppressLint
-import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -42,7 +41,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -66,21 +64,13 @@ fun ProviderRegistrationScreen(
   var companyName by remember { mutableStateOf("") }
   var phone by remember { mutableStateOf("") }
   var location by remember { mutableStateOf("") }
-  var password by remember { mutableStateOf("") }
-  var confirmPassword by remember { mutableStateOf("") }
   // represent the current authentified user
   val user by authViewModel.user.collectAsState()
 
   // Step tracking: Role, Details, Preferences
   var currentStep by remember { mutableStateOf(1) }
   val scrollState = rememberScrollState()
-  val isFormComplete =
-      fullName.isNotBlank() &&
-          phone.isNotBlank() &&
-          location.isNotBlank() &&
-          password.isNotBlank() &&
-          confirmPassword.isNotBlank()
-  // && password == confirmPassword
+  val isFormComplete = fullName.isNotBlank() && phone.isNotBlank() && location.isNotBlank()
 
   val context = LocalContext.current
 
@@ -179,44 +169,11 @@ fun ProviderRegistrationScreen(
                         unfocusedBorderColor = Color.Gray // Gray outline for unfocused state
                         ))
             Spacer(modifier = Modifier.height(16.dp))
-            // Password Field
-            OutlinedTextField(
-                value = password,
-                onValueChange = { password = it },
-                label = { Text("Password", color = Color.Black) },
-                placeholder = { Text("Enter your password") },
-                modifier = Modifier.fillMaxWidth().testTag("passwordInput"),
-                shape = RoundedCornerShape(12.dp),
-                visualTransformation = PasswordVisualTransformation(), // Hide password
-                colors =
-                    TextFieldDefaults.outlinedTextFieldColors(
-                        focusedBorderColor = Color(0xFF00C853), unfocusedBorderColor = Color.Gray))
-            Spacer(modifier = Modifier.height(16.dp))
-            // Confirm Password Field
-            OutlinedTextField(
-                value = confirmPassword,
-                onValueChange = { confirmPassword = it },
-                label = { Text("Confirm Password", color = Color.Black) },
-                placeholder = { Text("Re-enter your password") },
-                modifier = Modifier.fillMaxWidth().testTag("confirmPasswordInput"),
-                shape = RoundedCornerShape(12.dp),
-                visualTransformation = PasswordVisualTransformation(), // Hide password
-                colors =
-                    TextFieldDefaults.outlinedTextFieldColors(
-                        focusedBorderColor = Color(0xFF00C853), unfocusedBorderColor = Color.Gray))
-
-            Spacer(modifier = Modifier.height(16.dp))
 
             Button(
                 onClick = {
                   // Move to next step (Step 2: Preferences)
-                  if (password != confirmPassword) {
-                    // Show toast if passwords do not match
-                    Toast.makeText(context, "Passwords do not match!", Toast.LENGTH_SHORT).show()
-                  } else {
-                    // Move to next step (Step 2: Preferences)
-                    currentStep = 2
-                  }
+                  currentStep = 2
                 },
                 modifier =
                     Modifier.fillMaxWidth().height(60.dp).testTag("completeRegistrationButton"),
@@ -322,7 +279,6 @@ fun ProviderRegistrationScreen(
                   }
                   // Complete registration and navigate
                   if (authViewModel.googleAccount.value == null) {
-                    authViewModel.setPassword(password)
                     authViewModel.registerWithEmailAndPassword(onSuccess, {})
                   } else {
                     authViewModel.registerWithGoogle(onSuccess, {})
