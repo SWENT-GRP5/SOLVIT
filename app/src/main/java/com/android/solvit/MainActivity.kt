@@ -6,7 +6,6 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
@@ -15,6 +14,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navigation
+import com.android.solvit.provider.ui.map.ProviderMapScreen
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.seeker.ui.map.SeekerMapScreen
@@ -36,6 +36,7 @@ import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.navigation.Screen
 import com.android.solvit.shared.ui.theme.SampleAppTheme
 import com.android.solvit.ui.message.MessageScreen
+import com.android.solvit.ui.requests.ListRequestsFeedScreen
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 
@@ -130,5 +131,13 @@ fun ProviderUI(
     listProviderViewModel: ListProviderViewModel,
     seekerProfileViewModel: SeekerProfileViewModel
 ) {
-  Text("Provider UI")
+  val navController = rememberNavController()
+  val navigationActions = NavigationActions(navController)
+
+  NavHost(navController = navController, startDestination = Route.REQUESTS_FEED) {
+    composable(Route.REQUESTS_FEED) {
+      ListRequestsFeedScreen(navigationActions = navigationActions)
+    }
+    composable(Route.MAP_OF_SEEKERS) { ProviderMapScreen(navigationActions = navigationActions) }
+  }
 }

@@ -15,6 +15,7 @@ import com.android.solvit.shared.model.provider.ProviderRepository
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
+import com.android.solvit.shared.ui.navigation.TopLevelDestinations
 import com.google.firebase.Timestamp
 import org.junit.Before
 import org.junit.Rule
@@ -106,7 +107,7 @@ class SeekerMapScreenTest {
   fun onTabSelect_navigatesToCorrectRoute() {
     composeTestRule.setContent { SeekerMapScreen(listProviderViewModel, navigationActions, false) }
 
-    composeTestRule.onNodeWithTag("Home").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("Home").performClick()
+    composeTestRule.onNodeWithTag(TopLevelDestinations.SERVICES.textId).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(TopLevelDestinations.SERVICES.textId).performClick()
   }
 }

@@ -15,13 +15,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -81,15 +79,19 @@ fun RequestScreen(
       topBar = {
         TopAppBar(
             title = { Text(screenTitle, Modifier.testTag("screenTitle")) },
-            navigationIcon = {
+            // HJ : Comment this line as these screens have a bottom navigation menu with current
+            // version
+            /*navigationIcon = {
               IconButton(
-                  onClick = { navigationActions.goBack() },
+                  onClick = {
+                      //HJ : Comment this line as these screens have a bottom navigation menu
+                      navigationActions.goBack() },
                   modifier = Modifier.testTag("goBackButton")) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
                         contentDescription = "Back")
                   }
-            })
+            }*/ )
       },
       content = { paddingValues ->
         Column(

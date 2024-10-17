@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import com.android.solvit.R
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.navigation.Screen
 
 /*
@@ -279,7 +280,8 @@ fun SeekerProfileScreen(viewModel: SeekerProfileViewModel, navigationActions: Na
               backgroundColor = Color.Blue, // Set blue background
               title = { Text("Profile", color = Color.White) },
               navigationIcon = {
-                IconButton(onClick = { navigationActions.goBack() }) {
+                // When you go back from profile you diretctly return to home page
+                IconButton(onClick = { navigationActions.navigateTo(Route.SERVICES) }) {
                   Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
                 }
               },

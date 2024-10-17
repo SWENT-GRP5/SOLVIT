@@ -42,7 +42,8 @@ data class TopLevelDestination(val route: String, val icon: ImageVector, val tex
 object TopLevelDestinations {
 
   val SERVICES =
-      TopLevelDestination(route = Route.SERVICES, icon = Icons.Outlined.Home, textId = "Home")
+      TopLevelDestination(
+          route = Route.SERVICES, icon = Icons.Outlined.Home, textId = "Custommer Home")
   val REQUEST_FEED =
       TopLevelDestination(
           route = Route.REQUESTS_FEED, icon = Icons.Outlined.Home, textId = "Professional Home")
@@ -98,10 +99,7 @@ open class NavigationActions(
    */
   open fun navigateTo(destination: TopLevelDestination) {
     navController.navigate(destination.route) {
-      popUpTo(navController.graph.startDestinationId) {
-        saveState = true
-        inclusive = true
-      }
+      popUpTo(navController.graph.startDestinationId) { inclusive = true }
       launchSingleTop = true
       restoreState = true
     }
