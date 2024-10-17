@@ -2,7 +2,6 @@ package com.android.solvit.shared.ui.authentication
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -62,41 +61,38 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.solvit.R
+import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
-import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.navigation.Screen
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
-import com.google.firebase.Firebase
-import com.google.firebase.auth.AuthResult
-import com.google.firebase.auth.GoogleAuthProvider
-import com.google.firebase.auth.auth
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 
 @SuppressLint("InvalidColorHexValue")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SignInScreen(navigationActions: NavigationActions) {
+fun SignInScreen(
+    navigationActions: NavigationActions,
+    authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory)
+) {
   var email by remember { mutableStateOf("") }
   var password by remember { mutableStateOf("") }
   var passwordVisible by remember { mutableStateOf(false) }
   var isChecked by remember { mutableStateOf(false) }
 
   val context = LocalContext.current
+  val onSuccess: () -> Unit = {
+    Toast.makeText(context, "Login successful!", Toast.LENGTH_LONG).show()
+  }
+  val onFailure: () -> Unit = { Toast.makeText(context, "Login Failed!", Toast.LENGTH_LONG).show() }
+
   val launcher =
-      rememberFirebaseAuthLauncher(
-          onAuthComplete = { result ->
-            Log.d("SignInScreen", "User signed in: ${result.user?.displayName}")
-            Toast.makeText(context, "Login successful!", Toast.LENGTH_LONG).show()
-            navigationActions.navigateTo(Route.SERVICES)
-          },
-          onAuthError = {
-            Log.e("SignInScreen", "Failed to sign in: ${it.statusCode}")
-            Toast.makeText(context, "Login Failed!", Toast.LENGTH_LONG).show()
-          })
+      googleSignInLauncher(
+          authViewModel = authViewModel, onSuccess = onSuccess, onFailure = onFailure)
+
   val token = stringResource(R.string.default_web_client_id)
 
   val backgroundColor = Color(0xFFFFFFFF) // White background color
@@ -216,7 +212,10 @@ fun SignInScreen(navigationActions: NavigationActions) {
               Row(verticalAlignment = Alignment.CenterVertically) {
                 Checkbox(
                     checked = isChecked,
-                    onCheckedChange = { isChecked = it },
+                    onCheckedChange = {
+                      isChecked = it
+                      Toast.makeText(context, "Not implemented yet", Toast.LENGTH_LONG).show()
+                    },
                     modifier = Modifier.size(24.dp),
                     colors =
                         CheckboxDefaults.colors(
@@ -228,7 +227,9 @@ fun SignInScreen(navigationActions: NavigationActions) {
 
               ClickableText(
                   text = AnnotatedString("Forgot password?"),
-                  onClick = { /* Forgot password logic */},
+                  onClick = {
+                    Toast.makeText(context, "Not implemented yet", Toast.LENGTH_LONG).show()
+                  },
                   style = TextStyle(color = Color.Gray, textDecoration = TextDecoration.Underline),
                   modifier = Modifier.testTag("forgotPasswordLink"))
             }
@@ -237,7 +238,10 @@ fun SignInScreen(navigationActions: NavigationActions) {
 
         // Sign in button
         Button(
-            onClick = { // TODO("Sign in logic")
+            onClick = {
+              authViewModel.setEmail(email)
+              authViewModel.setPassword(password)
+              authViewModel.loginWithEmailAndPassword(onSuccess, onFailure)
             },
             colors =
                 ButtonDefaults.buttonColors(
@@ -324,9 +328,10 @@ fun GoogleSignInButton(onSignInClick: () -> Unit) {
 }
 
 @Composable
-fun rememberFirebaseAuthLauncher(
-    onAuthComplete: (AuthResult) -> Unit,
-    onAuthError: (ApiException) -> Unit
+fun googleSignInLauncher(
+    authViewModel: AuthViewModel,
+    onSuccess: () -> Unit,
+    onFailure: () -> Unit
 ): ManagedActivityResultLauncher<Intent, ActivityResult> {
   val scope = rememberCoroutineScope()
   return rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
@@ -334,13 +339,12 @@ fun rememberFirebaseAuthLauncher(
     val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
     try {
       val account = task.getResult(ApiException::class.java)!!
-      val credential = GoogleAuthProvider.getCredential(account.idToken!!, null)
       scope.launch {
-        val authResult = Firebase.auth.signInWithCredential(credential).await()
-        onAuthComplete(authResult)
+        authViewModel.setGoogleAccount(account)
+        authViewModel.signInWithGoogle(onSuccess, onFailure)
       }
     } catch (e: ApiException) {
-      onAuthError(e)
+      onFailure()
     }
   }
 }
