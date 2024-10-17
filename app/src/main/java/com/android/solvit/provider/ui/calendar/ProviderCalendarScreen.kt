@@ -1,8 +1,6 @@
 package com.android.solvit.provider.ui.calendar
 
 import android.content.Context
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -43,7 +41,6 @@ import java.time.temporal.TemporalAdjusters
 import java.util.Locale
 import kotlin.math.abs
 
-@RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProviderCalendarScreen(navigationActions: NavigationActions) {
@@ -644,7 +641,6 @@ enum class CalendarView {
   DAY
 }
 
-@RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 @Preview(showBackground = true)
 @Composable
 fun ProviderCalendarScreenPreview() {
@@ -675,7 +671,6 @@ enum class TimeSlotStatus {
   BUSY
 }
 
-@RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 fun generateInitialTimeSlots(): Map<LocalDate, List<TimeSlot>> {
   val startDate = LocalDate.of(2000, 1, 1) // A date far in the past
   val endDate = LocalDate.of(2100, 12, 31) // A date far in the future
@@ -693,7 +688,7 @@ fun generateInitialTimeSlots(): Map<LocalDate, List<TimeSlot>> {
                   "13:00-15:00",
                   "Busy",
                   "Sink Repair",
-                  "Sink dettached from wall and needs to be repaired"),
+                  "Sink detached from wall and needs to be repaired"),
               TimeSlot(
                   "15:00-17:00",
                   "Busy",
