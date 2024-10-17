@@ -155,9 +155,9 @@ fun SpFilterBar(display: () -> Unit, listProviderViewModel: ListProviderViewMode
                       text = filter,
                       fontSize = 16.sp,
                       lineHeight = 34.sp,
-                      fontFamily = FontFamily(Font(R.font.montserat)),
+                      fontFamily = FontFamily(Font(R.font.roboto)),
                       fontWeight = FontWeight(400),
-                      color = Color(0xFF5F6739))
+                      color = Color(0xFF0099FF))
                 }
           }
         }
