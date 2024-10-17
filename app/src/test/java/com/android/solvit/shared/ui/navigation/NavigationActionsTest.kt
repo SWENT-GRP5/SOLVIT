@@ -31,8 +31,8 @@ class NavigationActionsTest {
     Mockito.verify(navHostController)
         .navigate(eq(Route.SERVICES), any<NavOptionsBuilder.() -> Unit>())
 
-    navigationActions.navigateTo(Route.ORDER)
-    Mockito.verify(navHostController).navigate(Route.ORDER)
+    navigationActions.navigateTo(Route.REQUESTS_OVERVIEW)
+    Mockito.verify(navHostController).navigate(Route.REQUESTS_OVERVIEW)
   }
 
   @Test
