@@ -1,6 +1,7 @@
 package com.android.solvit.shared.ui.authentication
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -10,10 +11,12 @@ import androidx.test.espresso.intent.matcher.IntentMatchers
 import androidx.test.espresso.intent.rule.IntentsRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.android.solvit.shared.ui.navigation.Screen
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
+import org.mockito.kotlin.verify
 
 @RunWith(AndroidJUnit4::class)
 class SignUpScreenTest {
@@ -66,4 +69,25 @@ class SignUpScreenTest {
     // assert that an Intent resolving to Google Mobile Services has been sent (for sign-in)
     Intents.intended(IntentMatchers.toPackage("com.google.android.gms"))
   }
+
+  @Test
+  fun formCompleteEnablesButton() {
+    composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
+    composeTestRule.onNodeWithTag("emailInputField").performTextInput("test@test.com")
+    composeTestRule.onNodeWithTag("passwordInput").performTextInput("password")
+    composeTestRule.onNodeWithTag("confirmPasswordInput").performTextInput("password")
+
+    composeTestRule.onNodeWithTag("signUpButton").assertIsEnabled()
+  }
+
+    @Test
+    fun signUpButtonNavigatesToChooseRoleScreen() {
+        composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
+      composeTestRule.onNodeWithTag("emailInputField").performTextInput("test@test.com")
+      composeTestRule.onNodeWithTag("passwordInput").performTextInput("password")
+      composeTestRule.onNodeWithTag("confirmPasswordInput").performTextInput("password")
+
+      composeTestRule.onNodeWithTag("signUpButton").performClick()
+        verify(mockNavigationActions).navigateTo(Screen.SIGN_UP_CHOOSE_ROLE)
+    }
 }
