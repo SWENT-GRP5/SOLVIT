@@ -117,6 +117,7 @@ class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
         role.value,
         {
           _user.value = it
+          _email.value = it.email
           onSuccess()
         },
         {
