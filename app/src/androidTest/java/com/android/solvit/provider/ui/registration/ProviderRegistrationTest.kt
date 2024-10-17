@@ -1,4 +1,4 @@
-package com.android.solvit.seeker.ui.registration
+package com.android.solvit.provider.ui.registration
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
