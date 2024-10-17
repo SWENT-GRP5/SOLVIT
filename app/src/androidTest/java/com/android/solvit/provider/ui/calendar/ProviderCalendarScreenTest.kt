@@ -46,7 +46,8 @@ class ProviderCalendarScreenTest {
   @Test
   fun testDaySelection() {
     // composeTestRule.onNodeWithTag("monthView").assertIsDisplayed()
-    composeTestRule.onAllNodes(hasClickAction()).onFirst().performClick()
+    composeTestRule.onNodeWithTag("dayItem_2024-10-17").performClick()
+    composeTestRule.onNodeWithTag("bottomSheetDayView").assertIsDisplayed()
     // composeTestRule.onNodeWithTag("bottomSheet").assertIsDisplayed()
   }
 
@@ -54,14 +55,18 @@ class ProviderCalendarScreenTest {
   fun testTimeSlots() {
     composeTestRule.onNodeWithTag("toggleButton_day").performClick()
     // composeTestRule.onNodeWithTag("dayView").assertIsDisplayed()
-    composeTestRule.onAllNodesWithTag("timeSlotItem").assertCountEquals(4)
+    composeTestRule.onNodeWithTag("timeSlotItem_08:00-10:00").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("timeSlotItem_08:00-10:00").performClick()
+    composeTestRule.onNodeWithTag("timeSlotItem_10:00-12:00").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("timeSlotItem_13:00-15:00").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("timeSlotItem_15:00-17:00").assertIsDisplayed()
   }
 
   @Test
   fun testDatePicker() {
     // composeTestRule.onNodeWithTag("monthView").assertIsDisplayed()
     // Assuming there's a way to trigger the date picker, e.g., by clicking on the month-year text
-    composeTestRule.onNodeWithTag("monthYearText").performClick()
-    // composeTestRule.onNodeWithTag("datePickerDialog").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("monthYearHeader").performClick()
+    composeTestRule.onNodeWithTag("datePickerDialog").assertIsDisplayed()
   }
 }
