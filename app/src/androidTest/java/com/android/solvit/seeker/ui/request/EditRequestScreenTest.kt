@@ -70,14 +70,15 @@ class EditRequestScreenTest {
     composeTestRule.onNodeWithTag("screenTitle").assertTextEquals("Edit your request")
     composeTestRule.onNodeWithTag("requestSubmit").assertIsDisplayed()
     composeTestRule.onNodeWithTag("requestSubmit").assertTextEquals("Save Edits")
-    composeTestRule.onNodeWithTag("deleteRequestButton").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("deleteRequestButton").assertTextEquals("Delete")
 
     composeTestRule.onNodeWithTag("inputRequestTitle").assertIsDisplayed()
     composeTestRule.onNodeWithTag("inputRequestDescription").assertIsDisplayed()
     composeTestRule.onNodeWithTag("inputRequestAddress").assertIsDisplayed()
     composeTestRule.onNodeWithTag("inputRequestDate").assertIsDisplayed()
     composeTestRule.onNodeWithTag("imagePickerButton").assertIsDisplayed()
+
+    composeTestRule.onNodeWithTag("deleteRequestButton").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("deleteRequestButton").assertTextEquals("Delete")
     composeTestRule.onNodeWithTag("bottomNavigationMenu").assertIsDisplayed()
   }
 

@@ -66,6 +66,7 @@ fun SolvItApp() {
       viewModel<SeekerProfileViewModel>(factory = SeekerProfileViewModel.Factory)
 
   ProviderUI(authViewModel, listProviderViewModel, seekerProfileViewModel)
+  // SeekerUI(authViewModel, listProviderViewModel, seekerProfileViewModel)
   /*if (user.value == null) {
     SharedUI(authViewModel, listProviderViewModel, seekerProfileViewModel)
   } else {

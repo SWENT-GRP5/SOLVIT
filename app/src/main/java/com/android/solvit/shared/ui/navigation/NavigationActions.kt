@@ -78,7 +78,6 @@ val LIST_TOP_LEVEL_DESTINATION_CUSTOMMER =
     listOf(
         TopLevelDestinations.SERVICES,
         TopLevelDestinations.MAP_OF_PROVIDERS,
-        TopLevelDestinations.CREATE_REQUEST,
         TopLevelDestinations.EDIT_REQUEST,
         TopLevelDestinations.PROFILE)
 

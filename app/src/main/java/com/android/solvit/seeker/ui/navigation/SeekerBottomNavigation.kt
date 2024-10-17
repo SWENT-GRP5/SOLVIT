@@ -28,7 +28,7 @@ import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION
+import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_CUSTOMMER
 import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.navigation.TopLevelDestination
 import com.android.solvit.shared.ui.navigation.TopLevelDestinations
@@ -86,23 +86,24 @@ fun SeekerBottomNavigationMenu(
                     modifier = Modifier.testTag(tab.textId))
               }
             }
-
-        FloatingActionButton(
-            onClick = { onTabSelect(TopLevelDestinations.CREATE_REQUEST) },
-            modifier =
-                Modifier.size(70.dp)
-                    .offset(y = (-25).dp)
-                    .offset(x = (142).dp)
-                    .align(Alignment.TopCenter)
-                    .testTag(TopLevelDestinations.CREATE_REQUEST.toString()),
-            shape = CircleShape,
-            containerColor = Color(0xFF0099FF)) {
-              Icon(
-                  Icons.Outlined.Add,
-                  contentDescription = "Add",
-                  tint = Color.White,
-                  modifier = Modifier.size(30.dp))
-            }
+        if (tabList == LIST_TOP_LEVEL_DESTINATION_CUSTOMMER) {
+          FloatingActionButton(
+              onClick = { onTabSelect(TopLevelDestinations.CREATE_REQUEST) },
+              modifier =
+                  Modifier.size(70.dp)
+                      .offset(y = (-25).dp)
+                      .offset(x = (142).dp)
+                      .align(Alignment.TopCenter)
+                      .testTag(TopLevelDestinations.CREATE_REQUEST.toString()),
+              shape = CircleShape,
+              containerColor = Color(0xFF0099FF)) {
+                Icon(
+                    Icons.Outlined.Add,
+                    contentDescription = "Add",
+                    tint = Color.White,
+                    modifier = Modifier.size(30.dp))
+              }
+        }
       }
 }
 
@@ -110,7 +111,7 @@ fun SeekerBottomNavigationMenu(
 @Composable
 fun PreviewSeekerBottomNavigationMenu() {
   // Use the actual list of top-level destinations
-  val tabList = LIST_TOP_LEVEL_DESTINATION
+  val tabList = LIST_TOP_LEVEL_DESTINATION_CUSTOMMER
 
   // Preview with "Home" as the selected item
   SeekerBottomNavigationMenu(
