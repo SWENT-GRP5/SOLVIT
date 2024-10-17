@@ -80,14 +80,14 @@ class SignUpScreenTest {
     composeTestRule.onNodeWithTag("signUpButton").assertIsEnabled()
   }
 
-    @Test
-    fun signUpButtonNavigatesToChooseRoleScreen() {
-        composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
-      composeTestRule.onNodeWithTag("emailInputField").performTextInput("test@test.com")
-      composeTestRule.onNodeWithTag("passwordInput").performTextInput("password")
-      composeTestRule.onNodeWithTag("confirmPasswordInput").performTextInput("password")
+  @Test
+  fun signUpButtonNavigatesToChooseRoleScreen() {
+    composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
+    composeTestRule.onNodeWithTag("emailInputField").performTextInput("test@test.com")
+    composeTestRule.onNodeWithTag("passwordInput").performTextInput("password")
+    composeTestRule.onNodeWithTag("confirmPasswordInput").performTextInput("password")
 
-      composeTestRule.onNodeWithTag("signUpButton").performClick()
-        verify(mockNavigationActions).navigateTo(Screen.SIGN_UP_CHOOSE_ROLE)
-    }
+    composeTestRule.onNodeWithTag("signUpButton").performClick()
+    verify(mockNavigationActions).navigateTo(Screen.SIGN_UP_CHOOSE_ROLE)
+  }
 }
