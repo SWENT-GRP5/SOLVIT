@@ -73,6 +73,7 @@ class SignUpScreenTest {
   @Test
   fun formCompleteEnablesButton() {
     composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
+    composeTestRule.waitForIdle()
     composeTestRule.onNodeWithTag("emailInputField").performTextInput("test@test.com")
     composeTestRule.onNodeWithTag("passwordInput").performTextInput("password")
     composeTestRule.onNodeWithTag("confirmPasswordInput").performTextInput("password")
