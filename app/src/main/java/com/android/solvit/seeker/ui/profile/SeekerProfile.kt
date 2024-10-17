@@ -43,118 +43,116 @@ import androidx.compose.ui.unit.dp
 import com.android.solvit.R
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
-import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.navigation.Screen
-
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun SeekerProfileScreen(viewModel: SeekerProfileViewModel, navigationActions: NavigationActions) {
-    // Collect the user profile from the StateFlow
-    val userProfile by viewModel.seekerProfile.collectAsState()
+  // Collect the user profile from the StateFlow
+  val userProfile by viewModel.seekerProfile.collectAsState()
 
-    // Display the profile information if it's available
-    userProfile.let { profile ->
-        Scaffold(
-            modifier = Modifier.testTag("profileScreen"),
-            topBar = {
-                TopAppBar(
-                    backgroundColor = Color.Blue, // Set blue background
-                    title = { Text("Profile", color = Color.White) },
-                    navigationIcon = {
-                        IconButton(onClick = { navigationActions.goBack() }) {
-                            Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
-                        }
-                    },
-                    actions = {
-                        IconButton(onClick = { /* Handle notification click */}) {
-                            Icon(
-                                Icons.Default.Notifications,
-                                contentDescription = "Notifications",
-                                tint = Color.White)
-                        }
-                    })
-            }) {
-            Column(
-                modifier = Modifier.fillMaxSize().padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally) {
+  // Display the profile information if it's available
+  userProfile.let { profile ->
+    Scaffold(
+        modifier = Modifier.testTag("profileScreen"),
+        topBar = {
+          TopAppBar(
+              backgroundColor = Color.Blue, // Set blue background
+              title = { Text("Profile", color = Color.White) },
+              navigationIcon = {
+                IconButton(onClick = { navigationActions.goBack() }) {
+                  Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
+                }
+              },
+              actions = {
+                IconButton(onClick = { /* Handle notification click */}) {
+                  Icon(
+                      Icons.Default.Notifications,
+                      contentDescription = "Notifications",
+                      tint = Color.White)
+                }
+              })
+        }) {
+          Column(
+              modifier = Modifier.fillMaxSize().padding(16.dp),
+              horizontalAlignment = Alignment.CenterHorizontally) {
                 // Profile Picture
                 Image(
                     painter =
-                    painterResource(
-                        id =
-                        R.drawable
-                            .empty_profile_img), // Replace with actual profile image later
+                        painterResource(
+                            id =
+                                R.drawable
+                                    .empty_profile_img), // Replace with actual profile image later
                     contentDescription = "Profile Picture",
                     modifier =
-                    Modifier.size(100.dp)
-                        .clip(CircleShape)
-                        .border(2.dp, Color.Gray, CircleShape)
-                        .padding(bottom = 16.dp)
-                        .testTag("profilePicture"))
+                        Modifier.size(100.dp)
+                            .clip(CircleShape)
+                            .border(2.dp, Color.Gray, CircleShape)
+                            .padding(bottom = 16.dp)
+                            .testTag("profilePicture"))
 
                 // Edit Profile Button
                 Button(
                     onClick = { navigationActions.navigateTo(Screen.EDIT_PROFILE) },
                     modifier =
-                    Modifier.align(Alignment.CenterHorizontally).testTag("editProfileButton"),
+                        Modifier.align(Alignment.CenterHorizontally).testTag("editProfileButton"),
                     colors = ButtonDefaults.buttonColors(backgroundColor = Color.DarkGray)) {
-                    Text("Edit Profile", color = Color.White)
-                }
+                      Text("Edit Profile", color = Color.White)
+                    }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // Sections
                 LazyColumn {
-                    item {
-                        SectionTitle("Headline", Modifier.testTag("sectionHeadline"))
-                        ProfileOptionItem("Popular", Modifier.testTag("optionPopular"))
-                    }
-                    item {
-                        SectionTitle("Content")
-                        ProfileOptionItem("Favourite", Modifier.testTag("optionFavourite"))
-                        ProfileOptionItem(
-                            "Billing", Modifier.testTag("optionBilling")) // Billing Section Added
-                    }
-                    item {
-                        SectionTitle("Preferences")
-                        ProfileOptionItem("Language", Modifier.testTag("optionLanguage"))
-                        ProfileOptionItem("Darkmode", Modifier.testTag("optionDarkmode"))
-                    }
+                  item {
+                    SectionTitle("Headline", Modifier.testTag("sectionHeadline"))
+                    ProfileOptionItem("Popular", Modifier.testTag("optionPopular"))
+                  }
+                  item {
+                    SectionTitle("Content")
+                    ProfileOptionItem("Favourite", Modifier.testTag("optionFavourite"))
+                    ProfileOptionItem(
+                        "Billing", Modifier.testTag("optionBilling")) // Billing Section Added
+                  }
+                  item {
+                    SectionTitle("Preferences")
+                    ProfileOptionItem("Language", Modifier.testTag("optionLanguage"))
+                    ProfileOptionItem("Darkmode", Modifier.testTag("optionDarkmode"))
+                  }
                 }
-            }
+              }
         }
-    }
-        ?: run {
-            // Fallback when no profile data is available
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(text = "No profile data available")
-            }
+  }
+      ?: run {
+        // Fallback when no profile data is available
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+          Text(text = "No profile data available")
         }
+      }
 }
 
 @Composable
 fun SectionTitle(title: String, modifier: Modifier = Modifier) {
-    // Use Box to wrap the Text and apply a background color to the section title
-    Box(
-        modifier =
-        modifier
-            .fillMaxWidth()
-            .background(Color(0xFFF6F6F6)) // Set background color
-            .padding(horizontal = 16.dp, vertical = 8.dp)) {
+  // Use Box to wrap the Text and apply a background color to the section title
+  Box(
+      modifier =
+          modifier
+              .fillMaxWidth()
+              .background(Color(0xFFF6F6F6)) // Set background color
+              .padding(horizontal = 16.dp, vertical = 8.dp)) {
         Text(
             text = title,
             style = MaterialTheme.typography.subtitle1.copy(color = Color.Black), // Set text color
             fontWeight = FontWeight.Bold)
-    }
+      }
 }
 
 @Composable
 fun ProfileOptionItem(optionName: String, modifier: Modifier, onClick: () -> Unit = {}) {
-    Row(
-        modifier = modifier.fillMaxWidth().clickable { onClick() }.padding(vertical = 12.dp),
-        horizontalArrangement = Arrangement.SpaceBetween) {
+  Row(
+      modifier = modifier.fillMaxWidth().clickable { onClick() }.padding(vertical = 12.dp),
+      horizontalArrangement = Arrangement.SpaceBetween) {
         Text(optionName)
         Icon(Icons.Default.ArrowForward, contentDescription = null)
-    }
+      }
 }
