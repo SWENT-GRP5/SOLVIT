@@ -51,6 +51,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -82,10 +83,10 @@ fun SignUpScreen(
   val token = stringResource(R.string.default_web_client_id)
 
   val isFormComplete =
-      email.value.isNotBlank() &&
-          password.value.isNotBlank() &&
-          confirmPassword.value.isNotBlank() &&
-          password.value == confirmPassword.value
+      email.value.isNotBlank() && password.value.isNotBlank() && confirmPassword.value.isNotBlank()
+
+  val passwordLengthComplete = password.value.length >= 6
+  val samePassword = password.value == confirmPassword.value
 
   Column(
       modifier = Modifier.fillMaxWidth().background(Color(0xFFFFFFFF)).padding(horizontal = 16.dp),
@@ -108,7 +109,7 @@ fun SignUpScreen(
             modifier = Modifier.size(250.dp).testTag("signUpIllustration"))
 
         ScreenTitle("Sign up", "signUpTitle")
-        VerticalSpacer(height = 50.dp)
+        VerticalSpacer(height = 20.dp)
 
         // Social Sign Up Buttons
         VerticalSpacer(height = 10.dp)
@@ -160,7 +161,14 @@ fun SignUpScreen(
             testTag = "confirmPasswordInput",
             icon = Icons.Filled.Lock)
 
-        VerticalSpacer(height = 30.dp)
+        Text(
+            text = "Password must be at least 6 characters",
+            color = Color.Gray,
+            fontSize = 12.sp,
+            textAlign = TextAlign.Start,
+            modifier = Modifier.padding(top = 4.dp).fillMaxWidth())
+
+        VerticalSpacer(height = 20.dp)
 
         SignUpButton(
             {
@@ -168,7 +176,9 @@ fun SignUpScreen(
               authViewModel.setPassword(password.value)
               navigationActions.navigateTo(Screen.SIGN_UP_CHOOSE_ROLE)
             },
-            isFormComplete)
+            isFormComplete,
+            passwordLengthComplete,
+            samePassword)
 
         VerticalSpacer(height = 16.dp)
 
@@ -243,22 +253,37 @@ fun PasswordTextField(
 }
 
 @Composable
-fun SignUpButton(onClick: () -> Unit, isComplete: Boolean = false) {
+fun SignUpButton(
+    onClick: () -> Unit,
+    isComplete: Boolean = false,
+    passwordLengthComplete: Boolean = false,
+    samePassword: Boolean = false
+) {
   val context = LocalContext.current
 
   Button(
       onClick = {
-        if (isComplete) {
+        if (isComplete && passwordLengthComplete && samePassword) {
           onClick()
-        } else {
+        }
+        if (!isComplete) {
           Toast.makeText(context, "Form is not complete", Toast.LENGTH_SHORT).show()
+        } else if (!samePassword) {
+          Toast.makeText(
+                  context, "Password and Confirm Password is not the same", Toast.LENGTH_SHORT)
+              .show()
+        } else {
+          Toast.makeText(context, "Password must be at least 6 characters", Toast.LENGTH_SHORT)
+              .show()
         }
       },
       modifier = Modifier.fillMaxWidth().height(60.dp).testTag("signUpButton"),
       shape = RoundedCornerShape(12.dp),
       colors =
           ButtonDefaults.buttonColors(
-              containerColor = if (isComplete) Color(0xFF5AC561) else Color.Gray)) {
+              containerColor =
+                  if (isComplete && passwordLengthComplete && samePassword) Color(0xFF5AC561)
+                  else Color.Gray)) {
         Text("Sign Up", color = Color.White)
       }
 }
