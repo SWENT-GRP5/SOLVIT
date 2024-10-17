@@ -65,10 +65,10 @@ class EditSeekerProfileTest {
     assertEquals(testSeekerProfile, seekerProfileViewModel.seekerProfile.value)
     Thread.sleep(10000)
 
-    composeTestRule.onNodeWithTag("profileName").assertTextContains(testSeekerProfile.name)
-    composeTestRule.onNodeWithTag("profileUsername").assertTextContains(testSeekerProfile.username)
-    composeTestRule.onNodeWithTag("profileEmail").assertTextContains(testSeekerProfile.email)
-    composeTestRule.onNodeWithTag("profilePhone").assertTextContains(testSeekerProfile.phone)
-    composeTestRule.onNodeWithTag("profileAddress").assertTextContains(testSeekerProfile.address)
+    composeTestRule.onNodeWithTag("fullNameInput").assertTextContains(testSeekerProfile.name)
+    composeTestRule.onNodeWithTag("usernameInput").assertTextContains(testSeekerProfile.username)
+    composeTestRule.onNodeWithTag("emailInput").assertTextContains(testSeekerProfile.email)
+    composeTestRule.onNodeWithTag("phoneInput").assertTextContains(testSeekerProfile.phone)
+    composeTestRule.onNodeWithTag("addressInput").assertTextContains(testSeekerProfile.address)
   }
 }
