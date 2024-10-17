@@ -14,7 +14,7 @@ import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.ui.map.MapScreen
 import com.android.solvit.shared.ui.map.MarkerData
 import com.android.solvit.shared.ui.map.RequestLocationPermission
-import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION
+import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_PROVIDER
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
@@ -66,7 +66,7 @@ fun ProviderMapScreen(
       bottomBar = {
         SeekerBottomNavigationMenu(
             onTabSelect = { route -> navigationActions.navigateTo(route) },
-            tabList = LIST_TOP_LEVEL_DESTINATION,
+            tabList = LIST_TOP_LEVEL_DESTINATION_PROVIDER,
             selectedItem = navigationActions.currentRoute())
       })
 }
