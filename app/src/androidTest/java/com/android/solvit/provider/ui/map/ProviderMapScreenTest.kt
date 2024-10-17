@@ -12,6 +12,7 @@ import com.android.solvit.shared.model.request.ServiceRequestRepository
 import com.android.solvit.shared.model.request.ServiceRequestStatus
 import com.android.solvit.shared.model.request.ServiceRequestType
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
+import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_PROVIDER
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
 import com.google.firebase.Timestamp
@@ -109,7 +110,9 @@ class ProviderMapScreenTest {
       ProviderMapScreen(serviceRequestViewModel, navigationActions, false)
     }
 
-    composeTestRule.onNodeWithTag("Home").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("Home").performClick()
+    composeTestRule
+        .onNodeWithTag(LIST_TOP_LEVEL_DESTINATION_PROVIDER.get(0).textId)
+        .assertIsDisplayed()
+    composeTestRule.onNodeWithTag(LIST_TOP_LEVEL_DESTINATION_PROVIDER.get(0).textId).performClick()
   }
 }

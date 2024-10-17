@@ -62,9 +62,12 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.android.solvit.R
+import com.android.solvit.seeker.ui.navigation.SeekerBottomNavigationMenu
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.service.Services
+import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_PROVIDER
+import com.android.solvit.shared.ui.navigation.NavigationActions
 
 // Composable function representing the top bar with a menu, slogan, and notifications icon
 @Composable
@@ -447,7 +450,8 @@ fun FilterChip(label: String, isSelected: Boolean, onSelected: (Boolean) -> Unit
 @Composable
 fun ListRequestsFeedScreen(
     serviceRequestViewModel: ServiceRequestViewModel =
-        viewModel(factory = ServiceRequestViewModel.Factory)
+        viewModel(factory = ServiceRequestViewModel.Factory),
+    navigationActions: NavigationActions
 ) {
   val requests by serviceRequestViewModel.requests.collectAsState()
   val selectedFilters = remember { mutableStateOf(setOf<String>()) }
@@ -457,6 +461,12 @@ fun ListRequestsFeedScreen(
   Log.e("ListRequestsFeed", "${selectedFilters.value}")
   Scaffold(
       modifier = Modifier.fillMaxSize().testTag("ListRequestsScreen"),
+      bottomBar = {
+        SeekerBottomNavigationMenu(
+            onTabSelect = { route -> navigationActions.navigateTo(route) },
+            tabList = LIST_TOP_LEVEL_DESTINATION_PROVIDER,
+            selectedItem = navigationActions.currentRoute())
+      },
       topBar = { RequestsTopBar() },
       content = { paddingValues ->
         Column(
