@@ -1,7 +1,6 @@
 package com.android.solvit.seeker.ui.profile
 
 import android.annotation.SuppressLint
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -49,8 +48,6 @@ import com.android.solvit.seeker.model.profile.SeekerProfile
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
-import com.google.firebase.Firebase
-import com.google.firebase.auth.auth
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
@@ -263,26 +260,17 @@ fun SeekerRegistrationScreen(
 
             Button(
                 onClick = {
-                  val onSuccess: () -> Unit = {
-                    val newUserProfile =
-                        SeekerProfile(
-                            uid = Firebase.auth.currentUser!!.uid,
-                            name = fullName,
-                            phone = phone,
-                            address = address,
-                            email = email)
-                    viewModel.addUserProfile(newUserProfile)
-                    Log.e("SeekerRegistrationScreen", "User profile added")
-                  }
                   // Complete registration and navigate
-                  if (authViewModel.googleAccount.value == null) {
-                    authViewModel.registerWithEmailAndPassword(
-                        onSuccess,
-                        {},
-                    )
-                  } else {
-                    authViewModel.registerWithGoogle(onSuccess, {})
-                  }
+                  val newUserProfile =
+                      SeekerProfile(
+                          uid = user!!.uid,
+                          name = fullName,
+                          username = userName,
+                          phone = phone,
+                          address = address,
+                          email = email)
+                  viewModel.addUserProfile(newUserProfile)
+                  authViewModel.registered()
                   // navigationActions.goBack() // Navigate after saving
                 },
                 modifier = Modifier.fillMaxWidth().testTag("exploreServicesButton"),

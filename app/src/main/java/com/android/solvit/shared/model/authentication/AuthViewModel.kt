@@ -25,6 +25,9 @@ class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
   private val _googleAccount = MutableStateFlow<GoogleSignInAccount?>(null)
   val googleAccount: StateFlow<GoogleSignInAccount?> = _googleAccount
 
+  private val _userRegistered = MutableStateFlow<Boolean>(false)
+  val userRegistered: StateFlow<Boolean> = _userRegistered
+
   companion object {
     val Factory: ViewModelProvider.Factory =
         object : ViewModelProvider.Factory {
@@ -55,6 +58,10 @@ class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
     _googleAccount.value = account
   }
 
+  fun registered() {
+    _userRegistered.value = true
+  }
+
   fun loginWithEmailAndPassword(onSuccess: () -> Unit, onFailure: () -> Unit) {
     authRepository.loginWithEmailAndPassword(
         email.value,
@@ -77,6 +84,7 @@ class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
         googleAccount.value!!,
         {
           _user.value = it
+          _email.value = it.email
           onSuccess()
         },
         {
@@ -109,6 +117,7 @@ class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
         role.value,
         {
           _user.value = it
+          _email.value = it.email
           onSuccess()
         },
         {
