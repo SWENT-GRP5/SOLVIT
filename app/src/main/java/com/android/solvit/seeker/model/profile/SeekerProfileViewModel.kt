@@ -26,7 +26,7 @@ class SeekerProfileViewModel(
               phone = "", // Hardcoded Phone Number
               address = "" // Hardcoded Address
               ))
-  val seekerProfile: StateFlow<SeekerProfile> = _seekerProfile
+  var seekerProfile: StateFlow<SeekerProfile> = _seekerProfile
 
   private val _seekerProfileList = MutableStateFlow<List<SeekerProfile>>(emptyList())
   val seekerProfileList: StateFlow<List<SeekerProfile>> = _seekerProfileList
