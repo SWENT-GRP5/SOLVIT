@@ -1,8 +1,10 @@
 package com.android.solvit.seeker.ui.provider
 
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -47,9 +49,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -61,14 +66,20 @@ import com.android.solvit.R
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.shared.model.provider.Language
 import com.android.solvit.shared.model.provider.Provider
+import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
 
 @Composable
-fun SpTopAppBar(navigationActions: NavigationActions) {
+fun SpTopAppBar(navigationActions: NavigationActions, selectedService: Services?) {
+  val context = LocalContext.current
   Box(modifier = Modifier.fillMaxWidth().testTag("topAppBar")) {
     Image(
-        modifier = Modifier.fillMaxWidth().height(200.dp),
-        painter = painterResource(id = R.drawable.plumbier), // TODO Link each service to an image
+        modifier = Modifier.fillMaxWidth().height(200.dp).testTag("serviceImage"),
+        painter =
+            painterResource(
+                id =
+                    ServicesImages().serviceMap.get(selectedService)
+                        ?: R.drawable.error), // TODO Link each service to an image
         contentDescription = "image description",
         contentScale = ContentScale.FillBounds)
     Row(
@@ -102,7 +113,13 @@ fun SpTopAppBar(navigationActions: NavigationActions) {
                         color = Color(0xFF606060),
                     ))
             Image(
-                modifier = Modifier.clickable { TODO() }.padding(1.dp).width(16.dp).height(16.dp),
+                modifier =
+                    Modifier.clickable {
+                          Toast.makeText(context, "Not Yet Implemented", Toast.LENGTH_LONG).show()
+                        }
+                        .padding(1.dp)
+                        .width(16.dp)
+                        .height(16.dp),
                 painter = painterResource(id = R.drawable.arrowdown),
                 contentDescription = "image description",
                 contentScale = ContentScale.Crop)
@@ -113,6 +130,7 @@ fun SpTopAppBar(navigationActions: NavigationActions) {
 
 @Composable
 fun SpFilterBar(display: () -> Unit, listProviderViewModel: ListProviderViewModel) {
+  val context = LocalContext.current
   val filters =
       listOf("Top Rates", "Top Prices", "Time") // TODO update with decided list of filters
   Row(
@@ -125,18 +143,21 @@ fun SpFilterBar(display: () -> Unit, listProviderViewModel: ListProviderViewMode
           items(filters) { filter ->
             Box(
                 modifier =
-                    Modifier.fillMaxWidth()
-                        .background(
-                            brush =
-                                Brush.horizontalGradient(
-                                    colors = listOf(Color(0xFFE0E0E0), Color(0xFFFFFFFF))),
-                            shape = RoundedCornerShape(50))
-                        .padding(start = 16.dp, top = 12.dp, end = 16.dp, bottom = 12.dp)) {
+                    Modifier.padding(8.dp)
+                        .border(1.dp, Color(0xFFAFAFAF), shape = RoundedCornerShape(50))
+                        .background(Color(0xFFFFFFFF), shape = RoundedCornerShape(50))
+                        .padding(12.dp, 6.dp)
+                        .clickable {
+                          Toast.makeText(context, "Not Yet Implemented", Toast.LENGTH_LONG).show()
+                        }
+                        .testTag("filterIcon")) {
                   Text(
                       text = filter,
-                      fontWeight = FontWeight.Bold,
-                      fontSize = 14.sp,
-                      color = Color(0xFF4D5E29))
+                      fontSize = 16.sp,
+                      lineHeight = 34.sp,
+                      fontFamily = FontFamily(Font(R.font.roboto)),
+                      fontWeight = FontWeight(400),
+                      color = Color(0xFF0099FF))
                 }
           }
         }
@@ -586,26 +607,28 @@ fun SelectProviderScreen(
     navigationActions: NavigationActions
 ) {
   val providers by listProviderViewModel.providersList.collectAsState()
+  val selectedService by listProviderViewModel.selectedService.collectAsState()
   var displayFilters by remember { mutableStateOf(false) }
   val sheetState = rememberModalBottomSheetState()
   val scope = rememberCoroutineScope()
   Log.e("Select Provider Screen", "providers : $providers")
-  Scaffold(modifier = Modifier.fillMaxSize(), topBar = { SpTopAppBar(navigationActions) }) {
-      paddingValues ->
-    Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
-      SpFilterBar(display = { displayFilters = true }, listProviderViewModel)
-      Title("Popular")
-      DisplayPopularProviders(providers)
-      Title("See All")
-      ListProviders(providers)
-    }
-    if (displayFilters) {
-      ModalBottomSheet(
-          onDismissRequest = { displayFilters = false },
-          sheetState = sheetState,
-          containerColor = Color.White) {
-            FilterComposable(listProviderViewModel) { displayFilters = false }
-          }
-    }
-  }
+  Scaffold(
+      modifier = Modifier.fillMaxSize(),
+      topBar = { SpTopAppBar(navigationActions, selectedService) }) { paddingValues ->
+        Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
+          SpFilterBar(display = { displayFilters = true }, listProviderViewModel)
+          Title("Popular")
+          DisplayPopularProviders(providers)
+          Title("See All")
+          ListProviders(providers)
+        }
+        if (displayFilters) {
+          ModalBottomSheet(
+              onDismissRequest = { displayFilters = false },
+              sheetState = sheetState,
+              containerColor = Color.White) {
+                FilterComposable(listProviderViewModel) { displayFilters = false }
+              }
+        }
+      }
 }
