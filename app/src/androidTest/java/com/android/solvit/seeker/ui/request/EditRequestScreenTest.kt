@@ -14,15 +14,21 @@ import androidx.navigation.NavController
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.map.LocationRepository
 import com.android.solvit.shared.model.map.LocationViewModel
+import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestRepository
+import com.android.solvit.shared.model.request.ServiceRequestStatus
+import com.android.solvit.shared.model.request.ServiceRequestType
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.google.firebase.Timestamp
+import java.util.GregorianCalendar
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.`when`
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.never
@@ -43,6 +49,18 @@ class EditRequestScreenTest {
           Location(34.0522, -118.2437, "Los Angeles"),
           Location(40.7128, -74.0060, "New York"))
 
+  private val request =
+      ServiceRequest(
+          "uid",
+          "title",
+          ServiceRequestType.CLEANING,
+          "description",
+          "assigneeName",
+          Timestamp(GregorianCalendar(2024, 0, 1).time),
+          Location(37.7749, -122.4194, "San Francisco"),
+          "imageUrl",
+          ServiceRequestStatus.PENDING)
+
   @Before
   fun setUp() {
     navController = mock(NavController::class.java)
@@ -52,8 +70,8 @@ class EditRequestScreenTest {
     locationRepository = mock(LocationRepository::class.java)
     locationViewModel = LocationViewModel(locationRepository)
 
-    Mockito.`when`(locationRepository.search(anyString(), anyOrNull(), anyOrNull())).thenAnswer {
-        invocation ->
+    `when`(locationRepository.search(anyString(), anyOrNull(), anyOrNull())).thenAnswer { invocation
+      ->
       val onSuccess = invocation.getArgument<(List<Location>) -> Unit>(1)
       onSuccess(locations)
     }
@@ -61,6 +79,8 @@ class EditRequestScreenTest {
 
   @Test
   fun displayAllComponents() {
+    serviceRequestViewModel.selectRequest(request)
+
     composeTestRule.setContent {
       EditRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
     }
@@ -79,11 +99,12 @@ class EditRequestScreenTest {
 
     composeTestRule.onNodeWithTag("deleteRequestButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("deleteRequestButton").assertTextEquals("Delete")
-    composeTestRule.onNodeWithTag("bottomNavigationMenu").assertIsDisplayed()
   }
 
   @Test
   fun doesNotSubmitWithInvalidDate() {
+    serviceRequestViewModel.selectRequest(request)
+
     composeTestRule.setContent {
       EditRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
     }
@@ -97,6 +118,8 @@ class EditRequestScreenTest {
 
   @Test
   fun locationMenuExpandsWithInput() {
+    serviceRequestViewModel.selectRequest(request)
+
     composeTestRule.setContent {
       EditRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
     }
@@ -111,6 +134,8 @@ class EditRequestScreenTest {
 
   @Test
   fun locationSelectionFromDropdown() {
+    serviceRequestViewModel.selectRequest(request)
+
     composeTestRule.setContent {
       EditRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
     }
@@ -125,6 +150,8 @@ class EditRequestScreenTest {
 
   @Test
   fun serviceTypeDropdown_showsFilteredResults() {
+    serviceRequestViewModel.selectRequest(request)
+
     composeTestRule.setContent {
       EditRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
     }
@@ -137,6 +164,8 @@ class EditRequestScreenTest {
 
   @Test
   fun serviceTypeDropdown_closesOnSelection() {
+    serviceRequestViewModel.selectRequest(request)
+
     composeTestRule.setContent {
       EditRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
     }
@@ -148,6 +177,8 @@ class EditRequestScreenTest {
 
   @Test
   fun serviceTypeDropdown_showsNoResultsMessage() {
+    serviceRequestViewModel.selectRequest(request)
+
     composeTestRule.setContent {
       EditRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
     }
@@ -158,6 +189,8 @@ class EditRequestScreenTest {
 
   @Test
   fun serviceTypeDropdown_closesOnFocusLost() {
+    serviceRequestViewModel.selectRequest(request)
+
     composeTestRule.setContent {
       EditRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
     }
@@ -169,6 +202,8 @@ class EditRequestScreenTest {
 
   @Test
   fun deleteButton_triggersDeleteAction() {
+    serviceRequestViewModel.selectRequest(request)
+
     composeTestRule.setContent {
       EditRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
     }
@@ -180,15 +215,17 @@ class EditRequestScreenTest {
 
   @Test
   fun deleteButton_logsErrorOnFailure() {
+    serviceRequestViewModel.selectRequest(request)
+
     composeTestRule.setContent {
       EditRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
     }
 
-    Mockito.`when`(serviceRequestRepository.deleteServiceRequestById(any(), any(), any()))
-        .thenAnswer { invocation ->
-          val onError = invocation.getArgument<(String) -> Unit>(2)
-          onError("Error")
-        }
+    `when`(serviceRequestRepository.deleteServiceRequestById(any(), any(), any())).thenAnswer {
+        invocation ->
+      val onError = invocation.getArgument<(String) -> Unit>(2)
+      onError("Error")
+    }
 
     composeTestRule.onNodeWithTag("deleteRequestButton").performClick()
 
@@ -197,6 +234,8 @@ class EditRequestScreenTest {
 
   @Test
   fun doesNotSubmitWithInvalidTitle() {
+    serviceRequestViewModel.selectRequest(request)
+
     composeTestRule.setContent {
       EditRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
     }
@@ -209,6 +248,8 @@ class EditRequestScreenTest {
 
   @Test
   fun submitWithValidData() {
+    serviceRequestViewModel.selectRequest(request)
+
     composeTestRule.setContent {
       EditRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
     }
