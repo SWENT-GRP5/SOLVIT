@@ -12,6 +12,7 @@ import androidx.test.espresso.intent.rule.IntentsRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
+import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -90,5 +91,57 @@ class SignUpScreenTest {
 
     composeTestRule.onNodeWithTag("signUpButton").performClick()
     verify(mockNavigationActions).navigateTo(Screen.SIGN_UP_CHOOSE_ROLE)
+  }
+}
+
+class SignUpButtonTest {
+
+  private fun handleSignUpClick(
+      isComplete: Boolean,
+      passwordLengthComplete: Boolean,
+      samePassword: Boolean
+  ): String? {
+    return when {
+      isComplete && passwordLengthComplete && samePassword -> {
+        null
+      }
+      !isComplete -> {
+        "Form is not complete"
+      }
+      !samePassword -> {
+        "Password and Confirm Password is not the same"
+      }
+      else -> {
+        "Password must be at least 6 characters"
+      }
+    }
+  }
+
+  @Test
+  fun signUPButtonTest_allGood() {
+    val result =
+        handleSignUpClick(isComplete = true, passwordLengthComplete = true, samePassword = true)
+    assertEquals(null, result)
+  }
+
+  @Test
+  fun signUPButtonTest_notIsComplete() {
+    val result =
+        handleSignUpClick(isComplete = false, passwordLengthComplete = true, samePassword = true)
+    assertEquals("Form is not complete", result)
+  }
+
+  @Test
+  fun signUPButtonTest_notSamePassword() {
+    val result =
+        handleSignUpClick(isComplete = true, passwordLengthComplete = true, samePassword = false)
+    assertEquals("Password and Confirm Password is not the same", result)
+  }
+
+  @Test
+  fun signUPButtonTest_notPasswordLengthComplete() {
+    val result =
+        handleSignUpClick(isComplete = true, passwordLengthComplete = false, samePassword = true)
+    assertEquals("Password must be at least 6 characters", result)
   }
 }
