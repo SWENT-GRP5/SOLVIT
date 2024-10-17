@@ -39,31 +39,33 @@ class AuthViewModelTest {
 
   @Test
   fun loginWithEmailAndPassword() {
-    authViewModel.loginWithEmailAndPassword()
+    authViewModel.loginWithEmailAndPassword({}, {})
     verify(authRepository).loginWithEmailAndPassword(any(), any(), any(), any())
   }
 
   @Test
   fun registerWithEmailAndPassword() {
-    authViewModel.registerWithEmailAndPassword()
+    authViewModel.registerWithEmailAndPassword({}, {})
     verify(authRepository).registerWithEmailAndPassword(any(), any(), any(), any(), any())
   }
 
   @Test
   fun signInWithGoogle() {
-    authViewModel.signInWithGoogle(mockGoogleSignInAccount)
+    authViewModel.setGoogleAccount(mockGoogleSignInAccount)
+    authViewModel.signInWithGoogle({}, {})
     verify(authRepository).signInWithGoogle(any(), any(), any())
   }
 
   @Test
   fun registerWithGoogle() {
-    authViewModel.registerWithGoogle(mockGoogleSignInAccount)
+    authViewModel.setGoogleAccount(mockGoogleSignInAccount)
+    authViewModel.registerWithGoogle({}, {})
     verify(authRepository).registerWithGoogle(any(), any(), any(), any())
   }
 
   @Test
   fun logout() {
-    authViewModel.logout()
+    authViewModel.logout({})
     verify(authRepository).logout(any())
   }
 }

@@ -31,6 +31,7 @@ import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,15 +48,19 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.solvit.R
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
+import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun ProviderRegistrationScreen(
     viewModel: ListProviderViewModel = viewModel(factory = ListProviderViewModel.Factory),
-    navigationActions: NavigationActions
+    navigationActions: NavigationActions,
+    authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory)
 ) {
   var fullName by remember { mutableStateOf("") }
   var companyName by remember { mutableStateOf("") }
@@ -63,6 +68,8 @@ fun ProviderRegistrationScreen(
   var location by remember { mutableStateOf("") }
   var password by remember { mutableStateOf("") }
   var confirmPassword by remember { mutableStateOf("") }
+  // represent the current authentified user
+  val user by authViewModel.user.collectAsState()
 
   // Step tracking: Role, Details, Preferences
   var currentStep by remember { mutableStateOf(1) }
@@ -303,16 +310,24 @@ fun ProviderRegistrationScreen(
 
             Button(
                 onClick = {
+                  val onSuccess: () -> Unit = {
+                    val newProviderProfile =
+                        Provider(
+                            uid = Firebase.auth.currentUser!!.uid,
+                            name = fullName,
+                            phone = phone,
+                            companyName = companyName,
+                            location = Location(0.0, 0.0, location))
+                    viewModel.addProvider(newProviderProfile)
+                  }
                   // Complete registration and navigate
-                  val newProviderProfile =
-                      Provider(
-                          uid = viewModel.getNewUid(),
-                          name = fullName,
-                          phone = phone,
-                          companyName = companyName,
-                          location = Location(0.0, 0.0, location))
-                  viewModel.addProvider(newProviderProfile)
-                  navigationActions.goBack() // Navigate after saving
+                  if (authViewModel.googleAccount.value == null) {
+                    authViewModel.setPassword(password)
+                    authViewModel.registerWithEmailAndPassword(onSuccess, {})
+                  } else {
+                    authViewModel.registerWithGoogle(onSuccess, {})
+                  }
+                  // navigationActions.goBack() // Navigate after saving
                 },
                 modifier = Modifier.fillMaxWidth().testTag("continueDashboardButton"),
                 colors =
