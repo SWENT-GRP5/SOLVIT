@@ -14,7 +14,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.map.LocationViewModel
 import com.android.solvit.shared.model.request.ServiceRequest
-import com.android.solvit.shared.model.request.ServiceRequestStatus
 import com.android.solvit.shared.model.request.ServiceRequestType
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
@@ -28,24 +27,7 @@ fun EditRequestScreen(
         viewModel(factory = ServiceRequestViewModel.Factory),
     locationViewModel: LocationViewModel = viewModel(factory = LocationViewModel.Factory)
 ) {
-  requestViewModel.selectRequest(
-      ServiceRequest(
-          title = "Bathtub leak",
-          description = "I hit my bath too hard and now it's leaking",
-          assigneeName = "assignee",
-          dueDate = Timestamp(Calendar.getInstance().time),
-          location =
-              Location(
-                  48.8588897,
-                  2.3200410217200766,
-                  "Paris, Île-de-France, France métropolitaine, France"),
-          status = ServiceRequestStatus.PENDING,
-          uid = "gIoUWJGkTgLHgA7qts59",
-          type = ServiceRequestType.PLUMBING,
-          imageUrl =
-              "https://firebasestorage.googleapis.com/v0/b/solvit-14cc1.appspot.com/o/serviceRequestImages%2F588d3bd9-bcb7-47bc-9911-61fae59eaece.jpg?alt=media&token=5f747f33-9732-4b90-9b34-55e28732ebc3"))
-
-  val request = requestViewModel.selectedRequest.value ?: return
+  val request = requestViewModel.selectedRequest.collectAsState().value ?: return
   var title by remember { mutableStateOf(request.title) }
   var description by remember { mutableStateOf(request.description) }
   var dueDate by remember {

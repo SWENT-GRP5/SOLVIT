@@ -1,6 +1,7 @@
 package com.android.solvit.shared.model.request
 
 import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.google.firebase.Firebase
@@ -8,14 +9,13 @@ import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.storage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 
 open class ServiceRequestViewModel(private val repository: ServiceRequestRepository) : ViewModel() {
-  private val requests_ = MutableStateFlow<List<ServiceRequest>>(emptyList())
-  val requests: StateFlow<List<ServiceRequest>> = requests_.asStateFlow()
+  private val _requests = MutableStateFlow<List<ServiceRequest>>(emptyList())
+  val requests: StateFlow<List<ServiceRequest>> = _requests
 
-  private val selectedRequest_ = MutableStateFlow<ServiceRequest?>(null)
-  open val selectedRequest: StateFlow<ServiceRequest?> = selectedRequest_.asStateFlow()
+  private val _selectedRequest = MutableStateFlow<ServiceRequest?>(null)
+  val selectedRequest: StateFlow<ServiceRequest?> = _selectedRequest
 
   init {
     repository.init { getServiceRequests() }
@@ -39,24 +39,42 @@ open class ServiceRequestViewModel(private val repository: ServiceRequestReposit
   }
 
   fun getServiceRequests() {
-    repository.getServiceRequests(onSuccess = { requests_.value = it }, onFailure = {})
+    repository.getServiceRequests(
+        onSuccess = { _requests.value = it },
+        onFailure = { exception ->
+          Log.e("ServiceRequestViewModel", "Error fetching ServiceRequests", exception)
+        })
   }
 
   fun saveServiceRequest(serviceRequest: ServiceRequest) {
     repository.saveServiceRequest(
-        serviceRequest, onSuccess = { getServiceRequests() }, onFailure = {})
+        serviceRequest,
+        onSuccess = { getServiceRequests() },
+        onFailure = { exception ->
+          Log.e("ServiceRequestViewModel", "Error saving ServiceRequest", exception)
+        })
   }
 
   fun saveServiceRequestWithImage(serviceRequest: ServiceRequest, imageUri: Uri) {
     repository.saveServiceRequestWithImage(
-        serviceRequest, imageUri, onSuccess = { getServiceRequests() }, onFailure = {})
+        serviceRequest,
+        imageUri,
+        onSuccess = { getServiceRequests() },
+        onFailure = { exception ->
+          Log.e("ServiceRequestViewModel", "Error saving ServiceRequest", exception)
+        })
   }
 
   fun deleteServiceRequestById(id: String) {
-    repository.deleteServiceRequestById(id, onSuccess = { getServiceRequests() }, onFailure = {})
+    repository.deleteServiceRequestById(
+        id,
+        onSuccess = { getServiceRequests() },
+        onFailure = { exception ->
+          Log.e("ServiceRequestViewModel", "Error deleting ServiceRequest", exception)
+        })
   }
 
   fun selectRequest(serviceRequest: ServiceRequest) {
-    selectedRequest_.value = serviceRequest
+    _selectedRequest.value = serviceRequest
   }
 }
