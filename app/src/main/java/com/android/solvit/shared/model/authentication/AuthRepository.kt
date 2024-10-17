@@ -32,6 +32,10 @@ class AuthRepository(private val auth: FirebaseAuth, private val db: FirebaseFir
       onSuccess: (user: User) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
+    if (email.isEmpty() || password.isEmpty()) {
+      onFailure(Exception("Email and password cannot be empty"))
+      return
+    }
     auth.signInWithEmailAndPassword(email, password).addOnCompleteListener {
       if (it.isSuccessful) {
         Log.d("AuthRepository", "Login successful")
@@ -67,6 +71,10 @@ class AuthRepository(private val auth: FirebaseAuth, private val db: FirebaseFir
       onSuccess: (user: User) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
+    if (email.isEmpty() || password.isEmpty()) {
+      onFailure(Exception("Email and password cannot be empty"))
+      return
+    }
     auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener {
       if (it.isSuccessful) {
         Log.d("AuthRepository", "Registration successful")
