@@ -84,6 +84,7 @@ class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
         googleAccount.value!!,
         {
           _user.value = it
+          _email.value = it.email
           onSuccess()
         },
         {
