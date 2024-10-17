@@ -22,14 +22,14 @@ object Route {
 }
 
 object Screen {
-
   const val PROFILE = "Profile Screen"
   const val EDIT_PROFILE = "EditProfile Screen"
   const val SIGN_IN = "Sign In"
   const val SIGN_UP = "Sign Up"
-  const val CALENDAR = "Calendar"
+  const val SIGN_UP_CHOOSE_ROLE = "Choose Role Screen"
   const val SEEKER_REGISTRATION_PROFILE = "Seeker registration"
   const val PROVIDER_REGISTRATION_PROFILE = "Provider registration"
+  const val CALENDAR = "Calendar"
 }
 
 data class TopLevelDestination(val route: String, val icon: ImageVector, val textId: String)
