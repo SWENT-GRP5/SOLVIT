@@ -38,6 +38,18 @@ class AuthViewModelTest {
   }
 
   @Test
+  fun setGoogleAccount() {
+    authViewModel.setGoogleAccount(mockGoogleSignInAccount)
+    assert(authViewModel.googleAccount.value == mockGoogleSignInAccount)
+  }
+
+  @Test
+  fun registered() {
+    authViewModel.registered()
+    assert(authViewModel.userRegistered.value)
+  }
+
+  @Test
   fun loginWithEmailAndPassword() {
     authViewModel.loginWithEmailAndPassword({}, {})
     verify(authRepository).loginWithEmailAndPassword(any(), any(), any(), any())

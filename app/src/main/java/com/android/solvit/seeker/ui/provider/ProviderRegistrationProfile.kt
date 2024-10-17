@@ -38,7 +38,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
@@ -50,8 +49,6 @@ import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.ui.navigation.NavigationActions
-import com.google.firebase.Firebase
-import com.google.firebase.auth.auth
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
@@ -71,8 +68,6 @@ fun ProviderRegistrationScreen(
   var currentStep by remember { mutableStateOf(1) }
   val scrollState = rememberScrollState()
   val isFormComplete = fullName.isNotBlank() && phone.isNotBlank() && location.isNotBlank()
-
-  val context = LocalContext.current
 
   Scaffold(
       content = {
@@ -267,22 +262,16 @@ fun ProviderRegistrationScreen(
 
             Button(
                 onClick = {
-                  val onSuccess: () -> Unit = {
-                    val newProviderProfile =
-                        Provider(
-                            uid = Firebase.auth.currentUser!!.uid,
-                            name = fullName,
-                            phone = phone,
-                            companyName = companyName,
-                            location = Location(0.0, 0.0, location))
-                    viewModel.addProvider(newProviderProfile)
-                  }
                   // Complete registration and navigate
-                  if (authViewModel.googleAccount.value == null) {
-                    authViewModel.registerWithEmailAndPassword(onSuccess, {})
-                  } else {
-                    authViewModel.registerWithGoogle(onSuccess, {})
-                  }
+                  val newProviderProfile =
+                      Provider(
+                          uid = user!!.uid,
+                          name = fullName,
+                          phone = phone,
+                          companyName = companyName,
+                          location = Location(0.0, 0.0, location))
+                  viewModel.addProvider(newProviderProfile)
+                  authViewModel.registered()
                   // navigationActions.goBack() // Navigate after saving
                 },
                 modifier = Modifier.fillMaxWidth().testTag("continueDashboardButton"),
