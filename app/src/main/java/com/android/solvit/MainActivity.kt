@@ -58,12 +58,13 @@ class MainActivity : ComponentActivity() {
 fun SolvItApp() {
   val authViewModel = viewModel<AuthViewModel>(factory = AuthViewModel.Factory)
   val user = authViewModel.user.collectAsState()
+  val userRegistered = authViewModel.userRegistered.collectAsState()
   val listProviderViewModel =
       viewModel<ListProviderViewModel>(factory = ListProviderViewModel.Factory)
   val seekerProfileViewModel =
       viewModel<SeekerProfileViewModel>(factory = SeekerProfileViewModel.Factory)
 
-  if (user.value == null) {
+  if (!userRegistered.value) {
     SharedUI(authViewModel, listProviderViewModel, seekerProfileViewModel)
   } else {
     when (user.value!!.role) {

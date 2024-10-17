@@ -5,6 +5,9 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import androidx.test.espresso.intent.Intents
+import androidx.test.espresso.intent.matcher.IntentMatchers
+import androidx.test.espresso.intent.rule.IntentsRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import org.junit.Rule
@@ -16,6 +19,7 @@ import org.mockito.Mockito.mock
 class SignUpScreenTest {
 
   @get:Rule val composeTestRule = createComposeRule()
+  @get:Rule val intentsTestRule = IntentsRule()
 
   private val mockNavigationActions = mock(NavigationActions::class.java)
 
@@ -42,6 +46,7 @@ class SignUpScreenTest {
     composeTestRule.onNodeWithTag("backButton").performClick()
     composeTestRule.onNodeWithTag("passwordInput").performClick()
     composeTestRule.onNodeWithTag("confirmPasswordInput").performClick()
+    composeTestRule.onNodeWithTag("emailInputField").performClick()
     composeTestRule.onNodeWithTag("signUpButton").performClick()
     composeTestRule.onNodeWithTag("logInLink").performClick()
   }
@@ -52,5 +57,13 @@ class SignUpScreenTest {
 
     // Test email input
     composeTestRule.onNodeWithTag("emailInput").performTextInput("test@example.com")
+  }
+
+  @Test
+  fun googleSignInReturnsValidActivityResult() {
+    composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
+    composeTestRule.onNodeWithTag("googleSignUpButton").performClick()
+    // assert that an Intent resolving to Google Mobile Services has been sent (for sign-in)
+    Intents.intended(IntentMatchers.toPackage("com.google.android.gms"))
   }
 }

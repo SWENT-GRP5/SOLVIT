@@ -63,7 +63,13 @@ fun SignUpChooseProfile(
             testTag = "customerButton",
             onClickButton = {
               authViewModel.setRole("seeker")
-              navigationActions.navigateTo(Screen.SEEKER_REGISTRATION_PROFILE)
+              if (authViewModel.googleAccount.value == null) {
+                authViewModel.registerWithEmailAndPassword(
+                    { navigationActions.navigateTo(Screen.SEEKER_REGISTRATION_PROFILE) }, {})
+              } else {
+                authViewModel.registerWithGoogle(
+                    { navigationActions.navigateTo(Screen.SEEKER_REGISTRATION_PROFILE) }, {})
+              }
             })
 
         VerticalSpacer(height = 16.dp)
@@ -78,7 +84,13 @@ fun SignUpChooseProfile(
             testTag = "professionalButton",
             onClickButton = {
               authViewModel.setRole("provider")
-              navigationActions.navigateTo(Screen.PROVIDER_REGISTRATION_PROFILE)
+              if (authViewModel.googleAccount.value == null) {
+                authViewModel.registerWithEmailAndPassword(
+                    { navigationActions.navigateTo(Screen.PROVIDER_REGISTRATION_PROFILE) }, {})
+              } else {
+                authViewModel.registerWithGoogle(
+                    { navigationActions.navigateTo(Screen.PROVIDER_REGISTRATION_PROFILE) }, {})
+              }
             })
 
         VerticalSpacer(height = 30.dp)

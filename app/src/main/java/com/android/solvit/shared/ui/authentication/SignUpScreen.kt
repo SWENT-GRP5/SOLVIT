@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.SnackbarDefaults.backgroundColor
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Lock
@@ -57,8 +56,8 @@ fun SignUpScreen(
     authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory)
 ) {
   val email = remember { mutableStateOf("") }
-  var password = remember { mutableStateOf("") }
-  var confirmPassword = remember { mutableStateOf("") }
+  val password = remember { mutableStateOf("") }
+  val confirmPassword = remember { mutableStateOf("") }
 
   val context = LocalContext.current
   val launcher =
@@ -147,7 +146,13 @@ fun SignUpScreen(
 
         VerticalSpacer(height = 30.dp)
 
-        SignUpButton({ navigationActions.navigateTo(Screen.SIGN_UP_CHOOSE_ROLE) }, isFormComplete)
+        SignUpButton(
+            {
+              authViewModel.setEmail(email.value)
+              authViewModel.setPassword(password.value)
+              navigationActions.navigateTo(Screen.SIGN_UP_CHOOSE_ROLE)
+            },
+            isFormComplete)
 
         VerticalSpacer(height = 16.dp)
 

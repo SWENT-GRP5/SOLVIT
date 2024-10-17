@@ -86,6 +86,7 @@ fun SignInScreen(
   val context = LocalContext.current
   val onSuccess: () -> Unit = {
     Toast.makeText(context, "Login successful!", Toast.LENGTH_LONG).show()
+    authViewModel.registered()
   }
   val onFailure: () -> Unit = { Toast.makeText(context, "Login Failed!", Toast.LENGTH_LONG).show() }
 
