@@ -69,7 +69,7 @@ fun RequestScreen(
     submitButtonText: String
 ) {
   Scaffold(
-      modifier = Modifier.testTag("requestScreen"),
+      modifier = Modifier.padding(16.dp).testTag("requestScreen"),
       topBar = {
         TopAppBar(
             title = { Text(screenTitle, Modifier.testTag("screenTitle")) },
