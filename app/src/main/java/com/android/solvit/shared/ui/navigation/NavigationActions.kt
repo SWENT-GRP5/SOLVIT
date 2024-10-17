@@ -14,9 +14,9 @@ object Route {
   const val SERVICES = "Overview"
   const val CREATE_REQUEST = "Create request"
   const val EDIT_REQUEST = "Edit request"
+  const val REQUESTS_OVERVIEW = "Requests"
   const val MESSAGE = "Message"
   const val PROFILE = "Profile"
-  const val ORDER = "Order"
   const val PROVIDERS = "Providers"
   const val MAP = "Map"
 }
@@ -44,8 +44,9 @@ object TopLevelDestinations {
   val CREATE_REQUEST =
       TopLevelDestination(
           route = Route.CREATE_REQUEST, icon = Icons.Outlined.Create, textId = "Request")
-  val ORDER =
-      TopLevelDestination(route = Route.ORDER, icon = Icons.Outlined.Menu, textId = "Settings")
+  val REQUESTS_OVERVIEW =
+      TopLevelDestination(
+          route = Route.REQUESTS_OVERVIEW, icon = Icons.Outlined.Menu, textId = "Overview")
   val PROFILE =
       TopLevelDestination(
           route = Route.PROFILE, icon = Icons.Outlined.AccountCircle, textId = "Profile")
@@ -56,7 +57,7 @@ val LIST_TOP_LEVEL_DESTINATION =
         TopLevelDestinations.SERVICES,
         TopLevelDestinations.MESSAGE,
         TopLevelDestinations.CREATE_REQUEST,
-        TopLevelDestinations.ORDER,
+        TopLevelDestinations.REQUESTS_OVERVIEW,
         TopLevelDestinations.PROFILE)
 
 open class NavigationActions(

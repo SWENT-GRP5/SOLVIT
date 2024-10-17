@@ -25,8 +25,10 @@ import com.android.solvit.seeker.ui.provider.ProviderRegistrationScreen
 import com.android.solvit.seeker.ui.provider.SelectProviderScreen
 import com.android.solvit.seeker.ui.request.CreateRequestScreen
 import com.android.solvit.seeker.ui.request.EditRequestScreen
+import com.android.solvit.seeker.ui.request.RequestsOverviewScreen
 import com.android.solvit.seeker.ui.service.ServicesScreen
 import com.android.solvit.shared.model.authentication.AuthViewModel
+import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.ui.authentication.OpeningScreen
 import com.android.solvit.shared.ui.authentication.SignInScreen
 import com.android.solvit.shared.ui.authentication.SignUpChooseProfile
@@ -62,12 +64,16 @@ fun SolvItApp() {
       viewModel<ListProviderViewModel>(factory = ListProviderViewModel.Factory)
   val seekerProfileViewModel =
       viewModel<SeekerProfileViewModel>(factory = SeekerProfileViewModel.Factory)
+  val serviceRequestViewModel =
+      viewModel<ServiceRequestViewModel>(factory = ServiceRequestViewModel.Factory)
 
   if (user.value == null) {
     SharedUI(authViewModel, listProviderViewModel, seekerProfileViewModel)
   } else {
     when (user.value!!.role) {
-      "seeker" -> SeekerUI(authViewModel, listProviderViewModel, seekerProfileViewModel)
+      "seeker" ->
+          SeekerUI(
+              authViewModel, listProviderViewModel, seekerProfileViewModel, serviceRequestViewModel)
       "provider" -> ProviderUI(authViewModel, listProviderViewModel, seekerProfileViewModel)
     }
   }
@@ -100,7 +106,8 @@ fun SharedUI(
 fun SeekerUI(
     authViewModel: AuthViewModel,
     listProviderViewModel: ListProviderViewModel,
-    seekerProfileViewModel: SeekerProfileViewModel
+    seekerProfileViewModel: SeekerProfileViewModel,
+    serviceRequestViewModel: ServiceRequestViewModel
 ) {
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
@@ -109,12 +116,14 @@ fun SeekerUI(
     composable(Route.SERVICES) { ServicesScreen(navigationActions, listProviderViewModel) }
     composable(Route.PROVIDERS) { SelectProviderScreen(listProviderViewModel, navigationActions) }
     composable(Route.MESSAGE) { MessageScreen(navigationActions) }
-    composable(Route.CREATE_REQUEST) { CreateRequestScreen(navigationActions) }
-    composable(Route.EDIT_REQUEST) { EditRequestScreen(navigationActions) }
+    composable(Route.CREATE_REQUEST) {
+      CreateRequestScreen(navigationActions, serviceRequestViewModel)
+    }
+    composable(Route.REQUESTS_OVERVIEW) {
+      RequestsOverviewScreen(navigationActions, serviceRequestViewModel)
+    }
+    composable(Route.EDIT_REQUEST) { EditRequestScreen(navigationActions, serviceRequestViewModel) }
     composable(Route.MAP) { SeekerMapScreen(listProviderViewModel, navigationActions) }
-    composable(Route.ORDER) {
-      EditRequestScreen(navigationActions)
-    } // This line can be replace when the OrderScreen is implemented
     navigation(startDestination = Screen.PROFILE, route = Route.PROFILE) {
       composable(Screen.PROFILE) { SeekerProfileScreen(seekerProfileViewModel, navigationActions) }
       composable(Screen.EDIT_PROFILE) {
