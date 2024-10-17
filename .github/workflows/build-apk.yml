@@ -39,7 +39,7 @@ jobs:
             ${{ runner.os }}-gradle
 
       - name: Build APK
-        run: ./gradlew build
+        run: ./gradlew assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v3
