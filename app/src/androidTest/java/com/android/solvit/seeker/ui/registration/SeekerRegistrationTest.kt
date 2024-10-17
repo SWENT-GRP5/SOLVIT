@@ -55,8 +55,7 @@ class SeekerRegistrationTest {
     composeTestRule.onNodeWithTag("fullNameInput").assertIsDisplayed()
     composeTestRule.onNodeWithTag("phoneNumberInput").assertIsDisplayed()
     composeTestRule.onNodeWithTag("locationInput").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("passwordInput").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("confirmPasswordInput").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("userNameInput").assertIsDisplayed()
 
     // Verify the complete registration button
     composeTestRule
@@ -67,8 +66,7 @@ class SeekerRegistrationTest {
     composeTestRule.onNodeWithTag("fullNameInput").performTextInput("John Doe")
     composeTestRule.onNodeWithTag("phoneNumberInput").performTextInput("123456789")
     composeTestRule.onNodeWithTag("locationInput").performTextInput("123 Main St")
-    composeTestRule.onNodeWithTag("passwordInput").performTextInput("password123")
-    composeTestRule.onNodeWithTag("confirmPasswordInput").performTextInput("password123")
+    composeTestRule.onNodeWithTag("userNameInput").performTextInput("password123")
 
     // Click the complete registration button to move to the next step
     composeTestRule.onNodeWithTag("completeRegistrationButton").performClick()
@@ -105,10 +103,6 @@ class SeekerRegistrationTest {
     composeTestRule.onNodeWithTag("fullNameInput").performTextInput("John Doe")
     composeTestRule.onNodeWithTag("phoneNumberInput").performTextInput("123456789")
     composeTestRule.onNodeWithTag("locationInput").performTextInput("123 Main St")
-    composeTestRule.onNodeWithTag("passwordInput").performTextInput("password123")
-    composeTestRule
-        .onNodeWithTag("confirmPasswordInput")
-        .performTextInput("password124") // Passwords do not match
 
     // Try to submit the form
     composeTestRule.onNodeWithTag("completeRegistrationButton").performClick()
@@ -135,8 +129,7 @@ class SeekerRegistrationTest {
 
     // Complete the rest of the fields
     composeTestRule.onNodeWithTag("locationInput").performTextInput("123 Main St")
-    composeTestRule.onNodeWithTag("passwordInput").performTextInput("password123")
-    composeTestRule.onNodeWithTag("confirmPasswordInput").performTextInput("password123")
+    composeTestRule.onNodeWithTag("userNameInput").performTextInput("password123")
 
     // Now the button should be enabled
     composeTestRule.onNodeWithTag("completeRegistrationButton").assertIsEnabled()
@@ -155,8 +148,7 @@ class SeekerRegistrationTest {
     composeTestRule.onNodeWithTag("fullNameInput").performTextInput("John Doe")
     composeTestRule.onNodeWithTag("phoneNumberInput").performTextInput("123456789")
     composeTestRule.onNodeWithTag("locationInput").performTextInput("123 Main St")
-    composeTestRule.onNodeWithTag("passwordInput").performTextInput("password123")
-    composeTestRule.onNodeWithTag("confirmPasswordInput").performTextInput("password123")
+    composeTestRule.onNodeWithTag("userNameInput").performTextInput("password123")
 
     // Click the complete registration button (moves to step 2)
     composeTestRule.onNodeWithTag("completeRegistrationButton").performClick()
