@@ -5,6 +5,9 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import androidx.test.espresso.intent.Intents
+import androidx.test.espresso.intent.matcher.IntentMatchers
+import androidx.test.espresso.intent.rule.IntentsRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -22,6 +25,7 @@ import org.mockito.Mockito
 class SignInScreenTest {
 
   @get:Rule val composeTestRule = createComposeRule()
+  @get:Rule val intentsTestRule = IntentsRule()
 
   private val mockNavigationActions = Mockito.mock(NavigationActions::class.java)
 
@@ -60,6 +64,14 @@ class SignInScreenTest {
     composeTestRule.onNodeWithTag("forgotPasswordLink").performClick()
     composeTestRule.onNodeWithTag("signInButton").performClick()
     composeTestRule.onNodeWithTag("googleSignInButton").performClick()
+  }
+
+  @Test
+  fun googleSignInReturnsValidActivityResult() {
+    composeTestRule.setContent { SignInScreen(mockNavigationActions) }
+    composeTestRule.onNodeWithTag("googleSignInButton").performClick()
+    // assert that an Intent resolving to Google Mobile Services has been sent (for sign-in)
+    Intents.intended(IntentMatchers.toPackage("com.google.android.gms"))
   }
 
   suspend fun signInWithFirebase(

@@ -72,8 +72,8 @@ fun SignUpScreen(
     authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory)
 ) {
   val email = remember { mutableStateOf("") }
-  var password = remember { mutableStateOf("") }
-  var confirmPassword = remember { mutableStateOf("") }
+  val password = remember { mutableStateOf("") }
+  val confirmPassword = remember { mutableStateOf("") }
 
   val context = LocalContext.current
   val launcher =
@@ -162,7 +162,13 @@ fun SignUpScreen(
 
         VerticalSpacer(height = 30.dp)
 
-        SignUpButton({ navigationActions.navigateTo(Screen.SIGN_UP_CHOOSE_ROLE) }, isFormComplete)
+        SignUpButton(
+            {
+              authViewModel.setEmail(email.value)
+              authViewModel.setPassword(password.value)
+              navigationActions.navigateTo(Screen.SIGN_UP_CHOOSE_ROLE)
+            },
+            isFormComplete)
 
         VerticalSpacer(height = 16.dp)
 
