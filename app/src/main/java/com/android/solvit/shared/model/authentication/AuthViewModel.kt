@@ -22,6 +22,9 @@ class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
   private val _role = MutableStateFlow("")
   val role: StateFlow<String> = _role
 
+  private val _googleAccount = MutableStateFlow<GoogleSignInAccount?>(null)
+  val googleAccount: StateFlow<GoogleSignInAccount?> = _googleAccount
+
   companion object {
     val Factory: ViewModelProvider.Factory =
         object : ViewModelProvider.Factory {
@@ -48,26 +51,76 @@ class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
     _password.value = password
   }
 
-  fun loginWithEmailAndPassword() {
+  fun setGoogleAccount(account: GoogleSignInAccount) {
+    _googleAccount.value = account
+  }
+
+  fun loginWithEmailAndPassword(onSuccess: () -> Unit, onFailure: () -> Unit) {
     authRepository.loginWithEmailAndPassword(
-        email.value, password.value, { _user.value = it }, { _user.value = null })
+        email.value,
+        password.value,
+        {
+          _user.value = it
+          onSuccess()
+        },
+        {
+          _user.value = null
+          onFailure()
+        })
   }
 
-  fun signInWithGoogle(account: GoogleSignInAccount) {
-    authRepository.signInWithGoogle(account, { _user.value = it }, { _user.value = null })
+  fun signInWithGoogle(onSuccess: () -> Unit, onFailure: () -> Unit) {
+    if (googleAccount.value == null) {
+      onFailure()
+    }
+    authRepository.signInWithGoogle(
+        googleAccount.value!!,
+        {
+          _user.value = it
+          onSuccess()
+        },
+        {
+          _user.value = null
+          onFailure()
+        })
   }
 
-  fun registerWithEmailAndPassword() {
+  fun registerWithEmailAndPassword(onSuccess: () -> Unit, onFailure: () -> Unit) {
     authRepository.registerWithEmailAndPassword(
-        role.value, email.value, password.value, { _user.value = it }, { _user.value = null })
+        role.value,
+        email.value,
+        password.value,
+        {
+          _user.value = it
+          onSuccess()
+        },
+        {
+          _user.value = null
+          onFailure()
+        })
   }
 
-  fun registerWithGoogle(account: GoogleSignInAccount) {
+  fun registerWithGoogle(onSuccess: () -> Unit, onFailure: () -> Unit) {
+    if (googleAccount.value == null) {
+      onFailure()
+    }
     authRepository.registerWithGoogle(
-        account, role.value, { _user.value = it }, { _user.value = null })
+        googleAccount.value!!,
+        role.value,
+        {
+          _user.value = it
+          onSuccess()
+        },
+        {
+          _user.value = null
+          onFailure()
+        })
   }
 
-  fun logout() {
-    authRepository.logout { _user.value = null }
+  fun logout(onSuccess: () -> Unit) {
+    authRepository.logout {
+      _user.value = null
+      onSuccess()
+    }
   }
 }

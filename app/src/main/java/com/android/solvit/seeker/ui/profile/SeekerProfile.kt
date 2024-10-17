@@ -36,12 +36,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.android.solvit.R
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.navigation.Screen
 
 /*
@@ -276,10 +278,12 @@ fun SeekerProfileScreen(viewModel: SeekerProfileViewModel, navigationActions: Na
     Scaffold(
         topBar = {
           TopAppBar(
+              modifier = Modifier.testTag("ProfileTopBar"),
               backgroundColor = Color.Blue, // Set blue background
               title = { Text("Profile", color = Color.White) },
               navigationIcon = {
-                IconButton(onClick = { navigationActions.goBack() }) {
+                // When you go back from profile you diretctly return to home page
+                IconButton(onClick = { navigationActions.navigateTo(Route.SERVICES) }) {
                   Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
                 }
               },
@@ -293,7 +297,7 @@ fun SeekerProfileScreen(viewModel: SeekerProfileViewModel, navigationActions: Na
               })
         }) {
           Column(
-              modifier = Modifier.fillMaxSize().padding(16.dp),
+              modifier = Modifier.fillMaxSize().padding(16.dp).testTag("ProfileContent"),
               horizontalAlignment = Alignment.CenterHorizontally) {
                 // Profile Picture
                 Image(
@@ -312,7 +316,8 @@ fun SeekerProfileScreen(viewModel: SeekerProfileViewModel, navigationActions: Na
                 // Edit Profile Button
                 Button(
                     onClick = { navigationActions.navigateTo(Screen.EDIT_PROFILE) },
-                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                    modifier =
+                        Modifier.align(Alignment.CenterHorizontally).testTag("EditProfileButton"),
                     colors = ButtonDefaults.buttonColors(backgroundColor = Color.DarkGray)) {
                       Text("Edit Profile", color = Color.White)
                     }

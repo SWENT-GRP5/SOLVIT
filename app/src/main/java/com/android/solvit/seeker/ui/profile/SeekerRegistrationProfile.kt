@@ -1,7 +1,7 @@
 package com.android.solvit.seeker.ui.profile
 
 import android.annotation.SuppressLint
-import android.widget.Toast
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -39,10 +39,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -51,6 +49,8 @@ import com.android.solvit.seeker.model.profile.SeekerProfile
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
@@ -63,9 +63,7 @@ fun SeekerRegistrationScreen(
   // var username by remember { mutableStateOf("") }
   var phone by remember { mutableStateOf("") }
   var address by remember { mutableStateOf("") }
-  var password by remember { mutableStateOf("") }
-  var confirmPassword by remember { mutableStateOf("") }
-  var showPasswordMismatchMessage by remember { mutableStateOf(false) }
+  var userName by remember { mutableStateOf("") }
   // represent the current authentified user
   val user by authViewModel.user.collectAsState()
   // represent the email of the current user
@@ -74,15 +72,7 @@ fun SeekerRegistrationScreen(
   // Step tracking: Role, Details, Preferences
   var currentStep by remember { mutableStateOf(1) }
   val scrollState = rememberScrollState()
-  val isFormComplete =
-      fullName.isNotBlank() &&
-          phone.isNotBlank() &&
-          address.isNotBlank() &&
-          password.isNotBlank() &&
-          confirmPassword.isNotBlank()
-  // && password == confirmPassword
-
-  val context = LocalContext.current
+  val isFormComplete = fullName.isNotBlank() && phone.isNotBlank() && address.isNotBlank()
 
   Scaffold(
       content = {
@@ -134,6 +124,21 @@ fun SeekerRegistrationScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            OutlinedTextField(
+                value = userName,
+                onValueChange = { userName = it },
+                label = { Text("User Name", color = Color.Black) },
+                placeholder = { Text("Enter your user name") },
+                modifier = Modifier.fillMaxWidth().testTag("userNameInput"),
+                shape = RoundedCornerShape(12.dp),
+                colors =
+                    TextFieldDefaults.outlinedTextFieldColors(
+                        focusedBorderColor = Color(0xFF00C853), // Green outline for focused state
+                        unfocusedBorderColor = Color.Gray // Gray outline for unfocused state
+                        ))
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             // Phone Number
             OutlinedTextField(
                 value = phone,
@@ -161,43 +166,11 @@ fun SeekerRegistrationScreen(
                         focusedBorderColor = Color(0xFF00C853), unfocusedBorderColor = Color.Gray))
             Spacer(modifier = Modifier.height(16.dp))
             // Password Field
-            OutlinedTextField(
-                value = password,
-                onValueChange = { password = it },
-                label = { Text("Password", color = Color.Black) },
-                placeholder = { Text("Enter your password") },
-                modifier = Modifier.fillMaxWidth().testTag("passwordInput"),
-                shape = RoundedCornerShape(12.dp),
-                visualTransformation = PasswordVisualTransformation(), // Hide password
-                colors =
-                    TextFieldDefaults.outlinedTextFieldColors(
-                        focusedBorderColor = Color(0xFF00C853), unfocusedBorderColor = Color.Gray))
-            Spacer(modifier = Modifier.height(16.dp))
-            // Confirm Password Field
-            OutlinedTextField(
-                value = confirmPassword,
-                onValueChange = { confirmPassword = it },
-                label = { Text("Confirm Password", color = Color.Black) },
-                placeholder = { Text("Re-enter your password") },
-                modifier = Modifier.fillMaxWidth().testTag("confirmPasswordInput"),
-                shape = RoundedCornerShape(12.dp),
-                visualTransformation = PasswordVisualTransformation(), // Hide password
-                colors =
-                    TextFieldDefaults.outlinedTextFieldColors(
-                        focusedBorderColor = Color(0xFF00C853), unfocusedBorderColor = Color.Gray))
 
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
-                onClick = {
-                  // Move to next step (Step 2: Preferences)
-                  if (password != confirmPassword) {
-                    Toast.makeText(context, "Passwords do not match!", Toast.LENGTH_SHORT).show()
-                  } else {
-                    // Move to next step (Step 2: Preferences)
-                    currentStep = 2
-                  }
-                },
+                onClick = { currentStep = 2 },
                 modifier =
                     Modifier.fillMaxWidth().height(60.dp).testTag("completeRegistrationButton"),
                 enabled = isFormComplete,
@@ -290,20 +263,27 @@ fun SeekerRegistrationScreen(
 
             Button(
                 onClick = {
-                  // Complete registration and navigate
-                  if (user != null) {
+                  val onSuccess: () -> Unit = {
                     val newUserProfile =
                         SeekerProfile(
-                            uid = user!!.uid,
+                            uid = Firebase.auth.currentUser!!.uid,
                             name = fullName,
                             phone = phone,
                             address = address,
                             email = email)
                     viewModel.addUserProfile(newUserProfile)
-                    authViewModel.setPassword(password)
+                    Log.e("SeekerRegistrationScreen", "User profile added")
                   }
-
-                  navigationActions.goBack() // Navigate after saving
+                  // Complete registration and navigate
+                  if (authViewModel.googleAccount.value == null) {
+                    authViewModel.registerWithEmailAndPassword(
+                        onSuccess,
+                        {},
+                    )
+                  } else {
+                    authViewModel.registerWithGoogle(onSuccess, {})
+                  }
+                  // navigationActions.goBack() // Navigate after saving
                 },
                 modifier = Modifier.fillMaxWidth().testTag("exploreServicesButton"),
                 colors =

@@ -31,10 +31,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import com.android.solvit.seeker.ui.navigation.SeekerBottomNavigationMenu
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestType
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
+import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_CUSTOMMER
 import com.android.solvit.shared.ui.navigation.NavigationActions
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -69,18 +71,34 @@ fun RequestScreen(
     submitButtonText: String
 ) {
   Scaffold(
-      modifier = Modifier.testTag("requestScreen"),
+      modifier = Modifier.padding(16.dp).testTag("requestScreen"),
+      bottomBar = {
+        if (screenTitle == "Create a new request") {
+          SeekerBottomNavigationMenu(
+              onTabSelect = { route -> navigationActions.navigateTo(route) },
+              tabList = LIST_TOP_LEVEL_DESTINATION_CUSTOMMER,
+              selectedItem = navigationActions.currentRoute())
+        }
+      },
       topBar = {
         TopAppBar(
             title = { Text(screenTitle, Modifier.testTag("screenTitle")) },
+            // HJ : Comment this line as these screens have a bottom navigation menu with current
+            // version
+
             navigationIcon = {
-              IconButton(
-                  onClick = { navigationActions.goBack() },
-                  modifier = Modifier.testTag("goBackButton")) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-                        contentDescription = "Back")
-                  }
+              if (screenTitle == "Edit your request") {
+                IconButton(
+                    onClick = {
+                      // HJ : Comment this line as these screens have a bottom navigation menu
+                      navigationActions.goBack()
+                    },
+                    modifier = Modifier.testTag("goBackButton")) {
+                      Icon(
+                          imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
+                          contentDescription = "Back")
+                    }
+              }
             })
       },
       content = { paddingValues ->

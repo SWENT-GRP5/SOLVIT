@@ -6,12 +6,15 @@ import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import androidx.navigation.NavController
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestRepository
 import com.android.solvit.shared.model.request.ServiceRequestStatus
 import com.android.solvit.shared.model.request.ServiceRequestType
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
+import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.ui.requests.ListRequestsFeedScreen
 import com.google.firebase.Timestamp
 import java.util.Calendar
@@ -26,6 +29,8 @@ import org.mockito.kotlin.any
 class ListServicesRequestsScreenTest {
   private lateinit var serviceRequestRepository: ServiceRequestRepository
   private lateinit var serviceRequestViewModel: ServiceRequestViewModel
+  private lateinit var navController: NavController
+  private lateinit var navigationActions: NavigationActions
   @get:Rule val composeTestRule = createComposeRule()
 
   // Example service request data used for testing
@@ -66,12 +71,16 @@ class ListServicesRequestsScreenTest {
   fun setUp() {
     serviceRequestRepository = mock(ServiceRequestRepository::class.java)
     serviceRequestViewModel = ServiceRequestViewModel(serviceRequestRepository)
-    composeTestRule.setContent { ListRequestsFeedScreen(serviceRequestViewModel) }
-
+    navController = mock(NavController::class.java)
+    navigationActions = mock(NavigationActions::class.java)
     // Mocking the getServiceRequests function to return the pre-defined request list
     `when`(serviceRequestRepository.getServiceRequests(any(), any())).thenAnswer {
       val onSuccess = it.getArgument<(List<ServiceRequest>) -> Unit>(0)
       onSuccess(request) // Simulate success
+    }
+    `when`(navigationActions.currentRoute()).thenReturn(Route.REQUESTS_FEED)
+    composeTestRule.setContent {
+      ListRequestsFeedScreen(serviceRequestViewModel, navigationActions)
     }
 
     // Fetch service requests via the ViewModel
@@ -103,6 +112,7 @@ class ListServicesRequestsScreenTest {
 
     // Ensure that filtering bar is displayed
     composeTestRule.onNodeWithTag("FilterBar").isDisplayed()
+    composeTestRule.onNodeWithTag("bottomNavigationMenu").isDisplayed()
   }
 
   // Test the functionality of the search bar
