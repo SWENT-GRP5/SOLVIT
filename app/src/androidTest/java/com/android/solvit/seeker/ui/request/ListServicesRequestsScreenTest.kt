@@ -112,6 +112,7 @@ class ListServicesRequestsScreenTest {
 
     // Ensure that filtering bar is displayed
     composeTestRule.onNodeWithTag("FilterBar").isDisplayed()
+    composeTestRule.onNodeWithTag("bottomNavigationMenu").isDisplayed()
   }
 
   // Test the functionality of the search bar

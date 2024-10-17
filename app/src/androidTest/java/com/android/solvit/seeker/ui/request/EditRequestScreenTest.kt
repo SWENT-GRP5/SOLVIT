@@ -78,6 +78,7 @@ class EditRequestScreenTest {
     composeTestRule.onNodeWithTag("inputRequestAddress").assertIsDisplayed()
     composeTestRule.onNodeWithTag("inputRequestDate").assertIsDisplayed()
     composeTestRule.onNodeWithTag("imagePickerButton").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("bottomNavigationMenu").assertIsDisplayed()
   }
 
   @Test

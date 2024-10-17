@@ -24,7 +24,7 @@ object Route {
   const val PROVIDERS = "Providers"
   const val MAP = "Map"
   const val MAP_OF_SEEKERS = "Seekers Map"
-  const val CALENDAR = "Professional calendar"
+  const val CALENDAR = "Calendar"
 }
 
 object Screen {
