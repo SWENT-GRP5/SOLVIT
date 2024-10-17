@@ -41,6 +41,9 @@ import java.time.temporal.TemporalAdjusters
 import java.util.Locale
 import kotlin.math.abs
 
+// Add this color definition at the top of the file
+val SolvitBlue = Color(0xFF0099FF)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProviderCalendarScreen(navigationActions: NavigationActions) {
@@ -170,12 +173,30 @@ fun ProviderCalendarScreen(navigationActions: NavigationActions) {
                     showBottomSheet = true
                   }
                 }
-              }) {
-                Text("OK")
+              },
+              modifier = Modifier.testTag("confirmDateButton")) {
+                Text("OK", color = SolvitBlue)
               }
         },
-        dismissButton = { TextButton(onClick = { showDatePicker = false }) { Text("Cancel") } },
-        modifier = Modifier.testTag("datePickerDialog")) {
+        dismissButton = {
+          TextButton(
+              onClick = { showDatePicker = false },
+              modifier = Modifier.testTag("cancelDateButton")) {
+                Text("Cancel", color = SolvitBlue)
+              }
+        },
+        modifier = Modifier.testTag("datePickerDialog"),
+        colors =
+            DatePickerDefaults.colors(
+                containerColor = Color.White,
+                selectedDayContainerColor = SolvitBlue,
+                todayContentColor = SolvitBlue,
+                todayDateBorderColor = SolvitBlue,
+                selectedYearContainerColor = SolvitBlue,
+                currentYearContentColor = SolvitBlue,
+                dayContentColor = SolvitBlue,
+                selectedDayContentColor = Color.White,
+                weekdayContentColor = SolvitBlue)) {
           DatePicker(state = datePickerState)
         }
   }
@@ -191,8 +212,7 @@ fun CalendarViewToggle(currentView: CalendarView, onViewChange: (CalendarView) -
               onClick = { onViewChange(view) },
               colors =
                   ButtonDefaults.buttonColors(
-                      containerColor =
-                          if (currentView == view) Color(0xFF0099FF) else Color.LightGray),
+                      containerColor = if (currentView == view) SolvitBlue else Color.LightGray),
               modifier = Modifier.testTag("toggleButton_${view.name.lowercase()}")) {
                 Text(view.name, color = if (currentView == view) Color.White else Color.Black)
               }
@@ -215,7 +235,7 @@ fun MonthView(
 
   Column(
       modifier =
-          Modifier.pointerInput(Unit) {
+          Modifier.fillMaxSize().padding(16.dp).pointerInput(Unit) {
             detectHorizontalDragGestures(
                 onDragStart = { isDragging = true },
                 onDragEnd = { isDragging = false },
@@ -240,41 +260,46 @@ fun MonthView(
                 })
           }) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically) {
               Text(
-                  text = currentViewDate.format(DateTimeFormatter.ofPattern("MMMM yyyy")),
+                  text = currentMonth.format(DateTimeFormatter.ofPattern("MMMM yyyy")),
                   modifier =
                       Modifier.clickable(onClick = onHeaderClick)
                           .padding(vertical = 8.dp)
-                          .testTag("monthYearHeader"),
+                          .testTag("monthHeader"),
+                  fontSize = 16.sp,
                   fontWeight = FontWeight.Bold)
             }
+        Spacer(modifier = Modifier.height(16.dp))
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(7), modifier = Modifier.fillMaxWidth().weight(1f)) {
+              // Weekday headers
+              items(7) { dayIndex ->
+                Text(
+                    text =
+                        DayOfWeek.of(dayIndex + 1)
+                            .getDisplayName(TextStyle.SHORT, Locale.getDefault()),
+                    modifier = Modifier.padding(8.dp),
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Normal,
+                    textAlign = TextAlign.Center)
+              }
 
-        LazyVerticalGrid(columns = GridCells.Fixed(7), modifier = Modifier.fillMaxWidth()) {
-          items(7) { dayIndex ->
-            Text(
-                text =
-                    DayOfWeek.of(dayIndex + 1).getDisplayName(TextStyle.SHORT, Locale.getDefault()),
-                modifier = Modifier.padding(8.dp),
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Normal,
-                textAlign = TextAlign.Center)
-          }
+              // Calendar days
+              val firstDayOfWeek = currentMonth.atDay(1).dayOfWeek.value
+              repeat(firstDayOfWeek - 1) { item { Spacer(modifier = Modifier.aspectRatio(1f)) } }
 
-          val firstDayOfWeek = currentMonth.atDay(1).dayOfWeek.value
-          repeat(firstDayOfWeek - 1) { item { Spacer(modifier = Modifier.aspectRatio(1f)) } }
-
-          items(currentMonth.lengthOfMonth()) { dayOfMonth ->
-            val date = currentMonth.atDay(dayOfMonth + 1)
-            DayItem(
-                date = date,
-                isSelected = date == selectedDate,
-                isCurrentDay = date == LocalDate.now(),
-                onDateSelected = onDateSelected,
-                dayStatus = calculateDayStatus(timeSlots[date] ?: emptyList()))
-          }
-        }
+              items(currentMonth.lengthOfMonth()) { dayOfMonth ->
+                val date = currentMonth.atDay(dayOfMonth + 1)
+                DayItem(
+                    date = date,
+                    isSelected = date == selectedDate,
+                    isCurrentDay = date == LocalDate.now(),
+                    onDateSelected = onDateSelected,
+                    dayStatus = calculateDayStatus(timeSlots[date] ?: emptyList()))
+              }
+            }
       }
 }
 
@@ -288,8 +313,8 @@ fun DayItem(
 ) {
   val backgroundColor =
       when {
-        isSelected -> Color(0xFF0099FF)
-        isCurrentDay -> Color.Gray
+        isSelected -> SolvitBlue
+        isCurrentDay -> Color.LightGray
         else -> Color.Transparent
       }
   val textColor = if (isSelected || isCurrentDay) Color.White else Color.Black
@@ -414,7 +439,7 @@ fun WeekView(
 
   Column(
       modifier =
-          Modifier.fillMaxSize().pointerInput(Unit) {
+          Modifier.fillMaxSize().padding(16.dp).pointerInput(Unit) {
             detectHorizontalDragGestures(
                 onDragStart = { isDragging = true },
                 onDragEnd = { isDragging = false },
@@ -439,19 +464,20 @@ fun WeekView(
                 })
           }) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically) {
               Text(
                   text =
-                      "${currentWeekStart.format(DateTimeFormatter.ofPattern("MMMM d"))} - ${currentWeekStart.plusDays(6).format(DateTimeFormatter.ofPattern("MMMM d, yyyy"))}",
+                      "${currentWeekStart.format(DateTimeFormatter.ofPattern("EEEE, MMMM d"))} - ${currentWeekStart.plusDays(6).format(DateTimeFormatter.ofPattern("EEEE, MMMM d, yyyy"))}",
                   modifier =
                       Modifier.clickable(onClick = onHeaderClick)
                           .padding(vertical = 8.dp)
                           .testTag("weekHeader"),
+                  fontSize = 16.sp,
                   fontWeight = FontWeight.Bold)
             }
-
-        LazyColumn {
+        Spacer(modifier = Modifier.height(16.dp))
+        LazyColumn(modifier = Modifier.weight(1f)) {
           items(7) { dayOffset ->
             val date = currentWeekStart.plusDays(dayOffset.toLong())
             WeekDayItem(
