@@ -6,6 +6,7 @@ import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.FirebaseApp
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
@@ -37,6 +38,7 @@ class UserRepositoryFirestoreTest {
   @Mock private lateinit var mockQuerySnapshot: QuerySnapshot
   @Mock private lateinit var mockTaskUser: Task<UserRepository>
   @Mock private lateinit var mockTaskDoc: Task<DocumentSnapshot>
+  @Mock private lateinit var mockTaskQuery: Task<QuerySnapshot>
 
   private lateinit var firebaseRepository: UserRepositoryFirestore
 
@@ -62,6 +64,19 @@ class UserRepositoryFirestoreTest {
     Mockito.`when`(mockFirestore.collection(any())).thenReturn(mockCollectionReference)
     Mockito.`when`(mockCollectionReference.document(any())).thenReturn(mockDocumentReference)
     Mockito.`when`(mockCollectionReference.document()).thenReturn(mockDocumentReference)
+  }
+
+  @Test
+  fun init_callsAuthStateListener() {
+    val mockAuth = mock<FirebaseAuth>()
+    Mockito.`when`(mockAuth.addAuthStateListener(any())).thenAnswer {
+      val listener = it.arguments[0] as FirebaseAuth.AuthStateListener
+        listener.onAuthStateChanged(mockAuth)
+        mockAuth
+    }
+    val onSuccess: () -> Unit = mock()
+
+    firebaseRepository.init { onSuccess() }
   }
 
   @Test
@@ -94,8 +109,17 @@ class UserRepositoryFirestoreTest {
         .thenReturn(testSeekerProfile.username)
     Mockito.`when`(mockDocumentSnapshot.getString("email")).thenReturn(testSeekerProfile.email)
     Mockito.`when`(mockDocumentSnapshot.getString("phone")).thenReturn(testSeekerProfile.phone)
-    Mockito.`when`(mockDocumentSnapshot.getString("address")).thenReturn(testSeekerProfile.address)
+    Mockito.`when`(mockDocumentSnapshot.getString("address")).thenReturn(null)
     val onFailure: () -> Unit = mock()
+
+    // Test failing document snapshot
+    firebaseRepository.getUserProfile(
+        uid = "12345",
+        onSuccess = { TestCase.fail("Success callback should not be called") },
+        onFailure = { onFailure() })
+
+    // Test successful document snapshot
+    Mockito.`when`(mockDocumentSnapshot.getString("address")).thenReturn(testSeekerProfile.address)
 
     firebaseRepository.getUserProfile(
         uid = "12345",
@@ -104,30 +128,32 @@ class UserRepositoryFirestoreTest {
         },
         onFailure = { onFailure() })
 
-    verify(mockDocumentReference).get()
-    Mockito.verify(mockTaskDoc).addOnCompleteListener(Mockito.any())
+    verify(mockDocumentReference, Mockito.times(2)).get()
+    Mockito.verify(mockTaskDoc, Mockito.times(2)).addOnCompleteListener(Mockito.any())
   }
 
-  /*@Test
+  @Test
   fun getUserProfileFail() {
+    val mockException = Exception("Mock exception")
     // Mocking a failed task scenario
-    val mockException = Exception("Firestore error")
-
-    // Simulate failure by setting isSuccessful to false and providing an exception
-    Mockito.`when`(mockTaskFailure.isSuccessful).thenReturn(false)
-    Mockito.`when`(mockTaskFailure.exception).thenReturn(mockException)
-
-    Mockito.`when`(mockDocumentReference.get()).thenReturn(mockTaskFailure)
+    Mockito.`when`(mockDocumentReference.get()).thenReturn(mockTaskDoc)
+    Mockito.`when`(mockTaskDoc.isSuccessful).thenReturn(false)
+    Mockito.`when`(mockTaskDoc.exception).thenReturn(mockException)
+    `when`(mockTaskDoc.addOnCompleteListener(Mockito.any())).thenAnswer {
+      val listener = it.arguments[0] as OnCompleteListener<DocumentSnapshot>
+      listener.onComplete(mockTaskDoc)
+      mockTaskDoc
+    }
 
     // Call the method and verify failure callback is invoked
     firebaseRepository.getUserProfile(
         uid = "12345",
         onSuccess = { TestCase.fail("Success callback should not be called") },
         onFailure = { e ->
-          assertEquals(
-              mockException, e) // Ensure the failure callback is called with the right exception
+          assertEquals(mockException, e) // Ensure the failure callback is called with the right exception
         })
-  }*/
+  }
+
 
   @Test
   fun updateUserProfileTest() {
