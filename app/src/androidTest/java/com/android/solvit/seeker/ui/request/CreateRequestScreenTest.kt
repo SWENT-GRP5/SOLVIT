@@ -4,6 +4,7 @@ import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
@@ -102,6 +103,7 @@ class CreateRequestScreenTest {
     composeTestRule.onNodeWithTag("inputRequestAddress").assertIsDisplayed()
     composeTestRule.onNodeWithTag("inputRequestDate").assertIsDisplayed()
     composeTestRule.onNodeWithTag("imagePickerButton").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("bottomNavigationMenu").isDisplayed()
   }
 
   @Test

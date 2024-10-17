@@ -13,7 +13,7 @@ import com.android.solvit.seeker.ui.navigation.SeekerBottomNavigationMenu
 import com.android.solvit.shared.ui.map.MapScreen
 import com.android.solvit.shared.ui.map.MarkerData
 import com.android.solvit.shared.ui.map.RequestLocationPermission
-import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION
+import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_CUSTOMMER
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
@@ -58,7 +58,7 @@ fun SeekerMapScreen(
       bottomBar = {
         SeekerBottomNavigationMenu(
             onTabSelect = { route -> navigationActions.navigateTo(route) },
-            tabList = LIST_TOP_LEVEL_DESTINATION,
+            tabList = LIST_TOP_LEVEL_DESTINATION_CUSTOMMER,
             selectedItem = navigationActions.currentRoute())
       })
 }
