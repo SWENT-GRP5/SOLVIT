@@ -1,6 +1,7 @@
 package com.android.solvit.shared.ui.authentication
 
 import android.content.Intent
+import android.widget.Toast
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResult
@@ -22,6 +23,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.SnackbarDefaults.backgroundColor
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
@@ -34,22 +36,24 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -71,12 +75,20 @@ fun SignUpScreen(
     authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory)
 ) {
   val email = remember { mutableStateOf("") }
+  var password = remember { mutableStateOf("") }
+  var confirmPassword = remember { mutableStateOf("") }
 
   val context = LocalContext.current
   val launcher =
       googleRegisterLauncher(
           authViewModel, { navigationActions.navigateTo(Screen.SIGN_UP_CHOOSE_ROLE) }, {})
   val token = stringResource(R.string.default_web_client_id)
+
+  val isFormComplete =
+      email.value.isNotBlank() &&
+          password.value.isNotBlank() &&
+          confirmPassword.value.isNotBlank() &&
+          password.value == confirmPassword.value
 
   Column(
       modifier = Modifier.fillMaxWidth().background(Color(0xFFFFFFFF)).padding(horizontal = 16.dp),
@@ -102,11 +114,6 @@ fun SignUpScreen(
         VerticalSpacer(height = 50.dp)
 
         // Social Sign Up Buttons
-        SocialSignUpButton(
-            "Sign Up with Facebook",
-            R.drawable.facebook_logo,
-            "facebookSignUpButton",
-            Color(24, 119, 242)) { /* Facebook sign up */}
         VerticalSpacer(height = 10.dp)
         SocialSignUpButton(
             "Sign Up with Google",
@@ -125,11 +132,6 @@ fun SignUpScreen(
               launcher.launch(googleSignInClient.signInIntent)
             }
         VerticalSpacer(height = 10.dp)
-        SocialSignUpButton(
-            "Sign Up with Apple",
-            R.drawable.apple_logo,
-            "appleSignUpButton",
-            Color.Black) { /* Apple sign up */}
 
         VerticalSpacer(height = 10.dp)
         Text("OR", color = Color.Gray)
@@ -137,17 +139,37 @@ fun SignUpScreen(
 
         CustomOutlinedTextField(
             "Enter your email address", email.value, onValueChange = { email.value = it })
-        VerticalSpacer(height = 50.dp)
 
-        SignUpButton {
-          if (email.value.isNotEmpty()) {
-            authViewModel.setEmail(email.value)
-            navigationActions.navigateTo(Screen.SIGN_UP_CHOOSE_ROLE)
-          }
-        }
+        VerticalSpacer(height = 10.dp)
+
+        PasswordTextField(
+            value = password.value,
+            onValueChange = { password.value = it },
+            label = "Password",
+            placeholder = "Enter your password",
+            contentDescription = "Password",
+            testTag = "passwordInput",
+            icon = Icons.Filled.Lock)
+
+        VerticalSpacer(height = 10.dp)
+
+        // Confirm Password Field
+        PasswordTextField(
+            value = confirmPassword.value,
+            onValueChange = { confirmPassword.value = it },
+            label = "Confirm Password",
+            placeholder = "Re-enter your password",
+            contentDescription = "Confirm Password",
+            testTag = "confirmPasswordInput",
+            icon = Icons.Filled.Lock)
+
+        VerticalSpacer(height = 30.dp)
+
+        SignUpButton({ navigationActions.navigateTo(Screen.SIGN_UP_CHOOSE_ROLE) }, isFormComplete)
+
         VerticalSpacer(height = 16.dp)
 
-        AlreadyHaveAccountText()
+        AlreadyHaveAccountText(navigationActions)
       }
 }
 
@@ -186,31 +208,65 @@ fun CustomOutlinedTextField(label: String, value: String, onValueChange: (String
               focusedBorderColor = Color(0xFF5AC561), unfocusedBorderColor = Color(0xFF5AC561)))
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SignUpButton(onClick: () -> Unit) {
-  Box(
-      modifier =
-          Modifier.fillMaxWidth()
-              .height(48.dp)
-              .background(
-                  brush =
-                      Brush.horizontalGradient(
-                          colors = listOf(Color(0, 200, 81), Color(0, 153, 255))),
-                  shape = RoundedCornerShape(8.dp))
-              .clickable { onClick() }
-              .testTag("signUpButton"),
-      contentAlignment = Alignment.Center) {
-        Text("Sign up", color = Color.White, fontWeight = FontWeight.Bold)
+fun PasswordTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    placeholder: String,
+    contentDescription: String = "",
+    testTag: String,
+    icon: ImageVector
+) {
+  OutlinedTextField(
+      value = value,
+      onValueChange = onValueChange,
+      label = { Text(label, color = Color.Black) },
+      placeholder = { Text(placeholder) },
+      modifier = Modifier.fillMaxWidth().testTag(testTag),
+      shape = RoundedCornerShape(12.dp),
+      leadingIcon = {
+        Icon(
+            imageVector = icon,
+            contentDescription = contentDescription,
+            tint = Color(90, 197, 97),
+            modifier = Modifier.size(25.dp))
+      },
+      visualTransformation = PasswordVisualTransformation(), // Hide password
+      colors =
+          TextFieldDefaults.outlinedTextFieldColors(
+              focusedBorderColor = Color(0xFF5AC561), unfocusedBorderColor = Color(0xFF5AC561)))
+}
+
+@Composable
+fun SignUpButton(onClick: () -> Unit, isComplete: Boolean = false) {
+  val context = LocalContext.current
+
+  Button(
+      onClick = {
+        if (isComplete) {
+          onClick()
+        } else {
+          Toast.makeText(context, "Form is not complete", Toast.LENGTH_SHORT).show()
+        }
+      },
+      modifier = Modifier.fillMaxWidth().height(60.dp).testTag("signUpButton"),
+      shape = RoundedCornerShape(12.dp),
+      colors =
+          ButtonDefaults.buttonColors(
+              containerColor = if (isComplete) Color(0xFF5AC561) else Color.Gray)) {
+        Text("Sign Up", color = Color.White)
       }
 }
 
 @Composable
-fun AlreadyHaveAccountText() {
+fun AlreadyHaveAccountText(navigationActions: NavigationActions) {
   Row(verticalAlignment = Alignment.CenterVertically) {
     Text("Already have an account? ", color = Color.Gray)
     ClickableText(
         text = AnnotatedString("Log up in here!"),
-        onClick = { /* TODO: Navigate to Log In screen */},
+        onClick = { navigationActions.goBack() },
         style = TextStyle(color = Color(147, 168, 255), textDecoration = TextDecoration.Underline),
         modifier = Modifier.testTag("logInLink"))
   }
