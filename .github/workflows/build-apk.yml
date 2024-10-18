@@ -54,7 +54,7 @@ jobs:
           
       - name: Sign the APK
         run: |
-          jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 -keystore release-keystore.jks -storepass $RELEASE_KEYSTORE_PASSWORD -keypass $RELEASE_KEY_PASSWORD app/build/outputs/apk/release/app-release-unsigned.apk $RELEASE_KEY_ALIAS
+          jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 -keystore app/release-key.jks -storepass $RELEASE_KEYSTORE_PASSWORD -keypass $RELEASE_KEY_PASSWORD app/build/outputs/apk/release/app-release-unsigned.apk $RELEASE_KEY_ALIAS
 
       - name: Grant execute permission for Gradlew
         run: chmod +x ./gradlew
