@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+
   pull_request:
     types:
       - opened
@@ -27,9 +28,6 @@ jobs:
       # Load google-services.json and local.properties from the secrets
       - name: Decode secrets
         env:
-          RELEASE_KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
-          RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
-          RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
           GOOGLE_SERVICES: ${{ secrets.GOOGLE_SERVICES }}
           LOCAL_PROPERTIES: ${{ secrets.LOCAL_PROPERTIES }}
         run: |
@@ -43,7 +41,9 @@ jobs:
         run: |
           echo "$RELEASE_KEYSTORE" | base64 --decode > ./app/release-key.jks
 
-      # Cache Gradle packages to speed up the build process
+      - name: Grant execute permission for Gradlew
+        run: chmod +x ./gradlew
+
       - name: Cache Gradle packages
         uses: actions/cache@v3
         with:
@@ -54,30 +54,19 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle
 
-      - name: Grant execute permission for Gradlew
-        run: chmod +x ./gradlew
+      # Set up the signing configuration in the Gradle build
+      - name: Setup signing configuration
+        run: |
+          echo "RELEASE_STORE_FILE=app/release-key.jks" >> local.properties
+          echo "RELEASE_STORE_PASSWORD=${{ secrets.RELEASE_KEYSTORE_PASSWORD }}" >> local.properties
+          echo "RELEASE_KEY_ALIAS=${{ secrets.RELEASE_KEY_ALIAS }}" >> local.properties
+          echo "RELEASE_KEY_PASSWORD=${{ secrets.RELEASE_KEY_PASSWORD }}" >> local.properties
 
-      # Build APK (or AAB)
       - name: Build APK
         run: ./gradlew assembleRelease
 
-      # Sign the APK (after building it)
-      - name: Sign the APK
-        run: |
-          jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 \
-          -keystore ./app/release-key.jks \
-          -storepass $RELEASE_KEYSTORE_PASSWORD \
-          -keypass $RELEASE_KEY_PASSWORD \
-          app/build/outputs/apk/release/app-release-unsigned.apk $RELEASE_KEY_ALIAS
-
-      # Optionally, rename the signed APK for consistency
-      - name: Rename signed APK
-        run: |
-          mv app/build/outputs/apk/release/app-release-unsigned.apk app/build/outputs/apk/release/app-release-signed.apk
-
-      # Upload APK
       - name: Upload APK
         uses: actions/upload-artifact@v3
         with:
           name: M1-APK
-          path: app/build/outputs/apk/release/app-release-signed.apk
+          path: app/build/outputs/apk/debug/app-release-unsigned.apk
