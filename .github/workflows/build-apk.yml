@@ -40,6 +40,10 @@ jobs:
           RELEASE_KEYSTORE: ${{ secrets.RELEASE_KEYSTORE }}
         run: |
           echo "$RELEASE_KEYSTORE" | base64 --decode > ./app/release-key.jks
+          
+      - name: Sign the APK
+        run: |
+          jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 -keystore release-keystore.jks -storepass $KEYSTORE_PASSWORD -keypass $KEY_PASSWORD app/build/outputs/apk/release/app-release-unsigned.apk $KEY_ALIAS
 
       - name: Grant execute permission for Gradlew
         run: chmod +x ./gradlew
@@ -53,6 +57,7 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle
+            
 
       # Set up the signing configuration in the Gradle build
       - name: Setup signing configuration
@@ -69,4 +74,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: M1-APK
-          path: app/build/outputs/apk/release/app-release-unsigned.apk
+          path: app/build/outputs/apk/release/app-release-signed.apk
