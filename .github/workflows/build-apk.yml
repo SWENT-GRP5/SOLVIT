@@ -42,6 +42,11 @@ jobs:
           RELEASE_KEYSTORE: ${{ secrets.RELEASE_KEYSTORE }}
         run: |
           echo "$RELEASE_KEYSTORE" | base64 --decode > ./app/release-key.jks
+          
+      - name: Debug alias
+        run: echo $RELEASE_KEY_ALIAS
+        env:
+          RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
 
       # Cache Gradle packages to speed up the build process
       - name: Cache Gradle packages
