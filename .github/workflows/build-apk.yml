@@ -44,7 +44,7 @@ jobs:
         run: |
           echo "$RELEASE_KEYSTORE" | base64 --decode > ./app/release-key.jks
 
-      # Set up the signing configuration in the Gradle build
+      # Set up the signing configuration in the Gradle build and sign
       - name: Setup signing configuration
         run: |
           echo "RELEASE_STORE_FILE=app/release-key.jks" >> local.properties
