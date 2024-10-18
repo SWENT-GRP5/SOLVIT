@@ -28,6 +28,9 @@ jobs:
       # Load google-services.json and local.properties from the secrets
       - name: Decode secrets
         env:
+          RELEASE_KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
+          RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
+          RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
           GOOGLE_SERVICES: ${{ secrets.GOOGLE_SERVICES }}
           LOCAL_PROPERTIES: ${{ secrets.LOCAL_PROPERTIES }}
         run: |
@@ -40,10 +43,18 @@ jobs:
           RELEASE_KEYSTORE: ${{ secrets.RELEASE_KEYSTORE }}
         run: |
           echo "$RELEASE_KEYSTORE" | base64 --decode > ./app/release-key.jks
+
+      # Set up the signing configuration in the Gradle build
+      - name: Setup signing configuration
+        run: |
+          echo "RELEASE_STORE_FILE=app/release-key.jks" >> local.properties
+          echo "RELEASE_STORE_PASSWORD=${{ secrets.RELEASE_KEYSTORE_PASSWORD }}" >> local.properties
+          echo "RELEASE_KEY_ALIAS=${{ secrets.RELEASE_KEY_ALIAS }}" >> local.properties
+          echo "RELEASE_KEY_PASSWORD=${{ secrets.RELEASE_KEY_PASSWORD }}" >> local.properties
           
       - name: Sign the APK
         run: |
-          jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 -keystore release-keystore.jks -storepass $KEYSTORE_PASSWORD -keypass $KEY_PASSWORD app/build/outputs/apk/release/app-release-unsigned.apk $KEY_ALIAS
+          jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 -keystore release-keystore.jks -storepass $RELEASE_KEYSTORE_PASSWORD -keypass $RELEASE_KEY_PASSWORD app/build/outputs/apk/release/app-release-unsigned.apk $RELEASE_KEY_ALIAS
 
       - name: Grant execute permission for Gradlew
         run: chmod +x ./gradlew
@@ -59,13 +70,7 @@ jobs:
             ${{ runner.os }}-gradle
             
 
-      # Set up the signing configuration in the Gradle build
-      - name: Setup signing configuration
-        run: |
-          echo "RELEASE_STORE_FILE=app/release-key.jks" >> local.properties
-          echo "RELEASE_STORE_PASSWORD=${{ secrets.RELEASE_KEYSTORE_PASSWORD }}" >> local.properties
-          echo "RELEASE_KEY_ALIAS=${{ secrets.RELEASE_KEY_ALIAS }}" >> local.properties
-          echo "RELEASE_KEY_PASSWORD=${{ secrets.RELEASE_KEY_PASSWORD }}" >> local.properties
+     
 
       - name: Build APK
         run: ./gradlew assembleRelease
