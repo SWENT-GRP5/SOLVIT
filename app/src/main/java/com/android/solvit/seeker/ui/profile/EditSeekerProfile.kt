@@ -66,6 +66,7 @@ fun EditSeekerProfileScreen(
     address = userProfile.address
   }
   Scaffold(
+      modifier = Modifier.testTag("editProfileScreen"),
       topBar = {
         TopAppBar(
             backgroundColor = Color(0xFF002366), // Set blue background
@@ -89,7 +90,8 @@ fun EditSeekerProfileScreen(
                   Modifier.size(100.dp)
                       .clip(CircleShape)
                       .border(2.dp, Color.Gray, CircleShape)
-                      .padding(bottom = 16.dp))
+                      .padding(bottom = 16.dp)
+                      .testTag("profilePicture"))
           TextButton(onClick = { /* Handle change picture */}) { Text("Change Picture") }
 
           Spacer(modifier = Modifier.height(16.dp))
@@ -99,7 +101,7 @@ fun EditSeekerProfileScreen(
               value = fullName,
               onValueChange = { fullName = it },
               label = { Text("Full Name") },
-              modifier = Modifier.fillMaxWidth().testTag("profileName"))
+              modifier = Modifier.fillMaxWidth().testTag("fullNameInput"))
 
           Spacer(modifier = Modifier.height(16.dp))
 
@@ -108,7 +110,7 @@ fun EditSeekerProfileScreen(
               value = username,
               onValueChange = { username = it },
               label = { Text("Username") },
-              modifier = Modifier.fillMaxWidth().testTag("profileUsername"))
+              modifier = Modifier.fillMaxWidth().testTag("usernameInput"))
 
           Spacer(modifier = Modifier.height(16.dp))
 
@@ -117,7 +119,7 @@ fun EditSeekerProfileScreen(
               value = email,
               onValueChange = { email = it },
               label = { Text("Email") },
-              modifier = Modifier.fillMaxWidth().testTag("profileEmail"))
+              modifier = Modifier.fillMaxWidth().testTag("emailInput"))
 
           Spacer(modifier = Modifier.height(16.dp))
 
@@ -126,7 +128,7 @@ fun EditSeekerProfileScreen(
               value = phone,
               onValueChange = { phone = it },
               label = { Text("Phone Number") },
-              modifier = Modifier.fillMaxWidth().testTag("profilePhone"))
+              modifier = Modifier.fillMaxWidth().testTag("phoneInput"))
 
           Spacer(modifier = Modifier.height(16.dp))
 
@@ -135,7 +137,7 @@ fun EditSeekerProfileScreen(
               value = address,
               onValueChange = { address = it },
               label = { Text("Address") },
-              modifier = Modifier.fillMaxWidth().testTag("profileAddress"))
+              modifier = Modifier.fillMaxWidth().testTag("addressInput"))
 
           Spacer(modifier = Modifier.height(16.dp))
 
@@ -155,7 +157,7 @@ fun EditSeekerProfileScreen(
                 }
                 navigationActions.goBack()
               },
-              modifier = Modifier.fillMaxWidth(),
+              modifier = Modifier.fillMaxWidth().testTag("saveButton"),
               colors = ButtonDefaults.buttonColors(backgroundColor = Color.Black)) {
                 Text("Save", color = Color.White)
               }
