@@ -42,7 +42,7 @@ android {
     signingConfigs {
         create("release") {
             // Use environment variables or properties for signing config
-            storeFile = file(localProperties.getProperty("RELEASE_STORE_FILE"))
+            storeFile = rootProject.file("release-key.jks")
             storePassword = localProperties.getProperty("RELEASE_STORE_PASSWORD")
             keyAlias = localProperties.getProperty("RELEASE_KEY_ALIAS")
             keyPassword = localProperties.getProperty("RELEASE_KEY_PASSWORD")
