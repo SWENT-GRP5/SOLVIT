@@ -6,10 +6,10 @@ on:
       - main
 
   pull_request:
-          types:
-            - opened
-            - synchronize
-            - reopened
+    types:
+      - opened
+      - synchronize
+      - reopened
 
 jobs:
   build:
@@ -31,8 +31,15 @@ jobs:
           GOOGLE_SERVICES: ${{ secrets.GOOGLE_SERVICES }}
           LOCAL_PROPERTIES: ${{ secrets.LOCAL_PROPERTIES }}
         run: |
-            echo "$GOOGLE_SERVICES" | base64 --decode > ./app/google-services.json
-            echo "$LOCAL_PROPERTIES" | base64 --decode > ./local.properties
+          echo "$GOOGLE_SERVICES" | base64 --decode > ./app/google-services.json
+          echo "$LOCAL_PROPERTIES" | base64 --decode > ./local.properties
+
+      # Decode the keystore
+      - name: Decode release keystore
+        env:
+          RELEASE_KEYSTORE: ${{ secrets.RELEASE_KEYSTORE }}
+        run: |
+          echo "$RELEASE_KEYSTORE" | base64 --decode > ./release-key.jks
 
       - name: Grant execute permission for Gradlew
         run: chmod +x ./gradlew
@@ -47,11 +54,19 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle
 
+      # Set up the signing configuration in the Gradle build
+      - name: Setup signing configuration
+        run: |
+          echo "RELEASE_STORE_FILE=app/release-key.jks" >> local.properties
+          echo "RELEASE_STORE_PASSWORD=${{ secrets.RELEASE_KEYSTORE_PASSWORD }}" >> local.properties
+          echo "RELEASE_KEY_ALIAS=${{ secrets.RELEASE_KEY_ALIAS }}" >> local.properties
+          echo "RELEASE_KEY_PASSWORD=${{ secrets.RELEASE_KEY_PASSWORD }}" >> local.properties
+
       - name: Build APK
-        run: ./gradlew assembleDebug
+        run: ./gradlew assembleRelease
 
       - name: Upload APK
         uses: actions/upload-artifact@v3
         with:
           name: M1-APK
-          path: app/build/outputs/apk/debug/app-debug.apk
+          path: app/build/outputs/apk/release/app-release.apk
