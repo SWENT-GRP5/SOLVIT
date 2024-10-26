@@ -16,8 +16,8 @@ import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.map.LocationViewModel
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestStatus
-import com.android.solvit.shared.model.request.ServiceRequestType
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
+import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.model.utils.loadBitmapFromUri
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.google.firebase.Timestamp
@@ -42,8 +42,8 @@ fun CreateRequestScreen(
   var showDropdownType by remember { mutableStateOf(false) }
   var typeQuery by remember { mutableStateOf("") }
   val filteredServiceTypes =
-      ServiceRequestType.entries.filter { it.name.contains(typeQuery, ignoreCase = true) }
-  var selectedServiceType by remember { mutableStateOf(ServiceRequestType.OTHER) }
+      Services.entries.filter { it.name.contains(typeQuery, ignoreCase = true) }
+  var selectedServiceType by remember { mutableStateOf(Services.OTHER) }
   val localContext = LocalContext.current
 
   RequestScreen(

@@ -3,6 +3,7 @@ package com.android.solvit.shared.model.request
 import android.net.Uri
 import android.util.Log
 import com.android.solvit.shared.model.map.Location
+import com.android.solvit.shared.model.service.Services
 import com.google.android.gms.tasks.Task
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
@@ -121,7 +122,7 @@ class ServiceRequestRepositoryFirebase(
                   longitude = document.getDouble("location.longitude") ?: return null,
                   name = document.getString("location.name") ?: return null),
           imageUrl = document.getString("imageUrl"),
-          type = ServiceRequestType.valueOf(document.getString("type") ?: return null),
+          type = Services.valueOf(document.getString("type") ?: return null),
           status = ServiceRequestStatus.valueOf(document.getString("status") ?: return null))
     } catch (e: Exception) {
       Log.e("ServiceRequestRepositoryFirestore", "Error converting document to ServiceRequest", e)

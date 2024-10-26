@@ -17,8 +17,8 @@ import com.android.solvit.shared.model.map.LocationViewModel
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestRepository
 import com.android.solvit.shared.model.request.ServiceRequestStatus
-import com.android.solvit.shared.model.request.ServiceRequestType
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
+import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.google.firebase.Timestamp
 import java.util.GregorianCalendar
@@ -53,7 +53,7 @@ class EditRequestScreenTest {
       ServiceRequest(
           "uid",
           "title",
-          ServiceRequestType.CLEANING,
+          Services.CLEANER,
           "description",
           "assigneeName",
           Timestamp(GregorianCalendar(2024, 0, 1).time),
@@ -157,9 +157,9 @@ class EditRequestScreenTest {
     }
 
     composeTestRule.onNodeWithTag("inputServiceType").performTextClearance()
-    composeTestRule.onNodeWithTag("inputServiceType").performTextInput("Plumbing")
+    composeTestRule.onNodeWithTag("inputServiceType").performTextInput("Plumber")
     composeTestRule.onNodeWithTag("serviceTypeMenu").assertExists()
-    composeTestRule.onNodeWithTag("serviceTypeResult").assert(hasText("Plumbing"))
+    composeTestRule.onNodeWithTag("serviceTypeResult").assert(hasText("Plumber"))
   }
 
   @Test
@@ -170,7 +170,7 @@ class EditRequestScreenTest {
       EditRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
     }
 
-    composeTestRule.onNodeWithTag("inputServiceType").performTextInput("Plumbing")
+    composeTestRule.onNodeWithTag("inputServiceType").performTextInput("Plumber")
     composeTestRule.onNodeWithTag("serviceTypeResult").performClick()
     composeTestRule.onNodeWithTag("serviceTypeMenu").assertDoesNotExist()
   }
@@ -195,7 +195,7 @@ class EditRequestScreenTest {
       EditRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
     }
 
-    composeTestRule.onNodeWithTag("inputServiceType").performTextInput("Plumbing")
+    composeTestRule.onNodeWithTag("inputServiceType").performTextInput("Plumber")
     composeTestRule.onNodeWithTag("inputRequestTitle").performClick()
     composeTestRule.onNodeWithTag("serviceTypeMenu").assertDoesNotExist()
   }
