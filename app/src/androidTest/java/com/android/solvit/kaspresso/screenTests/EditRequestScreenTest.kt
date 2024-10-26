@@ -8,8 +8,8 @@ import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestRepository
 import com.android.solvit.shared.model.request.ServiceRequestStatus
-import com.android.solvit.shared.model.request.ServiceRequestType
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
+import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
 import com.google.firebase.Timestamp
@@ -32,7 +32,7 @@ class EditRequestScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.with
       ServiceRequest(
           "uid",
           "title",
-          ServiceRequestType.CLEANING,
+          Services.CLEANER,
           "description",
           "assigneeName",
           Timestamp(GregorianCalendar(2024, 0, 1).time),

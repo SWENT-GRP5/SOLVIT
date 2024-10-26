@@ -11,8 +11,8 @@ import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestRepository
 import com.android.solvit.shared.model.request.ServiceRequestStatus
-import com.android.solvit.shared.model.request.ServiceRequestType
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
+import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.ui.requests.ListRequestsFeedScreen
@@ -48,7 +48,7 @@ class ListServicesRequestsScreenTest {
                       "Paris, Île-de-France, France métropolitaine, France"),
               status = ServiceRequestStatus.PENDING,
               uid = "gIoUWJGkTgLHgA7qts59",
-              type = ServiceRequestType.PLUMBING,
+              type = Services.PLUMBER,
               imageUrl =
                   "https://firebasestorage.googleapis.com/v0/b/solvit-14cc1.appspot.com/o/serviceRequestImages%2F588d3bd9-bcb7-47bc-9911-61fae59eaece.jpg?alt=media&token=5f747f33-9732-4b90-9b34-55e28732ebc3"),
           ServiceRequest(
@@ -63,7 +63,7 @@ class ListServicesRequestsScreenTest {
                       "Paris, Île-de-France, France métropolitaine, France"),
               status = ServiceRequestStatus.PENDING,
               uid = "gIoUWJGkTgLHgA7qts59",
-              type = ServiceRequestType.TUTOR,
+              type = Services.TUTOR,
               imageUrl =
                   "https://firebasestorage.googleapis.com/v0/b/solvit-14cc1.appspot.com/o/serviceRequestImages%2F588d3bd9-bcb7-47bc-9911-61fae59eaece.jpg?alt=media&token=5f747f33-9732-4b90-9b34-55e28732ebc3"))
 
