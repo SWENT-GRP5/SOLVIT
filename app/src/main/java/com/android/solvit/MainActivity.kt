@@ -51,7 +51,7 @@ class MainActivity : ComponentActivity() {
     setContent {
       SampleAppTheme {
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-          SolvItApp()
+          SolvitApp()
         }
       }
     }
@@ -59,7 +59,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun SolvItApp() {
+fun SolvitApp() {
   val authViewModel = viewModel<AuthViewModel>(factory = AuthViewModel.Factory)
   val user = authViewModel.user.collectAsState()
   val userRegistered = authViewModel.userRegistered.collectAsState()

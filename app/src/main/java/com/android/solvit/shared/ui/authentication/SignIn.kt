@@ -81,7 +81,7 @@ fun SignInScreen(
   var email by remember { mutableStateOf("") }
   var password by remember { mutableStateOf("") }
   var passwordVisible by remember { mutableStateOf(false) }
-  var isChecked by remember { mutableStateOf(false) }
+  var rememberMeIsChecked by remember { mutableStateOf(false) }
 
   val context = LocalContext.current
   val onSuccess: () -> Unit = {
@@ -96,7 +96,11 @@ fun SignInScreen(
 
   val token = stringResource(R.string.default_web_client_id)
 
-  val backgroundColor = Color(0xFFFFFFFF) // White background color
+    val isFormComplete = email.isNotBlank() && password.isNotBlank()
+    val goodFormEmail = email.contains("@") && email.contains(".")
+    val passwordLengthComplete = password.length >= 6
+
+  val backgroundColor = Color(0xFFFFFFFF)
 
   Scaffold(
       topBar = {
@@ -117,18 +121,15 @@ fun SignInScreen(
         Column(
             modifier = Modifier.fillMaxSize().padding(padding).background(backgroundColor),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center) {
-              // Your existing content here
-            }
+            verticalArrangement = Arrangement.Center) {}
       })
 
-  // Main Layout
   Column(
       modifier = Modifier.fillMaxSize().padding(16.dp),
       horizontalAlignment = Alignment.CenterHorizontally,
       verticalArrangement = Arrangement.Center) {
         Image(
-            painter = painterResource(id = R.drawable.sign_in), // Replace with your check vector
+            painter = painterResource(id = R.drawable.sign_in),
             contentDescription = "Checkmark",
             modifier = Modifier.size(240.dp).testTag("loginImage"))
 
@@ -212,9 +213,9 @@ fun SignInScreen(
             verticalAlignment = Alignment.CenterVertically) {
               Row(verticalAlignment = Alignment.CenterVertically) {
                 Checkbox(
-                    checked = isChecked,
+                    checked = rememberMeIsChecked,
                     onCheckedChange = {
-                      isChecked = it
+                      rememberMeIsChecked = it
                       Toast.makeText(context, "Not implemented yet", Toast.LENGTH_LONG).show()
                     },
                     modifier = Modifier.size(24.dp),
@@ -228,36 +229,45 @@ fun SignInScreen(
 
               ClickableText(
                   text = AnnotatedString("Forgot password?"),
-                  onClick = {
-                    Toast.makeText(context, "Not implemented yet", Toast.LENGTH_LONG).show()
-                  },
+                  onClick = { Toast.makeText(context, "Not implemented yet", Toast.LENGTH_LONG).show() },
                   style = TextStyle(color = Color.Gray, textDecoration = TextDecoration.Underline),
                   modifier = Modifier.testTag("forgotPasswordLink"))
             }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Sign in button
         Button(
             onClick = {
-              authViewModel.setEmail(email)
-              authViewModel.setPassword(password)
-              authViewModel.loginWithEmailAndPassword(onSuccess, onFailure)
+                if (!isFormComplete) {
+                    Toast.makeText(context, "Please fill in all required fields", Toast.LENGTH_SHORT).show()
+                }
+                else if (!goodFormEmail) {
+                    Toast.makeText(context, "Your email must have \"@\" and \".\"", Toast.LENGTH_SHORT).show()
+                }
+                else if (!passwordLengthComplete) {
+                    Toast.makeText(context, "Your password must have at least 6 characters", Toast.LENGTH_SHORT).show()
+                }
+                else {
+                    authViewModel.setEmail(email)
+                    authViewModel.setPassword(password)
+                    authViewModel.loginWithEmailAndPassword(onSuccess, onFailure)
+                }
             },
-            colors =
-                ButtonDefaults.buttonColors(
-                    containerColor = Color.Transparent // Transparent to show the gradient
-                    ),
-            shape = RoundedCornerShape(25.dp), // Adjust the corner radius as needed
+            colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+            shape = RoundedCornerShape(25.dp),
             modifier =
                 Modifier.fillMaxWidth()
                     .height(50.dp)
                     .background(
-                        brush =
+                        brush = if (isFormComplete && goodFormEmail && passwordLengthComplete) {
                             Brush.horizontalGradient(
-                                colors =
-                                    listOf(Color(0, 200, 83), Color(0, 153, 255)) // Gradient colors
-                                ),
+                                colors = listOf(Color(0, 200, 83), Color(0, 153, 255))
+                            )
+                        } else {
+                            Brush.horizontalGradient(
+                                colors = listOf(Color.Gray, Color.Gray)
+                            )
+                        },
                         shape = RoundedCornerShape(25.dp))
                     .testTag("signInButton")) {
               Text("Sign in", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
@@ -283,7 +293,6 @@ fun SignInScreen(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // New user sign up
         Row(verticalAlignment = Alignment.CenterVertically) {
           Text("I'm new user, ", color = Color.Gray)
           ClickableText(
@@ -300,30 +309,19 @@ fun GoogleSignInButton(onSignInClick: () -> Unit) {
   Button(
       onClick = onSignInClick,
       colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent), // Button color
-      shape = RoundedCornerShape(50), // Circular edges for the button
+      shape = RoundedCornerShape(50),
       border = BorderStroke(1.dp, Color.LightGray),
-      modifier =
-          Modifier.padding(8.dp)
-              .height(48.dp) // Adjust height as needed
-              .testTag("googleSignInButton")) {
+      modifier = Modifier.fillMaxWidth().height(48.dp).testTag("googleSignInButton")) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center,
+            horizontalArrangement = Arrangement.SpaceBetween,
             modifier = Modifier.fillMaxWidth()) {
-              // Load the Google logo from resources
               Image(
                   painter = painterResource(id = R.drawable.google_logo),
                   contentDescription = "Google Logo",
-                  modifier =
-                      Modifier.size(30.dp) // Size of the Google logo
-                          .padding(end = 8.dp))
-
-              // Text for the button
-              Text(
-                  text = "Sign in with Google",
-                  color = Color.Gray, // Text color
-                  fontSize = 16.sp, // Font size
-                  fontWeight = FontWeight.Medium)
+                  modifier = Modifier.size(30.dp).padding(end = 8.dp))
+              Text(text = "Sign In with Google", color = Color.Gray, fontSize = 16.sp)
+              Spacer(Modifier.size(25.dp))
             }
       }
 }

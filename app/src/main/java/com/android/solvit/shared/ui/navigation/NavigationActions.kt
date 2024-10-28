@@ -4,7 +4,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.DateRange
-import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.MailOutline
@@ -30,6 +29,7 @@ object Route {
 object Screen {
   const val PROFILE = "Profile Screen"
   const val EDIT_PROFILE = "EditProfile Screen"
+  const val FORGET_PASSWORD = "Forget Password"
   const val SIGN_IN = "Sign In"
   const val SIGN_UP = "Sign Up"
   const val SIGN_UP_CHOOSE_ROLE = "Choose Role Screen"
@@ -44,7 +44,7 @@ object TopLevelDestinations {
 
   val SERVICES =
       TopLevelDestination(
-          route = Route.SERVICES, icon = Icons.Outlined.Home, textId = "Custommer Home")
+          route = Route.SERVICES, icon = Icons.Outlined.Home, textId = "Customer Home")
   val REQUEST_FEED =
       TopLevelDestination(
           route = Route.REQUESTS_FEED, icon = Icons.Outlined.Home, textId = "Professional Home")
@@ -58,9 +58,6 @@ object TopLevelDestinations {
   val MESSAGE =
       TopLevelDestination(
           route = Route.MESSAGE, icon = Icons.Outlined.MailOutline, textId = "Message")
-  val EDIT_REQUEST =
-      TopLevelDestination(
-          route = Route.EDIT_REQUEST, icon = Icons.Outlined.Edit, textId = "Edit Request")
   val MAP_OF_PROVIDERS =
       TopLevelDestination(
           route = Route.MAP, icon = Icons.Outlined.LocationOn, textId = "Providers Map")
@@ -75,7 +72,7 @@ object TopLevelDestinations {
           route = Route.PROFILE, icon = Icons.Outlined.AccountCircle, textId = "Profile")
 }
 
-val LIST_TOP_LEVEL_DESTINATION_CUSTOMMER =
+val LIST_TOP_LEVEL_DESTINATION_CUSTOMER =
     listOf(
         TopLevelDestinations.SERVICES,
         TopLevelDestinations.MAP_OF_PROVIDERS,

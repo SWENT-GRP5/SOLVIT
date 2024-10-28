@@ -22,6 +22,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -45,17 +47,42 @@ import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SignUpChooseProfile(
     navigationActions: NavigationActions,
     authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory)
 ) {
-  Column(
-      modifier = Modifier.fillMaxSize().background(Color(0xFFFFFFFF)),
-      horizontalAlignment = Alignment.CenterHorizontally) {
-        CustomTopAppBar(onBackClick = { navigationActions.goBack() }, testTag = "backButton")
+  val backgroundColor = Color(0xFFFFFFFF)
 
-        // Stepper section
+  Scaffold(
+      topBar = {
+        TopAppBar(
+            title = { Text("") },
+            navigationIcon = {
+              IconButton(onClick = { navigationActions.goBack() }) {
+                Icon(
+                    Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "goBackButton",
+                    modifier = Modifier.testTag("backButton"))
+              }
+            },
+            colors = TopAppBarDefaults.topAppBarColors(containerColor = backgroundColor),
+            modifier = Modifier.testTag("backButton"))
+      },
+      content = { padding ->
+        Column(
+            modifier = Modifier.fillMaxSize().padding(padding).background(backgroundColor),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center) {}
+      })
+
+  Column(
+      modifier = Modifier.fillMaxWidth().padding(16.dp),
+      horizontalAlignment = Alignment.CenterHorizontally,
+      verticalArrangement = Arrangement.Top) {
+        VerticalSpacer(50.dp)
+
         Stepper(currentStep = 1, isFormComplete = false)
 
         VerticalSpacer(height = 30.dp)
@@ -122,8 +149,7 @@ fun CustomTopAppBar(onBackClick: () -> Unit = {}, testTag: String = "") {
             Icons.AutoMirrored.Filled.ArrowBack,
             contentDescription = "Back",
             modifier = Modifier.testTag(testTag).clickable { onBackClick() })
-      },
-      colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFFFFFFFF)))
+      })
 }
 
 @Composable

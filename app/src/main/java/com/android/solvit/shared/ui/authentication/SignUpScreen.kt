@@ -9,12 +9,11 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -23,34 +22,39 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.Dp
@@ -72,9 +76,9 @@ fun SignUpScreen(
     navigationActions: NavigationActions,
     authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory)
 ) {
-  val email = remember { mutableStateOf("") }
-  val password = remember { mutableStateOf("") }
-  val confirmPassword = remember { mutableStateOf("") }
+  var email by remember { mutableStateOf("") }
+  var password by remember { mutableStateOf("") }
+  var confirmPassword by remember { mutableStateOf("") }
 
   val context = LocalContext.current
   val launcher =
@@ -82,27 +86,40 @@ fun SignUpScreen(
           authViewModel, { navigationActions.navigateTo(Screen.SIGN_UP_CHOOSE_ROLE) }, {})
   val token = stringResource(R.string.default_web_client_id)
 
-  val isFormComplete =
-      email.value.isNotBlank() && password.value.isNotBlank() && confirmPassword.value.isNotBlank()
 
-  val passwordLengthComplete = password.value.length >= 6
-  val samePassword = password.value == confirmPassword.value
+  val isFormComplete = email.isNotBlank() && password.isNotBlank() && confirmPassword.isNotBlank()
+  val goodFormEmail = email.contains("@") && email.contains(".")
+  val passwordLengthComplete = password.length >= 6
+  val samePassword = password == confirmPassword
 
-  Column(
-      modifier = Modifier.fillMaxWidth().background(Color(0xFFFFFFFF)).padding(horizontal = 16.dp),
-      horizontalAlignment = Alignment.CenterHorizontally,
-      verticalArrangement = Arrangement.Top) {
+  val backgroundColor = Color(0xFFFFFFFF)
+
+  Scaffold(
+      topBar = {
         TopAppBar(
             title = { Text("") },
             navigationIcon = {
-              Icon(
-                  Icons.Filled.ArrowBack,
-                  contentDescription = "Back",
-                  modifier =
-                      Modifier.testTag("backButton").clickable { navigationActions.goBack() })
+              IconButton(onClick = { navigationActions.goBack() }) {
+                Icon(
+                    Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "goBackButton",
+                    modifier = Modifier.testTag("backButton"))
+              }
             },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFFFFFFFF)))
+            colors = TopAppBarDefaults.topAppBarColors(containerColor = backgroundColor),
+            modifier = Modifier.testTag("backButton"))
+      },
+      content = { padding ->
+        Column(
+            modifier = Modifier.fillMaxSize().padding(padding).background(backgroundColor),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center) {}
+      })
 
+  Column(
+      modifier = Modifier.fillMaxWidth().padding(16.dp),
+      horizontalAlignment = Alignment.CenterHorizontally,
+      verticalArrangement = Arrangement.Top) {
         Image(
             painter = painterResource(id = R.drawable.sign_up_image),
             contentDescription = "Logo",
@@ -113,53 +130,44 @@ fun SignUpScreen(
 
         // Social Sign Up Buttons
         VerticalSpacer(height = 10.dp)
-        SocialSignUpButton(
-            "Sign Up with Google",
-            R.drawable.google_logo,
-            "googleSignUpButton",
-            Color.White,
-            Color.Black,
-            Color.Gray) {
-              authViewModel.setRole("seeker")
-              val gso =
-                  GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                      .requestIdToken(token)
-                      .requestEmail()
-                      .build()
-              val googleSignInClient = GoogleSignIn.getClient(context, gso)
-              launcher.launch(googleSignInClient.signInIntent)
-            }
+        SocialSignUpButton {
+          authViewModel.setRole("seeker")
+          val gso =
+              GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                  .requestIdToken(token)
+                  .requestEmail()
+                  .build()
+          val googleSignInClient = GoogleSignIn.getClient(context, gso)
+          launcher.launch(googleSignInClient.signInIntent)
+        }
         VerticalSpacer(height = 10.dp)
 
         VerticalSpacer(height = 10.dp)
         Text("OR", color = Color.Gray)
         VerticalSpacer(height = 10.dp)
 
-        CustomOutlinedTextField(
-            "Enter your email address", email.value, onValueChange = { email.value = it })
+        EmailTextField("Enter your email address", email, onValueChange = { email = it })
 
         VerticalSpacer(height = 10.dp)
 
         PasswordTextField(
-            value = password.value,
-            onValueChange = { password.value = it },
+            value = password,
+            onValueChange = { password = it },
             label = "Password",
             placeholder = "Enter your password",
             contentDescription = "Password",
-            testTag = "passwordInput",
-            icon = Icons.Filled.Lock)
+            testTag = "passwordInput")
 
         VerticalSpacer(height = 10.dp)
 
         // Confirm Password Field
         PasswordTextField(
-            value = confirmPassword.value,
-            onValueChange = { confirmPassword.value = it },
+            value = confirmPassword,
+            onValueChange = { confirmPassword = it },
             label = "Confirm Password",
             placeholder = "Re-enter your password",
             contentDescription = "Confirm Password",
-            testTag = "confirmPasswordInput",
-            icon = Icons.Filled.Lock)
+            testTag = "confirmPasswordInput")
 
         Text(
             text = "Password must be at least 6 characters",
@@ -172,11 +180,12 @@ fun SignUpScreen(
 
         SignUpButton(
             {
-              authViewModel.setEmail(email.value)
-              authViewModel.setPassword(password.value)
+              authViewModel.setEmail(email)
+              authViewModel.setPassword(password)
               navigationActions.navigateTo(Screen.SIGN_UP_CHOOSE_ROLE)
             },
             isFormComplete,
+            goodFormEmail,
             passwordLengthComplete,
             samePassword)
 
@@ -201,7 +210,7 @@ fun ScreenTitle(title: String, testTag: String) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CustomOutlinedTextField(label: String, value: String, onValueChange: (String) -> Unit) {
+fun EmailTextField(label: String, value: String, onValueChange: (String) -> Unit) {
   OutlinedTextField(
       value = value,
       onValueChange = onValueChange,
@@ -229,24 +238,40 @@ fun PasswordTextField(
     label: String,
     placeholder: String,
     contentDescription: String = "",
-    testTag: String,
-    icon: ImageVector
+    testTag: String
 ) {
+  var passwordVisible by remember { mutableStateOf(false) }
   OutlinedTextField(
       value = value,
       onValueChange = onValueChange,
       label = { Text(label, color = Color.Black) },
+      singleLine = true,
+      visualTransformation =
+          if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
       placeholder = { Text(placeholder) },
       modifier = Modifier.fillMaxWidth().testTag(testTag),
+      enabled = true,
       shape = RoundedCornerShape(12.dp),
       leadingIcon = {
         Icon(
-            imageVector = icon,
+            imageVector = Icons.Filled.Lock,
             contentDescription = contentDescription,
             tint = Color(90, 197, 97),
             modifier = Modifier.size(25.dp))
       },
-      visualTransformation = PasswordVisualTransformation(), // Hide password
+      trailingIcon = {
+        val image =
+            if (passwordVisible) painterResource(id = android.R.drawable.ic_menu_view)
+            else painterResource(id = android.R.drawable.ic_secure)
+
+        IconButton(onClick = { passwordVisible = !passwordVisible }) {
+          Icon(
+              painter = image,
+              contentDescription = null,
+              tint = Color(90, 197, 97),
+              modifier = Modifier.size(24.dp))
+        }
+      },
       colors =
           TextFieldDefaults.outlinedTextFieldColors(
               focusedBorderColor = Color(0xFF5AC561), unfocusedBorderColor = Color(0xFF5AC561)))
@@ -256,83 +281,61 @@ fun PasswordTextField(
 fun SignUpButton(
     onClick: () -> Unit,
     isComplete: Boolean = false,
+    goodFormEmail: Boolean = false,
     passwordLengthComplete: Boolean = false,
     samePassword: Boolean = false
 ) {
   val context = LocalContext.current
-
   Button(
       onClick = {
-        if (isComplete && passwordLengthComplete && samePassword) {
+        if (isComplete && goodFormEmail && samePassword && passwordLengthComplete) {
           onClick()
         }
         if (!isComplete) {
-          Toast.makeText(context, "Form is not complete", Toast.LENGTH_SHORT).show()
+          Toast.makeText(context, "Please fill in all required fields", Toast.LENGTH_SHORT).show()
+        } else if (!goodFormEmail) {
+          Toast.makeText(context, "Your email must have \"@\" and \".\"", Toast.LENGTH_SHORT)
+              .show()
         } else if (!samePassword) {
           Toast.makeText(
-                  context, "Password and Confirm Password is not the same", Toast.LENGTH_SHORT)
+                  context, "Password and Confirm Password must be the same", Toast.LENGTH_SHORT)
+              .show()
+        } else if (!passwordLengthComplete) {
+          Toast.makeText(context, "Your password must have at least 6 characters", Toast.LENGTH_SHORT)
               .show()
         } else {
-          Toast.makeText(context, "Password must be at least 6 characters", Toast.LENGTH_SHORT)
-              .show()
+          Toast.makeText(context, "You are Signed up!", Toast.LENGTH_SHORT).show()
         }
       },
-      modifier = Modifier.fillMaxWidth().height(60.dp).testTag("signUpButton"),
-      shape = RoundedCornerShape(12.dp),
+      modifier = Modifier.fillMaxWidth().height(50.dp).testTag("signUpButton"),
+      shape = RoundedCornerShape(25.dp),
       colors =
           ButtonDefaults.buttonColors(
               containerColor =
-                  if (isComplete && passwordLengthComplete && samePassword) Color(0xFF5AC561)
+                  if (isComplete && goodFormEmail && samePassword && passwordLengthComplete)
+                      Color(0xFF5AC561)
                   else Color.Gray)) {
-        Text("Sign Up", color = Color.White)
+        Text("Sign Up", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
       }
 }
 
 @Composable
-fun AlreadyHaveAccountText(navigationActions: NavigationActions) {
-  Row(verticalAlignment = Alignment.CenterVertically) {
-    Text("Already have an account? ", color = Color.Gray)
-    ClickableText(
-        text = AnnotatedString("Log up in here!"),
-        onClick = { navigationActions.goBack() },
-        style = TextStyle(color = Color(147, 168, 255), textDecoration = TextDecoration.Underline),
-        modifier = Modifier.testTag("logInLink"))
-  }
-}
-
-@Composable
-fun SocialSignUpButton(
-    text: String,
-    logoResId: Int,
-    testTag: String = "",
-    backgroundColor: Color,
-    textColor: Color = Color.White,
-    borderColor: Color = Color.Transparent,
-    onClick: () -> Unit = {}
-) {
+fun SocialSignUpButton(onClick: () -> Unit) {
   Button(
       onClick = onClick,
-      modifier =
-          Modifier.fillMaxWidth()
-              .height(48.dp)
-              .border(BorderStroke(1.dp, borderColor), shape = RoundedCornerShape(8.dp))
-              .testTag(testTag),
-      colors = ButtonDefaults.buttonColors(backgroundColor),
-      shape = RoundedCornerShape(8.dp)) {
+      colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+      shape = RoundedCornerShape(8.dp),
+      border = BorderStroke(1.dp, Color.LightGray),
+      modifier = Modifier.fillMaxWidth().height(48.dp).testTag("googleSignUpButton")) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
             modifier = Modifier.fillMaxWidth()) {
-              Icon(
-                  painter = painterResource(id = logoResId),
-                  contentDescription = null,
-                  tint = Color.Unspecified,
-                  modifier = Modifier.size(25.dp))
-              Text(
-                  text = text,
-                  color = textColor,
-                  fontSize = 16.sp,
-                  modifier = Modifier.padding(start = 8.dp))
+              Image(
+                  painter = painterResource(id = R.drawable.google_logo),
+                  contentDescription = "Google Logo",
+                  modifier = Modifier.size(30.dp).padding(end = 8.dp))
+              Text(text = "Sign Up with Google", color = Color.Gray, fontSize = 16.sp)
               Spacer(Modifier.size(25.dp))
             }
       }
@@ -357,5 +360,17 @@ fun googleRegisterLauncher(
     } catch (e: ApiException) {
       onFailure()
     }
+  }
+}
+
+@Composable
+fun AlreadyHaveAccountText(navigationActions: NavigationActions) {
+  Row(verticalAlignment = Alignment.CenterVertically) {
+    Text("Already have an account? ", color = Color.Gray)
+    ClickableText(
+        text = AnnotatedString("Log up in here!"),
+        onClick = { navigationActions.navigateTo(Screen.SIGN_IN) },
+        style = TextStyle(color = Color.Blue, textDecoration = TextDecoration.Underline),
+        modifier = Modifier.testTag("logInLink"))
   }
 }
