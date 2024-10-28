@@ -186,7 +186,7 @@ fun ShortcutsSection(navigationActions: NavigationActions) {
                   horizontalArrangement = Arrangement.SpaceBetween) {
                     Text("Service\nProviders", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
                     Image(
-                        painterResource(id = R.drawable.empty_profile_img),
+                        painterResource(id = R.drawable.providers_ovw_image),
                         contentDescription = "service providers",
                         Modifier.size(32.dp).clip(CircleShape))
                   }
@@ -204,7 +204,7 @@ fun ShortcutsSection(navigationActions: NavigationActions) {
                         modifier = Modifier.padding(16.dp).fillMaxWidth(),
                         verticalArrangement = Arrangement.spacedBy(16.dp)) {
                           Image(
-                              painterResource(id = R.drawable.empty_profile_img),
+                              painterResource(id = R.drawable.orders_ovw_image),
                               contentDescription = "All Orders",
                               Modifier.size(32.dp).clip(CircleShape).align(Alignment.End))
                           Text("All Orders", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
@@ -220,7 +220,7 @@ fun ShortcutsSection(navigationActions: NavigationActions) {
                         modifier = Modifier.padding(16.dp).fillMaxWidth(),
                         verticalArrangement = Arrangement.spacedBy(16.dp)) {
                           Image(
-                              painterResource(id = R.drawable.empty_profile_img),
+                              painterResource(id = R.drawable.map_ovw_image),
                               contentDescription = "providers map",
                               Modifier.size(32.dp).clip(CircleShape).align(Alignment.End))
                           Text("Providers Map", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
