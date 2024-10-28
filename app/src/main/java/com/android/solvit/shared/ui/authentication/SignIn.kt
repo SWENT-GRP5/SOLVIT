@@ -96,9 +96,9 @@ fun SignInScreen(
 
   val token = stringResource(R.string.default_web_client_id)
 
-    val isFormComplete = email.isNotBlank() && password.isNotBlank()
-    val goodFormEmail = email.contains("@") && email.contains(".")
-    val passwordLengthComplete = password.length >= 6
+  val isFormComplete = email.isNotBlank() && password.isNotBlank()
+  val goodFormEmail = email.contains("@") && email.contains(".")
+  val passwordLengthComplete = password.length >= 6
 
   val backgroundColor = Color(0xFFFFFFFF)
 
@@ -206,7 +206,6 @@ fun SignInScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Remember me & Forgot password
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -229,49 +228,24 @@ fun SignInScreen(
 
               ClickableText(
                   text = AnnotatedString("Forgot password?"),
-                  onClick = { Toast.makeText(context, "Not implemented yet", Toast.LENGTH_LONG).show() },
+                  onClick = {
+                    Toast.makeText(context, "Not implemented yet", Toast.LENGTH_LONG).show()
+                  },
                   style = TextStyle(color = Color.Gray, textDecoration = TextDecoration.Underline),
                   modifier = Modifier.testTag("forgotPasswordLink"))
             }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Button(
-            onClick = {
-                if (!isFormComplete) {
-                    Toast.makeText(context, "Please fill in all required fields", Toast.LENGTH_SHORT).show()
-                }
-                else if (!goodFormEmail) {
-                    Toast.makeText(context, "Your email must have \"@\" and \".\"", Toast.LENGTH_SHORT).show()
-                }
-                else if (!passwordLengthComplete) {
-                    Toast.makeText(context, "Your password must have at least 6 characters", Toast.LENGTH_SHORT).show()
-                }
-                else {
-                    authViewModel.setEmail(email)
-                    authViewModel.setPassword(password)
-                    authViewModel.loginWithEmailAndPassword(onSuccess, onFailure)
-                }
-            },
-            colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-            shape = RoundedCornerShape(25.dp),
-            modifier =
-                Modifier.fillMaxWidth()
-                    .height(50.dp)
-                    .background(
-                        brush = if (isFormComplete && goodFormEmail && passwordLengthComplete) {
-                            Brush.horizontalGradient(
-                                colors = listOf(Color(0, 200, 83), Color(0, 153, 255))
-                            )
-                        } else {
-                            Brush.horizontalGradient(
-                                colors = listOf(Color.Gray, Color.Gray)
-                            )
-                        },
-                        shape = RoundedCornerShape(25.dp))
-                    .testTag("signInButton")) {
-              Text("Sign in", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-            }
+        SignInButton(
+            email = email,
+            password = password,
+            isFormComplete = isFormComplete,
+            goodFormEmail = goodFormEmail,
+            passwordLengthComplete = passwordLengthComplete,
+            authViewModel = authViewModel,
+            onSuccess = onSuccess,
+            onFailure = onFailure)
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -301,6 +275,54 @@ fun SignInScreen(
               style = TextStyle(color = Color.Blue, textDecoration = TextDecoration.Underline),
               modifier = Modifier.testTag("signUpLink"))
         }
+      }
+}
+
+@Composable
+fun SignInButton(
+    email: String,
+    password: String,
+    isFormComplete: Boolean,
+    goodFormEmail: Boolean,
+    passwordLengthComplete: Boolean,
+    authViewModel: AuthViewModel,
+    onSuccess: () -> Unit,
+    onFailure: () -> Unit
+) {
+  val context = LocalContext.current
+
+  Button(
+      onClick = {
+        if (!isFormComplete) {
+          Toast.makeText(context, "Please fill in all required fields", Toast.LENGTH_SHORT).show()
+        } else if (!goodFormEmail) {
+          Toast.makeText(context, "Your email must have \"@\" and \".\"", Toast.LENGTH_SHORT).show()
+        } else if (!passwordLengthComplete) {
+          Toast.makeText(
+                  context, "Your password must have at least 6 characters", Toast.LENGTH_SHORT)
+              .show()
+        } else {
+          authViewModel.setEmail(email)
+          authViewModel.setPassword(password)
+          authViewModel.loginWithEmailAndPassword(onSuccess, onFailure)
+        }
+      },
+      colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+      shape = RoundedCornerShape(25.dp),
+      modifier =
+          Modifier.fillMaxWidth()
+              .height(50.dp)
+              .background(
+                  brush =
+                      if (isFormComplete && goodFormEmail && passwordLengthComplete) {
+                        Brush.horizontalGradient(
+                            colors = listOf(Color(0, 200, 83), Color(0, 153, 255)))
+                      } else {
+                        Brush.horizontalGradient(colors = listOf(Color.Gray, Color.Gray))
+                      },
+                  shape = RoundedCornerShape(25.dp))
+              .testTag("signInButton")) {
+        Text("Sign in", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
       }
 }
 

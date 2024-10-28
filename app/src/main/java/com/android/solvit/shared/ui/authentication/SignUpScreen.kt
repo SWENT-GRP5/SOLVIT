@@ -86,7 +86,6 @@ fun SignUpScreen(
           authViewModel, { navigationActions.navigateTo(Screen.SIGN_UP_CHOOSE_ROLE) }, {})
   val token = stringResource(R.string.default_web_client_id)
 
-
   val isFormComplete = email.isNotBlank() && password.isNotBlank() && confirmPassword.isNotBlank()
   val goodFormEmail = email.contains("@") && email.contains(".")
   val passwordLengthComplete = password.length >= 6
@@ -146,7 +145,8 @@ fun SignUpScreen(
         Text("OR", color = Color.Gray)
         VerticalSpacer(height = 10.dp)
 
-        EmailTextField("Enter your email address", email, onValueChange = { email = it })
+        EmailTextField(
+            email, onValueChange = { email = it }, "Enter your email address", "emailInputField")
 
         VerticalSpacer(height = 10.dp)
 
@@ -210,13 +210,13 @@ fun ScreenTitle(title: String, testTag: String) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EmailTextField(label: String, value: String, onValueChange: (String) -> Unit) {
+fun EmailTextField(value: String, onValueChange: (String) -> Unit, label: String, testTag: String) {
   OutlinedTextField(
       value = value,
       onValueChange = onValueChange,
       label = { Text(label) },
       singleLine = true,
-      modifier = Modifier.fillMaxWidth().testTag("emailInputField"),
+      modifier = Modifier.fillMaxWidth().testTag(testTag),
       keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Email),
       leadingIcon = {
         Icon(
@@ -294,14 +294,14 @@ fun SignUpButton(
         if (!isComplete) {
           Toast.makeText(context, "Please fill in all required fields", Toast.LENGTH_SHORT).show()
         } else if (!goodFormEmail) {
-          Toast.makeText(context, "Your email must have \"@\" and \".\"", Toast.LENGTH_SHORT)
-              .show()
+          Toast.makeText(context, "Your email must have \"@\" and \".\"", Toast.LENGTH_SHORT).show()
         } else if (!samePassword) {
           Toast.makeText(
                   context, "Password and Confirm Password must be the same", Toast.LENGTH_SHORT)
               .show()
         } else if (!passwordLengthComplete) {
-          Toast.makeText(context, "Your password must have at least 6 characters", Toast.LENGTH_SHORT)
+          Toast.makeText(
+                  context, "Your password must have at least 6 characters", Toast.LENGTH_SHORT)
               .show()
         } else {
           Toast.makeText(context, "You are Signed up!", Toast.LENGTH_SHORT).show()

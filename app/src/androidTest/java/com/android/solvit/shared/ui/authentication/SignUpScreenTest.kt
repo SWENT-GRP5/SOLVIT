@@ -1,5 +1,6 @@
 package com.android.solvit.shared.ui.authentication
 
+import android.widget.Toast
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -12,6 +13,11 @@ import androidx.test.espresso.intent.rule.IntentsRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.mockkStatic
+import io.mockk.verify
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -90,5 +96,101 @@ class SignUpScreenTest {
 
     composeTestRule.onNodeWithTag("signUpButton").performClick()
     verify(mockNavigationActions).navigateTo(Screen.SIGN_UP_CHOOSE_ROLE)
+  }
+}
+
+class SignUpButtonTest {
+  @get:Rule val composeTestRule = createComposeRule()
+
+  @Before
+  fun setup() {
+    // Mock the Toast.makeText function to intercept the Toast messages
+    mockkStatic(Toast::class)
+    every { Toast.makeText(any(), any<String>(), any()) } answers
+        {
+          // Simule une instance Toast pour vérifier les messages
+          mockk(relaxed = true)
+        }
+  }
+
+  @Test
+  fun testShowToastWhenFieldsIncomplete() {
+    composeTestRule.setContent {
+      SignUpButton(
+          onClick = {},
+          isComplete = false,
+          goodFormEmail = true,
+          passwordLengthComplete = true,
+          samePassword = true)
+    }
+    composeTestRule.onNodeWithTag("signUpButton").performClick()
+
+    // Vérifie que le toast "Please fill in all required fields" est affiché
+    verify { Toast.makeText(any(), "Please fill in all required fields", Toast.LENGTH_SHORT) }
+  }
+
+  @Test
+  fun testShowToastForInvalidEmailFormat() {
+    composeTestRule.setContent {
+      SignUpButton(
+          onClick = {},
+          isComplete = true,
+          goodFormEmail = false,
+          passwordLengthComplete = true,
+          samePassword = true)
+    }
+    composeTestRule.onNodeWithTag("signUpButton").performClick()
+
+    // Vérifie que le toast "Your email must have '@' and '.'" est affiché
+    verify { Toast.makeText(any(), "Your email must have \"@\" and \".\"", Toast.LENGTH_SHORT) }
+  }
+
+  @Test
+  fun testShowToastForNonMatchingPasswords() {
+    composeTestRule.setContent {
+      SignUpButton(
+          onClick = {},
+          isComplete = true,
+          goodFormEmail = true,
+          passwordLengthComplete = true,
+          samePassword = false)
+    }
+    composeTestRule.onNodeWithTag("signUpButton").performClick()
+
+    verify {
+      Toast.makeText(any(), "Password and Confirm Password must be the same", Toast.LENGTH_SHORT)
+    }
+  }
+
+  @Test
+  fun testShowToastForShortPassword() {
+    composeTestRule.setContent {
+      SignUpButton(
+          onClick = {},
+          isComplete = true,
+          goodFormEmail = true,
+          passwordLengthComplete = false,
+          samePassword = true)
+    }
+    composeTestRule.onNodeWithTag("signUpButton").performClick()
+
+    verify {
+      Toast.makeText(any(), "Your password must have at least 6 characters", Toast.LENGTH_SHORT)
+    }
+  }
+
+  @Test
+  fun testShowToastForSuccessfulSignUp() {
+    composeTestRule.setContent {
+      SignUpButton(
+          onClick = {},
+          isComplete = true,
+          goodFormEmail = true,
+          passwordLengthComplete = true,
+          samePassword = true)
+    }
+    composeTestRule.onNodeWithTag("signUpButton").performClick()
+
+    verify { Toast.makeText(any(), "You are Signed up!", Toast.LENGTH_SHORT) }
   }
 }

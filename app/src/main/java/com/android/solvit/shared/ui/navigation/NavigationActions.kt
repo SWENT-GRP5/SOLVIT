@@ -29,7 +29,6 @@ object Route {
 object Screen {
   const val PROFILE = "Profile Screen"
   const val EDIT_PROFILE = "EditProfile Screen"
-  const val FORGET_PASSWORD = "Forget Password"
   const val SIGN_IN = "Sign In"
   const val SIGN_UP = "Sign Up"
   const val SIGN_UP_CHOOSE_ROLE = "Choose Role Screen"
