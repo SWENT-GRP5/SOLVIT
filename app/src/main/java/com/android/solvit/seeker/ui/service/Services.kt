@@ -19,13 +19,16 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.DockedSearchBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -45,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.android.solvit.R
+import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.seeker.model.service.SearchServicesViewModel
 import com.android.solvit.seeker.ui.navigation.SeekerBottomNavigationMenu
@@ -52,6 +56,10 @@ import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_CUSTOMMER
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
+import com.android.solvit.shared.ui.theme.LightBlue
+import com.android.solvit.shared.ui.theme.LightOrange
+import com.android.solvit.shared.ui.theme.LightRed
+import com.android.solvit.shared.ui.theme.Purple80
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -95,7 +103,7 @@ fun TopSection(
   val isSearching by searchViewModel.isSearching.collectAsState()
 
   Column(
-      modifier = Modifier.fillMaxWidth().background(Color.LightGray),
+      modifier = Modifier.fillMaxWidth().background(Purple80, shape = RoundedCornerShape(bottomEnd = 16.dp, bottomStart = 16.dp)),
       verticalArrangement = Arrangement.spacedBy(16.dp),
       horizontalAlignment = Alignment.CenterHorizontally) {
         Spacer(Modifier.height(8.dp))
@@ -106,15 +114,28 @@ fun TopSection(
               Image(
                   painterResource(id = R.drawable.empty_profile_img),
                   contentDescription = "profile picture",
-                  Modifier.size(40.dp).clip(CircleShape))
+                  Modifier.size(40.dp).clip(CircleShape).clickable { navigationActions.navigateTo(Route.PROFILE) }
+              )
               Column(
                   modifier = Modifier.width(135.dp),
                   horizontalAlignment = Alignment.CenterHorizontally,
               ) {
-                Text("Current location")
-                Text("Dubai, USA")
+                  Row(verticalAlignment = Alignment.CenterVertically) {
+                      Text("Current location", fontSize = 14.sp)
+                      IconButton(
+                          onClick = { /*TODO*/ },
+                          modifier = Modifier.size(16.dp)
+                      ) {
+                        Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = null)
+                      }
+                  }
+                Text("Dubai, USA", fontSize = 15.sp)
               }
-              Icon(imageVector = Icons.Default.Menu, contentDescription = null)
+              IconButton(
+                    onClick = { /*TODO*/ }
+              ) {
+                  Icon(imageVector = Icons.Default.Menu, contentDescription = null)
+              }
             }
         DockedSearchBar(
             query = searchText,
@@ -157,13 +178,13 @@ fun ShortcutsSection(navigationActions: NavigationActions) {
         Box(
             modifier =
                 Modifier.fillMaxWidth()
-                    .background(Color.Yellow, shape = RoundedCornerShape(16.dp))
+                    .background(LightOrange, shape = RoundedCornerShape(16.dp))
                     .clickable { navigationActions.navigateTo(Route.PROVIDERS) }) {
               Row(
                   modifier = Modifier.padding(16.dp).fillMaxWidth(),
                   verticalAlignment = Alignment.CenterVertically,
                   horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text("Service\nProviders")
+                    Text("Service\nProviders", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
                     Image(
                         painterResource(id = R.drawable.empty_profile_img),
                         contentDescription = "service providers",
@@ -177,32 +198,32 @@ fun ShortcutsSection(navigationActions: NavigationActions) {
               Box(
                   modifier =
                       Modifier.fillMaxWidth(.5f)
-                          .background(Color.Blue, shape = RoundedCornerShape(16.dp))
-                          .clickable { navigationActions.navigateTo(Route.REQUESTS_FEED) }) {
+                          .background(LightBlue, shape = RoundedCornerShape(16.dp))
+                          .clickable { navigationActions.navigateTo(Route.REQUESTS_OVERVIEW) }) {
                     Column(
                         modifier = Modifier.padding(16.dp).fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally) {
+                        verticalArrangement = Arrangement.spacedBy(16.dp)) {
                           Image(
                               painterResource(id = R.drawable.empty_profile_img),
                               contentDescription = "All Orders",
-                              Modifier.size(32.dp).clip(CircleShape))
-                          Text("All orders")
+                              Modifier.size(32.dp).clip(CircleShape).align(Alignment.End))
+                          Text("All Orders", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
                         }
                   }
               Spacer(Modifier.size(16.dp))
               Box(
                   modifier =
                       Modifier.fillMaxWidth()
-                          .background(Color.Red, shape = RoundedCornerShape(16.dp))
+                          .background(LightRed, shape = RoundedCornerShape(16.dp))
                           .clickable { navigationActions.navigateTo(Route.MAP) }) {
                     Column(
                         modifier = Modifier.padding(16.dp).fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally) {
+                        verticalArrangement = Arrangement.spacedBy(16.dp)) {
                           Image(
                               painterResource(id = R.drawable.empty_profile_img),
-                              contentDescription = "all orders",
-                              Modifier.size(32.dp).clip(CircleShape))
-                          Text("Services on Map")
+                              contentDescription = "providers map",
+                              Modifier.size(32.dp).clip(CircleShape).align(Alignment.End))
+                          Text("Providers Map", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
                         }
                   }
             }
@@ -220,7 +241,7 @@ fun CategoriesSection(
       modifier = Modifier.fillMaxWidth().padding(16.dp),
       verticalArrangement = Arrangement.spacedBy(16.dp),
   ) {
-    Text("Top Categories")
+    Text("Top Categories", fontSize = 20.sp, fontWeight = FontWeight.Bold)
     LazyRow(
         modifier = Modifier.fillMaxWidth().height(150.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -243,7 +264,7 @@ fun PerformersSection(listProviderViewModel: ListProviderViewModel) {
       modifier = Modifier.fillMaxWidth().padding(16.dp),
       verticalArrangement = Arrangement.spacedBy(16.dp),
   ) {
-    Box { Text("Top Performers") }
+    Text("Top Performers", fontSize = 20.sp, fontWeight = FontWeight.Bold)
     LazyRow(
         Modifier.fillMaxWidth().height(150.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -275,17 +296,17 @@ fun ServiceItem(service: ServicesListItem, onClick: () -> Unit) {
                   service.service.toString().replace("_", " ").lowercase().replaceFirstChar {
                     it.uppercase()
                   },
-              modifier = Modifier.align(Alignment.Center),
+              modifier = Modifier.padding(20.dp).align(Alignment.BottomStart),
               fontSize = 20.sp,
               fontWeight = FontWeight.Bold,
-              textAlign = TextAlign.Center)
+              textAlign = TextAlign.Start)
         }
       }
 }
 
 @Composable
 fun ProviderItem(provider: Provider, onClick: () -> Unit) {
-  OutlinedCard(modifier = Modifier.aspectRatio(1f).clickable { onClick() }) {
+  OutlinedCard(modifier = Modifier.aspectRatio(.7f).clickable { onClick() }) {
     Box {
       AsyncImage(
           model = provider.imageUrl,
@@ -296,10 +317,10 @@ fun ProviderItem(provider: Provider, onClick: () -> Unit) {
       )
       Text(
           text = provider.name,
-          modifier = Modifier.align(Alignment.Center),
+          modifier = Modifier.padding(16.dp).align(Alignment.BottomStart),
           fontSize = 20.sp,
           fontWeight = FontWeight.Bold,
-          textAlign = TextAlign.Center)
+          textAlign = TextAlign.Start)
     }
   }
 }
