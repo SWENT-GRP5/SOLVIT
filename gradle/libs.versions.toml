@@ -1,6 +1,6 @@
 [versions]
 #Plugins
-agp = "8.4.2"
+agp = "8.7.1"
 coilCompose = "2.4.0"
 json = "20240303"
 kotlin = "1.9.0"
