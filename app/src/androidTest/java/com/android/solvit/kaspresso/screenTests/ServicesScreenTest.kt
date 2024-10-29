@@ -5,13 +5,13 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.solvit.kaspresso.screens.ServicesScreenObject
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.seeker.ui.service.ServicesScreen
+import com.android.solvit.shared.model.provider.ProviderRepository
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
 import com.kaspersky.components.composesupport.config.withComposeSupport
 import com.kaspersky.kaspresso.kaspresso.Kaspresso
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import io.github.kakaocup.compose.node.element.ComposeScreen
-import io.mockk.mockk
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -28,7 +28,8 @@ class ServicesScreenTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withCom
       // Set up the Opening screen
       composeTestRule.setContent {
         val navigationActions = mock(NavigationActions::class.java)
-        val listProviderViewModel = mockk<ListProviderViewModel>()
+        val providerRepository = mock(ProviderRepository::class.java)
+        val listProviderViewModel = ListProviderViewModel(providerRepository)
         ServicesScreen(navigationActions, listProviderViewModel)
         `when`(navigationActions.currentRoute()).thenReturn(Route.SERVICES)
       }

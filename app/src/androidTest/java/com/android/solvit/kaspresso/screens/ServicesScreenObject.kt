@@ -8,12 +8,12 @@ class ServicesScreenObject(semanticProvider: SemanticsNodeInteractionsProvider) 
     ComposeScreen<ServicesScreenObject>(semanticsProvider = semanticProvider) {
 
   val searchBar: KNode = child {
-    hasTestTag("searchBar")
+    hasTestTag("servicesScreenSearchBar")
     useUnmergedTree = true
   }
 
   val servicesGrid: KNode = child {
-    hasTestTag("servicesGrid")
+    hasTestTag("servicesScreenCategoriesList")
     useUnmergedTree = true
   }
 }
