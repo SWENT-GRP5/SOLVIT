@@ -30,6 +30,7 @@ import com.android.solvit.seeker.ui.request.RequestsOverviewScreen
 import com.android.solvit.seeker.ui.service.ServicesScreen
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
+import com.android.solvit.shared.ui.authentication.ForgotPassword
 import com.android.solvit.shared.ui.authentication.OpeningScreen
 import com.android.solvit.shared.ui.authentication.SignInScreen
 import com.android.solvit.shared.ui.authentication.SignUpChooseProfile
@@ -99,6 +100,7 @@ fun SharedUI(
     composable(Screen.PROVIDER_REGISTRATION_PROFILE) {
       ProviderRegistrationScreen(listProviderViewModel, navigationActions, authViewModel)
     }
+    composable(Screen.FORGOT_PASSWORD) { ForgotPassword(navigationActions) }
     composable(Screen.SEEKER_REGISTRATION_PROFILE) {
       SeekerRegistrationScreen(seekerProfileViewModel, navigationActions, authViewModel)
     }

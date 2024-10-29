@@ -228,9 +228,7 @@ fun SignInScreen(
 
               ClickableText(
                   text = AnnotatedString("Forgot password?"),
-                  onClick = {
-                    Toast.makeText(context, "Not implemented yet", Toast.LENGTH_LONG).show()
-                  },
+                  onClick = { navigationActions.navigateTo(Screen.FORGOT_PASSWORD) },
                   style = TextStyle(color = Color.Gray, textDecoration = TextDecoration.Underline),
                   modifier = Modifier.testTag("forgotPasswordLink"))
             }
