@@ -61,7 +61,6 @@ import com.android.solvit.shared.ui.theme.LightRed
 import com.android.solvit.shared.ui.theme.Purple80
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ServicesScreen(
     navigationActions: NavigationActions,
