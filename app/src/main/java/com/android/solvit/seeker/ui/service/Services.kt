@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -49,7 +48,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.android.solvit.R
-import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.seeker.model.service.SearchServicesViewModel
 import com.android.solvit.seeker.ui.navigation.SeekerBottomNavigationMenu
@@ -104,7 +102,11 @@ fun TopSection(
   val isSearching by searchViewModel.isSearching.collectAsState()
 
   Column(
-      modifier = Modifier.fillMaxWidth().background(Purple80, shape = RoundedCornerShape(bottomEnd = 16.dp, bottomStart = 16.dp)),
+      modifier =
+          Modifier.fillMaxWidth()
+              .background(
+                  Purple80, shape = RoundedCornerShape(bottomEnd = 16.dp, bottomStart = 16.dp))
+              .testTag("servicesScreenTopSection"),
       verticalArrangement = Arrangement.spacedBy(16.dp),
       horizontalAlignment = Alignment.CenterHorizontally) {
         Spacer(Modifier.height(8.dp))
@@ -115,27 +117,26 @@ fun TopSection(
               Image(
                   painterResource(id = R.drawable.empty_profile_img),
                   contentDescription = "profile picture",
-                  Modifier.size(40.dp).clip(CircleShape).clickable { navigationActions.navigateTo(Route.PROFILE) }
-              )
+                  Modifier.size(40.dp)
+                      .clip(CircleShape)
+                      .clickable { navigationActions.navigateTo(Route.PROFILE) }
+                      .testTag("servicesScreenProfileImage"))
               Column(
-                  modifier = Modifier.width(135.dp),
+                  modifier = Modifier.width(135.dp).testTag("servicesScreenCurrentLocation"),
                   horizontalAlignment = Alignment.CenterHorizontally,
               ) {
-                  Row(verticalAlignment = Alignment.CenterVertically) {
-                      Text("Current location", fontSize = 14.sp)
-                      IconButton(
-                          onClick = { /*TODO*/ },
-                          modifier = Modifier.size(16.dp)
-                      ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                  Text("Current location", fontSize = 14.sp)
+                  IconButton(
+                      onClick = { /*TODO*/},
+                      modifier = Modifier.size(16.dp).testTag("servicesScreenLocationButton")) {
                         Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = null)
                       }
-                  }
+                }
                 Text("Dubai, USA", fontSize = 15.sp)
               }
-              IconButton(
-                    onClick = { /*TODO*/ }
-              ) {
-                  Icon(imageVector = Icons.Default.Menu, contentDescription = null)
+              IconButton(onClick = { /*TODO*/}, modifier = Modifier.testTag("servicesScreenMenu")) {
+                Icon(imageVector = Icons.Default.Menu, contentDescription = null)
               }
             }
         DockedSearchBar(
@@ -144,7 +145,7 @@ fun TopSection(
             onSearch = searchViewModel::onSearchTextChange,
             active = isSearching,
             onActiveChange = { searchViewModel.onToggleSearch() },
-            modifier = Modifier.testTag("searchBar"),
+            modifier = Modifier.testTag("servicesScreenSearchBar"),
             placeholder = { Text("Find services near you") },
             leadingIcon = { Icon(imageVector = Icons.Default.Search, contentDescription = null) }) {
               LazyColumn(
@@ -173,19 +174,24 @@ fun TopSection(
 @Composable
 fun ShortcutsSection(navigationActions: NavigationActions) {
   Column(
-      modifier = Modifier.fillMaxWidth().padding(16.dp),
+      modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("servicesScreenShortcuts"),
       verticalArrangement = Arrangement.spacedBy(10.dp),
       horizontalAlignment = Alignment.CenterHorizontally) {
         Box(
             modifier =
                 Modifier.fillMaxWidth()
                     .background(LightOrange, shape = RoundedCornerShape(16.dp))
-                    .clickable { navigationActions.navigateTo(Route.PROVIDERS) }) {
+                    .clickable { navigationActions.navigateTo(Route.PROVIDERS) }
+                    .testTag("servicesScreenProvidersShortcut")) {
               Row(
                   modifier = Modifier.padding(16.dp).fillMaxWidth(),
                   verticalAlignment = Alignment.CenterVertically,
                   horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text("Service\nProviders", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                    Text(
+                        "Service\nProviders",
+                        color = Color.White,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold)
                     Image(
                         painterResource(id = R.drawable.providers_ovw_image),
                         contentDescription = "service providers",
@@ -200,7 +206,8 @@ fun ShortcutsSection(navigationActions: NavigationActions) {
                   modifier =
                       Modifier.fillMaxWidth(.5f)
                           .background(LightBlue, shape = RoundedCornerShape(16.dp))
-                          .clickable { navigationActions.navigateTo(Route.REQUESTS_OVERVIEW) }) {
+                          .clickable { navigationActions.navigateTo(Route.REQUESTS_OVERVIEW) }
+                          .testTag("servicesScreenOrdersShortcut")) {
                     Column(
                         modifier = Modifier.padding(16.dp).fillMaxWidth(),
                         verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -208,7 +215,11 @@ fun ShortcutsSection(navigationActions: NavigationActions) {
                               painterResource(id = R.drawable.orders_ovw_image),
                               contentDescription = "All Orders",
                               Modifier.size(32.dp).clip(CircleShape).align(Alignment.End))
-                          Text("All Orders", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                          Text(
+                              "All Orders",
+                              color = Color.White,
+                              fontSize = 20.sp,
+                              fontWeight = FontWeight.Bold)
                         }
                   }
               Spacer(Modifier.size(16.dp))
@@ -216,7 +227,8 @@ fun ShortcutsSection(navigationActions: NavigationActions) {
                   modifier =
                       Modifier.fillMaxWidth()
                           .background(LightRed, shape = RoundedCornerShape(16.dp))
-                          .clickable { navigationActions.navigateTo(Route.MAP) }) {
+                          .clickable { navigationActions.navigateTo(Route.MAP) }
+                          .testTag("servicesScreenMapShortcut")) {
                     Column(
                         modifier = Modifier.padding(16.dp).fillMaxWidth(),
                         verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -224,7 +236,11 @@ fun ShortcutsSection(navigationActions: NavigationActions) {
                               painterResource(id = R.drawable.map_ovw_image),
                               contentDescription = "providers map",
                               Modifier.size(32.dp).clip(CircleShape).align(Alignment.End))
-                          Text("Providers Map", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                          Text(
+                              "Providers Map",
+                              color = Color.White,
+                              fontSize = 20.sp,
+                              fontWeight = FontWeight.Bold)
                         }
                   }
             }
@@ -239,12 +255,16 @@ fun CategoriesSection(
 ) {
   val searchResults by searchServicesViewModel.servicesList.collectAsState()
   Column(
-      modifier = Modifier.fillMaxWidth().padding(16.dp),
+      modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("servicesScreenCategories"),
       verticalArrangement = Arrangement.spacedBy(16.dp),
   ) {
-    Text("Top Categories", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+    Text(
+        "Top Categories",
+        fontSize = 20.sp,
+        fontWeight = FontWeight.Bold,
+        modifier = Modifier.testTag("servicesScreenCategoriesTitle"))
     LazyRow(
-        modifier = Modifier.fillMaxWidth().height(150.dp),
+        modifier = Modifier.fillMaxWidth().height(150.dp).testTag("servicesScreenCategoriesList"),
         horizontalArrangement = Arrangement.spacedBy(16.dp)) {
           items(searchResults.size) { index ->
             ServiceItem(
@@ -261,14 +281,18 @@ fun CategoriesSection(
 @Composable
 fun PerformersSection(listProviderViewModel: ListProviderViewModel) {
   val providers by listProviderViewModel.providersList.collectAsState()
-    val topProviders = providers.sortedByDescending { it.rating }
+  val topProviders = providers.sortedByDescending { it.rating }
   Column(
-      modifier = Modifier.fillMaxWidth().padding(16.dp),
+      modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("servicesScreenPerformers"),
       verticalArrangement = Arrangement.spacedBy(16.dp),
   ) {
-    Text("Top Performers", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+    Text(
+        "Top Performers",
+        fontSize = 20.sp,
+        fontWeight = FontWeight.Bold,
+        modifier = Modifier.testTag("servicesScreenPerformersTitle"))
     LazyRow(
-        Modifier.fillMaxWidth().height(150.dp),
+        Modifier.fillMaxWidth().height(150.dp).testTag("servicesScreenPerformersList"),
         horizontalArrangement = Arrangement.spacedBy(16.dp)) {
           items(providers.size) { index ->
             ProviderItem(
@@ -308,44 +332,36 @@ fun ServiceItem(service: ServicesListItem, onClick: () -> Unit) {
 
 @Composable
 fun ProviderItem(provider: Provider, onClick: () -> Unit) {
-  OutlinedCard(modifier = Modifier.aspectRatio(.7f).clickable { onClick() }) {
-    Box {
-      AsyncImage(
-          model = provider.imageUrl,
-          placeholder = painterResource(id = R.drawable.empty_profile_img),
-          error = painterResource(id = R.drawable.empty_profile_img),
-          contentDescription = null,
-          contentScale = androidx.compose.ui.layout.ContentScale.Crop,
-          alpha = 0.3f
-      )
-        Column(
-            modifier = Modifier.fillMaxSize().padding(16.dp),
-            verticalArrangement = Arrangement.SpaceBetween,
-            horizontalAlignment = Alignment.Start
-        ) {
-            Text(
-                text = provider.service.toString().replace("_", " ").lowercase().replaceFirstChar { it.uppercase() },
-                fontWeight = FontWeight.Bold
-            )
-            Row(
-                modifier = Modifier.align(Alignment.End)
-            ) {
+  OutlinedCard(
+      modifier =
+          Modifier.aspectRatio(.7f).clickable { onClick() }.testTag(provider.name + "Item")) {
+        Box {
+          AsyncImage(
+              model = provider.imageUrl,
+              placeholder = painterResource(id = R.drawable.empty_profile_img),
+              error = painterResource(id = R.drawable.empty_profile_img),
+              contentDescription = null,
+              contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+              alpha = 0.3f)
+          Column(
+              modifier = Modifier.fillMaxSize().padding(16.dp),
+              verticalArrangement = Arrangement.SpaceBetween,
+              horizontalAlignment = Alignment.Start) {
                 Text(
-                    text = provider.rating.toString(),
-                    fontWeight = FontWeight.Bold
-                )
-                Icon(
-                    imageVector = Icons.Default.Star,
-                    contentDescription = null,
-                    modifier = Modifier.size(16.dp)
-                )
-            }
-            Text(
-                text = provider.name,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold
-            )
+                    text =
+                        provider.service.toString().replace("_", " ").lowercase().replaceFirstChar {
+                          it.uppercase()
+                        },
+                    fontWeight = FontWeight.Bold)
+                Row(modifier = Modifier.align(Alignment.End)) {
+                  Text(text = provider.rating.toString(), fontWeight = FontWeight.Bold)
+                  Icon(
+                      imageVector = Icons.Default.Star,
+                      contentDescription = null,
+                      modifier = Modifier.size(16.dp))
+                }
+                Text(text = provider.name, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+              }
         }
-    }
-  }
+      }
 }
