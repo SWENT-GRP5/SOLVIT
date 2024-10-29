@@ -25,6 +25,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.DockedSearchBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -260,6 +261,7 @@ fun CategoriesSection(
 @Composable
 fun PerformersSection(listProviderViewModel: ListProviderViewModel) {
   val providers by listProviderViewModel.providersList.collectAsState()
+    val topProviders = providers.sortedByDescending { it.rating }
   Column(
       modifier = Modifier.fillMaxWidth().padding(16.dp),
       verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -270,7 +272,7 @@ fun PerformersSection(listProviderViewModel: ListProviderViewModel) {
         horizontalArrangement = Arrangement.spacedBy(16.dp)) {
           items(providers.size) { index ->
             ProviderItem(
-                providers[index],
+                topProviders[index],
                 onClick = {
                   /*TODO*/
                 })
@@ -314,13 +316,36 @@ fun ProviderItem(provider: Provider, onClick: () -> Unit) {
           error = painterResource(id = R.drawable.empty_profile_img),
           contentDescription = null,
           contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+          alpha = 0.3f
       )
-      Text(
-          text = provider.name,
-          modifier = Modifier.padding(16.dp).align(Alignment.BottomStart),
-          fontSize = 20.sp,
-          fontWeight = FontWeight.Bold,
-          textAlign = TextAlign.Start)
+        Column(
+            modifier = Modifier.fillMaxSize().padding(16.dp),
+            verticalArrangement = Arrangement.SpaceBetween,
+            horizontalAlignment = Alignment.Start
+        ) {
+            Text(
+                text = provider.service.toString().replace("_", " ").lowercase().replaceFirstChar { it.uppercase() },
+                fontWeight = FontWeight.Bold
+            )
+            Row(
+                modifier = Modifier.align(Alignment.End)
+            ) {
+                Text(
+                    text = provider.rating.toString(),
+                    fontWeight = FontWeight.Bold
+                )
+                Icon(
+                    imageVector = Icons.Default.Star,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp)
+                )
+            }
+            Text(
+                text = provider.name,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
     }
   }
 }
