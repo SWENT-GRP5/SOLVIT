@@ -1,5 +1,6 @@
 package com.android.solvit.shared.model.review
 
+import android.os.Looper
 import androidx.test.core.app.ApplicationProvider
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
@@ -23,6 +24,7 @@ import org.mockito.Mockito.any
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.Shadows.shadowOf
 
 @RunWith(RobolectricTestRunner::class)
 class ReviewRepositoryFirestoreTest {
@@ -40,35 +42,8 @@ class ReviewRepositoryFirestoreTest {
           authorId = "user1",
           serviceRequestId = "request1",
           providerId = "provider1",
-          rating = 5,
-          comment = "Great service!")
-
-  private var review2 =
-      Review(
-          uid = "2",
-          authorId = "user2",
-          serviceRequestId = "request2",
-          providerId = "provider1",
-          rating = 4,
-          comment = "Good service!")
-
-  private var review3 =
-      Review(
-          uid = "3",
-          authorId = "user1",
-          serviceRequestId = "request3",
-          providerId = "provider2",
           rating = 3,
-          comment = "Average service!")
-
-  private var review4 =
-      Review(
-          uid = "4",
-          authorId = "user2",
-          serviceRequestId = "request4",
-          providerId = "provider2",
-          rating = 2,
-          comment = "Bad service!")
+          comment = "Great service!")
 
   @Before
   fun setUp() {
@@ -148,12 +123,18 @@ class ReviewRepositoryFirestoreTest {
   fun getReviews_failure() {
     `when`(mockCollectionReference.get()).thenReturn(mockQuerySnapshotFailureTask())
 
+    var onFailureCalled = false
+
     reviewRepositoryFirestore.getReviews(
         { fail("Should not succeed") },
         { exception ->
           assertNotNull(exception)
-          assertEquals("Firestore error", exception.message)
+          assertEquals("java.lang.Exception: Firestore error", exception.message)
+          onFailureCalled = true
         })
+
+    shadowOf(Looper.getMainLooper()).idle()
+    assertTrue(onFailureCalled)
   }
 
   @Test
@@ -167,6 +148,57 @@ class ReviewRepositoryFirestoreTest {
           assertTrue(reviews.isEmpty())
         },
         { fail("Should not fail") })
+  }
+
+  @Test
+  fun getReview_successful() {
+    `when`(mockDocumentReference.get()).thenReturn(taskForDocumentSnapshot())
+    mockDocumentSnapshotWithReviewData()
+
+    reviewRepositoryFirestore.getReview(
+        "1",
+        { review ->
+          assertNotNull(review)
+          assertEquals("1", review.uid)
+          assertEquals("user1", review.authorId)
+          assertEquals("request1", review.serviceRequestId)
+          assertEquals("provider1", review.providerId)
+          assertEquals(5, review.rating)
+          assertEquals("Great service!", review.comment)
+        },
+        { fail("Should not fail") })
+  }
+
+  @Test
+  fun getReview_failure() {
+    `when`(mockDocumentReference.get()).thenReturn(taskForDocumentSnapshot())
+
+    var onFailureCalled = false
+    reviewRepositoryFirestore.getReview(
+        "1",
+        { fail("Should not succeed") },
+        { exception ->
+          assertNotNull(exception)
+          assertEquals("Review not found", exception.message)
+          onFailureCalled = true
+        })
+
+    shadowOf(Looper.getMainLooper()).idle()
+    assertTrue(onFailureCalled)
+  }
+
+  @Test
+  fun getReview_notFound() {
+    `when`(mockDocumentReference.get()).thenReturn(taskForDocumentSnapshot())
+    `when`(mockQuerySnapshot.documents).thenReturn(emptyList())
+
+    reviewRepositoryFirestore.getReview(
+        "1",
+        { fail("Should not succeed") },
+        { exception ->
+          assertNotNull(exception)
+          assertEquals("Review not found", exception.message)
+        })
   }
 
   @Test
@@ -239,14 +271,19 @@ class ReviewRepositoryFirestoreTest {
         .thenReturn(mockCollectionReference)
     `when`(mockCollectionReference.get()).thenReturn(mockQuerySnapshotFailureTask())
 
+    var onFailureCalled = false
     reviewRepositoryFirestore.queryReviews(
         "field",
         "value",
         { fail("Should not succeed") },
         { exception ->
           assertNotNull(exception)
-          assertEquals("Firestore error", exception.message)
+          assertEquals("java.lang.Exception: Firestore error", exception.message)
+          onFailureCalled = true
         })
+
+    shadowOf(Looper.getMainLooper()).idle()
+    assertTrue(onFailureCalled)
   }
 
   @Test
@@ -316,7 +353,7 @@ class ReviewRepositoryFirestoreTest {
   fun getReviewsByProvider_successful() {
     val mockDocumentSnapshotList = listOf(mockDocumentSnapshot)
     `when`(mockQuerySnapshot.documents).thenReturn(mockDocumentSnapshotList)
-    `when`(mockCollectionReference.whereEqualTo("provider.uid", "provider1"))
+    `when`(mockCollectionReference.whereEqualTo("providerId", "provider1"))
         .thenReturn(mockCollectionReference)
     `when`(mockCollectionReference.get()).thenReturn(taskForQuerySnapshot())
     mockDocumentSnapshotWithReviewData()
@@ -329,7 +366,7 @@ class ReviewRepositoryFirestoreTest {
 
   @Test
   fun getReviewsByProvider_failure() {
-    `when`(mockCollectionReference.whereEqualTo("provider.uid", "provider1"))
+    `when`(mockCollectionReference.whereEqualTo("providerId", "provider1"))
         .thenReturn(mockCollectionReference)
     `when`(mockCollectionReference.get()).thenReturn(mockQuerySnapshotFailureTask())
 
@@ -345,7 +382,7 @@ class ReviewRepositoryFirestoreTest {
   @Test
   fun getReviewsByProvider_emptyResult_returnsEmptyList() {
     `when`(mockQuerySnapshot.documents).thenReturn(emptyList())
-    `when`(mockCollectionReference.whereEqualTo("provider.uid", "provider1"))
+    `when`(mockCollectionReference.whereEqualTo("providerId", "provider1"))
         .thenReturn(mockCollectionReference)
     `when`(mockCollectionReference.get()).thenReturn(taskForQuerySnapshot())
 
@@ -404,6 +441,34 @@ class ReviewRepositoryFirestoreTest {
         { fail("Should not fail") })
   }
 
+  @Test
+  fun calculateAverageRating_multipleReviews_returnsCorrectAverage() {
+    val mockDocumentSnapshotList = listOf(mockDocumentSnapshot, mockDocumentSnapshot)
+    `when`(mockQuerySnapshot.documents).thenReturn(mockDocumentSnapshotList)
+    `when`(mockCollectionReference.whereEqualTo("field", "value"))
+        .thenReturn(mockCollectionReference)
+    `when`(mockCollectionReference.get()).thenReturn(taskForQuerySnapshot())
+    `when`(mockDocumentSnapshot.getLong("rating")).thenReturn(4L, 6L)
+
+    val averageRating = reviewRepositoryFirestore.calculateAverageRating("field", "value")
+    assertEquals(5.0, averageRating, 0.0)
+  }
+
+  @Test
+  fun calculateAverageRating_successfulResult_executesAndReturnsCorrectAverage() {
+    val mockDocumentSnapshotList = listOf(mockDocumentSnapshot, mockDocumentSnapshot)
+    `when`(mockQuerySnapshot.documents).thenReturn(mockDocumentSnapshotList)
+
+    `when`(mockCollectionReference.whereEqualTo("field", "value"))
+        .thenReturn(mockCollectionReference)
+    `when`(mockCollectionReference.get()).thenReturn(taskForQuerySnapshot())
+    `when`(mockDocumentSnapshot.getLong("rating")).thenReturn(4L, 6L)
+
+    val averageRating = reviewRepositoryFirestore.calculateAverageRating("field", "value")
+
+    assertEquals(5.0, averageRating, 0.0)
+  }
+
   private fun mockDocumentSnapshotWithReviewData() {
     `when`(mockDocumentSnapshot.id).thenReturn("1")
     `when`(mockDocumentSnapshot.getString("authorId")).thenReturn("user1")
@@ -422,6 +487,9 @@ class ReviewRepositoryFirestoreTest {
       Tasks.forException(Exception(Exception("Firestore error")))
 
   private fun taskForQuerySnapshot(): Task<QuerySnapshot> = Tasks.forResult(mockQuerySnapshot)
+
+  private fun taskForDocumentSnapshot(): Task<DocumentSnapshot> =
+      Tasks.forResult(mockDocumentSnapshot)
 
   private fun assertReviewListContainsExpectedReview(
       reviews: List<Review>,

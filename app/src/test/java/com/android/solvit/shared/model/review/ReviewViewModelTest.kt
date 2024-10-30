@@ -41,6 +41,24 @@ class ReviewViewModelTest {
   }
 
   @Test
+  fun getNewUid_returnsNonEmptyString() {
+    `when`(reviewRepository.getNewUid()).thenReturn("newUid123")
+
+    val result = reviewViewModel.getNewUid()
+
+    assertEquals("newUid123", result)
+  }
+
+  @Test
+  fun getNewUid_handlesEmptyString() {
+    `when`(reviewRepository.getNewUid()).thenReturn("")
+
+    val result = reviewViewModel.getNewUid()
+
+    assertEquals("", result)
+  }
+
+  @Test
   fun getReviews_updatesReviewsStateFlow() = runTest {
     doAnswer { invocation ->
           val onSuccess = invocation.getArgument<(List<Review>) -> Unit>(0)
@@ -92,5 +110,80 @@ class ReviewViewModelTest {
     reviewViewModel.selectReview(review)
 
     assertEquals(review, reviewViewModel.selectedReview.value)
+  }
+
+  @Test
+  fun deleteReview_callsRepositoryDeleteReview() = runTest {
+    reviewViewModel.deleteReview(review)
+
+    verify(reviewRepository).deleteReview(any(), any(), any())
+  }
+
+  @Test
+  fun getReviewsByServiceRequest_updatesReviewsStateFlow() = runTest {
+    val serviceRequestId = "request1"
+    doAnswer { invocation ->
+          val onSuccess = invocation.getArgument<(List<Review>) -> Unit>(1)
+          onSuccess(reviews)
+        }
+        .`when`(reviewRepository)
+        .getReviewsByServiceRequest(any(), any(), any())
+
+    reviewViewModel.getReviewsByServiceRequest(serviceRequestId)
+
+    assertEquals(reviews, reviewViewModel.reviews.value)
+  }
+
+  @Test
+  fun getReviewsByUser_updatesReviewsStateFlow() = runTest {
+    val userId = "user1"
+    doAnswer { invocation ->
+          val onSuccess = invocation.getArgument<(List<Review>) -> Unit>(1)
+          onSuccess(reviews)
+        }
+        .`when`(reviewRepository)
+        .getReviewsByUser(any(), any(), any())
+
+    reviewViewModel.getReviewsByUser(userId)
+
+    assertEquals(reviews, reviewViewModel.reviews.value)
+  }
+
+  @Test
+  fun getReviewsByUser_handlesFailure() = runTest {
+    val userId = "user1"
+    val exception = Exception("Error fetching Reviews")
+    doAnswer { invocation ->
+          val onFailure = invocation.getArgument<(Exception) -> Unit>(2)
+          onFailure(exception)
+        }
+        .`when`(reviewRepository)
+        .getReviewsByUser(any(), any(), any())
+
+    reviewViewModel.getReviewsByUser(userId)
+
+    assertEquals(emptyList<Review>(), reviewViewModel.reviews.value)
+  }
+
+  @Test
+  fun getAverageRatingByProvider_returnsCorrectValue() {
+    val providerId = "provider1"
+    val averageRating = 4.5
+    `when`(reviewRepository.getAverageRatingByProvider(providerId)).thenReturn(averageRating)
+
+    val result = reviewViewModel.getAverageRatingByProvider(providerId)
+
+    assertEquals(averageRating, result, 0.0)
+  }
+
+  @Test
+  fun getAverageRatingByUser_returnsCorrectValue() {
+    val userId = "user1"
+    val averageRating = 4.0
+    `when`(reviewRepository.getAverageRatingByUser(userId)).thenReturn(averageRating)
+
+    val result = reviewViewModel.getAverageRatingByUser(userId)
+
+    assertEquals(averageRating, result, 0.0)
   }
 }

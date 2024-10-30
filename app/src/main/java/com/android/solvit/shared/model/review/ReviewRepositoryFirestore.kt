@@ -50,7 +50,7 @@ class ReviewRepositoryFirestore(private val db: FirebaseFirestore) : ReviewRepos
       onFailure: (Exception) -> Unit
   ) {
     // Query reviews by provider ID
-    queryReviews("provider.uid", providerId, onSuccess, onFailure)
+    queryReviews("providerId", providerId, onSuccess, onFailure)
   }
 
   override fun getReviewsByUser(
@@ -67,7 +67,7 @@ class ReviewRepositoryFirestore(private val db: FirebaseFirestore) : ReviewRepos
   }
 
   override fun getAverageRatingByProvider(providerId: String): Double {
-    return calculateAverageRating("provider.uid", providerId)
+    return calculateAverageRating("providerId", providerId)
   }
 
   override fun getAverageRatingByUser(userId: String): Double {
@@ -106,7 +106,7 @@ class ReviewRepositoryFirestore(private val db: FirebaseFirestore) : ReviewRepos
         db.collection(collectionPath).document(reviewId).delete(), onSuccess, onFailure)
   }
 
-  private fun performFirestoreOperation(
+  fun performFirestoreOperation(
       task: Task<Void>,
       onSuccess: () -> Unit,
       onFailure: (Exception) -> Unit
