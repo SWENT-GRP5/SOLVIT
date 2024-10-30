@@ -51,7 +51,17 @@ class MainActivity : ComponentActivity() {
     setContent {
       SampleAppTheme {
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-          SolvItApp()
+          //SolvItApp()
+          val authViewModel = viewModel<AuthViewModel>(factory = AuthViewModel.Factory)
+          val listProviderViewModel =
+            viewModel<ListProviderViewModel>(factory = ListProviderViewModel.Factory)
+          val seekerProfileViewModel =
+            viewModel<SeekerProfileViewModel>(factory = SeekerProfileViewModel.Factory)
+          val serviceRequestViewModel =
+            viewModel<ServiceRequestViewModel>(factory = ServiceRequestViewModel.Factory)
+          SeekerUI(authViewModel,listProviderViewModel,seekerProfileViewModel,serviceRequestViewModel)
+
+
         }
       }
     }
@@ -115,7 +125,7 @@ fun SeekerUI(
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
 
-  NavHost(navController = navController, startDestination = Route.SERVICES) {
+  NavHost(navController = navController, startDestination = Route.PROFILE) {
     composable(Route.SERVICES) { ServicesScreen(navigationActions, listProviderViewModel) }
     composable(Route.PROVIDERS) { SelectProviderScreen(listProviderViewModel, navigationActions) }
     composable(Route.MESSAGE) { MessageScreen(navigationActions) }
