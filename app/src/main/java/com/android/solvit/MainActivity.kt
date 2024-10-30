@@ -51,17 +51,7 @@ class MainActivity : ComponentActivity() {
     setContent {
       SampleAppTheme {
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-          //SolvItApp()
-          val authViewModel = viewModel<AuthViewModel>(factory = AuthViewModel.Factory)
-          val listProviderViewModel =
-            viewModel<ListProviderViewModel>(factory = ListProviderViewModel.Factory)
-          val seekerProfileViewModel =
-            viewModel<SeekerProfileViewModel>(factory = SeekerProfileViewModel.Factory)
-          val serviceRequestViewModel =
-            viewModel<ServiceRequestViewModel>(factory = ServiceRequestViewModel.Factory)
-          SeekerUI(authViewModel,listProviderViewModel,seekerProfileViewModel,serviceRequestViewModel)
-
-
+          SolvItApp()
         }
       }
     }

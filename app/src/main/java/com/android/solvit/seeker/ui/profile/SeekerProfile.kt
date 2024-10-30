@@ -2,7 +2,6 @@ package com.android.solvit.seeker.ui.profile
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -21,8 +20,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
@@ -30,8 +27,6 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Favorite
@@ -48,7 +43,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -59,7 +53,6 @@ import androidx.compose.ui.unit.sp
 import com.android.solvit.R
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
-import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.navigation.Screen
 
 /*
@@ -291,164 +284,151 @@ fun SeekerProfileScreen(viewModel: SeekerProfileViewModel, navigationActions: Na
   val scrollState = rememberScrollState()
 
   // Display the profile information if it's available
-    userProfile?.let { profile ->
-        Scaffold(
-            topBar = {
-                Column {
-                    Text(
-                        text = "Profile",
-                        style = TextStyle(
-                            fontSize = 24.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.Black
-                        ),
-                        modifier = Modifier
-                            .padding(start = 16.dp, top = 16.dp).verticalScroll(scrollState)
-                            .testTag("ProfileTitle"), // testTag for the title
+  userProfile?.let { profile ->
+    Scaffold(
+        topBar = {
+          Column {
+            Text(
+                text = "Profile",
+                style =
+                    TextStyle(fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Color.Black),
+                modifier =
+                    Modifier.padding(start = 16.dp, top = 16.dp)
+                        .verticalScroll(scrollState)
+                        .testTag("ProfileTitle"), // testTag for the title
+            )
+            Spacer(modifier = Modifier.height(16.dp))
 
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
+            TopAppBar(
+                modifier = Modifier.testTag("ProfileTopBar"),
+                backgroundColor = Color(0xFF0099FF), // Match background color from Figma
+                contentPadding = PaddingValues(16.dp)) {
+                  // Row layout for profile image, name, email, and edit icon
+                  Row(
+                      modifier = Modifier.fillMaxWidth(),
+                      verticalAlignment = Alignment.CenterVertically,
+                      horizontalArrangement = Arrangement.SpaceBetween // Space between items
+                      ) {
+                        // Profile Picture, Name, and Email on the left
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                          // Profile Picture
+                          Image(
+                              painter = painterResource(id = R.drawable.empty_profile_img),
+                              contentDescription = "Profile Picture",
+                              modifier =
+                                  Modifier.size(53.dp) // Set size to 53px
+                                      .clip(CircleShape)
+                                      .border(2.dp, Color.White, CircleShape)
+                                      .testTag("ProfileImage") // testTag for profile image
+                              )
+                          Spacer(modifier = Modifier.width(16.dp))
 
-
-                    TopAppBar(
-                        modifier = Modifier
-                            .testTag("ProfileTopBar"),
-                        backgroundColor = Color(0xFF0099FF), // Match background color from Figma
-                        contentPadding = PaddingValues(16.dp)
-                    ) {
-                        // Row layout for profile image, name, email, and edit icon
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween // Space between items
-                        ) {
-                            // Profile Picture, Name, and Email on the left
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                // Profile Picture
-                                Image(
-                                    painter = painterResource(id = R.drawable.empty_profile_img),
-                                    contentDescription = "Profile Picture",
-                                    modifier = Modifier
-                                        .size(53.dp) // Set size to 53px
-                                        .clip(CircleShape)
-                                        .border(2.dp, Color.White, CircleShape)
-                                        .testTag("ProfileImage") // testTag for profile image
+                          // Name and Email
+                          Column {
+                            Text(
+                                text = profile.name,
+                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.h6.copy(color = Color.White),
+                                modifier = Modifier.testTag("ProfileName") // testTag for name
                                 )
-                                Spacer(modifier = Modifier.width(16.dp))
-
-                                // Name and Email
-                                Column {
-                                    Text(
-                                        text = profile.name,
-                                        fontWeight = FontWeight.Bold,
-                                        style = MaterialTheme.typography.h6.copy(color = Color.White),
-                                        modifier = Modifier.testTag("ProfileName") // testTag for name
-                                    )
-                                    Text(
-                                        text = profile.email,
-                                        style = MaterialTheme.typography.body2.copy(color = Color.White),
-                                        modifier = Modifier.testTag("ProfileEmail") // testTag for email
-                                    )
-                                }
-                            }
-
-                            // Edit icon on the right
-                            IconButton(onClick = { navigationActions.navigateTo(Screen.EDIT_PROFILE) }) {
-                                Icon(
-                                    Icons.Default.Edit,
-                                    contentDescription = "Edit Profile",
-                                    tint = Color.White
+                            Text(
+                                text = profile.email,
+                                style = MaterialTheme.typography.body2.copy(color = Color.White),
+                                modifier = Modifier.testTag("ProfileEmail") // testTag for email
                                 )
-                            }
+                          }
                         }
-                    }
+
+                        // Edit icon on the right
+                        IconButton(
+                            onClick = { navigationActions.navigateTo(Screen.EDIT_PROFILE) }) {
+                              Icon(
+                                  Icons.Default.Edit,
+                                  contentDescription = "Edit Profile",
+                                  tint = Color.White)
+                            }
+                      }
                 }
-            }
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp)
-                    .testTag("ProfileContent"), // Adding testTag for profile content
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-
-
+          }
+        }) {
+          Column(
+              modifier =
+                  Modifier.fillMaxSize()
+                      .padding(16.dp)
+                      .testTag("ProfileContent"), // Adding testTag for profile content
+              horizontalAlignment = Alignment.CenterHorizontally) {
                 LazyColumn(
                     modifier = Modifier.testTag("ProfileOptionsList") // testTag for options list
-                ) {
-                    item {
-
+                    ) {
+                      item {
                         ProfileOptionItem(
                             icon = Icons.Default.Person,
                             optionName = "My Account",
                             subtitle = "Make changes to your account",
-                            onClick = { /* Handle click */ },
+                            onClick = { /* Handle click */},
                             modifier = Modifier.testTag("MyAccountOption") // testTag for option
-                        )
+                            )
                         Spacer(modifier = Modifier.height(8.dp))
                         ProfileOptionItem(
                             icon = Icons.Default.ShoppingCart,
                             optionName = "Order History",
                             subtitle = "Manage your requested services and their statuses",
-                            onClick = { /* Handle click */ },
+                            onClick = { /* Handle click */},
                             modifier = Modifier.testTag("OrdersOption") // testTag for option
-                        )
+                            )
                         Spacer(modifier = Modifier.height(8.dp))
                         ProfileOptionItem(
                             icon = Icons.Default.Lock,
                             optionName = "Billing",
                             subtitle = "Manage your billing information",
-                            onClick = { /* Handle click */ },
+                            onClick = { /* Handle click */},
                             modifier = Modifier.testTag("BillingOption") // testTag for option
-                        )
+                            )
                         Spacer(modifier = Modifier.height(8.dp))
                         ProfileOptionItem(
                             icon = Icons.Default.Favorite,
                             optionName = "Preferences",
                             subtitle = "Set your preferences", // Added subtitle
-                            onClick = { /* Handle click */ },
+                            onClick = { /* Handle click */},
                             modifier = Modifier.testTag("PreferencesOption") // testTag for option
-                        )
+                            )
                         Spacer(modifier = Modifier.height(8.dp))
                         ProfileOptionItem(
                             icon = Icons.Default.ExitToApp,
                             optionName = "Log out",
                             subtitle = "Log out of your account",
-                            onClick = { /* Handle log out */ },
+                            onClick = { /* Handle log out */},
                             modifier = Modifier.testTag("LogoutOption") // testTag for option
-                        )
+                            )
                         Spacer(modifier = Modifier.height(8.dp))
 
                         ProfileOptionItem(
                             icon = Icons.Default.Notifications,
                             optionName = "Help & Support",
-                            onClick = { /* Handle click */ },
+                            onClick = { /* Handle click */},
                             subtitle = "Get help and support",
                             modifier = Modifier.testTag("HelpSupportOption") // testTag for option
-                        )
+                            )
                         ProfileOptionItem(
                             icon = Icons.Default.Settings,
                             optionName = "About App",
-                            onClick = { /* Handle click */ },
+                            onClick = { /* Handle click */},
                             subtitle = "Learn more about the app",
                             modifier = Modifier.testTag("AboutAppOption") // testTag for option
-                        )
-                    }}}
+                            )
+                      }
+                    }
+              }
         }
-    } ?: run {
+  }
+      ?: run {
         // Fallback when no profile data is available
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(text = "No profile data available")
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+          Text(text = "No profile data available")
         }
-    }
+      }
 }
+
 @Composable
 fun ProfileOptionItem(
     icon: ImageVector,
@@ -458,33 +438,32 @@ fun ProfileOptionItem(
     iconColor: Color = Color.Gray,
     modifier: Modifier = Modifier // Adding modifier for testTag
 ) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable { onClick() }
-            .padding(vertical = 12.dp), // Padding for the whole row
-        verticalAlignment = Alignment.CenterVertically // Center vertically for icon and text
-    ) {
+  Row(
+      modifier =
+          modifier
+              .fillMaxWidth()
+              .clickable { onClick() }
+              .padding(vertical = 12.dp), // Padding for the whole row
+      verticalAlignment = Alignment.CenterVertically // Center vertically for icon and text
+      ) {
         Icon(
             imageVector = icon,
             contentDescription = optionName,
-            tint=iconColor,
-            modifier = Modifier.size(24.dp)
-        )
+            tint = iconColor,
+            modifier = Modifier.size(24.dp))
         Spacer(modifier = Modifier.width(8.dp)) // Space between icon and text
 
         Column(modifier = Modifier.weight(1f)) {
-            Text(optionName, style = MaterialTheme.typography.body1)
-            Text(
-                text = subtitle,
-                style = TextStyle(
-                    fontSize = 12.sp, // Set a smaller font size for the subtitle
-                    color = Color(0xFFABABAB)
-                ),
-                modifier = Modifier
-                    .padding(4.dp) // Padding for the subtitle
-            )
+          Text(optionName, style = MaterialTheme.typography.body1)
+          Text(
+              text = subtitle,
+              style =
+                  TextStyle(
+                      fontSize = 12.sp, // Set a smaller font size for the subtitle
+                      color = Color(0xFFABABAB)),
+              modifier = Modifier.padding(4.dp) // Padding for the subtitle
+              )
         }
-        Icon(Icons.Default.KeyboardArrowRight, contentDescription = null,tint = iconColor)
-    }
+        Icon(Icons.Default.KeyboardArrowRight, contentDescription = null, tint = iconColor)
+      }
 }

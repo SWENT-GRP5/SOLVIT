@@ -5,7 +5,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -20,7 +19,6 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
-import androidx.compose.material.TextButton
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -76,34 +74,32 @@ fun EditSeekerProfileScreen(
       topBar = {
         TopAppBar(
             backgroundColor = Color.White,
-            title = { Box(
-                modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.Center
-            ) {
+            title = {
+              Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                 Text("Bio-data", color = Color.Black, fontWeight = FontWeight.Bold)
-            } },
+              }
+            },
             navigationIcon = {
               IconButton(onClick = { navigationActions.goBack() }) {
                 Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
               }
             })
       }) { padding ->
-      Column(
-          modifier = Modifier
-              .fillMaxWidth()
-              .padding(top = 32.dp)
-              .verticalScroll(rememberScrollState()),
-          horizontalAlignment = Alignment.CenterHorizontally, // Align everything to the center
-      ) {
+        Column(
+            modifier =
+                Modifier.fillMaxWidth().padding(top = 32.dp).verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally, // Align everything to the center
+        ) {
           Image(
-              painter = painterResource(id = R.drawable.empty_profile_img), // Replace with actual profile image later
+              painter =
+                  painterResource(
+                      id = R.drawable.empty_profile_img), // Replace with actual profile image later
               contentDescription = "Profile Picture",
-              modifier = Modifier
-                  .size(72.dp)
-                  .clip(CircleShape)
-                  .border(2.dp, Color.Gray, CircleShape)
-                  .padding(bottom = 16.dp)
-          )
+              modifier =
+                  Modifier.size(72.dp)
+                      .clip(CircleShape)
+                      .border(2.dp, Color.Gray, CircleShape)
+                      .padding(bottom = 16.dp))
 
           Text(
               text = fullName,
@@ -111,87 +107,84 @@ fun EditSeekerProfileScreen(
               fontSize = 20.sp,
               color = Color.Black,
               textAlign = TextAlign.Center,
-              modifier = Modifier.padding(top = 8.dp)
-          )
+              modifier = Modifier.padding(top = 8.dp))
 
           Text(
               text = email,
               fontSize = 14.sp,
               color = Color.Gray,
               textAlign = TextAlign.Center,
-              modifier = Modifier.padding(top = 4.dp)
-          )
-      }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-          // Full Name Input
-            Text("Name", fontWeight = FontWeight.Bold)
-            Spacer(modifier = Modifier.height(8.dp))
-          OutlinedTextField(
-              value = fullName,
-              onValueChange = { fullName = it },
-              label = { Text("Enter your full name")},
-              modifier = Modifier.fillMaxWidth().testTag("profileName"))
-
-          Spacer(modifier = Modifier.height(16.dp))
-
-          // Username Input
-          OutlinedTextField(
-              value = username,
-              onValueChange = { username = it },
-              label = { Text("Enter your username") },
-              modifier = Modifier.fillMaxWidth().testTag("profileUsername"))
-
-          Spacer(modifier = Modifier.height(16.dp))
-
-          // Email Input
-          OutlinedTextField(
-              value = email,
-              onValueChange = { email = it },
-              label = { Text("Enter your email") },
-              modifier = Modifier.fillMaxWidth().testTag("profileEmail"))
-
-          Spacer(modifier = Modifier.height(16.dp))
-
-          // Phone Number Input
-          OutlinedTextField(
-              value = phone,
-              onValueChange = { phone = it },
-              label = { Text("Enter your phone Number") },
-              modifier = Modifier.fillMaxWidth().testTag("profilePhone"))
-
-          Spacer(modifier = Modifier.height(16.dp))
-
-          // Address Input
-          OutlinedTextField(
-              value = address,
-              onValueChange = { address = it },
-              label = { Text("Enter your address") },
-              modifier = Modifier.fillMaxWidth().testTag("profileAddress"))
-
-          Spacer(modifier = Modifier.height(16.dp))
-
-          // Save Button
-          Button(
-              onClick = {
-                userProfile.let { profile ->
-                  // Update the profile with the new values
-                  viewModel.updateUserProfile(
-                      SeekerProfile(
-                          uid = userProfile.uid, // Use the existing UID
-                          name = fullName,
-                          username = username,
-                          email = email,
-                          phone = phone,
-                          address = address))
-                }
-                navigationActions.goBack()
-              },
-              modifier = Modifier.fillMaxWidth().height(60.dp),
-              colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF00C853))) {
-                Text("Update Profile", color = Color.White)
-              }
+              modifier = Modifier.padding(top = 4.dp))
         }
-      }
 
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Full Name Input
+        Text("Name", fontWeight = FontWeight.Bold)
+        Spacer(modifier = Modifier.height(8.dp))
+        OutlinedTextField(
+            value = fullName,
+            onValueChange = { fullName = it },
+            label = { Text("Enter your full name") },
+            modifier = Modifier.fillMaxWidth().testTag("profileName"))
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Username Input
+        OutlinedTextField(
+            value = username,
+            onValueChange = { username = it },
+            label = { Text("Enter your username") },
+            modifier = Modifier.fillMaxWidth().testTag("profileUsername"))
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Email Input
+        OutlinedTextField(
+            value = email,
+            onValueChange = { email = it },
+            label = { Text("Enter your email") },
+            modifier = Modifier.fillMaxWidth().testTag("profileEmail"))
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Phone Number Input
+        OutlinedTextField(
+            value = phone,
+            onValueChange = { phone = it },
+            label = { Text("Enter your phone Number") },
+            modifier = Modifier.fillMaxWidth().testTag("profilePhone"))
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Address Input
+        OutlinedTextField(
+            value = address,
+            onValueChange = { address = it },
+            label = { Text("Enter your address") },
+            modifier = Modifier.fillMaxWidth().testTag("profileAddress"))
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Save Button
+        Button(
+            onClick = {
+              userProfile.let { profile ->
+                // Update the profile with the new values
+                viewModel.updateUserProfile(
+                    SeekerProfile(
+                        uid = userProfile.uid, // Use the existing UID
+                        name = fullName,
+                        username = username,
+                        email = email,
+                        phone = phone,
+                        address = address))
+              }
+              navigationActions.goBack()
+            },
+            modifier = Modifier.fillMaxWidth().height(60.dp),
+            colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF00C853))) {
+              Text("Update Profile", color = Color.White)
+            }
+      }
+}
