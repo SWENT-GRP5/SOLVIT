@@ -27,7 +27,7 @@ import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_CUSTOMMER
+import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_CUSTOMER
 import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.navigation.TopLevelDestination
 import com.android.solvit.shared.ui.navigation.TopLevelDestinations
@@ -85,7 +85,7 @@ fun SeekerBottomNavigationMenu(
                     modifier = Modifier.testTag(tab.textId))
               }
             }
-        if (tabList == LIST_TOP_LEVEL_DESTINATION_CUSTOMMER) {
+        if (tabList == LIST_TOP_LEVEL_DESTINATION_CUSTOMER) {
           FloatingActionButton(
               onClick = { onTabSelect(TopLevelDestinations.CREATE_REQUEST) },
               modifier =
@@ -110,7 +110,7 @@ fun SeekerBottomNavigationMenu(
 @Composable
 fun PreviewSeekerBottomNavigationMenu() {
   // Use the actual list of top-level destinations
-  val tabList = LIST_TOP_LEVEL_DESTINATION_CUSTOMMER
+  val tabList = LIST_TOP_LEVEL_DESTINATION_CUSTOMER
 
   // Preview with "Home" as the selected item
   SeekerBottomNavigationMenu(
