@@ -8,8 +8,12 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.navigation.NavController
+import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
+import com.android.solvit.seeker.model.profile.UserRepository
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.shared.model.map.Location
+import com.android.solvit.shared.model.map.LocationRepository
+import com.android.solvit.shared.model.map.LocationViewModel
 import com.android.solvit.shared.model.provider.Language
 import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.provider.ProviderRepository
@@ -19,13 +23,22 @@ import com.google.firebase.Timestamp
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito
 import org.mockito.Mockito.`when`
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 
 class ListProviderScreenTest {
   private lateinit var providerRepository: ProviderRepository
   private lateinit var listProviderViewModel: ListProviderViewModel
+
+  private lateinit var locationRepository: LocationRepository
+  private lateinit var locationViewModel: LocationViewModel
+
+  private lateinit var userRepository: UserRepository
+  private lateinit var seekerProfileViewModel: SeekerProfileViewModel
+
   private lateinit var navController: NavController
   private lateinit var navigationActions: NavigationActions
 
@@ -66,11 +79,33 @@ class ListProviderScreenTest {
   @Before
   fun setUp() {
     providerRepository = Mockito.mock(ProviderRepository::class.java)
+    userRepository = Mockito.mock(UserRepository::class.java)
     listProviderViewModel = ListProviderViewModel(providerRepository)
+    seekerProfileViewModel = SeekerProfileViewModel(userRepository)
     navController = Mockito.mock(NavController::class.java)
     navigationActions = NavigationActions(navController)
+    locationRepository = Mockito.mock(LocationRepository::class.java)
+    locationViewModel = LocationViewModel(locationRepository)
 
-    composeTestRule.setContent { SelectProviderScreen(listProviderViewModel, navigationActions) }
+    composeTestRule.setContent {
+      SelectProviderScreen(
+          seekerProfileViewModel = seekerProfileViewModel,
+          locationViewModel = locationViewModel,
+          // authViewModel=authViewModel,
+          listProviderViewModel = listProviderViewModel,
+          navigationActions = navigationActions,
+          userId = "1234")
+    }
+    `when`(userRepository.getCachedLocation(any(), any(), any())).thenAnswer {
+      val onSuccess = it.getArgument<(List<Location>) -> Unit>(1)
+      onSuccess(listOf(Location(0.0, 0.0, "EPFL")))
+    }
+    Mockito.`when`(
+            locationRepository.search(ArgumentMatchers.anyString(), anyOrNull(), anyOrNull()))
+        .thenAnswer { invocation ->
+          val onSuccess = invocation.getArgument<(List<Location>) -> Unit>(1)
+          onSuccess(listOf(Location(0.0, 0.0, "EPFL")))
+        }
   }
 
   @Test
@@ -95,6 +130,7 @@ class ListProviderScreenTest {
     composeTestRule.onNodeWithTag("serviceImage").assertIsDisplayed()
     composeTestRule.onNodeWithTag("popularProviders").assertIsDisplayed()
     composeTestRule.onNodeWithTag("providersList").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("filterByLocation").assertIsDisplayed()
     composeTestRule.onAllNodesWithTag("Rating")[0].assertIsDisplayed()
     composeTestRule.onAllNodesWithTag("filterIcon").fetchSemanticsNodes().isNotEmpty()
   }
@@ -107,7 +143,27 @@ class ListProviderScreenTest {
   }
 
   @Test
+  fun filterByLocationOpenBottomSheet() {
+    composeTestRule.onNodeWithTag("filterByLocation").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("filterByLocation").performClick()
+    composeTestRule.onNodeWithTag("SearchLocBar").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("filterByLocationSheet").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("cachedLocations").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("SearchLocBar").performTextInput("EPFL")
+    composeTestRule.waitUntil(timeoutMillis = 5000) {
+      composeTestRule.onNodeWithTag("suggestedLocations").isDisplayed()
+    }
+    composeTestRule.onNodeWithTag("suggestedLocations").assertIsDisplayed()
+    composeTestRule.waitUntil(timeoutMillis = 5000) {
+      composeTestRule.onAllNodesWithTag("suggestedLocation").fetchSemanticsNodes().isNotEmpty()
+    }
+    composeTestRule.onAllNodesWithTag("suggestedLocation")[0].performClick()
+    assert(composeTestRule.onAllNodesWithTag("popularProviders").fetchSemanticsNodes().size == 1)
+  }
+
+  @Test
   fun filterAction() {
+
     composeTestRule.onNodeWithTag("filterOption").assertIsDisplayed()
     composeTestRule.onNodeWithTag("filterOption").performClick()
     composeTestRule.onNodeWithTag("filterSheet").assertIsDisplayed()
@@ -120,10 +176,6 @@ class ListProviderScreenTest {
     composeTestRule.onNodeWithTag("minPrice").performTextInput("20")
     composeTestRule.onNodeWithTag("maxPrice").performTextInput("30")
 
-    `when`(providerRepository.filterProviders(any())).thenAnswer {
-      val onSuccess = it.getArgument<(List<Provider>) -> Unit>(0)
-      onSuccess(listOf(provider1)) // Simulate success
-    }
     composeTestRule.onNodeWithTag("applyFilterButton").performClick()
     composeTestRule.waitUntil(
         timeoutMillis = 10000L,

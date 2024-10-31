@@ -2,6 +2,7 @@ package com.android.solvit.shared.model.request
 
 import android.net.Uri
 import com.android.solvit.shared.model.map.Location
+import com.android.solvit.shared.model.service.Services
 import com.google.firebase.Timestamp
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.MatcherAssert.assertThat
@@ -26,7 +27,7 @@ class ServiceRequestViewModelTest {
           dueDate = Timestamp.now(),
           location = Location(name = "EPFL", latitude = 0.0, longitude = 0.0),
           imageUrl = null,
-          type = ServiceRequestType.CLEANING,
+          type = Services.CLEANER,
           status = ServiceRequestStatus.PENDING)
 
   @Before
