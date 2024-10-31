@@ -1,6 +1,7 @@
 package com.android.solvit.seeker.model.profile
 
 import android.util.Log
+import com.android.solvit.shared.model.map.Location
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
@@ -85,6 +86,62 @@ open class UserRepositoryFirestore(private val db: FirebaseFirestore) : UserRepo
   ) {
     performFirestoreOperation(
         db.collection(collectionPath).document(id).delete(), onSuccess, onFailure)
+  }
+
+  fun getLocations(doc: DocumentSnapshot): MutableList<Location> {
+    val locations =
+        (doc.get("cachedLocations") as? List<*>)?.mapNotNull { locationMap ->
+          (locationMap as? Map<String, Any>)?.let {
+            Location(
+                latitude = it["latitude"] as? Double ?: 0.0,
+                longitude = it["longitude"] as? Double ?: 0.0,
+                name = it["name"] as? String ?: "Unknown")
+          }
+        } ?: emptyList()
+    return locations.toMutableList()
+  }
+
+  override fun updateUserLocations(
+      userId: String,
+      newLocation: Location,
+      onSuccess: (List<Location>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    Log.e("AVANT", userId)
+    db.collection(collectionPath).document(userId).get().addOnCompleteListener { task ->
+      Log.e("Apres", "soy aqui $userId")
+      if (task.isSuccessful) {
+        Log.e("updateUserLocation", "yes task is succesfull")
+        val doc = task.result
+        var locations = getLocations(doc)
+        locations.add(0, newLocation)
+        if (locations.size > 2) {
+          locations = locations.take(2).toMutableList()
+        }
+        Log.e("CACHED LOCAATIONS", "$locations")
+        db.collection(collectionPath).document(userId).update("cachedLocations", locations.toList())
+        onSuccess(locations.toList())
+      } else {
+        task.exception?.let { onFailure(it) }
+      }
+    }
+  }
+
+  override fun getCachedLocation(
+      userId: String,
+      onSuccess: (List<Location>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    db.collection(collectionPath).document(userId).get().addOnCompleteListener() { task ->
+      if (task.isSuccessful) {
+        val doc = task.result
+        val locations = getLocations(doc)
+        onSuccess(locations)
+      } else {
+
+        task.exception?.let { onFailure(it) }
+      }
+    }
   }
 
   private fun performFirestoreOperation(
