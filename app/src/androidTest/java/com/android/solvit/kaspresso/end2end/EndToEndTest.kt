@@ -17,26 +17,6 @@ class EndToEndTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeSu
   @Test
   fun endToEndTest() =
       run {
-        /*step("OpeningScreen Test"){
-            OpeningScreenTest().openingScreenTest()
-        }
-        step("Sign In Screen Test") {
-            SignInScreenTest().signInScreenTest()
-        }
-        step("Sign Up Screen Test") {
-            SignUpScreenTest().signUpScreenTest()
-        }
-        step("Choose Profile Screen Test") {
-            ChooseProfileScreenTest().chooseProfileScreenTest()
-        }
-        step("Services Screen Test") {
-            ServicesScreenTest().servicesScreenTest()
-        }
-        step("Create Request Screen Test") {
-            CreateRequestScreenTest().createRequestScreenTest()
-        }
-        step("Edit Request Screen Test") {
-            EditRequestScreenTest().editRequestScreenTest()
-        }*/
+        // TODO: Implement the end-to-end test
       }
 }

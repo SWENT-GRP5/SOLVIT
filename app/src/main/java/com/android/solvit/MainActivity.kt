@@ -8,6 +8,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
@@ -30,6 +31,7 @@ import com.android.solvit.seeker.ui.request.RequestsOverviewScreen
 import com.android.solvit.seeker.ui.service.ServicesScreen
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
+import com.android.solvit.shared.ui.authentication.ForgotPassword
 import com.android.solvit.shared.ui.authentication.OpeningScreen
 import com.android.solvit.shared.ui.authentication.SignInScreen
 import com.android.solvit.shared.ui.authentication.SignUpChooseProfile
@@ -51,7 +53,7 @@ class MainActivity : ComponentActivity() {
     setContent {
       SampleAppTheme {
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-          SolvItApp()
+          SolvitApp()
         }
       }
     }
@@ -59,7 +61,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun SolvItApp() {
+fun SolvitApp() {
   val authViewModel = viewModel<AuthViewModel>(factory = AuthViewModel.Factory)
   val user = authViewModel.user.collectAsState()
   val userRegistered = authViewModel.userRegistered.collectAsState()
@@ -99,6 +101,7 @@ fun SharedUI(
     composable(Screen.PROVIDER_REGISTRATION_PROFILE) {
       ProviderRegistrationScreen(listProviderViewModel, navigationActions, authViewModel)
     }
+    composable(Screen.FORGOT_PASSWORD) { ForgotPassword(navigationActions) }
     composable(Screen.SEEKER_REGISTRATION_PROFILE) {
       SeekerRegistrationScreen(seekerProfileViewModel, navigationActions, authViewModel)
     }
@@ -114,10 +117,19 @@ fun SeekerUI(
 ) {
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
+  val user by authViewModel.user.collectAsState()
 
   NavHost(navController = navController, startDestination = Route.SERVICES) {
     composable(Route.SERVICES) { ServicesScreen(navigationActions, listProviderViewModel) }
-    composable(Route.PROVIDERS) { SelectProviderScreen(listProviderViewModel, navigationActions) }
+    composable(Route.PROVIDERS) {
+      user?.let { it1 ->
+        SelectProviderScreen(
+            listProviderViewModel = listProviderViewModel,
+            navigationActions = navigationActions,
+            userId = it1.uid,
+        )
+      }
+    }
     composable(Route.MESSAGE) { MessageScreen(navigationActions) }
     composable(Route.CREATE_REQUEST) {
       CreateRequestScreen(navigationActions, serviceRequestViewModel)

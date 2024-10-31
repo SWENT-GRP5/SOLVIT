@@ -178,6 +178,7 @@ dependencies {
     implementation(libs.firebase.storage.ktx)
     implementation(libs.play.services.location)
     implementation(libs.androidx.navigation.testing)
+    testImplementation(libs.testng)
 
 
     // ------------- Jetpack Compose ------------------

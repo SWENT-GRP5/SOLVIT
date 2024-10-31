@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.android.solvit.shared.model.map.Location
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,6 +31,12 @@ class SeekerProfileViewModel(
 
   private val _seekerProfileList = MutableStateFlow<List<SeekerProfile>>(emptyList())
   val seekerProfileList: StateFlow<List<SeekerProfile>> = _seekerProfileList
+
+  private val _cachedLocations = MutableStateFlow<List<Location>>(emptyList())
+  val cachedLocations: StateFlow<List<Location>> = _cachedLocations
+
+  private val _locationSearched = MutableStateFlow<Location>(Location(0.0, 0.0, "Unknown"))
+  val locationSearched: StateFlow<Location> = _locationSearched
 
   // create factory
   companion object {
@@ -81,5 +88,19 @@ class SeekerProfileViewModel(
 
   fun deleteUserProfile(id: String) {
     repository.deleteUserProfile(id = id, onSuccess = { getUsersProfile() }, onFailure = {})
+  }
+
+  fun updateCachedLocations(userId: String, newLocation: Location) {
+    repository.updateUserLocations(
+        userId, newLocation, onSuccess = { _cachedLocations.value = it }, onFailure = {})
+  }
+
+  fun getCachedLocations(userId: String) {
+    repository.getCachedLocation(
+        userId, onSuccess = { _cachedLocations.value = it }, onFailure = {})
+  }
+
+  fun setLocationSearched(location: Location) {
+    _locationSearched.value = location
   }
 }
