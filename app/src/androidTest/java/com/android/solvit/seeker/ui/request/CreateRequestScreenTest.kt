@@ -18,8 +18,8 @@ import com.android.solvit.shared.model.map.LocationViewModel
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestRepository
 import com.android.solvit.shared.model.request.ServiceRequestStatus
-import com.android.solvit.shared.model.request.ServiceRequestType
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
+import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.google.firebase.Timestamp
 import java.util.GregorianCalendar
@@ -52,7 +52,7 @@ class CreateRequestScreenTest {
       ServiceRequest(
           "uid",
           "title",
-          ServiceRequestType.CLEANING,
+          Services.CLEANER,
           "description",
           "assigneeName",
           Timestamp(GregorianCalendar(2024, 0, 1).time),
@@ -153,9 +153,9 @@ class CreateRequestScreenTest {
       CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
     }
 
-    composeTestRule.onNodeWithTag("inputServiceType").performTextInput("Plumbing")
+    composeTestRule.onNodeWithTag("inputServiceType").performTextInput("Plumber")
     composeTestRule.onNodeWithTag("serviceTypeMenu").assertExists()
-    composeTestRule.onNodeWithTag("serviceTypeResult").assert(hasText("Plumbing"))
+    composeTestRule.onNodeWithTag("serviceTypeResult").assert(hasText("Plumber"))
   }
 
   @Test
@@ -164,7 +164,7 @@ class CreateRequestScreenTest {
       CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
     }
 
-    composeTestRule.onNodeWithTag("inputServiceType").performTextInput("Plumbing")
+    composeTestRule.onNodeWithTag("inputServiceType").performTextInput("Plumber")
     composeTestRule.onNodeWithTag("serviceTypeResult").performClick()
     composeTestRule.onNodeWithTag("serviceTypeMenu").assertDoesNotExist()
   }
