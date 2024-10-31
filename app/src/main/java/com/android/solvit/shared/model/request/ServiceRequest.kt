@@ -1,12 +1,13 @@
 package com.android.solvit.shared.model.request
 
 import com.android.solvit.shared.model.map.Location
+import com.android.solvit.shared.model.service.Services
 import com.google.firebase.Timestamp
 
 data class ServiceRequest(
     val uid: String,
     val title: String,
-    val type: ServiceRequestType,
+    val type: Services,
     val description: String,
     val assigneeName: String,
     val dueDate: Timestamp,
@@ -21,31 +22,4 @@ enum class ServiceRequestStatus {
   STARTED,
   ENDED,
   ARCHIVED
-}
-
-enum class ServiceRequestType {
-  CLEANING,
-  PLUMBING,
-  ELECTRICIAN,
-  CARPENTER,
-  PAINTER,
-  GARDENER,
-  TUTOR,
-  MOVING,
-  LOCKSMITH,
-  PEST_CONTROL,
-  HVAC,
-  ROOFING,
-  LANDSCAPING,
-  INTERIOR_DESIGN,
-  WEB_DEVELOPMENT,
-  GRAPHIC_DESIGN,
-  PHOTOGRAPHY,
-  PERSONAL_TRAINING,
-  DOG_WALKING,
-  CLEANING_SERVICES,
-  VIRTUAL_ASSISTANCE,
-  COOKING,
-  CAR_REPAIR,
-  OTHER
 }

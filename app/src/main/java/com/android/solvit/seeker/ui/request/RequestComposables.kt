@@ -43,8 +43,8 @@ import androidx.compose.ui.window.PopupProperties
 import coil.compose.AsyncImage
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.request.ServiceRequest
-import com.android.solvit.shared.model.request.ServiceRequestType
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
+import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import java.util.Locale
 
@@ -76,8 +76,8 @@ fun ServiceTypeDropdown(
     onTypeQueryChange: (String) -> Unit,
     showDropdownType: Boolean,
     onShowDropdownTypeChange: (Boolean) -> Unit,
-    filteredServiceTypes: List<ServiceRequestType>,
-    onServiceTypeSelected: (ServiceRequestType) -> Unit
+    filteredServiceTypes: List<Services>,
+    onServiceTypeSelected: (Services) -> Unit
 ) {
   Box(modifier = Modifier.fillMaxWidth()) {
     OutlinedTextField(
@@ -130,12 +130,12 @@ fun ServiceTypeDropdown(
                 modifier = Modifier.testTag("serviceTypeResult"),
                 text = {
                   Text(
-                      ServiceRequestType.OTHER.name
-                          .lowercase(Locale.getDefault())
-                          .replaceFirstChar { it.uppercase(Locale.getDefault()) })
+                      Services.OTHER.name.lowercase(Locale.getDefault()).replaceFirstChar {
+                        it.uppercase(Locale.getDefault())
+                      })
                 },
                 onClick = {
-                  onServiceTypeSelected(ServiceRequestType.OTHER)
+                  onServiceTypeSelected(Services.OTHER)
                   onShowDropdownTypeChange(false)
                 })
             HorizontalDivider()
