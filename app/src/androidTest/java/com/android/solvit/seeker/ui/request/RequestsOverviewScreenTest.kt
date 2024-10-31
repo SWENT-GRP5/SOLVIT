@@ -39,7 +39,7 @@ class RequestsOverviewScreenTest {
       ServiceRequest(
           "uid",
           "title",
-          ServiceRequestType.CLEANING,
+          Services.CLEANER,
           "description",
           "assigneeName",
           Timestamp(GregorianCalendar(2024, 0, 1).time),
@@ -182,7 +182,7 @@ class RequestsOverviewScreenTest {
     composeTestRule.setContent { RequestItemRow(request = request, onClick = {}) }
 
     composeTestRule.onNodeWithText("title").assertIsDisplayed()
-    composeTestRule.onNodeWithText("Cleaning").assertIsDisplayed()
+    composeTestRule.onNodeWithText("Cleaner").assertIsDisplayed()
 
     val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
     val expectedDate = dateFormat.format(request.dueDate.toDate())
@@ -193,7 +193,7 @@ class RequestsOverviewScreenTest {
   }
 
   @Test
-  fun todoItemRowClickCallsOnClick() {
+  fun requestItemRowClickCallsOnClick() {
     val onClickMock = mock<() -> Unit>()
 
     composeTestRule.setContent { RequestItemRow(request = request, onClick = onClickMock) }
