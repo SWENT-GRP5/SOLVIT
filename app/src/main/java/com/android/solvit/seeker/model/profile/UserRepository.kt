@@ -1,5 +1,7 @@
 package com.android.solvit.seeker.model.profile
 
+import com.android.solvit.shared.model.map.Location
+
 interface UserRepository {
   fun getNewUid(): String
 
@@ -22,4 +24,17 @@ interface UserRepository {
   fun addUserProfile(profile: SeekerProfile, onSuccess: () -> Unit, onFailure: (Exception) -> Unit)
 
   fun deleteUserProfile(id: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit)
+
+  fun updateUserLocations(
+      userId: String,
+      newLocation: Location,
+      onSuccess: (List<Location>) -> Unit,
+      onFailure: (Exception) -> Unit
+  )
+
+  fun getCachedLocation(
+      userId: String,
+      onSuccess: (List<Location>) -> Unit,
+      onFailure: (Exception) -> Unit
+  )
 }
