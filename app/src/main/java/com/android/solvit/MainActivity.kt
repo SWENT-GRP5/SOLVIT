@@ -64,19 +64,19 @@ fun SolvItApp() {
   val user = authViewModel.user.collectAsState()
   val userRegistered = authViewModel.userRegistered.collectAsState()
   val listProviderViewModel =
-      viewModel<ListProviderViewModel>(factory = ListProviderViewModel.Factory)
+    viewModel<ListProviderViewModel>(factory = ListProviderViewModel.Factory)
   val seekerProfileViewModel =
-      viewModel<SeekerProfileViewModel>(factory = SeekerProfileViewModel.Factory)
+    viewModel<SeekerProfileViewModel>(factory = SeekerProfileViewModel.Factory)
   val serviceRequestViewModel =
-      viewModel<ServiceRequestViewModel>(factory = ServiceRequestViewModel.Factory)
+    viewModel<ServiceRequestViewModel>(factory = ServiceRequestViewModel.Factory)
 
   if (!userRegistered.value) {
     SharedUI(authViewModel, listProviderViewModel, seekerProfileViewModel)
   } else {
     when (user.value!!.role) {
       "seeker" ->
-          SeekerUI(
-              authViewModel, listProviderViewModel, seekerProfileViewModel, serviceRequestViewModel)
+        SeekerUI(
+          authViewModel, listProviderViewModel, seekerProfileViewModel, serviceRequestViewModel)
       "provider" -> ProviderUI(authViewModel, listProviderViewModel, seekerProfileViewModel)
     }
   }
@@ -84,9 +84,9 @@ fun SolvItApp() {
 
 @Composable
 fun SharedUI(
-    authViewModel: AuthViewModel,
-    listProviderViewModel: ListProviderViewModel,
-    seekerProfileViewModel: SeekerProfileViewModel
+  authViewModel: AuthViewModel,
+  listProviderViewModel: ListProviderViewModel,
+  seekerProfileViewModel: SeekerProfileViewModel
 ) {
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
@@ -107,15 +107,15 @@ fun SharedUI(
 
 @Composable
 fun SeekerUI(
-    authViewModel: AuthViewModel,
-    listProviderViewModel: ListProviderViewModel,
-    seekerProfileViewModel: SeekerProfileViewModel,
-    serviceRequestViewModel: ServiceRequestViewModel
+  authViewModel: AuthViewModel,
+  listProviderViewModel: ListProviderViewModel,
+  seekerProfileViewModel: SeekerProfileViewModel,
+  serviceRequestViewModel: ServiceRequestViewModel
 ) {
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
 
-  NavHost(navController = navController, startDestination = Route.PROFILE) {
+  NavHost(navController = navController, startDestination = Route.SERVICES) {
     composable(Route.SERVICES) { ServicesScreen(navigationActions, listProviderViewModel) }
     composable(Route.PROVIDERS) { SelectProviderScreen(listProviderViewModel, navigationActions) }
     composable(Route.MESSAGE) { MessageScreen(navigationActions) }
@@ -138,9 +138,9 @@ fun SeekerUI(
 
 @Composable
 fun ProviderUI(
-    authViewModel: AuthViewModel,
-    listProviderViewModel: ListProviderViewModel,
-    seekerProfileViewModel: SeekerProfileViewModel
+  authViewModel: AuthViewModel,
+  listProviderViewModel: ListProviderViewModel,
+  seekerProfileViewModel: SeekerProfileViewModel
 ) {
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
