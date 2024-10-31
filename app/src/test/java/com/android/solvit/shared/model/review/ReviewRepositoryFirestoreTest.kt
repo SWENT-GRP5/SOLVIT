@@ -469,6 +469,51 @@ class ReviewRepositoryFirestoreTest {
     assertEquals(5.0, averageRating, 0.0)
   }
 
+  @Test
+  fun getAverageRating_returnsCorrectResult() {
+    val mockDocumentSnapshotList = listOf(mockDocumentSnapshot, mockDocumentSnapshot)
+    `when`(mockQuerySnapshot.documents).thenReturn(mockDocumentSnapshotList)
+
+    `when`(mockCollectionReference.whereEqualTo("serviceRequestId", "1"))
+        .thenReturn(mockCollectionReference)
+    `when`(mockCollectionReference.get()).thenReturn(taskForQuerySnapshot())
+    `when`(mockDocumentSnapshot.getLong("rating")).thenReturn(4L, 6L)
+
+    val averageRating = reviewRepositoryFirestore.getAverageRating("1")
+
+    assertEquals(5.0, averageRating, 0.0)
+  }
+
+  @Test
+  fun getAverageRatingByProvider_returnsCorrectResult() {
+    val mockDocumentSnapshotList = listOf(mockDocumentSnapshot, mockDocumentSnapshot)
+    `when`(mockQuerySnapshot.documents).thenReturn(mockDocumentSnapshotList)
+
+    `when`(mockCollectionReference.whereEqualTo("providerId", "1"))
+        .thenReturn(mockCollectionReference)
+    `when`(mockCollectionReference.get()).thenReturn(taskForQuerySnapshot())
+    `when`(mockDocumentSnapshot.getLong("rating")).thenReturn(4L, 6L)
+
+    val averageRating = reviewRepositoryFirestore.getAverageRatingByProvider("1")
+
+    assertEquals(5.0, averageRating, 0.0)
+  }
+
+  @Test
+  fun getAverageRatingByUser_returnsCorrectResult() {
+    val mockDocumentSnapshotList = listOf(mockDocumentSnapshot, mockDocumentSnapshot)
+    `when`(mockQuerySnapshot.documents).thenReturn(mockDocumentSnapshotList)
+
+    `when`(mockCollectionReference.whereEqualTo("authorId", "1"))
+        .thenReturn(mockCollectionReference)
+    `when`(mockCollectionReference.get()).thenReturn(taskForQuerySnapshot())
+    `when`(mockDocumentSnapshot.getLong("rating")).thenReturn(4L, 6L)
+
+    val averageRating = reviewRepositoryFirestore.getAverageRatingByUser("1")
+
+    assertEquals(5.0, averageRating, 0.0)
+  }
+
   private fun mockDocumentSnapshotWithReviewData() {
     `when`(mockDocumentSnapshot.id).thenReturn("1")
     `when`(mockDocumentSnapshot.getString("authorId")).thenReturn("user1")
