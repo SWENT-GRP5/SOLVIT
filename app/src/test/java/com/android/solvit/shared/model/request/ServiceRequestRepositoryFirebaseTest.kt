@@ -3,6 +3,7 @@ package com.android.solvit.shared.model.request
 import android.os.Looper
 import androidx.test.core.app.ApplicationProvider
 import com.android.solvit.shared.model.map.Location
+import com.android.solvit.shared.model.service.Services
 import com.google.android.gms.tasks.TaskCompletionSource
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.FirebaseApp
@@ -57,7 +58,7 @@ class ServiceRequestRepositoryFirebaseTest {
           dueDate = Timestamp.now(),
           location = Location(name = "EPFL", latitude = 0.0, longitude = 0.0),
           imageUrl = null,
-          type = ServiceRequestType.CLEANING,
+          type = Services.PLUMBER,
           status = ServiceRequestStatus.PENDING)
 
   @Before
@@ -166,7 +167,7 @@ class ServiceRequestRepositoryFirebaseTest {
     `when`(mockDocumentSnapshot.getDouble("location.longitude")).thenReturn(0.0)
     `when`(mockDocumentSnapshot.getString("location.name")).thenReturn("EPFL")
     `when`(mockDocumentSnapshot.getString("imageUrl")).thenReturn(null)
-    `when`(mockDocumentSnapshot.getString("type")).thenReturn("CLEANING")
+    `when`(mockDocumentSnapshot.getString("type")).thenReturn("CLEANER")
     `when`(mockDocumentSnapshot.getString("status")).thenReturn("PENDING")
 
     val result = serviceRequestRepositoryFirebase.documentToServiceRequest(mockDocumentSnapshot)
@@ -177,7 +178,7 @@ class ServiceRequestRepositoryFirebaseTest {
     assert(result?.title == "Test Request")
     assert(result?.description == "Test Description")
     assert(result?.location?.name == "EPFL")
-    assert(result?.type == ServiceRequestType.CLEANING)
+    assert(result?.type == Services.CLEANER)
     assert(result?.status == ServiceRequestStatus.PENDING)
   }
 
