@@ -1,5 +1,9 @@
 package com.android.solvit.seeker.ui.provider
 
+import android.annotation.SuppressLint
+import android.content.Context
+import android.location.Address
+import android.location.Geocoder
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
@@ -23,11 +27,17 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.Divider
+import androidx.compose.material.TextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -41,7 +51,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -63,14 +72,28 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.android.solvit.R
+import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
+import com.android.solvit.shared.model.map.Location
+import com.android.solvit.shared.model.map.LocationViewModel
+import com.android.solvit.shared.model.map.haversineDistance
 import com.android.solvit.shared.model.provider.Language
 import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.service.Services
+import com.android.solvit.shared.ui.map.RequestLocationPermission
 import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.maps.model.LatLng
+import java.util.Locale
 
 @Composable
-fun SpTopAppBar(navigationActions: NavigationActions, selectedService: Services?) {
+fun SpTopAppBar(
+    navigationActions: NavigationActions,
+    selectedService: Services?,
+    onClickAction: () -> Unit,
+    seekerProfileViewModel: SeekerProfileViewModel
+) {
+  val location by seekerProfileViewModel.locationSearched.collectAsState()
   val context = LocalContext.current
   Box(modifier = Modifier.fillMaxWidth().testTag("topAppBar")) {
     Image(
@@ -104,7 +127,7 @@ fun SpTopAppBar(navigationActions: NavigationActions, selectedService: Services?
                 contentDescription = "image description",
                 contentScale = ContentScale.Crop)
             Text(
-                text = "Aspen, USA", // TODO() edit with user location
+                text = location.name,
                 style =
                     TextStyle(
                         fontSize = 12.sp,
@@ -114,12 +137,11 @@ fun SpTopAppBar(navigationActions: NavigationActions, selectedService: Services?
                     ))
             Image(
                 modifier =
-                    Modifier.clickable {
-                          Toast.makeText(context, "Not Yet Implemented", Toast.LENGTH_LONG).show()
-                        }
+                    Modifier.clickable { onClickAction() }
                         .padding(1.dp)
                         .width(16.dp)
-                        .height(16.dp),
+                        .height(16.dp)
+                        .testTag("filterByLocation"),
                 painter = painterResource(id = R.drawable.arrowdown),
                 contentDescription = "image description",
                 contentScale = ContentScale.Crop)
@@ -599,22 +621,241 @@ fun FilterComposable(listProviderViewModel: ListProviderViewModel, display: () -
       }
 }
 
+fun getLocationName(latLng: LatLng, context: Context): String {
+  val geocoder = Geocoder(context, Locale.getDefault())
+  return try {
+    // Get a list of addresses for the provided latitude and longitude
+    val addresses: List<Address>? = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1)
+    // Extract the address name if available
+    if (!addresses.isNullOrEmpty()) {
+      val address = addresses[0]
+      // Get a readable location name, like city and country
+      "${address.locality ?: address.subAdminArea ?: address.adminArea}, ${address.countryName}"
+    } else {
+      "Unknown location"
+    }
+  } catch (e: Exception) {
+    Log.e("Geocoder Exception", "$e")
+    "Unknown Location"
+  }
+}
+
+@Composable
+fun SearchLocBar(searchedAddress: String, onSearchChanged: (String) -> Unit) {
+  TextField(
+      value = searchedAddress,
+      onValueChange = onSearchChanged,
+      placeholder = { Text("Enter a new address", color = Color.Gray) },
+      leadingIcon = {
+        Icon(
+            imageVector = Icons.Default.Search,
+            contentDescription = "Search Icon",
+            tint = Color.Gray)
+      },
+      modifier =
+          Modifier.fillMaxWidth()
+              .height(56.dp)
+              .background(color = Color(0xFFF5F5F5), shape = RoundedCornerShape(16.dp))
+              .testTag("SearchLocBar"))
+}
+
+@Composable
+fun LocationSuggestion(location: Location, index: Int, onClickAction: () -> Unit) {
+
+  Row(
+      modifier =
+          Modifier.fillMaxWidth()
+              .background(if (index == 0) Color(0xFFE5E7EB) else Color.Transparent)
+              .clickable { onClickAction() }
+              .padding(16.dp)
+              .testTag("suggestedLocation"),
+      verticalAlignment = Alignment.CenterVertically) {
+        Icon(
+            imageVector = Icons.Default.LocationOn,
+            contentDescription = "Location Icon",
+            tint = Color(0xFF0099FF))
+        Spacer(modifier = Modifier.width(8.dp))
+        Column {
+          Text(
+              text = location.name,
+              style =
+                  TextStyle(
+                      fontSize = 16.sp,
+                      lineHeight = 20.sp,
+                      fontWeight = FontWeight(500),
+                      color = Color(0xFF000000),
+                  ))
+          Text(
+              text = "CA", // TODO
+              style =
+                  TextStyle(
+                      fontSize = 16.sp,
+                      lineHeight = 20.sp,
+                      fontWeight = FontWeight(500),
+                      color = Color(0xFF827F7F),
+                  ))
+        }
+      }
+}
+
+@SuppressLint("SuspiciousIndentation")
+@Composable
+fun FilterByLocation(
+    userId: String,
+    seekerProfileViewModel: SeekerProfileViewModel,
+    onClick: (Location) -> Unit,
+    locationViewModel: LocationViewModel
+) {
+  // Represent the address user is searching
+  var searchedAdress by remember { mutableStateOf("") }
+  // List of location suggestions given the searched adress
+  val locationSuggestions by locationViewModel.locationSuggestions.collectAsState()
+  // List of saved locations of user
+  val cachedLocations by seekerProfileViewModel.cachedLocations.collectAsState()
+  // User current location
+  var userLocation by remember { mutableStateOf<LatLng?>(null) }
+  // Get the current context
+  val context = LocalContext.current
+  // Initialize the FusedLocationProviderClient
+  val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
+  // Check whether user want to use his current location
+  var enableCurrentLocation by remember { mutableStateOf(false) }
+
+  if (enableCurrentLocation)
+      RequestLocationPermission(context, fusedLocationClient) { location ->
+        userLocation = location
+      }
+  Column(
+      modifier = Modifier.fillMaxSize().padding(16.dp).testTag("filterByLocationSheet"),
+  ) {
+    // SearchBar
+    Box(
+        modifier =
+            Modifier.fillMaxWidth(0.9f)
+                .align(Alignment.CenterHorizontally)
+                .background(color = Color(0xFFF5F5F5), shape = RoundedCornerShape(size = 16.dp))) {
+          SearchLocBar(
+              searchedAddress = searchedAdress,
+              onSearchChanged = {
+                searchedAdress = it
+                locationViewModel.setQuery(searchedAdress)
+              })
+        }
+
+    Spacer(Modifier.height(15.dp))
+    // Display either saved locations or new location if searching in bar
+    if (searchedAdress.isEmpty()) {
+      // User Current Location
+
+      Text(
+          text = "Nearby",
+          style =
+              TextStyle(
+                  fontSize = 16.sp,
+                  lineHeight = 20.sp,
+                  fontWeight = FontWeight(500),
+                  color = Color(0xFF000000),
+              ))
+
+      Row(
+          modifier =
+              Modifier.fillMaxWidth()
+                  .testTag("currentLocation")
+                  .clickable {
+                    enableCurrentLocation = true
+                    Log.e("LOCATE USER", "${userLocation?.latitude}")
+                    userLocation
+                        ?.let { Location(it.latitude, it.longitude, getLocationName(it, context)) }
+                        ?.let {
+                          seekerProfileViewModel.setLocationSearched(it)
+                          onClick(it)
+                        }
+                  }
+                  .padding(8.dp)) {
+            Icon(Icons.Outlined.Home, contentDescription = null, tint = Color(0xFF0099FF))
+            Spacer(Modifier.width(8.dp))
+            Text(
+                text = "Current location",
+                style =
+                    TextStyle(
+                        fontSize = 16.sp,
+                        lineHeight = 20.sp,
+                        fontWeight = FontWeight(500),
+                        color = Color(0xFF000000),
+                    ))
+          }
+      // Add the line separator
+      Divider(color = Color.LightGray)
+
+      Spacer(Modifier.height(6.dp))
+      Text(
+          text = "Recent locations",
+          style =
+              TextStyle(
+                  fontSize = 16.sp,
+                  lineHeight = 20.sp,
+                  fontWeight = FontWeight(500),
+                  color = Color(0xFF000000),
+              ))
+      LazyColumn(modifier = Modifier.testTag("cachedLocations")) {
+        itemsIndexed(cachedLocations) { index, location ->
+          // TODO see the index if it's the first elemn set its background color to the green
+          LocationSuggestion(
+              location,
+              index,
+              onClickAction = {
+                seekerProfileViewModel.setLocationSearched(location)
+                onClick(location)
+              })
+        }
+      }
+    } else {
+      LazyColumn(modifier = Modifier.testTag("suggestedLocations")) {
+        itemsIndexed(locationSuggestions) { index, location ->
+          LocationSuggestion(
+              location,
+              index,
+              onClickAction = {
+                seekerProfileViewModel.updateCachedLocations(userId, location)
+                seekerProfileViewModel.setLocationSearched(location)
+                onClick(location)
+              })
+        }
+      }
+    }
+  }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SelectProviderScreen(
+    seekerProfileViewModel: SeekerProfileViewModel =
+        viewModel(factory = SeekerProfileViewModel.Factory),
     listProviderViewModel: ListProviderViewModel =
         viewModel(factory = ListProviderViewModel.Factory),
-    navigationActions: NavigationActions
+    userId: String,
+    navigationActions: NavigationActions,
+    locationViewModel: LocationViewModel = viewModel(factory = LocationViewModel.Factory)
 ) {
-  val providers by listProviderViewModel.providersList.collectAsState()
+
+  val providers by listProviderViewModel.providersListFiltered.collectAsState()
   val selectedService by listProviderViewModel.selectedService.collectAsState()
+
   var displayFilters by remember { mutableStateOf(false) }
-  val sheetState = rememberModalBottomSheetState()
-  val scope = rememberCoroutineScope()
+  var displayByLocation by remember { mutableStateOf(false) }
+  val sheetStateFilter = rememberModalBottomSheetState()
+  val sheetStateLocation = rememberModalBottomSheetState()
   Log.e("Select Provider Screen", "providers : $providers")
+  Log.e("Seeker UID", "${userId}")
   Scaffold(
       modifier = Modifier.fillMaxSize(),
-      topBar = { SpTopAppBar(navigationActions, selectedService) }) { paddingValues ->
+      topBar = {
+        SpTopAppBar(
+            navigationActions,
+            selectedService,
+            onClickAction = { displayByLocation = true },
+            seekerProfileViewModel)
+      }) { paddingValues ->
         Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
           SpFilterBar(display = { displayFilters = true }, listProviderViewModel)
           Title("Popular")
@@ -625,9 +866,36 @@ fun SelectProviderScreen(
         if (displayFilters) {
           ModalBottomSheet(
               onDismissRequest = { displayFilters = false },
-              sheetState = sheetState,
+              sheetState = sheetStateFilter,
               containerColor = Color.White) {
                 FilterComposable(listProviderViewModel) { displayFilters = false }
+              }
+        }
+        if (displayByLocation) {
+          seekerProfileViewModel.getCachedLocations(userId)
+          ModalBottomSheet(
+              onDismissRequest = { displayByLocation = false },
+              sheetState = sheetStateLocation,
+              containerColor = Color.White) {
+                FilterByLocation(
+                    userId,
+                    seekerProfileViewModel,
+                    onClick = { location ->
+                      listProviderViewModel.filterProviders(filter = { true }, "location")
+                      listProviderViewModel.filterProviders(
+                          filter = { provider ->
+                            // filter providers within a 25.0 km radius
+                            haversineDistance(
+                                location.latitude,
+                                location.longitude,
+                                provider.location.latitude,
+                                provider.location.longitude) <= 25.0
+                          },
+                          "location")
+                      Log.e("FILTER PROVIDER BY LOC", "$providers")
+                      displayByLocation = false
+                    },
+                    locationViewModel)
               }
         }
       }
