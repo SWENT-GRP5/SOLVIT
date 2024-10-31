@@ -1,6 +1,8 @@
 package com.android.solvit.seeker.ui.request
 
+import android.widget.Toast
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -14,6 +16,9 @@ import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
 import com.google.firebase.Timestamp
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.mockkStatic
 import java.text.SimpleDateFormat
 import java.util.GregorianCalendar
 import java.util.Locale
@@ -30,6 +35,18 @@ class RequestsOverviewScreenTest {
   private lateinit var serviceRequestRepository: ServiceRequestRepository
   private lateinit var serviceRequestViewModel: ServiceRequestViewModel
 
+  private val request =
+      ServiceRequest(
+          "uid",
+          "title",
+          Services.CLEANER,
+          "description",
+          "assigneeName",
+          Timestamp(GregorianCalendar(2024, 0, 1).time),
+          Location(37.7749, -122.4194, "San Francisco"),
+          "imageUrl",
+          ServiceRequestStatus.PENDING)
+
   @get:Rule val composeTestRule = createComposeRule()
 
   @Before
@@ -39,6 +56,18 @@ class RequestsOverviewScreenTest {
     serviceRequestViewModel = ServiceRequestViewModel(serviceRequestRepository)
 
     `when`(navigationActions.currentRoute()).thenReturn(Route.REQUESTS_OVERVIEW)
+  }
+
+  @Test
+  fun hasRequiredComponents() {
+    composeTestRule.setContent {
+      RequestsOverviewScreen(navigationActions, serviceRequestViewModel)
+    }
+
+    composeTestRule.onNodeWithTag("requestsOverviewScreen").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("bottomNavigationMenu").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("topOrdersSection").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("filterRequestsBar").assertIsDisplayed()
   }
 
   @Test
@@ -56,29 +85,85 @@ class RequestsOverviewScreenTest {
   }
 
   @Test
-  fun hasRequiredComponents() {
+  fun displayRequestsWhenNotEmpty() {
     composeTestRule.setContent {
       RequestsOverviewScreen(navigationActions, serviceRequestViewModel)
     }
 
-    composeTestRule.onNodeWithTag("overviewScreen").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("bottomNavigationMenu").assertIsDisplayed()
+    `when`(serviceRequestRepository.getServiceRequests(any(), any())).then {
+      it.getArgument<(List<ServiceRequest>) -> Unit>(0)(listOf(request))
+    }
+    serviceRequestViewModel.getServiceRequests()
+
+    composeTestRule.onNodeWithTag("requestsList").assertIsDisplayed()
+  }
+
+  @Test
+  fun topBarArrowNavigatesBack() {
+    composeTestRule.setContent {
+      RequestsOverviewScreen(navigationActions, serviceRequestViewModel)
+    }
+
+    composeTestRule.onNodeWithTag("arrowBack").performClick()
+    verify(navigationActions).goBack()
+  }
+
+  @Test
+  fun categoriesSettingsShowsFilters() {
+    composeTestRule.setContent {
+      RequestsOverviewScreen(navigationActions, serviceRequestViewModel)
+    }
+
+    composeTestRule.onNodeWithTag("categoriesSettings").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("categoriesFilter").assertIsNotDisplayed()
+    composeTestRule.onNodeWithTag("categoriesSettings").performClick()
+    composeTestRule.onNodeWithTag("categoriesFilter").assertIsDisplayed()
+  }
+
+  @Test
+  fun categoriesSortShowFilters() {
+    composeTestRule.setContent {
+      RequestsOverviewScreen(navigationActions, serviceRequestViewModel)
+    }
+
+    composeTestRule.onNodeWithTag("categoriesSort").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("categoriesSortFilter").assertIsNotDisplayed()
+    composeTestRule.onNodeWithTag("categoriesSort").performClick()
+    composeTestRule.onNodeWithTag("categoriesSortFilter").assertIsDisplayed()
+  }
+
+  @Test
+  fun categoryFiltersWorks() {
+    composeTestRule.setContent {
+      RequestsOverviewScreen(navigationActions, serviceRequestViewModel)
+    }
+
+    mockkStatic(Toast::class)
+    val toastMock = mockk<Toast>(relaxed = true)
+    every { Toast.makeText(any(), any<String>(), any()) } returns toastMock
+
+    composeTestRule.onNodeWithTag("categoriesSettings").performClick()
+    composeTestRule.onNodeWithTag("plumber FilterItem").performClick()
+    io.mockk.verify { toastMock.show() }
+  }
+
+  @Test
+  fun categorySortWorks() {
+    composeTestRule.setContent {
+      RequestsOverviewScreen(navigationActions, serviceRequestViewModel)
+    }
+
+    mockkStatic(Toast::class)
+    val toastMock = mockk<Toast>(relaxed = true)
+    every { Toast.makeText(any(), any<String>(), any()) } returns toastMock
+
+    composeTestRule.onNodeWithTag("categoriesSort").performClick()
+    composeTestRule.onNodeWithTag("Sort by date FilterItem").performClick()
+    io.mockk.verify { toastMock.show() }
   }
 
   @Test
   fun clickOnRequestNavigatesToEditScreen() {
-    val request =
-        ServiceRequest(
-            "uid",
-            "title",
-            Services.CLEANER,
-            "description",
-            "assigneeName",
-            Timestamp(GregorianCalendar(2024, 0, 1).time),
-            Location(37.7749, -122.4194, "San Francisco"),
-            "imageUrl",
-            ServiceRequestStatus.PENDING)
-
     composeTestRule.setContent {
       RequestsOverviewScreen(navigationActions, serviceRequestViewModel)
     }
@@ -93,62 +178,22 @@ class RequestsOverviewScreenTest {
   }
 
   @Test
-  fun todoItemDisplaysCorrectData() {
-    val request =
-        ServiceRequest(
-            "uid",
-            "title",
-            Services.PLUMBER,
-            "description",
-            "assigneeName",
-            Timestamp(GregorianCalendar(2024, 0, 1).time),
-            Location(37.7749, -122.4194, "San Francisco"),
-            "imageUrl",
-            ServiceRequestStatus.PENDING)
-
+  fun requestItemDisplaysCorrectData() {
     composeTestRule.setContent { RequestItemRow(request = request, onClick = {}) }
 
     composeTestRule.onNodeWithText("title").assertIsDisplayed()
-    composeTestRule.onNodeWithText("Plumber").assertIsDisplayed()
+    composeTestRule.onNodeWithText("Cleaner").assertIsDisplayed()
 
     val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
     val expectedDate = dateFormat.format(request.dueDate.toDate())
-    composeTestRule.onNodeWithText("Deadline: $expectedDate").assertIsDisplayed()
-  }
-
-  @Test
-  fun todoItemDisplaysCorrectStatus() {
-    val request =
-        ServiceRequest(
-            "uid",
-            "title",
-            Services.CLEANER,
-            "description",
-            "assigneeName",
-            Timestamp(GregorianCalendar(2024, 0, 1).time),
-            Location(37.7749, -122.4194, "San Francisco"),
-            "imageUrl",
-            ServiceRequestStatus.PENDING)
-
-    composeTestRule.setContent { RequestItemRow(request = request, onClick = {}) }
+    composeTestRule.onNodeWithText("Until:").assertIsDisplayed()
+    composeTestRule.onNodeWithText(expectedDate).assertIsDisplayed()
 
     composeTestRule.onNodeWithText("Pending").assertIsDisplayed()
   }
 
   @Test
-  fun todoItemRowClickCallsOnClick() {
-    val request =
-        ServiceRequest(
-            "uid",
-            "title",
-            Services.OTHER,
-            "description",
-            "assigneeName",
-            Timestamp(GregorianCalendar(2024, 0, 1).time),
-            Location(37.7749, -122.4194, "San Francisco"),
-            "imageUrl",
-            ServiceRequestStatus.PENDING)
-
+  fun requestItemRowClickCallsOnClick() {
     val onClickMock = mock<() -> Unit>()
 
     composeTestRule.setContent { RequestItemRow(request = request, onClick = onClickMock) }
