@@ -1,16 +1,21 @@
 package com.android.solvit.shared.model.provider
 
 import androidx.test.core.app.ApplicationProvider
+import com.android.solvit.seeker.model.profile.UserRepository
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.service.Services
+import com.google.android.gms.tasks.OnCompleteListener
+import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.FirebaseApp
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
 import junit.framework.TestCase
+import junit.framework.TestCase.assertEquals
 import org.hamcrest.CoreMatchers
 import org.hamcrest.MatcherAssert
 import org.junit.Before
@@ -18,6 +23,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
@@ -31,6 +38,9 @@ class ProviderRepositoryFirestoneTest {
   @Mock private lateinit var mockDocumentReference: DocumentReference
   @Mock private lateinit var mockCollectionReference: CollectionReference
   @Mock private lateinit var mockQuerySnapshot: QuerySnapshot
+  @Mock private lateinit var mockDocumentSnapshot: DocumentSnapshot
+  @Mock private lateinit var mockTaskUser: Task<UserRepository>
+  @Mock private lateinit var mockTaskDoc: Task<DocumentSnapshot>
 
   private lateinit var providerRepositoryFirestore: ProviderRepositoryFirestore
 
@@ -99,5 +109,58 @@ class ProviderRepositoryFirestoneTest {
     Mockito.`when`(mockQuerySnapshot.documents).thenReturn(listOf())
     providerRepositoryFirestore.getProviders(null, {}, { TestCase.fail("Should not fail") })
     verify(mockCollectionReference).get()
+  }
+
+  @Test
+  fun getProvider() {
+    // For success
+
+    Mockito.`when`(mockDocumentReference.get()).thenReturn(mockTaskDoc)
+    Mockito.`when`(mockTaskDoc.isSuccessful).thenReturn(true)
+    Mockito.`when`(mockTaskDoc.result).thenReturn(mockDocumentSnapshot)
+    Mockito.`when`(mockDocumentSnapshot.exists()).thenReturn(true)
+    `when`(mockTaskDoc.addOnCompleteListener(Mockito.any())).thenAnswer {
+      val listener = it.arguments[0] as OnCompleteListener<DocumentSnapshot>
+      listener.onComplete(mockTaskDoc)
+      mockTaskDoc
+    }
+
+    // Mock the document snapshot to return data
+    // Mock basic string fields
+    Mockito.`when`(mockDocumentSnapshot.id).thenReturn(provider.uid)
+    Mockito.`when`(mockDocumentSnapshot.getString("name")).thenReturn(provider.name)
+    Mockito.`when`(mockDocumentSnapshot.getString("service")).thenReturn(provider.service.name)
+    Mockito.`when`(mockDocumentSnapshot.getString("imageUrl")).thenReturn(provider.imageUrl)
+    Mockito.`when`(mockDocumentSnapshot.getString("description")).thenReturn(provider.description)
+    Mockito.`when`(mockDocumentSnapshot.getString("companyName")).thenReturn(provider.companyName)
+    Mockito.`when`(mockDocumentSnapshot.getString("phone")).thenReturn(provider.phone)
+
+    // Mock location map field
+    val locationMap =
+        mapOf(
+            "latitude" to provider.location.latitude,
+            "longitude" to provider.location.longitude,
+            "name" to provider.location.name)
+    Mockito.`when`(mockDocumentSnapshot.get("location")).thenReturn(locationMap)
+
+    // Mock other fields
+    Mockito.`when`(mockDocumentSnapshot.getDouble("rating")).thenReturn(provider.rating)
+    Mockito.`when`(mockDocumentSnapshot.getBoolean("popular")).thenReturn(provider.popular)
+    Mockito.`when`(mockDocumentSnapshot.getDouble("price")).thenReturn(provider.price)
+    Mockito.`when`(mockDocumentSnapshot.getTimestamp("deliveryTime"))
+        .thenReturn(provider.deliveryTime)
+    Mockito.`when`(mockDocumentSnapshot.get("languages"))
+        .thenReturn(provider.languages.map { it.name })
+    val onFailure: () -> Unit = mock()
+
+    providerRepositoryFirestore.getProvider(
+        "12345",
+        onSuccess = { profile ->
+          assertEquals(provider, profile) // Ensure correct profile is returned
+        },
+        onFailure = { onFailure() })
+
+    verify(mockDocumentReference).get()
+    Mockito.verify(mockTaskDoc).addOnCompleteListener(Mockito.any())
   }
 }

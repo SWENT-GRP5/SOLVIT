@@ -26,6 +26,10 @@ class AuthRepository(private val auth: FirebaseAuth, private val db: FirebaseFir
     }
   }
 
+  fun getUserId(): String {
+    return auth.currentUser?.uid ?: ""
+  }
+
   fun loginWithEmailAndPassword(
       email: String,
       password: String,
