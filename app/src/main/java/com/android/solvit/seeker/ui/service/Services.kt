@@ -52,7 +52,7 @@ import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.seeker.model.service.SearchServicesViewModel
 import com.android.solvit.seeker.ui.navigation.SeekerBottomNavigationMenu
 import com.android.solvit.shared.model.provider.Provider
-import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_CUSTOMMER
+import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_CUSTOMER
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.theme.LightBlue
@@ -74,7 +74,7 @@ fun ServicesScreen(
       bottomBar = {
         SeekerBottomNavigationMenu(
             { navigationActions.navigateTo(it.route) },
-            LIST_TOP_LEVEL_DESTINATION_CUSTOMMER,
+            LIST_TOP_LEVEL_DESTINATION_CUSTOMER,
             navigationActions.currentRoute())
       }) {
         Column(modifier = Modifier.fillMaxSize()) {
