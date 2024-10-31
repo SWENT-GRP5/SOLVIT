@@ -17,6 +17,6 @@ class EndToEndTest : TestCase(kaspressoBuilder = Kaspresso.Builder.withComposeSu
   @Test
   fun endToEndTest() =
       run {
-          //TODO: Implement the end-to-end test
+        // TODO: Implement the end-to-end test
       }
 }
