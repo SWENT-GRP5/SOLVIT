@@ -36,6 +36,7 @@ object Screen {
   const val SEEKER_REGISTRATION_PROFILE = "Seeker registration"
   const val PROVIDER_REGISTRATION_PROFILE = "Provider registration"
   const val CALENDAR = "Calendar"
+  const val PROFESSIONAL_PROFILE = "Professional Profile"
 }
 
 data class TopLevelDestination(val route: String, val icon: ImageVector, val textId: String)
