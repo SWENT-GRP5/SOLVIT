@@ -61,9 +61,7 @@ class EditSeekerProfileTest {
     composeTestRule.onNodeWithTag("profileAddress").assertIsDisplayed()
     composeTestRule.onNodeWithTag("profilePhone").assertIsDisplayed()
     composeTestRule.onNodeWithTag("CountryCode").assertIsDisplayed()
-
   }
-
 
   @Test
   fun inputsHaveInitialValue() {
@@ -82,8 +80,7 @@ class EditSeekerProfileTest {
     composeTestRule.onNodeWithTag("profileName").assertTextContains(testSeekerProfile.name)
     composeTestRule.onNodeWithTag("profileUsername").assertTextContains(testSeekerProfile.username)
     composeTestRule.onNodeWithTag("profileEmail").assertTextContains(testSeekerProfile.email)
-    //composeTestRule.onNodeWithTag("profilePhone").assertTextContains(testSeekerProfile.phone)
+    // composeTestRule.onNodeWithTag("profilePhone").assertTextContains(testSeekerProfile.phone)
     composeTestRule.onNodeWithTag("profileAddress").assertTextContains(testSeekerProfile.address)
-
   }
 }

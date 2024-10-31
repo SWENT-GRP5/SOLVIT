@@ -60,256 +60,227 @@ fun EditSeekerProfileScreen(
     navigationActions: NavigationActions,
     authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory)
 ) {
-    // Collect the user profile from the StateFlow
-    val user by authViewModel.user.collectAsState()
-    val userProfile by viewModel.seekerProfile.collectAsState()
-    user?.let { viewModel.getUserProfile(it.uid) }
+  // Collect the user profile from the StateFlow
+  val user by authViewModel.user.collectAsState()
+  val userProfile by viewModel.seekerProfile.collectAsState()
+  user?.let { viewModel.getUserProfile(it.uid) }
 
-    var fullName by remember { mutableStateOf("") }
-    var username by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var phone by remember { mutableStateOf("") }
-    var address by remember { mutableStateOf("") }
+  var fullName by remember { mutableStateOf("") }
+  var username by remember { mutableStateOf("") }
+  var email by remember { mutableStateOf("") }
+  var phone by remember { mutableStateOf("") }
+  var address by remember { mutableStateOf("") }
 
+  LaunchedEffect(userProfile) {
+    fullName = userProfile.name
+    username = userProfile.username
+    email = userProfile.email
+    phone = userProfile.phone
+    address = userProfile.address
+  }
 
-
-    LaunchedEffect(userProfile) {
-        fullName = userProfile.name
-        username = userProfile.username
-        email = userProfile.email
-        phone = userProfile.phone
-        address = userProfile.address
-    }
-
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                backgroundColor = Color.White,
-                title = {
-                    Box(modifier = Modifier.fillMaxWidth().testTag("goBackButton"), contentAlignment = Alignment.Center) {
-                        Text("Bio-data", color = Color.Black, fontWeight = FontWeight.Bold)
-                    }
-                },
-                navigationIcon = {
-                    IconButton(onClick = { navigationActions.goBack() }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.Black)
-                    }
-                },
-                // Set actions parameter to an empty Box to balance the alignment caused by navigationIcon
-                actions = { Box(modifier = Modifier.size(48.dp)) }
-            )
-        }
-    ) { padding ->  // Apply padding from Scaffold
+  Scaffold(
+      topBar = {
+        TopAppBar(
+            backgroundColor = Color.White,
+            title = {
+              Box(
+                  modifier = Modifier.fillMaxWidth().testTag("goBackButton"),
+                  contentAlignment = Alignment.Center) {
+                    Text("Bio-data", color = Color.Black, fontWeight = FontWeight.Bold)
+                  }
+            },
+            navigationIcon = {
+              IconButton(onClick = { navigationActions.goBack() }) {
+                Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.Black)
+              }
+            },
+            // Set actions parameter to an empty Box to balance the alignment caused by
+            // navigationIcon
+            actions = { Box(modifier = Modifier.size(48.dp)) })
+      }) { padding -> // Apply padding from Scaffold
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(padding)  // Use Scaffold's padding here
-                .padding(top = 32.dp)
-                .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.empty_profile_img),
-                contentDescription = "Profile Picture",
-                modifier = Modifier
-                    .size(72.dp)
-                    .clip(CircleShape)
-                    .border(2.dp, Color.Gray, CircleShape)
-                    .padding(bottom = 16.dp)
-            )
+            modifier =
+                Modifier.fillMaxWidth()
+                    .padding(padding) // Use Scaffold's padding here
+                    .padding(top = 32.dp)
+                    .verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally) {
+              Image(
+                  painter = painterResource(id = R.drawable.empty_profile_img),
+                  contentDescription = "Profile Picture",
+                  modifier =
+                      Modifier.size(72.dp)
+                          .clip(CircleShape)
+                          .border(2.dp, Color.Gray, CircleShape)
+                          .padding(bottom = 16.dp))
 
-            Text(
-                text = fullName,
-                fontWeight = FontWeight.Bold,
-                fontSize = 20.sp,
-                color = Color.Black,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(top = 8.dp)
-            )
+              Text(
+                  text = fullName,
+                  fontWeight = FontWeight.Bold,
+                  fontSize = 20.sp,
+                  color = Color.Black,
+                  textAlign = TextAlign.Center,
+                  modifier = Modifier.padding(top = 8.dp))
 
-            Text(
-                text = email,
-                fontSize = 14.sp,
-                color = Color.Gray,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(top = 4.dp)
-            )
+              Text(
+                  text = email,
+                  fontSize = 14.sp,
+                  color = Color.Gray,
+                  textAlign = TextAlign.Center,
+                  modifier = Modifier.padding(top = 4.dp))
 
-            Spacer(modifier = Modifier.height(16.dp)) // Move spacer inside the column
+              Spacer(modifier = Modifier.height(16.dp)) // Move spacer inside the column
 
-            // Full Name Input
+              // Full Name Input
 
-            Spacer(modifier = Modifier.height(8.dp))
-            OutlinedTextField(
-                value = fullName,
-                onValueChange = { fullName = it },
-                label = { Text("Enter your full name") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag("profileName")
-                    .padding(horizontal = 16.dp)  // Add padding to avoid edge clipping
-            )
+              Spacer(modifier = Modifier.height(8.dp))
+              OutlinedTextField(
+                  value = fullName,
+                  onValueChange = { fullName = it },
+                  label = { Text("Enter your full name") },
+                  modifier =
+                      Modifier.fillMaxWidth()
+                          .testTag("profileName")
+                          .padding(horizontal = 16.dp) // Add padding to avoid edge clipping
+                  )
 
-            Spacer(modifier = Modifier.height(16.dp))
+              Spacer(modifier = Modifier.height(16.dp))
 
-            // Username Input
-            OutlinedTextField(
-                value = username,
-                onValueChange = { username = it },
-                label = { Text("Enter your username") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag("profileUsername")
-                    .padding(horizontal = 16.dp)
-            )
+              // Username Input
+              OutlinedTextField(
+                  value = username,
+                  onValueChange = { username = it },
+                  label = { Text("Enter your username") },
+                  modifier =
+                      Modifier.fillMaxWidth()
+                          .testTag("profileUsername")
+                          .padding(horizontal = 16.dp))
 
-            Spacer(modifier = Modifier.height(16.dp))
+              Spacer(modifier = Modifier.height(16.dp))
 
-            // Email Input
-            OutlinedTextField(
-                value = email,
-                onValueChange = { email = it },
-                label = { Text("Enter your email") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag("profileEmail")
-                    .padding(horizontal = 16.dp)
-            )
+              // Email Input
+              OutlinedTextField(
+                  value = email,
+                  onValueChange = { email = it },
+                  label = { Text("Enter your email") },
+                  modifier =
+                      Modifier.fillMaxWidth().testTag("profileEmail").padding(horizontal = 16.dp))
 
-            Spacer(modifier = Modifier.height(16.dp))
+              Spacer(modifier = Modifier.height(16.dp))
 
-            CountryDropdownMenu()
+              CountryDropdownMenu()
 
-            Spacer(modifier = Modifier.height(16.dp))
+              Spacer(modifier = Modifier.height(16.dp))
 
+              Spacer(modifier = Modifier.height(16.dp))
 
-            Spacer(modifier = Modifier.height(16.dp))
+              // Address Input
+              OutlinedTextField(
+                  value = address,
+                  onValueChange = { address = it },
+                  label = { Text("Enter your address") },
+                  modifier =
+                      Modifier.fillMaxWidth().testTag("profileAddress").padding(horizontal = 16.dp))
 
-            // Address Input
-            OutlinedTextField(
-                value = address,
-                onValueChange = { address = it },
-                label = { Text("Enter your address") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag("profileAddress")
-                    .padding(horizontal = 16.dp)
-            )
+              Spacer(modifier = Modifier.height(16.dp))
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Save Button
-            Button(
-                onClick = {
+              // Save Button
+              Button(
+                  onClick = {
                     userProfile.let { profile ->
-                        // Update the profile with the new values
-                        viewModel.updateUserProfile(
-                            SeekerProfile(
-                                uid = userProfile.uid, // Use the existing UID
-                                name = fullName,
-                                username = username,
-                                email = email,
-                                phone = phone,
-                                address = address
-                            )
-                        )
+                      // Update the profile with the new values
+                      viewModel.updateUserProfile(
+                          SeekerProfile(
+                              uid = userProfile.uid, // Use the existing UID
+                              name = fullName,
+                              username = username,
+                              email = email,
+                              phone = phone,
+                              address = address))
                     }
                     navigationActions.goBack()
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(60.dp)
-                    .padding(horizontal = 16.dp),  // Add padding to button
-                colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF00C853))
-            ) {
-                Text("Update Profile", color = Color.White)
+                  },
+                  modifier =
+                      Modifier.fillMaxWidth()
+                          .height(60.dp)
+                          .padding(horizontal = 16.dp), // Add padding to button
+                  colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF00C853))) {
+                    Text("Update Profile", color = Color.White)
+                  }
             }
-        }
-    }
+      }
 }
+
 data class Country(val name: String, val code: String, val flagResId: Int)
 
-val countries = listOf(
-    Country("United States", "+1", R.drawable.us_flag),
-    Country("Morocco", "+212", R.drawable.maroc_flag),
-    Country("France", "+33", R.drawable.france_flag),
-    Country("Switzerland", "+41", R.drawable.switzerland_flag)
-
-)
+val countries =
+    listOf(
+        Country("United States", "+1", R.drawable.us_flag),
+        Country("Morocco", "+212", R.drawable.maroc_flag),
+        Country("France", "+33", R.drawable.france_flag),
+        Country("Switzerland", "+41", R.drawable.switzerland_flag))
 
 @Composable
 fun CountryDropdownMenu() {
-    var expanded by remember { mutableStateOf(false) }
-    var selectedCountry by remember { mutableStateOf(countries[0]) }
-    var phoneNumber by remember { mutableStateOf("") }
+  var expanded by remember { mutableStateOf(false) }
+  var selectedCountry by remember { mutableStateOf(countries[0]) }
+  var phoneNumber by remember { mutableStateOf("") }
 
-    Column(modifier = Modifier.fillMaxWidth()) {
-        OutlinedTextField(
-            value = selectedCountry.code,
-            onValueChange = { /* Country code is static, don't update */ },
-            label = { Text("Country code") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-                .testTag("CountryCode")
-                .clickable { expanded = true },  // Open dropdown on click
+  Column(modifier = Modifier.fillMaxWidth()) {
+    OutlinedTextField(
+        value = selectedCountry.code,
+        onValueChange = { /* Country code is static, don't update */},
+        label = { Text("Country code") },
+        modifier =
+            Modifier.fillMaxWidth().padding(horizontal = 16.dp).testTag("CountryCode").clickable {
+              expanded = true
+            }, // Open dropdown on click
+        leadingIcon = {
+          Row(
+              modifier = Modifier.padding(start = 8.dp),
+              verticalAlignment = Alignment.CenterVertically) {
+                Image(
+                    painter = painterResource(id = selectedCountry.flagResId),
+                    contentDescription = "Country Flag",
+                    modifier = Modifier.size(24.dp))
+                Spacer(modifier = Modifier.width(8.dp))
+              }
+        },
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+        trailingIcon = { Icon(Icons.Default.ArrowDropDown, contentDescription = "Dropdown Icon") })
 
-            leadingIcon = {
-                Row(
-                    modifier = Modifier.padding(start = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Image(
-                        painter = painterResource(id = selectedCountry.flagResId),
-                        contentDescription = "Country Flag",
-                        modifier = Modifier
-                            .size(24.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                }
-            },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-            trailingIcon = {
-                Icon(Icons.Default.ArrowDropDown, contentDescription = "Dropdown Icon")
-            }
-        )
-
-        // Dropdown Menu
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            countries.forEach { country ->
-                DropdownMenuItem(onClick = {
-                    selectedCountry = country
-                    expanded = false
+    // Dropdown Menu
+    DropdownMenu(
+        expanded = expanded,
+        onDismissRequest = { expanded = false },
+        modifier = Modifier.fillMaxWidth()) {
+          countries.forEach { country ->
+            DropdownMenuItem(
+                onClick = {
+                  selectedCountry = country
+                  expanded = false
                 }) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Image(
-                            painter = painterResource(id = country.flagResId),
-                            contentDescription = country.name,
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(country.name) // Display the country name for clarity
-                    }
+                  Row(verticalAlignment = Alignment.CenterVertically) {
+                    Image(
+                        painter = painterResource(id = country.flagResId),
+                        contentDescription = country.name,
+                        modifier = Modifier.size(24.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(country.name) // Display the country name for clarity
+                  }
                 }
-            }
+          }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+    Spacer(modifier = Modifier.height(16.dp))
 
-        // Input field for the phone number
-        OutlinedTextField(
-            value = phoneNumber,
-            onValueChange = { phoneNumber = it },
-            label = { Text("Enter your phone number") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .testTag("profilePhone")
-                .padding(horizontal = 16.dp),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)
-        )
-    }
+    // Input field for the phone number
+    OutlinedTextField(
+        value = phoneNumber,
+        onValueChange = { phoneNumber = it },
+        label = { Text("Enter your phone number") },
+        modifier = Modifier.fillMaxWidth().testTag("profilePhone").padding(horizontal = 16.dp),
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone))
+  }
 }
