@@ -1,6 +1,7 @@
 package com.android.solvit.seeker.ui.request
 
 import android.annotation.SuppressLint
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -15,6 +16,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -25,11 +28,16 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -39,12 +47,15 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.android.solvit.R
 import com.android.solvit.seeker.ui.navigation.SeekerBottomNavigationMenu
+import com.android.solvit.seeker.ui.service.SERVICES_LIST
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestStatus
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_CUSTOMMER
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
+import com.android.solvit.shared.ui.theme.LightBlue
+import com.android.solvit.shared.ui.theme.LightOrange
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -55,7 +66,7 @@ fun RequestsOverviewScreen(
     requestViewModel: ServiceRequestViewModel = viewModel(factory = ServiceRequestViewModel.Factory)
 ) {
   Scaffold(
-      modifier = Modifier.testTag("overviewScreen"),
+      modifier = Modifier.testTag("requestsOverviewScreen"),
       bottomBar = {
         SeekerBottomNavigationMenu(
             onTabSelect = { navigationActions.navigateTo(it.route) },
@@ -65,13 +76,13 @@ fun RequestsOverviewScreen(
         val requests = requestViewModel.requests.collectAsState()
 
         Column {
-          TopOrdersSection()
+          TopOrdersSection(navigationActions)
           CategoriesFiltersSection()
           if (requests.value.isEmpty()) {
             NoRequestsText()
           } else {
             LazyColumn(
-                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("requestsList"),
                 verticalArrangement = Arrangement.spacedBy(16.dp)) {
                   items(requests.value) { request ->
                     RequestItemRow(
@@ -88,16 +99,19 @@ fun RequestsOverviewScreen(
 }
 
 @Composable
-fun TopOrdersSection() {
+fun TopOrdersSection(navigationActions: NavigationActions) {
   Row(
-      modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 32.dp),
+      modifier =
+          Modifier.fillMaxWidth()
+              .padding(horizontal = 20.dp, vertical = 32.dp)
+              .testTag("topOrdersSection"),
       horizontalArrangement = Arrangement.SpaceBetween,
       verticalAlignment = Alignment.CenterVertically) {
         Row {
           Icon(
               imageVector = Icons.AutoMirrored.Filled.ArrowBack,
               contentDescription = null,
-          )
+              modifier = Modifier.clickable { navigationActions.goBack() }.testTag("arrowBack"))
           Spacer(modifier = Modifier.size(22.dp))
           Text(
               text = "Orders",
@@ -108,7 +122,7 @@ fun TopOrdersSection() {
         Icon(
             imageVector = Icons.Default.Menu,
             contentDescription = null,
-        )
+            modifier = Modifier.clickable { /*TODO*/})
       }
 }
 
@@ -129,24 +143,36 @@ fun NoRequestsText() {
 
 @Composable
 fun CategoriesFiltersSection() {
+  var showFilters by remember { mutableStateOf(false) }
+  var showSort by remember { mutableStateOf(false) }
   Row(
-      modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+      modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).testTag("filterRequestsBar"),
       horizontalArrangement = Arrangement.SpaceBetween,
       verticalAlignment = Alignment.CenterVertically) {
-        Box(modifier = Modifier.background(Color.Blue, shape = RoundedCornerShape(16.dp))) {
-          Row(
-              modifier = Modifier.padding(horizontal = 32.dp, vertical = 16.dp),
-              verticalAlignment = Alignment.CenterVertically,
-              horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Image(
-                    painter = painterResource(id = R.drawable.filter_square),
-                    contentDescription = "categories filter",
-                    modifier = Modifier.size(24.dp))
-                Text(text = "Category Settings", fontWeight = FontWeight.Bold, color = Color.White)
-              }
-        }
         Box(
-            modifier = Modifier.background(Color.Blue, shape = RoundedCornerShape(16.dp)),
+            modifier =
+                Modifier.background(LightBlue, shape = RoundedCornerShape(16.dp))
+                    .clickable { showFilters = !showFilters }
+                    .testTag("categoriesSettings")) {
+              Row(
+                  modifier = Modifier.padding(horizontal = 32.dp, vertical = 16.dp),
+                  verticalAlignment = Alignment.CenterVertically,
+                  horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Image(
+                        painter = painterResource(id = R.drawable.filter_square),
+                        contentDescription = "categories filter",
+                        modifier = Modifier.size(24.dp))
+                    Text(
+                        text = "Category Settings",
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White)
+                  }
+            }
+        Box(
+            modifier =
+                Modifier.background(LightOrange, shape = RoundedCornerShape(16.dp))
+                    .clickable { showSort = !showSort }
+                    .testTag("categoriesSort"),
         ) {
           Row(
               modifier = Modifier.padding(horizontal = 32.dp, vertical = 16.dp),
@@ -159,6 +185,66 @@ fun CategoriesFiltersSection() {
                 Text(text = "Sort", fontWeight = FontWeight.Bold, color = Color.White)
               }
         }
+      }
+  if (showFilters) {
+    CategoriesFilter()
+  }
+  if (showSort) {
+    CategoriesSort()
+  }
+}
+
+@Composable
+fun CategoriesFilter() {
+  val context = LocalContext.current
+  LazyVerticalGrid(
+      columns = GridCells.Fixed(2),
+      modifier = Modifier.padding(16.dp).testTag("categoriesFilter")) {
+        items(SERVICES_LIST.size) {
+          FilterItem(SERVICES_LIST[it].service.toString().lowercase().replace("_", " ")) {
+            Toast.makeText(context, "This feature is not yet implemented", Toast.LENGTH_SHORT)
+                .show()
+          }
+        }
+      }
+}
+
+@Composable
+fun CategoriesSort() {
+  val context = LocalContext.current
+  LazyVerticalGrid(
+      columns = GridCells.Fixed(2),
+      modifier = Modifier.padding(16.dp).testTag("categoriesSortFilter")) {
+        item {
+          FilterItem("Sort by date") {
+            Toast.makeText(context, "This feature is not yet implemented", Toast.LENGTH_SHORT)
+                .show()
+          }
+        }
+        item {
+          FilterItem("Sort by status") {
+            Toast.makeText(context, "This feature is not yet implemented", Toast.LENGTH_SHORT)
+                .show()
+          }
+        }
+      }
+}
+
+@Composable
+fun FilterItem(text: String, filter: () -> Unit) {
+  var isFilterSelected by remember { mutableStateOf(false) }
+  val borderColor = if (isFilterSelected) Color.Black else Color.LightGray
+  Box(
+      modifier =
+          Modifier.padding(8.dp)
+              .border(1.dp, borderColor, RoundedCornerShape(8.dp))
+              .clickable {
+                isFilterSelected = !isFilterSelected
+                filter()
+              }
+              .testTag("$text FilterItem"),
+      contentAlignment = Alignment.Center) {
+        Text(text = text)
       }
 }
 
