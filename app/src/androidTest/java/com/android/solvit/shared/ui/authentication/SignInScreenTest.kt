@@ -1,5 +1,6 @@
 package com.android.solvit.shared.ui.authentication
 
+import android.widget.Toast
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -9,13 +10,20 @@ import androidx.test.espresso.intent.Intents
 import androidx.test.espresso.intent.matcher.IntentMatchers
 import androidx.test.espresso.intent.rule.IntentsRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.android.gms.common.SignInButton
 import com.google.firebase.Firebase
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.auth
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.mockkStatic
+import io.mockk.verify
 import kotlinx.coroutines.tasks.await
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -87,5 +95,105 @@ class SignInScreenTest {
     } catch (e: Exception) {
       onAuthError(e)
     }
+  }
+}
+
+class SignInButtonTest {
+
+  @get:Rule val composeTestRule = createComposeRule()
+
+  private val authViewModel = mockk<AuthViewModel>(relaxed = true)
+  private val onSuccess = {}
+  private val onFailure = {}
+
+  @Before
+  fun setup() {
+    // Mock the Toast.makeText function to intercept the Toast messages
+    mockkStatic(Toast::class)
+    every { Toast.makeText(any(), any<String>(), any()) } answers
+        {
+          // Simule une instance Toast pour vérifier les messages
+          mockk(relaxed = true)
+        }
+  }
+
+  @Test
+  fun testShowToastWhenFieldsIncomplete() {
+    composeTestRule.setContent {
+      SignInButton(
+          email = "",
+          password = "",
+          isFormComplete = false,
+          goodFormEmail = true,
+          passwordLengthComplete = true,
+          authViewModel = authViewModel,
+          onSuccess = onSuccess,
+          onFailure = onFailure)
+    }
+
+    composeTestRule.onNodeWithTag("signInButton").performClick()
+
+    verify { Toast.makeText(any(), "Please fill in all required fields", Toast.LENGTH_SHORT) }
+  }
+
+  @Test
+  fun testShowToastForInvalidEmailFormat() {
+    composeTestRule.setContent {
+      SignInButton(
+          email = "invalidemail",
+          password = "password123",
+          isFormComplete = true,
+          goodFormEmail = false,
+          passwordLengthComplete = true,
+          authViewModel = authViewModel,
+          onSuccess = onSuccess,
+          onFailure = onFailure)
+    }
+
+    composeTestRule.onNodeWithTag("signInButton").performClick()
+
+    verify { Toast.makeText(any(), "Your email must have \"@\" and \".\"", Toast.LENGTH_SHORT) }
+  }
+
+  @Test
+  fun testShowToastForShortPassword() {
+    composeTestRule.setContent {
+      SignInButton(
+          email = "test@example.com",
+          password = "123",
+          isFormComplete = true,
+          goodFormEmail = true,
+          passwordLengthComplete = false,
+          authViewModel = authViewModel,
+          onSuccess = onSuccess,
+          onFailure = onFailure)
+    }
+
+    composeTestRule.onNodeWithTag("signInButton").performClick()
+
+    verify {
+      Toast.makeText(any(), "Your password must have at least 6 characters", Toast.LENGTH_SHORT)
+    }
+  }
+
+  @Test
+  fun testAuthIsCalledOnValidForm() {
+    composeTestRule.setContent {
+      SignInButton(
+          email = "test@example.com",
+          password = "password123",
+          isFormComplete = true,
+          goodFormEmail = true,
+          passwordLengthComplete = true,
+          authViewModel = authViewModel,
+          onSuccess = onSuccess,
+          onFailure = onFailure)
+    }
+
+    composeTestRule.onNodeWithTag("signInButton").performClick()
+
+    verify { authViewModel.setEmail("test@example.com") }
+    verify { authViewModel.setPassword("password123") }
+    verify { authViewModel.loginWithEmailAndPassword(onSuccess, onFailure) }
   }
 }

@@ -36,7 +36,7 @@ import com.android.solvit.seeker.ui.navigation.SeekerBottomNavigationMenu
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestStatus
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
-import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_CUSTOMMER
+import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_CUSTOMER
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
 import java.text.SimpleDateFormat
@@ -95,7 +95,7 @@ fun RequestsOverviewScreen(
       bottomBar = {
         SeekerBottomNavigationMenu(
             onTabSelect = { navigationActions.navigateTo(it.route) },
-            tabList = LIST_TOP_LEVEL_DESTINATION_CUSTOMMER,
+            tabList = LIST_TOP_LEVEL_DESTINATION_CUSTOMER,
             selectedItem = navigationActions.currentRoute())
       })
 }

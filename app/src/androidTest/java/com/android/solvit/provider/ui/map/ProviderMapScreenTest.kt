@@ -10,8 +10,8 @@ import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestRepository
 import com.android.solvit.shared.model.request.ServiceRequestStatus
-import com.android.solvit.shared.model.request.ServiceRequestType
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
+import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_PROVIDER
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
@@ -37,7 +37,7 @@ class ProviderMapScreenTest {
           ServiceRequest(
               uid = "1",
               title = "Test Request 1",
-              type = ServiceRequestType.PLUMBING,
+              type = Services.PLUMBER,
               description = "Test Description 1",
               assigneeName = "Assignee 1",
               location = Location(0.0, 0.0, "Test Location 1"),
@@ -47,7 +47,7 @@ class ProviderMapScreenTest {
           ServiceRequest(
               uid = "2",
               title = "Test Request 2",
-              type = ServiceRequestType.PLUMBING,
+              type = Services.PLUMBER,
               description = "Test Description 2",
               assigneeName = "Assignee 2",
               location = Location(10.0, 10.0, "Test Location 2"),
