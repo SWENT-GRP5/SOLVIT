@@ -8,6 +8,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
@@ -114,10 +115,19 @@ fun SeekerUI(
 ) {
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
+  val user by authViewModel.user.collectAsState()
 
   NavHost(navController = navController, startDestination = Route.SERVICES) {
     composable(Route.SERVICES) { ServicesScreen(navigationActions, listProviderViewModel) }
-    composable(Route.PROVIDERS) { SelectProviderScreen(listProviderViewModel, navigationActions) }
+    composable(Route.PROVIDERS) {
+      user?.let { it1 ->
+        SelectProviderScreen(
+            listProviderViewModel = listProviderViewModel,
+            navigationActions = navigationActions,
+            userId = it1.uid,
+        )
+      }
+    }
     composable(Route.MESSAGE) { MessageScreen(navigationActions) }
     composable(Route.CREATE_REQUEST) {
       CreateRequestScreen(navigationActions, serviceRequestViewModel)

@@ -2,6 +2,7 @@ package com.android.solvit.seeker.model.profile
 
 import android.os.Looper
 import androidx.test.core.app.ApplicationProvider
+import com.android.solvit.shared.model.map.Location
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
@@ -22,6 +23,7 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.timeout
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
@@ -48,6 +50,10 @@ class UserRepositoryFirestoreTest {
           email = "john.doe@example.com",
           phone = "+1234567890",
           address = "Chemin des Triaudes")
+
+  private val testLocation1 = Location(46.5197, 6.6323, "Location1")
+  private val testLocation2 = Location(47.3769, 8.5417, "Location2")
+  private val testUserId = "12345"
 
   @Before
   fun setUp() {
@@ -189,6 +195,70 @@ class UserRepositoryFirestoreTest {
     Shadows.shadowOf(Looper.getMainLooper()).idle()
 
     verify(mockDocumentReference).delete()
+  }
+
+  @Test
+  fun `getLocations returns parsed locations from document`() {
+    val locationMap1 = mapOf("latitude" to 46.5197, "longitude" to 6.6323, "name" to "Location1")
+    val locationMap2 = mapOf("latitude" to 47.3769, "longitude" to 8.5417, "name" to "Location2")
+
+    `when`(mockDocumentSnapshot.get("cachedLocations"))
+        .thenReturn(listOf(locationMap1, locationMap2))
+
+    val locations = firebaseRepository.getLocations(mockDocumentSnapshot)
+
+    assertEquals(2, locations.size)
+    assertEquals(testLocation1, locations[0])
+    assertEquals(testLocation2, locations[1])
+  }
+
+  @Test
+  fun `updateUserLocations updates cachedLocations with new location added first`() {
+    val newLocation = Location(48.8566, 2.3522, "New Location")
+    val locations = mutableListOf(testLocation1, testLocation2)
+    val updatedLocations = mutableListOf(newLocation, testLocation1)
+
+    Mockito.`when`(mockDocumentReference.get()).thenReturn(mockTaskDoc)
+    Mockito.`when`(mockTaskDoc.isSuccessful).thenReturn(true)
+    Mockito.`when`(mockTaskDoc.result).thenReturn(mockDocumentSnapshot)
+    Mockito.`when`(mockDocumentSnapshot.exists()).thenReturn(true)
+    `when`(mockDocumentSnapshot.get("cachedLocations")).thenReturn(locations)
+
+    // Mock update call to return a completed task
+    `when`(mockDocumentReference.update(eq("cachedLocations"), any()))
+        .thenReturn(Tasks.forResult(null))
+
+    firebaseRepository.updateUserLocations(
+        testUserId,
+        newLocation,
+        onSuccess = { updatedList ->
+          assertEquals(2, updatedList.size)
+          assertEquals(newLocation, updatedList[0])
+          assertEquals(testLocation1, updatedList[1])
+        },
+        onFailure = {})
+  }
+
+  @Test
+  fun `getCachedLocation returns list of locations on success`() {
+    // Mock the document retrieval task to return a successful result
+    `when`(mockDocumentReference.get()).thenReturn(Tasks.forResult(mockDocumentSnapshot))
+
+    // Mock the locations data
+    val locationMap1 = mapOf("latitude" to 46.5197, "longitude" to 6.6323, "name" to "Location1")
+    val locationMap2 = mapOf("latitude" to 47.3769, "longitude" to 8.5417, "name" to "Location2")
+    `when`(mockDocumentSnapshot.get("cachedLocations"))
+        .thenReturn(listOf(locationMap1, locationMap2))
+
+    // Call getCachedLocation and assert the results
+    firebaseRepository.getCachedLocation(
+        testUserId,
+        onSuccess = { locations ->
+          assertEquals(2, locations.size)
+          assertEquals(testLocation1, locations[0])
+          assertEquals(testLocation2, locations[1])
+        },
+        onFailure = {})
   }
 
   @Test
