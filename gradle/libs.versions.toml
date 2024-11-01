@@ -1,6 +1,6 @@
 [versions]
 #Plugins
-agp = "8.7.1"
+agp = "8.4.2"
 coilCompose = "2.4.0"
 firebaseBom = "33.4.0"
 json = "20240303"

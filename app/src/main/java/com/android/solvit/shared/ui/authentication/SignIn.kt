@@ -98,6 +98,8 @@ fun SignInScreen(
 
   val launcher = googleSignInLauncher(authViewModel, onSuccess, onFailure)
   val token = stringResource(R.string.default_web_client_id)
+
+
   val backgroundColor = Color(0xFFFFFFFF) // White background color
 
   Scaffold(
@@ -294,7 +296,10 @@ fun FormSection(
     launcher: ManagedActivityResultLauncher<Intent, ActivityResult>,
     token: String
 ) {
-  // Email input
+  val isFormComplete = email.isNotBlank() && password.isNotBlank()
+  val goodFormEmail = email.contains("@") && email.contains(".")
+  val passwordLengthComplete = password.length >= 6
+    // Email input
   OutlinedTextField(
       value = email,
       onValueChange = onEmailChange,
@@ -379,29 +384,16 @@ fun FormSection(
   Spacer(modifier = Modifier.height(16.dp))
 
   // Sign in button
-  Button(
-      onClick = {
-        authViewModel.setEmail(email)
-        authViewModel.setPassword(password)
-        authViewModel.loginWithEmailAndPassword(onSuccess, onFailure)
-      },
-      colors =
-          ButtonDefaults.buttonColors(
-              containerColor = Color.Transparent // Transparent to show the gradient
-              ),
-      shape = RoundedCornerShape(25.dp), // Adjust the corner radius as needed
-      modifier =
-          Modifier.fillMaxWidth()
-              .height(50.dp)
-              .background(
-                  brush =
-                      Brush.horizontalGradient(
-                          colors = listOf(Color(0, 200, 83), Color(0, 153, 255)) // Gradient colors
-                          ),
-                  shape = RoundedCornerShape(25.dp))
-              .testTag("signInButton")) {
-        Text("Sign in", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-      }
+  SignInButton(
+       email = email,
+       password = password,
+       isFormComplete = isFormComplete,
+       goodFormEmail = goodFormEmail,
+       passwordLengthComplete = passwordLengthComplete,
+       authViewModel = authViewModel,
+       onSuccess = onSuccess,
+       onFailure = onFailure
+  )
 
   Spacer(modifier = Modifier.height(4.dp))
 
@@ -432,6 +424,54 @@ fun SignUpSection(navigationActions: NavigationActions) {
         style = TextStyle(color = Color.Blue, textDecoration = TextDecoration.Underline),
         modifier = Modifier.testTag("signUpLink"))
   }
+}
+
+@Composable
+fun SignInButton(
+    email: String,
+    password: String,
+    isFormComplete: Boolean,
+    goodFormEmail: Boolean,
+    passwordLengthComplete: Boolean,
+    authViewModel: AuthViewModel,
+    onSuccess: () -> Unit,
+    onFailure: () -> Unit
+) {
+    val context = LocalContext.current
+
+    Button(
+        onClick = {
+            if (!isFormComplete) {
+                Toast.makeText(context, "Please fill in all required fields", Toast.LENGTH_SHORT).show()
+            } else if (!goodFormEmail) {
+                Toast.makeText(context, "Your email must have \"@\" and \".\"", Toast.LENGTH_SHORT).show()
+            } else if (!passwordLengthComplete) {
+                Toast.makeText(
+                    context, "Your password must have at least 6 characters", Toast.LENGTH_SHORT)
+                    .show()
+            } else {
+                authViewModel.setEmail(email)
+                authViewModel.setPassword(password)
+                authViewModel.loginWithEmailAndPassword(onSuccess, onFailure)
+            }
+        },
+        colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+        shape = RoundedCornerShape(25.dp),
+        modifier =
+        Modifier.fillMaxWidth()
+            .height(50.dp)
+            .background(
+                brush =
+                if (isFormComplete && goodFormEmail && passwordLengthComplete) {
+                    Brush.horizontalGradient(
+                        colors = listOf(Color(0, 200, 83), Color(0, 153, 255)))
+                } else {
+                    Brush.horizontalGradient(colors = listOf(Color.Gray, Color.Gray))
+                },
+                shape = RoundedCornerShape(25.dp))
+            .testTag("signInButton")) {
+        Text("Sign in", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+    }
 }
 
 @Composable
