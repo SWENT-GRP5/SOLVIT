@@ -58,7 +58,9 @@ class ProviderCalendarScreenTest {
   @Test
   fun testDaySelection() {
     // composeTestRule.onNodeWithTag("monthView").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("dayItem_2024-10-17").performClick()
+    val today = java.time.LocalDate.now().toString()
+    val todayTag = "dayItem_$today"
+    composeTestRule.onNodeWithTag(todayTag).performClick()
     composeTestRule.onNodeWithTag("bottomSheetDayView").assertIsDisplayed()
     // composeTestRule.onNodeWithTag("bottomSheet").assertIsDisplayed()
   }
