@@ -54,7 +54,7 @@ class CreateRequestScreenTest {
           "title",
           Services.CLEANER,
           "description",
-          "assigneeName",
+          "1",
           Timestamp(GregorianCalendar(2024, 0, 1).time),
           Location(37.7749, -122.4194, "San Francisco"),
           "imageUrl",
@@ -88,7 +88,7 @@ class CreateRequestScreenTest {
   @Test
   fun displayAllComponents() {
     composeTestRule.setContent {
-      CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
+      CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel, "1")
     }
 
     composeTestRule.onNodeWithTag("screenTitle").assertIsDisplayed()
@@ -109,7 +109,7 @@ class CreateRequestScreenTest {
   @Test
   fun doesNotSubmitWithInvalidDate() {
     composeTestRule.setContent {
-      CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
+      CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel, "1")
     }
 
     composeTestRule.onNodeWithTag("inputRequestDate").performTextClearance()
@@ -122,7 +122,7 @@ class CreateRequestScreenTest {
   @Test
   fun locationMenuExpandsWithInput() {
     composeTestRule.setContent {
-      CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
+      CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel, "1")
     }
 
     composeTestRule.onNodeWithTag("inputRequestAddress").performTextInput("USA")
@@ -136,7 +136,7 @@ class CreateRequestScreenTest {
   @Test
   fun locationSelectionFromDropdown() {
     composeTestRule.setContent {
-      CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
+      CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel, "1")
     }
 
     composeTestRule.onNodeWithTag("inputRequestAddress").performTextInput("USA")
@@ -150,7 +150,7 @@ class CreateRequestScreenTest {
   @Test
   fun serviceTypeDropdown_showsFilteredResults() {
     composeTestRule.setContent {
-      CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
+      CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel, "1")
     }
 
     composeTestRule.onNodeWithTag("inputServiceType").performTextInput("Plumber")
@@ -161,7 +161,7 @@ class CreateRequestScreenTest {
   @Test
   fun serviceTypeDropdown_closesOnSelection() {
     composeTestRule.setContent {
-      CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
+      CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel, "1")
     }
 
     composeTestRule.onNodeWithTag("inputServiceType").performTextInput("Plumber")
@@ -172,7 +172,7 @@ class CreateRequestScreenTest {
   @Test
   fun serviceTypeDropdown_showsNoResultsMessage() {
     composeTestRule.setContent {
-      CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
+      CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel, "1")
     }
 
     composeTestRule.onNodeWithTag("inputServiceType").performTextInput("NonExistentType")
@@ -182,7 +182,7 @@ class CreateRequestScreenTest {
   @Test
   fun serviceTypeDropdown_closesOnFocusLost() {
     composeTestRule.setContent {
-      CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
+      CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel, "1")
     }
 
     composeTestRule.onNodeWithTag("inputServiceType").performTextInput("Plumbing")
@@ -193,7 +193,7 @@ class CreateRequestScreenTest {
   @Test
   fun doesNotSubmitWithInvalidTitle() {
     composeTestRule.setContent {
-      CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
+      CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel, "1")
     }
 
     composeTestRule.onNodeWithTag("inputRequestTitle").performTextClearance()

@@ -41,7 +41,7 @@ class RequestsOverviewScreenTest {
           "title",
           Services.CLEANER,
           "description",
-          "assigneeName",
+          "1",
           Timestamp(GregorianCalendar(2024, 0, 1).time),
           Location(37.7749, -122.4194, "San Francisco"),
           "imageUrl",
@@ -61,7 +61,7 @@ class RequestsOverviewScreenTest {
   @Test
   fun hasRequiredComponents() {
     composeTestRule.setContent {
-      RequestsOverviewScreen(navigationActions, serviceRequestViewModel)
+      RequestsOverviewScreen(navigationActions, serviceRequestViewModel, "1")
     }
 
     composeTestRule.onNodeWithTag("requestsOverviewScreen").assertIsDisplayed()
@@ -73,7 +73,7 @@ class RequestsOverviewScreenTest {
   @Test
   fun displayTextWhenEmpty() {
     composeTestRule.setContent {
-      RequestsOverviewScreen(navigationActions, serviceRequestViewModel)
+      RequestsOverviewScreen(navigationActions, serviceRequestViewModel, "1")
     }
 
     `when`(serviceRequestRepository.getServiceRequests(any(), any())).then {
@@ -87,7 +87,7 @@ class RequestsOverviewScreenTest {
   @Test
   fun displayRequestsWhenNotEmpty() {
     composeTestRule.setContent {
-      RequestsOverviewScreen(navigationActions, serviceRequestViewModel)
+      RequestsOverviewScreen(navigationActions, serviceRequestViewModel, "1")
     }
 
     `when`(serviceRequestRepository.getServiceRequests(any(), any())).then {
@@ -101,7 +101,7 @@ class RequestsOverviewScreenTest {
   @Test
   fun topBarArrowNavigatesBack() {
     composeTestRule.setContent {
-      RequestsOverviewScreen(navigationActions, serviceRequestViewModel)
+      RequestsOverviewScreen(navigationActions, serviceRequestViewModel, "1")
     }
 
     composeTestRule.onNodeWithTag("arrowBack").performClick()
@@ -111,7 +111,7 @@ class RequestsOverviewScreenTest {
   @Test
   fun categoriesSettingsShowsFilters() {
     composeTestRule.setContent {
-      RequestsOverviewScreen(navigationActions, serviceRequestViewModel)
+      RequestsOverviewScreen(navigationActions, serviceRequestViewModel, "1")
     }
 
     composeTestRule.onNodeWithTag("categoriesSettings").assertIsDisplayed()
@@ -123,7 +123,7 @@ class RequestsOverviewScreenTest {
   @Test
   fun categoriesSortShowFilters() {
     composeTestRule.setContent {
-      RequestsOverviewScreen(navigationActions, serviceRequestViewModel)
+      RequestsOverviewScreen(navigationActions, serviceRequestViewModel, "1")
     }
 
     composeTestRule.onNodeWithTag("categoriesSort").assertIsDisplayed()
@@ -135,7 +135,7 @@ class RequestsOverviewScreenTest {
   @Test
   fun categoryFiltersWorks() {
     composeTestRule.setContent {
-      RequestsOverviewScreen(navigationActions, serviceRequestViewModel)
+      RequestsOverviewScreen(navigationActions, serviceRequestViewModel, "1")
     }
 
     mockkStatic(Toast::class)
@@ -150,7 +150,7 @@ class RequestsOverviewScreenTest {
   @Test
   fun categorySortWorks() {
     composeTestRule.setContent {
-      RequestsOverviewScreen(navigationActions, serviceRequestViewModel)
+      RequestsOverviewScreen(navigationActions, serviceRequestViewModel, "1")
     }
 
     mockkStatic(Toast::class)
@@ -165,7 +165,7 @@ class RequestsOverviewScreenTest {
   @Test
   fun clickOnRequestNavigatesToEditScreen() {
     composeTestRule.setContent {
-      RequestsOverviewScreen(navigationActions, serviceRequestViewModel)
+      RequestsOverviewScreen(navigationActions, serviceRequestViewModel, "1")
     }
 
     `when`(serviceRequestRepository.getServiceRequests(any(), any())).then {

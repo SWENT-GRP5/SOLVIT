@@ -63,7 +63,8 @@ import java.util.Locale
 @Composable
 fun RequestsOverviewScreen(
     navigationActions: NavigationActions,
-    requestViewModel: ServiceRequestViewModel = viewModel(factory = ServiceRequestViewModel.Factory),
+    requestViewModel: ServiceRequestViewModel =
+        viewModel(factory = ServiceRequestViewModel.Factory),
     userId: String
 ) {
   Scaffold(
@@ -74,9 +75,8 @@ fun RequestsOverviewScreen(
             tabList = LIST_TOP_LEVEL_DESTINATION_CUSTOMER,
             selectedItem = navigationActions.currentRoute())
       }) {
-        val requests = requestViewModel.requests.collectAsState().value.filter {
-            it.userId == userId
-        }
+        val requests =
+            requestViewModel.requests.collectAsState().value.filter { it.userId == userId }
 
         Column {
           TopOrdersSection(navigationActions)
