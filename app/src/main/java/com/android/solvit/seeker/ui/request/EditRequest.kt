@@ -95,7 +95,7 @@ fun EditRequestScreen(
                 ServiceRequest(
                     title = title,
                     description = description,
-                    assigneeName = request.assigneeName,
+                    userId = request.userId,
                     dueDate = Timestamp(calendar.time),
                     location = selectedLocation,
                     status = request.status,

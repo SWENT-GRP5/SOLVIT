@@ -27,7 +27,8 @@ fun CreateRequestScreen(
     navigationActions: NavigationActions,
     requestViewModel: ServiceRequestViewModel =
         viewModel(factory = ServiceRequestViewModel.Factory),
-    locationViewModel: LocationViewModel = viewModel(factory = LocationViewModel.Factory)
+    locationViewModel: LocationViewModel = viewModel(factory = LocationViewModel.Factory),
+    userId: String
 ) {
   var title by remember { mutableStateOf("") }
   var description by remember { mutableStateOf("") }
@@ -88,7 +89,7 @@ fun CreateRequestScreen(
                 ServiceRequest(
                     title = title,
                     description = description,
-                    assigneeName = "assignee",
+                    userId = userId,
                     dueDate = Timestamp(calendar.time),
                     location = selectedLocation,
                     status = ServiceRequestStatus.PENDING,

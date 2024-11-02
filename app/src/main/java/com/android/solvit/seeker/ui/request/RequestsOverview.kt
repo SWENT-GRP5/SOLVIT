@@ -63,7 +63,8 @@ import java.util.Locale
 @Composable
 fun RequestsOverviewScreen(
     navigationActions: NavigationActions,
-    requestViewModel: ServiceRequestViewModel = viewModel(factory = ServiceRequestViewModel.Factory)
+    requestViewModel: ServiceRequestViewModel = viewModel(factory = ServiceRequestViewModel.Factory),
+    userId: String
 ) {
   Scaffold(
       modifier = Modifier.testTag("requestsOverviewScreen"),
@@ -73,18 +74,20 @@ fun RequestsOverviewScreen(
             tabList = LIST_TOP_LEVEL_DESTINATION_CUSTOMER,
             selectedItem = navigationActions.currentRoute())
       }) {
-        val requests = requestViewModel.requests.collectAsState()
+        val requests = requestViewModel.requests.collectAsState().value.filter {
+            it.userId == userId
+        }
 
         Column {
           TopOrdersSection(navigationActions)
           CategoriesFiltersSection()
-          if (requests.value.isEmpty()) {
+          if (requests.isEmpty()) {
             NoRequestsText()
           } else {
             LazyColumn(
                 modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("requestsList"),
                 verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                  items(requests.value) { request ->
+                  items(requests) { request ->
                     RequestItemRow(
                         request = request,
                         onClick = {
