@@ -1,10 +1,13 @@
 package com.android.solvit.seeker.ui.request
 
+import android.content.pm.ActivityInfo
 import android.graphics.Bitmap
 import android.icu.util.GregorianCalendar
 import android.net.Uri
 import android.widget.Toast
+import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -29,6 +32,14 @@ fun CreateRequestScreen(
         viewModel(factory = ServiceRequestViewModel.Factory),
     locationViewModel: LocationViewModel = viewModel(factory = LocationViewModel.Factory)
 ) {
+  // Lock Orientation to Portrait
+  val context = LocalContext.current
+  DisposableEffect(Unit) {
+    val activity = context as? ComponentActivity
+    activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+    onDispose { activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED }
+  }
+
   var title by remember { mutableStateOf("") }
   var description by remember { mutableStateOf("") }
   var dueDate by remember { mutableStateOf("") }

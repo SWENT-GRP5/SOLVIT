@@ -200,7 +200,8 @@ fun PortraitLayout(
             onSuccess = onSuccess,
             onFailure = onFailure,
             launcher = launcher,
-            token = token)
+            token = token,
+            navigationActions = navigationActions)
         Spacer(modifier = Modifier.height(20.dp))
         SignUpSection(navigationActions)
       }
@@ -253,7 +254,8 @@ fun LandscapeLayout(
                   onSuccess = onSuccess,
                   onFailure = onFailure,
                   launcher = launcher,
-                  token = token)
+                  token = token,
+                  navigationActions = navigationActions)
             }
       }
 }
@@ -293,7 +295,8 @@ fun FormSection(
     onSuccess: () -> Unit,
     onFailure: () -> Unit,
     launcher: ManagedActivityResultLauncher<Intent, ActivityResult>,
-    token: String
+    token: String,
+    navigationActions: NavigationActions
 ) {
   val isFormComplete = email.isNotBlank() && password.isNotBlank()
   val goodFormEmail = email.contains("@") && email.contains(".")
@@ -375,7 +378,7 @@ fun FormSection(
 
         ClickableText(
             text = AnnotatedString("Forgot password?"),
-            onClick = { Toast.makeText(context, "Not implemented yet", Toast.LENGTH_LONG).show() },
+            onClick = { navigationActions.navigateTo(Screen.FORGOT_PASSWORD) },
             style = TextStyle(color = Color.Gray, textDecoration = TextDecoration.Underline),
             modifier = Modifier.testTag("forgotPasswordLink"))
       }
