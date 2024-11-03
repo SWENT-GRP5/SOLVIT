@@ -23,6 +23,7 @@ import com.android.solvit.seeker.ui.map.SeekerMapScreen
 import com.android.solvit.seeker.ui.profile.EditSeekerProfileScreen
 import com.android.solvit.seeker.ui.profile.SeekerProfileScreen
 import com.android.solvit.seeker.ui.profile.SeekerRegistrationScreen
+import com.android.solvit.seeker.ui.provider.ProviderInfoScreen
 import com.android.solvit.seeker.ui.provider.ProviderRegistrationScreen
 import com.android.solvit.seeker.ui.provider.SelectProviderScreen
 import com.android.solvit.seeker.ui.request.CreateRequestScreen
@@ -31,6 +32,7 @@ import com.android.solvit.seeker.ui.request.RequestsOverviewScreen
 import com.android.solvit.seeker.ui.service.ServicesScreen
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
+import com.android.solvit.shared.model.review.ReviewViewModel
 import com.android.solvit.shared.ui.authentication.ForgotPassword
 import com.android.solvit.shared.ui.authentication.OpeningScreen
 import com.android.solvit.shared.ui.authentication.SignInScreen
@@ -71,6 +73,7 @@ fun SolvitApp() {
       viewModel<SeekerProfileViewModel>(factory = SeekerProfileViewModel.Factory)
   val serviceRequestViewModel =
       viewModel<ServiceRequestViewModel>(factory = ServiceRequestViewModel.Factory)
+  val reviewViewModel = viewModel<ReviewViewModel>(factory = ReviewViewModel.Factory)
 
   if (!userRegistered.value) {
     SharedUI(authViewModel, listProviderViewModel, seekerProfileViewModel)
@@ -78,7 +81,11 @@ fun SolvitApp() {
     when (user.value!!.role) {
       "seeker" ->
           SeekerUI(
-              authViewModel, listProviderViewModel, seekerProfileViewModel, serviceRequestViewModel)
+              authViewModel,
+              listProviderViewModel,
+              seekerProfileViewModel,
+              serviceRequestViewModel,
+              reviewViewModel)
       "provider" -> ProviderUI(authViewModel, listProviderViewModel, seekerProfileViewModel)
     }
   }
@@ -113,7 +120,8 @@ fun SeekerUI(
     authViewModel: AuthViewModel,
     listProviderViewModel: ListProviderViewModel,
     seekerProfileViewModel: SeekerProfileViewModel,
-    serviceRequestViewModel: ServiceRequestViewModel
+    serviceRequestViewModel: ServiceRequestViewModel,
+    reviewViewModel: ReviewViewModel
 ) {
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
@@ -129,6 +137,9 @@ fun SeekerUI(
             userId = it1.uid,
         )
       }
+    }
+    composable(Route.PROVIDER_PROFILE) {
+      ProviderInfoScreen(navigationActions, listProviderViewModel, reviewViewModel)
     }
     composable(Route.MESSAGE) { MessageScreen(navigationActions) }
     composable(Route.CREATE_REQUEST) {
