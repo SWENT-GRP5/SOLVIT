@@ -148,12 +148,18 @@ fun ProviderTabs(selectedTabIndex: Int, onTabSelected: (Int) -> Unit) {
       modifier = Modifier.fillMaxWidth().testTag("providerTabs"),
       containerColor = Color(0xFF0099FF),
       contentColor = Color.White) {
-        Tab(selected = selectedTabIndex == 0, onClick = { onTabSelected(0) }) {
-          Text("Profile", modifier = Modifier.padding(16.dp).testTag("profileTab"))
-        }
-        Tab(selected = selectedTabIndex == 1, onClick = { onTabSelected(1) }) {
-          Text("Reviews", modifier = Modifier.padding(16.dp).testTag("reviewsTab"))
-        }
+        Tab(
+            selected = selectedTabIndex == 0,
+            onClick = { onTabSelected(0) },
+            modifier = Modifier.testTag("profileTab")) {
+              Text("Profile", modifier = Modifier.padding(16.dp))
+            }
+        Tab(
+            selected = selectedTabIndex == 1,
+            onClick = { onTabSelected(1) },
+            modifier = Modifier.testTag("reviewsTab")) {
+              Text("Reviews", modifier = Modifier.padding(16.dp))
+            }
       }
 }
 
