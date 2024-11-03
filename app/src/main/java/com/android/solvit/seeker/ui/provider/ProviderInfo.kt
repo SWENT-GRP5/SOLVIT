@@ -107,37 +107,42 @@ fun ProviderTopBar(onBackClick: () -> Unit) {
 @Composable
 fun ProviderHeader(provider: Provider) {
   Box(modifier = Modifier.fillMaxWidth().background(Color.White).testTag("providerHeader")) {
-    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-      val context = LocalContext.current
-      AsyncImage(
-          model = if (provider.imageUrl != "") provider.imageUrl else R.drawable.default_pdp,
-          contentDescription = "Profile Picture",
-          contentScale = ContentScale.Crop,
-          modifier =
-              Modifier.size(128.dp)
-                  .border(2.dp, Color.Transparent, RoundedCornerShape(16.dp))
-                  .clip(RoundedCornerShape(16.dp))
-                  .testTag("providerImage"))
-      Spacer(modifier = Modifier.width(16.dp))
-      Column {
-        Text(
-            text = provider.name,
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.testTag("providerName"))
-        Text(
-            text = provider.companyName,
-            color = Color.Gray,
-            modifier = Modifier.testTag("providerCompanyName"))
-      }
-
-      // Share icon on the right
-      IconButton(
-          onClick = { Toast.makeText(context, "Not implemented", Toast.LENGTH_SHORT).show() },
-          modifier = Modifier.testTag("shareButton")) {
-            Icon(Icons.Default.Share, contentDescription = "Share")
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween) {
+          val context = LocalContext.current
+          Row(verticalAlignment = Alignment.CenterVertically) {
+            AsyncImage(
+                model = if (provider.imageUrl != "") provider.imageUrl else R.drawable.default_pdp,
+                contentDescription = "Profile Picture",
+                contentScale = ContentScale.Crop,
+                modifier =
+                    Modifier.size(128.dp)
+                        .border(2.dp, Color.Transparent, RoundedCornerShape(16.dp))
+                        .clip(RoundedCornerShape(16.dp))
+                        .testTag("providerImage"))
+            Spacer(modifier = Modifier.width(16.dp))
+            Column {
+              Text(
+                  text = provider.name,
+                  fontSize = 20.sp,
+                  fontWeight = FontWeight.Bold,
+                  modifier = Modifier.testTag("providerName"))
+              Text(
+                  text = provider.companyName,
+                  color = Color.Gray,
+                  modifier = Modifier.testTag("providerCompanyName"))
+            }
           }
-    }
+
+          // Share icon on the right
+          IconButton(
+              onClick = { Toast.makeText(context, "Not implemented", Toast.LENGTH_SHORT).show() },
+              modifier = Modifier.testTag("shareButton")) {
+                Icon(Icons.Default.Share, contentDescription = "Share")
+              }
+        }
   }
 }
 

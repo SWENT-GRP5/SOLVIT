@@ -82,6 +82,7 @@ import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.map.RequestLocationPermission
 import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.android.solvit.shared.ui.navigation.Route
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
 import java.util.Locale
@@ -243,7 +244,11 @@ fun Note(note: String = "5") {
 }
 
 @Composable
-fun DisplayPopularProviders(providers: List<Provider>) {
+fun DisplayPopularProviders(
+    providers: List<Provider>,
+    listProviderViewModel: ListProviderViewModel,
+    navigationActions: NavigationActions
+) {
 
   LazyRow(
       modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("popularProviders"),
@@ -252,48 +257,57 @@ fun DisplayPopularProviders(providers: List<Provider>) {
       userScrollEnabled = true,
   ) {
     items(providers.filter { it.popular }) { provider ->
-      Box(modifier = Modifier.clip(RoundedCornerShape(16.dp))) {
-        AsyncImage(
-            modifier = Modifier.width(141.dp).height(172.dp),
-            model = provider.imageUrl,
-            placeholder = painterResource(id = R.drawable.loading),
-            error = painterResource(id = R.drawable.error),
-            contentDescription = "provider image",
-            contentScale = ContentScale.Crop)
-        Box(
-            modifier =
-                Modifier.fillMaxWidth()
-                    .height(50.dp)
-                    .align(Alignment.BottomCenter)
-                    .background(
-                        brush =
-                            Brush.verticalGradient(
-                                colors =
-                                    listOf(
-                                        Color(android.graphics.Color.parseColor("#2A5A52")),
-                                        Color(android.graphics.Color.parseColor("#DBD1B9"))))))
+      Box(
+          modifier =
+              Modifier.clip(RoundedCornerShape(16.dp)).clickable {
+                listProviderViewModel.selectProvider(provider)
+                navigationActions.navigateTo(Route.PROVIDER_PROFILE)
+              }) {
+            AsyncImage(
+                modifier = Modifier.width(141.dp).height(172.dp),
+                model = provider.imageUrl,
+                placeholder = painterResource(id = R.drawable.loading),
+                error = painterResource(id = R.drawable.error),
+                contentDescription = "provider image",
+                contentScale = ContentScale.Crop)
+            Box(
+                modifier =
+                    Modifier.fillMaxWidth()
+                        .height(50.dp)
+                        .align(Alignment.BottomCenter)
+                        .background(
+                            brush =
+                                Brush.verticalGradient(
+                                    colors =
+                                        listOf(
+                                            Color(android.graphics.Color.parseColor("#2A5A52")),
+                                            Color(android.graphics.Color.parseColor("#DBD1B9"))))))
 
-        Row(
-            modifier = Modifier.align(Alignment.BottomStart).padding(8.dp),
-            verticalAlignment = Alignment.CenterVertically) {
-              Text(
-                  text = provider.name.uppercase(),
-                  style =
-                      TextStyle(
-                          fontSize = 16.sp,
-                          fontWeight = FontWeight(400),
-                          color = Color(0xFFFFFFFF),
-                      ))
-              Spacer(Modifier.width(40.dp))
-              Note(provider.rating.toString())
-            }
-      }
+            Row(
+                modifier = Modifier.align(Alignment.BottomStart).padding(8.dp),
+                verticalAlignment = Alignment.CenterVertically) {
+                  Text(
+                      text = provider.name.uppercase(),
+                      style =
+                          TextStyle(
+                              fontSize = 16.sp,
+                              fontWeight = FontWeight(400),
+                              color = Color(0xFFFFFFFF),
+                          ))
+                  Spacer(Modifier.width(40.dp))
+                  Note(provider.rating.toString())
+                }
+          }
     }
   }
 }
 
 @Composable
-fun ListProviders(providers: List<Provider>) {
+fun ListProviders(
+    providers: List<Provider>,
+    listProviderViewModel: ListProviderViewModel,
+    navigationActions: NavigationActions
+) {
   LazyColumn(
       modifier = Modifier.fillMaxWidth().testTag("providersList"),
       verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -303,7 +317,11 @@ fun ListProviders(providers: List<Provider>) {
       Row(
           modifier =
               Modifier.fillMaxWidth()
-                  .background(color = Color(0xFFFFFFFF), shape = RoundedCornerShape(size = 16.dp)),
+                  .background(color = Color(0xFFFFFFFF), shape = RoundedCornerShape(size = 16.dp))
+                  .clickable {
+                    listProviderViewModel.selectProvider(provider)
+                    navigationActions.navigateTo(Route.PROVIDER_PROFILE)
+                  },
           horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.Start)) {
             AsyncImage(
                 modifier = Modifier.width(116.dp).height(85.dp).clip(RoundedCornerShape(12.dp)),
@@ -859,9 +877,9 @@ fun SelectProviderScreen(
         Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
           SpFilterBar(display = { displayFilters = true }, listProviderViewModel)
           Title("Popular")
-          DisplayPopularProviders(providers)
+          DisplayPopularProviders(providers, listProviderViewModel, navigationActions)
           Title("See All")
-          ListProviders(providers)
+          ListProviders(providers, listProviderViewModel, navigationActions)
         }
         if (displayFilters) {
           ModalBottomSheet(
