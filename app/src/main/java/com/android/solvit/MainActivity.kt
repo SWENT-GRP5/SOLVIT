@@ -106,8 +106,6 @@ fun SharedUI(
     composable(Screen.SEEKER_REGISTRATION_PROFILE) {
       SeekerRegistrationScreen(seekerProfileViewModel, navigationActions, authViewModel)
     }
-    // A RETIRER
-    composable(Screen.PROFESSIONAL_PROFILE) { ProfessionalProfileScreen(navigationActions) }
   }
 }
 
@@ -159,6 +157,7 @@ fun ProviderUI(
 ) {
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
+  val user by authViewModel.user.collectAsState()
 
   NavHost(navController = navController, startDestination = Route.REQUESTS_FEED) {
     composable(Route.REQUESTS_FEED) {
@@ -166,6 +165,14 @@ fun ProviderUI(
     }
     composable(Route.MAP_OF_SEEKERS) { ProviderMapScreen(navigationActions = navigationActions) }
     composable(Screen.CALENDAR) { ProviderCalendarScreen(navigationActions = navigationActions) }
-    // composable(Screen.PROFESSIONAL_PROFILE) { ProfessionalProfileScreen() }
+    composable(Screen.PROFESSIONAL_PROFILE) {
+      user?.let { it1 ->
+        ProfessionalProfileScreen(
+            listProviderViewModel = listProviderViewModel,
+            navigationActions = navigationActions,
+            userId = it1.uid,
+        )
+      }
+    }
   }
 }
