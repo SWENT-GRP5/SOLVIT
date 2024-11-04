@@ -207,7 +207,7 @@ fun ProviderRegistrationScreen(
                                     location // Set selectedLocation as non-null Location
                                 showDropdown = false // Close dropdown on selection
                               },
-                              modifier = Modifier.padding(8.dp))
+                              modifier = Modifier.padding(8.dp).testTag("locationResult"))
                         }
                       }
                 }
