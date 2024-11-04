@@ -4,12 +4,16 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.seeker.ui.provider.ProviderRegistrationScreen
+import com.android.solvit.shared.model.map.Location
+import com.android.solvit.shared.model.map.LocationRepository
+import com.android.solvit.shared.model.map.LocationViewModel
 import com.android.solvit.shared.model.provider.ProviderRepository
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
@@ -17,10 +21,13 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers
+import org.mockito.Mockito
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.`when`
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.verify
 
 @RunWith(AndroidJUnit4::class)
@@ -31,6 +38,14 @@ class ProviderRegistrationTest {
   private lateinit var providerRepository: ProviderRepository
   private lateinit var navigationActions: NavigationActions
   private lateinit var listProviderViewModel: ListProviderViewModel
+  private lateinit var locationRepository: LocationRepository
+  private lateinit var locationViewModel: LocationViewModel
+
+  private val locations =
+      listOf(
+          Location(37.7749, -122.4194, "San Francisco"),
+          Location(34.0522, -118.2437, "Los Angeles"),
+          Location(40.7128, -74.0060, "New York"))
 
   @Before
   fun setUp() {
@@ -38,16 +53,26 @@ class ProviderRegistrationTest {
     providerRepository = mock(ProviderRepository::class.java)
     navigationActions = mock(NavigationActions::class.java)
     listProviderViewModel = ListProviderViewModel(providerRepository)
+    locationRepository = Mockito.mock(LocationRepository::class.java)
+    locationViewModel = LocationViewModel(locationRepository)
 
     // Mock the current route to be the add todo screen
     `when`(navigationActions.currentRoute()).thenReturn(Screen.PROVIDER_REGISTRATION_PROFILE)
+    Mockito.`when`(
+            locationRepository.search(ArgumentMatchers.anyString(), anyOrNull(), anyOrNull()))
+        .thenAnswer { invocation ->
+          val onSuccess = invocation.getArgument<(List<Location>) -> Unit>(1)
+          onSuccess(locations)
+        }
   }
 
   @Test
   fun testAllComponents() {
     composeTestRule.setContent {
       ProviderRegistrationScreen(
-          viewModel = listProviderViewModel, navigationActions = navigationActions)
+          viewModel = listProviderViewModel,
+          navigationActions = navigationActions,
+      )
     }
 
     composeTestRule.onNodeWithTag("goBackButton").assertIsDisplayed()
@@ -130,5 +155,39 @@ class ProviderRegistrationTest {
 
     // Check that the second step circle is visible (indicating the user is on step 2)
     composeTestRule.onNodeWithTag("stepCircle-2-incomplete").assertExists()
+  }
+
+  @Test
+  fun locMenuExpandsWithInput() {
+    composeTestRule.setContent {
+      ProviderRegistrationScreen(
+          viewModel = listProviderViewModel,
+          navigationActions = navigationActions,
+          locationViewModel = locationViewModel)
+    }
+
+    composeTestRule.onNodeWithTag("locationInput").performTextInput("USA")
+    composeTestRule.waitUntil { locationViewModel.locationSuggestions.value.isNotEmpty() }
+
+    composeTestRule.onAllNodesWithTag("locationResult")[0].assertIsDisplayed()
+    composeTestRule.onAllNodesWithTag("locationResult")[1].assertIsDisplayed()
+    composeTestRule.onAllNodesWithTag("locationResult")[2].assertIsDisplayed()
+  }
+
+  @Test
+  fun locSelectionFromDropdown() {
+    composeTestRule.setContent {
+      ProviderRegistrationScreen(
+          viewModel = listProviderViewModel,
+          navigationActions = navigationActions,
+          locationViewModel = locationViewModel)
+    }
+
+    composeTestRule.onNodeWithTag("locationInput").performTextInput("USA")
+    composeTestRule.waitUntil { locationViewModel.locationSuggestions.value.isNotEmpty() }
+
+    composeTestRule.onAllNodesWithTag("locationResult")[2].performClick()
+    assert(locationViewModel.locationSuggestions.value == locations)
+    assert(locationViewModel.query.value == "New York")
   }
 }

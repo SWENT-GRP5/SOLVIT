@@ -31,6 +31,7 @@ import com.android.solvit.seeker.ui.request.EditRequestScreen
 import com.android.solvit.seeker.ui.request.RequestsOverviewScreen
 import com.android.solvit.seeker.ui.service.ServicesScreen
 import com.android.solvit.shared.model.authentication.AuthViewModel
+import com.android.solvit.shared.model.map.LocationViewModel
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.review.ReviewViewModel
 import com.android.solvit.shared.ui.authentication.ForgotPassword
@@ -73,10 +74,11 @@ fun SolvitApp() {
       viewModel<SeekerProfileViewModel>(factory = SeekerProfileViewModel.Factory)
   val serviceRequestViewModel =
       viewModel<ServiceRequestViewModel>(factory = ServiceRequestViewModel.Factory)
+  val locationViewModel = viewModel<LocationViewModel>(factory = LocationViewModel.Factory)
   val reviewViewModel = viewModel<ReviewViewModel>(factory = ReviewViewModel.Factory)
 
   if (!userRegistered.value) {
-    SharedUI(authViewModel, listProviderViewModel, seekerProfileViewModel)
+    SharedUI(authViewModel, listProviderViewModel, seekerProfileViewModel, locationViewModel)
   } else {
     when (user.value!!.role) {
       "seeker" ->
@@ -95,7 +97,8 @@ fun SolvitApp() {
 fun SharedUI(
     authViewModel: AuthViewModel,
     listProviderViewModel: ListProviderViewModel,
-    seekerProfileViewModel: SeekerProfileViewModel
+    seekerProfileViewModel: SeekerProfileViewModel,
+    locationViewModel: LocationViewModel
 ) {
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
@@ -106,7 +109,8 @@ fun SharedUI(
     composable(Screen.SIGN_UP) { SignUpScreen(navigationActions, authViewModel) }
     composable(Screen.SIGN_UP_CHOOSE_ROLE) { SignUpChooseProfile(navigationActions, authViewModel) }
     composable(Screen.PROVIDER_REGISTRATION_PROFILE) {
-      ProviderRegistrationScreen(listProviderViewModel, navigationActions, authViewModel)
+      ProviderRegistrationScreen(
+          listProviderViewModel, navigationActions, locationViewModel, authViewModel)
     }
     composable(Screen.FORGOT_PASSWORD) { ForgotPassword(navigationActions) }
     composable(Screen.SEEKER_REGISTRATION_PROFILE) {
