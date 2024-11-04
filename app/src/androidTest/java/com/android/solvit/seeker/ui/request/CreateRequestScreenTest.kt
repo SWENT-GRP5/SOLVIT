@@ -28,6 +28,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito
+import org.mockito.Mockito.`when`
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.never
@@ -54,7 +55,7 @@ class CreateRequestScreenTest {
           "title",
           Services.CLEANER,
           "description",
-          "1",
+          "-1",
           Timestamp(GregorianCalendar(2024, 0, 1).time),
           Location(37.7749, -122.4194, "San Francisco"),
           "imageUrl",
@@ -69,26 +70,25 @@ class CreateRequestScreenTest {
     navController = Mockito.mock(NavController::class.java)
     navigationActions = NavigationActions(navController)
 
-    Mockito.`when`(
-            locationRepository.search(ArgumentMatchers.anyString(), anyOrNull(), anyOrNull()))
+    `when`(locationRepository.search(ArgumentMatchers.anyString(), anyOrNull(), anyOrNull()))
         .thenAnswer { invocation ->
           val onSuccess = invocation.getArgument<(List<Location>) -> Unit>(1)
           onSuccess(locations)
         }
 
-    Mockito.`when`(serviceRequestRepository.saveServiceRequest(any(), any(), any())).thenAnswer {
-        invocation ->
+    `when`(serviceRequestRepository.saveServiceRequest(any(), any(), any())).thenAnswer { invocation
+      ->
       val onSuccess = invocation.getArgument<(ServiceRequest) -> Unit>(1)
       onSuccess(serviceRequest)
     }
 
-    Mockito.`when`(serviceRequestRepository.getNewUid()).thenAnswer { "1" }
+    `when`(serviceRequestRepository.getNewUid()).thenAnswer { "1" }
   }
 
   @Test
   fun displayAllComponents() {
     composeTestRule.setContent {
-      CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel, "1")
+      CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
     }
 
     composeTestRule.onNodeWithTag("screenTitle").assertIsDisplayed()
@@ -109,7 +109,7 @@ class CreateRequestScreenTest {
   @Test
   fun doesNotSubmitWithInvalidDate() {
     composeTestRule.setContent {
-      CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel, "1")
+      CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
     }
 
     composeTestRule.onNodeWithTag("inputRequestDate").performTextClearance()
@@ -122,7 +122,7 @@ class CreateRequestScreenTest {
   @Test
   fun locationMenuExpandsWithInput() {
     composeTestRule.setContent {
-      CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel, "1")
+      CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
     }
 
     composeTestRule.onNodeWithTag("inputRequestAddress").performTextInput("USA")
@@ -136,7 +136,7 @@ class CreateRequestScreenTest {
   @Test
   fun locationSelectionFromDropdown() {
     composeTestRule.setContent {
-      CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel, "1")
+      CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
     }
 
     composeTestRule.onNodeWithTag("inputRequestAddress").performTextInput("USA")
@@ -150,7 +150,7 @@ class CreateRequestScreenTest {
   @Test
   fun serviceTypeDropdown_showsFilteredResults() {
     composeTestRule.setContent {
-      CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel, "1")
+      CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
     }
 
     composeTestRule.onNodeWithTag("inputServiceType").performTextInput("Plumber")
@@ -161,7 +161,7 @@ class CreateRequestScreenTest {
   @Test
   fun serviceTypeDropdown_closesOnSelection() {
     composeTestRule.setContent {
-      CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel, "1")
+      CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
     }
 
     composeTestRule.onNodeWithTag("inputServiceType").performTextInput("Plumber")
@@ -172,7 +172,7 @@ class CreateRequestScreenTest {
   @Test
   fun serviceTypeDropdown_showsNoResultsMessage() {
     composeTestRule.setContent {
-      CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel, "1")
+      CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
     }
 
     composeTestRule.onNodeWithTag("inputServiceType").performTextInput("NonExistentType")
@@ -182,7 +182,7 @@ class CreateRequestScreenTest {
   @Test
   fun serviceTypeDropdown_closesOnFocusLost() {
     composeTestRule.setContent {
-      CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel, "1")
+      CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
     }
 
     composeTestRule.onNodeWithTag("inputServiceType").performTextInput("Plumbing")
@@ -193,7 +193,7 @@ class CreateRequestScreenTest {
   @Test
   fun doesNotSubmitWithInvalidTitle() {
     composeTestRule.setContent {
-      CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel, "1")
+      CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
     }
 
     composeTestRule.onNodeWithTag("inputRequestTitle").performTextClearance()

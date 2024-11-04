@@ -132,17 +132,10 @@ fun SeekerUI(
     }
     composable(Route.MESSAGE) { MessageScreen(navigationActions) }
     composable(Route.CREATE_REQUEST) {
-      user?.let { user ->
-        CreateRequestScreen(
-            navigationActions = navigationActions,
-            requestViewModel = serviceRequestViewModel,
-            userId = user.uid)
-      }
+      CreateRequestScreen(navigationActions, serviceRequestViewModel)
     }
     composable(Route.REQUESTS_OVERVIEW) {
-      user?.let { user ->
-        RequestsOverviewScreen(navigationActions, serviceRequestViewModel, user.uid)
-      }
+      RequestsOverviewScreen(navigationActions, serviceRequestViewModel)
     }
     composable(Route.EDIT_REQUEST) { EditRequestScreen(navigationActions, serviceRequestViewModel) }
     composable(Route.MAP) { SeekerMapScreen(listProviderViewModel, navigationActions) }
