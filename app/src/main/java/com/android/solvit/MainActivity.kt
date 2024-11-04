@@ -74,10 +74,8 @@ fun SolvitApp() {
       viewModel<SeekerProfileViewModel>(factory = SeekerProfileViewModel.Factory)
   val serviceRequestViewModel =
       viewModel<ServiceRequestViewModel>(factory = ServiceRequestViewModel.Factory)
-  val locationViewModel =
-    viewModel<LocationViewModel>(factory = LocationViewModel.Factory)
-  val reviewViewModel =
-    viewModel<ReviewViewModel>(factory = ReviewViewModel.Factory)
+  val locationViewModel = viewModel<LocationViewModel>(factory = LocationViewModel.Factory)
+  val reviewViewModel = viewModel<ReviewViewModel>(factory = ReviewViewModel.Factory)
 
   if (!userRegistered.value) {
     SharedUI(authViewModel, listProviderViewModel, seekerProfileViewModel, locationViewModel)
