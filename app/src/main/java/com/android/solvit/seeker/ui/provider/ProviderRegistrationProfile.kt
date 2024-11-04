@@ -29,6 +29,9 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -47,27 +50,39 @@ import com.android.solvit.R
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.map.Location
+import com.android.solvit.shared.model.map.LocationViewModel
 import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.ui.navigation.NavigationActions
 
+@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun ProviderRegistrationScreen(
     viewModel: ListProviderViewModel = viewModel(factory = ListProviderViewModel.Factory),
     navigationActions: NavigationActions,
+    locationViewModel: LocationViewModel = viewModel(factory = LocationViewModel.Factory),
     authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory)
 ) {
   var fullName by remember { mutableStateOf("") }
   var companyName by remember { mutableStateOf("") }
   var phone by remember { mutableStateOf("") }
-  var location by remember { mutableStateOf("") }
+  var selectedLocation by remember {
+    mutableStateOf(Location(name = "", latitude = 0.0, longitude = 0.0))
+  }
+
+  val locationQuery by locationViewModel.query.collectAsState()
+
+  var showDropdown by remember { mutableStateOf(false) }
+  val locationSuggestions by
+      locationViewModel.locationSuggestions.collectAsState(initial = emptyList<Location?>())
+
   // represent the current authentified user
   val user by authViewModel.user.collectAsState()
 
   // Step tracking: Role, Details, Preferences
   var currentStep by remember { mutableStateOf(1) }
   val scrollState = rememberScrollState()
-  val isFormComplete = fullName.isNotBlank() && phone.isNotBlank() && location.isNotBlank()
+  val isFormComplete = fullName.isNotBlank() && phone.isNotBlank() && locationQuery.isNotBlank()
 
   Scaffold(
       content = {
@@ -150,19 +165,53 @@ fun ProviderRegistrationScreen(
                         unfocusedBorderColor = Color.Gray // Gray outline for unfocused state
                         ))
             Spacer(modifier = Modifier.height(16.dp))
-            // Location
-            OutlinedTextField(
-                value = location,
-                onValueChange = { location = it },
-                label = { Text("Location", color = Color.Black) },
-                placeholder = { Text("Enter your location or business location") },
-                modifier = Modifier.fillMaxWidth().testTag("locationInput"),
-                shape = RoundedCornerShape(12.dp),
-                colors =
-                    TextFieldDefaults.outlinedTextFieldColors(
-                        focusedBorderColor = Color(0xFF00C853), // Green outline for focused state
-                        unfocusedBorderColor = Color.Gray // Gray outline for unfocused state
-                        ))
+
+            // Location Input
+            ExposedDropdownMenuBox(
+                expanded = showDropdown && locationSuggestions.isNotEmpty(),
+                onExpandedChange = { showDropdown = it }) {
+                  OutlinedTextField(
+                      value = locationQuery,
+                      onValueChange = {
+                        locationViewModel.setQuery(it)
+                        showDropdown = true // Show dropdown when user starts typing
+                      },
+                      label = { Text("Location", color = Color.Black) },
+                      placeholder = { Text("Enter an Address or Location") },
+                      modifier = Modifier.menuAnchor().fillMaxWidth().testTag("locationInput"),
+                      singleLine = true,
+                      shape = RoundedCornerShape(12.dp),
+                      colors =
+                          TextFieldDefaults.outlinedTextFieldColors(
+                              focusedBorderColor =
+                                  Color(0xFF28A745), // Green outline for focused state
+                              unfocusedBorderColor = Color.Gray // Gray outline for unfocused state
+                              ))
+
+                  // Dropdown menu for location suggestions
+                  ExposedDropdownMenu(
+                      expanded = showDropdown && locationSuggestions.isNotEmpty(),
+                      onDismissRequest = { showDropdown = false }) {
+                        locationSuggestions.filterNotNull().take(3).forEach { location ->
+                          DropdownMenuItem(
+                              text = {
+                                Text(
+                                    text =
+                                        location.name.take(30) +
+                                            if (location.name.length > 30) "..." else "",
+                                    maxLines = 1)
+                              },
+                              onClick = {
+                                locationViewModel.setQuery(location.name)
+                                selectedLocation =
+                                    location // Set selectedLocation as non-null Location
+                                showDropdown = false // Close dropdown on selection
+                              },
+                              modifier = Modifier.padding(8.dp))
+                        }
+                      }
+                }
+
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
@@ -263,13 +312,14 @@ fun ProviderRegistrationScreen(
             Button(
                 onClick = {
                   // Complete registration and navigate
+                  val loc = selectedLocation
                   val newProviderProfile =
                       Provider(
                           uid = user!!.uid,
                           name = fullName,
                           phone = phone,
                           companyName = companyName,
-                          location = Location(0.0, 0.0, location))
+                          location = loc)
                   viewModel.addProvider(newProviderProfile)
                   authViewModel.registered()
                   // navigationActions.goBack() // Navigate after saving
