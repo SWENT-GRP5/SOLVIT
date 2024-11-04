@@ -1,4 +1,4 @@
-package com.android.solvit.shared.model.request
+package com.android.solvit.seeker.model.request
 
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.service.Services

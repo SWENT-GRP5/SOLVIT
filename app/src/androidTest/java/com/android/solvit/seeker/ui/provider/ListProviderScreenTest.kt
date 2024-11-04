@@ -14,9 +14,9 @@ import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.map.LocationRepository
 import com.android.solvit.shared.model.map.LocationViewModel
-import com.android.solvit.shared.model.provider.Language
-import com.android.solvit.shared.model.provider.Provider
-import com.android.solvit.shared.model.provider.ProviderRepository
+import com.android.solvit.shared.model.language.Language
+import com.android.solvit.provider.model.profile.Provider
+import com.android.solvit.provider.model.profile.ProviderRepository
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.google.firebase.Timestamp

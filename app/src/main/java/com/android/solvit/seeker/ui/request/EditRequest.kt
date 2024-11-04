@@ -13,8 +13,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.map.LocationViewModel
-import com.android.solvit.shared.model.request.ServiceRequest
-import com.android.solvit.shared.model.request.ServiceRequestViewModel
+import com.android.solvit.seeker.model.request.ServiceRequest
+import com.android.solvit.seeker.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.google.firebase.Timestamp

@@ -1,4 +1,4 @@
-package com.android.solvit.seeker.model.service
+package com.android.solvit.shared.model.service
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

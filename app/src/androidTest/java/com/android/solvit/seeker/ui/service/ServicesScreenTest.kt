@@ -6,7 +6,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.navigation.NavController
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
-import com.android.solvit.shared.model.provider.ProviderRepository
+import com.android.solvit.provider.model.profile.ProviderRepository
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
 import org.junit.Before

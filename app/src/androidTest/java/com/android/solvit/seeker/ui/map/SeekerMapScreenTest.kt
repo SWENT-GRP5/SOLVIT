@@ -9,9 +9,9 @@ import androidx.navigation.NavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.shared.model.map.Location
-import com.android.solvit.shared.model.provider.Language
-import com.android.solvit.shared.model.provider.Provider
-import com.android.solvit.shared.model.provider.ProviderRepository
+import com.android.solvit.shared.model.language.Language
+import com.android.solvit.provider.model.profile.Provider
+import com.android.solvit.provider.model.profile.ProviderRepository
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
@@ -59,7 +59,8 @@ class SeekerMapScreenTest {
               description = "Test Description 2",
               languages = listOf(Language.ARABIC, Language.ENGLISH),
               deliveryTime = Timestamp(0, 0),
-              popular = true))
+              popular = true)
+      )
 
   @Before
   fun setUp() {

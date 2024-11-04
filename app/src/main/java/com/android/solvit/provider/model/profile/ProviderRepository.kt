@@ -1,4 +1,4 @@
-package com.android.solvit.shared.model.provider
+package com.android.solvit.provider.model.profile
 
 import com.android.solvit.shared.model.service.Services
 

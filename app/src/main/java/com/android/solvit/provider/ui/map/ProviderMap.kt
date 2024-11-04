@@ -10,7 +10,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.solvit.seeker.ui.navigation.SeekerBottomNavigationMenu
-import com.android.solvit.shared.model.request.ServiceRequestViewModel
+import com.android.solvit.seeker.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.ui.map.MapScreen
 import com.android.solvit.shared.ui.map.MarkerData
 import com.android.solvit.shared.ui.map.RequestLocationPermission

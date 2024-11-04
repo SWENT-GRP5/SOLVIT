@@ -1,4 +1,4 @@
-package com.android.solvit.shared.model.request
+package com.android.solvit.seeker.model.request
 
 import android.net.Uri
 import android.util.Log

@@ -9,8 +9,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
-import com.android.solvit.seeker.ui.provider.ProviderRegistrationScreen
-import com.android.solvit.shared.model.provider.ProviderRepository
+import com.android.solvit.provider.model.profile.ProviderRepository
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
 import org.junit.Before

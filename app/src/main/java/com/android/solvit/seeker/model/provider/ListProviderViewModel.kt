@@ -3,9 +3,9 @@ package com.android.solvit.seeker.model.provider
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.android.solvit.shared.model.provider.Provider
-import com.android.solvit.shared.model.provider.ProviderRepository
-import com.android.solvit.shared.model.provider.ProviderRepositoryFirestore
+import com.android.solvit.provider.model.profile.Provider
+import com.android.solvit.provider.model.profile.ProviderRepository
+import com.android.solvit.provider.model.profile.ProviderRepositoryFirestore
 import com.android.solvit.shared.model.service.Services
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,7 +33,8 @@ class ListProviderViewModel(private val repository: ProviderRepository) : ViewMo
           @Suppress("UNCHECKED_CAST")
           override fun <T : ViewModel> create(modelClass: Class<T>): T {
             return ListProviderViewModel(
-                repository = ProviderRepositoryFirestore(FirebaseFirestore.getInstance()))
+                repository = ProviderRepositoryFirestore(FirebaseFirestore.getInstance())
+            )
                 as T
           }
         }

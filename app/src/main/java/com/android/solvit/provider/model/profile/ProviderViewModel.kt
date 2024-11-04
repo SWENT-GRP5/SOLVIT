@@ -1,16 +1,14 @@
-package com.android.solvit.seeker.model.provider
+package com.android.solvit.provider.model.profile
 
 import com.android.solvit.shared.model.authentication.AuthRepository
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.map.haversineDistance
-import com.android.solvit.shared.model.provider.Provider
-import com.android.solvit.shared.model.provider.ProviderRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 class ProviderViewModel(
-    private val repository: ProviderRepository,
-    private val authRepository: AuthRepository
+  private val repository: ProviderRepository,
+  private val authRepository: AuthRepository
 ) {
   private val _userProvider = MutableStateFlow<Provider?>(null)
   val userProvider: StateFlow<Provider?> = _userProvider
@@ -27,7 +25,8 @@ class ProviderViewModel(
 
   fun distanceTo(startLoc: Location, destLoc: Location): Double {
     return haversineDistance(
-        startLoc.latitude, startLoc.longitude, destLoc.latitude, destLoc.longitude)
+        startLoc.latitude, startLoc.longitude, destLoc.latitude, destLoc.longitude
+    )
   }
 
   fun distanceMatrix(bookings: List<Location>): Array<DoubleArray> {

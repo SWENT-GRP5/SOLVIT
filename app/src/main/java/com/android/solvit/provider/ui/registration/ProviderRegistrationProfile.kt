@@ -1,4 +1,4 @@
-package com.android.solvit.seeker.ui.provider
+package com.android.solvit.provider.ui.registration
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
@@ -47,7 +47,7 @@ import com.android.solvit.R
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.map.Location
-import com.android.solvit.shared.model.provider.Provider
+import com.android.solvit.provider.model.profile.Provider
 import com.android.solvit.shared.ui.navigation.NavigationActions
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")

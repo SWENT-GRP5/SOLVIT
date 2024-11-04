@@ -1,4 +1,4 @@
-package com.android.solvit.shared.model.provider
+package com.android.solvit.provider.model.packages
 
 data class PackageProposal(
     val uid: String,

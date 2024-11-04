@@ -48,9 +48,9 @@ import coil.compose.AsyncImage
 import com.android.solvit.R
 import com.android.solvit.seeker.ui.navigation.SeekerBottomNavigationMenu
 import com.android.solvit.seeker.ui.service.SERVICES_LIST
-import com.android.solvit.shared.model.request.ServiceRequest
-import com.android.solvit.shared.model.request.ServiceRequestStatus
-import com.android.solvit.shared.model.request.ServiceRequestViewModel
+import com.android.solvit.seeker.model.request.ServiceRequest
+import com.android.solvit.seeker.model.request.ServiceRequestStatus
+import com.android.solvit.seeker.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_CUSTOMER
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route

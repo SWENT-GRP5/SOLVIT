@@ -15,10 +15,10 @@ import androidx.navigation.NavController
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.map.LocationRepository
 import com.android.solvit.shared.model.map.LocationViewModel
-import com.android.solvit.shared.model.request.ServiceRequest
-import com.android.solvit.shared.model.request.ServiceRequestRepository
-import com.android.solvit.shared.model.request.ServiceRequestStatus
-import com.android.solvit.shared.model.request.ServiceRequestViewModel
+import com.android.solvit.seeker.model.request.ServiceRequest
+import com.android.solvit.seeker.model.request.ServiceRequestRepository
+import com.android.solvit.seeker.model.request.ServiceRequestStatus
+import com.android.solvit.seeker.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.google.firebase.Timestamp

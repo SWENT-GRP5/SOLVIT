@@ -1,4 +1,4 @@
-package com.android.solvit.seeker.ui.profile
+package com.android.solvit.seeker.ui.registration
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.Image

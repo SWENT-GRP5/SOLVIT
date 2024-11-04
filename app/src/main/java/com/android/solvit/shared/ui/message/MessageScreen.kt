@@ -1,6 +1,6 @@
 // FICHIER A SUPPRIMER QUAND LES MESSAGES SERONT IMPLEMENTES
 
-package com.android.solvit.ui.message
+package com.android.solvit.shared.ui.message
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize

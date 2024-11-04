@@ -42,8 +42,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.PopupProperties
 import coil.compose.AsyncImage
 import com.android.solvit.shared.model.map.Location
-import com.android.solvit.shared.model.request.ServiceRequest
-import com.android.solvit.shared.model.request.ServiceRequestViewModel
+import com.android.solvit.seeker.model.request.ServiceRequest
+import com.android.solvit.seeker.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import java.util.Locale

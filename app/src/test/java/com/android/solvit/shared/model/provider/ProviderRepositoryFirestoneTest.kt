@@ -1,6 +1,8 @@
 package com.android.solvit.shared.model.provider
 
 import androidx.test.core.app.ApplicationProvider
+import com.android.solvit.provider.model.profile.Provider
+import com.android.solvit.provider.model.profile.ProviderRepositoryFirestore
 import com.android.solvit.seeker.model.profile.UserRepository
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.service.Services

@@ -1,6 +1,7 @@
-package com.android.solvit.shared.model.provider
+package com.android.solvit.provider.model.profile
 
 import com.android.solvit.shared.model.map.Location
+import com.android.solvit.shared.model.language.Language
 import com.android.solvit.shared.model.service.Services
 import com.google.firebase.Timestamp
 

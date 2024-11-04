@@ -22,15 +22,15 @@ import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.seeker.ui.map.SeekerMapScreen
 import com.android.solvit.seeker.ui.profile.EditSeekerProfileScreen
 import com.android.solvit.seeker.ui.profile.SeekerProfileScreen
-import com.android.solvit.seeker.ui.profile.SeekerRegistrationScreen
-import com.android.solvit.seeker.ui.provider.ProviderRegistrationScreen
+import com.android.solvit.seeker.ui.registration.SeekerRegistrationScreen
+import com.android.solvit.provider.ui.registration.ProviderRegistrationScreen
 import com.android.solvit.seeker.ui.provider.SelectProviderScreen
 import com.android.solvit.seeker.ui.request.CreateRequestScreen
 import com.android.solvit.seeker.ui.request.EditRequestScreen
 import com.android.solvit.seeker.ui.request.RequestsOverviewScreen
 import com.android.solvit.seeker.ui.service.ServicesScreen
 import com.android.solvit.shared.model.authentication.AuthViewModel
-import com.android.solvit.shared.model.request.ServiceRequestViewModel
+import com.android.solvit.seeker.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.ui.authentication.ForgotPassword
 import com.android.solvit.shared.ui.authentication.OpeningScreen
 import com.android.solvit.shared.ui.authentication.SignInScreen
@@ -40,7 +40,7 @@ import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.navigation.Screen
 import com.android.solvit.shared.ui.theme.SampleAppTheme
-import com.android.solvit.ui.message.MessageScreen
+import com.android.solvit.shared.ui.message.MessageScreen
 import com.android.solvit.ui.requests.ListRequestsFeedScreen
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth

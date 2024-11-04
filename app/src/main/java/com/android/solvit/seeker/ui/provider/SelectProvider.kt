@@ -77,8 +77,8 @@ import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.map.LocationViewModel
 import com.android.solvit.shared.model.map.haversineDistance
-import com.android.solvit.shared.model.provider.Language
-import com.android.solvit.shared.model.provider.Provider
+import com.android.solvit.shared.model.language.Language
+import com.android.solvit.provider.model.profile.Provider
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.map.RequestLocationPermission
 import com.android.solvit.shared.ui.navigation.NavigationActions

@@ -49,9 +49,9 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.android.solvit.R
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
-import com.android.solvit.seeker.model.service.SearchServicesViewModel
+import com.android.solvit.shared.model.service.SearchServicesViewModel
 import com.android.solvit.seeker.ui.navigation.SeekerBottomNavigationMenu
-import com.android.solvit.shared.model.provider.Provider
+import com.android.solvit.provider.model.profile.Provider
 import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_CUSTOMER
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route

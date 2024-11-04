@@ -1,8 +1,8 @@
 package com.android.solvit.seeker.model.provider
 
 import com.android.solvit.shared.model.map.Location
-import com.android.solvit.shared.model.provider.Provider
-import com.android.solvit.shared.model.provider.ProviderRepository
+import com.android.solvit.provider.model.profile.Provider
+import com.android.solvit.provider.model.profile.ProviderRepository
 import com.android.solvit.shared.model.service.Services
 import com.google.firebase.Timestamp
 import org.hamcrest.CoreMatchers

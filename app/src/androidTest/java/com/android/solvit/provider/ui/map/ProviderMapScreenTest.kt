@@ -7,10 +7,10 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.navigation.NavController
 import com.android.solvit.shared.model.map.Location
-import com.android.solvit.shared.model.request.ServiceRequest
-import com.android.solvit.shared.model.request.ServiceRequestRepository
-import com.android.solvit.shared.model.request.ServiceRequestStatus
-import com.android.solvit.shared.model.request.ServiceRequestViewModel
+import com.android.solvit.seeker.model.request.ServiceRequest
+import com.android.solvit.seeker.model.request.ServiceRequestRepository
+import com.android.solvit.seeker.model.request.ServiceRequestStatus
+import com.android.solvit.seeker.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_PROVIDER
 import com.android.solvit.shared.ui.navigation.NavigationActions
@@ -53,7 +53,8 @@ class ProviderMapScreenTest {
               location = Location(10.0, 10.0, "Test Location 2"),
               status = ServiceRequestStatus.PENDING,
               imageUrl = "https://example",
-              dueDate = Timestamp(GregorianCalendar(2022, 12, 31).time)))
+              dueDate = Timestamp(GregorianCalendar(2022, 12, 31).time))
+      )
 
   @Before
   fun setUp() {

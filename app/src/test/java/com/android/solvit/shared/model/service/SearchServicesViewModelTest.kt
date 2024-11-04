@@ -1,7 +1,6 @@
-package com.android.solvit.seeker.model.service
+package com.android.solvit.shared.model.service
 
 import com.android.solvit.seeker.ui.service.SERVICES_LIST
-import com.android.solvit.shared.model.service.Services
 import org.junit.Before
 import org.junit.Test
 
