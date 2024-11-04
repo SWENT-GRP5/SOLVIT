@@ -82,7 +82,7 @@ fun ServicesScreen(
           LazyColumn(modifier = Modifier.fillMaxSize()) {
             item { ShortcutsSection(navigationActions) }
             item { CategoriesSection(searchViewModel, listProviderViewModel, navigationActions) }
-            item { PerformersSection(listProviderViewModel) }
+            item { PerformersSection(listProviderViewModel, navigationActions) }
             item { Spacer(Modifier.size(80.dp)) }
           }
         }
@@ -278,7 +278,10 @@ fun CategoriesSection(
 }
 
 @Composable
-fun PerformersSection(listProviderViewModel: ListProviderViewModel) {
+fun PerformersSection(
+    listProviderViewModel: ListProviderViewModel,
+    navigationActions: NavigationActions
+) {
   val providers by listProviderViewModel.providersList.collectAsState()
   val topProviders = providers.sortedByDescending { it.rating }
   Column(
@@ -297,7 +300,8 @@ fun PerformersSection(listProviderViewModel: ListProviderViewModel) {
             ProviderItem(
                 topProviders[index],
                 onClick = {
-                  /*TODO*/
+                  listProviderViewModel.selectProvider(topProviders[index])
+                  navigationActions.navigateTo(Route.PROVIDER_PROFILE)
                 })
           }
         }
