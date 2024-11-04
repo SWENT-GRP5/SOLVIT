@@ -1,7 +1,9 @@
 package com.android.solvit.shared.ui.authentication
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.widget.Toast
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -48,6 +50,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -78,22 +81,22 @@ fun SignInScreen(
     navigationActions: NavigationActions,
     authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory)
 ) {
+  val configuration = LocalConfiguration.current
+  val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+  val context = LocalContext.current
+
   var email by remember { mutableStateOf("") }
   var password by remember { mutableStateOf("") }
   var passwordVisible by remember { mutableStateOf(false) }
   var isChecked by remember { mutableStateOf(false) }
 
-  val context = LocalContext.current
   val onSuccess: () -> Unit = {
     Toast.makeText(context, "Login successful!", Toast.LENGTH_LONG).show()
     authViewModel.registered()
   }
   val onFailure: () -> Unit = { Toast.makeText(context, "Login Failed!", Toast.LENGTH_LONG).show() }
 
-  val launcher =
-      googleSignInLauncher(
-          authViewModel = authViewModel, onSuccess = onSuccess, onFailure = onFailure)
-
+  val launcher = googleSignInLauncher(authViewModel, onSuccess, onFailure)
   val token = stringResource(R.string.default_web_client_id)
 
   val backgroundColor = Color(0xFFFFFFFF) // White background color
@@ -122,176 +125,350 @@ fun SignInScreen(
             }
       })
 
-  // Main Layout
+  if (isLandscape) {
+    LandscapeLayout(
+        context = context,
+        email = email,
+        onEmailChange = { email = it },
+        password = password,
+        onPasswordChange = { password = it },
+        passwordVisible = passwordVisible,
+        onPasswordVisibilityChange = { passwordVisible = !passwordVisible },
+        isChecked = isChecked,
+        onCheckedChange = { isChecked = it },
+        navigationActions = navigationActions,
+        authViewModel = authViewModel,
+        onSuccess = onSuccess,
+        onFailure = onFailure,
+        launcher = launcher,
+        token = token)
+  } else {
+    PortraitLayout(
+        context = context,
+        email = email,
+        onEmailChange = { email = it },
+        password = password,
+        onPasswordChange = { password = it },
+        passwordVisible = passwordVisible,
+        onPasswordVisibilityChange = { passwordVisible = !passwordVisible },
+        isChecked = isChecked,
+        onCheckedChange = { isChecked = it },
+        navigationActions = navigationActions,
+        authViewModel = authViewModel,
+        onSuccess = onSuccess,
+        onFailure = onFailure,
+        launcher = launcher,
+        token = token)
+  }
+}
+
+@Composable
+fun PortraitLayout(
+    context: Context,
+    email: String,
+    onEmailChange: (String) -> Unit,
+    password: String,
+    onPasswordChange: (String) -> Unit,
+    passwordVisible: Boolean,
+    onPasswordVisibilityChange: () -> Unit,
+    isChecked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    navigationActions: NavigationActions,
+    authViewModel: AuthViewModel,
+    onSuccess: () -> Unit,
+    onFailure: () -> Unit,
+    launcher: ManagedActivityResultLauncher<Intent, ActivityResult>,
+    token: String
+) {
   Column(
       modifier = Modifier.fillMaxSize().padding(16.dp),
       horizontalAlignment = Alignment.CenterHorizontally,
       verticalArrangement = Arrangement.Center) {
-        Image(
-            painter = painterResource(id = R.drawable.sign_in), // Replace with your check vector
-            contentDescription = "Checkmark",
-            modifier = Modifier.size(240.dp).testTag("loginImage"))
-
+        LogoSection()
         Spacer(modifier = Modifier.height(20.dp))
-
-        // Welcome text
-        Text(
-            text = "Welcome!",
-            fontSize = 28.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color(0, 153, 255),
-            modifier = Modifier.testTag("welcomeText"))
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(text = "Sign in to continue", color = Color.Black)
-
+        FormSection(
+            context = context,
+            email = email,
+            onEmailChange = onEmailChange,
+            password = password,
+            onPasswordChange = onPasswordChange,
+            passwordVisible = passwordVisible,
+            onPasswordVisibilityChange = onPasswordVisibilityChange,
+            isChecked = isChecked,
+            onCheckedChange = onCheckedChange,
+            authViewModel = authViewModel,
+            onSuccess = onSuccess,
+            onFailure = onFailure,
+            launcher = launcher,
+            token = token)
         Spacer(modifier = Modifier.height(20.dp))
+        SignUpSection(navigationActions)
+      }
+}
 
-        // Email input
-        OutlinedTextField(
-            value = email,
-            onValueChange = { email = it },
-            label = { Text("Email") },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth().testTag("emailInput"),
-            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Email),
-            leadingIcon = {
-              Icon(
-                  painter = painterResource(id = android.R.drawable.ic_dialog_email),
-                  contentDescription = "Email Icon",
-                  tint = Color(90, 197, 97))
-            },
-            shape = RoundedCornerShape(8.dp),
-            colors =
-                TextFieldDefaults.outlinedTextFieldColors(
-                    focusedBorderColor = Color(0xFF5AC561), // Green color when focused
-                    unfocusedBorderColor = Color(0xFF5AC561) // Green color when not focused
-                    ))
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Password input
-        OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text("Password") },
-            singleLine = true,
-            visualTransformation =
-                if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            leadingIcon = {
-              Icon(Icons.Default.Lock, contentDescription = "Email Icon", tint = Color(90, 197, 97))
-            },
-            trailingIcon = {
-              val image =
-                  if (passwordVisible) painterResource(id = android.R.drawable.ic_menu_view)
-                  else painterResource(id = android.R.drawable.ic_secure)
-
-              IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                Icon(
-                    painter = image,
-                    contentDescription = null,
-                    tint = Color(90, 197, 97),
-                    modifier = Modifier.size(24.dp))
-              }
-            },
-            shape = RoundedCornerShape(8.dp),
-            modifier = Modifier.fillMaxWidth().testTag("password"),
-            colors =
-                TextFieldDefaults.outlinedTextFieldColors(
-                    focusedBorderColor = Color(0xFF5AC561), // Green color when focused
-                    unfocusedBorderColor = Color(0xFF5AC561) // Green color when not focused
-                    ))
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Remember me & Forgot password
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically) {
-              Row(verticalAlignment = Alignment.CenterVertically) {
-                Checkbox(
-                    checked = isChecked,
-                    onCheckedChange = {
-                      isChecked = it
-                      Toast.makeText(context, "Not implemented yet", Toast.LENGTH_LONG).show()
-                    },
-                    modifier = Modifier.size(24.dp),
-                    colors =
-                        CheckboxDefaults.colors(
-                            checkmarkColor = Color.White,
-                            uncheckedColor = Color(90, 197, 97),
-                            checkedColor = Color(90, 197, 97)))
-                Text(text = " Remember me", modifier = Modifier.testTag("rememberMeCheckbox"))
-              }
-
-              ClickableText(
-                  text = AnnotatedString("Forgot password?"),
-                  onClick = {
-                    Toast.makeText(context, "Not implemented yet", Toast.LENGTH_LONG).show()
-                  },
-                  style = TextStyle(color = Color.Gray, textDecoration = TextDecoration.Underline),
-                  modifier = Modifier.testTag("forgotPasswordLink"))
+@Composable
+fun LandscapeLayout(
+    context: Context,
+    email: String,
+    onEmailChange: (String) -> Unit,
+    password: String,
+    onPasswordChange: (String) -> Unit,
+    passwordVisible: Boolean,
+    onPasswordVisibilityChange: () -> Unit,
+    isChecked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    navigationActions: NavigationActions,
+    authViewModel: AuthViewModel,
+    onSuccess: () -> Unit,
+    onFailure: () -> Unit,
+    launcher: ManagedActivityResultLauncher<Intent, ActivityResult>,
+    token: String
+) {
+  Row(
+      modifier = Modifier.fillMaxSize().padding(16.dp),
+      horizontalArrangement = Arrangement.SpaceEvenly,
+      verticalAlignment = Alignment.CenterVertically) {
+        Column(
+            modifier = Modifier.weight(1f),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center) {
+              LogoSection()
+              SignUpSection(navigationActions)
             }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Sign in button
-        Button(
-            onClick = {
-              authViewModel.setEmail(email)
-              authViewModel.setPassword(password)
-              authViewModel.loginWithEmailAndPassword(onSuccess, onFailure)
-            },
-            colors =
-                ButtonDefaults.buttonColors(
-                    containerColor = Color.Transparent // Transparent to show the gradient
-                    ),
-            shape = RoundedCornerShape(25.dp), // Adjust the corner radius as needed
-            modifier =
-                Modifier.fillMaxWidth()
-                    .height(50.dp)
-                    .background(
-                        brush =
-                            Brush.horizontalGradient(
-                                colors =
-                                    listOf(Color(0, 200, 83), Color(0, 153, 255)) // Gradient colors
-                                ),
-                        shape = RoundedCornerShape(25.dp))
-                    .testTag("signInButton")) {
-              Text("Sign in", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+        Column(
+            modifier = Modifier.weight(1f),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center) {
+              FormSection(
+                  context = context,
+                  email = email,
+                  onEmailChange = onEmailChange,
+                  password = password,
+                  onPasswordChange = onPasswordChange,
+                  passwordVisible = passwordVisible,
+                  onPasswordVisibilityChange = onPasswordVisibilityChange,
+                  isChecked = isChecked,
+                  onCheckedChange = onCheckedChange,
+                  authViewModel = authViewModel,
+                  onSuccess = onSuccess,
+                  onFailure = onFailure,
+                  launcher = launcher,
+                  token = token)
             }
+      }
+}
 
-        Spacer(modifier = Modifier.height(16.dp))
+@Composable
+fun LogoSection() {
+  Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    Image(
+        painter = painterResource(id = R.drawable.sign_in),
+        contentDescription = "Checkmark",
+        modifier = Modifier.size(230.dp).testTag("loginImage"))
+    Spacer(modifier = Modifier.height(4.dp))
+    Text(
+        text = "Welcome!",
+        fontSize = 28.sp,
+        fontWeight = FontWeight.Bold,
+        color = Color(0, 153, 255),
+        modifier = Modifier.testTag("welcomeText"))
+    // Spacer(modifier = Modifier.height(4.dp))
+    Text(text = "Sign in to continue", color = Color.Black)
+  }
+}
 
-        Text("OR", color = Color.Gray)
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun FormSection(
+    context: Context,
+    email: String,
+    onEmailChange: (String) -> Unit,
+    password: String,
+    onPasswordChange: (String) -> Unit,
+    passwordVisible: Boolean,
+    onPasswordVisibilityChange: () -> Unit,
+    isChecked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    authViewModel: AuthViewModel,
+    onSuccess: () -> Unit,
+    onFailure: () -> Unit,
+    launcher: ManagedActivityResultLauncher<Intent, ActivityResult>,
+    token: String
+) {
+  val isFormComplete = email.isNotBlank() && password.isNotBlank()
+  val goodFormEmail = email.contains("@") && email.contains(".")
+  val passwordLengthComplete = password.length >= 6
+  // Email input
+  OutlinedTextField(
+      value = email,
+      onValueChange = onEmailChange,
+      label = { Text("Email") },
+      singleLine = true,
+      modifier = Modifier.fillMaxWidth().testTag("emailInput"),
+      keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Email),
+      leadingIcon = {
+        Icon(
+            painter = painterResource(id = android.R.drawable.ic_dialog_email),
+            contentDescription = "Email Icon",
+            tint = Color(90, 197, 97))
+      },
+      shape = RoundedCornerShape(8.dp),
+      colors =
+          TextFieldDefaults.outlinedTextFieldColors(
+              focusedBorderColor = Color(0xFF5AC561), // Green color when focused
+              unfocusedBorderColor = Color(0xFF5AC561) // Green color when not focused
+              ))
 
-        Spacer(modifier = Modifier.height(16.dp))
+  Spacer(modifier = Modifier.height(8.dp))
 
-        // Google sign in button
-        GoogleSignInButton(
-            onSignInClick = {
-              val gso =
-                  GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                      .requestIdToken(token)
-                      .requestEmail()
-                      .build()
-              val googleSignInClient = GoogleSignIn.getClient(context, gso)
-              launcher.launch(googleSignInClient.signInIntent)
-            })
+  // Password input
+  OutlinedTextField(
+      value = password,
+      onValueChange = onPasswordChange,
+      label = { Text("Password") },
+      singleLine = true,
+      visualTransformation =
+          if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+      leadingIcon = {
+        Icon(Icons.Default.Lock, contentDescription = "Email Icon", tint = Color(90, 197, 97))
+      },
+      trailingIcon = {
+        val image =
+            if (passwordVisible) painterResource(id = android.R.drawable.ic_menu_view)
+            else painterResource(id = android.R.drawable.ic_secure)
 
-        Spacer(modifier = Modifier.height(20.dp))
-
-        // New user sign up
-        Row(verticalAlignment = Alignment.CenterVertically) {
-          Text("I'm new user, ", color = Color.Gray)
-          ClickableText(
-              text = AnnotatedString("Sign up"),
-              onClick = { navigationActions.navigateTo(Screen.SIGN_UP) },
-              style = TextStyle(color = Color.Blue, textDecoration = TextDecoration.Underline),
-              modifier = Modifier.testTag("signUpLink"))
+        IconButton(onClick = onPasswordVisibilityChange) {
+          Icon(
+              painter = image,
+              contentDescription = null,
+              tint = Color(90, 197, 97),
+              modifier = Modifier.size(24.dp))
         }
+      },
+      shape = RoundedCornerShape(8.dp),
+      modifier = Modifier.fillMaxWidth().testTag("password"),
+      colors =
+          TextFieldDefaults.outlinedTextFieldColors(
+              focusedBorderColor = Color(0xFF5AC561), // Green color when focused
+              unfocusedBorderColor = Color(0xFF5AC561) // Green color when not focused
+              ))
+
+  Spacer(modifier = Modifier.height(8.dp))
+
+  // Remember me & Forgot password
+  Row(
+      modifier = Modifier.fillMaxWidth(),
+      horizontalArrangement = Arrangement.SpaceBetween,
+      verticalAlignment = Alignment.CenterVertically) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+          Checkbox(
+              checked = isChecked,
+              onCheckedChange = onCheckedChange,
+              modifier = Modifier.size(24.dp),
+              colors =
+                  CheckboxDefaults.colors(
+                      checkmarkColor = Color.White,
+                      uncheckedColor = Color(90, 197, 97),
+                      checkedColor = Color(90, 197, 97)))
+          Text(text = " Remember me", modifier = Modifier.testTag("rememberMeCheckbox"))
+        }
+
+        ClickableText(
+            text = AnnotatedString("Forgot password?"),
+            onClick = { Toast.makeText(context, "Not implemented yet", Toast.LENGTH_LONG).show() },
+            style = TextStyle(color = Color.Gray, textDecoration = TextDecoration.Underline),
+            modifier = Modifier.testTag("forgotPasswordLink"))
+      }
+
+  Spacer(modifier = Modifier.height(16.dp))
+
+  // Sign in button
+  SignInButton(
+      email = email,
+      password = password,
+      isFormComplete = isFormComplete,
+      goodFormEmail = goodFormEmail,
+      passwordLengthComplete = passwordLengthComplete,
+      authViewModel = authViewModel,
+      onSuccess = onSuccess,
+      onFailure = onFailure)
+
+  Spacer(modifier = Modifier.height(4.dp))
+
+  Text("OR", color = Color.Gray)
+
+  Spacer(modifier = Modifier.height(4.dp))
+
+  // Google sign in button
+  GoogleSignInButton(
+      onSignInClick = {
+        val gso =
+            GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(token)
+                .requestEmail()
+                .build()
+        val googleSignInClient = GoogleSignIn.getClient(context, gso)
+        launcher.launch(googleSignInClient.signInIntent)
+      })
+}
+
+@Composable
+fun SignUpSection(navigationActions: NavigationActions) {
+  Row(verticalAlignment = Alignment.CenterVertically) {
+    Text("I'm new user, ", color = Color.Gray)
+    ClickableText(
+        text = AnnotatedString("Sign up"),
+        onClick = { navigationActions.navigateTo(Screen.SIGN_UP) },
+        style = TextStyle(color = Color.Blue, textDecoration = TextDecoration.Underline),
+        modifier = Modifier.testTag("signUpLink"))
+  }
+}
+
+@Composable
+fun SignInButton(
+    email: String,
+    password: String,
+    isFormComplete: Boolean,
+    goodFormEmail: Boolean,
+    passwordLengthComplete: Boolean,
+    authViewModel: AuthViewModel,
+    onSuccess: () -> Unit,
+    onFailure: () -> Unit
+) {
+  val context = LocalContext.current
+
+  Button(
+      onClick = {
+        if (!isFormComplete) {
+          Toast.makeText(context, "Please fill in all required fields", Toast.LENGTH_SHORT).show()
+        } else if (!goodFormEmail) {
+          Toast.makeText(context, "Your email must have \"@\" and \".\"", Toast.LENGTH_SHORT).show()
+        } else if (!passwordLengthComplete) {
+          Toast.makeText(
+                  context, "Your password must have at least 6 characters", Toast.LENGTH_SHORT)
+              .show()
+        } else {
+          authViewModel.setEmail(email)
+          authViewModel.setPassword(password)
+          authViewModel.loginWithEmailAndPassword(onSuccess, onFailure)
+        }
+      },
+      colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+      shape = RoundedCornerShape(25.dp),
+      modifier =
+          Modifier.fillMaxWidth()
+              .height(50.dp)
+              .background(
+                  brush =
+                      if (isFormComplete && goodFormEmail && passwordLengthComplete) {
+                        Brush.horizontalGradient(
+                            colors = listOf(Color(0, 200, 83), Color(0, 153, 255)))
+                      } else {
+                        Brush.horizontalGradient(colors = listOf(Color.Gray, Color.Gray))
+                      },
+                  shape = RoundedCornerShape(25.dp))
+              .testTag("signInButton")) {
+        Text("Sign in", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
       }
 }
 
@@ -300,11 +477,11 @@ fun GoogleSignInButton(onSignInClick: () -> Unit) {
   Button(
       onClick = onSignInClick,
       colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent), // Button color
-      shape = RoundedCornerShape(50), // Circular edges for the button
+      shape = RoundedCornerShape(25.dp), // Circular edges for the button
       border = BorderStroke(1.dp, Color.LightGray),
       modifier =
-          Modifier.padding(8.dp)
-              .height(48.dp) // Adjust height as needed
+          Modifier.fillMaxWidth()
+              .height(50.dp) // Adjust height as needed
               .testTag("googleSignInButton")) {
         Row(
             verticalAlignment = Alignment.CenterVertically,

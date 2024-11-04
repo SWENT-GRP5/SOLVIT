@@ -14,8 +14,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.map.LocationViewModel
 import com.android.solvit.shared.model.request.ServiceRequest
-import com.android.solvit.shared.model.request.ServiceRequestType
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
+import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.google.firebase.Timestamp
 import java.util.Calendar
@@ -50,7 +50,7 @@ fun EditRequestScreen(
   var showDropdownType by remember { mutableStateOf(false) }
   var typeQuery by remember { mutableStateOf(request.type.name) }
   val filteredServiceTypes =
-      ServiceRequestType.entries.filter { it.name.contains(typeQuery, ignoreCase = true) }
+      Services.entries.filter { it.name.contains(typeQuery, ignoreCase = true) }
   var selectedServiceType by remember { mutableStateOf(request.type) }
   var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
   val imageUrl = request.imageUrl

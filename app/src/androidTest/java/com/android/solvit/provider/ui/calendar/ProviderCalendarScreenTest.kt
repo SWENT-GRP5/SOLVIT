@@ -1,7 +1,10 @@
 package com.android.solvit.provider.ui
 
-import androidx.compose.ui.test.*
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeLeft
 import androidx.compose.ui.test.swipeRight
@@ -55,7 +58,9 @@ class ProviderCalendarScreenTest {
   @Test
   fun testDaySelection() {
     // composeTestRule.onNodeWithTag("monthView").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("dayItem_2024-10-17").performClick()
+    val today = java.time.LocalDate.now().toString()
+    val todayTag = "dayItem_$today"
+    composeTestRule.onNodeWithTag(todayTag).performClick()
     composeTestRule.onNodeWithTag("bottomSheetDayView").assertIsDisplayed()
     // composeTestRule.onNodeWithTag("bottomSheet").assertIsDisplayed()
   }

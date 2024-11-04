@@ -119,6 +119,23 @@ class ProviderRepositoryFirestore(private val db: FirebaseFirestore) : ProviderR
     }
   }
 
+  override fun getProvider(
+      userId: String,
+      onSuccess: (Provider?) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    val collectionRef =
+        db.collection(collectionPath).document(userId).get().addOnCompleteListener { task ->
+          if (task.isSuccessful) {
+            val doc = task.result
+            val provider = convertDoc(doc)
+            onSuccess(provider)
+          } else {
+            task.exception?.let { onFailure(it) }
+          }
+        }
+  }
+
   private fun performFirestoreOperation(
       task: Task<Void>,
       onSuccess: () -> Unit,
