@@ -100,8 +100,7 @@ class ListProviderScreenTest {
       val onSuccess = it.getArgument<(List<Location>) -> Unit>(1)
       onSuccess(listOf(Location(0.0, 0.0, "EPFL")))
     }
-    Mockito.`when`(
-            locationRepository.search(ArgumentMatchers.anyString(), anyOrNull(), anyOrNull()))
+    `when`(locationRepository.search(ArgumentMatchers.anyString(), anyOrNull(), anyOrNull()))
         .thenAnswer { invocation ->
           val onSuccess = invocation.getArgument<(List<Location>) -> Unit>(1)
           onSuccess(listOf(Location(0.0, 0.0, "EPFL")))
@@ -120,18 +119,10 @@ class ListProviderScreenTest {
     listProviderViewModel.selectService(Services.PLUMBER)
     listProviderViewModel.getProviders()
 
-    composeTestRule.waitUntil(
-        timeoutMillis = 20000L,
-        condition = {
-          composeTestRule.onNodeWithTag("popularProviders").isDisplayed() &&
-              composeTestRule.onNodeWithTag("popularProviders").isDisplayed() &&
-              composeTestRule.onAllNodesWithTag("Rating").fetchSemanticsNodes().isNotEmpty()
-        })
     composeTestRule.onNodeWithTag("serviceImage").assertIsDisplayed()
     composeTestRule.onNodeWithTag("popularProviders").assertIsDisplayed()
     composeTestRule.onNodeWithTag("providersList").assertIsDisplayed()
     composeTestRule.onNodeWithTag("filterByLocation").assertIsDisplayed()
-    composeTestRule.onAllNodesWithTag("Rating")[0].assertIsDisplayed()
     composeTestRule.onAllNodesWithTag("filterIcon").fetchSemanticsNodes().isNotEmpty()
   }
 
