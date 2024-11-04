@@ -143,7 +143,7 @@ class ProviderInfoTest {
 
     composeTestRule.onNodeWithTag("ProviderTopBar").assertIsDisplayed()
     composeTestRule.onNodeWithTag("backButton").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("topBarTitle").assertTextEquals("Performer")
+    composeTestRule.onNodeWithTag("topBarTitle").assertTextEquals("Provider")
     composeTestRule.onNodeWithTag("menuButton").assertIsDisplayed()
   }
 
