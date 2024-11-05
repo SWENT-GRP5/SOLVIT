@@ -33,20 +33,20 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.Divider
-import androidx.compose.material.TextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -85,6 +85,7 @@ import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.map.RequestLocationPermission
 import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.android.solvit.shared.ui.navigation.Route
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
 import java.util.Locale
@@ -111,7 +112,7 @@ fun SpTopAppBar(
         painter =
             painterResource(
                 id =
-                    ServicesImages().serviceMap.get(selectedService)
+                    ServicesImages().serviceMap[selectedService]
                         ?: R.drawable.error), // TODO Link each service to an image
         contentDescription = "image description",
         contentScale = ContentScale.FillBounds)
@@ -141,7 +142,6 @@ fun SpTopAppBar(
                 style =
                     TextStyle(
                         fontSize = 12.sp,
-                        // fontFamily = FontFamily(Font(R.font.alata)),
                         fontWeight = FontWeight(400),
                         color = Color(0xFF606060),
                     ))
@@ -227,7 +227,6 @@ fun Title(title: String) {
 
 @Composable
 fun Note(note: String = "5") {
-
   Box(
       modifier =
           Modifier.width(46.dp)
@@ -253,7 +252,11 @@ fun Note(note: String = "5") {
 }
 
 @Composable
-fun DisplayPopularProviders(providers: List<Provider>) {
+fun DisplayPopularProviders(
+    providers: List<Provider>,
+    listProviderViewModel: ListProviderViewModel,
+    navigationActions: NavigationActions
+) {
 
   LazyRow(
       modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("popularProviders"),
@@ -262,48 +265,57 @@ fun DisplayPopularProviders(providers: List<Provider>) {
       userScrollEnabled = true,
   ) {
     items(providers.filter { it.popular }) { provider ->
-      Box(modifier = Modifier.clip(RoundedCornerShape(16.dp))) {
-        AsyncImage(
-            modifier = Modifier.width(141.dp).height(172.dp),
-            model = provider.imageUrl,
-            placeholder = painterResource(id = R.drawable.loading),
-            error = painterResource(id = R.drawable.error),
-            contentDescription = "provider image",
-            contentScale = ContentScale.Crop)
-        Box(
-            modifier =
-                Modifier.fillMaxWidth()
-                    .height(50.dp)
-                    .align(Alignment.BottomCenter)
-                    .background(
-                        brush =
-                            Brush.verticalGradient(
-                                colors =
-                                    listOf(
-                                        Color(android.graphics.Color.parseColor("#2A5A52")),
-                                        Color(android.graphics.Color.parseColor("#DBD1B9"))))))
+      Box(
+          modifier =
+              Modifier.clip(RoundedCornerShape(16.dp)).clickable {
+                listProviderViewModel.selectProvider(provider)
+                navigationActions.navigateTo(Route.PROVIDER_PROFILE)
+              }) {
+            AsyncImage(
+                modifier = Modifier.width(141.dp).height(172.dp),
+                model = provider.imageUrl,
+                placeholder = painterResource(id = R.drawable.loading),
+                error = painterResource(id = R.drawable.error),
+                contentDescription = "provider image",
+                contentScale = ContentScale.Crop)
+            Box(
+                modifier =
+                    Modifier.fillMaxWidth()
+                        .height(50.dp)
+                        .align(Alignment.BottomCenter)
+                        .background(
+                            brush =
+                                Brush.verticalGradient(
+                                    colors =
+                                        listOf(
+                                            Color(android.graphics.Color.parseColor("#2A5A52")),
+                                            Color(android.graphics.Color.parseColor("#DBD1B9"))))))
 
-        Row(
-            modifier = Modifier.align(Alignment.BottomStart).padding(8.dp),
-            verticalAlignment = Alignment.CenterVertically) {
-              Text(
-                  text = provider.name.uppercase(),
-                  style =
-                      TextStyle(
-                          fontSize = 16.sp,
-                          fontWeight = FontWeight(400),
-                          color = Color(0xFFFFFFFF),
-                      ))
-              Spacer(Modifier.width(40.dp))
-              Note(provider.rating.toString())
-            }
-      }
+            Row(
+                modifier = Modifier.align(Alignment.BottomStart).padding(8.dp),
+                verticalAlignment = Alignment.CenterVertically) {
+                  Text(
+                      text = provider.name.uppercase(),
+                      style =
+                          TextStyle(
+                              fontSize = 16.sp,
+                              fontWeight = FontWeight(400),
+                              color = Color(0xFFFFFFFF),
+                          ))
+                  Spacer(Modifier.width(40.dp))
+                  Note(provider.rating.toString())
+                }
+          }
     }
   }
 }
 
 @Composable
-fun ListProviders(providers: List<Provider>) {
+fun ListProviders(
+    providers: List<Provider>,
+    listProviderViewModel: ListProviderViewModel,
+    navigationActions: NavigationActions
+) {
   LazyColumn(
       modifier = Modifier.fillMaxWidth().testTag("providersList"),
       verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -313,7 +325,11 @@ fun ListProviders(providers: List<Provider>) {
       Row(
           modifier =
               Modifier.fillMaxWidth()
-                  .background(color = Color(0xFFFFFFFF), shape = RoundedCornerShape(size = 16.dp)),
+                  .background(color = Color(0xFFFFFFFF), shape = RoundedCornerShape(size = 16.dp))
+                  .clickable {
+                    listProviderViewModel.selectProvider(provider)
+                    navigationActions.navigateTo(Route.PROVIDER_PROFILE)
+                  },
           horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.Start)) {
             AsyncImage(
                 modifier = Modifier.width(116.dp).height(85.dp).clip(RoundedCornerShape(12.dp)),
@@ -392,7 +408,7 @@ fun PriceFilter(listProviderViewModel: ListProviderViewModel) {
             val minPriceValue = minPrice.toDoubleOrNull()
             if (maxPriceValue != null && minPriceValue != null && minPriceValue < maxPriceValue) {
               listProviderViewModel.filterProviders(
-                  { prvd -> maxPriceValue >= prvd.price }, "Price")
+                  { provider -> maxPriceValue >= provider.price }, "Price")
             } else {
               listProviderViewModel.filterProviders(
                   filter = { provider -> provider.price >= 0 }, "Price")
@@ -498,13 +514,13 @@ fun LanguageFilterField(list: List<String>, listProviderViewModel: ListProviderV
                     idx,
                     list[idx],
                     listProviderViewModel,
-                    { prvd ->
+                    { provider ->
                       selectedFields
                           .map { u -> Language.valueOf(u.uppercase()) }
-                          .intersect(prvd.languages.toSet())
+                          .intersect(provider.languages.toSet())
                           .isNotEmpty()
                     },
-                    { prvd -> prvd.languages.isNotEmpty() },
+                    { provider -> provider.languages.isNotEmpty() },
                     "Language")
               }) {
             Text(text = list[idx], fontSize = 18.sp, modifier = Modifier.padding(3.dp))
@@ -546,10 +562,10 @@ fun RatingFilterField(list: List<String>, listProviderViewModel: ListProviderVie
                           idx,
                           list[idx],
                           listProviderViewModel,
-                          { prvd ->
-                            selectedFields.map { u -> u.toDouble() }.contains(prvd.rating)
+                          { provider ->
+                            selectedFields.map { u -> u.toDouble() }.contains(provider.rating)
                           },
-                          { prvd -> prvd.rating >= 1.0 },
+                          { provider -> provider.rating >= 1.0 },
                           "Rating")
                     }) {
                   Image(
@@ -717,8 +733,8 @@ fun FilterByLocation(
     locationViewModel: LocationViewModel
 ) {
   // Represent the address user is searching
-  var searchedAdress by remember { mutableStateOf("") }
-  // List of location suggestions given the searched adress
+  var searchedAddress by remember { mutableStateOf("") }
+  // List of location suggestions given the searched address
   val locationSuggestions by locationViewModel.locationSuggestions.collectAsState()
   // List of saved locations of user
   val cachedLocations by seekerProfileViewModel.cachedLocations.collectAsState()
@@ -745,16 +761,16 @@ fun FilterByLocation(
                 .align(Alignment.CenterHorizontally)
                 .background(color = Color(0xFFF5F5F5), shape = RoundedCornerShape(size = 16.dp))) {
           SearchLocBar(
-              searchedAddress = searchedAdress,
+              searchedAddress = searchedAddress,
               onSearchChanged = {
-                searchedAdress = it
-                locationViewModel.setQuery(searchedAdress)
+                searchedAddress = it
+                locationViewModel.setQuery(searchedAddress)
               })
         }
 
     Spacer(Modifier.height(15.dp))
     // Display either saved locations or new location if searching in bar
-    if (searchedAdress.isEmpty()) {
+    if (searchedAddress.isEmpty()) {
       // User Current Location
 
       Text(
@@ -795,7 +811,7 @@ fun FilterByLocation(
                     ))
           }
       // Add the line separator
-      Divider(color = Color.LightGray)
+      HorizontalDivider(color = Color.LightGray)
 
       Spacer(Modifier.height(6.dp))
       Text(
@@ -809,7 +825,7 @@ fun FilterByLocation(
               ))
       LazyColumn(modifier = Modifier.testTag("cachedLocations")) {
         itemsIndexed(cachedLocations) { index, location ->
-          // TODO see the index if it's the first elemn set its background color to the green
+          // TODO see the index if it's the first element set its background color to the green
           LocationSuggestion(
               location,
               index,
@@ -869,9 +885,9 @@ fun SelectProviderScreen(
         Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
           SpFilterBar(display = { displayFilters = true }, listProviderViewModel)
           Title("Popular")
-          DisplayPopularProviders(providers)
+          DisplayPopularProviders(providers, listProviderViewModel, navigationActions)
           Title("See All")
-          ListProviders(providers)
+          ListProviders(providers, listProviderViewModel, navigationActions)
         }
         if (displayFilters) {
           ModalBottomSheet(

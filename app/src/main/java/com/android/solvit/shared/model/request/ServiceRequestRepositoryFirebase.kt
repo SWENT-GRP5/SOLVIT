@@ -114,7 +114,7 @@ class ServiceRequestRepositoryFirebase(
           uid = document.id,
           title = document.getString("title") ?: return null,
           description = document.getString("description") ?: return null,
-          assigneeName = document.getString("assigneeName") ?: return null,
+          userId = document.getString("userId") ?: return null,
           dueDate = document.getTimestamp("dueDate") ?: return null,
           location =
               Location(

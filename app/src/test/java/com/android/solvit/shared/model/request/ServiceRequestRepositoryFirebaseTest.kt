@@ -54,7 +54,7 @@ class ServiceRequestRepositoryFirebaseTest {
           uid = "1",
           title = "Test Request",
           description = "Test Description",
-          assigneeName = "Test Assignee",
+          userId = "1",
           dueDate = Timestamp.now(),
           location = Location(name = "EPFL", latitude = 0.0, longitude = 0.0),
           imageUrl = null,
@@ -161,7 +161,7 @@ class ServiceRequestRepositoryFirebaseTest {
     `when`(mockDocumentSnapshot.id).thenReturn("1")
     `when`(mockDocumentSnapshot.getString("title")).thenReturn("Test Request")
     `when`(mockDocumentSnapshot.getString("description")).thenReturn("Test Description")
-    `when`(mockDocumentSnapshot.getString("assigneeName")).thenReturn("Test Assignee")
+    `when`(mockDocumentSnapshot.getString("userId")).thenReturn("1")
     `when`(mockDocumentSnapshot.getTimestamp("dueDate")).thenReturn(Timestamp.now())
     `when`(mockDocumentSnapshot.getDouble("location.latitude")).thenReturn(0.0)
     `when`(mockDocumentSnapshot.getDouble("location.longitude")).thenReturn(0.0)
@@ -175,6 +175,7 @@ class ServiceRequestRepositoryFirebaseTest {
     // Check that a valid ServiceRequest object is returned
     Assert.assertNotNull(result)
     assert(result?.uid == "1")
+    assert(result?.userId == "1")
     assert(result?.title == "Test Request")
     assert(result?.description == "Test Description")
     assert(result?.location?.name == "EPFL")

@@ -9,7 +9,7 @@ data class ServiceRequest(
     val title: String,
     val type: Services,
     val description: String,
-    val assigneeName: String,
+    val userId: String,
     val dueDate: Timestamp,
     val location: Location?,
     val imageUrl: String?,
