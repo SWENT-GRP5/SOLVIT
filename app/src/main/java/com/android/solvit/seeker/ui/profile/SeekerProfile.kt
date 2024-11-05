@@ -1,6 +1,8 @@
 package com.android.solvit.seeker.ui.profile
 
 import android.annotation.SuppressLint
+import android.content.pm.ActivityInfo
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -37,6 +39,7 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -44,6 +47,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -279,6 +283,14 @@ fun ProfileOptionItem(optionName: String, onClick: () -> Unit = {}) {
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun SeekerProfileScreen(viewModel: SeekerProfileViewModel, navigationActions: NavigationActions) {
+
+  // Lock Orientation to Portrait
+  val context = LocalContext.current
+  DisposableEffect(Unit) {
+    val activity = context as? ComponentActivity
+    activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+    onDispose { activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED }
+  }
   // Collect the user profile from the StateFlow
   val userProfile by viewModel.seekerProfile.collectAsState()
   val scrollState = rememberScrollState()

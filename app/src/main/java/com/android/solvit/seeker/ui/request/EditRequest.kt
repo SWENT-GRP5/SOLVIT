@@ -1,9 +1,12 @@
 package com.android.solvit.seeker.ui.request
 
+import android.content.pm.ActivityInfo
 import android.icu.util.GregorianCalendar
 import android.net.Uri
 import android.widget.Toast
+import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -27,6 +30,13 @@ fun EditRequestScreen(
         viewModel(factory = ServiceRequestViewModel.Factory),
     locationViewModel: LocationViewModel = viewModel(factory = LocationViewModel.Factory)
 ) {
+  // Lock Orientation to Portrait
+  val localContext = LocalContext.current
+  DisposableEffect(Unit) {
+    val activity = localContext as? ComponentActivity
+    activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+    onDispose { activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED }
+  }
   val request = requestViewModel.selectedRequest.collectAsState().value ?: return
   var title by remember { mutableStateOf(request.title) }
   var description by remember { mutableStateOf(request.description) }
@@ -54,7 +64,6 @@ fun EditRequestScreen(
   var selectedServiceType by remember { mutableStateOf(request.type) }
   var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
   val imageUrl = request.imageUrl
-  val localContext = LocalContext.current
 
   RequestScreen(
       navigationActions = navigationActions,
