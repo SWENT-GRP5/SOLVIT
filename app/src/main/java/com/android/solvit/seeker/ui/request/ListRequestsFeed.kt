@@ -231,7 +231,7 @@ fun ListRequests(requests: List<ServiceRequest>) {
                       // Assignee information
                       Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = request.assigneeName,
+                            text = request.userId,
                             fontSize = 15.sp,
                             fontFamily = FontFamily(Font(R.font.roboto)),
                             fontWeight = FontWeight(500),

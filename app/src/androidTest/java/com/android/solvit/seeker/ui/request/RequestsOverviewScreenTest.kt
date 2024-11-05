@@ -41,7 +41,7 @@ class RequestsOverviewScreenTest {
           "title",
           Services.CLEANER,
           "description",
-          "assigneeName",
+          "-1",
           Timestamp(GregorianCalendar(2024, 0, 1).time),
           Location(37.7749, -122.4194, "San Francisco"),
           "imageUrl",

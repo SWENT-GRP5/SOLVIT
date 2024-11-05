@@ -39,7 +39,7 @@ class ProviderMapScreenTest {
               title = "Test Request 1",
               type = Services.PLUMBER,
               description = "Test Description 1",
-              assigneeName = "Assignee 1",
+              userId = "1",
               location = Location(0.0, 0.0, "Test Location 1"),
               status = ServiceRequestStatus.PENDING,
               imageUrl = "https://example",
@@ -49,7 +49,7 @@ class ProviderMapScreenTest {
               title = "Test Request 2",
               type = Services.PLUMBER,
               description = "Test Description 2",
-              assigneeName = "Assignee 2",
+              userId = "2",
               location = Location(10.0, 10.0, "Test Location 2"),
               status = ServiceRequestStatus.PENDING,
               imageUrl = "https://example",
@@ -91,7 +91,6 @@ class ProviderMapScreenTest {
       composeTestRule.onNodeWithTag("requestMarker-${request.uid}").assertIsDisplayed()
       composeTestRule.onNodeWithText(request.title).assertIsDisplayed()
       composeTestRule.onNodeWithText(request.description).assertIsDisplayed()
-      composeTestRule.onNodeWithText(request.assigneeName).assertIsDisplayed()
     }
   }
 

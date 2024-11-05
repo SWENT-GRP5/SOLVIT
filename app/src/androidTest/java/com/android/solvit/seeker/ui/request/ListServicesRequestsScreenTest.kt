@@ -39,7 +39,7 @@ class ListServicesRequestsScreenTest {
           ServiceRequest(
               title = "Bathtub leak",
               description = "I hit my bath too hard and now it's leaking",
-              assigneeName = "Nathan",
+              userId = "1",
               dueDate = Timestamp(Calendar.getInstance().time),
               location =
                   Location(
@@ -54,7 +54,7 @@ class ListServicesRequestsScreenTest {
           ServiceRequest(
               title = "Bathtub leak",
               description = "I hit my bath too hard and now it's leaking",
-              assigneeName = "Nathan",
+              userId = "2",
               dueDate = Timestamp(Calendar.getInstance().time),
               location =
                   Location(

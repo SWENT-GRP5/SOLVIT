@@ -23,7 +23,7 @@ class ServiceRequestViewModelTest {
           uid = "1",
           title = "Test Request",
           description = "Test Description",
-          assigneeName = "Test Assignee",
+          userId = "1",
           dueDate = Timestamp.now(),
           location = Location(name = "EPFL", latitude = 0.0, longitude = 0.0),
           imageUrl = null,

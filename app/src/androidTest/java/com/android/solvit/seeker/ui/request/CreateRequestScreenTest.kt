@@ -28,6 +28,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito
+import org.mockito.Mockito.`when`
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.never
@@ -54,7 +55,7 @@ class CreateRequestScreenTest {
           "title",
           Services.CLEANER,
           "description",
-          "assigneeName",
+          "-1",
           Timestamp(GregorianCalendar(2024, 0, 1).time),
           Location(37.7749, -122.4194, "San Francisco"),
           "imageUrl",
@@ -69,20 +70,19 @@ class CreateRequestScreenTest {
     navController = Mockito.mock(NavController::class.java)
     navigationActions = NavigationActions(navController)
 
-    Mockito.`when`(
-            locationRepository.search(ArgumentMatchers.anyString(), anyOrNull(), anyOrNull()))
+    `when`(locationRepository.search(ArgumentMatchers.anyString(), anyOrNull(), anyOrNull()))
         .thenAnswer { invocation ->
           val onSuccess = invocation.getArgument<(List<Location>) -> Unit>(1)
           onSuccess(locations)
         }
 
-    Mockito.`when`(serviceRequestRepository.saveServiceRequest(any(), any(), any())).thenAnswer {
-        invocation ->
+    `when`(serviceRequestRepository.saveServiceRequest(any(), any(), any())).thenAnswer { invocation
+      ->
       val onSuccess = invocation.getArgument<(ServiceRequest) -> Unit>(1)
       onSuccess(serviceRequest)
     }
 
-    Mockito.`when`(serviceRequestRepository.getNewUid()).thenAnswer { "1" }
+    `when`(serviceRequestRepository.getNewUid()).thenAnswer { "1" }
   }
 
   @Test
