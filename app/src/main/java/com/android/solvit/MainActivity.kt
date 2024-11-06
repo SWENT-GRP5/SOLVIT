@@ -1,5 +1,6 @@
 package com.android.solvit
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -149,6 +150,7 @@ fun SeekerUI(
   }
 }
 
+@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun ProviderUI(
     authViewModel: AuthViewModel,
@@ -157,7 +159,6 @@ fun ProviderUI(
 ) {
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
-  val user by authViewModel.user.collectAsState()
 
   NavHost(navController = navController, startDestination = Route.REQUESTS_FEED) {
     composable(Route.REQUESTS_FEED) {
@@ -166,13 +167,11 @@ fun ProviderUI(
     composable(Route.MAP_OF_SEEKERS) { ProviderMapScreen(navigationActions = navigationActions) }
     composable(Screen.CALENDAR) { ProviderCalendarScreen(navigationActions = navigationActions) }
     composable(Screen.PROFESSIONAL_PROFILE) {
-      user?.let { it1 ->
-        ProfessionalProfileScreen(
-            listProviderViewModel = listProviderViewModel,
-            navigationActions = navigationActions,
-            userId = it1.uid,
-        )
-      }
+      ProfessionalProfileScreen(
+          listProviderViewModel = listProviderViewModel,
+          navigationActions = navigationActions,
+          userId = authViewModel.user.value!!.uid,
+      )
     }
   }
 }
