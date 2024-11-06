@@ -76,7 +76,7 @@ fun MapScreen(userLocation: LatLng?, markers: List<MarkerData>, bottomBar: @Comp
 }
 
 @Composable
-fun MapContent(userLocation: LatLng?, markers: List<MarkerData>, modifier: Modifier = Modifier) {
+fun MapContent(userLocation: LatLng?, markers: List<MarkerData>, modifier: Modifier = Modifier, onMapLoaded: () -> Unit = {}) {
   val context = LocalContext.current
   val cameraPositionState = rememberCameraPositionState()
 
@@ -87,7 +87,8 @@ fun MapContent(userLocation: LatLng?, markers: List<MarkerData>, modifier: Modif
 
   GoogleMap(
       modifier = modifier.fillMaxSize().testTag("googleMap"),
-      cameraPositionState = cameraPositionState) {
+      cameraPositionState = cameraPositionState,
+      onMapLoaded = onMapLoaded) {
         markers.forEach { markerData -> MapMarker(markerData) }
 
         // Display a marker at the user's location if it's available
@@ -118,7 +119,8 @@ fun MapMarker(markerData: MarkerData) {
             modifier =
                 Modifier.clip(RoundedCornerShape(8.dp))
                     .background(Color.White)
-                    .border(1.dp, Color.Black, RoundedCornerShape(8.dp))) {
+                    .border(1.dp, Color.Black, RoundedCornerShape(8.dp))
+                    .testTag(markerData.tag)) {
               Image(
                   markerData.image,
                   contentDescription = null,
@@ -127,17 +129,18 @@ fun MapMarker(markerData: MarkerData) {
                       Modifier.padding(top = 4.dp, start = 6.dp, end = 6.dp)
                           .size(50.dp)
                           .clip(CircleShape)
-                          .border(2.dp, Color.Black, CircleShape))
+                          .border(2.dp, Color.Black, CircleShape)
+                          .testTag(markerData.tag+"Image"))
               Text(
                   maxLines = 1,
                   textAlign = TextAlign.Center,
                   text = markerData.title,
-                  modifier = Modifier.width(60.dp),
+                  modifier = Modifier.width(60.dp).padding(4.dp).testTag(markerData.tag+"Title"),
                   style = MaterialTheme.typography.labelSmall)
               Text(
                   textAlign = TextAlign.Center,
                   text = markerData.snippet,
-                  modifier = Modifier.width(60.dp).padding(4.dp),
+                  modifier = Modifier.width(60.dp).padding(4.dp).testTag(markerData.tag+"Snippet"),
                   style = MaterialTheme.typography.bodySmall)
             }
       }

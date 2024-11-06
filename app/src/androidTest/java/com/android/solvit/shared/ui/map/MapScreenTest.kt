@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -11,12 +12,15 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.tasks.Tasks
+import junit.framework.TestCase.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 @RunWith(AndroidJUnit4::class)
 class MapScreenTest {
@@ -71,11 +75,21 @@ class MapScreenTest {
             location = LatLng(37.7749, -122.4194),
             title = "Test Title",
             snippet = "Test Snippet",
-            tag = "testTag")
+            tag = "testTag",
+            image = ImageBitmap(1, 1),
+            onClick = {}
+        )
 
-    composeTestRule.setContent {
-      MapContent(userLocation = LatLng(37.7749, -122.4194), markers = listOf(markerData))
-    }
+      val countDownLatch = CountDownLatch(1)
+      composeTestRule.setContent {
+          MapContent(LatLng(37.7749, -122.4194), listOf(markerData),
+              onMapLoaded = {
+                  countDownLatch.countDown()
+              },
+          )
+      }
+      val mapLoaded = countDownLatch.await(30, TimeUnit.SECONDS)
+      assertTrue("Map loaded", mapLoaded)
 
     composeTestRule.onNodeWithTag("googleMap").assertIsDisplayed()
   }
