@@ -1,10 +1,13 @@
 package com.android.solvit.seeker.ui.request
 
+import android.content.pm.ActivityInfo
 import android.graphics.Bitmap
 import android.icu.util.GregorianCalendar
 import android.net.Uri
 import android.widget.Toast
+import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -20,7 +23,9 @@ import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.model.utils.loadBitmapFromUri
 import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.google.firebase.Firebase
 import com.google.firebase.Timestamp
+import com.google.firebase.auth.auth
 
 @Composable
 fun CreateRequestScreen(
@@ -29,6 +34,14 @@ fun CreateRequestScreen(
         viewModel(factory = ServiceRequestViewModel.Factory),
     locationViewModel: LocationViewModel = viewModel(factory = LocationViewModel.Factory)
 ) {
+  // Lock Orientation to Portrait
+  val context = LocalContext.current
+  DisposableEffect(Unit) {
+    val activity = context as? ComponentActivity
+    activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+    onDispose { activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED }
+  }
+
   var title by remember { mutableStateOf("") }
   var description by remember { mutableStateOf("") }
   var dueDate by remember { mutableStateOf("") }
@@ -45,6 +58,7 @@ fun CreateRequestScreen(
       Services.entries.filter { it.name.contains(typeQuery, ignoreCase = true) }
   var selectedServiceType by remember { mutableStateOf(Services.OTHER) }
   val localContext = LocalContext.current
+  val userId = Firebase.auth.currentUser?.uid ?: "-1"
 
   RequestScreen(
       navigationActions = navigationActions,
@@ -88,7 +102,7 @@ fun CreateRequestScreen(
                 ServiceRequest(
                     title = title,
                     description = description,
-                    assigneeName = "assignee",
+                    userId = userId,
                     dueDate = Timestamp(calendar.time),
                     location = selectedLocation,
                     status = ServiceRequestStatus.PENDING,

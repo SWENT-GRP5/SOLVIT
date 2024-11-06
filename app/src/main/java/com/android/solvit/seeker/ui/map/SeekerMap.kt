@@ -1,7 +1,10 @@
 package com.android.solvit.seeker.ui.map
 
+import android.content.pm.ActivityInfo
+import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -28,8 +31,16 @@ fun SeekerMapScreen(
     navigationActions: NavigationActions,
     requestLocationPermission: Boolean = true
 ) {
+
   // Get the current context
   val context = LocalContext.current
+  // Lock Orientation to Portrait
+  DisposableEffect(Unit) {
+    val activity = context as? ComponentActivity
+    activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+    onDispose { activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED }
+  }
+
   // Initialize the FusedLocationProviderClient
   val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
   // State to hold the user's location
