@@ -56,7 +56,7 @@ class MainActivity : ComponentActivity() {
     setContent {
       SampleAppTheme {
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-          ZyadApp()
+          SolvitApp()
         }
       }
     }
@@ -179,22 +179,4 @@ fun ProviderUI(
     composable(Route.MAP_OF_SEEKERS) { ProviderMapScreen(navigationActions = navigationActions) }
     composable(Screen.CALENDAR) { ProviderCalendarScreen(navigationActions = navigationActions) }
   }
-}
-
-@Composable
-fun ZyadApp() {
-  // Create necessary view models
-  val serviceRequestViewModel =
-      viewModel<ServiceRequestViewModel>(factory = ServiceRequestViewModel.Factory)
-
-  // Navigation setup
-  val navController = rememberNavController()
-  val navigationActions = NavigationActions(navController)
-  val listProviderViewModel =
-      viewModel<ListProviderViewModel>(factory = ListProviderViewModel.Factory)
-
-  // Only display the CreateRequestScreen
-  // CreateRequestScreen(navigationActions = navigationActions)
-  ListRequestsFeedScreen(navigationActions = navigationActions)
-  // ServicesScreen(navigationActions, listProviderViewModel)
 }
