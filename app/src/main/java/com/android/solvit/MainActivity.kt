@@ -56,7 +56,7 @@ class MainActivity : ComponentActivity() {
     setContent {
       SampleAppTheme {
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-            ZyadApp()
+          ZyadApp()
         }
       }
     }
@@ -181,20 +181,20 @@ fun ProviderUI(
   }
 }
 
-
 @Composable
 fun ZyadApp() {
-    // Create necessary view models
-    val serviceRequestViewModel = viewModel<ServiceRequestViewModel>(factory = ServiceRequestViewModel.Factory)
+  // Create necessary view models
+  val serviceRequestViewModel =
+      viewModel<ServiceRequestViewModel>(factory = ServiceRequestViewModel.Factory)
 
-    // Navigation setup
-    val navController = rememberNavController()
-    val navigationActions = NavigationActions(navController)
-    val listProviderViewModel =
-        viewModel<ListProviderViewModel>(factory = ListProviderViewModel.Factory)
+  // Navigation setup
+  val navController = rememberNavController()
+  val navigationActions = NavigationActions(navController)
+  val listProviderViewModel =
+      viewModel<ListProviderViewModel>(factory = ListProviderViewModel.Factory)
 
-    // Only display the CreateRequestScreen
-    //CreateRequestScreen(navigationActions = navigationActions)
-    ListRequestsFeedScreen(navigationActions = navigationActions)
-    //ServicesScreen(navigationActions, listProviderViewModel)
+  // Only display the CreateRequestScreen
+  // CreateRequestScreen(navigationActions = navigationActions)
+  ListRequestsFeedScreen(navigationActions = navigationActions)
+  // ServicesScreen(navigationActions, listProviderViewModel)
 }

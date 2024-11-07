@@ -49,14 +49,14 @@ fun BottomNavigationMenu(
     onDispose { activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED }
   }
 
-    BoxWithConstraints(
+  BoxWithConstraints(
       modifier =
           Modifier.fillMaxWidth()
               .height(80.dp)
               .background(Color.Transparent)
               .testTag("bottomNavigationMenu"),
       contentAlignment = Alignment.BottomCenter) {
-        val width  = maxWidth
+        val width = maxWidth
         val height = maxHeight
         Canvas(modifier = Modifier.fillMaxWidth().height(60.dp).background(Color.Transparent)) {
           val path =
@@ -91,8 +91,14 @@ fun BottomNavigationMenu(
               val filteredTabList = tabList.filter { it.route != Route.CREATE_REQUEST }
               filteredTabList.forEachIndexed { index, tab ->
                 BottomNavigationItem(
-                    icon = { Icon(tab.icon, contentDescription = null,
-                        tint =  if (tab.route == selectedItem) Color(0xFF0099FF) else Color(0xFFD8D8D8) )},
+                    icon = {
+                      Icon(
+                          tab.icon,
+                          contentDescription = null,
+                          tint =
+                              if (tab.route == selectedItem) Color(0xFF0099FF)
+                              else Color(0xFFD8D8D8))
+                    },
                     selected = tab.route == selectedItem,
                     onClick = { onTabSelect(tab) },
                     modifier = Modifier.testTag(tab.textId))
@@ -100,8 +106,12 @@ fun BottomNavigationMenu(
             }
 
         FloatingActionButton(
-            onClick = { onTabSelect(if (tabList == LIST_TOP_LEVEL_DESTINATION_CUSTOMER)
-                TopLevelDestinations.CREATE_REQUEST else TopLevelDestinations.MYJOBS) },
+            onClick = {
+              onTabSelect(
+                  if (tabList == LIST_TOP_LEVEL_DESTINATION_CUSTOMER)
+                      TopLevelDestinations.CREATE_REQUEST
+                  else TopLevelDestinations.MYJOBS)
+            },
             modifier =
                 Modifier.size(height * 0.85f)
                     .offset(y = (-25).dp)
@@ -111,12 +121,13 @@ fun BottomNavigationMenu(
             shape = CircleShape,
             containerColor = Color(0xFF0099FF)) {
               Icon(
-                  if (tabList == LIST_TOP_LEVEL_DESTINATION_CUSTOMER) Icons.Outlined.Add else Icons.Outlined.CheckCircle,
-                  contentDescription = if (tabList == LIST_TOP_LEVEL_DESTINATION_CUSTOMER) "Add" else "Myjobs",
+                  if (tabList == LIST_TOP_LEVEL_DESTINATION_CUSTOMER) Icons.Outlined.Add
+                  else Icons.Outlined.CheckCircle,
+                  contentDescription =
+                      if (tabList == LIST_TOP_LEVEL_DESTINATION_CUSTOMER) "Add" else "Myjobs",
                   tint = Color.White,
                   modifier = Modifier.size(30.dp))
             }
-
       }
 }
 
