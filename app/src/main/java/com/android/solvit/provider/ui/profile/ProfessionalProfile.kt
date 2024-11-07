@@ -32,6 +32,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.TextUnit
@@ -50,12 +51,12 @@ import com.android.solvit.shared.ui.navigation.Route
 fun ProfessionalProfileScreen(
     listProviderViewModel: ListProviderViewModel =
         viewModel(factory = ListProviderViewModel.Factory),
-    userId: String,
+    userId: String = "",
     navigationActions: NavigationActions
 ) {
   val provider =
       listProviderViewModel.providersList.collectAsState().value.first { it.uid == userId }
-  Column(modifier = Modifier.fillMaxSize().background(Color.White)) {
+  Column(modifier = Modifier.fillMaxSize().background(Color.White).testTag("background")) {
     ProfileHeader(navigationActions = navigationActions, provider = provider)
     VerticalSpacer(10.dp)
     JobsDoneSection()
@@ -81,7 +82,7 @@ fun ProfileHeader(navigationActions: NavigationActions, provider: Provider) {
                     Icon(
                         Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Back",
-                        modifier = Modifier.size(24.dp),
+                        modifier = Modifier.size(24.dp).testTag("backButton"),
                         tint = Color(239, 70, 55))
                   }
                 }
@@ -90,7 +91,10 @@ fun ProfileHeader(navigationActions: NavigationActions, provider: Provider) {
           VerticalSpacer(20.dp)
 
           Box(
-              modifier = Modifier.size(130.dp).background(Color.White, shape = CircleShape),
+              modifier =
+                  Modifier.size(130.dp)
+                      .background(Color.White, shape = CircleShape)
+                      .testTag("profileImage"),
               contentAlignment = Alignment.Center) {
                 AsyncImage(
                     model =
@@ -107,7 +111,8 @@ fun ProfileHeader(navigationActions: NavigationActions, provider: Provider) {
           VerticalSpacer(40.dp)
 
           Text(
-              provider.name,
+              text = provider.name,
+              modifier = Modifier.testTag("professionalName"),
               color = Color.Black,
               fontSize = 24.sp,
               fontWeight = FontWeight.Bold,
@@ -122,13 +127,21 @@ fun ProfileHeader(navigationActions: NavigationActions, provider: Provider) {
           val bodyColor = Color(239, 70, 55)
 
           @Composable
-          fun TitleText(text: String, fontSize: TextUnit = 21.sp) {
-            Text(text = text, color = titleColor, fontSize = fontSize)
+          fun TitleText(text: String, fontSize: TextUnit = 21.sp, testTag: String = "") {
+            Text(
+                text = text,
+                color = titleColor,
+                fontSize = fontSize,
+                modifier = Modifier.testTag(testTag))
           }
 
           @Composable
-          fun BodyText(text: String, fontSize: TextUnit = 15.sp) {
-            Text(text = text, color = bodyColor, fontSize = fontSize)
+          fun BodyText(text: String, fontSize: TextUnit = 15.sp, testTag: String = "") {
+            Text(
+                text = text,
+                color = bodyColor,
+                fontSize = fontSize,
+                modifier = Modifier.testTag(testTag))
           }
 
           Column(modifier = Modifier.align(Alignment.End)) { TitleText("Profile") }
@@ -136,32 +149,33 @@ fun ProfileHeader(navigationActions: NavigationActions, provider: Provider) {
           VerticalSpacer(20.dp)
 
           Column {
-            TitleText("Company name")
-            BodyText(provider.companyName.ifEmpty { "Not provided" })
+            TitleText("Company name", testTag = "companyNameTitle")
+            BodyText(provider.companyName.ifEmpty { "Not provided" }, testTag = "companyName")
           }
 
           Column {
-            TitleText("Profession")
-            BodyText(provider.service.toString())
+            TitleText("Profession", testTag = "professionTitle")
+            BodyText(provider.service.toString(), testTag = "profession")
           }
 
           Column {
-            TitleText("Contact")
-            BodyText(provider.phone)
+            TitleText("Contact", testTag = "contactTitle")
+            BodyText(provider.phone, testTag = "contact")
           }
 
           Column {
-            TitleText("Location")
-            BodyText(provider.location.name)
+            TitleText("Location", testTag = "locationTitle")
+            BodyText(provider.location.name, testTag = "location")
           }
 
           var isOpen by remember { mutableStateOf(true) }
 
           Column {
-            TitleText("Position")
+            TitleText("Position", testTag = "positionTitle")
             Spacer(modifier = Modifier.width(8.dp))
 
             Row(
+                modifier = Modifier.testTag("position"),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically) {
                   Box(
@@ -199,7 +213,7 @@ fun JobsDoneSection() {
         "Jobs done",
         fontWeight = FontWeight.Bold,
         fontSize = 18.sp,
-        modifier = Modifier.align(Alignment.CenterHorizontally))
+        modifier = Modifier.align(Alignment.CenterHorizontally).testTag("jobsDoneTitle"))
     Spacer(modifier = Modifier.height(20.dp))
     Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
       JobItem("Back end")
@@ -217,7 +231,8 @@ fun JobItem(title: String) {
           Modifier.size(80.dp)
               .shadow(4.dp, shape = RoundedCornerShape(12.dp))
               .background(Color.White, shape = RoundedCornerShape(12.dp))
-              .padding(8.dp),
+              .padding(8.dp)
+              .testTag("jobItem"),
       contentAlignment = Alignment.Center) {
         Text(
             text = title,
@@ -232,7 +247,11 @@ fun JobItem(title: String) {
 fun StatsSection(provider: Provider) {
   Column(
       modifier =
-          Modifier.fillMaxWidth().height(400.dp).background(Color(0, 121, 107)).padding(16.dp),
+          Modifier.fillMaxWidth()
+              .height(400.dp)
+              .background(Color(0, 121, 107))
+              .padding(16.dp)
+              .testTag("statsSection"),
       horizontalAlignment = Alignment.Start) {
         Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
           Column(horizontalAlignment = Alignment.Start) {
