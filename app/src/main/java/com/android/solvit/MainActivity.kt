@@ -168,10 +168,7 @@ fun ProviderUI(
     composable(Screen.CALENDAR) { ProviderCalendarScreen(navigationActions = navigationActions) }
     composable(Screen.PROFESSIONAL_PROFILE) {
       ProfessionalProfileScreen(
-          listProviderViewModel = listProviderViewModel,
-          navigationActions = navigationActions,
-          userId = authViewModel.user.value!!.uid,
-      )
+          listProviderViewModel = listProviderViewModel, navigationActions = navigationActions)
     }
   }
 }
