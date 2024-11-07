@@ -4,7 +4,9 @@ import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Surface
@@ -22,7 +24,7 @@ fun GetDirectionsBubble(location: Location, onDismiss: () -> Unit) {
   val context = LocalContext.current
   Dialog(onDismissRequest = onDismiss) {
     Surface(
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(32.dp),
         shadowElevation = 8.dp,
         modifier = Modifier.padding(16.dp)) {
           Column(
@@ -30,7 +32,7 @@ fun GetDirectionsBubble(location: Location, onDismiss: () -> Unit) {
               verticalArrangement = Arrangement.Center,
               horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(text = location.name)
-
+                Spacer(modifier = Modifier.size(16.dp))
                 Button(
                     onClick = {
                       val gmmIntentUri =
