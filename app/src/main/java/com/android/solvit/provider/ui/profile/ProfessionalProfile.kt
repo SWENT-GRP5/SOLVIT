@@ -50,7 +50,7 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 
 @Composable
-fun ProfessionalProfileScreen(
+fun ProviderProfileScreen(
     listProviderViewModel: ListProviderViewModel =
         viewModel(factory = ListProviderViewModel.Factory),
     navigationActions: NavigationActions
@@ -58,8 +58,8 @@ fun ProfessionalProfileScreen(
   val userId = Firebase.auth.currentUser?.uid ?: "-1"
   val provider =
       listProviderViewModel.providersList.collectAsState().value.first { it.uid == userId }
-  Column(modifier = Modifier.fillMaxSize().background(Color.White).testTag("background")) {
-    ProfileHeader(navigationActions = navigationActions, provider = provider)
+  Column(modifier = Modifier.fillMaxSize().background(Color.White)) {
+    ProfileHeader(navigationActions, provider)
     VerticalSpacer(10.dp)
     JobsDoneSection()
     VerticalSpacer(10.dp)
@@ -85,7 +85,7 @@ fun ProfileHeader(navigationActions: NavigationActions, provider: Provider) {
                       modifier = Modifier.testTag("backButton")) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = "GoBackButton",
                             modifier = Modifier.size(24.dp),
                             tint = Color(239, 70, 55))
                       }
