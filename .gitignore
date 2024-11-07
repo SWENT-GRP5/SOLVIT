@@ -29,12 +29,12 @@ replay_pid*
 .vscode/
 **/build
 local.properties
-keystore.properties
 .gradle
 /app/google-services.json
 /app/release
 upload-keystore.jks
 /scraping/firebase_credentials.json
+release-key.jks
 
 # MacOS
 **/.DS_Store
