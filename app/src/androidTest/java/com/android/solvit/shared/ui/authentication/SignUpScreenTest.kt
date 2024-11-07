@@ -107,7 +107,7 @@ class SignUpButtonTest {
     mockkStatic(Toast::class)
     every { Toast.makeText(any(), any<String>(), any()) } answers
         {
-          // Simule une instance Toast pour vérifier les messages
+
           mockk(relaxed = true)
         }
   }
@@ -124,7 +124,7 @@ class SignUpButtonTest {
     }
     composeTestRule.onNodeWithTag("signUpButton").performClick()
 
-    // Vérifie que le toast "Please fill in all required fields" est affiché
+
     verify { Toast.makeText(any(), "Please fill in all required fields", Toast.LENGTH_SHORT) }
   }
 
@@ -140,7 +140,7 @@ class SignUpButtonTest {
     }
     composeTestRule.onNodeWithTag("signUpButton").performClick()
 
-    // Vérifie que le toast "Your email must have '@' and '.'" est affiché
+
     verify { Toast.makeText(any(), "Your email must have \"@\" and \".\"", Toast.LENGTH_SHORT) }
   }
 

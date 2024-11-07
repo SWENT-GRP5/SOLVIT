@@ -204,7 +204,7 @@ fun PortraitLayout(
     token: String
 ) {
   Column(
-      modifier = modifier.padding(16.dp),
+      modifier = modifier.padding(16.dp).testTag("portraitLayout"),
       horizontalAlignment = Alignment.CenterHorizontally,
       verticalArrangement = Arrangement.Center) {
         LogoSection()
@@ -251,11 +251,11 @@ fun LandscapeLayout(
     token: String
 ) {
   Row(
-      modifier = modifier.padding(16.dp),
+      modifier = modifier.padding(16.dp).testTag("landscapeLayout"),
       horizontalArrangement = Arrangement.SpaceEvenly,
       verticalAlignment = Alignment.CenterVertically) {
         Column(
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.weight(1f).testTag("leftColumnLandScape"),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center) {
               LogoSection()
@@ -263,7 +263,7 @@ fun LandscapeLayout(
             }
 
         Column(
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.weight(1f).testTag("rightColumnLandScape"),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center) {
               FormSection(

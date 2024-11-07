@@ -59,7 +59,7 @@ fun OpeningScreenPortrait(navigationActions: NavigationActions) {
               Image(
                   painter = painterResource(id = R.drawable.logosolvit_firstpage),
                   contentDescription = null,
-                  modifier = Modifier.size(200.dp).testTag("appLogo"))
+                  modifier = Modifier.size(200.dp).testTag("appLogoPortrait"))
               Spacer(modifier = Modifier.height(7.dp))
               Text(
                   text =
@@ -78,13 +78,13 @@ fun OpeningScreenPortrait(navigationActions: NavigationActions) {
                                         color = Color(64, 165, 72), fontWeight = FontWeight.Bold)))
                       },
                   fontSize = 60.sp,
-                  modifier = Modifier.testTag("appName"))
+                  modifier = Modifier.testTag("appNamePortrait"))
               Spacer(modifier = Modifier.height(175.dp))
               Text(
                   text = "Your Problem, Our Priority",
                   fontSize = 18.sp,
                   color = Color(102, 102, 102),
-                  modifier = Modifier.testTag("tagline"))
+                  modifier = Modifier.testTag("taglinePortrait"))
               Text(
                   text = "Tap to Continue",
                   fontSize = 18.sp,
@@ -92,7 +92,7 @@ fun OpeningScreenPortrait(navigationActions: NavigationActions) {
                   color = Color(0, 200, 83),
                   modifier =
                       Modifier.clickable { navigationActions.navigateTo(Screen.SIGN_IN) }
-                          .testTag("ctaButton"))
+                          .testTag("ctaButtonPortrait"))
             }
       }
 }
@@ -110,14 +110,13 @@ fun OpeningScreenLandscape(navigationActions: NavigationActions) {
               Image(
                   painter = painterResource(id = R.drawable.logosolvit_firstpage),
                   contentDescription = null,
-                  modifier = Modifier.size(200.dp).testTag("appLogo"))
+                  modifier = Modifier.size(200.dp).testTag("appLogoLandscape"))
 
               // Right Side Texts
               Column(
                   verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.Start) {
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    // App Name with Colored "Solvit"
                     Text(
                         text =
                             buildAnnotatedString {
@@ -137,7 +136,7 @@ fun OpeningScreenLandscape(navigationActions: NavigationActions) {
                                               fontWeight = FontWeight.Bold)))
                             },
                         fontSize = 60.sp,
-                        modifier = Modifier.testTag("appName"))
+                        modifier = Modifier.testTag("appNameLandscape"))
 
                     Spacer(modifier = Modifier.height(16.dp))
 
@@ -146,7 +145,7 @@ fun OpeningScreenLandscape(navigationActions: NavigationActions) {
                         text = "Your Problem, Our Priority",
                         fontSize = 18.sp,
                         color = Color(102, 102, 102),
-                        modifier = Modifier.testTag("tagline"))
+                        modifier = Modifier.testTag("taglineLandscape"))
 
                     Spacer(modifier = Modifier.height(8.dp))
 
@@ -158,7 +157,7 @@ fun OpeningScreenLandscape(navigationActions: NavigationActions) {
                         color = Color(0, 200, 83),
                         modifier =
                             Modifier.clickable { navigationActions.navigateTo(Screen.SIGN_IN) }
-                                .testTag("ctaButton"))
+                                .testTag("ctaButtonLandscape"))
                   }
             }
       }
