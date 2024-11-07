@@ -36,7 +36,6 @@ class SignUpScreenTest {
   fun signUpScreen_testAllTheTest() {
     composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
 
-    // Check if all components are displayed
     composeTestRule.onNodeWithTag("backButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("signUpIllustration").assertIsDisplayed()
     composeTestRule.onNodeWithTag("signUpTitle").assertIsDisplayed()
