@@ -1,6 +1,15 @@
 import java.io.FileInputStream
 import java.util.Properties
 
+allprojects {
+    configurations.all {
+        resolutionStrategy {
+            force("com.google.protobuf:protobuf-java:3.22.3")
+            force("com.google.protobuf:protobuf-javalite:3.22.3")
+        }
+    }
+}
+
 plugins {
     jacoco
     alias(libs.plugins.androidApplication)
@@ -178,6 +187,7 @@ dependencies {
     implementation(libs.firebase.storage.ktx)
     implementation(libs.play.services.location)
     implementation(libs.androidx.navigation.testing)
+    implementation(libs.google.firebase.firestore.ktx)
     testImplementation(libs.testng)
 
 
@@ -228,6 +238,19 @@ dependencies {
 
     // Integration with ViewModels
     implementation(libs.compose.viewmodel)
+
+    implementation(libs.protobuf.javalite)
+    implementation("com.google.firebase:firebase-firestore") {
+        exclude(group = "com.google.protobuf", module = "protobuf-java")
+        exclude(group = "com.google.protobuf", module = "protobuf-javalite")
+    }
+
+    implementation("com.google.firebase:firebase-auth") {
+        exclude(group = "com.google.protobuf", module = "protobuf-java")
+        exclude(group = "com.google.protobuf", module = "protobuf-javalite")
+    }
+
+
 
     // UI Tests
     globalTestImplementation(libs.androidx.junit)
