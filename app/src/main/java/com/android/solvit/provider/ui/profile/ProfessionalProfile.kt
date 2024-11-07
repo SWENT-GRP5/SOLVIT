@@ -78,13 +78,15 @@ fun ProfileHeader(navigationActions: NavigationActions, provider: Provider) {
               horizontalAlignment = Alignment.Start,
               verticalArrangement = Arrangement.Bottom) {
                 Box {
-                  IconButton(onClick = { navigationActions.navigateTo(Route.REQUESTS_FEED) }) {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back",
-                        modifier = Modifier.size(24.dp).testTag("backButton"),
-                        tint = Color(239, 70, 55))
-                  }
+                  IconButton(
+                      onClick = { navigationActions.navigateTo(Route.REQUESTS_FEED) },
+                      modifier = Modifier.testTag("backButton")) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back",
+                            modifier = Modifier.size(24.dp),
+                            tint = Color(239, 70, 55))
+                      }
                 }
               }
 
