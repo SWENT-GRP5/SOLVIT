@@ -1,6 +1,8 @@
 package com.android.solvit.seeker.ui.service
 
 import android.annotation.SuppressLint
+import android.content.pm.ActivityInfo
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -33,6 +35,7 @@ import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -40,6 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -66,6 +70,13 @@ fun ServicesScreen(
     navigationActions: NavigationActions,
     listProviderViewModel: ListProviderViewModel
 ) {
+  // Lock Orientation to Portrait
+  val localContext = LocalContext.current
+  DisposableEffect(Unit) {
+    val activity = localContext as? ComponentActivity
+    activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+    onDispose { activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED }
+  }
 
   val searchViewModel = SearchServicesViewModel()
 
@@ -82,7 +93,7 @@ fun ServicesScreen(
           LazyColumn(modifier = Modifier.fillMaxSize()) {
             item { ShortcutsSection(navigationActions) }
             item { CategoriesSection(searchViewModel, listProviderViewModel, navigationActions) }
-            item { PerformersSection(listProviderViewModel) }
+            item { PerformersSection(listProviderViewModel, navigationActions) }
             item { Spacer(Modifier.size(80.dp)) }
           }
         }
@@ -278,7 +289,10 @@ fun CategoriesSection(
 }
 
 @Composable
-fun PerformersSection(listProviderViewModel: ListProviderViewModel) {
+fun PerformersSection(
+    listProviderViewModel: ListProviderViewModel,
+    navigationActions: NavigationActions
+) {
   val providers by listProviderViewModel.providersList.collectAsState()
   val topProviders = providers.sortedByDescending { it.rating }
   Column(
@@ -297,7 +311,8 @@ fun PerformersSection(listProviderViewModel: ListProviderViewModel) {
             ProviderItem(
                 topProviders[index],
                 onClick = {
-                  /*TODO*/
+                  listProviderViewModel.selectProvider(topProviders[index])
+                  navigationActions.navigateTo(Route.PROVIDER_PROFILE)
                 })
           }
         }

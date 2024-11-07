@@ -1,7 +1,9 @@
 package com.android.solvit.seeker.ui.request
 
 import android.annotation.SuppressLint
+import android.content.pm.ActivityInfo
 import android.widget.Toast
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -27,6 +29,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -56,6 +59,8 @@ import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.theme.LightBlue
 import com.android.solvit.shared.ui.theme.LightOrange
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -65,6 +70,14 @@ fun RequestsOverviewScreen(
     navigationActions: NavigationActions,
     requestViewModel: ServiceRequestViewModel = viewModel(factory = ServiceRequestViewModel.Factory)
 ) {
+
+  // Lock Orientation to Portrait
+  val context = LocalContext.current
+  DisposableEffect(Unit) {
+    val activity = context as? ComponentActivity
+    activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+    onDispose { activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED }
+  }
   Scaffold(
       modifier = Modifier.testTag("requestsOverviewScreen"),
       bottomBar = {
@@ -73,18 +86,20 @@ fun RequestsOverviewScreen(
             tabList = LIST_TOP_LEVEL_DESTINATION_CUSTOMER,
             selectedItem = navigationActions.currentRoute())
       }) {
-        val requests = requestViewModel.requests.collectAsState()
+        val userId = Firebase.auth.currentUser?.uid ?: "-1"
+        val requests =
+            requestViewModel.requests.collectAsState().value.filter { it.userId == userId }
 
         Column {
           TopOrdersSection(navigationActions)
           CategoriesFiltersSection()
-          if (requests.value.isEmpty()) {
+          if (requests.isEmpty()) {
             NoRequestsText()
           } else {
             LazyColumn(
                 modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("requestsList"),
                 verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                  items(requests.value) { request ->
+                  items(requests) { request ->
                     RequestItemRow(
                         request = request,
                         onClick = {
