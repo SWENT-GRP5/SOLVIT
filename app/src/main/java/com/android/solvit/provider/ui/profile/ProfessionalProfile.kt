@@ -156,8 +156,8 @@ fun ProfileHeader(navigationActions: NavigationActions, provider: Provider) {
           }
 
           Column {
-            TitleText("Profession", testTag = "professionTitle")
-            BodyText(provider.service.toString(), testTag = "profession")
+            TitleText("Profession", testTag = "serviceTitle")
+            BodyText(provider.service.toString(), testTag = "service")
           }
 
           Column {
