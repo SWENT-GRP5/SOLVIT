@@ -15,6 +15,4 @@ interface ChatRepository {
       onSuccess: (List<ChatMessage>) -> Unit,
       onFailure: () -> Unit
   )
-
-  fun listenForAllMessages(onSuccess: (List<ChatMessage>) -> Unit, onFailure: () -> Unit)
 }

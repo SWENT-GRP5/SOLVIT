@@ -10,8 +10,6 @@ import kotlinx.coroutines.flow.StateFlow
 
 class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
 
-  private val currentUser = FirebaseAuth.getInstance().currentUser
-
   private var receiverUid: String? = null
   private var chatId: String? = null
 
@@ -21,15 +19,15 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
   private val _allMessages = MutableStateFlow<List<ChatMessage>>(emptyList())
   val allMessages: StateFlow<List<ChatMessage>> = _allMessages
 
-  private
-
   // Create factory
   companion object {
     val Factory: ViewModelProvider.Factory =
         object : ViewModelProvider.Factory {
           @Suppress("UNCHECKED_CAST")
           override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return ChatViewModel(ChatRepositoryFirestore(FirebaseDatabase.getInstance())) as T
+            return ChatViewModel(
+                ChatRepositoryFirestore(FirebaseAuth.getInstance(), FirebaseDatabase.getInstance()))
+                as T
           }
         }
   }
@@ -53,8 +51,6 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
           onFailure = {})
     }
   }
-
-  fun getAllLastMessages() {}
 
   fun getConversation() {
     chatId?.let {
