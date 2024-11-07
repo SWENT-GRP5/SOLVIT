@@ -134,9 +134,8 @@ fun ServiceBookingScreen() {
                                     ) {
                                       Row(
                                           verticalAlignment =
-                                              Alignment
-                                                  .CenterVertically, // Align star and text
-                                                                     // vertically
+                                              Alignment.CenterVertically, // Align star and text
+                                          // vertically
                                           horizontalArrangement =
                                               Arrangement.spacedBy(
                                                   4.dp) // Space between star and rating value
