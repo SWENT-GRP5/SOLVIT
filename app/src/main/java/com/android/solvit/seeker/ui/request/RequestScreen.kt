@@ -35,7 +35,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import com.android.solvit.seeker.ui.navigation.SeekerBottomNavigationMenu
+import com.android.solvit.seeker.ui.navigation.BottomNavigationMenu
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
@@ -82,10 +82,10 @@ fun RequestScreen(
     onDispose { activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED }
   }
   Scaffold(
-      modifier = Modifier.padding(16.dp).testTag("requestScreen"),
+      modifier = Modifier.testTag("requestScreen"),
       bottomBar = {
         if (screenTitle == "Create a new request") {
-          SeekerBottomNavigationMenu(
+          BottomNavigationMenu(
               onTabSelect = { route -> navigationActions.navigateTo(route) },
               tabList = LIST_TOP_LEVEL_DESTINATION_CUSTOMER,
               selectedItem = navigationActions.currentRoute())
