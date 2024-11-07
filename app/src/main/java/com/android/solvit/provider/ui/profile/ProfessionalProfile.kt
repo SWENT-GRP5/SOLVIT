@@ -177,6 +177,7 @@ fun ProfileHeader(navigationActions: NavigationActions, provider: Provider) {
             Spacer(modifier = Modifier.width(8.dp))
 
             Row(
+                //TODO : Stores the value position in memory
                 modifier = Modifier.testTag("position"),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically) {
@@ -210,6 +211,7 @@ fun ProfileHeader(navigationActions: NavigationActions, provider: Provider) {
 
 @Composable
 fun JobsDoneSection() {
+    //TODO : Change the hardcoded value to jobs done by the provider
   Column(modifier = Modifier.fillMaxWidth().background(Color.White).padding(16.dp)) {
     Text(
         "Jobs done",
@@ -265,6 +267,7 @@ fun StatsSection(provider: Provider) {
             Text("Average Rating", fontSize = 10.sp, color = Color.White)
           }
           Column(horizontalAlignment = Alignment.End) {
+              //TODO : Change the hardcoded value to the actual number of jobs completed by the provider
             Text("37", fontSize = 40.sp, color = Color.White, fontWeight = FontWeight.Bold)
             Text("Jobs Completed", fontSize = 10.sp, color = Color.White)
           }
@@ -291,6 +294,7 @@ fun StatsSection(provider: Provider) {
         VerticalSpacer(30.dp)
         Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
           Column(horizontalAlignment = Alignment.Start) {
+              //TODO : Change the hardcoded value to the actual availability of the provider
             Text("Excellent", fontSize = 15.sp, color = Color.White, fontWeight = FontWeight.Bold)
             Text("Availability", fontSize = 10.sp, color = Color.White)
           }
