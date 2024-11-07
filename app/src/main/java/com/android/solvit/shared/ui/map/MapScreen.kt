@@ -38,6 +38,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
@@ -93,7 +94,6 @@ fun MapContent(
     modifier: Modifier = Modifier,
     onMapLoaded: () -> Unit = {}
 ) {
-  val context = LocalContext.current
   val cameraPositionState = rememberCameraPositionState()
 
   // Update camera position when userLocation changes
@@ -138,7 +138,7 @@ fun MapMarker(markerData: MarkerData) {
                     .border(1.dp, Color.Black, RoundedCornerShape(8.dp))
                     .testTag(markerData.tag)) {
               Image(
-                  markerData.image,
+                  markerData.image ?: ImageBitmap.imageResource(R.drawable.empty_profile_img),
                   contentDescription = null,
                   contentScale = ContentScale.Crop,
                   modifier =
@@ -235,6 +235,6 @@ data class MarkerData(
     val title: String, // Name of the marker
     val snippet: String, // Additional info like description
     val tag: String, // Unique identifier for the marker
-    val image: ImageBitmap,
+    val image: ImageBitmap?,
     val onClick: () -> Unit
 )

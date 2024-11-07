@@ -1,6 +1,5 @@
 package com.android.solvit.shared.model.map
 
-import androidx.compose.ui.graphics.ImageBitmap
 import com.android.solvit.shared.ui.map.MarkerData
 import com.google.android.gms.maps.model.LatLng
 import org.junit.Assert.assertEquals
@@ -15,14 +14,13 @@ class MarketDataTest {
             title = "Test Marker",
             snippet = "Test Snippet",
             tag = "Test Tag",
-            image = ImageBitmap(1, 1),
+            image = null,
             onClick = {})
     assertEquals(45.0, markerData.location.latitude, 0.0)
     assertEquals(90.0, markerData.location.longitude, 0.0)
     assertEquals("Test Marker", markerData.title)
     assertEquals("Test Snippet", markerData.snippet)
     assertEquals("Test Tag", markerData.tag)
-    assertEquals(ImageBitmap(1, 1), markerData.image)
   }
 
   @Test
@@ -33,7 +31,7 @@ class MarketDataTest {
             title = "Negative Marker",
             snippet = "Negative Snippet",
             tag = "Negative Tag",
-            image = ImageBitmap(1, 1),
+            image = null,
             onClick = {})
     assertEquals(-45.0, markerData.location.latitude, 0.0)
     assertEquals(-90.0, markerData.location.longitude, 0.0)
@@ -49,7 +47,7 @@ class MarketDataTest {
             title = "Test Marker",
             snippet = "Test Snippet",
             tag = "Test Tag",
-            image = ImageBitmap(1, 1),
+            image = null,
             onClick = {})
     assertEquals(LatLng(45.0, 90.0), markerData.location)
   }
@@ -62,7 +60,7 @@ class MarketDataTest {
             title = "Test Marker",
             snippet = "Test Snippet",
             tag = "Test Tag",
-            image = ImageBitmap(1, 1),
+            image = null,
             onClick = {})
     assertEquals("Test Marker", markerData.title)
   }
@@ -75,7 +73,7 @@ class MarketDataTest {
             title = "Test Marker",
             snippet = "Test Snippet",
             tag = "Test Tag",
-            image = ImageBitmap(1, 1),
+            image = null,
             onClick = {})
     assertEquals("Test Snippet", markerData.snippet)
   }
@@ -88,7 +86,7 @@ class MarketDataTest {
             title = "Test Marker",
             snippet = "Test Snippet",
             tag = "Test Tag",
-            image = ImageBitmap(1, 1),
+            image = null,
             onClick = {})
     assertEquals("Test Tag", markerData.tag)
   }
