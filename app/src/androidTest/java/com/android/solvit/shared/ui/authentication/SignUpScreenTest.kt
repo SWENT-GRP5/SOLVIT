@@ -105,11 +105,7 @@ class SignUpButtonTest {
   fun setup() {
     // Mock the Toast.makeText function to intercept the Toast messages
     mockkStatic(Toast::class)
-    every { Toast.makeText(any(), any<String>(), any()) } answers
-        {
-
-          mockk(relaxed = true)
-        }
+    every { Toast.makeText(any(), any<String>(), any()) } answers { mockk(relaxed = true) }
   }
 
   @Test
@@ -123,7 +119,6 @@ class SignUpButtonTest {
           samePassword = true)
     }
     composeTestRule.onNodeWithTag("signUpButton").performClick()
-
 
     verify { Toast.makeText(any(), "Please fill in all required fields", Toast.LENGTH_SHORT) }
   }
@@ -139,7 +134,6 @@ class SignUpButtonTest {
           samePassword = true)
     }
     composeTestRule.onNodeWithTag("signUpButton").performClick()
-
 
     verify { Toast.makeText(any(), "Your email must have \"@\" and \".\"", Toast.LENGTH_SHORT) }
   }
