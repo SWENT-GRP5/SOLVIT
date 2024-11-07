@@ -87,7 +87,12 @@ fun MapScreen(userLocation: LatLng?, markers: List<MarkerData>, bottomBar: @Comp
 }
 
 @Composable
-fun MapContent(userLocation: LatLng?, markers: List<MarkerData>, modifier: Modifier = Modifier, onMapLoaded: () -> Unit = {}) {
+fun MapContent(
+    userLocation: LatLng?,
+    markers: List<MarkerData>,
+    modifier: Modifier = Modifier,
+    onMapLoaded: () -> Unit = {}
+) {
   val context = LocalContext.current
   val cameraPositionState = rememberCameraPositionState()
 
@@ -141,17 +146,18 @@ fun MapMarker(markerData: MarkerData) {
                           .size(50.dp)
                           .clip(CircleShape)
                           .border(2.dp, Color.Black, CircleShape)
-                          .testTag(markerData.tag+"Image"))
+                          .testTag(markerData.tag + "Image"))
               Text(
                   maxLines = 1,
                   textAlign = TextAlign.Center,
                   text = markerData.title,
-                  modifier = Modifier.width(60.dp).padding(4.dp).testTag(markerData.tag+"Title"),
+                  modifier = Modifier.width(60.dp).padding(4.dp).testTag(markerData.tag + "Title"),
                   style = MaterialTheme.typography.labelSmall)
               Text(
                   textAlign = TextAlign.Center,
                   text = markerData.snippet,
-                  modifier = Modifier.width(60.dp).padding(4.dp).testTag(markerData.tag+"Snippet"),
+                  modifier =
+                      Modifier.width(60.dp).padding(4.dp).testTag(markerData.tag + "Snippet"),
                   style = MaterialTheme.typography.bodySmall)
             }
       }
