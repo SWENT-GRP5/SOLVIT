@@ -30,10 +30,7 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
@@ -52,13 +49,13 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.solvit.R
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
+import com.android.solvit.seeker.ui.request.LocationDropdown
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.map.LocationViewModel
 import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.ui.navigation.NavigationActions
 
-@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun ProviderRegistrationScreen(
@@ -80,9 +77,8 @@ fun ProviderRegistrationScreen(
   var companyName by remember { mutableStateOf("") }
   var phone by remember { mutableStateOf("") }
   var selectedLocation by remember {
-    mutableStateOf(Location(name = "", latitude = 0.0, longitude = 0.0))
+    mutableStateOf<Location?>(null)
   }
-
   val locationQuery by locationViewModel.query.collectAsState()
 
   var showDropdown by remember { mutableStateOf(false) }
@@ -95,10 +91,10 @@ fun ProviderRegistrationScreen(
   // Step tracking: Role, Details, Preferences
   var currentStep by remember { mutableStateOf(1) }
   val scrollState = rememberScrollState()
-  val isFormComplete = fullName.isNotBlank() && phone.isNotBlank() && locationQuery.isNotBlank()
+  val isFormComplete = fullName.isNotBlank() && phone.isNotBlank() && selectedLocation != null
 
   Scaffold(
-      content = {
+      content = { paddingValues ->
         Column(modifier = Modifier.fillMaxSize().padding(16.dp).verticalScroll(scrollState)) {
           Row(
               modifier = Modifier.fillMaxWidth(),
@@ -107,7 +103,7 @@ fun ProviderRegistrationScreen(
                 // Back Button
                 IconButton(
                     onClick = { navigationActions.goBack() }, Modifier.testTag("goBackButton")) {
-                      Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.Black)
+                      Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.Black)
                     }
                 Spacer(modifier = Modifier.width(8.dp))
 
@@ -179,51 +175,15 @@ fun ProviderRegistrationScreen(
                         ))
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Location Input
-            ExposedDropdownMenuBox(
-                expanded = showDropdown && locationSuggestions.isNotEmpty(),
-                onExpandedChange = { showDropdown = it }) {
-                  OutlinedTextField(
-                      value = locationQuery,
-                      onValueChange = {
-                        locationViewModel.setQuery(it)
-                        showDropdown = true // Show dropdown when user starts typing
-                      },
-                      label = { Text("Location", color = Color.Black) },
-                      placeholder = { Text("Enter an Address or Location") },
-                      modifier = Modifier.menuAnchor().fillMaxWidth().testTag("locationInput"),
-                      singleLine = true,
-                      shape = RoundedCornerShape(12.dp),
-                      colors =
-                          TextFieldDefaults.outlinedTextFieldColors(
-                              focusedBorderColor =
-                                  Color(0xFF28A745), // Green outline for focused state
-                              unfocusedBorderColor = Color.Gray // Gray outline for unfocused state
-                              ))
-
-                  // Dropdown menu for location suggestions
-                  ExposedDropdownMenu(
-                      expanded = showDropdown && locationSuggestions.isNotEmpty(),
-                      onDismissRequest = { showDropdown = false }) {
-                        locationSuggestions.filterNotNull().take(3).forEach { location ->
-                          DropdownMenuItem(
-                              text = {
-                                Text(
-                                    text =
-                                        location.name.take(30) +
-                                            if (location.name.length > 30) "..." else "",
-                                    maxLines = 1)
-                              },
-                              onClick = {
-                                locationViewModel.setQuery(location.name)
-                                selectedLocation =
-                                    location // Set selectedLocation as non-null Location
-                                showDropdown = false // Close dropdown on selection
-                              },
-                              modifier = Modifier.padding(8.dp).testTag("locationResult"))
-                        }
-                      }
-                }
+            LocationDropdown(
+                locationQuery = locationQuery,
+                onLocationQueryChange = { locationViewModel.setQuery(it) },
+                showDropdownLocation = showDropdown,
+                onShowDropdownLocationChange = { showDropdown = it },
+                locationSuggestions = locationSuggestions.filterNotNull(),
+                onLocationSelected = { selectedLocation = it },
+                requestLocation = null
+            )
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -325,7 +285,7 @@ fun ProviderRegistrationScreen(
             Button(
                 onClick = {
                   // Complete registration and navigate
-                  val loc = selectedLocation
+                  val loc = selectedLocation?: Location(0.0, 0.0, "")
                   val newProviderProfile =
                       Provider(
                           uid = user!!.uid,

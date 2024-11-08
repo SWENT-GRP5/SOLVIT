@@ -12,6 +12,7 @@ class NominatimLocationRepository(private val client: OkHttpClient) : LocationRe
     val encodedQuery = URLEncoder.encode(query, "UTF-8")
     val request =
         okhttp3.Request.Builder()
+            .addHeader("User-Agent", "SolvitAppEPFL")
             .url("https://nominatim.openstreetmap.org/search?format=json&q=$encodedQuery")
             .build()
 
