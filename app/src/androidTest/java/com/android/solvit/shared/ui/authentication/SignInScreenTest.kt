@@ -1,7 +1,10 @@
 package com.android.solvit.shared.ui.authentication
 
+import android.content.pm.ActivityInfo
 import android.widget.Toast
+import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -13,7 +16,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import com.google.android.gms.common.SignInButton
 import com.google.firebase.Firebase
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.GoogleAuthProvider
@@ -27,7 +29,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito
+import org.mockito.Mockito.mock
 
 @RunWith(AndroidJUnit4::class)
 class SignInScreenTest {
@@ -35,7 +37,7 @@ class SignInScreenTest {
   @get:Rule val composeTestRule = createComposeRule()
   @get:Rule val intentsTestRule = IntentsRule()
 
-  private val mockNavigationActions = Mockito.mock(NavigationActions::class.java)
+  private val mockNavigationActions = mock(NavigationActions::class.java)
 
   @Test
   fun testSignInScreen_displaysAllComponents() {
@@ -52,6 +54,7 @@ class SignInScreenTest {
     composeTestRule.onNodeWithTag("signInButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("googleSignInButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("signUpLink").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("portraitLayout").assertIsDisplayed()
   }
 
   @Test
@@ -110,11 +113,7 @@ class SignInButtonTest {
   fun setup() {
     // Mock the Toast.makeText function to intercept the Toast messages
     mockkStatic(Toast::class)
-    every { Toast.makeText(any(), any<String>(), any()) } answers
-        {
-          // Simule une instance Toast pour vérifier les messages
-          mockk(relaxed = true)
-        }
+    every { Toast.makeText(any(), any<String>(), any()) } answers { mockk(relaxed = true) }
   }
 
   @Test
@@ -195,5 +194,28 @@ class SignInButtonTest {
     verify { authViewModel.setEmail("test@example.com") }
     verify { authViewModel.setPassword("password123") }
     verify { authViewModel.loginWithEmailAndPassword(onSuccess, onFailure) }
+  }
+}
+
+class SignInScreenLandscapeTest {
+
+  @get:Rule val composeTestRule = createAndroidComposeRule<ComponentActivity>()
+
+  private val mockNavigationActions = mock(NavigationActions::class.java)
+
+  @Before
+  fun setUp() {
+    composeTestRule.activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+  }
+
+  @Test
+  fun testSignInScreenLandscape_displaysAllComponents() {
+
+    composeTestRule.setContent { SignInScreen(mockNavigationActions) }
+
+    // Test the display of UI components
+    composeTestRule.onNodeWithTag("landscapeLayout").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("leftColumnLandScape").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("rightColumnLandScape").assertIsDisplayed()
   }
 }

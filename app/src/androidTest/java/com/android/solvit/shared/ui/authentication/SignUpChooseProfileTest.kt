@@ -23,7 +23,7 @@ class SignUpChooseProfileTest {
   fun signUpChooseProfile_displaysAllComponents() {
     composeTestRule.setContent { SignUpChooseProfile(mockNavigationActions) }
 
-    composeTestRule.onNodeWithTag("backButton").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("backButton", useUnmergedTree = true).assertIsDisplayed()
     composeTestRule.onNodeWithTag("roleIllustration").assertIsDisplayed()
     composeTestRule.onNodeWithTag("signUpAsTitle").assertIsDisplayed()
     composeTestRule.onNodeWithTag("customerButton").assertIsDisplayed()
@@ -35,7 +35,7 @@ class SignUpChooseProfileTest {
   fun signUpChooseProfile_performClick() {
     composeTestRule.setContent { SignUpChooseProfile(mockNavigationActions) }
 
-    composeTestRule.onNodeWithTag("backButton").performClick()
+    composeTestRule.onNodeWithTag("backButton", useUnmergedTree = true).performClick()
     composeTestRule.onNodeWithTag("customerButton").performClick()
     composeTestRule.onNodeWithTag("professionalButton").performClick()
     composeTestRule.onNodeWithTag("learnMoreLink").performClick()
