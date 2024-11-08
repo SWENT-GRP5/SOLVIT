@@ -1,5 +1,6 @@
 package com.android.solvit.seeker.ui.provider
 
+
 import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
 import androidx.activity.ComponentActivity
@@ -27,17 +28,20 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
+import androidx.compose.material3.Text
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -56,10 +60,11 @@ import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.map.LocationViewModel
 import com.android.solvit.shared.model.provider.Provider
+import com.android.solvit.shared.ui.authentication.GoBackButton
 import com.android.solvit.shared.ui.navigation.NavigationActions
 
-@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProviderRegistrationScreen(
     viewModel: ListProviderViewModel = viewModel(factory = ListProviderViewModel.Factory),
@@ -89,31 +94,35 @@ fun ProviderRegistrationScreen(
   val locationSuggestions by
       locationViewModel.locationSuggestions.collectAsState(initial = emptyList<Location?>())
 
-  // represent the current authentified user
+  // represent the current authenticated user
   val user by authViewModel.user.collectAsState()
 
   // Step tracking: Role, Details, Preferences
-  var currentStep by remember { mutableStateOf(1) }
+  var currentStep by remember { mutableIntStateOf(1) }
   val scrollState = rememberScrollState()
+  val backgroundColor = Color(0xFFFFFFFF)
   val isFormComplete = fullName.isNotBlank() && phone.isNotBlank() && locationQuery.isNotBlank()
 
   Scaffold(
+      topBar = {
+        TopAppBar(
+            title = {
+              com.android.solvit.seeker.ui.profile.Stepper(
+                  currentStep = currentStep, isFormComplete)
+            },
+            navigationIcon = {
+              if (currentStep > 1) {
+                IconButton(onClick = { currentStep -= 1 }) {
+                  Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
+                }
+              } else {
+                GoBackButton(navigationActions)
+              }
+            },
+            colors = TopAppBarDefaults.topAppBarColors(containerColor = backgroundColor))
+      },
       content = {
         Column(modifier = Modifier.fillMaxSize().padding(16.dp).verticalScroll(scrollState)) {
-          Row(
-              modifier = Modifier.fillMaxWidth(),
-              horizontalArrangement = Arrangement.SpaceBetween,
-              verticalAlignment = Alignment.CenterVertically) {
-                // Back Button
-                IconButton(
-                    onClick = { navigationActions.goBack() }, Modifier.testTag("goBackButton")) {
-                      Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.Black)
-                    }
-                Spacer(modifier = Modifier.width(8.dp))
-
-                Stepper(currentStep = currentStep, isFormComplete)
-              }
-
           Spacer(modifier = Modifier.height(16.dp))
 
           if (currentStep == 1) {
@@ -236,8 +245,7 @@ fun ProviderRegistrationScreen(
                     Modifier.fillMaxWidth().height(60.dp).testTag("completeRegistrationButton"),
                 enabled = isFormComplete,
                 shape = RoundedCornerShape(12.dp),
-                colors =
-                    ButtonDefaults.buttonColors(backgroundColor = Color(0xFF28A745)) // Green button
+                colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF28A745)) // Green
                 ) {
                   Text("Complete registration", color = Color.White)
                 }

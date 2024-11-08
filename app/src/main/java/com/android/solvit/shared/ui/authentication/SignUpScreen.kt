@@ -1,5 +1,6 @@
 package com.android.solvit.shared.ui.authentication
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.widget.Toast
@@ -74,6 +75,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import kotlinx.coroutines.launch
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SignUpScreen(
@@ -111,8 +113,8 @@ fun SignUpScreen(
             colors = TopAppBarDefaults.topAppBarColors(containerColor = backgroundColor),
             modifier = Modifier.testTag("backButton"))
       },
-      content = { padding ->
-        Column(
+      content = {
+          Column(
             modifier =
                 Modifier.fillMaxSize()
                     .background(backgroundColor)

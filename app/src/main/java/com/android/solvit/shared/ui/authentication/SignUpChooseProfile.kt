@@ -10,11 +10,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.solvit.R
+import com.android.solvit.seeker.ui.profile.Stepper
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
@@ -67,24 +68,21 @@ fun SignUpChooseProfile(
   Scaffold(
       topBar = {
         TopAppBar(
-            title = { Text("") },
+            title = { Stepper(currentStep = 1, isFormComplete = false) },
             navigationIcon = { GoBackButton(navigationActions) },
             colors = TopAppBarDefaults.topAppBarColors(containerColor = backgroundColor))
       },
       content = { padding ->
         Column(
             modifier =
-                Modifier.fillMaxWidth()
-                    .background(backgroundColor)
+                Modifier.background(backgroundColor)
+                    .padding(padding)
+                    .fillMaxSize()
                     .padding(16.dp)
                     .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top) {
-              VerticalSpacer(50.dp)
-
-              Stepper(currentStep = 1, isFormComplete = false)
-
-              VerticalSpacer(height = 30.dp)
+              VerticalSpacer(80.dp)
 
               Image(
                   painter = painterResource(id = R.drawable.sign_up_choose_profile_logo),
@@ -167,25 +165,6 @@ fun ButtonCustomerProvider(
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(text = description, fontSize = 12.sp, color = Color.Gray, textAlign = TextAlign.Center)
-      }
-}
-
-@Composable
-fun Stepper(currentStep: Int, isFormComplete: Boolean) {
-  val stepLabels = listOf("Role", "Details", "Preferences")
-  Row(
-      modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-      horizontalArrangement = Arrangement.SpaceBetween,
-      verticalAlignment = Alignment.CenterVertically) {
-        stepLabels.forEachIndexed { index, label ->
-          StepCircle(
-              stepNumber = index + 1,
-              isCompleted = (index == 0 && isFormComplete) || currentStep > index + 1,
-              label = label)
-          if (index < stepLabels.size - 1) {
-            Spacer(modifier = Modifier.width(8.dp))
-          }
-        }
       }
 }
 
