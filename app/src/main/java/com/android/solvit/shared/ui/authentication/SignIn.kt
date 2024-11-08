@@ -21,9 +21,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Lock
@@ -72,6 +74,7 @@ import com.android.solvit.shared.ui.navigation.Screen
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @SuppressLint("InvalidColorHexValue")
@@ -105,65 +108,85 @@ fun SignInScreen(
       topBar = {
         TopAppBar(
             title = { Text("") },
-            navigationIcon = {
-              IconButton(onClick = { navigationActions.goBack() }) {
-                Icon(
-                    Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "goBackButton",
-                    modifier = Modifier.testTag("backButton"))
-              }
-            },
+            navigationIcon = { GoBackButton(navigationActions) },
             colors = TopAppBarDefaults.topAppBarColors(containerColor = backgroundColor),
             modifier = Modifier.testTag("backButton"))
       },
       content = { padding ->
-        Column(
-            modifier = Modifier.fillMaxSize().padding(padding).background(backgroundColor),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center) {
-              // Your existing content here
-            }
-      })
+        val modifier =
+            Modifier.fillMaxSize()
+                .padding(padding)
+                .background(backgroundColor)
+                .verticalScroll(rememberScrollState())
 
-  if (isLandscape) {
-    LandscapeLayout(
-        context = context,
-        email = email,
-        onEmailChange = { email = it },
-        password = password,
-        onPasswordChange = { password = it },
-        passwordVisible = passwordVisible,
-        onPasswordVisibilityChange = { passwordVisible = !passwordVisible },
-        isChecked = isChecked,
-        onCheckedChange = { isChecked = it },
-        navigationActions = navigationActions,
-        authViewModel = authViewModel,
-        onSuccess = onSuccess,
-        onFailure = onFailure,
-        launcher = launcher,
-        token = token)
-  } else {
-    PortraitLayout(
-        context = context,
-        email = email,
-        onEmailChange = { email = it },
-        password = password,
-        onPasswordChange = { password = it },
-        passwordVisible = passwordVisible,
-        onPasswordVisibilityChange = { passwordVisible = !passwordVisible },
-        isChecked = isChecked,
-        onCheckedChange = { isChecked = it },
-        navigationActions = navigationActions,
-        authViewModel = authViewModel,
-        onSuccess = onSuccess,
-        onFailure = onFailure,
-        launcher = launcher,
-        token = token)
-  }
+        if (isLandscape) {
+          LandscapeLayout(
+              modifier = modifier,
+              context = context,
+              email = email,
+              onEmailChange = { email = it },
+              password = password,
+              onPasswordChange = { password = it },
+              passwordVisible = passwordVisible,
+              onPasswordVisibilityChange = { passwordVisible = !passwordVisible },
+              isChecked = isChecked,
+              onCheckedChange = { isChecked = it },
+              navigationActions = navigationActions,
+              authViewModel = authViewModel,
+              onSuccess = onSuccess,
+              onFailure = onFailure,
+              launcher = launcher,
+              token = token,
+          )
+        } else {
+          PortraitLayout(
+              modifier = modifier,
+              context = context,
+              email = email,
+              onEmailChange = { email = it },
+              password = password,
+              onPasswordChange = { password = it },
+              passwordVisible = passwordVisible,
+              onPasswordVisibilityChange = { passwordVisible = !passwordVisible },
+              isChecked = isChecked,
+              onCheckedChange = { isChecked = it },
+              navigationActions = navigationActions,
+              authViewModel = authViewModel,
+              onSuccess = onSuccess,
+              onFailure = onFailure,
+              launcher = launcher,
+              token = token,
+          )
+        }
+      })
+}
+
+@Composable
+fun GoBackButton(navigationActions: NavigationActions) {
+  var canGoBack by remember { mutableStateOf(true) }
+  val coroutineScope = rememberCoroutineScope()
+  IconButton(
+      onClick = {
+        if (canGoBack) {
+          canGoBack = false
+          navigationActions.goBack()
+          coroutineScope.launch {
+            delay(500)
+            canGoBack = true
+          }
+        }
+      },
+      enabled = canGoBack) {
+        Icon(
+            Icons.AutoMirrored.Filled.ArrowBack,
+            contentDescription = "goBackButton",
+            modifier = Modifier.testTag("backButton"))
+      }
 }
 
 @Composable
 fun PortraitLayout(
+    modifier: Modifier,
     context: Context,
     email: String,
     onEmailChange: (String) -> Unit,
@@ -181,7 +204,7 @@ fun PortraitLayout(
     token: String
 ) {
   Column(
-      modifier = Modifier.fillMaxSize().padding(16.dp),
+      modifier = modifier.padding(16.dp).testTag("portraitLayout"),
       horizontalAlignment = Alignment.CenterHorizontally,
       verticalArrangement = Arrangement.Center) {
         LogoSection()
@@ -203,12 +226,14 @@ fun PortraitLayout(
             token = token,
             navigationActions = navigationActions)
         Spacer(modifier = Modifier.height(20.dp))
+
         SignUpSection(navigationActions)
       }
 }
 
 @Composable
 fun LandscapeLayout(
+    modifier: Modifier,
     context: Context,
     email: String,
     onEmailChange: (String) -> Unit,
@@ -226,18 +251,19 @@ fun LandscapeLayout(
     token: String
 ) {
   Row(
-      modifier = Modifier.fillMaxSize().padding(16.dp),
+      modifier = modifier.padding(16.dp).testTag("landscapeLayout"),
       horizontalArrangement = Arrangement.SpaceEvenly,
       verticalAlignment = Alignment.CenterVertically) {
         Column(
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.weight(1f).testTag("leftColumnLandScape"),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center) {
               LogoSection()
               SignUpSection(navigationActions)
             }
+
         Column(
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.weight(1f).testTag("rightColumnLandScape"),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center) {
               FormSection(
