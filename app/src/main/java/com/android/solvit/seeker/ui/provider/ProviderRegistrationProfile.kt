@@ -76,9 +76,7 @@ fun ProviderRegistrationScreen(
   var fullName by remember { mutableStateOf("") }
   var companyName by remember { mutableStateOf("") }
   var phone by remember { mutableStateOf("") }
-  var selectedLocation by remember {
-    mutableStateOf<Location?>(null)
-  }
+  var selectedLocation by remember { mutableStateOf<Location?>(null) }
   val locationQuery by locationViewModel.query.collectAsState()
 
   var showDropdown by remember { mutableStateOf(false) }
@@ -103,7 +101,10 @@ fun ProviderRegistrationScreen(
                 // Back Button
                 IconButton(
                     onClick = { navigationActions.goBack() }, Modifier.testTag("goBackButton")) {
-                      Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.Black)
+                      Icon(
+                          Icons.AutoMirrored.Filled.ArrowBack,
+                          contentDescription = "Back",
+                          tint = Color.Black)
                     }
                 Spacer(modifier = Modifier.width(8.dp))
 
@@ -182,8 +183,7 @@ fun ProviderRegistrationScreen(
                 onShowDropdownLocationChange = { showDropdown = it },
                 locationSuggestions = locationSuggestions.filterNotNull(),
                 onLocationSelected = { selectedLocation = it },
-                requestLocation = null
-            )
+                requestLocation = null)
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -285,7 +285,7 @@ fun ProviderRegistrationScreen(
             Button(
                 onClick = {
                   // Complete registration and navigate
-                  val loc = selectedLocation?: Location(0.0, 0.0, "")
+                  val loc = selectedLocation ?: Location(0.0, 0.0, "")
                   val newProviderProfile =
                       Provider(
                           uid = user!!.uid,

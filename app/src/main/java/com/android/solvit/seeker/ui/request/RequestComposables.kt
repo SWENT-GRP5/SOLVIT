@@ -279,7 +279,7 @@ fun DatePickerFieldToModal(
       trailingIcon = { Icon(Icons.Default.DateRange, contentDescription = "Select date") },
       shape = RoundedCornerShape(12.dp),
       modifier =
-          modifier.fillMaxWidth().testTag("inputRequestDeadline").pointerInput(selectedDate) {
+          modifier.fillMaxWidth().testTag("inputRequestDate").pointerInput(selectedDate) {
             awaitEachGesture {
               awaitFirstDown(pass = PointerEventPass.Initial)
               val upEvent = waitForUpOrCancellation(pass = PointerEventPass.Initial)
@@ -327,7 +327,7 @@ fun ImagePicker(
               .clip(RoundedCornerShape(12.dp))
               .background(Color.Transparent)
               .clickable { imagePickerLauncher.launch("image/*") }
-              .testTag("imagePickerBox")) {
+              .testTag("imagePickerButton")) {
         if (selectedImageUri == null && imageUrl == null) {
           Row(
               verticalAlignment = Alignment.CenterVertically,
