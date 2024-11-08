@@ -1,5 +1,7 @@
 package com.android.solvit.seeker.ui.profile
 
+import android.content.pm.ActivityInfo
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -30,6 +32,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -40,6 +43,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -60,6 +64,14 @@ fun EditSeekerProfileScreen(
     navigationActions: NavigationActions,
     authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory)
 ) {
+
+  // Lock Orientation to Portrait
+  val context = LocalContext.current
+  DisposableEffect(Unit) {
+    val activity = context as? ComponentActivity
+    activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+    onDispose { activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED }
+  }
   // Collect the user profile from the StateFlow
   val user by authViewModel.user.collectAsState()
   val userProfile by viewModel.seekerProfile.collectAsState()

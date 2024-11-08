@@ -85,7 +85,7 @@ fun ProviderTopBar(onBackClick: () -> Unit) {
 
         // Title in the center
         Text(
-            text = "Performer",
+            text = "Provider",
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.weight(1f).testTag("topBarTitle"),
@@ -176,39 +176,31 @@ fun ProviderDetails(provider: Provider, reviews: List<Review>) {
               .fillMaxWidth()
               .background(color = Color.Transparent, shape = RoundedCornerShape(16.dp))
               .testTag("providerDetails")) {
-        Column(
-            modifier =
-                Modifier.fillMaxWidth()
-                    .background(color = Color.White, shape = RoundedCornerShape(16.dp))
-                    .border(
-                        width = 2.dp, color = Color.Transparent, shape = RoundedCornerShape(16.dp))
-                    .padding(16.dp)
-                    .testTag("detailsSection")) {
-              Row(
-                  verticalAlignment = Alignment.CenterVertically,
-                  horizontalArrangement = Arrangement.SpaceBetween,
-                  modifier = Modifier.fillMaxWidth()) {
-                    RatingStars(provider.rating.toInt())
-                    Text(
-                        text = "${reviews.size} Reviews",
-                        color = Color.Gray,
-                        modifier = Modifier.testTag("reviewsCount"))
-                    Text(
-                        text = "15 Jobs",
-                        color = Color.Gray,
-                        modifier = Modifier.testTag("jobsCount")) // Replace with actual job count
+        Rubric(modifier = Modifier.testTag("detailsSection")) {
+          Row(
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.SpaceBetween,
+              modifier = Modifier.fillMaxWidth()) {
+                RatingStars(provider.rating.toInt())
+                Text(
+                    text = "${reviews.size} Reviews",
+                    color = Color.Gray,
+                    modifier = Modifier.testTag("reviewsCount"))
+                Text(
+                    text = "15 Jobs", // Replace with actual job count
+                    color = Color.Gray,
+                    modifier = Modifier.testTag("jobsCount"))
               }
 
-              Spacer(modifier = Modifier.height(8.dp))
+          Spacer(modifier = Modifier.height(8.dp))
 
-              // Service description
-              Text("Refrigerator repair", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-              Text(
-                  text = "CHF ${provider.price}/hour",
-                  fontSize = 16.sp,
-                  color = Color.Gray,
-                  modifier = Modifier.padding(vertical = 4.dp).testTag("priceDisplay"))
-            }
+          Text("Refrigerator repair", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+          Text(
+              text = "CHF ${provider.price}/hour",
+              fontSize = 16.sp,
+              color = Color.Gray,
+              modifier = Modifier.padding(vertical = 4.dp).testTag("priceDisplay"))
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -220,21 +212,13 @@ fun ProviderDetails(provider: Provider, reviews: List<Review>) {
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Description section with white background and border
-        Column(
-            modifier =
-                Modifier.fillMaxWidth()
-                    .background(color = Color.White, shape = RoundedCornerShape(16.dp))
-                    .border(
-                        width = 2.dp, color = Color.Transparent, shape = RoundedCornerShape(16.dp))
-                    .padding(16.dp)
-                    .testTag("descriptionSection")) {
-              Text(
-                  text = provider.description,
-                  modifier = Modifier.padding(vertical = 4.dp).testTag("descriptionText"),
-                  color = Color.Gray,
-                  fontWeight = FontWeight.Medium)
-            }
+        Rubric(modifier = Modifier.testTag("descriptionSection")) {
+          Text(
+              text = provider.description,
+              modifier = Modifier.padding(vertical = 4.dp).testTag("descriptionText"),
+              color = Color.Gray,
+              fontWeight = FontWeight.Medium)
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -246,33 +230,38 @@ fun ProviderDetails(provider: Provider, reviews: List<Review>) {
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Contact section with white background and border
-        Column(
-            modifier =
-                Modifier.fillMaxWidth()
-                    .background(color = Color.White, shape = RoundedCornerShape(16.dp))
-                    .border(
-                        width = 2.dp, color = Color.Transparent, shape = RoundedCornerShape(16.dp))
-                    .padding(16.dp)
-                    .testTag("contactSection")) {
-              Row(
-                  verticalAlignment = Alignment.CenterVertically,
-                  horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.message),
-                        contentDescription = "Message",
-                        modifier = Modifier.size(64.dp).testTag("messageIcon"),
-                        tint = Color.Unspecified)
-                    Text(
-                        text =
-                            "The contractor's contacts are visible only to its customers." +
-                                "If you are interested in the services of this contractor" +
-                                " - offer him an order.",
-                        modifier = Modifier.padding(vertical = 4.dp).testTag("contactText"),
-                        color = Color.Gray,
-                        fontWeight = FontWeight.Medium)
-                  }
-            }
+        Rubric(modifier = Modifier.testTag("contactSection")) {
+          Row(
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                Icon(
+                    painter = painterResource(id = R.drawable.message),
+                    contentDescription = "Message",
+                    modifier = Modifier.size(64.dp).testTag("messageIcon"),
+                    tint = Color.Unspecified)
+                Text(
+                    text =
+                        "The contractor's contacts are visible only to its customers." +
+                            "If you are interested in the services of this contractor" +
+                            " - offer him an order.",
+                    modifier = Modifier.padding(vertical = 4.dp).testTag("contactText"),
+                    color = Color.Gray,
+                    fontWeight = FontWeight.Medium)
+              }
+        }
+      }
+}
+
+@Composable
+fun Rubric(modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
+  Column(
+      modifier =
+          modifier
+              .fillMaxWidth()
+              .background(color = Color.White, shape = RoundedCornerShape(16.dp))
+              .border(width = 2.dp, color = Color.Transparent, shape = RoundedCornerShape(16.dp))
+              .padding(16.dp)) {
+        content()
       }
 }
 

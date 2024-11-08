@@ -2,10 +2,12 @@ package com.android.solvit.seeker.ui.provider
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.pm.ActivityInfo
 import android.location.Address
 import android.location.Geocoder
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -47,6 +49,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -94,6 +97,14 @@ fun SpTopAppBar(
     onClickAction: () -> Unit,
     seekerProfileViewModel: SeekerProfileViewModel
 ) {
+  // Lock Orientation to Portrait
+  val context = LocalContext.current
+  DisposableEffect(Unit) {
+    val activity = context as? ComponentActivity
+    activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+    onDispose { activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED }
+  }
+
   val location by seekerProfileViewModel.locationSearched.collectAsState()
   Box(modifier = Modifier.fillMaxWidth().testTag("topAppBar")) {
     Image(
@@ -861,7 +872,7 @@ fun SelectProviderScreen(
   val sheetStateFilter = rememberModalBottomSheetState()
   val sheetStateLocation = rememberModalBottomSheetState()
   Log.e("Select Provider Screen", "providers : $providers")
-  Log.e("Seeker UID", userId)
+  Log.e("Seeker UID", "${userId}")
   Scaffold(
       modifier = Modifier.fillMaxSize(),
       topBar = {
