@@ -63,9 +63,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.android.solvit.R
 import com.android.solvit.seeker.ui.navigation.SeekerBottomNavigationMenu
+import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.service.Services
+import com.android.solvit.shared.ui.map.GetDirectionsBubble
 import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_PROVIDER
 import com.android.solvit.shared.ui.navigation.NavigationActions
 
@@ -197,6 +199,7 @@ fun TitleScreen() {
 // Displays a list of service requests using LazyColumn
 @Composable
 fun ListRequests(requests: List<ServiceRequest>) {
+  var selectedLocation by remember { mutableStateOf<Location?>(null) }
   LazyColumn(
       modifier = Modifier.fillMaxSize().testTag("requests"),
       contentPadding = PaddingValues(16.dp),
@@ -239,7 +242,11 @@ fun ListRequests(requests: List<ServiceRequest>) {
                             letterSpacing = 1.sp,
                         )
                         request.location?.let {
-                          Text(text = it.name, fontSize = 12.sp, color = Color.Gray)
+                          Text(
+                              text = it.name,
+                              fontSize = 12.sp,
+                              color = Color.Gray,
+                              modifier = Modifier.clickable { selectedLocation = it })
                         }
                         // TODO date request was created
 
@@ -295,6 +302,9 @@ fun ListRequests(requests: List<ServiceRequest>) {
                       InteractionBar("Share", R.drawable.share_icon)
                       InteractionBar("Reply", R.drawable.reply_icon)
                     }
+                selectedLocation?.let {
+                  GetDirectionsBubble(location = it) { selectedLocation = null }
+                }
               }
         }
       }
