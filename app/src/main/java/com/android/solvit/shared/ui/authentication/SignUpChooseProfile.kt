@@ -24,6 +24,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -33,7 +34,6 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -49,6 +49,8 @@ import com.android.solvit.R
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
+import com.android.solvit.shared.ui.theme.GradientBlue
+import com.android.solvit.shared.ui.theme.GradientGreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,7 +59,6 @@ fun SignUpChooseProfile(
     authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory)
 ) {
 
-  val backgroundColor = Color(0xFFFFFFFF)
   val context = LocalContext.current
 
   DisposableEffect(Unit) {
@@ -77,11 +78,11 @@ fun SignUpChooseProfile(
                   modifier =
                       Modifier.testTag("backButton").clickable { navigationActions.goBack() })
             },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = backgroundColor))
+            colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background))
       },
       content = { padding ->
         Column(
-            modifier = Modifier.fillMaxSize().padding(padding).background(backgroundColor),
+            modifier = Modifier.fillMaxSize().padding(padding).background(colorScheme.background),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center) {}
       })
@@ -177,17 +178,24 @@ fun ButtonCustomerProvider(
                     .height(50.dp)
                     .background(
                         brush =
-                            Brush.horizontalGradient(
-                                colors = listOf(Color(0, 200, 81), Color(0, 153, 255))),
+                            Brush.horizontalGradient(colors = listOf(GradientGreen, GradientBlue)),
                         shape = RoundedCornerShape(10.dp))
                     .clickable { onClickButton() },
             contentAlignment = Alignment.Center) {
-              Text(text = text, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+              Text(
+                  text = text,
+                  color = colorScheme.onPrimary,
+                  fontWeight = FontWeight.Bold,
+                  fontSize = 16.sp)
             }
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        Text(text = description, fontSize = 12.sp, color = Color.Gray, textAlign = TextAlign.Center)
+        Text(
+            text = description,
+            fontSize = 12.sp,
+            color = colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center)
       }
 }
 
@@ -220,15 +228,17 @@ fun StepCircle(stepNumber: Int, isCompleted: Boolean, label: String) {
             modifier =
                 Modifier.size(40.dp)
                     .background(
-                        color = if (isCompleted) Color(0xFF28A745) else Color.Gray,
+                        color = if (isCompleted) colorScheme.primary else colorScheme.primary,
                         shape = CircleShape),
             contentAlignment = Alignment.Center) {
-              Text(text = if (isCompleted) "✔" else stepNumber.toString(), color = Color.White)
+              Text(
+                  text = if (isCompleted) "✔" else stepNumber.toString(),
+                  color = colorScheme.onPrimary)
             }
 
         Text(
             text = label,
-            color = Color.Black,
+            color = colorScheme.onBackground,
             modifier = Modifier.padding(top = 4.dp),
             maxLines = 1,
             softWrap = false)
@@ -240,7 +250,7 @@ fun SectionTitle(text: String, testTag: String = "") {
   Text(
       text = text,
       fontSize = 25.sp,
-      color = Color(51, 51, 51),
+      color = colorScheme.onBackground,
       modifier = Modifier.testTag(testTag))
 }
 
@@ -251,16 +261,16 @@ fun LearnMoreSection() {
       verticalArrangement = Arrangement.Center,
       modifier = Modifier.fillMaxWidth().padding(16.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-          Text("Not sure? ", color = Color.Gray)
+          Text("Not sure? ", color = colorScheme.onSurfaceVariant)
           ClickableText(
               text = AnnotatedString("Learn more"),
               onClick = { /* TODO: Learn more action */},
               style =
-                  TextStyle(color = Color(0, 153, 255), textDecoration = TextDecoration.Underline),
+                  TextStyle(color = colorScheme.primary, textDecoration = TextDecoration.Underline),
               modifier = Modifier.testTag("learnMoreLink"))
-          Text(" about becoming a", color = Color.Gray)
+          Text(" about becoming a", color = colorScheme.onSurfaceVariant)
         }
         Spacer(modifier = Modifier.height(8.dp))
-        Text("Customer or Provider.", color = Color.Gray)
+        Text("Customer or Provider.", color = colorScheme.onSurfaceVariant)
       }
 }

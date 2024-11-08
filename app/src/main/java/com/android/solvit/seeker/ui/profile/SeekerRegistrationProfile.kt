@@ -31,6 +31,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
@@ -40,7 +41,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -94,7 +94,10 @@ fun SeekerRegistrationScreen(
                 // Back Button
                 IconButton(
                     onClick = { navigationActions.goBack() }, Modifier.testTag("goBackButton")) {
-                      Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.Black)
+                      Icon(
+                          Icons.Default.ArrowBack,
+                          contentDescription = "Back",
+                          tint = colorScheme.onBackground)
                     }
                 Spacer(modifier = Modifier.width(8.dp))
 
@@ -122,14 +125,16 @@ fun SeekerRegistrationScreen(
             OutlinedTextField(
                 value = fullName,
                 onValueChange = { fullName = it },
-                label = { Text("Full Name", color = Color.Black) },
+                label = { Text("Full Name", color = colorScheme.onBackground) },
                 placeholder = { Text("Enter your full name") },
                 modifier = Modifier.fillMaxWidth().testTag("fullNameInput"),
                 shape = RoundedCornerShape(12.dp),
                 colors =
                     TextFieldDefaults.outlinedTextFieldColors(
-                        focusedBorderColor = Color(0xFF00C853), // Green outline for focused state
-                        unfocusedBorderColor = Color.Gray // Gray outline for unfocused state
+                        focusedBorderColor =
+                            colorScheme.secondary, // Green outline for focused state
+                        unfocusedBorderColor =
+                            colorScheme.onSurfaceVariant // Gray outline for unfocused state
                         ))
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -137,14 +142,16 @@ fun SeekerRegistrationScreen(
             OutlinedTextField(
                 value = userName,
                 onValueChange = { userName = it },
-                label = { Text("User Name", color = Color.Black) },
+                label = { Text("User Name", color = colorScheme.onBackground) },
                 placeholder = { Text("Enter your user name") },
                 modifier = Modifier.fillMaxWidth().testTag("userNameInput"),
                 shape = RoundedCornerShape(12.dp),
                 colors =
                     TextFieldDefaults.outlinedTextFieldColors(
-                        focusedBorderColor = Color(0xFF00C853), // Green outline for focused state
-                        unfocusedBorderColor = Color.Gray // Gray outline for unfocused state
+                        focusedBorderColor =
+                            colorScheme.secondary, // Green outline for focused state
+                        unfocusedBorderColor =
+                            colorScheme.onSurfaceVariant // Gray outline for unfocused state
                         ))
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -153,27 +160,30 @@ fun SeekerRegistrationScreen(
             OutlinedTextField(
                 value = phone,
                 onValueChange = { phone = it },
-                label = { Text("Phone Number", color = Color.Black) },
+                label = { Text("Phone Number", color = colorScheme.onBackground) },
                 placeholder = { Text("Enter your phone number") },
                 modifier = Modifier.fillMaxWidth().testTag("phoneNumberInput"),
                 shape = RoundedCornerShape(12.dp),
                 colors =
                     TextFieldDefaults.outlinedTextFieldColors(
-                        focusedBorderColor = Color(0xFF00C853), // Green outline for focused state
-                        unfocusedBorderColor = Color.Gray // Gray outline for unfocused state
+                        focusedBorderColor =
+                            colorScheme.secondary, // Green outline for focused state
+                        unfocusedBorderColor =
+                            colorScheme.onSurfaceVariant // Gray outline for unfocused state
                         ))
             Spacer(modifier = Modifier.height(16.dp))
             // Location
             OutlinedTextField(
                 value = address,
                 onValueChange = { address = it },
-                label = { Text("Location", color = Color.Black) },
+                label = { Text("Location", color = colorScheme.onBackground) },
                 placeholder = { Text("Enter your location or business location") },
                 modifier = Modifier.fillMaxWidth().testTag("locationInput"),
                 shape = RoundedCornerShape(12.dp),
                 colors =
                     TextFieldDefaults.outlinedTextFieldColors(
-                        focusedBorderColor = Color(0xFF00C853), unfocusedBorderColor = Color.Gray))
+                        focusedBorderColor = colorScheme.secondary,
+                        unfocusedBorderColor = colorScheme.onSurfaceVariant))
             Spacer(modifier = Modifier.height(16.dp))
             // Password Field
 
@@ -186,9 +196,10 @@ fun SeekerRegistrationScreen(
                 enabled = isFormComplete,
                 shape = RoundedCornerShape(12.dp),
                 colors =
-                    ButtonDefaults.buttonColors(backgroundColor = Color(0xFF28A745)) // Green button
+                    ButtonDefaults.buttonColors(
+                        backgroundColor = colorScheme.secondary) // Green button
                 ) {
-                  Text("Complete registration", color = Color.White)
+                  Text("Complete registration", color = colorScheme.onSecondary)
                 }
           }
           // Preferences Step
@@ -221,13 +232,14 @@ fun SeekerRegistrationScreen(
                       style = MaterialTheme.typography.body1,
                       modifier = Modifier.align(Alignment.CenterHorizontally),
                       textAlign = TextAlign.Center,
-                      color = Color.Blue)
+                      color = colorScheme.primary)
                   Spacer(modifier = Modifier.height(100.dp))
                   Button(
                       onClick = { currentStep = 3 },
                       modifier = Modifier.fillMaxWidth().testTag("savePreferencesButton"),
-                      colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF28A745))) {
-                        Text("Save Preferences", color = Color.White)
+                      colors =
+                          ButtonDefaults.buttonColors(backgroundColor = colorScheme.secondary)) {
+                        Text("Save Preferences", color = colorScheme.onSecondary)
                       }
                   Text(
                       text = "You can always update your preferences in your profile settings.",
@@ -288,9 +300,10 @@ fun SeekerRegistrationScreen(
                 },
                 modifier = Modifier.fillMaxWidth().testTag("exploreServicesButton"),
                 colors =
-                    ButtonDefaults.buttonColors(backgroundColor = Color(0xFF28A745)) // Green button
+                    ButtonDefaults.buttonColors(
+                        backgroundColor = colorScheme.secondary) // Green button
                 ) {
-                  Text("Continue to Explore Services", color = Color.White)
+                  Text("Continue to Explore Services", color = colorScheme.onSecondary)
                 }
           }
         }
@@ -335,18 +348,19 @@ fun StepCircle(stepNumber: Int, isCompleted: Boolean, label: String) {
             modifier =
                 Modifier.size(40.dp)
                     .background(
-                        if (isCompleted) Color(0xFF28A745) else Color.Gray, shape = CircleShape),
+                        if (isCompleted) colorScheme.secondary else colorScheme.onSurfaceVariant,
+                        shape = CircleShape),
             contentAlignment = Alignment.Center) {
               Text(
                   text = if (isCompleted) "✔" else stepNumber.toString(),
-                  color = Color.White,
+                  color = colorScheme.onSecondary,
                   style = MaterialTheme.typography.h6)
             }
 
         // Display the label below the circle
         Text(
             text = label,
-            color = Color.Black, // You can customize this color
+            color = colorScheme.onBackground, // You can customize this color
             style = MaterialTheme.typography.body2,
             modifier = Modifier.padding(top = 4.dp) // Add space between circle and label
             )

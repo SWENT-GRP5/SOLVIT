@@ -54,7 +54,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -62,7 +61,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.android.solvit.R
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.theme.*
@@ -100,6 +98,7 @@ fun ProviderCalendarScreen(navigationActions: NavigationActions) {
                   fontWeight = FontWeight.ExtraBold,
                   lineHeight = 24.sp,
                   textAlign = TextAlign.Left,
+                  color = colorScheme.onBackground,
                   modifier = Modifier.testTag("calendarTitle"))
             },
             navigationIcon = {
@@ -109,20 +108,20 @@ fun ProviderCalendarScreen(navigationActions: NavigationActions) {
                     Icon(
                         Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Back",
-                        tint = colorScheme.onSurface)
+                        tint = colorScheme.onBackground)
                   }
             },
             actions = {
               IconButton(
                   onClick = { /* TODO: Implement menu action */},
                   modifier = Modifier.testTag("menuButton")) {
-                    Icon(Icons.Default.Menu, contentDescription = "Menu", tint = colorScheme.primary)
+                    Icon(
+                        Icons.Default.Menu, contentDescription = "Menu", tint = colorScheme.primary)
                   }
             },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.primary)
-        )
+            colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background))
       },
-      containerColor = colorScheme.surface) { paddingValues ->
+      containerColor = colorScheme.background) { paddingValues ->
         Column(modifier = Modifier.fillMaxSize().padding(paddingValues).testTag("calendarColumn")) {
           CalendarViewToggle(calendarView) { newView ->
             calendarView = newView
@@ -177,8 +176,8 @@ fun ProviderCalendarScreen(navigationActions: NavigationActions) {
         modifier = Modifier.testTag("bottomSheetDayView")) {
           DayView(
               currentViewDate = selectedDate,
-              onViewDateChanged = { /* No action needed here */},
-              onHeaderClick = { /* No action needed here */},
+              onViewDateChanged = { currentViewDate = it },
+              onHeaderClick = { showDatePicker = true },
               timeSlots = timeSlots,
               onTimeSlotsChanged = { date, newTimeSlots ->
                 timeSlots = timeSlots.toMutableMap().apply { put(date, newTimeSlots) }
@@ -246,9 +245,14 @@ fun CalendarViewToggle(currentView: CalendarView, onViewChange: (CalendarView) -
               onClick = { onViewChange(view) },
               colors =
                   ButtonDefaults.buttonColors(
-                      containerColor = if (currentView == view) colorScheme.primary else colorScheme.surfaceVariant),
+                      containerColor =
+                          if (currentView == view) colorScheme.primary
+                          else colorScheme.surfaceVariant),
               modifier = Modifier.testTag("toggleButton_${view.name.lowercase()}")) {
-                Text(view.name, color = if (currentView == view) colorScheme.onPrimary else colorScheme.onSurface)
+                Text(
+                    view.name,
+                    color =
+                        if (currentView == view) colorScheme.onPrimary else colorScheme.onSurface)
               }
         }
       }
@@ -386,14 +390,16 @@ fun StatusIndicator(status: TimeSlotStatus) {
               .background(
                   color =
                       when (status) {
-                        TimeSlotStatus.AVAILABLE -> colorResource(id = R.color.available)
-                        TimeSlotStatus.UNAVAILABLE -> colorResource(id = R.color.unavailable)
-                        TimeSlotStatus.BUSY -> colorResource(id = R.color.busy)
+                        TimeSlotStatus.AVAILABLE -> Available
+                        TimeSlotStatus.UNAVAILABLE -> Unavailable
+                        TimeSlotStatus.BUSY -> Busy
                       },
                   shape = CircleShape)) {
         Box(
             modifier =
-                Modifier.size(4.dp).background(colorScheme.surface, CircleShape).align(Alignment.Center))
+                Modifier.size(4.dp)
+                    .background(colorScheme.surface, CircleShape)
+                    .align(Alignment.Center))
       }
 }
 
@@ -450,7 +456,7 @@ fun DayView(
         Spacer(modifier = Modifier.height(16.dp))
         TimeSlots(
             timeSlots = timeSlots[currentDay] ?: emptyList(),
-            textColor = Color.Black,
+            textColor = colorScheme.onSurface,
             showDescription = true,
             onTimeSlotsChanged = { newTimeSlots -> onTimeSlotsChanged(currentDay, newTimeSlots) })
       }
@@ -539,20 +545,20 @@ fun WeekDayItem(
 ) {
   val borderColor =
       when {
-        isSelected -> Color(0xFF0099FF)
-        isCurrentDay -> Color.Gray
-        else -> Color.LightGray
+        isSelected -> colorScheme.primary
+        isCurrentDay -> colorScheme.surfaceVariant
+        else -> Color.Transparent
       }
-  val textColor =
+  val textColor = colorScheme.onSurface
+  val dayDigitColor =
       when {
-        isSelected -> Color.White
-        isCurrentDay -> Color.White
-        else -> Color.Black
+        isSelected -> colorScheme.onPrimary
+        else -> colorScheme.onSurface
       }
   val dayBackgroundColor =
       when {
-        isSelected -> Color(0xFF0099FF)
-        isCurrentDay -> Color.Gray
+        isSelected -> colorScheme.primary
+        isCurrentDay -> colorScheme.surfaceVariant
         else -> Color.Transparent
       }
 
@@ -571,17 +577,17 @@ fun WeekDayItem(
                     Text(
                         text = date.dayOfMonth.toString(),
                         fontWeight = FontWeight.Bold,
-                        color = textColor)
+                        color = dayDigitColor)
                   }
               Spacer(modifier = Modifier.width(8.dp))
               Text(
-                  text = date.format(DateTimeFormatter.ofPattern("EEEE, MMMM d")),
+                  text = date.format(DateTimeFormatter.ofPattern("EEEE")),
                   fontWeight = FontWeight.Bold,
-                  color = Color.Black)
+                  color = textColor)
             }
         TimeSlots(
             timeSlots = timeSlots,
-            textColor = Color.Black,
+            textColor = colorScheme.onSurface,
             showDescription = false,
             onTimeSlotsChanged = onTimeSlotsChanged)
       }
@@ -590,7 +596,7 @@ fun WeekDayItem(
 @Composable
 fun TimeSlots(
     timeSlots: List<TimeSlot>,
-    textColor: Color = Color.Black,
+    textColor: Color = colorScheme.onSurface,
     showDescription: Boolean = true,
     onTimeSlotsChanged: (List<TimeSlot>) -> Unit
 ) {
@@ -631,18 +637,18 @@ fun TimeSlotItem(
 ) {
   val backgroundColor =
       when (slot.status) {
-        "Available" -> Color(0xFF00C853).copy(alpha = 0.1f)
-        "Unavailable" -> Color(0xFFEC5865).copy(alpha = 0.1f)
-        "Busy" -> Color(0xFF0099FF).copy(alpha = 0.1f)
-        else -> Color.Gray.copy(alpha = 0.1f)
+        "Available" -> Available.copy(alpha = 0.1f)
+        "Unavailable" -> Unavailable.copy(alpha = 0.1f)
+        "Busy" -> Busy.copy(alpha = 0.1f)
+        else -> colorScheme.surfaceVariant.copy(alpha = 0.1f)
       }
 
   val statusColor =
       when (slot.status) {
-        "Available" -> Color(0xFF00C853)
-        "Unavailable" -> Color(0xFFEC5865)
-        "Busy" -> Color(0xFF0099FF)
-        else -> Color.Gray
+        "Available" -> Available
+        "Unavailable" -> Unavailable
+        "Busy" -> Busy
+        else -> colorScheme.surfaceVariant
       }
 
   Column(

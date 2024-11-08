@@ -42,6 +42,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.Scaffold
@@ -86,6 +87,12 @@ import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.map.RequestLocationPermission
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
+import com.android.solvit.shared.ui.theme.Gradient1
+import com.android.solvit.shared.ui.theme.Gradient2
+import com.android.solvit.shared.ui.theme.Gradient3
+import com.android.solvit.shared.ui.theme.Gradient4
+import com.android.solvit.shared.ui.theme.OnSurfaceVariant
+import com.android.solvit.shared.ui.theme.SurfaceVariant
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
 import java.util.Locale
@@ -143,7 +150,7 @@ fun SpTopAppBar(
                     TextStyle(
                         fontSize = 12.sp,
                         fontWeight = FontWeight(400),
-                        color = Color(0xFF606060),
+                        color = colorScheme.onSurfaceVariant,
                     ))
             Image(
                 modifier =
@@ -189,7 +196,7 @@ fun SpFilterBar(display: () -> Unit, listProviderViewModel: ListProviderViewMode
                       lineHeight = 34.sp,
                       fontFamily = FontFamily(Font(R.font.roboto)),
                       fontWeight = FontWeight(400),
-                      color = Color(0xFF0099FF))
+                      color = colorScheme.primary)
                 }
           }
         }
@@ -220,7 +227,7 @@ fun Title(title: String) {
             TextStyle(
                 fontSize = 18.sp,
                 fontWeight = FontWeight(600),
-                color = Color(0xFF232323),
+                color = colorScheme.onBackground,
             ))
   }
 }
@@ -231,7 +238,7 @@ fun Note(note: String = "5") {
       modifier =
           Modifier.width(46.dp)
               .height(24.dp)
-              .background(color = Color(0xFF4D5652), shape = RoundedCornerShape(size = 59.dp))
+              .background(color = colorScheme.onSurface, shape = RoundedCornerShape(size = 59.dp))
               .testTag("Rating")) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -245,7 +252,7 @@ fun Note(note: String = "5") {
 
               Text(
                   text = note, // TODO
-                  color = Color.White,
+                  color = colorScheme.surface,
                   fontSize = 14.sp)
             }
       }
@@ -284,12 +291,7 @@ fun DisplayPopularProviders(
                         .height(50.dp)
                         .align(Alignment.BottomCenter)
                         .background(
-                            brush =
-                                Brush.verticalGradient(
-                                    colors =
-                                        listOf(
-                                            Color(android.graphics.Color.parseColor("#2A5A52")),
-                                            Color(android.graphics.Color.parseColor("#DBD1B9"))))))
+                            brush = Brush.verticalGradient(colors = listOf(Gradient1, Gradient2))))
 
             Row(
                 modifier = Modifier.align(Alignment.BottomStart).padding(8.dp),
@@ -300,8 +302,7 @@ fun DisplayPopularProviders(
                           TextStyle(
                               fontSize = 16.sp,
                               fontWeight = FontWeight(400),
-                              color = Color(0xFFFFFFFF),
-                          ))
+                              color = colorScheme.onPrimary))
                   Spacer(Modifier.width(40.dp))
                   Note(provider.rating.toString())
                 }
@@ -325,7 +326,8 @@ fun ListProviders(
       Row(
           modifier =
               Modifier.fillMaxWidth()
-                  .background(color = Color(0xFFFFFFFF), shape = RoundedCornerShape(size = 16.dp))
+                  .background(
+                      color = colorScheme.background, shape = RoundedCornerShape(size = 16.dp))
                   .clickable {
                     listProviderViewModel.selectProvider(provider)
                     navigationActions.navigateTo(Route.PROVIDER_PROFILE)
@@ -347,7 +349,7 @@ fun ListProviders(
                             fontSize = 16.sp,
                             lineHeight = 24.sp,
                             fontWeight = FontWeight(400),
-                            color = Color(0xFF6E7146),
+                            color = colorScheme.background,
                             textAlign = TextAlign.Center,
                         ))
                 Spacer(Modifier.weight(1f))
@@ -361,7 +363,7 @@ fun ListProviders(
                           fontSize = 8.sp,
                           lineHeight = 10.sp,
                           fontWeight = FontWeight(400),
-                          color = Color(0xFF000000),
+                          color = colorScheme.onSurface,
                       ))
             }
           }
@@ -394,7 +396,7 @@ fun PriceFilter(listProviderViewModel: ListProviderViewModel) {
           },
           modifier =
               Modifier.weight(1f)
-                  .background(Color(0xFFE0E0E0), RoundedCornerShape(8.dp))
+                  .background(color = colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
                   .padding(16.dp)
                   .testTag("minPrice"),
           singleLine = true,
@@ -416,7 +418,7 @@ fun PriceFilter(listProviderViewModel: ListProviderViewModel) {
           },
           modifier =
               Modifier.weight(1f)
-                  .background(Color(0xFFE0E0E0), RoundedCornerShape(8.dp))
+                  .background(colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
                   .padding(16.dp)
                   .testTag("maxPrice"),
           singleLine = true,
@@ -440,7 +442,7 @@ fun FilterSubText(text: String) {
           TextStyle(
               fontSize = 17.sp,
               fontWeight = FontWeight(500),
-              color = Color(0xFF000000),
+              color = colorScheme.onBackground,
           ))
 }
 
@@ -463,7 +465,7 @@ fun filterStringFields(
 
   val newIconsColor =
       iconsColor.toMutableList().apply {
-        set(idx, if (newIconsPressed[idx]) Color(0xFF4D5652) else Color.White)
+        set(idx, if (newIconsPressed[idx]) OnSurfaceVariant else SurfaceVariant)
       }
 
   val newSelectedFields =
@@ -489,7 +491,7 @@ fun filterStringFields(
 fun LanguageFilterField(list: List<String>, listProviderViewModel: ListProviderViewModel) {
   var selectedFields by remember { mutableStateOf(listOf<String>()) }
   var iconsPressed by remember { mutableStateOf(List(list.size) { false }) }
-  var iconsColor by remember { mutableStateOf(List(list.size) { Color(0xFFF6F6F6) }) }
+  var iconsColor by remember { mutableStateOf(List(list.size) { SurfaceVariant }) }
   Log.e("COLORS", "$iconsColor")
   Log.e("Icons Pressed", "$iconsPressed")
 
@@ -534,7 +536,7 @@ fun LanguageFilterField(list: List<String>, listProviderViewModel: ListProviderV
 fun RatingFilterField(list: List<String>, listProviderViewModel: ListProviderViewModel) {
   var selectedFields by remember { mutableStateOf(listOf<String>()) }
   var iconsPressed by remember { mutableStateOf(List(list.size) { false }) }
-  var colors by remember { mutableStateOf(List(list.size) { Color(0xFFF6F6F6) }) }
+  var colors by remember { mutableStateOf(List(list.size) { SurfaceVariant }) }
 
   FlowRow(
       Modifier.padding(20.dp).fillMaxWidth(),
@@ -590,12 +592,7 @@ fun ApplyButton(listProviderViewModel: ListProviderViewModel, display: () -> Uni
               .width(249.dp)
               .height(43.dp)
               .background(
-                  brush =
-                      Brush.horizontalGradient(
-                          colors =
-                              listOf(
-                                  Color(android.graphics.Color.parseColor("#EFEBDE")),
-                                  Color(android.graphics.Color.parseColor("#4D5652")))),
+                  brush = Brush.horizontalGradient(colors = listOf(Gradient3, Gradient4)),
                   shape = RoundedCornerShape(50))
               .clickable {
                 listProviderViewModel.applyFilters()
@@ -611,12 +608,12 @@ fun ApplyButton(listProviderViewModel: ListProviderViewModel, display: () -> Uni
               text = "Apply", // TODO()
               fontWeight = FontWeight.Bold,
               fontSize = 14.sp,
-              color = Color(0xFF4D5E29))
+              color = colorScheme.onBackground)
           Text(
               text = "${filteredList.size} providers", // TODO()
               fontWeight = FontWeight.Bold,
               fontSize = 14.sp,
-              color = Color(0xFF4D5E29))
+              color = colorScheme.onBackground)
         }
   }
 }
@@ -633,7 +630,7 @@ fun FilterComposable(listProviderViewModel: ListProviderViewModel, display: () -
                 TextStyle(
                     fontSize = 21.sp,
                     fontWeight = FontWeight(600),
-                    color = Color(0xFF000000),
+                    color = colorScheme.onBackground,
                 ))
         FilterSubText("Price")
         PriceFilter(listProviderViewModel)
@@ -671,17 +668,17 @@ fun SearchLocBar(searchedAddress: String, onSearchChanged: (String) -> Unit) {
   TextField(
       value = searchedAddress,
       onValueChange = onSearchChanged,
-      placeholder = { Text("Enter a new address", color = Color.Gray) },
+      placeholder = { Text("Enter a new address", color = colorScheme.onSurface) },
       leadingIcon = {
         Icon(
             imageVector = Icons.Default.Search,
             contentDescription = "Search Icon",
-            tint = Color.Gray)
+            tint = colorScheme.onSurface)
       },
       modifier =
           Modifier.fillMaxWidth()
               .height(56.dp)
-              .background(color = Color(0xFFF5F5F5), shape = RoundedCornerShape(16.dp))
+              .background(color = colorScheme.surface, shape = RoundedCornerShape(16.dp))
               .testTag("SearchLocBar"))
 }
 
@@ -691,7 +688,7 @@ fun LocationSuggestion(location: Location, index: Int, onClickAction: () -> Unit
   Row(
       modifier =
           Modifier.fillMaxWidth()
-              .background(if (index == 0) Color(0xFFE5E7EB) else Color.Transparent)
+              .background(if (index == 0) colorScheme.surface else Color.Transparent)
               .clickable { onClickAction() }
               .padding(16.dp)
               .testTag("suggestedLocation"),
@@ -699,7 +696,7 @@ fun LocationSuggestion(location: Location, index: Int, onClickAction: () -> Unit
         Icon(
             imageVector = Icons.Default.LocationOn,
             contentDescription = "Location Icon",
-            tint = Color(0xFF0099FF))
+            tint = colorScheme.primary)
         Spacer(modifier = Modifier.width(8.dp))
         Column {
           Text(
@@ -709,7 +706,7 @@ fun LocationSuggestion(location: Location, index: Int, onClickAction: () -> Unit
                       fontSize = 16.sp,
                       lineHeight = 20.sp,
                       fontWeight = FontWeight(500),
-                      color = Color(0xFF000000),
+                      color = colorScheme.onBackground,
                   ))
           Text(
               text = "CA", // TODO
@@ -718,7 +715,7 @@ fun LocationSuggestion(location: Location, index: Int, onClickAction: () -> Unit
                       fontSize = 16.sp,
                       lineHeight = 20.sp,
                       fontWeight = FontWeight(500),
-                      color = Color(0xFF827F7F),
+                      color = colorScheme.onSurface,
                   ))
         }
       }
@@ -759,7 +756,8 @@ fun FilterByLocation(
         modifier =
             Modifier.fillMaxWidth(0.9f)
                 .align(Alignment.CenterHorizontally)
-                .background(color = Color(0xFFF5F5F5), shape = RoundedCornerShape(size = 16.dp))) {
+                .background(
+                    color = colorScheme.surface, shape = RoundedCornerShape(size = 16.dp))) {
           SearchLocBar(
               searchedAddress = searchedAddress,
               onSearchChanged = {
@@ -780,7 +778,7 @@ fun FilterByLocation(
                   fontSize = 16.sp,
                   lineHeight = 20.sp,
                   fontWeight = FontWeight(500),
-                  color = Color(0xFF000000),
+                  color = colorScheme.onBackground,
               ))
 
       Row(
@@ -798,7 +796,7 @@ fun FilterByLocation(
                         }
                   }
                   .padding(8.dp)) {
-            Icon(Icons.Outlined.Home, contentDescription = null, tint = Color(0xFF0099FF))
+            Icon(Icons.Outlined.Home, contentDescription = null, tint = colorScheme.primary)
             Spacer(Modifier.width(8.dp))
             Text(
                 text = "Current location",
@@ -807,7 +805,7 @@ fun FilterByLocation(
                         fontSize = 16.sp,
                         lineHeight = 20.sp,
                         fontWeight = FontWeight(500),
-                        color = Color(0xFF000000),
+                        color = colorScheme.onBackground,
                     ))
           }
       // Add the line separator
@@ -821,7 +819,7 @@ fun FilterByLocation(
                   fontSize = 16.sp,
                   lineHeight = 20.sp,
                   fontWeight = FontWeight(500),
-                  color = Color(0xFF000000),
+                  color = colorScheme.onBackground,
               ))
       LazyColumn(modifier = Modifier.testTag("cachedLocations")) {
         itemsIndexed(cachedLocations) { index, location ->

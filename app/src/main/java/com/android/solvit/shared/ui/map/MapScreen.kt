@@ -18,13 +18,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
@@ -56,7 +56,7 @@ fun MapScreen(userLocation: LatLng?, markers: List<MarkerData>, bottomBar: @Comp
             modifier =
                 Modifier.fillMaxSize()
                     .padding(paddingValues)
-                    .background(color = Color.White, shape = RoundedCornerShape(18.dp))
+                    .background(color = colorScheme.background, shape = RoundedCornerShape(18.dp))
                     .testTag("mapScreen"),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,

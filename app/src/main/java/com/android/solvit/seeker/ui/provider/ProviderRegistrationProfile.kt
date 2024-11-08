@@ -34,6 +34,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
@@ -43,7 +44,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -89,7 +89,7 @@ fun ProviderRegistrationScreen(
   val locationSuggestions by
       locationViewModel.locationSuggestions.collectAsState(initial = emptyList<Location?>())
 
-  // represent the current authentified user
+  // represent the current authenticated user
   val user by authViewModel.user.collectAsState()
 
   // Step tracking: Role, Details, Preferences
@@ -107,7 +107,10 @@ fun ProviderRegistrationScreen(
                 // Back Button
                 IconButton(
                     onClick = { navigationActions.goBack() }, Modifier.testTag("goBackButton")) {
-                      Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.Black)
+                      Icon(
+                          Icons.Default.ArrowBack,
+                          contentDescription = "Back",
+                          tint = colorScheme.onBackground)
                     }
                 Spacer(modifier = Modifier.width(8.dp))
 
@@ -135,14 +138,16 @@ fun ProviderRegistrationScreen(
             OutlinedTextField(
                 value = fullName,
                 onValueChange = { fullName = it },
-                label = { Text("Full Name", color = Color.Black) },
+                label = { Text("Full Name", color = colorScheme.onBackground) },
                 placeholder = { Text("Enter your full name") },
                 modifier = Modifier.fillMaxWidth().testTag("fullNameInput"),
                 shape = RoundedCornerShape(12.dp),
                 colors =
                     TextFieldDefaults.outlinedTextFieldColors(
-                        focusedBorderColor = Color(0xFF00C853), // Green outline for focused state
-                        unfocusedBorderColor = Color.Gray // Gray outline for unfocused state
+                        focusedBorderColor =
+                            colorScheme.secondary, // Green outline for focused state
+                        unfocusedBorderColor =
+                            colorScheme.onSurfaceVariant // Gray outline for unfocused state
                         ))
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -151,14 +156,16 @@ fun ProviderRegistrationScreen(
             OutlinedTextField(
                 value = phone,
                 onValueChange = { phone = it },
-                label = { Text("Phone Number", color = Color.Black) },
+                label = { Text("Phone Number", color = colorScheme.onBackground) },
                 placeholder = { Text("Enter your phone number") },
                 modifier = Modifier.fillMaxWidth().testTag("phoneNumberInput"),
                 shape = RoundedCornerShape(12.dp),
                 colors =
                     TextFieldDefaults.outlinedTextFieldColors(
-                        focusedBorderColor = Color(0xFF00C853), // Green outline for focused state
-                        unfocusedBorderColor = Color.Gray // Gray outline for unfocused state
+                        focusedBorderColor =
+                            colorScheme.secondary, // Green outline for focused state
+                        unfocusedBorderColor =
+                            colorScheme.onSurfaceVariant // Gray outline for unfocused state
                         ))
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -166,7 +173,7 @@ fun ProviderRegistrationScreen(
             OutlinedTextField(
                 value = companyName,
                 onValueChange = { companyName = it },
-                label = { Text("Business/Company Name", color = Color.Black) },
+                label = { Text("Business/Company Name", color = colorScheme.onBackground) },
                 placeholder = {
                   Text("Enter your business name (optional for independent providers) ")
                 },
@@ -174,8 +181,10 @@ fun ProviderRegistrationScreen(
                 shape = RoundedCornerShape(12.dp),
                 colors =
                     TextFieldDefaults.outlinedTextFieldColors(
-                        focusedBorderColor = Color(0xFF28A745), // Green outline for focused state
-                        unfocusedBorderColor = Color.Gray // Gray outline for unfocused state
+                        focusedBorderColor =
+                            colorScheme.secondary, // Green outline for focused state
+                        unfocusedBorderColor =
+                            colorScheme.onSurfaceVariant // Gray outline for unfocused state
                         ))
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -189,7 +198,7 @@ fun ProviderRegistrationScreen(
                         locationViewModel.setQuery(it)
                         showDropdown = true // Show dropdown when user starts typing
                       },
-                      label = { Text("Location", color = Color.Black) },
+                      label = { Text("Location", color = colorScheme.onBackground) },
                       placeholder = { Text("Enter an Address or Location") },
                       modifier = Modifier.menuAnchor().fillMaxWidth().testTag("locationInput"),
                       singleLine = true,
@@ -197,8 +206,9 @@ fun ProviderRegistrationScreen(
                       colors =
                           TextFieldDefaults.outlinedTextFieldColors(
                               focusedBorderColor =
-                                  Color(0xFF28A745), // Green outline for focused state
-                              unfocusedBorderColor = Color.Gray // Gray outline for unfocused state
+                                  colorScheme.secondary, // Green outline for focused state
+                              unfocusedBorderColor =
+                                  colorScheme.onSurfaceVariant // Gray outline for unfocused state
                               ))
 
                   // Dropdown menu for location suggestions
@@ -237,9 +247,10 @@ fun ProviderRegistrationScreen(
                 enabled = isFormComplete,
                 shape = RoundedCornerShape(12.dp),
                 colors =
-                    ButtonDefaults.buttonColors(backgroundColor = Color(0xFF28A745)) // Green button
+                    ButtonDefaults.buttonColors(
+                        backgroundColor = colorScheme.secondary) // Green button
                 ) {
-                  Text("Complete registration", color = Color.White)
+                  Text("Complete registration", color = colorScheme.onSecondary)
                 }
           }
           // Preferences Step
@@ -272,13 +283,14 @@ fun ProviderRegistrationScreen(
                       style = MaterialTheme.typography.body1,
                       modifier = Modifier.align(Alignment.CenterHorizontally),
                       textAlign = TextAlign.Center,
-                      color = Color.Blue)
+                      color = colorScheme.primary)
                   Spacer(modifier = Modifier.height(100.dp))
                   Button(
                       onClick = { currentStep = 3 },
                       modifier = Modifier.fillMaxWidth().testTag("savePreferencesButton"),
-                      colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF28A745))) {
-                        Text("Save Preferences", color = Color.White)
+                      colors =
+                          ButtonDefaults.buttonColors(backgroundColor = colorScheme.secondary)) {
+                        Text("Save Preferences", color = colorScheme.onSecondary)
                       }
                   Text(
                       text = "You can always update your preferences in your profile settings.",
@@ -339,9 +351,10 @@ fun ProviderRegistrationScreen(
                 },
                 modifier = Modifier.fillMaxWidth().testTag("continueDashboardButton"),
                 colors =
-                    ButtonDefaults.buttonColors(backgroundColor = Color(0xFF28A745)) // Green button
+                    ButtonDefaults.buttonColors(
+                        backgroundColor = colorScheme.secondary) // Green button
                 ) {
-                  Text("Continue to My Dashboard", color = Color.White)
+                  Text("Continue to My Dashboard", color = colorScheme.onSecondary)
                 }
           }
         }
@@ -383,18 +396,19 @@ fun StepCircle(stepNumber: Int, isCompleted: Boolean, label: String) {
             modifier =
                 Modifier.size(40.dp)
                     .background(
-                        if (isCompleted) Color(0xFF28A745) else Color.Gray, shape = CircleShape),
+                        if (isCompleted) colorScheme.secondary else colorScheme.onSurfaceVariant,
+                        shape = CircleShape),
             contentAlignment = Alignment.Center) {
               Text(
                   text = if (isCompleted) "✔" else stepNumber.toString(),
-                  color = Color.White,
+                  color = colorScheme.onSecondary,
                   style = MaterialTheme.typography.h6)
             }
 
         // Display the label below the circle
         Text(
             text = label,
-            color = Color.Black,
+            color = colorScheme.onBackground,
             style = MaterialTheme.typography.body2,
             modifier = Modifier.padding(top = 4.dp))
       }

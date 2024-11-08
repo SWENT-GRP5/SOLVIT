@@ -76,11 +76,17 @@ fun ProviderInfoScreen(
 fun ProviderTopBar(onBackClick: () -> Unit) {
   val context = LocalContext.current
   Row(
-      modifier = Modifier.fillMaxWidth().background(color = Color.White).testTag("ProviderTopBar"),
+      modifier =
+          Modifier.fillMaxWidth()
+              .background(color = MaterialTheme.colorScheme.background)
+              .testTag("ProviderTopBar"),
       verticalAlignment = Alignment.CenterVertically) {
         // Back button on the left
         IconButton(onClick = onBackClick, modifier = Modifier.testTag("backButton")) {
-          Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+          Icon(
+              Icons.AutoMirrored.Filled.ArrowBack,
+              contentDescription = "Back",
+              tint = MaterialTheme.colorScheme.onBackground)
         }
 
         // Title in the center
@@ -89,7 +95,8 @@ fun ProviderTopBar(onBackClick: () -> Unit) {
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.weight(1f).testTag("topBarTitle"),
-            textAlign = TextAlign.Start)
+            textAlign = TextAlign.Start,
+            color = MaterialTheme.colorScheme.onBackground)
 
         // Menu icon on the right
         IconButton(
@@ -99,51 +106,62 @@ fun ProviderTopBar(onBackClick: () -> Unit) {
                   painter = painterResource(id = R.drawable.menu_icon),
                   contentDescription = "Menu",
                   modifier = Modifier.size(24.dp),
-                  tint = Color.Unspecified)
+                  tint = MaterialTheme.colorScheme.onBackground)
             }
       }
 }
 
 @Composable
 fun ProviderHeader(provider: Provider) {
-  Box(modifier = Modifier.fillMaxWidth().background(Color.White).testTag("providerHeader")) {
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween) {
-          val context = LocalContext.current
-          Row(verticalAlignment = Alignment.CenterVertically) {
-            AsyncImage(
-                model = if (provider.imageUrl != "") provider.imageUrl else R.drawable.default_pdp,
-                contentDescription = "Profile Picture",
-                contentScale = ContentScale.Crop,
-                modifier =
-                    Modifier.size(128.dp)
-                        .border(2.dp, Color.Transparent, RoundedCornerShape(16.dp))
-                        .clip(RoundedCornerShape(16.dp))
-                        .testTag("providerImage"))
-            Spacer(modifier = Modifier.width(16.dp))
-            Column {
-              Text(
-                  text = provider.name,
-                  fontSize = 20.sp,
-                  fontWeight = FontWeight.Bold,
-                  modifier = Modifier.testTag("providerName"))
-              Text(
-                  text = provider.companyName,
-                  color = Color.Gray,
-                  modifier = Modifier.testTag("providerCompanyName"))
-            }
-          }
-
-          // Share icon on the right
-          IconButton(
-              onClick = { Toast.makeText(context, "Not implemented", Toast.LENGTH_SHORT).show() },
-              modifier = Modifier.testTag("shareButton")) {
-                Icon(Icons.Default.Share, contentDescription = "Share")
+  Box(
+      modifier =
+          Modifier.fillMaxWidth()
+              .background(MaterialTheme.colorScheme.background)
+              .testTag("providerHeader")) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween) {
+              val context = LocalContext.current
+              Row(verticalAlignment = Alignment.CenterVertically) {
+                AsyncImage(
+                    model =
+                        if (provider.imageUrl != "") provider.imageUrl else R.drawable.default_pdp,
+                    contentDescription = "Profile Picture",
+                    contentScale = ContentScale.Crop,
+                    modifier =
+                        Modifier.size(128.dp)
+                            .border(2.dp, Color.Transparent, RoundedCornerShape(16.dp))
+                            .clip(RoundedCornerShape(16.dp))
+                            .testTag("providerImage"))
+                Spacer(modifier = Modifier.width(16.dp))
+                Column {
+                  Text(
+                      text = provider.name,
+                      fontSize = 20.sp,
+                      fontWeight = FontWeight.Bold,
+                      modifier = Modifier.testTag("providerName"),
+                      color = MaterialTheme.colorScheme.onBackground)
+                  Text(
+                      text = provider.companyName,
+                      color = MaterialTheme.colorScheme.onSurfaceVariant,
+                      modifier = Modifier.testTag("providerCompanyName"))
+                }
               }
-        }
-  }
+
+              // Share icon on the right
+              IconButton(
+                  onClick = {
+                    Toast.makeText(context, "Not implemented", Toast.LENGTH_SHORT).show()
+                  },
+                  modifier = Modifier.testTag("shareButton")) {
+                    Icon(
+                        Icons.Default.Share,
+                        contentDescription = "Share",
+                        tint = MaterialTheme.colorScheme.onBackground)
+                  }
+            }
+      }
 }
 
 @Composable
@@ -151,19 +169,25 @@ fun ProviderTabs(selectedTabIndex: Int, onTabSelected: (Int) -> Unit) {
   TabRow(
       selectedTabIndex = selectedTabIndex,
       modifier = Modifier.fillMaxWidth().testTag("providerTabs"),
-      containerColor = Color(0xFF0099FF),
-      contentColor = Color.White) {
+      containerColor = MaterialTheme.colorScheme.primary,
+      contentColor = MaterialTheme.colorScheme.onPrimary) {
         Tab(
             selected = selectedTabIndex == 0,
             onClick = { onTabSelected(0) },
             modifier = Modifier.testTag("profileTab")) {
-              Text("Profile", modifier = Modifier.padding(16.dp))
+              Text(
+                  "Profile",
+                  modifier = Modifier.padding(16.dp),
+                  color = MaterialTheme.colorScheme.onPrimary)
             }
         Tab(
             selected = selectedTabIndex == 1,
             onClick = { onTabSelected(1) },
             modifier = Modifier.testTag("reviewsTab")) {
-              Text("Reviews", modifier = Modifier.padding(16.dp))
+              Text(
+                  "Reviews",
+                  modifier = Modifier.padding(16.dp),
+                  color = MaterialTheme.colorScheme.onPrimary)
             }
       }
 }
@@ -174,7 +198,8 @@ fun ProviderDetails(provider: Provider, reviews: List<Review>) {
       modifier =
           Modifier.padding(16.dp)
               .fillMaxWidth()
-              .background(color = Color.Transparent, shape = RoundedCornerShape(16.dp))
+              .background(
+                  color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(16.dp))
               .testTag("providerDetails")) {
         Rubric(modifier = Modifier.testTag("detailsSection")) {
           Row(
@@ -184,21 +209,25 @@ fun ProviderDetails(provider: Provider, reviews: List<Review>) {
                 RatingStars(provider.rating.toInt())
                 Text(
                     text = "${reviews.size} Reviews",
-                    color = Color.Gray,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.testTag("reviewsCount"))
                 Text(
                     text = "15 Jobs", // Replace with actual job count
-                    color = Color.Gray,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.testTag("jobsCount"))
               }
 
           Spacer(modifier = Modifier.height(8.dp))
 
-          Text("Refrigerator repair", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+          Text(
+              "Refrigerator repair",
+              fontSize = 18.sp,
+              fontWeight = FontWeight.Bold,
+              color = MaterialTheme.colorScheme.onBackground)
           Text(
               text = "CHF ${provider.price}/hour",
               fontSize = 16.sp,
-              color = Color.Gray,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
               modifier = Modifier.padding(vertical = 4.dp).testTag("priceDisplay"))
         }
 
@@ -208,7 +237,8 @@ fun ProviderDetails(provider: Provider, reviews: List<Review>) {
             text = "Descriptions",
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.testTag("descriptionTitle"))
+            modifier = Modifier.testTag("descriptionTitle"),
+            color = MaterialTheme.colorScheme.onBackground)
 
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -216,7 +246,7 @@ fun ProviderDetails(provider: Provider, reviews: List<Review>) {
           Text(
               text = provider.description,
               modifier = Modifier.padding(vertical = 4.dp).testTag("descriptionText"),
-              color = Color.Gray,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
               fontWeight = FontWeight.Medium)
         }
 
@@ -226,7 +256,8 @@ fun ProviderDetails(provider: Provider, reviews: List<Review>) {
             text = "Contact",
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.testTag("contactTitle"))
+            modifier = Modifier.testTag("contactTitle"),
+            color = MaterialTheme.colorScheme.onBackground)
 
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -238,14 +269,12 @@ fun ProviderDetails(provider: Provider, reviews: List<Review>) {
                     painter = painterResource(id = R.drawable.message),
                     contentDescription = "Message",
                     modifier = Modifier.size(64.dp).testTag("messageIcon"),
-                    tint = Color.Unspecified)
+                    tint = MaterialTheme.colorScheme.onBackground)
                 Text(
                     text =
-                        "The contractor's contacts are visible only to its customers." +
-                            "If you are interested in the services of this contractor" +
-                            " - offer him an order.",
+                        "The contractor's contacts are visible only to its customers. If you are interested in the services of this contractor - offer him an order.",
                     modifier = Modifier.padding(vertical = 4.dp).testTag("contactText"),
-                    color = Color.Gray,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontWeight = FontWeight.Medium)
               }
         }
@@ -258,7 +287,8 @@ fun Rubric(modifier: Modifier = Modifier, content: @Composable ColumnScope.() ->
       modifier =
           modifier
               .fillMaxWidth()
-              .background(color = Color.White, shape = RoundedCornerShape(16.dp))
+              .background(
+                  color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(16.dp))
               .border(width = 2.dp, color = Color.Transparent, shape = RoundedCornerShape(16.dp))
               .padding(16.dp)) {
         content()
@@ -271,11 +301,13 @@ fun ProviderReviews(provider: Provider, reviews: List<Review>) {
       modifier =
           Modifier.padding(16.dp)
               .fillMaxWidth()
-              .background(color = Color.Transparent, shape = RoundedCornerShape(16.dp))
+              .background(
+                  color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(16.dp))
               .testTag("providerReviews")) {
         Column(
             Modifier.fillMaxWidth()
-                .background(color = Color.White, shape = RoundedCornerShape(16.dp))
+                .background(
+                    color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(16.dp))
                 .border(width = 2.dp, color = Color.Transparent, shape = RoundedCornerShape(16.dp))
                 .padding(16.dp)
                 .testTag("reviewsOverview")) {
@@ -283,7 +315,7 @@ fun ProviderReviews(provider: Provider, reviews: List<Review>) {
                   "Overall",
                   fontSize = 18.sp,
                   fontWeight = FontWeight.Bold,
-                  color = Color.Gray,
+                  color = MaterialTheme.colorScheme.onSurfaceVariant,
                   modifier = Modifier.testTag("overallTitle"))
 
               Spacer(modifier = Modifier.height(8.dp))
@@ -292,7 +324,11 @@ fun ProviderReviews(provider: Provider, reviews: List<Review>) {
                   verticalAlignment = Alignment.CenterVertically,
                   horizontalArrangement = Arrangement.SpaceBetween,
                   modifier = Modifier.fillMaxWidth().testTag("overallRating")) {
-                    Text(provider.rating.toString(), fontSize = 35.sp, fontWeight = FontWeight.Bold)
+                    Text(
+                        provider.rating.toString(),
+                        fontSize = 35.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onBackground)
                     RatingStars(provider.rating.toInt())
                   }
 
@@ -301,7 +337,7 @@ fun ProviderReviews(provider: Provider, reviews: List<Review>) {
               Text(
                   "${reviews.size} " + if (reviews.size > 1) "Reviews" else "Review",
                   modifier = Modifier.padding(vertical = 4.dp),
-                  color = Color.Gray)
+                  color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -310,13 +346,19 @@ fun ProviderReviews(provider: Provider, reviews: List<Review>) {
             "Reviews",
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.testTag("reviewsTitle"))
+            modifier = Modifier.testTag("reviewsTitle"),
+            color = MaterialTheme.colorScheme.onBackground)
 
         Spacer(modifier = Modifier.height(8.dp))
 
         LazyColumn {
           if (reviews.isEmpty()) {
-            item { Text("No reviews yet", modifier = Modifier.padding(16.dp), color = Color.Gray) }
+            item {
+              Text(
+                  "No reviews yet",
+                  modifier = Modifier.padding(16.dp),
+                  color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
           }
           items(reviews) { review -> ReviewRow(review) }
         }
@@ -328,7 +370,7 @@ fun ReviewRow(review: Review) {
   Column(
       Modifier.fillMaxWidth()
           .padding(top = 16.dp)
-          .background(color = Color.White, shape = RoundedCornerShape(16.dp))
+          .background(color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(16.dp))
           .border(width = 2.dp, color = Color.Transparent, shape = RoundedCornerShape(16.dp))
           .padding(4.dp)
           .testTag("reviewRow")) {
@@ -350,7 +392,7 @@ fun ReviewRow(review: Review) {
         Text(
             review.comment,
             modifier = Modifier.padding(vertical = 4.dp).testTag("reviewComment"),
-            color = Color.Gray)
+            color = MaterialTheme.colorScheme.onSurfaceVariant)
       }
 }
 
@@ -364,7 +406,9 @@ fun RatingStars(rating: Int) {
           painter = painterResource(id = R.drawable.star),
           modifier = Modifier.size(24.dp),
           contentDescription = "Rating Star",
-          tint = if (index < rating) Color(0xFF0099FF) else Color.Gray)
+          tint =
+              if (index < rating) MaterialTheme.colorScheme.primary
+              else MaterialTheme.colorScheme.onSurfaceVariant)
     }
   }
 }
@@ -379,12 +423,17 @@ fun BottomBar() {
             modifier =
                 Modifier.padding(16.dp)
                     .clip(RoundedCornerShape(16.dp))
-                    .background(Color(0xFF0099FF))
+                    .background(MaterialTheme.colorScheme.primary)
                     .size(200.dp, 50.dp)
                     .testTag("bookNowButton"),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0099FF)),
+            colors =
+                ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
             onClick = { Toast.makeText(context, "Not implemented", Toast.LENGTH_SHORT).show() }) {
-              Text("Book Now", color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.Bold)
+              Text(
+                  "Book Now",
+                  color = MaterialTheme.colorScheme.onPrimary,
+                  fontSize = 24.sp,
+                  fontWeight = FontWeight.Bold)
             }
       }
 }

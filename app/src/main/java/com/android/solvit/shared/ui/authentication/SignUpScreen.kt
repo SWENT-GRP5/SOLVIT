@@ -32,6 +32,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -60,11 +61,13 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.solvit.R
+import com.android.solvit.provider.ui.calendar.FakeNavController
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
@@ -100,8 +103,6 @@ fun SignUpScreen(
   val passwordLengthComplete = password.length >= 6
   val samePassword = password == confirmPassword
 
-  val backgroundColor = Color(0xFFFFFFFF)
-
   Scaffold(
       topBar = {
         TopAppBar(
@@ -114,12 +115,12 @@ fun SignUpScreen(
                     modifier = Modifier.testTag("backButton"))
               }
             },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = backgroundColor),
+            colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background),
             modifier = Modifier.testTag("backButton"))
       },
       content = { padding ->
         Column(
-            modifier = Modifier.fillMaxSize().padding(padding).background(backgroundColor),
+            modifier = Modifier.fillMaxSize().padding(padding).background(colorScheme.background),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center) {}
       })
@@ -137,7 +138,7 @@ fun SignUpScreen(
         VerticalSpacer(height = 20.dp)
 
         // Social Sign Up Buttons
-        VerticalSpacer(height = 10.dp)
+        VerticalSpacer(height = 20.dp)
         SocialSignUpButton {
           authViewModel.setRole("seeker")
           val gso =
@@ -151,7 +152,7 @@ fun SignUpScreen(
         VerticalSpacer(height = 10.dp)
 
         VerticalSpacer(height = 10.dp)
-        Text("OR", color = Color.Gray)
+        Text("OR", color = colorScheme.onSurface)
         VerticalSpacer(height = 10.dp)
 
         EmailTextField(
@@ -180,7 +181,7 @@ fun SignUpScreen(
 
         Text(
             text = "Password must be at least 6 characters",
-            color = Color.Gray,
+            color = colorScheme.onSurfaceVariant,
             fontSize = 12.sp,
             textAlign = TextAlign.Start,
             modifier = Modifier.padding(top = 4.dp).fillMaxWidth())
@@ -231,12 +232,14 @@ fun EmailTextField(value: String, onValueChange: (String) -> Unit, label: String
         Icon(
             painter = painterResource(id = android.R.drawable.ic_dialog_email),
             contentDescription = "Email Icon",
-            tint = Color(90, 197, 97))
+            tint = colorScheme.secondary)
       },
       shape = RoundedCornerShape(8.dp),
       colors =
           TextFieldDefaults.outlinedTextFieldColors(
-              focusedBorderColor = Color(0xFF5AC561), unfocusedBorderColor = Color(0xFF5AC561)))
+              focusedBorderColor = colorScheme.secondary, // Green color when focused
+              unfocusedBorderColor = colorScheme.secondary // Green color when not focused
+              ))
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -253,7 +256,7 @@ fun PasswordTextField(
   OutlinedTextField(
       value = value,
       onValueChange = onValueChange,
-      label = { Text(label, color = Color.Black) },
+      label = { Text(label) },
       singleLine = true,
       visualTransformation =
           if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
@@ -265,7 +268,7 @@ fun PasswordTextField(
         Icon(
             imageVector = Icons.Filled.Lock,
             contentDescription = contentDescription,
-            tint = Color(90, 197, 97),
+            tint = colorScheme.secondary,
             modifier = Modifier.size(25.dp))
       },
       trailingIcon = {
@@ -277,13 +280,15 @@ fun PasswordTextField(
           Icon(
               painter = image,
               contentDescription = null,
-              tint = Color(90, 197, 97),
+              tint = colorScheme.secondary,
               modifier = Modifier.size(24.dp))
         }
       },
       colors =
           TextFieldDefaults.outlinedTextFieldColors(
-              focusedBorderColor = Color(0xFF5AC561), unfocusedBorderColor = Color(0xFF5AC561)))
+              focusedBorderColor = colorScheme.secondary, // Green color when focused
+              unfocusedBorderColor = colorScheme.secondary // Green color when not focused
+              ))
 }
 
 @Composable
@@ -322,9 +327,13 @@ fun SignUpButton(
           ButtonDefaults.buttonColors(
               containerColor =
                   if (isComplete && goodFormEmail && samePassword && passwordLengthComplete)
-                      Color(0xFF5AC561)
-                  else Color.Gray)) {
-        Text("Sign Up", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                      colorScheme.secondary
+                  else colorScheme.onSurfaceVariant)) {
+        Text(
+            "Sign Up",
+            color = colorScheme.background,
+            fontWeight = FontWeight.Bold,
+            fontSize = 16.sp)
       }
 }
 
@@ -334,7 +343,7 @@ fun SocialSignUpButton(onClick: () -> Unit) {
       onClick = onClick,
       colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
       shape = RoundedCornerShape(8.dp),
-      border = BorderStroke(1.dp, Color.LightGray),
+      border = BorderStroke(1.dp, colorScheme.onSurface),
       modifier = Modifier.fillMaxWidth().height(48.dp).testTag("googleSignUpButton")) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -344,7 +353,7 @@ fun SocialSignUpButton(onClick: () -> Unit) {
                   painter = painterResource(id = R.drawable.google_logo),
                   contentDescription = "Google Logo",
                   modifier = Modifier.size(30.dp).padding(end = 8.dp))
-              Text(text = "Sign Up with Google", color = Color.Gray, fontSize = 16.sp)
+              Text(text = "Sign Up with Google", color = colorScheme.onSurface, fontSize = 16.sp)
               Spacer(Modifier.size(25.dp))
             }
       }
@@ -375,11 +384,17 @@ fun googleRegisterLauncher(
 @Composable
 fun AlreadyHaveAccountText(navigationActions: NavigationActions) {
   Row(verticalAlignment = Alignment.CenterVertically) {
-    Text("Already have an account? ", color = Color.Gray)
+    Text("Already have an account? ", color = colorScheme.onSurface)
     ClickableText(
         text = AnnotatedString("Log up in here!"),
         onClick = { navigationActions.navigateTo(Screen.SIGN_IN) },
-        style = TextStyle(color = Color.Blue, textDecoration = TextDecoration.Underline),
+        style = TextStyle(color = colorScheme.primary, textDecoration = TextDecoration.Underline),
         modifier = Modifier.testTag("logInLink"))
   }
+}
+
+@Preview
+@Composable
+fun PreviewSignUpScreen() {
+  SignUpScreen(NavigationActions(FakeNavController(LocalContext.current)))
 }

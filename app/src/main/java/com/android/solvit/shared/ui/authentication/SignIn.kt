@@ -34,6 +34,7 @@ import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -69,6 +70,8 @@ import com.android.solvit.R
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
+import com.android.solvit.shared.ui.theme.GradientBlue
+import com.android.solvit.shared.ui.theme.GradientGreen
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
@@ -99,7 +102,7 @@ fun SignInScreen(
   val launcher = googleSignInLauncher(authViewModel, onSuccess, onFailure)
   val token = stringResource(R.string.default_web_client_id)
 
-  val backgroundColor = Color(0xFFFFFFFF) // White background color
+  val backgroundColor = colorScheme.background // White background color
 
   Scaffold(
       topBar = {
@@ -272,10 +275,10 @@ fun LogoSection() {
         text = "Welcome!",
         fontSize = 28.sp,
         fontWeight = FontWeight.Bold,
-        color = Color(0, 153, 255),
+        color = colorScheme.primary,
         modifier = Modifier.testTag("welcomeText"))
     // Spacer(modifier = Modifier.height(4.dp))
-    Text(text = "Sign in to continue", color = Color.Black)
+    Text(text = "Sign in to continue", color = colorScheme.onBackground)
   }
 }
 
@@ -313,13 +316,13 @@ fun FormSection(
         Icon(
             painter = painterResource(id = android.R.drawable.ic_dialog_email),
             contentDescription = "Email Icon",
-            tint = Color(90, 197, 97))
+            tint = colorScheme.secondary)
       },
       shape = RoundedCornerShape(8.dp),
       colors =
           TextFieldDefaults.outlinedTextFieldColors(
-              focusedBorderColor = Color(0xFF5AC561), // Green color when focused
-              unfocusedBorderColor = Color(0xFF5AC561) // Green color when not focused
+              focusedBorderColor = colorScheme.secondary, // Green color when focused
+              unfocusedBorderColor = colorScheme.secondary // Green color when not focused
               ))
 
   Spacer(modifier = Modifier.height(8.dp))
@@ -333,7 +336,7 @@ fun FormSection(
       visualTransformation =
           if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
       leadingIcon = {
-        Icon(Icons.Default.Lock, contentDescription = "Email Icon", tint = Color(90, 197, 97))
+        Icon(Icons.Default.Lock, contentDescription = "Email Icon", tint = colorScheme.secondary)
       },
       trailingIcon = {
         val image =
@@ -344,7 +347,7 @@ fun FormSection(
           Icon(
               painter = image,
               contentDescription = null,
-              tint = Color(90, 197, 97),
+              tint = colorScheme.secondary,
               modifier = Modifier.size(24.dp))
         }
       },
@@ -352,11 +355,11 @@ fun FormSection(
       modifier = Modifier.fillMaxWidth().testTag("password"),
       colors =
           TextFieldDefaults.outlinedTextFieldColors(
-              focusedBorderColor = Color(0xFF5AC561), // Green color when focused
-              unfocusedBorderColor = Color(0xFF5AC561) // Green color when not focused
+              focusedBorderColor = colorScheme.secondary, // Green color when focused
+              unfocusedBorderColor = colorScheme.secondary // Green color when not focused
               ))
 
-  Spacer(modifier = Modifier.height(8.dp))
+  Spacer(modifier = Modifier.height(16.dp))
 
   // Remember me & Forgot password
   Row(
@@ -370,16 +373,19 @@ fun FormSection(
               modifier = Modifier.size(24.dp),
               colors =
                   CheckboxDefaults.colors(
-                      checkmarkColor = Color.White,
-                      uncheckedColor = Color(90, 197, 97),
-                      checkedColor = Color(90, 197, 97)))
+                      checkmarkColor = colorScheme.background,
+                      uncheckedColor = colorScheme.secondary,
+                      checkedColor = colorScheme.secondary))
           Text(text = " Remember me", modifier = Modifier.testTag("rememberMeCheckbox"))
         }
 
         ClickableText(
             text = AnnotatedString("Forgot password?"),
             onClick = { navigationActions.navigateTo(Screen.FORGOT_PASSWORD) },
-            style = TextStyle(color = Color.Gray, textDecoration = TextDecoration.Underline),
+            style =
+                TextStyle(
+                    color = colorScheme.onSurfaceVariant,
+                    textDecoration = TextDecoration.Underline),
             modifier = Modifier.testTag("forgotPasswordLink"))
       }
 
@@ -398,7 +404,7 @@ fun FormSection(
 
   Spacer(modifier = Modifier.height(4.dp))
 
-  Text("OR", color = Color.Gray)
+  Text("OR", color = colorScheme.onSurface)
 
   Spacer(modifier = Modifier.height(4.dp))
 
@@ -418,11 +424,11 @@ fun FormSection(
 @Composable
 fun SignUpSection(navigationActions: NavigationActions) {
   Row(verticalAlignment = Alignment.CenterVertically) {
-    Text("I'm new user, ", color = Color.Gray)
+    Text("I'm a new user, ", color = colorScheme.onSurface)
     ClickableText(
         text = AnnotatedString("Sign up"),
         onClick = { navigationActions.navigateTo(Screen.SIGN_UP) },
-        style = TextStyle(color = Color.Blue, textDecoration = TextDecoration.Underline),
+        style = TextStyle(color = colorScheme.primary, textDecoration = TextDecoration.Underline),
         modifier = Modifier.testTag("signUpLink"))
   }
 }
@@ -464,14 +470,19 @@ fun SignInButton(
               .background(
                   brush =
                       if (isFormComplete && goodFormEmail && passwordLengthComplete) {
-                        Brush.horizontalGradient(
-                            colors = listOf(Color(0, 200, 83), Color(0, 153, 255)))
+                        Brush.horizontalGradient(colors = listOf(GradientGreen, GradientBlue))
                       } else {
-                        Brush.horizontalGradient(colors = listOf(Color.Gray, Color.Gray))
+                        Brush.horizontalGradient(
+                            colors =
+                                listOf(colorScheme.onSurfaceVariant, colorScheme.onSurfaceVariant))
                       },
                   shape = RoundedCornerShape(25.dp))
               .testTag("signInButton")) {
-        Text("Sign in", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+        Text(
+            "Sign in",
+            color = colorScheme.background,
+            fontWeight = FontWeight.Bold,
+            fontSize = 16.sp)
       }
 }
 
@@ -481,7 +492,7 @@ fun GoogleSignInButton(onSignInClick: () -> Unit) {
       onClick = onSignInClick,
       colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent), // Button color
       shape = RoundedCornerShape(25.dp), // Circular edges for the button
-      border = BorderStroke(1.dp, Color.LightGray),
+      border = BorderStroke(1.dp, colorScheme.onSurfaceVariant), // Border color
       modifier =
           Modifier.fillMaxWidth()
               .height(50.dp) // Adjust height as needed
@@ -501,7 +512,7 @@ fun GoogleSignInButton(onSignInClick: () -> Unit) {
               // Text for the button
               Text(
                   text = "Sign in with Google",
-                  color = Color.Gray, // Text color
+                  color = colorScheme.onSurface, // Text color
                   fontSize = 16.sp, // Font size
                   fontWeight = FontWeight.Medium)
             }

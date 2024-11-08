@@ -21,6 +21,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -42,6 +43,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.android.solvit.R
 import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.android.solvit.shared.ui.theme.*
 
 @SuppressLint("SuspiciousIndentation")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -93,7 +95,7 @@ fun ForgotPassword(navigationActions: NavigationActions) {
 
         Text(
             text = "Please enter your email address to reset your password",
-            color = Color.DarkGray,
+            color = colorScheme.onSurfaceVariant,
             fontSize = 20.sp,
             modifier = Modifier.padding(top = 4.dp).fillMaxWidth().testTag("bigText"))
 
@@ -126,16 +128,19 @@ fun ForgotPassword(navigationActions: NavigationActions) {
                     .background(
                         brush =
                             if (email.isNotBlank() && email.contains("@") && email.contains(".")) {
-                              Brush.horizontalGradient(
-                                  colors = listOf(Color(0, 200, 83), Color(0, 153, 255)))
+                              Brush.horizontalGradient(colors = listOf(GradientGreen, GradientBlue))
                             } else {
-                              Brush.horizontalGradient(colors = listOf(Color.Gray, Color.Gray))
+                              Brush.horizontalGradient(
+                                  colors =
+                                      listOf(
+                                          colorScheme.onSurfaceVariant,
+                                          colorScheme.onSurfaceVariant))
                             },
                         shape = RoundedCornerShape(25.dp))
                     .testTag("Send reset link")) {
               Text(
                   "Send reset link",
-                  color = Color.White,
+                  color = colorScheme.onPrimary,
                   fontWeight = FontWeight.Bold,
                   fontSize = 16.sp)
             }

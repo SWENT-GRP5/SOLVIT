@@ -20,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Alignment
@@ -35,6 +36,7 @@ import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_CUSTOM
 import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.navigation.TopLevelDestination
 import com.android.solvit.shared.ui.navigation.TopLevelDestinations
+import com.android.solvit.shared.ui.theme.Background
 
 @Composable
 fun SeekerBottomNavigationMenu(
@@ -80,7 +82,9 @@ fun SeekerBottomNavigationMenu(
                 close()
               }
 
-          drawPath(path = path, color = Color(0xFFD8D8D8), style = Fill)
+          // TODO: Use the colorScheme from the MaterialTheme to accommodate dark mode, should be
+          // colorScheme.background
+          drawPath(path = path, color = Background, style = Fill)
         }
 
         Row(
@@ -90,7 +94,9 @@ fun SeekerBottomNavigationMenu(
               val filteredTabList = tabList.filter { it.route != Route.CREATE_REQUEST }
               filteredTabList.forEachIndexed { index, tab ->
                 BottomNavigationItem(
-                    icon = { Icon(tab.icon, contentDescription = null, tint = Color.White) },
+                    icon = {
+                      Icon(tab.icon, contentDescription = null, tint = colorScheme.onSurfaceVariant)
+                    },
                     selected = tab.route == selectedItem,
                     onClick = { onTabSelect(tab) },
                     modifier = Modifier.testTag(tab.textId))
@@ -106,11 +112,11 @@ fun SeekerBottomNavigationMenu(
                       .align(Alignment.TopCenter)
                       .testTag(TopLevelDestinations.CREATE_REQUEST.toString()),
               shape = CircleShape,
-              containerColor = Color(0xFF0099FF)) {
+              containerColor = colorScheme.primary) {
                 Icon(
                     Icons.Outlined.Add,
                     contentDescription = "Add",
-                    tint = Color.White,
+                    tint = colorScheme.onPrimary,
                     modifier = Modifier.size(30.dp))
               }
         }

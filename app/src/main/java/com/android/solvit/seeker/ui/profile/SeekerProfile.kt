@@ -38,6 +38,7 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
@@ -303,7 +304,10 @@ fun SeekerProfileScreen(viewModel: SeekerProfileViewModel, navigationActions: Na
             Text(
                 text = "Profile",
                 style =
-                    TextStyle(fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Color.Black),
+                    TextStyle(
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = colorScheme.onBackground),
                 modifier =
                     Modifier.padding(start = 16.dp, top = 16.dp)
                         .verticalScroll(scrollState)
@@ -313,7 +317,7 @@ fun SeekerProfileScreen(viewModel: SeekerProfileViewModel, navigationActions: Na
 
             TopAppBar(
                 modifier = Modifier.testTag("ProfileTopBar"),
-                backgroundColor = Color(0xFF0099FF), // Match background color from Figma
+                backgroundColor = colorScheme.primary, // Match background color from Figma
                 contentPadding = PaddingValues(16.dp)) {
                   // Row layout for profile image, name, email, and edit icon
                   Row(
@@ -330,7 +334,7 @@ fun SeekerProfileScreen(viewModel: SeekerProfileViewModel, navigationActions: Na
                               modifier =
                                   Modifier.size(53.dp) // Set size to 53px
                                       .clip(CircleShape)
-                                      .border(2.dp, Color.White, CircleShape)
+                                      .border(2.dp, colorScheme.onPrimary, CircleShape)
                                       .testTag("ProfileImage") // testTag for profile image
                               )
                           Spacer(modifier = Modifier.width(16.dp))
@@ -340,12 +344,15 @@ fun SeekerProfileScreen(viewModel: SeekerProfileViewModel, navigationActions: Na
                             Text(
                                 text = profile.name,
                                 fontWeight = FontWeight.Bold,
-                                style = MaterialTheme.typography.h6.copy(color = Color.White),
+                                style =
+                                    MaterialTheme.typography.h6.copy(color = colorScheme.onPrimary),
                                 modifier = Modifier.testTag("ProfileName") // testTag for name
                                 )
                             Text(
                                 text = profile.email,
-                                style = MaterialTheme.typography.body2.copy(color = Color.White),
+                                style =
+                                    MaterialTheme.typography.body2.copy(
+                                        color = colorScheme.onPrimary),
                                 modifier = Modifier.testTag("ProfileEmail") // testTag for email
                                 )
                           }
@@ -357,7 +364,7 @@ fun SeekerProfileScreen(viewModel: SeekerProfileViewModel, navigationActions: Na
                               Icon(
                                   Icons.Default.Edit,
                                   contentDescription = "Edit Profile",
-                                  tint = Color.White)
+                                  tint = colorScheme.onPrimary)
                             }
                       }
                 }
@@ -447,7 +454,7 @@ fun ProfileOptionItem(
     optionName: String,
     subtitle: String, // New parameter for subtitle
     onClick: () -> Unit = {},
-    iconColor: Color = Color.Gray,
+    iconColor: Color = colorScheme.onBackground,
     modifier: Modifier = Modifier // Adding modifier for testTag
 ) {
   Row(
@@ -472,7 +479,9 @@ fun ProfileOptionItem(
               style =
                   TextStyle(
                       fontSize = 12.sp, // Set a smaller font size for the subtitle
-                      color = Color(0xFFABABAB)),
+                      color =
+                          colorScheme.onBackground.copy(
+                              alpha = 0.3F)), // Use onBackground color for the subtitle
               modifier = Modifier.padding(4.dp) // Padding for the subtitle
               )
         }
