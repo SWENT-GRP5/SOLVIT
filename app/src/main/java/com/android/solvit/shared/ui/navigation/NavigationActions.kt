@@ -37,6 +37,7 @@ object Screen {
   const val SEEKER_REGISTRATION_PROFILE = "Seeker registration"
   const val PROVIDER_REGISTRATION_PROFILE = "Provider registration"
   const val CALENDAR = "Calendar"
+  const val PROFESSIONAL_PROFILE = "Professional Profile"
 }
 
 data class TopLevelDestination(val route: String, val icon: ImageVector, val textId: String)
@@ -71,6 +72,11 @@ object TopLevelDestinations {
   val PROFILE =
       TopLevelDestination(
           route = Route.PROFILE, icon = Icons.Outlined.AccountCircle, textId = "Profile")
+  val PROFESSIONAL_PROFILE =
+      TopLevelDestination(
+          route = Screen.PROFESSIONAL_PROFILE,
+          icon = Icons.Outlined.AccountCircle,
+          textId = "Profile")
 }
 
 val LIST_TOP_LEVEL_DESTINATION_CUSTOMER =
@@ -84,7 +90,8 @@ val LIST_TOP_LEVEL_DESTINATION_PROVIDER =
     listOf(
         TopLevelDestinations.REQUEST_FEED,
         TopLevelDestinations.MAP_OF_SEEKERS,
-        TopLevelDestinations.CALENDAR)
+        TopLevelDestinations.CALENDAR,
+        TopLevelDestinations.PROFESSIONAL_PROFILE)
 
 open class NavigationActions(
     private val navController: NavController,
