@@ -16,6 +16,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navigation
 import com.android.solvit.provider.ui.calendar.ProviderCalendarScreen
+import com.android.solvit.provider.ui.jobs.JobDashboardScreen
 import com.android.solvit.provider.ui.map.ProviderMapScreen
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
@@ -56,7 +57,7 @@ class MainActivity : ComponentActivity() {
     setContent {
       SampleAppTheme {
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-          SolvitApp()
+          ZyadApp()
         }
       }
     }
@@ -178,5 +179,25 @@ fun ProviderUI(
     }
     composable(Route.MAP_OF_SEEKERS) { ProviderMapScreen(navigationActions = navigationActions) }
     composable(Screen.CALENDAR) { ProviderCalendarScreen(navigationActions = navigationActions) }
+    composable(Screen.MYJOBS) { JobDashboardScreen(navigationActions = navigationActions) }
   }
+}
+
+@Composable
+fun ZyadApp() {
+  // Create necessary view models
+  val serviceRequestViewModel =
+      viewModel<ServiceRequestViewModel>(factory = ServiceRequestViewModel.Factory)
+
+  // Navigation setup
+  val navController = rememberNavController()
+  val navigationActions = NavigationActions(navController)
+  val listProviderViewModel =
+      viewModel<ListProviderViewModel>(factory = ListProviderViewModel.Factory)
+
+  // Only display the CreateRequestScreen
+  // CreateRequestScreen(navigationActions = navigationActions)
+  // ListRequestsFeedScreen(navigationActions = navigationActions)
+  // ServicesScreen(navigationActions, listProviderViewModel)
+  JobDashboardScreen(navigationActions)
 }
