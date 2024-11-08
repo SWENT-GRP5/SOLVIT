@@ -2,6 +2,7 @@ package com.android.solvit.shared.ui.map
 
 import android.content.Intent
 import android.net.Uri
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -52,7 +53,12 @@ fun GetDirectionsBubble(location: Location, onDismiss: () -> Unit) {
                                 Intent.ACTION_VIEW,
                                 Uri.parse(
                                     "https://www.google.com/maps/dir/?api=1&destination=${location.latitude},${location.longitude}"))
-                        context.startActivity(browserIntent)
+                        if (browserIntent.resolveActivity(context.packageManager) != null) {
+                          context.startActivity(browserIntent)
+                        } else {
+                          Toast.makeText(context, "No navigation app available", Toast.LENGTH_SHORT)
+                              .show()
+                        }
                       }
 
                       // Dismiss the bubble after clicking "Get Directions"
