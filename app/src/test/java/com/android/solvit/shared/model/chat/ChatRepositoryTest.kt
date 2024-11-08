@@ -139,7 +139,7 @@ class ChatRepositoryTest {
   @Test
   fun `sendMessage Test`() {
     val chatRoomId = "testChatRoom"
-    val message = ChatMessage("Test message", "senderId", System.currentTimeMillis())
+    val message = ChatMessage.TextMessage("Test message", "senderId", System.currentTimeMillis())
 
     val mockPushReference = mock(DatabaseReference::class.java)
     `when`(mockDatabaseReference.child(chatRoomId)).thenReturn(mockPushReference)
@@ -171,8 +171,8 @@ class ChatRepositoryTest {
     val chatRoomId = "testChatRoom"
     val mockMessageSnapshot1 = mock(DataSnapshot::class.java)
     val mockMessageSnapshot2 = mock(DataSnapshot::class.java)
-    val message1 = ChatMessage("Message 1", "Hello", System.currentTimeMillis())
-    val message2 = ChatMessage("Message 2", "How Are you", System.currentTimeMillis())
+    val message1 = ChatMessage.TextMessage("Message 1", "Hello", System.currentTimeMillis())
+    val message2 = ChatMessage.TextMessage("Message 2", "How Are you", System.currentTimeMillis())
 
     `when`(mockMessageSnapshot1.getValue(ChatMessage::class.java)).thenReturn(message1)
     `when`(mockMessageSnapshot2.getValue(ChatMessage::class.java)).thenReturn(message2)

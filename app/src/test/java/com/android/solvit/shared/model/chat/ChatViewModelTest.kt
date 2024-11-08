@@ -39,7 +39,8 @@ class ChatViewModelTest {
 
     chatViewModel.initChat()
 
-    chatViewModel.sendMessage(ChatMessage("Message 1", "Hello", System.currentTimeMillis()))
+    chatViewModel.sendMessage(
+        ChatMessage.TextMessage("Message 1", "Hello", System.currentTimeMillis()))
     verify(chatRepository).sendMessage(any(), any(), any(), any())
   }
 

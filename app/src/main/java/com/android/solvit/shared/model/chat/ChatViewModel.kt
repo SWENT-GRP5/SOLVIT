@@ -40,7 +40,7 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
     receiverUid?.let { repository.initChat(onSuccess = { uid -> chatId = uid }, it) }
   }
 
-  fun sendMessage(message: ChatMessage) {
+  fun sendMessage(message: ChatMessage.TextMessage) {
     chatId?.let {
       repository.sendMessage(
           chatRoomId = it,
