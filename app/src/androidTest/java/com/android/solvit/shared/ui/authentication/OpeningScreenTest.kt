@@ -20,22 +20,43 @@ class OpeningScreenTest {
   private val mockNavigationActions = Mockito.mock(NavigationActions::class.java)
 
   @Test
-  fun testOpeningScreen_displaysAllComponents() {
-    composeTestRule.setContent { OpeningScreen(mockNavigationActions) }
+  fun testOpeningScreen_Portrait_displaysAllComponents() {
+    composeTestRule.setContent { OpeningScreenPortrait(mockNavigationActions) }
 
     // Test the display of UI components
-    composeTestRule.onNodeWithTag("appLogo").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("appName").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("tagline").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("ctaButton").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("appLogoPortrait").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("appNamePortrait").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("taglinePortrait").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("ctaButtonPortrait").assertIsDisplayed()
   }
 
   @Test
-  fun testTapToContinue_navigatesToSignInScreen() {
-    composeTestRule.setContent { OpeningScreen(mockNavigationActions) }
+  fun testOpeningScreen_Landscape_displaysAllComponents() {
+    composeTestRule.setContent { OpeningScreenLandscape(mockNavigationActions) }
+
+    composeTestRule.onNodeWithTag("appLogoLandscape").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("appNameLandscape").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("taglineLandscape").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("ctaButtonLandscape").assertIsDisplayed()
+  }
+
+  @Test
+  fun testTapToContinue_Portrait_navigatesToSignInScreen() {
+    composeTestRule.setContent { OpeningScreenPortrait(mockNavigationActions) }
 
     // Perform click on "Tap to Continue" and verify navigation to Sign In screen
-    composeTestRule.onNodeWithTag("ctaButton").performClick()
+    composeTestRule.onNodeWithTag("ctaButtonPortrait").performClick()
+
+    // Verify that the navigation action was triggered
+    Mockito.verify(mockNavigationActions).navigateTo(Screen.SIGN_IN)
+  }
+
+  @Test
+  fun testTapToContinue_Landscape_navigatesToSignInScreen() {
+    composeTestRule.setContent { OpeningScreenLandscape(mockNavigationActions) }
+
+    // Perform click on "Tap to Continue" and verify navigation to Sign In screen
+    composeTestRule.onNodeWithTag("ctaButtonLandscape").performClick()
 
     // Verify that the navigation action was triggered
     Mockito.verify(mockNavigationActions).navigateTo(Screen.SIGN_IN)
