@@ -6,6 +6,7 @@ import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.service.Services
 import com.google.android.gms.tasks.Task
 import com.google.firebase.Firebase
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
@@ -112,18 +113,20 @@ class ServiceRequestRepositoryFirebase(
     return try {
       ServiceRequest(
           uid = document.id,
-          title = document.getString("title") ?: return null,
-          description = document.getString("description") ?: return null,
-          userId = document.getString("userId") ?: return null,
-          dueDate = document.getTimestamp("dueDate") ?: return null,
+          title = document.getString("title") ?: "",
+          description = document.getString("description") ?: "",
+          userId = document.getString("userId") ?: "",
+          dueDate = document.getTimestamp("dueDate") ?: Timestamp.now(),
           location =
               Location(
-                  latitude = document.getDouble("location.latitude") ?: return null,
-                  longitude = document.getDouble("location.longitude") ?: return null,
-                  name = document.getString("location.name") ?: return null),
+                  latitude = document.getDouble("location.latitude") ?: 0.0,
+                  longitude = document.getDouble("location.longitude") ?: 0.0,
+                  name = document.getString("location.name") ?: ""),
           imageUrl = document.getString("imageUrl"),
-          type = Services.valueOf(document.getString("type") ?: return null),
-          status = ServiceRequestStatus.valueOf(document.getString("status") ?: return null))
+          type = Services.valueOf(document.getString("type") ?: Services.OTHER.name),
+          status =
+              ServiceRequestStatus.valueOf(
+                  document.getString("status") ?: ServiceRequestStatus.PENDING.name))
     } catch (e: Exception) {
       Log.e("ServiceRequestRepositoryFirestore", "Error converting document to ServiceRequest", e)
       null
