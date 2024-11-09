@@ -40,7 +40,7 @@ import coil.compose.rememberAsyncImagePainter
 import com.android.solvit.R
 import com.android.solvit.shared.ui.navigation.NavigationActions
 
-@SuppressLint("SuspiciousIndentation")
+@SuppressLint("SuspiciousIndentation", "UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ForgotPassword(navigationActions: NavigationActions) {
@@ -61,7 +61,7 @@ fun ForgotPassword(navigationActions: NavigationActions) {
             navigationIcon = { GoBackButton(navigationActions) },
             modifier = Modifier.testTag("topAppBar"))
       },
-      content = { padding ->
+      content = {
         Column(
             modifier = Modifier.fillMaxWidth().padding(16.dp).verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,

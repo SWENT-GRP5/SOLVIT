@@ -48,7 +48,7 @@ class SeekerRegistrationTest {
       SeekerRegistrationScreen(viewModel = seekerViewModel, navigationActions = navigationActions)
     }
 
-    composeTestRule.onNodeWithTag("goBackButton").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("backButton").assertIsDisplayed()
     // Step 1: Registration form fields should be displayed
     composeTestRule.onNodeWithTag("signUpIcon").assertIsDisplayed()
     composeTestRule.onNodeWithTag("signUpCustomerTitle").assertIsDisplayed()

@@ -23,7 +23,7 @@ class ForgotPasswordTest {
   fun signUpChooseProfile_displaysAllComponents() {
     composeTestRule.setContent { ForgotPassword(mockNavigationActions) }
 
-    composeTestRule.onNodeWithTag("backButton", useUnmergedTree = true).assertIsDisplayed()
+    composeTestRule.onNodeWithTag("backButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("forgotPasswordImage").assertIsDisplayed()
     composeTestRule.onNodeWithTag("topAppBar").assertIsDisplayed()
     composeTestRule.onNodeWithTag("bigText").assertIsDisplayed()
@@ -35,7 +35,7 @@ class ForgotPasswordTest {
   fun signUpChooseProfile_performClick() {
     composeTestRule.setContent { ForgotPassword(mockNavigationActions) }
 
-    composeTestRule.onNodeWithTag("backButton", useUnmergedTree = true).performClick()
+    composeTestRule.onNodeWithTag("backButton").performClick()
     composeTestRule.onNodeWithTag("emailInputField").performClick()
     composeTestRule.onNodeWithTag("Send reset link").performClick()
 

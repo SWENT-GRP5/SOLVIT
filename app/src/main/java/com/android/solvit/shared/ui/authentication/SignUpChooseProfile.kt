@@ -1,6 +1,7 @@
 package com.android.solvit.shared.ui.authentication
 
 import android.content.pm.ActivityInfo
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -15,11 +16,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -35,7 +33,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -169,31 +166,6 @@ fun ButtonCustomerProvider(
 }
 
 @Composable
-fun StepCircle(stepNumber: Int, isCompleted: Boolean, label: String) {
-  Column(
-      horizontalAlignment = Alignment.CenterHorizontally,
-      verticalArrangement = Arrangement.Center,
-      modifier = Modifier.widthIn(min = 80.dp)) {
-        Box(
-            modifier =
-                Modifier.size(40.dp)
-                    .background(
-                        color = if (isCompleted) Color(0xFF28A745) else Color.Gray,
-                        shape = CircleShape),
-            contentAlignment = Alignment.Center) {
-              Text(text = if (isCompleted) "✔" else stepNumber.toString(), color = Color.White)
-            }
-
-        Text(
-            text = label,
-            color = Color.Black,
-            modifier = Modifier.padding(top = 4.dp),
-            maxLines = 1,
-            softWrap = false)
-      }
-}
-
-@Composable
 fun SectionTitle(text: String, testTag: String = "") {
   Text(
       text = text,
@@ -204,21 +176,26 @@ fun SectionTitle(text: String, testTag: String = "") {
 
 @Composable
 fun LearnMoreSection() {
+  val context = LocalContext.current // Obtenez le contexte ici
+
   Column(
       horizontalAlignment = Alignment.CenterHorizontally,
       verticalArrangement = Arrangement.Center,
       modifier = Modifier.fillMaxWidth().padding(16.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
           Text("Not sure? ", color = Color.Gray)
-          ClickableText(
-              text = AnnotatedString("Learn more"),
-              onClick = { /* TODO: Learn more action */},
-              style =
-                  TextStyle(color = Color(0, 153, 255), textDecoration = TextDecoration.Underline),
-              modifier = Modifier.testTag("learnMoreLink"))
+          Text(
+              text = "Learn more",
+              color = Color(0, 153, 255),
+              style = TextStyle(textDecoration = TextDecoration.Underline),
+              modifier =
+                  Modifier.clickable {
+                        Toast.makeText(context, "Not implemented yet", Toast.LENGTH_SHORT).show()
+                      }
+                      .testTag("learnMoreLink"))
           Text(" about becoming a", color = Color.Gray)
         }
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(5.dp))
         Text("Customer or Provider.", color = Color.Gray)
       }
 }

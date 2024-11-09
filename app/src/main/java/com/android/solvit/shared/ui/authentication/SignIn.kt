@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
+import android.util.Patterns
 import android.widget.Toast
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -109,8 +110,7 @@ fun SignInScreen(
         TopAppBar(
             title = { Text("") },
             navigationIcon = { GoBackButton(navigationActions) },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = backgroundColor),
-            modifier = Modifier.testTag("backButton"))
+            colors = TopAppBarDefaults.topAppBarColors(containerColor = backgroundColor))
       },
       content = { padding ->
         val modifier =
@@ -162,7 +162,7 @@ fun SignInScreen(
 }
 
 @Composable
-fun GoBackButton(navigationActions: NavigationActions) {
+fun GoBackButton(navigationActions: NavigationActions, testTag: String = "backButton") {
   var canGoBack by remember { mutableStateOf(true) }
   val coroutineScope = rememberCoroutineScope()
   IconButton(
@@ -176,11 +176,12 @@ fun GoBackButton(navigationActions: NavigationActions) {
           }
         }
       },
+      modifier = Modifier.testTag(testTag),
       enabled = canGoBack) {
         Icon(
             Icons.AutoMirrored.Filled.ArrowBack,
             contentDescription = "goBackButton",
-            modifier = Modifier.testTag("backButton"))
+            modifier = Modifier.testTag(testTag))
       }
 }
 
@@ -325,9 +326,13 @@ fun FormSection(
     navigationActions: NavigationActions
 ) {
   val isFormComplete = email.isNotBlank() && password.isNotBlank()
-  val goodFormEmail = email.contains("@") && email.contains(".")
   val passwordLengthComplete = password.length >= 6
-  // Email input
+  val goodFormEmail =
+      email.isNotBlank() &&
+          Patterns.EMAIL_ADDRESS.matcher(email).matches() &&
+          email.contains(".") &&
+          email.contains("@")
+
   OutlinedTextField(
       value = email,
       onValueChange = onEmailChange,
@@ -339,14 +344,23 @@ fun FormSection(
         Icon(
             painter = painterResource(id = android.R.drawable.ic_dialog_email),
             contentDescription = "Email Icon",
-            tint = Color(90, 197, 97))
+            tint = if (goodFormEmail) Color(90, 197, 97) else Color.Gray)
       },
       shape = RoundedCornerShape(8.dp),
       colors =
           TextFieldDefaults.outlinedTextFieldColors(
-              focusedBorderColor = Color(0xFF5AC561), // Green color when focused
-              unfocusedBorderColor = Color(0xFF5AC561) // Green color when not focused
-              ))
+              focusedTextColor = Color.Black,
+              unfocusedTextColor =
+                  if (email.isEmpty()) Color.Gray
+                  else if (!goodFormEmail) Color.Red else Color.Black,
+              focusedBorderColor = if (goodFormEmail) Color(0xFF5AC561) else Color.Blue,
+              unfocusedBorderColor =
+                  when {
+                    email.isEmpty() -> Color.Gray
+                    goodFormEmail -> Color(0xFF5AC561)
+                    else -> Color.Red
+                  },
+          ))
 
   Spacer(modifier = Modifier.height(8.dp))
 
@@ -359,7 +373,10 @@ fun FormSection(
       visualTransformation =
           if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
       leadingIcon = {
-        Icon(Icons.Default.Lock, contentDescription = "Email Icon", tint = Color(90, 197, 97))
+        Icon(
+            Icons.Default.Lock,
+            contentDescription = "Password Icon",
+            tint = if (passwordLengthComplete) Color(90, 197, 97) else Color.Gray)
       },
       trailingIcon = {
         val image =
@@ -370,7 +387,7 @@ fun FormSection(
           Icon(
               painter = image,
               contentDescription = null,
-              tint = Color(90, 197, 97),
+              tint = if (passwordLengthComplete) Color(90, 197, 97) else Color.Gray,
               modifier = Modifier.size(24.dp))
         }
       },
@@ -378,9 +395,18 @@ fun FormSection(
       modifier = Modifier.fillMaxWidth().testTag("password"),
       colors =
           TextFieldDefaults.outlinedTextFieldColors(
-              focusedBorderColor = Color(0xFF5AC561), // Green color when focused
-              unfocusedBorderColor = Color(0xFF5AC561) // Green color when not focused
-              ))
+              focusedTextColor = Color.Black,
+              unfocusedTextColor =
+                  if (password.isEmpty()) Color.Gray
+                  else if (!passwordLengthComplete) Color.Red else Color.Black,
+              focusedBorderColor = if (passwordLengthComplete) Color(0xFF5AC561) else Color.Blue,
+              unfocusedBorderColor =
+                  when {
+                    password.isEmpty() -> Color.Gray
+                    passwordLengthComplete -> Color(0xFF5AC561)
+                    else -> Color.Red
+                  },
+          ))
 
   Spacer(modifier = Modifier.height(8.dp))
 
@@ -397,7 +423,7 @@ fun FormSection(
               colors =
                   CheckboxDefaults.colors(
                       checkmarkColor = Color.White,
-                      uncheckedColor = Color(90, 197, 97),
+                      uncheckedColor = Color.Gray,
                       checkedColor = Color(90, 197, 97)))
           Text(text = " Remember me", modifier = Modifier.testTag("rememberMeCheckbox"))
         }
@@ -554,4 +580,41 @@ fun googleSignInLauncher(
       onFailure()
     }
   }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CustomEmailField() {
+  var email by remember { mutableStateOf("") }
+  val isEmailValid =
+      email.isNotEmpty() &&
+          Patterns.EMAIL_ADDRESS.matcher(email).matches() &&
+          email.contains(".") &&
+          email.contains("@")
+
+  OutlinedTextField(
+      value = email,
+      onValueChange = { email = it },
+      label = { Text("Email") },
+      singleLine = true,
+      modifier = Modifier.fillMaxWidth().testTag("emailInput"),
+      keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Email),
+      leadingIcon = {
+        Icon(
+            painter = painterResource(id = android.R.drawable.ic_dialog_email),
+            contentDescription = "Email Icon",
+            tint = Color(90, 197, 97))
+      },
+      shape = RoundedCornerShape(8.dp),
+      colors =
+          TextFieldDefaults.outlinedTextFieldColors(
+              focusedTextColor = if (email.isEmpty()) Color.Gray else Color.Black,
+              focusedBorderColor = if (isEmailValid) Color(0xFF5AC561) else Color.Blue,
+              unfocusedBorderColor =
+                  when {
+                    email.isEmpty() -> Color.Gray
+                    isEmailValid -> Color(0xFF5AC561)
+                    else -> Color.Red
+                  },
+          ))
 }

@@ -3,6 +3,7 @@ package com.android.solvit.shared.ui.authentication
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.ActivityInfo
+import android.util.Patterns
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.ManagedActivityResultLauncher
@@ -49,6 +50,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -99,7 +101,11 @@ fun SignUpScreen(
   val token = stringResource(R.string.default_web_client_id)
 
   val isFormComplete = email.isNotBlank() && password.isNotBlank() && confirmPassword.isNotBlank()
-  val goodFormEmail = email.contains("@") && email.contains(".")
+  val goodFormEmail =
+      email.isNotBlank() &&
+          Patterns.EMAIL_ADDRESS.matcher(email).matches() &&
+          email.contains(".") &&
+          email.contains("@")
   val passwordLengthComplete = password.length >= 6
   val samePassword = password == confirmPassword
 
@@ -110,11 +116,10 @@ fun SignUpScreen(
         TopAppBar(
             title = { Text("") },
             navigationIcon = { GoBackButton(navigationActions) },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = backgroundColor),
-            modifier = Modifier.testTag("backButton"))
+            colors = TopAppBarDefaults.topAppBarColors(containerColor = backgroundColor))
       },
       content = {
-          Column(
+        Column(
             modifier =
                 Modifier.fillMaxSize()
                     .background(backgroundColor)
@@ -151,7 +156,8 @@ fun SignUpScreen(
                   email,
                   onValueChange = { email = it },
                   "Enter your email address",
-                  "emailInputField")
+                  "emailInputField",
+                  goodFormEmail)
 
               VerticalSpacer(height = 10.dp)
 
@@ -216,7 +222,13 @@ fun ScreenTitle(title: String, testTag: String) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EmailTextField(value: String, onValueChange: (String) -> Unit, label: String, testTag: String) {
+fun EmailTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    testTag: String,
+    goodFormEmail: Boolean = false
+) {
   OutlinedTextField(
       value = value,
       onValueChange = onValueChange,
@@ -228,12 +240,23 @@ fun EmailTextField(value: String, onValueChange: (String) -> Unit, label: String
         Icon(
             painter = painterResource(id = android.R.drawable.ic_dialog_email),
             contentDescription = "Email Icon",
-            tint = Color(90, 197, 97))
+            tint = if (goodFormEmail) Color(90, 197, 97) else Color.Gray)
       },
       shape = RoundedCornerShape(8.dp),
       colors =
           TextFieldDefaults.outlinedTextFieldColors(
-              focusedBorderColor = Color(0xFF5AC561), unfocusedBorderColor = Color(0xFF5AC561)))
+              focusedTextColor = Color.Black,
+              unfocusedTextColor =
+                  if (value.isEmpty()) Color.Gray
+                  else if (!goodFormEmail) Color.Red else Color.Black,
+              focusedBorderColor = if (goodFormEmail) Color(0xFF5AC561) else Color.Blue,
+              unfocusedBorderColor =
+                  when {
+                    value.isEmpty() -> Color.Gray
+                    goodFormEmail -> Color(0xFF5AC561)
+                    else -> Color.Red
+                  },
+          ))
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -247,6 +270,7 @@ fun PasswordTextField(
     testTag: String
 ) {
   var passwordVisible by remember { mutableStateOf(false) }
+  val passwordLengthComplete = value.length >= 6
   OutlinedTextField(
       value = value,
       onValueChange = onValueChange,
@@ -262,7 +286,7 @@ fun PasswordTextField(
         Icon(
             imageVector = Icons.Filled.Lock,
             contentDescription = contentDescription,
-            tint = Color(90, 197, 97),
+            tint = if (passwordLengthComplete) Color(90, 197, 97) else Color.Gray,
             modifier = Modifier.size(25.dp))
       },
       trailingIcon = {
@@ -274,13 +298,24 @@ fun PasswordTextField(
           Icon(
               painter = image,
               contentDescription = null,
-              tint = Color(90, 197, 97),
+              tint = if (passwordLengthComplete) Color(90, 197, 97) else Color.Gray,
               modifier = Modifier.size(24.dp))
         }
       },
       colors =
           TextFieldDefaults.outlinedTextFieldColors(
-              focusedBorderColor = Color(0xFF5AC561), unfocusedBorderColor = Color(0xFF5AC561)))
+              focusedTextColor = Color.Black,
+              unfocusedTextColor =
+                  if (value.isEmpty()) Color.Gray
+                  else if (!passwordLengthComplete) Color.Red else Color.Black,
+              focusedBorderColor = if (passwordLengthComplete) Color(0xFF5AC561) else Color.Blue,
+              unfocusedBorderColor =
+                  when {
+                    value.isEmpty() -> Color.Gray
+                    passwordLengthComplete -> Color(0xFF5AC561)
+                    else -> Color.Red
+                  },
+          ))
 }
 
 @Composable
@@ -313,14 +348,21 @@ fun SignUpButton(
           Toast.makeText(context, "You are Signed up!", Toast.LENGTH_SHORT).show()
         }
       },
-      modifier = Modifier.fillMaxWidth().height(50.dp).testTag("signUpButton"),
+      modifier =
+          Modifier.fillMaxWidth()
+              .height(50.dp)
+              .background(
+                  brush =
+                      if (isComplete && goodFormEmail && passwordLengthComplete && samePassword) {
+                        Brush.horizontalGradient(
+                            colors = listOf(Color(0, 200, 83), Color(0, 153, 255)))
+                      } else {
+                        Brush.horizontalGradient(colors = listOf(Color.Gray, Color.Gray))
+                      },
+                  shape = RoundedCornerShape(25.dp))
+              .testTag("signUpButton"),
       shape = RoundedCornerShape(25.dp),
-      colors =
-          ButtonDefaults.buttonColors(
-              containerColor =
-                  if (isComplete && goodFormEmail && samePassword && passwordLengthComplete)
-                      Color(0xFF5AC561)
-                  else Color.Gray)) {
+      colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)) {
         Text("Sign Up", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
       }
 }
