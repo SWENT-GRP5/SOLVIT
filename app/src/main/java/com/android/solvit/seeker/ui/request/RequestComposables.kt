@@ -249,6 +249,7 @@ fun DatePickerModal(onDateSelected: (Long?) -> Unit, onDismiss: () -> Unit) {
 
   DatePickerDialog(
       onDismissRequest = onDismiss,
+      modifier = Modifier.testTag("datePickerDialog"),
       confirmButton = {
         TextButton(
             onClick = {
