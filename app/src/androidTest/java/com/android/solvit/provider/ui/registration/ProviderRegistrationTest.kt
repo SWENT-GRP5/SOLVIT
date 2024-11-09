@@ -7,6 +7,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
@@ -22,7 +23,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers
-import org.mockito.Mockito
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.`when`
@@ -53,13 +53,12 @@ class ProviderRegistrationTest {
     providerRepository = mock(ProviderRepository::class.java)
     navigationActions = mock(NavigationActions::class.java)
     listProviderViewModel = ListProviderViewModel(providerRepository)
-    locationRepository = Mockito.mock(LocationRepository::class.java)
+    locationRepository = mock(LocationRepository::class.java)
     locationViewModel = LocationViewModel(locationRepository)
 
     // Mock the current route to be the add todo screen
     `when`(navigationActions.currentRoute()).thenReturn(Screen.PROVIDER_REGISTRATION_PROFILE)
-    Mockito.`when`(
-            locationRepository.search(ArgumentMatchers.anyString(), anyOrNull(), anyOrNull()))
+    `when`(locationRepository.search(ArgumentMatchers.anyString(), anyOrNull(), anyOrNull()))
         .thenAnswer { invocation ->
           val onSuccess = invocation.getArgument<(List<Location>) -> Unit>(1)
           onSuccess(locations)
@@ -81,7 +80,7 @@ class ProviderRegistrationTest {
     composeTestRule.onNodeWithTag("fullNameInput").assertIsDisplayed()
     composeTestRule.onNodeWithTag("phoneNumberInput").assertIsDisplayed()
     composeTestRule.onNodeWithTag("companyNameInput").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("locationInput").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("inputRequestAddress").assertIsDisplayed()
     composeTestRule.onNodeWithTag("completeRegistrationButton").performClick()
 
     // Now check for the complete registration button
@@ -99,7 +98,7 @@ class ProviderRegistrationTest {
     composeTestRule.onNodeWithTag("fullNameInput").performTextInput("John Doe")
     composeTestRule.onNodeWithTag("phoneNumberInput").performTextInput("123456789")
     composeTestRule.onNodeWithTag("companyNameInput").performTextInput("Company")
-    composeTestRule.onNodeWithTag("locationInput").performTextInput("123 Main St")
+    composeTestRule.onNodeWithTag("inputRequestAddress").performTextInput("123 Main St")
 
     // Try to submit the form
     composeTestRule.onNodeWithTag("completeRegistrationButton").performClick()
@@ -112,7 +111,9 @@ class ProviderRegistrationTest {
   fun testCompleteProviderRegistrationButtonDisabledWhenFieldsAreIncomplete() {
     composeTestRule.setContent {
       ProviderRegistrationScreen(
-          viewModel = listProviderViewModel, navigationActions = navigationActions)
+          viewModel = listProviderViewModel,
+          navigationActions = navigationActions,
+          locationViewModel = locationViewModel)
     }
     // Initially, the button should be disabled when fields are empty
     composeTestRule.onNodeWithTag("completeRegistrationButton").assertIsNotEnabled()
@@ -126,9 +127,16 @@ class ProviderRegistrationTest {
 
     // Complete the rest of the fields
     composeTestRule.onNodeWithTag("companyNameInput").performTextInput("Company")
-    composeTestRule.onNodeWithTag("locationInput").performTextInput("123 Main St")
+    composeTestRule.onNodeWithTag("inputRequestAddress").performTextInput("123 Main St")
 
     // Now the button should be enabled
+    composeTestRule.onNodeWithTag("completeRegistrationButton").assertIsNotEnabled()
+
+    composeTestRule.onNodeWithTag("inputRequestAddress").performTextClearance()
+    composeTestRule.onNodeWithTag("inputRequestAddress").performTextInput("USA")
+    composeTestRule.waitUntil { locationViewModel.locationSuggestions.value.isNotEmpty() }
+    composeTestRule.onAllNodesWithTag("locationResult")[0].performClick()
+
     composeTestRule.onNodeWithTag("completeRegistrationButton").assertIsEnabled()
   }
 
@@ -136,7 +144,9 @@ class ProviderRegistrationTest {
   fun testStepperMovesToStep2() {
     composeTestRule.setContent {
       ProviderRegistrationScreen(
-          viewModel = listProviderViewModel, navigationActions = navigationActions)
+          viewModel = listProviderViewModel,
+          navigationActions = navigationActions,
+          locationViewModel = locationViewModel)
     }
     // Initially, step 1 should be incomplete and visible
     composeTestRule.onNodeWithTag("stepCircle-1-incomplete").assertExists()
@@ -145,7 +155,9 @@ class ProviderRegistrationTest {
     composeTestRule.onNodeWithTag("fullNameInput").performTextInput("John Doe")
     composeTestRule.onNodeWithTag("phoneNumberInput").performTextInput("123456789")
     composeTestRule.onNodeWithTag("companyNameInput").performTextInput("Company")
-    composeTestRule.onNodeWithTag("locationInput").performTextInput("123 Main St")
+    composeTestRule.onNodeWithTag("inputRequestAddress").performTextInput("USA")
+    composeTestRule.waitUntil { locationViewModel.locationSuggestions.value.isNotEmpty() }
+    composeTestRule.onAllNodesWithTag("locationResult")[0].performClick()
 
     // Click the complete registration button (moves to step 2)
     composeTestRule.onNodeWithTag("completeRegistrationButton").performClick()
@@ -166,7 +178,7 @@ class ProviderRegistrationTest {
           locationViewModel = locationViewModel)
     }
 
-    composeTestRule.onNodeWithTag("locationInput").performTextInput("USA")
+    composeTestRule.onNodeWithTag("inputRequestAddress").performTextInput("USA")
     composeTestRule.waitUntil { locationViewModel.locationSuggestions.value.isNotEmpty() }
 
     composeTestRule.onAllNodesWithTag("locationResult")[0].assertIsDisplayed()
@@ -183,7 +195,7 @@ class ProviderRegistrationTest {
           locationViewModel = locationViewModel)
     }
 
-    composeTestRule.onNodeWithTag("locationInput").performTextInput("USA")
+    composeTestRule.onNodeWithTag("inputRequestAddress").performTextInput("USA")
     composeTestRule.waitUntil { locationViewModel.locationSuggestions.value.isNotEmpty() }
 
     composeTestRule.onAllNodesWithTag("locationResult")[2].performClick()
