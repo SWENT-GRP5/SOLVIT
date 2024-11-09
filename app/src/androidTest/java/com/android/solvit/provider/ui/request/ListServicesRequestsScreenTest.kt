@@ -121,7 +121,8 @@ class ListServicesRequestsScreenTest {
     // Check that only the service request with the word "French" in the title is displayed
     assert(composeTestRule.onAllNodesWithTag("ServiceRequest").fetchSemanticsNodes().size == 1)
 
-      // Check that no service request is displayed when the search query does not match any service request
+    // Check that no service request is displayed when the search query does not match any service
+    // request
     composeTestRule.onNodeWithTag("SearchBar").performTextInput("Plumber")
     assert(composeTestRule.onAllNodesWithTag("ServiceRequest").fetchSemanticsNodes().isEmpty())
   }

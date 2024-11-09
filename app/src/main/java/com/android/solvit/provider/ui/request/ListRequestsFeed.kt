@@ -273,7 +273,7 @@ fun FilterBar(
     onSelectedService: (String) -> Unit,
     onFilterChange: (String, Boolean) -> Unit
 ) {
-  val filters = listOf("Service", "Near To Me", "Due Time")
+  val filters = listOf("Service", "Near Me", "Due Time")
 
   LazyRow(
       modifier = Modifier.testTag("FilterBar"),
