@@ -21,7 +21,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
@@ -30,9 +29,11 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -42,13 +43,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -108,52 +108,42 @@ fun RequestsTopBar() {
       }
 }
 
-@Preview
 @Composable
-fun SearchBar() {
-  val context = LocalContext.current
-  Row(
-      modifier = Modifier.fillMaxWidth().background(Color.White),
-      horizontalArrangement = Arrangement.Center,
-      verticalAlignment = Alignment.CenterVertically) {
-        BasicTextField(
-            value = "",
-            onValueChange = {
-              Toast.makeText(context, "Not Yet Implemented", Toast.LENGTH_LONG).show()
-            },
-            singleLine = true,
-            textStyle = TextStyle(color = Color.Gray, fontSize = 16.sp),
-            modifier =
-                Modifier.fillMaxWidth(0.9f)
-                    .height(50.dp)
-                    .border(1.dp, Color.Gray, RoundedCornerShape(12.dp))
-                    .background(Color.White, RoundedCornerShape(12.dp))
-                    .padding(horizontal = 12.dp, vertical = 8.dp)
-                    .testTag("SearchBar")) {
-              Row(verticalAlignment = Alignment.CenterVertically) {
-                Image(
-                    modifier = Modifier.size(15.dp),
-                    painter = painterResource(id = R.drawable.search_icon),
-                    contentDescription = "Search icon",
-                    contentScale = ContentScale.Crop)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    "Search requests",
-                    style =
-                        TextStyle(
-                            color = Color(0xFFAFAFAF),
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold))
-              }
-            }
-      }
+fun SearchBar(searchQuery: MutableState<String>) {
+  OutlinedTextField(
+      value = searchQuery.value,
+      onValueChange = { searchQuery.value = it },
+      singleLine = true,
+      placeholder = {
+        Text(
+            "Search requests",
+            style =
+                TextStyle(
+                    color = Color(0xFFFF6B00), fontSize = 16.sp, fontWeight = FontWeight.Bold))
+      },
+      leadingIcon = {
+        Icon(
+            painter = painterResource(id = R.drawable.search_icon),
+            contentDescription = "Search icon",
+            tint = Color(0xFFFF6B00),
+            modifier = Modifier.size(20.dp))
+      },
+      modifier =
+          Modifier.fillMaxWidth()
+              .padding(horizontal = 16.dp)
+              .height(56.dp)
+              .border(3.dp, Color(0xFFFF6B00), RoundedCornerShape(12.dp))
+              .testTag("SearchBar"),
+      textStyle =
+          TextStyle(color = Color(0xFFFF6B00), fontSize = 16.sp, fontWeight = FontWeight.Bold),
+      shape = RoundedCornerShape(12.dp))
 }
 
 @Composable
 fun ListRequests(requests: List<ServiceRequest>) {
   LazyColumn(
-      modifier = Modifier.fillMaxSize().background(Color.White).padding(16.dp),
-      verticalArrangement = Arrangement.spacedBy(16.dp)) {
+      modifier = Modifier.fillMaxSize().padding(start = 16.dp, end = 16.dp).background(Color.White),
+      verticalArrangement = Arrangement.spacedBy(8.dp)) {
         items(requests) { request -> ServiceRequestItem(request) }
       }
 }
@@ -168,16 +158,20 @@ fun ServiceRequestItem(request: ServiceRequest) {
           Modifier.fillMaxWidth()
               .padding(8.dp)
               .border(1.dp, Color.Gray, RoundedCornerShape(12.dp))
-              .background(Color.White, RoundedCornerShape(12.dp))
+              .background(Color(0xFF407BFF), RoundedCornerShape(12.dp))
               .padding(16.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
           Image(
-              painter = painterResource(id = R.drawable.image_user),
+              painter = painterResource(id = R.drawable.default_pdp),
               contentDescription = "Profile Picture",
               modifier = Modifier.size(50.dp).clip(CircleShape))
           Spacer(modifier = Modifier.width(8.dp))
           Column(modifier = Modifier.weight(1f)) {
-            Text(text = request.title, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            Text(
+                text = request.title,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White)
             Text(
                 text =
                     request.type.name
@@ -185,44 +179,66 @@ fun ServiceRequestItem(request: ServiceRequest) {
                         .replaceFirstChar { it.uppercase() }
                         .replace("_", " "),
                 fontSize = 14.sp,
-                color = Color.Gray,
-            )
+                color = Color.White)
           }
           IconButton(onClick = { onClick() }) {
-            Icon(imageVector = Icons.Default.MoreVert, contentDescription = "Menu")
+            Icon(
+                imageVector = Icons.Default.MoreVert,
+                contentDescription = "Menu",
+                tint = Color.White)
           }
         }
         Row {
-          Text(text = "Deadline:", fontSize = 15.sp, fontWeight = FontWeight.Bold)
+          Text(
+              text = "Deadline: ",
+              fontSize = 15.sp,
+              fontWeight = FontWeight.Bold,
+              color = Color.White)
           Text(
               text =
                   SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
                       .format(request.dueDate.toDate()),
-              fontSize = 15.sp)
+              fontSize = 15.sp,
+              fontWeight = FontWeight.Bold,
+              color = Color(0xFFFF6B00))
         }
         request.location?.let {
           Text(
               text = if (it.name.length > 50) "${it.name.take(50)}..." else it.name,
               fontSize = 12.sp,
-              color = Color.Gray,
+              color = Color.White,
               modifier = Modifier.clickable { selectedLocation = it })
         }
         Spacer(modifier = Modifier.height(8.dp))
-        Text(text = request.description, fontSize = 14.sp, lineHeight = 18.sp)
+        Text(
+            text = request.description,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Bold,
+            lineHeight = 18.sp,
+            color = Color.White)
         Spacer(modifier = Modifier.height(8.dp))
-        if (request.imageUrl != null) {
+        val imageUrl = request.imageUrl
+        if (!imageUrl.isNullOrEmpty()) {
           AsyncImage(
-              model = request.imageUrl,
+              model = imageUrl,
               placeholder = painterResource(id = R.drawable.loading),
-              error = painterResource(id = R.drawable.logosolvit_firstpage),
+              error = painterResource(id = R.drawable.error),
               contentDescription = "Service Image",
-              modifier = Modifier.fillMaxWidth().height(160.dp).clip(RoundedCornerShape(12.dp)),
+              modifier =
+                  Modifier.fillMaxWidth()
+                      .height(160.dp)
+                      .border(1.dp, Color.White, RoundedCornerShape(12.dp))
+                      .clip(RoundedCornerShape(12.dp)),
               contentScale = ContentScale.Crop)
         } else {
           Box(
-              modifier = Modifier.fillMaxWidth().height(160.dp).clip(RoundedCornerShape(12.dp)),
+              modifier =
+                  Modifier.fillMaxWidth()
+                      .height(160.dp)
+                      .border(1.dp, Color.White, RoundedCornerShape(12.dp))
+                      .clip(RoundedCornerShape(12.dp)),
               contentAlignment = Alignment.Center) {
-                Text(text = "No Image Provided", fontSize = 16.sp, color = Color.Gray)
+                Text(text = "No Image Provided", fontSize = 16.sp, color = Color.White)
               }
         }
         Spacer(modifier = Modifier.height(8.dp))
@@ -238,11 +254,12 @@ fun ServiceRequestItem(request: ServiceRequest) {
 @Composable
 fun InteractionBar(text: String, icon: Int, onClick: () -> Unit = {}) {
   Column(horizontalAlignment = Alignment.CenterHorizontally) {
-    Text(text = text, fontSize = 14.sp, color = Color(0xFF585C60))
+    Text(text = text, fontSize = 14.sp, color = Color.White)
     IconButton(onClick = { onClick() }) {
       Image(
           painter = painterResource(id = icon),
           contentDescription = text,
+          colorFilter = ColorFilter.tint(Color.White),
           modifier = Modifier.size(21.dp))
     }
   }
@@ -259,7 +276,7 @@ fun FilterBar(
 
   LazyRow(
       modifier = Modifier.testTag("FilterBar"),
-      horizontalArrangement = Arrangement.spacedBy(10.dp),
+      horizontalArrangement = Arrangement.spacedBy(5.dp),
       verticalAlignment = Alignment.Top) {
         items(filters.size) { idx ->
           val filter = filters[idx]
@@ -286,7 +303,7 @@ fun ServiceChip(selectedService: String, onServiceSelected: (String) -> Unit) {
   var showDropdown by remember { mutableStateOf(false) }
 
   val backgroundColor = if (selectedText != "Service") Color(0xFFFFFAF5) else Color(0xFFFFFFFF)
-  val borderTextColor = if (selectedText != "Service") Color(0xFF00C853) else Color(0xFFAFAFAF)
+  val borderTextColor = if (selectedText != "Service") Color(0xFFFFCD55) else Color(0xFF00C853)
 
   Box(
       modifier =
@@ -298,7 +315,6 @@ fun ServiceChip(selectedService: String, onServiceSelected: (String) -> Unit) {
             text = selectedText,
             fontSize = 16.sp,
             lineHeight = 34.sp,
-            fontFamily = FontFamily(Font(R.font.donegal_one)),
             fontWeight = FontWeight(400),
             color = borderTextColor)
       }
@@ -311,7 +327,8 @@ fun ServiceChip(selectedService: String, onServiceSelected: (String) -> Unit) {
               .background(Color.White, RoundedCornerShape(12.dp))
               .testTag("ServiceDropdown")) {
         Services.entries.forEach { service ->
-          val serviceName = service.name.replace("_", " ")
+          val serviceName =
+              service.name.replace("_", " ").lowercase().replaceFirstChar { it.uppercase() }
           DropdownMenuItem(
               modifier = Modifier.testTag(serviceName),
               text = { Text(serviceName) },
@@ -327,23 +344,20 @@ fun ServiceChip(selectedService: String, onServiceSelected: (String) -> Unit) {
 @Composable
 fun FilterChip(label: String, isSelected: Boolean, onSelected: (Boolean) -> Unit) {
   val backgroundColor = if (isSelected) Color(0xFFFFFAF5) else Color(0xFFFFFFFF)
-  val borderTextColor = if (isSelected) Color(0xFF00C853) else Color(0xFFAFAFAF)
+  val borderTextColor = if (isSelected) Color(0xFFFFCD55) else Color(0xFF00C853)
 
   val context = LocalContext.current
   Box(
       modifier =
           Modifier.chipModifier(backgroundColor, borderTextColor).clickable {
             onSelected(!isSelected)
-            if (label == "Near To Me") {
-              Toast.makeText(context, "Not Yet Implemented", Toast.LENGTH_LONG).show()
-            }
+            Toast.makeText(context, "Not Yet Implemented", Toast.LENGTH_LONG).show()
           },
       contentAlignment = Alignment.Center) {
         Text(
             text = label,
             fontSize = 16.sp,
             lineHeight = 34.sp,
-            fontFamily = FontFamily(Font(R.font.donegal_one)),
             fontWeight = FontWeight(400),
             color = borderTextColor)
       }
@@ -352,8 +366,8 @@ fun FilterChip(label: String, isSelected: Boolean, onSelected: (Boolean) -> Unit
 // Extension function for common modifier styling
 private fun Modifier.chipModifier(backgroundColor: Color, borderTextColor: Color) =
     this.padding(8.dp)
-        .border(1.dp, borderTextColor, shape = RoundedCornerShape(50))
-        .background(backgroundColor, shape = RoundedCornerShape(50))
+        .border(3.dp, borderTextColor, shape = RoundedCornerShape(12.dp))
+        .background(backgroundColor, shape = RoundedCornerShape(12.dp))
         .padding(12.dp, 6.dp)
 
 @Composable
@@ -365,6 +379,7 @@ fun ListRequestsFeedScreen(
   val requests by serviceRequestViewModel.requests.collectAsState()
   val selectedFilters = remember { mutableStateOf(setOf<String>()) }
   var selectedService by remember { mutableStateOf("Service") }
+  val searchQuery = remember { mutableStateOf("") }
 
   Scaffold(
       topBar = { RequestsTopBar() },
@@ -382,8 +397,8 @@ fun ListRequestsFeedScreen(
                     .testTag("ScreenContent"),
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally) {
-              SearchBar()
-              Spacer(modifier = Modifier.height(15.dp))
+              Spacer(modifier = Modifier.height(8.dp))
+              SearchBar(searchQuery) // Pass the searchQuery state
               FilterBar(
                   selectedService = selectedService,
                   selectedFilters = selectedFilters.value,
@@ -393,11 +408,25 @@ fun ListRequestsFeedScreen(
                         if (isSelected) selectedFilters.value + filter
                         else selectedFilters.value - filter
                   })
+
+              // Filter requests based on the search query
               val filteredRequests =
                   requests.filter { request ->
-                    // Apply filtering logic here
-                    true
+                    // Check if the request matches the search query
+                    val query = searchQuery.value.trim().lowercase()
+                    val matchesQuery =
+                        query.isEmpty() ||
+                            request.title.lowercase().contains(query) ||
+                            request.description.lowercase().contains(query)
+
+                    // Check if the request matches the selected filters
+                    val matchesFilters =
+                        if (selectedService == "Service") true
+                        else request.type.name == selectedService.replace(" ", "_").uppercase()
+
+                    matchesQuery && matchesFilters
                   }
+
               ListRequests(filteredRequests)
             }
       }
