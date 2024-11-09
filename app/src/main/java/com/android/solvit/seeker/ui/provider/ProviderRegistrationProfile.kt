@@ -183,7 +183,8 @@ fun ProviderRegistrationScreen(
                 onShowDropdownLocationChange = { showDropdown = it },
                 locationSuggestions = locationSuggestions.filterNotNull(),
                 onLocationSelected = { selectedLocation = it },
-                requestLocation = null)
+                requestLocation = null,
+                backgroundColor = Color.White)
 
             Spacer(modifier = Modifier.height(16.dp))
 

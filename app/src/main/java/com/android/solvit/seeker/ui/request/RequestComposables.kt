@@ -179,6 +179,7 @@ fun LocationDropdown(
     locationSuggestions: List<Location>,
     onLocationSelected: (Location) -> Unit,
     requestLocation: Location?,
+    backgroundColor: Color = MaterialTheme.colorScheme.surface,
     debounceDelay: Long = 1001L // we need more than 1 second debounce delay
 ) {
   val coroutineScope = rememberCoroutineScope()
@@ -218,7 +219,7 @@ fun LocationDropdown(
         modifier =
             Modifier.fillMaxWidth()
                 .heightIn(max = 200.dp)
-                .background(MaterialTheme.colorScheme.surface)
+                .background(backgroundColor)
                 .border(1.dp, MaterialTheme.colorScheme.onSurface, shape = RoundedCornerShape(8.dp))
                 .padding(start = 8.dp, end = 8.dp)) {
           locationSuggestions.forEach { location ->
