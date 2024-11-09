@@ -159,7 +159,8 @@ fun ServiceRequestItem(request: ServiceRequest) {
               .padding(8.dp)
               .border(1.dp, Color.Gray, RoundedCornerShape(12.dp))
               .background(Color(0xFF407BFF), RoundedCornerShape(12.dp))
-              .padding(16.dp)) {
+              .padding(16.dp)
+              .testTag("ServiceRequest")) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
           Image(
               painter = painterResource(id = R.drawable.default_pdp),

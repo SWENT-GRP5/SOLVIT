@@ -1,4 +1,4 @@
-package com.android.solvit.seeker.ui.request
+package com.android.solvit.provider.ui.request
 
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -7,7 +7,6 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.navigation.NavController
-import com.android.solvit.provider.ui.request.ListRequestsFeedScreen
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestRepository
@@ -34,11 +33,11 @@ class ListServicesRequestsScreenTest {
   @get:Rule val composeTestRule = createComposeRule()
 
   // Example service request data used for testing
-  val request =
+  private val requests =
       listOf(
           ServiceRequest(
-              title = "Bathtub leak",
-              description = "I hit my bath too hard and now it's leaking",
+              title = "French Tutor",
+              description = "I need a tutor to help me with my French",
               userId = "1",
               dueDate = Timestamp(Calendar.getInstance().time),
               location =
@@ -76,7 +75,7 @@ class ListServicesRequestsScreenTest {
     // Mocking the getServiceRequests function to return the pre-defined request list
     `when`(serviceRequestRepository.getServiceRequests(any(), any())).thenAnswer {
       val onSuccess = it.getArgument<(List<ServiceRequest>) -> Unit>(0)
-      onSuccess(request) // Simulate success
+      onSuccess(requests) // Simulate success
     }
     `when`(navigationActions.currentRoute()).thenReturn(Route.REQUESTS_FEED)
     composeTestRule.setContent {
@@ -118,9 +117,13 @@ class ListServicesRequestsScreenTest {
   // Test the functionality of the search bar
   @Test
   fun testSearchBar() {
-    // Simulate user input in the search bar with the text "French"
     composeTestRule.onNodeWithTag("SearchBar").performTextInput("French")
-    // TODO: complete the test when implement searching functionnality
+    // Check that only the service request with the word "French" in the title is displayed
+    assert(composeTestRule.onAllNodesWithTag("ServiceRequest").fetchSemanticsNodes().size == 1)
+
+      // Check that no service request is displayed when the search query does not match any service request
+    composeTestRule.onNodeWithTag("SearchBar").performTextInput("Plumber")
+    assert(composeTestRule.onAllNodesWithTag("ServiceRequest").fetchSemanticsNodes().isEmpty())
   }
 
   @Test
@@ -130,8 +133,8 @@ class ListServicesRequestsScreenTest {
     composeTestRule.onNodeWithTag("ServiceChip").isDisplayed()
     composeTestRule.onNodeWithTag("ServiceChip").performClick()
     // Choose to keep only tutors
-    composeTestRule.onNodeWithTag("TUTOR").isDisplayed()
-    composeTestRule.onNodeWithTag("TUTOR").performClick()
+    composeTestRule.onNodeWithTag("Tutor").isDisplayed()
+    composeTestRule.onNodeWithTag("Tutor").performClick()
 
     // Check that only tutor service request is displayed on the screen
     assert(composeTestRule.onAllNodesWithTag("ServiceRequest").fetchSemanticsNodes().size == 1)
