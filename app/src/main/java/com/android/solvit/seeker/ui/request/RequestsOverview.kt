@@ -49,7 +49,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.android.solvit.R
-import com.android.solvit.seeker.ui.navigation.SeekerBottomNavigationMenu
+import com.android.solvit.seeker.ui.navigation.BottomNavigationMenu
 import com.android.solvit.seeker.ui.service.SERVICES_LIST
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestStatus
@@ -81,10 +81,10 @@ fun RequestsOverviewScreen(
   Scaffold(
       modifier = Modifier.testTag("requestsOverviewScreen"),
       bottomBar = {
-        SeekerBottomNavigationMenu(
+        BottomNavigationMenu(
             onTabSelect = { navigationActions.navigateTo(it.route) },
             tabList = LIST_TOP_LEVEL_DESTINATION_CUSTOMER,
-            selectedItem = navigationActions.currentRoute())
+            selectedItem = Route.REQUESTS_OVERVIEW)
       }) {
         val userId = Firebase.auth.currentUser?.uid ?: "-1"
         val requests =
