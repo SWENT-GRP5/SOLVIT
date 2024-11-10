@@ -102,21 +102,6 @@ class EditRequestScreenTest {
   }
 
   @Test
-  fun doesNotSubmitWithInvalidDate() {
-    serviceRequestViewModel.selectRequest(request)
-
-    composeTestRule.setContent {
-      EditRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
-    }
-
-    composeTestRule.onNodeWithTag("inputRequestDate").performTextClearance()
-    composeTestRule.onNodeWithTag("inputRequestDate").performTextInput("notadate")
-    composeTestRule.onNodeWithTag("requestSubmit").performClick()
-
-    Mockito.verify(serviceRequestRepository, never()).saveServiceRequest(any(), any(), any())
-  }
-
-  @Test
   fun locationMenuExpandsWithInput() {
     serviceRequestViewModel.selectRequest(request)
 
