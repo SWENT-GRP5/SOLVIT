@@ -20,18 +20,20 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
-import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -45,6 +47,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -54,7 +57,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.solvit.R
 import com.android.solvit.seeker.model.profile.SeekerProfile
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
+import com.android.solvit.seeker.ui.request.LocationDropdown
 import com.android.solvit.shared.model.authentication.AuthViewModel
+import com.android.solvit.shared.model.map.Location
+import com.android.solvit.shared.model.map.LocationViewModel
 import com.android.solvit.shared.ui.authentication.GoBackButton
 import com.android.solvit.shared.ui.navigation.NavigationActions
 
@@ -64,6 +70,7 @@ import com.android.solvit.shared.ui.navigation.NavigationActions
 fun SeekerRegistrationScreen(
     viewModel: SeekerProfileViewModel = viewModel(factory = SeekerProfileViewModel.Factory),
     navigationActions: NavigationActions,
+    locationViewModel: LocationViewModel = viewModel(factory = LocationViewModel.Factory),
     authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory)
 ) {
 
@@ -76,19 +83,30 @@ fun SeekerRegistrationScreen(
   }
 
   var fullName by remember { mutableStateOf("") }
-  // var username by remember { mutableStateOf("") }
-  var phone by remember { mutableStateOf("") }
-  var address by remember { mutableStateOf("") }
   var userName by remember { mutableStateOf("") }
+  var phone by remember { mutableStateOf("") }
+  val locationQuery by locationViewModel.query.collectAsState()
+
   // represent the current authentified user
   val user by authViewModel.user.collectAsState()
   // represent the email of the current user
   val email by authViewModel.email.collectAsState()
 
+  var showDropdown by remember { mutableStateOf(false) }
+  val locationSuggestions by
+      locationViewModel.locationSuggestions.collectAsState(initial = emptyList<Location?>())
+  var selectedLocation by remember { mutableStateOf<Location?>(null) }
+
   // Step tracking: Role, Details, Preferences
   var currentStep by remember { mutableIntStateOf(1) }
+
   val backgroundColor = Color(0xFFFFFFFF)
-  val isFormComplete = fullName.isNotBlank() && phone.isNotBlank() && address.isNotBlank()
+
+  val isFullNameOk = fullName.isNotBlank() && fullName.length > 2
+  val isUserNameOk = userName.isNotBlank() && userName.length > 2
+  val isPhoneOk = phone.isNotBlank() && phone.all { it.isDigit() || it == '+' } && phone.length > 6
+  val isLocationOK = selectedLocation != null
+  val isFormComplete = isFullNameOk && isUserNameOk && isPhoneOk && isLocationOK
 
   Scaffold(
       topBar = {
@@ -97,7 +115,7 @@ fun SeekerRegistrationScreen(
             navigationIcon = {
               if (currentStep > 1) {
                 IconButton(onClick = { currentStep -= 1 }) {
-                  Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
+                  Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                 }
               } else {
                 GoBackButton(navigationActions)
@@ -108,7 +126,8 @@ fun SeekerRegistrationScreen(
       content = { padding ->
         Column(
             modifier =
-                Modifier.padding(padding)
+                Modifier.background(backgroundColor)
+                    .padding(padding)
                     .fillMaxSize()
                     .padding(16.dp)
                     .verticalScroll(rememberScrollState())) {
@@ -124,75 +143,60 @@ fun SeekerRegistrationScreen(
                             .align(Alignment.CenterHorizontally))
                 Text(
                     text = "Sign Up as a Customer",
-                    style = MaterialTheme.typography.h6,
+                    style = MaterialTheme.typography.titleLarge,
                     modifier =
                         Modifier.testTag("signUpCustomerTitle").align(Alignment.CenterHorizontally))
 
                 Spacer(modifier = Modifier.height(16.dp))
-                // Full Name
-                OutlinedTextField(
+
+                CustomOutlinedTextField(
                     value = fullName,
                     onValueChange = { fullName = it },
-                    label = { Text("Full Name", color = Color.Black) },
-                    placeholder = { Text("Enter your full name") },
-                    modifier = Modifier.fillMaxWidth().testTag("fullNameInput"),
-                    shape = RoundedCornerShape(12.dp),
-                    colors =
-                        TextFieldDefaults.outlinedTextFieldColors(
-                            focusedBorderColor =
-                                Color(0xFF00C853), // Green outline for focused state
-                            unfocusedBorderColor = Color.Gray // Gray outline for unfocused state
-                            ))
+                    label = "Full Name",
+                    placeholder = "Enter your full name",
+                    isValueOk = isFullNameOk,
+                    leadingIcon = Icons.Default.Person,
+                    leadingIconDescription = "Person Icon",
+                    testTag = "fullNameInput")
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(10.dp))
 
-                OutlinedTextField(
+                CustomOutlinedTextField(
                     value = userName,
                     onValueChange = { userName = it },
-                    label = { Text("User Name", color = Color.Black) },
-                    placeholder = { Text("Enter your user name") },
-                    modifier = Modifier.fillMaxWidth().testTag("userNameInput"),
-                    shape = RoundedCornerShape(12.dp),
-                    colors =
-                        TextFieldDefaults.outlinedTextFieldColors(
-                            focusedBorderColor =
-                                Color(0xFF00C853), // Green outline for focused state
-                            unfocusedBorderColor = Color.Gray // Gray outline for unfocused state
-                            ))
+                    label = "User Name",
+                    placeholder = "Enter your user name",
+                    isValueOk = isUserNameOk,
+                    leadingIcon = Icons.Default.Person,
+                    leadingIconDescription = "Person Icon",
+                    testTag = "userNameInput")
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(10.dp))
 
-                // Phone Number
-                OutlinedTextField(
+                CustomOutlinedTextField(
                     value = phone,
                     onValueChange = { phone = it },
-                    label = { Text("Phone Number", color = Color.Black) },
-                    placeholder = { Text("Enter your phone number") },
-                    modifier = Modifier.fillMaxWidth().testTag("phoneNumberInput"),
-                    shape = RoundedCornerShape(12.dp),
-                    colors =
-                        TextFieldDefaults.outlinedTextFieldColors(
-                            focusedBorderColor =
-                                Color(0xFF00C853), // Green outline for focused state
-                            unfocusedBorderColor = Color.Gray // Gray outline for unfocused state
-                            ))
-                Spacer(modifier = Modifier.height(16.dp))
-                // Location
-                OutlinedTextField(
-                    value = address,
-                    onValueChange = { address = it },
-                    label = { Text("Location", color = Color.Black) },
-                    placeholder = { Text("Enter your location or business location") },
-                    modifier = Modifier.fillMaxWidth().testTag("locationInput"),
-                    shape = RoundedCornerShape(12.dp),
-                    colors =
-                        TextFieldDefaults.outlinedTextFieldColors(
-                            focusedBorderColor = Color(0xFF00C853),
-                            unfocusedBorderColor = Color.Gray))
-                Spacer(modifier = Modifier.height(16.dp))
-                // Password Field
+                    label = "Phone Number",
+                    placeholder = "Enter your phone number",
+                    isValueOk = isPhoneOk,
+                    leadingIcon = Icons.Default.Phone,
+                    leadingIconDescription = "Phone Icon",
+                    testTag = "phoneNumberInput")
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(10.dp))
+
+                LocationDropdown(
+                    locationQuery = locationQuery,
+                    onLocationQueryChange = { locationViewModel.setQuery(it) },
+                    showDropdownLocation = showDropdown,
+                    onShowDropdownLocationChange = { showDropdown = it },
+                    locationSuggestions = locationSuggestions.filterNotNull(),
+                    onLocationSelected = { selectedLocation = it },
+                    requestLocation = null,
+                    backgroundColor = Color.White,
+                    isValueOk = isLocationOK)
+
+                Spacer(modifier = Modifier.height(30.dp))
 
                 Button(
                     onClick = { currentStep = 2 },
@@ -200,9 +204,7 @@ fun SeekerRegistrationScreen(
                         Modifier.fillMaxWidth().height(60.dp).testTag("completeRegistrationButton"),
                     enabled = isFormComplete,
                     shape = RoundedCornerShape(12.dp),
-                    colors =
-                        ButtonDefaults.buttonColors(
-                            backgroundColor = Color(0xFF28A745)) // Green button
+                    colors = ButtonDefaults.buttonColors(Color(0xFF28A745)) // Green button
                     ) {
                       Text("Complete registration", color = Color.White)
                     }
@@ -218,7 +220,7 @@ fun SeekerRegistrationScreen(
                     ) {
                       Text(
                           text = "Set Your Preferences",
-                          style = MaterialTheme.typography.h6,
+                          style = MaterialTheme.typography.titleLarge,
                           modifier =
                               Modifier.align(Alignment.CenterHorizontally)
                                   .testTag("preferencesTitle"),
@@ -235,7 +237,7 @@ fun SeekerRegistrationScreen(
                       Spacer(modifier = Modifier.height(20.dp))
                       Text(
                           text = "This feature is not implemented yet.",
-                          style = MaterialTheme.typography.body1,
+                          style = MaterialTheme.typography.bodyLarge,
                           modifier = Modifier.align(Alignment.CenterHorizontally),
                           textAlign = TextAlign.Center,
                           color = Color.Blue)
@@ -243,13 +245,12 @@ fun SeekerRegistrationScreen(
                       Button(
                           onClick = { currentStep = 3 },
                           modifier = Modifier.fillMaxWidth().testTag("savePreferencesButton"),
-                          colors =
-                              ButtonDefaults.buttonColors(backgroundColor = Color(0xFF28A745))) {
+                          colors = ButtonDefaults.buttonColors(Color(0xFF28A745))) {
                             Text("Save Preferences", color = Color.White)
                           }
                       Text(
                           text = "You can always update your preferences in your profile settings.",
-                          style = MaterialTheme.typography.body1,
+                          style = MaterialTheme.typography.bodyLarge,
                           modifier =
                               Modifier.align(Alignment.CenterHorizontally).testTag("footerText"),
                           textAlign = TextAlign.Center)
@@ -261,7 +262,7 @@ fun SeekerRegistrationScreen(
                 // Completion screen
                 Text(
                     text = "You're All Set!",
-                    style = MaterialTheme.typography.h6,
+                    style = MaterialTheme.typography.titleLarge,
                     modifier =
                         Modifier.align(Alignment.CenterHorizontally).testTag("confirmationTitle"))
 
@@ -282,7 +283,7 @@ fun SeekerRegistrationScreen(
                         "Your profile has been successfully created. " +
                             "You're ready to explore the best services tailored to your needs. " +
                             "Start browsing through available services, connect with experts, and solve any challenge.",
-                    style = MaterialTheme.typography.body1,
+                    style = MaterialTheme.typography.bodyLarge,
                     modifier =
                         Modifier.align(Alignment.CenterHorizontally)
                             .testTag("successMessageText"), // Add horizontal padding
@@ -299,22 +300,60 @@ fun SeekerRegistrationScreen(
                               name = fullName,
                               username = userName,
                               phone = phone,
-                              address = address,
                               email = email)
                       viewModel.addUserProfile(newUserProfile)
                       authViewModel.registered()
                       // navigationActions.goBack() // Navigate after saving
                     },
                     modifier = Modifier.fillMaxWidth().testTag("exploreServicesButton"),
-                    colors =
-                        ButtonDefaults.buttonColors(
-                            backgroundColor = Color(0xFF28A745)) // Green button
+                    colors = ButtonDefaults.buttonColors(Color(0xFF28A745)) // Green button
                     ) {
                       Text("Continue to Explore Services", color = Color.White)
                     }
               }
             }
       })
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CustomOutlinedTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    placeholder: String,
+    isValueOk: Boolean,
+    leadingIcon: ImageVector,
+    leadingIconDescription: String = "",
+    @SuppressLint("ModifierParameter") modifier: Modifier = Modifier,
+    testTag: String
+) {
+  OutlinedTextField(
+      value = value,
+      onValueChange = onValueChange,
+      label = { Text(label, color = Color.Black) },
+      singleLine = true,
+      placeholder = { Text(placeholder) },
+      leadingIcon = {
+        Icon(
+            leadingIcon,
+            contentDescription = leadingIconDescription,
+            tint = if (isValueOk) Color(90, 197, 97) else Color.Gray)
+      },
+      modifier = modifier.fillMaxWidth().testTag(testTag),
+      shape = RoundedCornerShape(12.dp),
+      colors =
+          TextFieldDefaults.outlinedTextFieldColors(
+              focusedTextColor = Color.Black,
+              unfocusedTextColor =
+                  if (value.isEmpty()) Color.Gray else if (!isValueOk) Color.Red else Color.Black,
+              focusedBorderColor = if (isValueOk) Color(0xFF5AC561) else Color.Blue,
+              unfocusedBorderColor =
+                  when {
+                    value.isEmpty() -> Color.Gray
+                    isValueOk -> Color(0xFF5AC561)
+                    else -> Color.Red
+                  }))
 }
 
 @Composable
@@ -359,14 +398,14 @@ fun StepCircle(stepNumber: Int, isCompleted: Boolean, label: String) {
               Text(
                   text = if (isCompleted) "✔" else stepNumber.toString(),
                   color = Color.White,
-                  style = MaterialTheme.typography.h6)
+                  style = MaterialTheme.typography.titleLarge)
             }
 
         // Display the label below the circle
         Text(
             text = label,
             color = Color.Black, // You can customize this color
-            style = MaterialTheme.typography.body2,
+            style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.padding(top = 4.dp) // Add space between circle and label
             )
       }

@@ -5,23 +5,30 @@ import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.seeker.model.profile.UserRepositoryFirestore
 import com.android.solvit.seeker.ui.profile.SeekerRegistrationScreen
+import com.android.solvit.shared.model.map.Location
+import com.android.solvit.shared.model.map.LocationRepository
+import com.android.solvit.shared.model.map.LocationViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.`when`
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.verify
 
 @RunWith(AndroidJUnit4::class)
@@ -32,20 +39,38 @@ class SeekerRegistrationTest {
   private lateinit var userRepository: UserRepositoryFirestore
   private lateinit var navigationActions: NavigationActions
   private lateinit var seekerViewModel: SeekerProfileViewModel
+  private lateinit var locationRepository: LocationRepository
+  private lateinit var locationViewModel: LocationViewModel
+
+  private val locations =
+      listOf(
+          Location(37.7749, -122.4194, "San Francisco"),
+          Location(34.0522, -118.2437, "Los Angeles"),
+          Location(40.7128, -74.0060, "New York"))
 
   @Before
   fun setUp() {
     userRepository = mock(UserRepositoryFirestore::class.java)
     navigationActions = mock(NavigationActions::class.java)
     seekerViewModel = SeekerProfileViewModel(userRepository)
+    locationRepository = mock(LocationRepository::class.java)
+    locationViewModel = LocationViewModel(locationRepository)
 
     `when`(navigationActions.currentRoute()).thenReturn(Screen.SEEKER_REGISTRATION_PROFILE)
+    `when`(locationRepository.search(ArgumentMatchers.anyString(), anyOrNull(), anyOrNull()))
+        .thenAnswer { invocation ->
+          val onSuccess = invocation.getArgument<(List<Location>) -> Unit>(1)
+          onSuccess(locations)
+        }
   }
 
   @Test
   fun displayAllcomponents() {
     composeTestRule.setContent {
-      SeekerRegistrationScreen(viewModel = seekerViewModel, navigationActions = navigationActions)
+      SeekerRegistrationScreen(
+          viewModel = seekerViewModel,
+          navigationActions = navigationActions,
+          locationViewModel = locationViewModel)
     }
 
     composeTestRule.onNodeWithTag("backButton").assertIsDisplayed()
@@ -54,7 +79,7 @@ class SeekerRegistrationTest {
     composeTestRule.onNodeWithTag("signUpCustomerTitle").assertIsDisplayed()
     composeTestRule.onNodeWithTag("fullNameInput").assertIsDisplayed()
     composeTestRule.onNodeWithTag("phoneNumberInput").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("locationInput").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("inputRequestAddress").assertIsDisplayed()
     composeTestRule.onNodeWithTag("userNameInput").assertIsDisplayed()
 
     // Verify the complete registration button
@@ -64,9 +89,12 @@ class SeekerRegistrationTest {
         .assertTextEquals("Complete registration")
 
     composeTestRule.onNodeWithTag("fullNameInput").performTextInput("John Doe")
-    composeTestRule.onNodeWithTag("phoneNumberInput").performTextInput("123456789")
-    composeTestRule.onNodeWithTag("locationInput").performTextInput("123 Main St")
     composeTestRule.onNodeWithTag("userNameInput").performTextInput("password123")
+    composeTestRule.onNodeWithTag("phoneNumberInput").performTextInput("123456789")
+    composeTestRule.onNodeWithTag("inputRequestAddress").performTextClearance()
+    composeTestRule.onNodeWithTag("inputRequestAddress").performTextInput("USA")
+    composeTestRule.waitUntil { locationViewModel.locationSuggestions.value.isNotEmpty() }
+    composeTestRule.onAllNodesWithTag("locationResult")[0].performClick()
 
     // Click the complete registration button to move to the next step
     composeTestRule.onNodeWithTag("completeRegistrationButton").performClick()
@@ -102,7 +130,7 @@ class SeekerRegistrationTest {
     // Fill out the form fields
     composeTestRule.onNodeWithTag("fullNameInput").performTextInput("John Doe")
     composeTestRule.onNodeWithTag("phoneNumberInput").performTextInput("123456789")
-    composeTestRule.onNodeWithTag("locationInput").performTextInput("123 Main St")
+    composeTestRule.onNodeWithTag("inputRequestAddress").performTextInput("123 Main St")
 
     // Try to submit the form
     composeTestRule.onNodeWithTag("completeRegistrationButton").performClick()
@@ -114,7 +142,10 @@ class SeekerRegistrationTest {
   @Test
   fun testCompleteRegistrationButtonDisabledWhenFieldsAreIncomplete() {
     composeTestRule.setContent {
-      SeekerRegistrationScreen(viewModel = seekerViewModel, navigationActions = navigationActions)
+      SeekerRegistrationScreen(
+          viewModel = seekerViewModel,
+          navigationActions = navigationActions,
+          locationViewModel = locationViewModel)
     }
 
     // Initially, the button should be disabled when fields are empty
@@ -128,9 +159,10 @@ class SeekerRegistrationTest {
     composeTestRule.onNodeWithTag("completeRegistrationButton").assertIsNotEnabled()
 
     // Complete the rest of the fields
-    composeTestRule.onNodeWithTag("locationInput").performTextInput("123 Main St")
     composeTestRule.onNodeWithTag("userNameInput").performTextInput("password123")
-
+    composeTestRule.onNodeWithTag("inputRequestAddress").performTextInput("123 Main St")
+    composeTestRule.waitUntil { locationViewModel.locationSuggestions.value.isNotEmpty() }
+    composeTestRule.onAllNodesWithTag("locationResult")[0].performClick()
     // Now the button should be enabled
     composeTestRule.onNodeWithTag("completeRegistrationButton").assertIsEnabled()
   }
@@ -138,7 +170,10 @@ class SeekerRegistrationTest {
   @Test
   fun testStepperMovesToStep2() {
     composeTestRule.setContent {
-      SeekerRegistrationScreen(viewModel = seekerViewModel, navigationActions = navigationActions)
+      SeekerRegistrationScreen(
+          viewModel = seekerViewModel,
+          navigationActions = navigationActions,
+          locationViewModel = locationViewModel)
     }
 
     // Initially, step 1 should be incomplete and visible
@@ -147,8 +182,10 @@ class SeekerRegistrationTest {
     // Fill out the form and move to step 2
     composeTestRule.onNodeWithTag("fullNameInput").performTextInput("John Doe")
     composeTestRule.onNodeWithTag("phoneNumberInput").performTextInput("123456789")
-    composeTestRule.onNodeWithTag("locationInput").performTextInput("123 Main St")
     composeTestRule.onNodeWithTag("userNameInput").performTextInput("password123")
+    composeTestRule.onNodeWithTag("inputRequestAddress").performTextInput("123 Main St")
+    composeTestRule.waitUntil { locationViewModel.locationSuggestions.value.isNotEmpty() }
+    composeTestRule.onAllNodesWithTag("locationResult")[0].performClick()
 
     // Click the complete registration button (moves to step 2)
     composeTestRule.onNodeWithTag("completeRegistrationButton").performClick()

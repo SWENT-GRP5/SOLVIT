@@ -115,7 +115,8 @@ fun SharedUI(
     }
     composable(Screen.FORGOT_PASSWORD) { ForgotPassword(navigationActions) }
     composable(Screen.SEEKER_REGISTRATION_PROFILE) {
-      SeekerRegistrationScreen(seekerProfileViewModel, navigationActions, authViewModel)
+      SeekerRegistrationScreen(
+          seekerProfileViewModel, navigationActions, locationViewModel, authViewModel)
     }
   }
 }
