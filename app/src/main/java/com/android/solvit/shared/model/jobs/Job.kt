@@ -13,9 +13,11 @@ data class Job(
     val date: LocalDate? = null, // Firestore Timestamp for date
     val time: LocalTime? = null, // Firestore Timestamp for time
     val locationName: String = ""
-) {
-  // fun getDateAsLocalDate(): LocalDate? =
-  // date?.toDate()?.toInstant()?.atZone(ZoneId.systemDefault())?.toLocalDate()
-  // fun getTimeAsLocalTime(): LocalTime? =
-  // time?.toDate()?.toInstant()?.atZone(ZoneId.systemDefault())?.toLocalTime()
+)
+
+enum class JobStatus {
+    PENDING,
+    CURRENT,
+    HISTORY
 }
+
