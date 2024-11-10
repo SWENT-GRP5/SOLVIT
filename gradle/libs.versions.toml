@@ -10,7 +10,7 @@ ktfmt = "0.17.0"
 
 #UI Compose
 mockitoAndroid = "5.13.0"
-protobufJavalite = "3.21.6"
+protobufJavalite = "3.25.1"
 ui = "1.6.8"
 uiTestJunit4 = "1.6.8"
 uiTestManifest = "1.6.8"
@@ -74,7 +74,6 @@ firebaseStorageKtx = "21.0.0"
 playServicesLocation = "21.3.0"
 testng = "6.9.6"
 navigationTesting = "2.8.2"
-firebaseFirestoreKtx = "25.1.1"
 
 [libraries]
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
@@ -138,7 +137,6 @@ play-services-location = { group = "com.google.android.gms", name = "play-servic
 androidx-navigation-runtime-ktx = { group = "androidx.navigation", name = "navigation-runtime-ktx", version.ref = "navigationRuntimeKtx" }
 androidx-navigation-testing = { group = "androidx.navigation", name = "navigation-testing", version.ref = "navigationTesting" }
 testng = { group = "org.testng", name = "testng", version.ref = "testng" }
-google-firebase-firestore-ktx = { group = "com.google.firebase", name = "firebase-firestore-ktx", version.ref = "firebaseFirestoreKtx" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
