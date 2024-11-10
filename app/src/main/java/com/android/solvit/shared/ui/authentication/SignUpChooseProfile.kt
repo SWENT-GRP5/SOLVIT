@@ -10,20 +10,18 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -70,94 +68,75 @@ fun SignUpChooseProfile(
       topBar = {
         TopAppBar(
             title = { Text("") },
-            navigationIcon = {
-              Icon(
-                  Icons.AutoMirrored.Filled.ArrowBack,
-                  contentDescription = "goBackButton",
-                  modifier =
-                      Modifier.testTag("backButton").clickable { navigationActions.goBack() })
-            },
+            navigationIcon = { GoBackButton(navigationActions) },
             colors = TopAppBarDefaults.topAppBarColors(containerColor = backgroundColor))
       },
       content = { padding ->
         Column(
-            modifier = Modifier.fillMaxSize().padding(padding).background(backgroundColor),
+            modifier =
+                Modifier.fillMaxWidth()
+                    .background(backgroundColor)
+                    .padding(16.dp)
+                    .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center) {}
-      })
+            verticalArrangement = Arrangement.Top) {
+              VerticalSpacer(50.dp)
 
-  Column(
-      modifier = Modifier.fillMaxWidth().padding(16.dp),
-      horizontalAlignment = Alignment.CenterHorizontally,
-      verticalArrangement = Arrangement.Top) {
-        VerticalSpacer(50.dp)
+              Stepper(currentStep = 1, isFormComplete = false)
 
-        Stepper(currentStep = 1, isFormComplete = false)
+              VerticalSpacer(height = 30.dp)
 
-        VerticalSpacer(height = 30.dp)
+              Image(
+                  painter = painterResource(id = R.drawable.sign_up_choose_profile_logo),
+                  contentDescription = "Illustration",
+                  modifier = Modifier.size(300.dp).testTag("roleIllustration"))
 
-        // Illustration
-        Image(
-            painter = painterResource(id = R.drawable.sign_up_choose_profile_logo),
-            contentDescription = "Illustration",
-            modifier = Modifier.size(300.dp).testTag("roleIllustration"))
+              SectionTitle(text = "Sign up as :", testTag = "signUpAsTitle")
 
-        SectionTitle(text = "Sign up as :", testTag = "signUpAsTitle")
+              VerticalSpacer(height = 30.dp)
 
-        VerticalSpacer(height = 30.dp)
+              ButtonCustomerProvider(
+                  text = "Customer",
+                  description = "I want to request services.",
+                  testTag = "customerButton",
+                  onClickButton = {
+                    authViewModel.setRole("seeker")
+                    if (authViewModel.googleAccount.value == null) {
+                      authViewModel.registerWithEmailAndPassword(
+                          { navigationActions.navigateTo(Screen.SEEKER_REGISTRATION_PROFILE) }, {})
+                    } else {
+                      authViewModel.registerWithGoogle(
+                          { navigationActions.navigateTo(Screen.SEEKER_REGISTRATION_PROFILE) }, {})
+                    }
+                  })
 
-        ButtonCustomerProvider(
-            text = "Customer",
-            description = "I want to request services.",
-            testTag = "customerButton",
-            onClickButton = {
-              authViewModel.setRole("seeker")
-              if (authViewModel.googleAccount.value == null) {
-                authViewModel.registerWithEmailAndPassword(
-                    { navigationActions.navigateTo(Screen.SEEKER_REGISTRATION_PROFILE) }, {})
-              } else {
-                authViewModel.registerWithGoogle(
-                    { navigationActions.navigateTo(Screen.SEEKER_REGISTRATION_PROFILE) }, {})
-              }
-            })
+              VerticalSpacer(height = 16.dp)
 
-        VerticalSpacer(height = 16.dp)
+              Text(text = "OR")
 
-        Text(text = "OR")
+              VerticalSpacer(height = 16.dp)
 
-        VerticalSpacer(height = 16.dp)
+              ButtonCustomerProvider(
+                  text = "Professional",
+                  description = "I want to offer services.",
+                  testTag = "professionalButton",
+                  onClickButton = {
+                    authViewModel.setRole("provider")
+                    if (authViewModel.googleAccount.value == null) {
+                      authViewModel.registerWithEmailAndPassword(
+                          { navigationActions.navigateTo(Screen.PROVIDER_REGISTRATION_PROFILE) },
+                          {})
+                    } else {
+                      authViewModel.registerWithGoogle(
+                          { navigationActions.navigateTo(Screen.PROVIDER_REGISTRATION_PROFILE) },
+                          {})
+                    }
+                  })
 
-        ButtonCustomerProvider(
-            text = "Professional",
-            description = "I want to offer services.",
-            testTag = "professionalButton",
-            onClickButton = {
-              authViewModel.setRole("provider")
-              if (authViewModel.googleAccount.value == null) {
-                authViewModel.registerWithEmailAndPassword(
-                    { navigationActions.navigateTo(Screen.PROVIDER_REGISTRATION_PROFILE) }, {})
-              } else {
-                authViewModel.registerWithGoogle(
-                    { navigationActions.navigateTo(Screen.PROVIDER_REGISTRATION_PROFILE) }, {})
-              }
-            })
+              VerticalSpacer(height = 30.dp)
 
-        VerticalSpacer(height = 30.dp)
-
-        LearnMoreSection()
-      }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun CustomTopAppBar(onBackClick: () -> Unit = {}, testTag: String = "") {
-  TopAppBar(
-      title = { Text("") },
-      navigationIcon = {
-        Icon(
-            Icons.AutoMirrored.Filled.ArrowBack,
-            contentDescription = "Back",
-            modifier = Modifier.testTag(testTag).clickable { onBackClick() })
+              LearnMoreSection()
+            }
       })
 }
 

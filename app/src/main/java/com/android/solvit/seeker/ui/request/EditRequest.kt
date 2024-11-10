@@ -89,11 +89,12 @@ fun EditRequestScreen(
       onShowDropdownLocationChange = { showDropdownLocation = it },
       locationSuggestions = locationSuggestions.filterNotNull(),
       onLocationSelected = { selectedLocation = it },
+      selectedLocation = selectedLocation,
       dueDate = dueDate,
       onDueDateChange = { dueDate = it },
       selectedImageUri = selectedImageUri,
       imageUrl = imageUrl,
-      onImageSelected = { uri -> selectedImageUri = uri },
+      onImageSelected = { uri -> if (uri != null) selectedImageUri = uri },
       onSubmit = {
         val calendar = GregorianCalendar()
         val parts = dueDate.split("/")
