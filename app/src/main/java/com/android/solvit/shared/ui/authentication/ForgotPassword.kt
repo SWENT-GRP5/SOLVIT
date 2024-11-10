@@ -9,6 +9,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -79,14 +80,14 @@ fun ForgotPassword(navigationActions: NavigationActions) {
             modifier = Modifier.fillMaxWidth().padding(16.dp).verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top) {
-              VerticalSpacer(60.dp)
+              Spacer(modifier = Modifier.height(60.dp))
 
               Image(
                   painter = rememberAsyncImagePainter(R.drawable.passwordforgot),
                   contentDescription = "Checkmark",
                   modifier = Modifier.size(240.dp).testTag("forgotPasswordImage"))
 
-              VerticalSpacer(30.dp)
+              Spacer(modifier = Modifier.height(30.dp))
 
               Text(
                   text = "Please enter your email address to reset your password",
@@ -94,7 +95,7 @@ fun ForgotPassword(navigationActions: NavigationActions) {
                   fontSize = 20.sp,
                   modifier = Modifier.padding(top = 4.dp).fillMaxWidth().testTag("bigText"))
 
-              VerticalSpacer(height = 10.dp)
+              Spacer(modifier = Modifier.height(10.dp))
 
               CustomOutlinedTextField(
                   value = email,
@@ -106,14 +107,14 @@ fun ForgotPassword(navigationActions: NavigationActions) {
                   leadingIconDescription = "Email Icon",
                   testTag = "emailInputField")
 
-              VerticalSpacer(height = 20.dp)
+              Spacer(modifier = Modifier.height(20.dp))
 
               Button(
                   onClick = {
                     if (email.isEmpty()) {
                       Toast.makeText(context, "Please enter your email address", Toast.LENGTH_LONG)
                           .show()
-                    } else if (!(email.contains("@") && email.contains("."))) {
+                    } else if (!goodFormEmail) {
                       Toast.makeText(
                               context, "your email must contain \"@\" and \".\"", Toast.LENGTH_LONG)
                           .show()

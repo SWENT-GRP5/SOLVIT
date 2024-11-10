@@ -143,10 +143,10 @@ fun SeekerRegistrationScreen(
                             .size(150.dp)
                             .align(Alignment.CenterHorizontally))
                 Text(
-                    text = "Sign Up as a Customer",
+                    text = "Sign Up as a Seeker",
                     style = MaterialTheme.typography.titleLarge,
                     modifier =
-                        Modifier.testTag("signUpCustomerTitle").align(Alignment.CenterHorizontally))
+                        Modifier.testTag("signUpSeekerTitle").align(Alignment.CenterHorizontally))
 
                 Spacer(modifier = Modifier.height(16.dp))
 

@@ -91,12 +91,12 @@ fun SignUpChooseProfile(
 
               SectionTitle(text = "Sign up as :", testTag = "signUpAsTitle")
 
-              VerticalSpacer(height = 30.dp)
+              Spacer(modifier = Modifier.height(30.dp))
 
               ButtonCustomerProvider(
-                  text = "Customer",
+                  text = "Seeker",
                   description = "I want to request services.",
-                  testTag = "customerButton",
+                  testTag = "seekerButton",
                   onClickButton = {
                     authViewModel.setRole("seeker")
                     if (authViewModel.googleAccount.value == null) {
@@ -108,16 +108,16 @@ fun SignUpChooseProfile(
                     }
                   })
 
-              VerticalSpacer(height = 16.dp)
+              Spacer(modifier = Modifier.height(16.dp))
 
               Text(text = "OR")
 
-              VerticalSpacer(height = 16.dp)
+              Spacer(modifier = Modifier.height(16.dp))
 
               ButtonCustomerProvider(
-                  text = "Professional",
+                  text = "Provider",
                   description = "I want to offer services.",
-                  testTag = "professionalButton",
+                  testTag = "providerButton",
                   onClickButton = {
                     authViewModel.setRole("provider")
                     if (authViewModel.googleAccount.value == null) {
@@ -131,7 +131,7 @@ fun SignUpChooseProfile(
                     }
                   })
 
-              VerticalSpacer(height = 30.dp)
+              Spacer(modifier = Modifier.height(20.dp))
 
               LearnMoreSection()
             }
@@ -159,7 +159,7 @@ fun ButtonCustomerProvider(
                         shape = RoundedCornerShape(10.dp))
                     .clickable { onClickButton() },
             contentAlignment = Alignment.Center) {
-              Text(text = text, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+              Text(text = text, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 20.sp)
             }
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -179,7 +179,7 @@ fun SectionTitle(text: String, testTag: String = "") {
 
 @Composable
 fun LearnMoreSection() {
-  val context = LocalContext.current // Obtenez le contexte ici
+  val context = LocalContext.current
 
   Column(
       horizontalAlignment = Alignment.CenterHorizontally,

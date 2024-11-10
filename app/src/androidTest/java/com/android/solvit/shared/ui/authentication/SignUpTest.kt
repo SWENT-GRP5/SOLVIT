@@ -36,7 +36,7 @@ class SignUpScreenTest {
   fun signUpScreen_testAllTheTest() {
     composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
 
-    composeTestRule.onNodeWithTag("backButton").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("goBackButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("signUpIllustration").assertIsDisplayed()
     composeTestRule.onNodeWithTag("signUpTitle").assertIsDisplayed()
     composeTestRule.onNodeWithTag("googleSignUpButton").assertIsDisplayed()
@@ -51,7 +51,7 @@ class SignUpScreenTest {
   fun signUpScreen_testAllPerformClick() {
     composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
 
-    composeTestRule.onNodeWithTag("backButton").performClick()
+    composeTestRule.onNodeWithTag("goBackButton").performClick()
     composeTestRule.onNodeWithTag("passwordInput").performClick()
     composeTestRule.onNodeWithTag("confirmPasswordInput").performClick()
     composeTestRule.onNodeWithTag("emailInputField").performClick()

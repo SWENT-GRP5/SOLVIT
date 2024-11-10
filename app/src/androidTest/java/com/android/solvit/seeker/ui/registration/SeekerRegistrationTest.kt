@@ -73,10 +73,10 @@ class SeekerRegistrationTest {
           locationViewModel = locationViewModel)
     }
 
-    composeTestRule.onNodeWithTag("backButton").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("goBackButton").assertIsDisplayed()
     // Step 1: Registration form fields should be displayed
     composeTestRule.onNodeWithTag("signUpIcon").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("signUpCustomerTitle").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("signUpSeekerTitle").assertIsDisplayed()
     composeTestRule.onNodeWithTag("fullNameInput").assertIsDisplayed()
     composeTestRule.onNodeWithTag("phoneNumberInput").assertIsDisplayed()
     composeTestRule.onNodeWithTag("inputRequestAddress").assertIsDisplayed()

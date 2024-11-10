@@ -157,7 +157,7 @@ fun SignInScreen(
 }
 
 @Composable
-fun GoBackButton(navigationActions: NavigationActions, testTag: String = "backButton") {
+fun GoBackButton(navigationActions: NavigationActions) {
   var canGoBack by remember { mutableStateOf(true) }
   val coroutineScope = rememberCoroutineScope()
   IconButton(
@@ -171,12 +171,9 @@ fun GoBackButton(navigationActions: NavigationActions, testTag: String = "backBu
           }
         }
       },
-      modifier = Modifier.testTag(testTag),
+      modifier = Modifier.testTag("goBackButton"),
       enabled = canGoBack) {
-        Icon(
-            Icons.AutoMirrored.Filled.ArrowBack,
-            contentDescription = "goBackButton",
-            modifier = Modifier.testTag(testTag))
+        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "goBackButton")
       }
 }
 
@@ -301,7 +298,6 @@ fun LogoSection() {
   }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FormSection(
     context: Context,
@@ -347,7 +343,8 @@ fun FormSection(
       label = "Password",
       placeholder = "Enter your password",
       contentDescription = "Password",
-      testTag = "password")
+      testTag = "password",
+      passwordLengthComplete = passwordLengthComplete)
 
   Spacer(modifier = Modifier.height(8.dp))
 

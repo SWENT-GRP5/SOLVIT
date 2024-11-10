@@ -43,7 +43,6 @@ import coil.compose.AsyncImage
 import com.android.solvit.R
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.shared.model.provider.Provider
-import com.android.solvit.shared.ui.authentication.VerticalSpacer
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
 import com.google.firebase.Firebase
@@ -60,9 +59,9 @@ fun ProviderProfileScreen(
       listProviderViewModel.providersList.collectAsState().value.first { it.uid == userId }
   Column(modifier = Modifier.fillMaxSize().background(Color.White)) {
     ProfileHeader(navigationActions, provider)
-    VerticalSpacer(10.dp)
+    Spacer(modifier = Modifier.height(10.dp))
     JobsDoneSection()
-    VerticalSpacer(10.dp)
+    Spacer(modifier = Modifier.height(10.dp))
     StatsSection(provider = provider)
   }
 }
@@ -92,7 +91,7 @@ fun ProfileHeader(navigationActions: NavigationActions, provider: Provider) {
                 }
               }
 
-          VerticalSpacer(20.dp)
+          Spacer(modifier = Modifier.height(20.dp))
 
           Box(
               modifier =
@@ -112,7 +111,7 @@ fun ProfileHeader(navigationActions: NavigationActions, provider: Provider) {
                     contentScale = ContentScale.Crop)
               }
 
-          VerticalSpacer(40.dp)
+          Spacer(modifier = Modifier.height(40.dp))
 
           Text(
               text = provider.name,
@@ -150,7 +149,7 @@ fun ProfileHeader(navigationActions: NavigationActions, provider: Provider) {
 
           Column(modifier = Modifier.align(Alignment.End)) { TitleText("Profile") }
 
-          VerticalSpacer(20.dp)
+          Spacer(modifier = Modifier.height(20.dp))
 
           Column {
             TitleText("Company name", testTag = "companyNameTitle")
@@ -275,7 +274,8 @@ fun StatsSection(provider: Provider) {
             Text("Jobs Completed", fontSize = 10.sp, color = Color.White)
           }
         }
-        VerticalSpacer(30.dp)
+
+        Spacer(modifier = Modifier.height(30.dp))
         Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
           Column(horizontalAlignment = Alignment.Start) {
             Text(
@@ -294,7 +294,8 @@ fun StatsSection(provider: Provider) {
             Text("delivery Time", fontSize = 10.sp, color = Color.White)
           }
         }
-        VerticalSpacer(30.dp)
+
+        Spacer(modifier = Modifier.height(30.dp))
         Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
           Column(horizontalAlignment = Alignment.Start) {
             // TODO : Change the hardcoded value to the actual availability of the provider

@@ -141,11 +141,10 @@ fun ProviderRegistrationScreen(
                             .size(150.dp) // Adjust the size as per your logo
                             .align(Alignment.CenterHorizontally))
                 Text(
-                    text = "Sign Up as a Professional",
+                    text = "Sign Up as a Provider",
                     style = MaterialTheme.typography.titleLarge,
                     modifier =
-                        Modifier.testTag("signUpProfessionalTitle")
-                            .align(Alignment.CenterHorizontally))
+                        Modifier.testTag("signUpProviderTitle").align(Alignment.CenterHorizontally))
 
                 Spacer(modifier = Modifier.height(16.dp))
                 // Full Name

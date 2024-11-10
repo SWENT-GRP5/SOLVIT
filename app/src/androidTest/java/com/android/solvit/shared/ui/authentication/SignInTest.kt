@@ -44,7 +44,7 @@ class SignInScreenTest {
     composeTestRule.setContent { SignInScreen(mockNavigationActions) }
 
     // Test the display of UI components
-    composeTestRule.onNodeWithTag("backButton").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("goBackButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("loginImage").assertIsDisplayed()
     composeTestRule.onNodeWithTag("welcomeText").assertIsDisplayed()
     composeTestRule.onNodeWithTag("emailInput").assertIsDisplayed()

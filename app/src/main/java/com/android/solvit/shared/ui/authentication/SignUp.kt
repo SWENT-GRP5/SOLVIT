@@ -63,7 +63,6 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -77,7 +76,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import kotlinx.coroutines.launch
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "SourceLockedOrientationActivity")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SignUpScreen(
@@ -100,7 +99,6 @@ fun SignUpScreen(
           authViewModel, { navigationActions.navigateTo(Screen.SIGN_UP_CHOOSE_ROLE) }, {})
   val token = stringResource(R.string.default_web_client_id)
 
-  val isFormComplete = email.isNotBlank() && password.isNotBlank() && confirmPassword.isNotBlank()
   val goodFormEmail =
       email.isNotBlank() &&
           Patterns.EMAIL_ADDRESS.matcher(email).matches() &&
@@ -108,6 +106,8 @@ fun SignUpScreen(
           email.contains("@")
   val passwordLengthComplete = password.length >= 6
   val samePassword = password == confirmPassword
+
+  val isFormComplete = goodFormEmail && passwordLengthComplete && samePassword
 
   val backgroundColor = Color(0xFFFFFFFF)
 
@@ -133,9 +133,7 @@ fun SignUpScreen(
                   modifier = Modifier.size(250.dp).testTag("signUpIllustration"))
 
               ScreenTitle("Sign up", "signUpTitle")
-              VerticalSpacer(height = 20.dp)
-
-              VerticalSpacer(height = 10.dp)
+              Spacer(modifier = Modifier.height(30.dp))
               SocialSignUpButton {
                 authViewModel.setRole("seeker")
                 val gso =
@@ -146,11 +144,11 @@ fun SignUpScreen(
                 val googleSignInClient = GoogleSignIn.getClient(context, gso)
                 launcher.launch(googleSignInClient.signInIntent)
               }
-              VerticalSpacer(height = 10.dp)
 
-              VerticalSpacer(height = 10.dp)
+              Spacer(modifier = Modifier.height(20.dp))
               Text("OR", color = Color.Gray)
-              VerticalSpacer(height = 10.dp)
+
+              Spacer(modifier = Modifier.height(10.dp))
 
               CustomOutlinedTextField(
                   value = email,
@@ -162,7 +160,7 @@ fun SignUpScreen(
                   leadingIconDescription = "Email Icon",
                   testTag = "emailInputField")
 
-              VerticalSpacer(height = 10.dp)
+              Spacer(modifier = Modifier.height(10.dp))
 
               PasswordTextField(
                   value = password,
@@ -170,9 +168,10 @@ fun SignUpScreen(
                   label = "Password",
                   placeholder = "Enter your password",
                   contentDescription = "Password",
-                  testTag = "passwordInput")
+                  testTag = "passwordInput",
+                  passwordLengthComplete = passwordLengthComplete)
 
-              VerticalSpacer(height = 10.dp)
+              Spacer(modifier = Modifier.height(10.dp))
 
               // Confirm Password Field
               PasswordTextField(
@@ -181,16 +180,17 @@ fun SignUpScreen(
                   label = "Confirm Password",
                   placeholder = "Re-enter your password",
                   contentDescription = "Confirm Password",
-                  testTag = "confirmPasswordInput")
+                  testTag = "confirmPasswordInput",
+                  passwordLengthComplete = (passwordLengthComplete && samePassword))
 
               Text(
-                  text = "Password must be at least 6 characters",
+                  text = "Your passport must have at least 6 characters",
                   color = Color.Gray,
                   fontSize = 12.sp,
                   textAlign = TextAlign.Start,
                   modifier = Modifier.padding(top = 4.dp).fillMaxWidth())
 
-              VerticalSpacer(height = 20.dp)
+              Spacer(modifier = Modifier.height(20.dp))
 
               SignUpButton(
                   {
@@ -203,16 +203,11 @@ fun SignUpScreen(
                   passwordLengthComplete,
                   samePassword)
 
-              VerticalSpacer(height = 16.dp)
+              Spacer(modifier = Modifier.height(16.dp))
 
               AlreadyHaveAccountText(navigationActions)
             }
       })
-}
-
-@Composable
-fun VerticalSpacer(height: Dp) {
-  Spacer(modifier = Modifier.height(height))
 }
 
 @Composable
@@ -231,21 +226,21 @@ fun PasswordTextField(
     label: String,
     placeholder: String,
     contentDescription: String = "",
-    testTag: String
+    testTag: String,
+    passwordLengthComplete: Boolean
 ) {
   var passwordVisible by remember { mutableStateOf(false) }
-  val passwordLengthComplete = value.length >= 6
   OutlinedTextField(
       value = value,
       onValueChange = onValueChange,
       label = { Text(label, color = Color.Black) },
       singleLine = true,
-      visualTransformation =
-          if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
       placeholder = { Text(placeholder) },
       modifier = Modifier.fillMaxWidth().testTag(testTag),
       enabled = true,
       shape = RoundedCornerShape(12.dp),
+      visualTransformation =
+          if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
       leadingIcon = {
         Icon(
             imageVector = Icons.Filled.Lock,
