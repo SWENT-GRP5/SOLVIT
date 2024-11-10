@@ -30,6 +30,7 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -52,13 +53,13 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.solvit.R
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
+import com.android.solvit.seeker.ui.request.LocationDropdown
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.map.LocationViewModel
 import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.ui.navigation.NavigationActions
 
-@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun ProviderRegistrationScreen(
@@ -79,10 +80,7 @@ fun ProviderRegistrationScreen(
   var fullName by remember { mutableStateOf("") }
   var companyName by remember { mutableStateOf("") }
   var phone by remember { mutableStateOf("") }
-  var selectedLocation by remember {
-    mutableStateOf(Location(name = "", latitude = 0.0, longitude = 0.0))
-  }
-
+  var selectedLocation by remember { mutableStateOf<Location?>(null) }
   val locationQuery by locationViewModel.query.collectAsState()
 
   var showDropdown by remember { mutableStateOf(false) }
@@ -95,10 +93,10 @@ fun ProviderRegistrationScreen(
   // Step tracking: Role, Details, Preferences
   var currentStep by remember { mutableStateOf(1) }
   val scrollState = rememberScrollState()
-  val isFormComplete = fullName.isNotBlank() && phone.isNotBlank() && locationQuery.isNotBlank()
+  val isFormComplete = fullName.isNotBlank() && phone.isNotBlank() && selectedLocation != null
 
   Scaffold(
-      content = {
+      content = { paddingValues ->
         Column(modifier = Modifier.fillMaxSize().padding(16.dp).verticalScroll(scrollState)) {
           Row(
               modifier = Modifier.fillMaxWidth(),
@@ -108,7 +106,7 @@ fun ProviderRegistrationScreen(
                 IconButton(
                     onClick = { navigationActions.goBack() }, Modifier.testTag("goBackButton")) {
                       Icon(
-                          Icons.Default.ArrowBack,
+                          Icons.AutoMirrored.Filled.ArrowBack,
                           contentDescription = "Back",
                           tint = colorScheme.onBackground)
                     }
@@ -188,6 +186,15 @@ fun ProviderRegistrationScreen(
                         ))
             Spacer(modifier = Modifier.height(16.dp))
 
+            LocationDropdown(
+                locationQuery = locationQuery,
+                onLocationQueryChange = { locationViewModel.setQuery(it) },
+                showDropdownLocation = showDropdown,
+                onShowDropdownLocationChange = { showDropdown = it },
+                locationSuggestions = locationSuggestions.filterNotNull(),
+                onLocationSelected = { selectedLocation = it },
+                requestLocation = null,
+                backgroundColor = Color.White)
             // Location Input
             ExposedDropdownMenuBox(
                 expanded = showDropdown && locationSuggestions.isNotEmpty(),
@@ -337,7 +344,7 @@ fun ProviderRegistrationScreen(
             Button(
                 onClick = {
                   // Complete registration and navigate
-                  val loc = selectedLocation
+                  val loc = selectedLocation ?: Location(0.0, 0.0, "")
                   val newProviderProfile =
                       Provider(
                           uid = user!!.uid,

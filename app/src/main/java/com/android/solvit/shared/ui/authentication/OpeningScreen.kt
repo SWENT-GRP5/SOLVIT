@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -46,15 +48,17 @@ fun OpeningScreen(navigationActions: NavigationActions) {
 
 @Composable
 fun OpeningScreenPortrait(navigationActions: NavigationActions) {
-  Surface(modifier = Modifier.fillMaxSize(), color = colorScheme.background) {
-    Column(
-        modifier = Modifier.fillMaxSize().background(colorScheme.background).padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally) {
-          Image(
-              painter = painterResource(id = R.drawable.logosolvit_firstpage),
-              contentDescription = null,
-              modifier = Modifier.size(200.dp).testTag("appLogo"))
+  Surface(
+      modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
+      color = colorScheme.background) {
+        Column(
+            modifier = Modifier.fillMaxSize().background(colorScheme.background).padding(16.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally) {
+              Image(
+                  painter = painterResource(id = R.drawable.logosolvit_firstpage),
+                  contentDescription = null,
+                  modifier = Modifier.size(200.dp).testTag("appLogoPortrait"))
           Spacer(modifier = Modifier.height(7.dp))
           Text(
               text =
@@ -72,88 +76,91 @@ fun OpeningScreenPortrait(navigationActions: NavigationActions) {
                             spanStyle =
                                 SpanStyle(
                                     color = colorScheme.secondary, fontWeight = FontWeight.Bold)))
-                  },
-              fontSize = 60.sp,
-              modifier = Modifier.testTag("appName"))
-          Spacer(modifier = Modifier.height(175.dp))
-          Text(
-              text = "Your Problem, Our Priority",
-              fontSize = 18.sp,
-              color = colorScheme.onSurfaceVariant,
-              modifier = Modifier.testTag("tagline"))
-          Text(
-              text = "Tap to Continue",
-              fontSize = 18.sp,
-              textDecoration = TextDecoration.Underline,
-              color = colorScheme.secondary,
-              modifier =
-                  Modifier.clickable { navigationActions.navigateTo(Screen.SIGN_IN) }
-                      .testTag("ctaButton"))
-        }
-  }
+                      },
+                  fontSize = 60.sp,
+                  modifier = Modifier.testTag("appNamePortrait"))
+              Spacer(modifier = Modifier.height(175.dp))
+              Text(
+                  text = "Your Problem, Our Priority",
+                  fontSize = 18.sp,
+                  color = colorScheme.onSurfaceVariant,
+                  modifier = Modifier.testTag("taglinePortrait"))
+              Text(
+                  text = "Tap to Continue",
+                  fontSize = 18.sp,
+                  textDecoration = TextDecoration.Underline,
+                  color = colorScheme.secondary,
+                  modifier =
+                      Modifier.clickable { navigationActions.navigateTo(Screen.SIGN_IN) }
+                          .testTag("ctaButtonPortrait"))
+            }
+      }
 }
 
 @Composable
 fun OpeningScreenLandscape(navigationActions: NavigationActions) {
-  Surface(modifier = Modifier.fillMaxSize(), color = colorScheme.background) {
-    Row(
-        modifier = Modifier.fillMaxSize().background(colorScheme.background).padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceEvenly) {
-          // Logo Image
-          Image(
-              painter = painterResource(id = R.drawable.logosolvit_firstpage),
-              contentDescription = null,
-              modifier = Modifier.size(200.dp).testTag("appLogo"))
+  Surface(
+      modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
+      color = colorScheme.background) {
+        Row(
+            modifier = Modifier.fillMaxSize().background(colorScheme.background).padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceEvenly) {
+              // Logo Image
+              Image(
+                  painter = painterResource(id = R.drawable.logosolvit_firstpage),
+                  contentDescription = null,
+                  modifier = Modifier.size(200.dp).testTag("appLogoLandscape"))
 
-          // Right Side Texts
-          Column(verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.Start) {
-            Spacer(modifier = Modifier.height(8.dp))
+              // Right Side Texts
+              Column(
+                  verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.Start) {
+                    Spacer(modifier = Modifier.height(8.dp))
 
-            // App Name with Colored "Solvit"
-            Text(
-                text =
-                    buildAnnotatedString {
-                      append(
-                          AnnotatedString(
-                              "Solv",
-                              spanStyle =
-                                  SpanStyle(
-                                      color = colorScheme.onBackground,
+                    Text(
+                        text =
+                            buildAnnotatedString {
+                              append(
+                                  AnnotatedString(
+                                      "Solv",
+                                      spanStyle =
+                                          SpanStyle(
+                                              color = colorScheme.onBackground,
                                       fontWeight = FontWeight.Bold)))
                       append(
                           AnnotatedString(
                               "it",
                               spanStyle =
                                   SpanStyle(
-                                      color = colorScheme.secondary, fontWeight = FontWeight.Bold)))
-                    },
-                fontSize = 60.sp,
-                modifier = Modifier.testTag("appName"))
+                                      color = colorScheme.secondary,
+                                              fontWeight = FontWeight.Bold)))
+                            },
+                        fontSize = 60.sp,
+                        modifier = Modifier.testTag("appNameLandscape"))
 
-            Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
 
-            // Tagline Text
-            Text(
-                text = "Your Problem, Our Priority",
-                fontSize = 18.sp,
-                color = colorScheme.onSurface,
-                modifier = Modifier.testTag("tagline"))
+                    // Tagline Text
+                    Text(
+                        text = "Your Problem, Our Priority",
+                        fontSize = 18.sp,
+                        color = colorScheme.onSurface,
+                        modifier = Modifier.testTag("taglineLandscape"))
 
-            Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
-            // Call-to-Action Button
-            Text(
-                text = "Tap to Continue",
-                fontSize = 18.sp,
-                textDecoration = TextDecoration.Underline,
-                color = colorScheme.secondary,
-                modifier =
-                    Modifier.clickable { navigationActions.navigateTo(Screen.SIGN_IN) }
-                        .testTag("ctaButton"))
-          }
-        }
-  }
+                    // Call-to-Action Button
+                    Text(
+                        text = "Tap to Continue",
+                        fontSize = 18.sp,
+                        textDecoration = TextDecoration.Underline,
+                        color = colorScheme.secondary,
+                        modifier =
+                            Modifier.clickable { navigationActions.navigateTo(Screen.SIGN_IN) }
+                                .testTag("ctaButtonLandscape"))
+                  }
+            }
+      }
 }
 
 // Preview function for testing

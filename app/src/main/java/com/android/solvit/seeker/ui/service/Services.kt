@@ -55,7 +55,7 @@ import coil.compose.AsyncImage
 import com.android.solvit.R
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.seeker.model.service.SearchServicesViewModel
-import com.android.solvit.seeker.ui.navigation.SeekerBottomNavigationMenu
+import com.android.solvit.seeker.ui.navigation.BottomNavigationMenu
 import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_CUSTOMER
 import com.android.solvit.shared.ui.navigation.NavigationActions
@@ -83,10 +83,10 @@ fun ServicesScreen(
   Scaffold(
       modifier = Modifier.testTag("servicesScreen"),
       bottomBar = {
-        SeekerBottomNavigationMenu(
+        BottomNavigationMenu(
             { navigationActions.navigateTo(it.route) },
             LIST_TOP_LEVEL_DESTINATION_CUSTOMER,
-            navigationActions.currentRoute())
+            Route.SERVICES)
       }) {
         Column(modifier = Modifier.fillMaxSize()) {
           TopSection(searchViewModel, listProviderViewModel, navigationActions)

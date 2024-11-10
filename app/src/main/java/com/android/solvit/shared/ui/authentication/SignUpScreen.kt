@@ -20,11 +20,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -107,102 +108,96 @@ fun SignUpScreen(
       topBar = {
         TopAppBar(
             title = { Text("") },
-            navigationIcon = {
-              IconButton(onClick = { navigationActions.goBack() }) {
-                Icon(
-                    Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "goBackButton",
-                    modifier = Modifier.testTag("backButton"))
-              }
-            },
+            navigationIcon = { GoBackButton(navigationActions) },
             colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background),
             modifier = Modifier.testTag("backButton"))
       },
       content = { padding ->
         Column(
-            modifier = Modifier.fillMaxSize().padding(padding).background(colorScheme.background),
+            modifier =
+                Modifier.fillMaxSize()
+                    .background(colorScheme.background)
+                    .padding(16.dp)
+                    .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center) {}
+            verticalArrangement = Arrangement.Top) {
+              Image(
+                  painter = painterResource(id = R.drawable.sign_up_image),
+                  contentDescription = "Logo",
+                  modifier = Modifier.size(250.dp).testTag("signUpIllustration"))
+
+              ScreenTitle("Sign up", "signUpTitle")
+              VerticalSpacer(height = 20.dp)
+
+              VerticalSpacer(height = 20.dp)
+              SocialSignUpButton {
+                authViewModel.setRole("seeker")
+                val gso =
+                    GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                        .requestIdToken(token)
+                        .requestEmail()
+                        .build()
+                val googleSignInClient = GoogleSignIn.getClient(context, gso)
+                launcher.launch(googleSignInClient.signInIntent)
+              }
+              VerticalSpacer(height = 10.dp)
+
+              VerticalSpacer(height = 10.dp)
+              Text("OR", color = colorScheme.onSurface)
+              VerticalSpacer(height = 10.dp)
+
+              EmailTextField(
+                  email,
+                  onValueChange = { email = it },
+                  "Enter your email address",
+                  "emailInputField")
+
+              VerticalSpacer(height = 10.dp)
+
+              PasswordTextField(
+                  value = password,
+                  onValueChange = { password = it },
+                  label = "Password",
+                  placeholder = "Enter your password",
+                  contentDescription = "Password",
+                  testTag = "passwordInput")
+
+              VerticalSpacer(height = 10.dp)
+
+              // Confirm Password Field
+              PasswordTextField(
+                  value = confirmPassword,
+                  onValueChange = { confirmPassword = it },
+                  label = "Confirm Password",
+                  placeholder = "Re-enter your password",
+                  contentDescription = "Confirm Password",
+                  testTag = "confirmPasswordInput")
+
+              Text(
+                  text = "Password must be at least 6 characters",
+                  color = colorScheme.onSurfaceVariant,
+                  fontSize = 12.sp,
+                  textAlign = TextAlign.Start,
+                  modifier = Modifier.padding(top = 4.dp).fillMaxWidth())
+
+              VerticalSpacer(height = 20.dp)
+
+              SignUpButton(
+                  {
+                    authViewModel.setEmail(email)
+                    authViewModel.setPassword(password)
+                    navigationActions.navigateTo(Screen.SIGN_UP_CHOOSE_ROLE)
+                  },
+                  isFormComplete,
+                  goodFormEmail,
+                  passwordLengthComplete,
+                  samePassword)
+
+              VerticalSpacer(height = 16.dp)
+
+              AlreadyHaveAccountText(navigationActions)
+            }
       })
-
-  Column(
-      modifier = Modifier.fillMaxWidth().padding(16.dp),
-      horizontalAlignment = Alignment.CenterHorizontally,
-      verticalArrangement = Arrangement.Top) {
-        Image(
-            painter = painterResource(id = R.drawable.sign_up_image),
-            contentDescription = "Logo",
-            modifier = Modifier.size(250.dp).testTag("signUpIllustration"))
-
-        ScreenTitle("Sign up", "signUpTitle")
-        VerticalSpacer(height = 20.dp)
-
-        // Social Sign Up Buttons
-        VerticalSpacer(height = 20.dp)
-        SocialSignUpButton {
-          authViewModel.setRole("seeker")
-          val gso =
-              GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                  .requestIdToken(token)
-                  .requestEmail()
-                  .build()
-          val googleSignInClient = GoogleSignIn.getClient(context, gso)
-          launcher.launch(googleSignInClient.signInIntent)
-        }
-        VerticalSpacer(height = 10.dp)
-
-        VerticalSpacer(height = 10.dp)
-        Text("OR", color = colorScheme.onSurface)
-        VerticalSpacer(height = 10.dp)
-
-        EmailTextField(
-            email, onValueChange = { email = it }, "Enter your email address", "emailInputField")
-
-        VerticalSpacer(height = 10.dp)
-
-        PasswordTextField(
-            value = password,
-            onValueChange = { password = it },
-            label = "Password",
-            placeholder = "Enter your password",
-            contentDescription = "Password",
-            testTag = "passwordInput")
-
-        VerticalSpacer(height = 10.dp)
-
-        // Confirm Password Field
-        PasswordTextField(
-            value = confirmPassword,
-            onValueChange = { confirmPassword = it },
-            label = "Confirm Password",
-            placeholder = "Re-enter your password",
-            contentDescription = "Confirm Password",
-            testTag = "confirmPasswordInput")
-
-        Text(
-            text = "Password must be at least 6 characters",
-            color = colorScheme.onSurfaceVariant,
-            fontSize = 12.sp,
-            textAlign = TextAlign.Start,
-            modifier = Modifier.padding(top = 4.dp).fillMaxWidth())
-
-        VerticalSpacer(height = 20.dp)
-
-        SignUpButton(
-            {
-              authViewModel.setEmail(email)
-              authViewModel.setPassword(password)
-              navigationActions.navigateTo(Screen.SIGN_UP_CHOOSE_ROLE)
-            },
-            isFormComplete,
-            goodFormEmail,
-            passwordLengthComplete,
-            samePassword)
-
-        VerticalSpacer(height = 16.dp)
-
-        AlreadyHaveAccountText(navigationActions)
-      }
 }
 
 @Composable

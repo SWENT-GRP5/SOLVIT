@@ -1,13 +1,11 @@
 package com.android.solvit.seeker.ui.navigation
 
-//noinspection UsingMaterialAndMaterial3Libraries
-//noinspection UsingMaterialAndMaterial3Libraries
 import android.content.pm.ActivityInfo
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -18,6 +16,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.colorScheme
@@ -39,7 +38,7 @@ import com.android.solvit.shared.ui.navigation.TopLevelDestinations
 import com.android.solvit.shared.ui.theme.Background
 
 @Composable
-fun SeekerBottomNavigationMenu(
+fun BottomNavigationMenu(
     onTabSelect: (TopLevelDestination) -> Unit,
     tabList: List<TopLevelDestination>,
     selectedItem: String
@@ -52,13 +51,15 @@ fun SeekerBottomNavigationMenu(
     onDispose { activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED }
   }
 
-  Box(
+  BoxWithConstraints(
       modifier =
           Modifier.fillMaxWidth()
               .height(80.dp)
               .background(Color.Transparent)
               .testTag("bottomNavigationMenu"),
       contentAlignment = Alignment.BottomCenter) {
+        val width = maxWidth
+        val height = maxHeight
         Canvas(modifier = Modifier.fillMaxWidth().height(60.dp).background(Color.Transparent)) {
           val path =
               Path().apply {
@@ -95,31 +96,42 @@ fun SeekerBottomNavigationMenu(
               filteredTabList.forEachIndexed { index, tab ->
                 BottomNavigationItem(
                     icon = {
-                      Icon(tab.icon, contentDescription = null, tint = colorScheme.onSurfaceVariant)
+                      Icon(
+                          tab.icon,
+                          contentDescription = null,
+                          tint =
+                              if (tab.route == selectedItem) Color(0xFF0099FF)
+                              else Color(0xFFD8D8D8))
                     },
                     selected = tab.route == selectedItem,
                     onClick = { onTabSelect(tab) },
                     modifier = Modifier.testTag(tab.textId))
               }
             }
-        if (tabList == LIST_TOP_LEVEL_DESTINATION_CUSTOMER) {
-          FloatingActionButton(
-              onClick = { onTabSelect(TopLevelDestinations.CREATE_REQUEST) },
-              modifier =
-                  Modifier.size(70.dp)
-                      .offset(y = (-25).dp)
-                      .offset(x = (142).dp)
-                      .align(Alignment.TopCenter)
-                      .testTag(TopLevelDestinations.CREATE_REQUEST.toString()),
-              shape = CircleShape,
-              containerColor = colorScheme.primary) {
-                Icon(
-                    Icons.Outlined.Add,
-                    contentDescription = "Add",
-                    tint = colorScheme.onPrimary,
-                    modifier = Modifier.size(30.dp))
-              }
-        }
+
+        FloatingActionButton(
+            onClick = {
+              onTabSelect(
+                  if (tabList == LIST_TOP_LEVEL_DESTINATION_CUSTOMER)
+                      TopLevelDestinations.CREATE_REQUEST
+                  else TopLevelDestinations.MYJOBS)
+            },
+            modifier =
+                Modifier.size(height * 0.85f)
+                    .offset(y = (-25).dp)
+                    .offset(x = width * 0.5f - 53.dp)
+                    .align(Alignment.TopCenter)
+                    .testTag(TopLevelDestinations.CREATE_REQUEST.toString()),
+            shape = CircleShape,
+            containerColor = Color(0xFF0099FF)) {
+              Icon(
+                  if (tabList == LIST_TOP_LEVEL_DESTINATION_CUSTOMER) Icons.Outlined.Add
+                  else Icons.Outlined.CheckCircle,
+                  contentDescription =
+                      if (tabList == LIST_TOP_LEVEL_DESTINATION_CUSTOMER) "Add" else "Myjobs",
+                  tint = Color.White,
+                  modifier = Modifier.size(30.dp))
+            }
       }
 }
 
@@ -130,7 +142,7 @@ fun PreviewSeekerBottomNavigationMenu() {
   val tabList = LIST_TOP_LEVEL_DESTINATION_CUSTOMER
 
   // Preview with "Home" as the selected item
-  SeekerBottomNavigationMenu(
+  BottomNavigationMenu(
       onTabSelect = {}, // No action needed for preview
       tabList = tabList,
       selectedItem = Route.SERVICES // Default to SERVICES (Home)

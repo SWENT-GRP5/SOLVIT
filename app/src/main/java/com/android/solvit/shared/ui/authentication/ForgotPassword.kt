@@ -8,14 +8,13 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -63,48 +62,38 @@ fun ForgotPassword(navigationActions: NavigationActions) {
       topBar = {
         TopAppBar(
             title = { Text("") },
-            navigationIcon = {
-              IconButton(onClick = { navigationActions.goBack() }) {
-                Icon(
-                    Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "goBackButton",
-                    modifier = Modifier.testTag("backButton"))
-              }
-            },
+            navigationIcon = { GoBackButton(navigationActions) },
             modifier = Modifier.testTag("topAppBar"))
       },
       content = { padding ->
         Column(
-            modifier = Modifier.fillMaxSize().padding(padding),
+            modifier = Modifier.fillMaxWidth().padding(16.dp).verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center) {}
-      })
+            verticalArrangement = Arrangement.Top) {
+              VerticalSpacer(60.dp)
 
-  Column(
-      modifier = Modifier.fillMaxWidth().padding(16.dp),
-      horizontalAlignment = Alignment.CenterHorizontally,
-      verticalArrangement = Arrangement.Top) {
-        VerticalSpacer(60.dp)
+              Image(
+                  painter = rememberAsyncImagePainter(R.drawable.passwordforgot),
+                  contentDescription = "Checkmark",
+                  modifier = Modifier.size(240.dp).testTag("forgotPasswordImage"))
 
-        Image(
-            painter = rememberAsyncImagePainter(R.drawable.passwordforgot),
-            contentDescription = "Checkmark",
-            modifier = Modifier.size(240.dp).testTag("forgotPasswordImage"))
+              VerticalSpacer(30.dp)
 
-        VerticalSpacer(30.dp)
+              Text(
+                  text = "Please enter your email address to reset your password",
+                  color = colorScheme.onSurfaceVariant,
+                  fontSize = 20.sp,
+                  modifier = Modifier.padding(top = 4.dp).fillMaxWidth().testTag("bigText"))
 
-        Text(
-            text = "Please enter your email address to reset your password",
-            color = colorScheme.onSurfaceVariant,
-            fontSize = 20.sp,
-            modifier = Modifier.padding(top = 4.dp).fillMaxWidth().testTag("bigText"))
+              VerticalSpacer(height = 10.dp)
 
-        VerticalSpacer(height = 10.dp)
+              EmailTextField(
+                  email,
+                  onValueChange = { email = it },
+                  "Enter your email address",
+                  "emailInputField")
 
-        EmailTextField(
-            email, onValueChange = { email = it }, "Enter your email address", "emailInputField")
-
-        VerticalSpacer(height = 20.dp)
+              VerticalSpacer(height = 20.dp)
 
         Button(
             onClick = {
@@ -135,14 +124,15 @@ fun ForgotPassword(navigationActions: NavigationActions) {
                                       listOf(
                                           colorScheme.onSurfaceVariant,
                                           colorScheme.onSurfaceVariant))
-                            },
-                        shape = RoundedCornerShape(25.dp))
-                    .testTag("Send reset link")) {
-              Text(
-                  "Send reset link",
-                  color = colorScheme.onPrimary,
-                  fontWeight = FontWeight.Bold,
-                  fontSize = 16.sp)
+                                  },
+                              shape = RoundedCornerShape(25.dp))
+                          .testTag("Send reset link")) {
+                    Text(
+                        "Send reset link",
+                        color = colorScheme.onPrimary,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp)
+                  }
             }
-      }
+      })
 }
