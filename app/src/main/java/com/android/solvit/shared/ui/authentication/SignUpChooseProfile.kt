@@ -1,5 +1,6 @@
 package com.android.solvit.shared.ui.authentication
 
+import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -46,6 +47,7 @@ import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
 
+@SuppressLint("SourceLockedOrientationActivity")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SignUpChooseProfile(
@@ -65,7 +67,7 @@ fun SignUpChooseProfile(
   Scaffold(
       topBar = {
         TopAppBar(
-            title = { Stepper(currentStep = 1, isFormComplete = false) },
+            title = { Text("Choose your profile") },
             navigationIcon = { GoBackButton(navigationActions) },
             colors = TopAppBarDefaults.topAppBarColors(containerColor = backgroundColor))
       },
@@ -79,7 +81,8 @@ fun SignUpChooseProfile(
                     .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top) {
-              VerticalSpacer(80.dp)
+              Stepper(currentStep = 1, isFormComplete = false)
+              Spacer(modifier = Modifier.height(16.dp))
 
               Image(
                   painter = painterResource(id = R.drawable.sign_up_choose_profile_logo),

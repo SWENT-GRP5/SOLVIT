@@ -25,11 +25,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
@@ -37,10 +36,8 @@ import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -61,14 +58,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.solvit.R
+import com.android.solvit.seeker.ui.profile.CustomOutlinedTextField
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
@@ -333,80 +328,26 @@ fun FormSection(
           email.contains(".") &&
           email.contains("@")
 
-  OutlinedTextField(
+  CustomOutlinedTextField(
       value = email,
       onValueChange = onEmailChange,
-      label = { Text("Email") },
-      singleLine = true,
-      modifier = Modifier.fillMaxWidth().testTag("emailInput"),
-      keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Email),
-      leadingIcon = {
-        Icon(
-            painter = painterResource(id = android.R.drawable.ic_dialog_email),
-            contentDescription = "Email Icon",
-            tint = if (goodFormEmail) Color(90, 197, 97) else Color.Gray)
-      },
-      shape = RoundedCornerShape(8.dp),
-      colors =
-          TextFieldDefaults.outlinedTextFieldColors(
-              focusedTextColor = Color.Black,
-              unfocusedTextColor =
-                  if (email.isEmpty()) Color.Gray
-                  else if (!goodFormEmail) Color.Red else Color.Black,
-              focusedBorderColor = if (goodFormEmail) Color(0xFF5AC561) else Color.Blue,
-              unfocusedBorderColor =
-                  when {
-                    email.isEmpty() -> Color.Gray
-                    goodFormEmail -> Color(0xFF5AC561)
-                    else -> Color.Red
-                  },
-          ))
+      label = "Email",
+      placeholder = "Enter your email",
+      isValueOk = goodFormEmail,
+      leadingIcon = Icons.Default.Email,
+      leadingIconDescription = "Email Icon",
+      testTag = "emailInput")
 
-  Spacer(modifier = Modifier.height(8.dp))
+  Spacer(modifier = Modifier.height(10.dp))
 
   // Password input
-  OutlinedTextField(
+  PasswordTextField(
       value = password,
       onValueChange = onPasswordChange,
-      label = { Text("Password") },
-      singleLine = true,
-      visualTransformation =
-          if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-      leadingIcon = {
-        Icon(
-            Icons.Default.Lock,
-            contentDescription = "Password Icon",
-            tint = if (passwordLengthComplete) Color(90, 197, 97) else Color.Gray)
-      },
-      trailingIcon = {
-        val image =
-            if (passwordVisible) painterResource(id = android.R.drawable.ic_menu_view)
-            else painterResource(id = android.R.drawable.ic_secure)
-
-        IconButton(onClick = onPasswordVisibilityChange) {
-          Icon(
-              painter = image,
-              contentDescription = null,
-              tint = if (passwordLengthComplete) Color(90, 197, 97) else Color.Gray,
-              modifier = Modifier.size(24.dp))
-        }
-      },
-      shape = RoundedCornerShape(8.dp),
-      modifier = Modifier.fillMaxWidth().testTag("password"),
-      colors =
-          TextFieldDefaults.outlinedTextFieldColors(
-              focusedTextColor = Color.Black,
-              unfocusedTextColor =
-                  if (password.isEmpty()) Color.Gray
-                  else if (!passwordLengthComplete) Color.Red else Color.Black,
-              focusedBorderColor = if (passwordLengthComplete) Color(0xFF5AC561) else Color.Blue,
-              unfocusedBorderColor =
-                  when {
-                    password.isEmpty() -> Color.Gray
-                    passwordLengthComplete -> Color(0xFF5AC561)
-                    else -> Color.Red
-                  },
-          ))
+      label = "Password",
+      placeholder = "Enter your password",
+      contentDescription = "Password",
+      testTag = "password")
 
   Spacer(modifier = Modifier.height(8.dp))
 
@@ -580,41 +521,4 @@ fun googleSignInLauncher(
       onFailure()
     }
   }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun CustomEmailField() {
-  var email by remember { mutableStateOf("") }
-  val isEmailValid =
-      email.isNotEmpty() &&
-          Patterns.EMAIL_ADDRESS.matcher(email).matches() &&
-          email.contains(".") &&
-          email.contains("@")
-
-  OutlinedTextField(
-      value = email,
-      onValueChange = { email = it },
-      label = { Text("Email") },
-      singleLine = true,
-      modifier = Modifier.fillMaxWidth().testTag("emailInput"),
-      keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Email),
-      leadingIcon = {
-        Icon(
-            painter = painterResource(id = android.R.drawable.ic_dialog_email),
-            contentDescription = "Email Icon",
-            tint = Color(90, 197, 97))
-      },
-      shape = RoundedCornerShape(8.dp),
-      colors =
-          TextFieldDefaults.outlinedTextFieldColors(
-              focusedTextColor = if (email.isEmpty()) Color.Gray else Color.Black,
-              focusedBorderColor = if (isEmailValid) Color(0xFF5AC561) else Color.Blue,
-              unfocusedBorderColor =
-                  when {
-                    email.isEmpty() -> Color.Gray
-                    isEmailValid -> Color(0xFF5AC561)
-                    else -> Color.Red
-                  },
-          ))
 }

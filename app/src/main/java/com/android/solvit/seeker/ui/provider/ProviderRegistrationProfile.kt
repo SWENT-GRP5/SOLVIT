@@ -61,7 +61,10 @@ import com.android.solvit.shared.ui.authentication.GoBackButton
 import com.android.solvit.shared.ui.navigation.NavigationActions
 
 @OptIn(ExperimentalMaterial3Api::class)
-@SuppressLint("UnusedMaterialScaffoldPaddingParameter", "UnusedMaterial3ScaffoldPaddingParameter")
+@SuppressLint(
+    "UnusedMaterialScaffoldPaddingParameter",
+    "UnusedMaterial3ScaffoldPaddingParameter",
+    "SourceLockedOrientationActivity")
 @Composable
 fun ProviderRegistrationScreen(
     viewModel: ListProviderViewModel = viewModel(factory = ListProviderViewModel.Factory),
@@ -106,7 +109,7 @@ fun ProviderRegistrationScreen(
   Scaffold(
       topBar = {
         TopAppBar(
-            title = { Stepper(currentStep = currentStep, isFormComplete) },
+            title = { Text("Provider Registration") },
             navigationIcon = {
               if (currentStep > 1) {
                 IconButton(onClick = { currentStep -= 1 }) {
@@ -126,6 +129,7 @@ fun ProviderRegistrationScreen(
                     .fillMaxSize()
                     .padding(16.dp)
                     .verticalScroll(rememberScrollState())) {
+              Stepper(currentStep = currentStep, isFormComplete)
               Spacer(modifier = Modifier.height(16.dp))
 
               if (currentStep == 1) {
@@ -151,12 +155,8 @@ fun ProviderRegistrationScreen(
                     label = "Full Name",
                     placeholder = "Enter your full name",
                     isValueOk = isFullNameOk,
-                    leadingIcon = {
-                      Icon(
-                          Icons.Default.Person,
-                          contentDescription = "Person Icon",
-                          tint = if (isFullNameOk) Color(90, 197, 97) else Color.Gray)
-                    },
+                    leadingIcon = Icons.Default.Person,
+                    leadingIconDescription = "Person Icon",
                     testTag = "fullNameInput")
 
                 Spacer(modifier = Modifier.height(10.dp))
@@ -168,12 +168,8 @@ fun ProviderRegistrationScreen(
                     label = "Phone Number",
                     placeholder = "Enter your phone number",
                     isValueOk = isPhoneOk,
-                    leadingIcon = {
-                      Icon(
-                          Icons.Default.Phone,
-                          contentDescription = "Phone Icon",
-                          tint = if (isPhoneOk) Color(90, 197, 97) else Color.Gray)
-                    },
+                    leadingIcon = Icons.Default.Phone,
+                    leadingIconDescription = "Phone Icon",
                     testTag = "phoneNumberInput")
 
                 Spacer(modifier = Modifier.height(10.dp))
@@ -184,12 +180,8 @@ fun ProviderRegistrationScreen(
                     label = "Business/Company Name",
                     placeholder = "Enter your business name (optional for independent providers",
                     isValueOk = isFullNameOk,
-                    leadingIcon = {
-                      Icon(
-                          Icons.Default.Build,
-                          contentDescription = "Company Icon",
-                          tint = if (isFullNameOk) Color(90, 197, 97) else Color.Gray)
-                    },
+                    leadingIcon = Icons.Default.Build,
+                    leadingIconDescription = "Company Icon",
                     testTag = "companyNameInput")
 
                 Spacer(modifier = Modifier.height(10.dp))

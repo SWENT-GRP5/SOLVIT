@@ -25,9 +25,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -59,7 +59,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
@@ -69,6 +68,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.solvit.R
+import com.android.solvit.seeker.ui.profile.CustomOutlinedTextField
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
@@ -152,12 +152,15 @@ fun SignUpScreen(
               Text("OR", color = Color.Gray)
               VerticalSpacer(height = 10.dp)
 
-              EmailTextField(
-                  email,
+              CustomOutlinedTextField(
+                  value = email,
                   onValueChange = { email = it },
-                  "Enter your email address",
-                  "emailInputField",
-                  goodFormEmail)
+                  label = "Email",
+                  placeholder = "Enter your email",
+                  isValueOk = goodFormEmail,
+                  leadingIcon = Icons.Default.Email,
+                  leadingIconDescription = "Email Icon",
+                  testTag = "emailInputField")
 
               VerticalSpacer(height = 10.dp)
 
@@ -218,45 +221,6 @@ fun ScreenTitle(title: String, testTag: String) {
       text = title,
       style = MaterialTheme.typography.titleLarge,
       modifier = Modifier.testTag(testTag))
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun EmailTextField(
-    value: String,
-    onValueChange: (String) -> Unit,
-    label: String,
-    testTag: String,
-    goodFormEmail: Boolean = false
-) {
-  OutlinedTextField(
-      value = value,
-      onValueChange = onValueChange,
-      label = { Text(label) },
-      singleLine = true,
-      modifier = Modifier.fillMaxWidth().testTag(testTag),
-      keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Email),
-      leadingIcon = {
-        Icon(
-            painter = painterResource(id = android.R.drawable.ic_dialog_email),
-            contentDescription = "Email Icon",
-            tint = if (goodFormEmail) Color(90, 197, 97) else Color.Gray)
-      },
-      shape = RoundedCornerShape(8.dp),
-      colors =
-          TextFieldDefaults.outlinedTextFieldColors(
-              focusedTextColor = Color.Black,
-              unfocusedTextColor =
-                  if (value.isEmpty()) Color.Gray
-                  else if (!goodFormEmail) Color.Red else Color.Black,
-              focusedBorderColor = if (goodFormEmail) Color(0xFF5AC561) else Color.Blue,
-              unfocusedBorderColor =
-                  when {
-                    value.isEmpty() -> Color.Gray
-                    goodFormEmail -> Color(0xFF5AC561)
-                    else -> Color.Red
-                  },
-          ))
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

@@ -65,7 +65,7 @@ import com.android.solvit.shared.ui.authentication.GoBackButton
 import com.android.solvit.shared.ui.navigation.NavigationActions
 
 @OptIn(ExperimentalMaterial3Api::class)
-@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
+@SuppressLint("UnusedMaterialScaffoldPaddingParameter", "SourceLockedOrientationActivity")
 @Composable
 fun SeekerRegistrationScreen(
     viewModel: SeekerProfileViewModel = viewModel(factory = SeekerProfileViewModel.Factory),
@@ -111,7 +111,7 @@ fun SeekerRegistrationScreen(
   Scaffold(
       topBar = {
         TopAppBar(
-            title = { Stepper(currentStep = currentStep, isFormComplete) },
+            title = { Text("Seeker Registration") },
             navigationIcon = {
               if (currentStep > 1) {
                 IconButton(onClick = { currentStep -= 1 }) {
@@ -131,6 +131,7 @@ fun SeekerRegistrationScreen(
                     .fillMaxSize()
                     .padding(16.dp)
                     .verticalScroll(rememberScrollState())) {
+              Stepper(currentStep = currentStep, isFormComplete)
               Spacer(modifier = Modifier.height(16.dp))
 
               if (currentStep == 1) {
@@ -359,9 +360,8 @@ fun CustomOutlinedTextField(
 @Composable
 fun Stepper(currentStep: Int, isFormComplete: Boolean) {
   val stepLabels = listOf("Information", "Details", "All Done")
-
   Row(
-      modifier = Modifier.fillMaxWidth().height(560.dp).padding(horizontal = 8.dp),
+      modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
       horizontalArrangement = Arrangement.SpaceBetween,
       verticalAlignment = Alignment.CenterVertically) {
         stepLabels.forEachIndexed { index, label ->

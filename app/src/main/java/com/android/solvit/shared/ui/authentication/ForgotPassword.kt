@@ -2,6 +2,7 @@ package com.android.solvit.shared.ui.authentication
 
 import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
+import android.util.Patterns
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
@@ -15,6 +16,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -38,15 +41,25 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.android.solvit.R
+import com.android.solvit.seeker.ui.profile.CustomOutlinedTextField
 import com.android.solvit.shared.ui.navigation.NavigationActions
 
-@SuppressLint("SuspiciousIndentation", "UnusedMaterial3ScaffoldPaddingParameter")
+@SuppressLint(
+    "SuspiciousIndentation",
+    "UnusedMaterial3ScaffoldPaddingParameter",
+    "SourceLockedOrientationActivity")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ForgotPassword(navigationActions: NavigationActions) {
   var email by remember { mutableStateOf("") }
 
   val context = LocalContext.current
+
+  val goodFormEmail =
+      email.isNotBlank() &&
+          Patterns.EMAIL_ADDRESS.matcher(email).matches() &&
+          email.contains(".") &&
+          email.contains("@")
 
   DisposableEffect(Unit) {
     val activity = context as? ComponentActivity
@@ -83,11 +96,15 @@ fun ForgotPassword(navigationActions: NavigationActions) {
 
               VerticalSpacer(height = 10.dp)
 
-              EmailTextField(
-                  email,
+              CustomOutlinedTextField(
+                  value = email,
                   onValueChange = { email = it },
-                  "Enter your email address",
-                  "emailInputField")
+                  label = "Email",
+                  placeholder = "Enter your email",
+                  isValueOk = goodFormEmail,
+                  leadingIcon = Icons.Default.Email,
+                  leadingIconDescription = "Email Icon",
+                  testTag = "emailInputField")
 
               VerticalSpacer(height = 20.dp)
 
@@ -113,9 +130,7 @@ fun ForgotPassword(navigationActions: NavigationActions) {
                           .height(50.dp)
                           .background(
                               brush =
-                                  if (email.isNotBlank() &&
-                                      email.contains("@") &&
-                                      email.contains(".")) {
+                                  if (goodFormEmail) {
                                     Brush.horizontalGradient(
                                         colors = listOf(Color(0, 200, 83), Color(0, 153, 255)))
                                   } else {
