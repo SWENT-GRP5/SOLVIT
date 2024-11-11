@@ -71,7 +71,10 @@ fun SeekerMapScreen(
                   provider.service.toString().replace("_", " ") + "\n" + provider.rating.toString(),
               tag = "providerMarker-${provider.uid}",
               image = imageBitmap,
-              onClick = { navigationActions.navigateTo(Route.PROVIDERS) })
+              onClick = {
+                  providerViewModel.selectProvider(provider)
+                  navigationActions.navigateTo(Route.PROVIDER_PROFILE)
+              })
         }
     providerMarkers.value = markers
   }
