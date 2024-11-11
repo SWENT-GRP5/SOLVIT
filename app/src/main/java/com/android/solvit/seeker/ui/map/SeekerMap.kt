@@ -14,7 +14,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.solvit.R
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
-import com.android.solvit.seeker.ui.navigation.SeekerBottomNavigationMenu
+import com.android.solvit.seeker.ui.navigation.BottomNavigationMenu
 import com.android.solvit.shared.ui.map.MapScreen
 import com.android.solvit.shared.ui.map.MarkerData
 import com.android.solvit.shared.ui.map.RequestLocationPermission
@@ -81,9 +81,9 @@ fun SeekerMapScreen(
       userLocation = userLocation,
       markers = providerMarkers.value,
       bottomBar = {
-        SeekerBottomNavigationMenu(
+        BottomNavigationMenu(
             onTabSelect = { route -> navigationActions.navigateTo(route) },
             tabList = LIST_TOP_LEVEL_DESTINATION_CUSTOMER,
-            selectedItem = navigationActions.currentRoute())
+            selectedItem = Route.MAP)
       })
 }

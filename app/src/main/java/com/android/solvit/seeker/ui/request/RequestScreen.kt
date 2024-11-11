@@ -35,7 +35,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import com.android.solvit.seeker.ui.navigation.SeekerBottomNavigationMenu
+import com.android.solvit.seeker.ui.navigation.BottomNavigationMenu
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
@@ -64,6 +64,7 @@ fun RequestScreen(
     onShowDropdownLocationChange: (Boolean) -> Unit,
     locationSuggestions: List<Location>,
     onLocationSelected: (Location) -> Unit,
+    selectedLocation: Location?,
     selectedRequest: ServiceRequest?,
     requestViewModel: ServiceRequestViewModel,
     dueDate: String,
@@ -85,7 +86,7 @@ fun RequestScreen(
       modifier = Modifier.padding(16.dp).testTag("requestScreen"),
       bottomBar = {
         if (screenTitle == "Create a new request") {
-          SeekerBottomNavigationMenu(
+          BottomNavigationMenu(
               onTabSelect = { route -> navigationActions.navigateTo(route) },
               tabList = LIST_TOP_LEVEL_DESTINATION_CUSTOMER,
               selectedItem = navigationActions.currentRoute())
@@ -94,22 +95,17 @@ fun RequestScreen(
       topBar = {
         TopAppBar(
             title = { Text(screenTitle, Modifier.testTag("screenTitle")) },
-            // HJ : Comment this line as these screens have a bottom navigation menu with current
-            // version
-
             navigationIcon = {
-              if (screenTitle == "Edit your request") {
-                IconButton(
-                    onClick = {
-                      // HJ : Comment this line as these screens have a bottom navigation menu
-                      navigationActions.goBack()
-                    },
-                    modifier = Modifier.testTag("goBackButton")) {
-                      Icon(
-                          imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-                          contentDescription = "Back")
-                    }
-              }
+              IconButton(
+                  onClick = {
+                    // HJ : Comment this line as these screens have a bottom navigation menu
+                    navigationActions.goBack()
+                  },
+                  modifier = Modifier.testTag("goBackButton")) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
+                        contentDescription = "Back")
+                  }
             })
       },
       content = { paddingValues ->
@@ -138,7 +134,7 @@ fun RequestScreen(
                   locationSuggestions,
                   onLocationSelected,
                   selectedRequest?.location)
-              DueDateInput(dueDate, onDueDateChange)
+              DatePickerFieldToModal(dueDate = dueDate, onDateChange = onDueDateChange)
               ImagePicker(selectedImageUri, imageUrl, onImageSelected)
               Button(
                   onClick = onSubmit,
@@ -148,7 +144,11 @@ fun RequestScreen(
                           .height(40.dp)
                           .testTag("requestSubmit"),
                   shape = RoundedCornerShape(25.dp),
-                  enabled = title.isNotBlank() && description.isNotBlank() && dueDate.isNotBlank(),
+                  enabled =
+                      title.isNotBlank() &&
+                          description.isNotBlank() &&
+                          dueDate.isNotBlank() &&
+                          selectedLocation != null,
                   colors =
                       ButtonDefaults.buttonColors(
                           containerColor = Color(0xFFCA97FC),
