@@ -63,8 +63,6 @@ import com.android.solvit.seeker.model.profile.SeekerProfile
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
-import com.android.solvit.shared.ui.theme.colorScheme.secondary
-import com.android.solvit.shared.ui.theme.colorScheme.secondary
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
