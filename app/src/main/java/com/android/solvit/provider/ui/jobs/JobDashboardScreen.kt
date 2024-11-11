@@ -23,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -32,177 +33,189 @@ import com.android.solvit.shared.model.jobs.JobDashboardViewModel
 import com.android.solvit.shared.model.jobs.JobStatus
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.google.android.gms.maps.model.LatLng
-import androidx.compose.ui.platform.testTag
-
-
 
 @Composable
 fun JobDashboardScreen(
     navigationActions: NavigationActions,
-    jobDashboardViewModel: JobDashboardViewModel = viewModel(factory = JobDashboardViewModel.Factory)
+    jobDashboardViewModel: JobDashboardViewModel =
+        viewModel(factory = JobDashboardViewModel.Factory)
 ) {
-    // Set initial tab to 1 (Current) so it’s the first page displayed
-    var selectedTab by remember { mutableStateOf(1) }
+  // Set initial tab to 1 (Current) so it’s the first page displayed
+  var selectedTab by remember { mutableStateOf(1) }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(
-                    "Job Dashboard",
-                    style = MaterialTheme.typography.h6,
-                    color = Color.Black,
-                    modifier = Modifier.testTag("JobDashboardTitle")) },
-                navigationIcon = {
-                    IconButton(
-                        onClick = { navigationActions.goBack() },
-                        modifier = Modifier.testTag("JobDashboardBackButton")) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Go back"
-                        )
-                    }
-                },
-                backgroundColor = Color.White, // Set background color to white or any preferred color
-                elevation = 0.dp // Remove shadow for a flat look, adjust as needed
+  Scaffold(
+      topBar = {
+        TopAppBar(
+            title = {
+              Text(
+                  "Job Dashboard",
+                  style = MaterialTheme.typography.h6,
+                  color = Color.Black,
+                  modifier = Modifier.testTag("JobDashboardTitle"))
+            },
+            navigationIcon = {
+              IconButton(
+                  onClick = { navigationActions.goBack() },
+                  modifier = Modifier.testTag("JobDashboardBackButton")) {
+                    Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Go back")
+                  }
+            },
+            backgroundColor = Color.White, // Set background color to white or any preferred color
+            elevation = 0.dp // Remove shadow for a flat look, adjust as needed
             )
-        },
-        content = { innerPadding ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-            ) {
-                // Tabs for Pending, Current, and History
-                TabRow(selectedTabIndex = selectedTab, backgroundColor = Color.Transparent) {
-                    Tab(
-                        selected = selectedTab == 0,
-                        onClick = { selectedTab = 0 },
-                        text = { Text("Pending", color = if (selectedTab == 0) Color.Black else Color.Gray) },
-                        modifier = Modifier.testTag("Tab_Pending")
-                    )
-                    Tab(
-                        selected = selectedTab == 1,
-                        onClick = { selectedTab = 1 },
-                        text = { Text("Current", color = if (selectedTab == 1) Color.Black else Color.Gray) },
-                        modifier = Modifier.testTag("Tab_Current")
-                    )
-                    Tab(
-                        selected = selectedTab == 2,
-                        onClick = { selectedTab = 2 },
-                        text = { Text("History", color = if (selectedTab == 2) Color.Black else Color.Gray) },
-                        modifier = Modifier.testTag("Tab_History")
-                    )
-                }
+      },
+      content = { innerPadding ->
+        Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
+          // Tabs for Pending, Current, and History
+          TabRow(selectedTabIndex = selectedTab, backgroundColor = Color.Transparent) {
+            Tab(
+                selected = selectedTab == 0,
+                onClick = { selectedTab = 0 },
+                text = {
+                  Text("Pending", color = if (selectedTab == 0) Color.Black else Color.Gray)
+                },
+                modifier = Modifier.testTag("Tab_Pending"))
+            Tab(
+                selected = selectedTab == 1,
+                onClick = { selectedTab = 1 },
+                text = {
+                  Text("Current", color = if (selectedTab == 1) Color.Black else Color.Gray)
+                },
+                modifier = Modifier.testTag("Tab_Current"))
+            Tab(
+                selected = selectedTab == 2,
+                onClick = { selectedTab = 2 },
+                text = {
+                  Text("History", color = if (selectedTab == 2) Color.Black else Color.Gray)
+                },
+                modifier = Modifier.testTag("Tab_History"))
+          }
 
-                // Show content based on selected tab
-                when (selectedTab) {
-                    0 -> PendingJobsSection(viewModel = jobDashboardViewModel)
-                    1 -> CurrentJobsSection(viewModel = jobDashboardViewModel)
-                    2 -> HistoryJobsSection(viewModel = jobDashboardViewModel)
-                }
-            }
+          // Show content based on selected tab
+          when (selectedTab) {
+            0 -> PendingJobsSection(viewModel = jobDashboardViewModel)
+            1 -> CurrentJobsSection(viewModel = jobDashboardViewModel)
+            2 -> HistoryJobsSection(viewModel = jobDashboardViewModel)
+          }
         }
-    )
+      })
 }
-
 
 @Composable
 fun CurrentJobsSection(viewModel: JobDashboardViewModel) {
-    val context = LocalContext.current
-    val currentLocation = LatLng(40.748817, -73.985428)
-    val currentJobs by viewModel.currentJobs.collectAsState()
+  val context = LocalContext.current
+  val currentLocation = LatLng(40.748817, -73.985428)
+  val currentJobs by viewModel.currentJobs.collectAsState()
 
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).testTag("CurrentJobsSection")) {
+  Column(
+      Modifier.fillMaxSize().verticalScroll(rememberScrollState()).testTag("CurrentJobsSection")) {
         // "Navigate to All Jobs of the Day" button
         Button(
-            onClick = { navigateToAllSortedJobs(context, currentLocation, viewModel.getTodaySortedJobs()) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp)
-                .testTag("NavigateAllJobsButton"),
-            colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF42A5F5))
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(imageVector = Icons.Outlined.Place, contentDescription = null, tint = Color.Black)
+            onClick = {
+              navigateToAllSortedJobs(context, currentLocation, viewModel.getTodaySortedJobs())
+            },
+            modifier =
+                Modifier.fillMaxWidth().padding(vertical = 8.dp).testTag("NavigateAllJobsButton"),
+            colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF42A5F5))) {
+              Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Outlined.Place,
+                    contentDescription = null,
+                    tint = Color.Black)
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("Navigate to All Jobs of the Day", color = Color.Black)
+              }
             }
-        }
 
         Spacer(modifier = Modifier.height(8.dp))
 
         // Job list or message if no current jobs
         if (currentJobs.isEmpty()) {
-            Text(
-                "No current jobs available",
-                style = MaterialTheme.typography.body2,
-                color = Color.Gray,
-                modifier = Modifier.testTag("CurrentJobsEmptyText"))
+          Text(
+              "No current jobs available",
+              style = MaterialTheme.typography.body2,
+              color = Color.Gray,
+              modifier = Modifier.testTag("CurrentJobsEmptyText"))
         } else {
-            currentJobs.forEach { job ->
-                JobItem(
-                    job = job,
-                    status = JobStatus.CURRENT,
-                    onNavigateToJob = {
-                        job.location?.let { navigateToSingleJob(context, it.latitude, it.longitude) }
-                    },
-                    onContactCustomer = {  Toast.makeText(context, "Contact Not yet Implemented", Toast.LENGTH_SHORT).show()},
-                    onMarkAsCompleted = { viewModel.completeJob(job) },  // Move to history
-                    onCancelRequest = { viewModel.completeJob(job, isCanceled = true) },  // Move to history
-                    onChat = { Toast.makeText(context, "Chat Not yet Implemented", Toast.LENGTH_SHORT).show() }
-                )
-            }
+          currentJobs.forEach { job ->
+            JobItem(
+                job = job,
+                status = JobStatus.CURRENT,
+                onNavigateToJob = {
+                  job.location?.let { navigateToSingleJob(context, it.latitude, it.longitude) }
+                },
+                onContactCustomer = {
+                  Toast.makeText(context, "Contact Not yet Implemented", Toast.LENGTH_SHORT).show()
+                },
+                onMarkAsCompleted = { viewModel.completeJob(job) }, // Move to history
+                onCancelRequest = {
+                  viewModel.completeJob(job, isCanceled = true)
+                }, // Move to history
+                onChat = {
+                  Toast.makeText(context, "Chat Not yet Implemented", Toast.LENGTH_SHORT).show()
+                })
+          }
         }
-    }
+      }
 }
+
 @Composable
 fun PendingJobsSection(viewModel: JobDashboardViewModel) {
-    val context = LocalContext.current
-    val pendingJobs by viewModel.pendingJobs.collectAsState()
+  val context = LocalContext.current
+  val pendingJobs by viewModel.pendingJobs.collectAsState()
 
-    Column (Modifier.fillMaxSize().verticalScroll(rememberScrollState()).testTag("PendingJobsSection")) {
+  Column(
+      Modifier.fillMaxSize().verticalScroll(rememberScrollState()).testTag("PendingJobsSection")) {
         if (pendingJobs.isEmpty()) {
-            Text(
-                "No pending jobs",
-                style = MaterialTheme.typography.body2,
-                color = Color.Gray,
-                modifier = Modifier.testTag("PendingJobsEmptyText"))
+          Text(
+              "No pending jobs",
+              style = MaterialTheme.typography.body2,
+              color = Color.Gray,
+              modifier = Modifier.testTag("PendingJobsEmptyText"))
         } else {
-            pendingJobs.forEach { job ->
-                JobItem(
-                    job = job,
-                    status = JobStatus.PENDING,
-                    onContactCustomer = { Toast.makeText(context, "Contact Not yet Implemented", Toast.LENGTH_SHORT).show() },
-                    onConfirmRequest = { viewModel.confirmJob(job)},
-                    onChat = {  Toast.makeText(context, "Chat Not yet Implemented", Toast.LENGTH_SHORT).show() }
-                )
-            }
+          pendingJobs.forEach { job ->
+            JobItem(
+                job = job,
+                status = JobStatus.PENDING,
+                onContactCustomer = {
+                  Toast.makeText(context, "Contact Not yet Implemented", Toast.LENGTH_SHORT).show()
+                },
+                onConfirmRequest = { viewModel.confirmJob(job) },
+                onChat = {
+                  Toast.makeText(context, "Chat Not yet Implemented", Toast.LENGTH_SHORT).show()
+                })
+          }
         }
-    }
+      }
 }
+
 @Composable
 fun HistoryJobsSection(viewModel: JobDashboardViewModel) {
-    val context = LocalContext.current
-    val historyJobs by viewModel.historyJobs.collectAsState()
+  val context = LocalContext.current
+  val historyJobs by viewModel.historyJobs.collectAsState()
 
-    Column (Modifier.fillMaxSize().verticalScroll(rememberScrollState()).testTag("HistoryJobsSection")) {
+  Column(
+      Modifier.fillMaxSize().verticalScroll(rememberScrollState()).testTag("HistoryJobsSection")) {
         if (historyJobs.isEmpty()) {
-            Text(
-                "No job history",
-                style = MaterialTheme.typography.body2,
-                color = Color.Gray,
-                modifier = Modifier.testTag("HistoryJobsEmptyText"))
+          Text(
+              "No job history",
+              style = MaterialTheme.typography.body2,
+              color = Color.Gray,
+              modifier = Modifier.testTag("HistoryJobsEmptyText"))
         } else {
-            historyJobs.forEach { job ->
-                JobItem(
-                    job = job,
-                    status = JobStatus.HISTORY,
-                    onContactCustomer = { Toast.makeText(context, "Contact Not yet Implemented", Toast.LENGTH_SHORT).show() },
-                    onChat = { Toast.makeText(context, "Chat Not yet Implemented", Toast.LENGTH_SHORT).show() }
-                )
-            }
+          historyJobs.forEach { job ->
+            JobItem(
+                job = job,
+                status = JobStatus.HISTORY,
+                onContactCustomer = {
+                  Toast.makeText(context, "Contact Not yet Implemented", Toast.LENGTH_SHORT).show()
+                },
+                onChat = {
+                  Toast.makeText(context, "Chat Not yet Implemented", Toast.LENGTH_SHORT).show()
+                })
+          }
         }
-    }
+      }
 }
 
 @Composable
@@ -216,139 +229,137 @@ fun JobItem(
     onCancelRequest: (() -> Unit)? = null,
     onChat: (() -> Unit)? = null
 ) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp)
-            .testTag("JobItem_${status.name}_${job.id}"),
-        elevation = 4.dp,
-        backgroundColor = when (status) {
+  Card(
+      modifier =
+          Modifier.fillMaxWidth()
+              .padding(vertical = 8.dp)
+              .testTag("JobItem_${status.name}_${job.id}"),
+      elevation = 4.dp,
+      backgroundColor =
+          when (status) {
             JobStatus.PENDING -> Color(0xFFF3E5F5) // Light purple for pending jobs
             JobStatus.CURRENT -> Color(0xFFE3F2FD) // Light blue for current jobs
             JobStatus.HISTORY -> Color(0xFFECEFF1) // Light gray for history
-        },
-        shape = RoundedCornerShape(12.dp)
-    ) {
+          },
+      shape = RoundedCornerShape(12.dp)) {
         Column(modifier = Modifier.padding(16.dp)) {
-            // Title and Navigate Button
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+          // Title and Navigate Button
+          Row(
+              modifier = Modifier.fillMaxWidth(),
+              horizontalArrangement = Arrangement.SpaceBetween,
+              verticalAlignment = Alignment.CenterVertically) {
                 // Job Title
                 Text(job.title, style = MaterialTheme.typography.subtitle1, color = Color.Black)
 
                 // Navigate Button for Current Jobs
                 if (status == JobStatus.CURRENT) {
-                    onNavigateToJob?.let {
-                        Button(
-                            onClick = it,
-                            colors = ButtonDefaults.buttonColors(backgroundColor = Color.Black,),
-                            modifier = Modifier.testTag("NavigateButton_${job.id}")
-                        ) {
-                            Text("Navigate", color = Color.White)
+                  onNavigateToJob?.let {
+                    Button(
+                        onClick = it,
+                        colors =
+                            ButtonDefaults.buttonColors(
+                                backgroundColor = Color.Black,
+                            ),
+                        modifier = Modifier.testTag("NavigateButton_${job.id}")) {
+                          Text("Navigate", color = Color.White)
                         }
-                    }
+                  }
                 }
-            }
-            // Job  Description
+              }
+          // Job  Description
+          Text(
+              job.description,
+              style = MaterialTheme.typography.body2,
+              color = Color.Gray,
+              textAlign = TextAlign.Start)
+          Spacer(modifier = Modifier.height(8.dp))
+
+          // Scheduled Date and Time
+          Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(Icons.Default.DateRange, contentDescription = "Scheduled Time", tint = Color.Gray)
             Text(
-                job.description,
-                style = MaterialTheme.typography.body2,
-                color = Color.Gray,
-                textAlign = TextAlign.Start
-            )
-            Spacer(modifier = Modifier.height(8.dp))
+                "Scheduled: ${job.date} at ${job.time}",
+                style = MaterialTheme.typography.caption,
+                color = Color.Gray)
+          }
+          Spacer(modifier = Modifier.height(8.dp))
 
-            // Scheduled Date and Time
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.DateRange, contentDescription = "Scheduled Time", tint = Color.Gray)
-                Text(
-                    "Scheduled: ${job.date} at ${job.time}",
-                    style = MaterialTheme.typography.caption,
-                    color = Color.Gray
-                )
-            }
-            Spacer(modifier = Modifier.height(8.dp))
+          // Location
+          Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(Icons.Outlined.Place, contentDescription = "Location", tint = Color.Gray)
+            Text(job.locationName, style = MaterialTheme.typography.caption, color = Color.Gray)
+          }
+          Spacer(modifier = Modifier.height(8.dp))
 
-            // Location
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Outlined.Place, contentDescription = "Location", tint = Color.Gray)
-                Text(job.locationName, style = MaterialTheme.typography.caption, color = Color.Gray)
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Buttons Row
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+          // Buttons Row
+          Row(
+              modifier = Modifier.fillMaxWidth(),
+              horizontalArrangement = Arrangement.SpaceBetween,
+              verticalAlignment = Alignment.CenterVertically) {
                 // Chat Button
                 onChat?.let {
-                    IconButton(
-                        onClick = it,
-                        modifier = Modifier.testTag("ChatButton_${job.id}")) {
-                        Icon(Icons.Outlined.MailOutline, contentDescription = "Chat with Customer", tint = Color(0xFF42A5F5))
-                    }
+                  IconButton(onClick = it, modifier = Modifier.testTag("ChatButton_${job.id}")) {
+                    Icon(
+                        Icons.Outlined.MailOutline,
+                        contentDescription = "Chat with Customer",
+                        tint = Color(0xFF42A5F5))
+                  }
                 }
 
                 // Conditional Buttons based on the status
                 when (status) {
-                    JobStatus.PENDING -> {
-                        // Confirm Request Button
-                        onConfirmRequest?.let {
-                            Button(
-                                onClick = it,
-                                colors = ButtonDefaults.buttonColors(
-                                    backgroundColor = Color(0xFF66BB6A)
-                                ),
-                                modifier = Modifier.testTag("ConfirmButton_${job.id}")
-                            ) {
-                                Text("Confirm Request", color = Color.White)
-                            }
-                        }
+                  JobStatus.PENDING -> {
+                    // Confirm Request Button
+                    onConfirmRequest?.let {
+                      Button(
+                          onClick = it,
+                          colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF66BB6A)),
+                          modifier = Modifier.testTag("ConfirmButton_${job.id}")) {
+                            Text("Confirm Request", color = Color.White)
+                          }
                     }
-                    JobStatus.CURRENT -> {
-                        // Cancel and Complete Buttons for Current Jobs
-                        onCancelRequest?.let {
-                            Button(onClick = it,
-                                colors = ButtonDefaults.buttonColors(backgroundColor = Color.Red),
-                                modifier = Modifier.testTag("CancelButton_${job.id}")) {
-                                Text("Cancel", color = Color.White, fontSize = 10.sp)
-                            }
-                        }
-                        Spacer(modifier = Modifier.width(2.dp))
-                        // Mark as Complete Button
-                        onMarkAsCompleted?.let {
-                            Button(onClick = it,
-                                colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF66BB6A)),
-                                modifier = Modifier.testTag("CompleteButton_${job.id}")) {
-                                Text("Mark As Complete", color = Color.White, fontSize =10.sp)
-                            }
-                        }
+                  }
+                  JobStatus.CURRENT -> {
+                    // Cancel and Complete Buttons for Current Jobs
+                    onCancelRequest?.let {
+                      Button(
+                          onClick = it,
+                          colors = ButtonDefaults.buttonColors(backgroundColor = Color.Red),
+                          modifier = Modifier.testTag("CancelButton_${job.id}")) {
+                            Text("Cancel", color = Color.White, fontSize = 10.sp)
+                          }
                     }
-                    JobStatus.HISTORY -> {
-                        // Status Indicator (Completed or Cancelled)
-                        Text(
-                            text = if (job.status == "COMPLETED") "Completed" else "Cancelled",
-                            color = if (job.status == "COMPLETED") Color.Green else Color.Red,
-                            style = MaterialTheme.typography.body2,
-                            modifier = Modifier.testTag("StatusText_${job.id}")
-                        )
+                    Spacer(modifier = Modifier.width(2.dp))
+                    // Mark as Complete Button
+                    onMarkAsCompleted?.let {
+                      Button(
+                          onClick = it,
+                          colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF66BB6A)),
+                          modifier = Modifier.testTag("CompleteButton_${job.id}")) {
+                            Text("Mark As Complete", color = Color.White, fontSize = 10.sp)
+                          }
                     }
+                  }
+                  JobStatus.HISTORY -> {
+                    // Status Indicator (Completed or Cancelled)
+                    Text(
+                        text = if (job.status == "COMPLETED") "Completed" else "Cancelled",
+                        color = if (job.status == "COMPLETED") Color.Green else Color.Red,
+                        style = MaterialTheme.typography.body2,
+                        modifier = Modifier.testTag("StatusText_${job.id}"))
+                  }
                 }
 
                 // Call Button
                 onContactCustomer?.let {
-                    IconButton(
-                        onClick = it,
-                        modifier = Modifier.testTag("CallButton_${job.id}")) {
-                        Icon(Icons.Outlined.Phone, contentDescription = "Contact Customer", tint = Color(0xFF42A5F5))
-                    }
+                  IconButton(onClick = it, modifier = Modifier.testTag("CallButton_${job.id}")) {
+                    Icon(
+                        Icons.Outlined.Phone,
+                        contentDescription = "Contact Customer",
+                        tint = Color(0xFF42A5F5))
+                  }
                 }
-            }
+              }
         }
-    }
+      }
 }

@@ -16,8 +16,7 @@ data class Job(
 )
 
 enum class JobStatus {
-    PENDING,
-    CURRENT,
-    HISTORY
+  PENDING,
+  CURRENT,
+  HISTORY
 }
-
