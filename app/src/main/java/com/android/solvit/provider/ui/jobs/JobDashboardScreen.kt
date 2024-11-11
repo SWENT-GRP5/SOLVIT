@@ -34,6 +34,13 @@ import com.android.solvit.shared.model.jobs.JobStatus
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.google.android.gms.maps.model.LatLng
 
+/**
+ * JobDashboardScreen displays a dashboard with three tabs: Pending, Current, and History. Each tab
+ * contains a list of jobs in its respective state. The initial tab is set to "Current."
+ *
+ * @param navigationActions Actions for navigating back to the previous screen.
+ * @param jobDashboardViewModel ViewModel instance containing job data.
+ */
 @Composable
 fun JobDashboardScreen(
     navigationActions: NavigationActions,
@@ -101,6 +108,12 @@ fun JobDashboardScreen(
       })
 }
 
+/**
+ * CurrentJobsSection displays the list of "Current" jobs, allowing navigation and state
+ * transitions.
+ *
+ * @param viewModel ViewModel instance containing the list of current jobs.
+ */
 @Composable
 fun CurrentJobsSection(viewModel: JobDashboardViewModel) {
   val context = LocalContext.current
@@ -159,6 +172,12 @@ fun CurrentJobsSection(viewModel: JobDashboardViewModel) {
       }
 }
 
+/**
+ * PendingJobsSection displays the list of "Pending" jobs. Allows confirming job requests to move
+ * them to the "Current" tab.
+ *
+ * @param viewModel ViewModel instance containing the list of pending jobs.
+ */
 @Composable
 fun PendingJobsSection(viewModel: JobDashboardViewModel) {
   val context = LocalContext.current
@@ -189,6 +208,11 @@ fun PendingJobsSection(viewModel: JobDashboardViewModel) {
       }
 }
 
+/**
+ * HistoryJobsSection displays the list of completed or canceled jobs.
+ *
+ * @param viewModel ViewModel instance containing the list of historical jobs.
+ */
 @Composable
 fun HistoryJobsSection(viewModel: JobDashboardViewModel) {
   val context = LocalContext.current
@@ -218,6 +242,19 @@ fun HistoryJobsSection(viewModel: JobDashboardViewModel) {
       }
 }
 
+/**
+ * JobItem represents a job item in a list. The display changes based on job status: Pending,
+ * Current, or History.
+ *
+ * @param job Job data to display.
+ * @param status JobStatus indicating the current state of the job.
+ * @param onNavigateToJob Optional callback to navigate to the job's location.
+ * @param onContactCustomer Optional callback to contact the customer.
+ * @param onMarkAsCompleted Optional callback to mark the job as completed.
+ * @param onConfirmRequest Optional callback to confirm a job request (for pending jobs).
+ * @param onCancelRequest Optional callback to cancel the job.
+ * @param onChat Optional callback to initiate a chat with the customer.
+ */
 @Composable
 fun JobItem(
     job: Job,
