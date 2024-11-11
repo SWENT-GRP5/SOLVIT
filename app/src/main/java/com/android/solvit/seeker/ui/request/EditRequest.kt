@@ -111,9 +111,12 @@ fun EditRequestScreen(
                     status = request.status,
                     uid = request.uid,
                     type = selectedServiceType,
-                    imageUrl = selectedImageUri.toString())
+                    imageUrl = null)
             if (selectedImageUri != null) {
               requestViewModel.saveServiceRequestWithImage(serviceRequest, selectedImageUri!!)
+              navigationActions.goBack()
+            } else if (imageUrl != null) {
+              requestViewModel.saveServiceRequestWithImage(serviceRequest, Uri.parse(imageUrl))
               navigationActions.goBack()
             } else {
               requestViewModel.saveServiceRequest(serviceRequest)
