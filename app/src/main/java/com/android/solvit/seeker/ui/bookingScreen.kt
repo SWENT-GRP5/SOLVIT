@@ -36,7 +36,7 @@ fun ServiceBookingScreen() {
       topBar = {
         // TopAppBar displays the navigation icon and title of the screen
         TopAppBar(
-            backgroundColor = Color.White, // White background for the top bar
+            backgroundColor = colorScheme.background, // White background for the top bar
             title = {
               // Centered title within the AppBar
               Box(
@@ -63,7 +63,7 @@ fun ServiceBookingScreen() {
             modifier =
                 Modifier.fillMaxSize() // Fill the entire screen
                     .padding(16.dp) // Padding for content
-                    .background(Color.White) // White background for the screen
+                    .background(colorScheme.background) // White background for the screen
                     .padding(innerPadding) // Additional padding to respect Scaffold's inner padding
                     .verticalScroll(rememberScrollState()) // Make the content scrollable
             ) {
@@ -96,7 +96,7 @@ fun ServiceBookingScreen() {
                         modifier =
                             Modifier.weight(1f) // Takes up half of the available width
                                 .background(
-                                    Color.White,
+                                    colorScheme.background,
                                     RoundedCornerShape(
                                         8.dp)) // White background with rounded corners
                                 .padding(16.dp) // Padding inside the box
@@ -106,7 +106,7 @@ fun ServiceBookingScreen() {
                               modifier =
                                   Modifier.fillMaxSize() // Fill the available space in the box
                                       .background(
-                                          Color.Gray,
+                                          colorScheme.surfaceVariant,
                                           RoundedCornerShape(
                                               8.dp)) // Gray background and rounded corners
                                       .testTag("profile_image_container") // Test tag for UI testing

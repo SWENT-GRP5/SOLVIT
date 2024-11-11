@@ -117,7 +117,7 @@ fun ForgotPassword(navigationActions: NavigationActions) {
                     .background(
                         brush =
                             if (email.isNotBlank() && email.contains("@") && email.contains(".")) {
-                              Brush.horizontalGradient(colors = listOf(GradientGreen, GradientBlue))
+                              Brush.horizontalGradient(colors = listOf(colorScheme.secondary, colorScheme.secondary))
                             } else {
                               Brush.horizontalGradient(
                                   colors =

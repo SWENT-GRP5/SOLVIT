@@ -35,6 +35,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -96,7 +97,7 @@ fun RequestsTopBar() {
               TextStyle(
                   fontSize = 15.sp,
                   fontWeight = FontWeight(700),
-                  color = Color(0xFF333333),
+                  color = colorScheme.onBackground,
               ))
       Text(
           text = "it",
@@ -104,7 +105,7 @@ fun RequestsTopBar() {
               TextStyle(
                   fontSize = 15.sp,
                   fontWeight = FontWeight(700),
-                  color = Color(0xFF3D823B),
+                  color = colorScheme.secondary,
               ))
     }
 
@@ -177,7 +178,7 @@ fun TitleScreen() {
         fontSize = 30.sp,
         fontFamily = FontFamily(Font(R.font.ruwudu)),
         fontWeight = FontWeight(400),
-        color = Color(0xFF00C853),
+        color = colorScheme.secondary,
         textAlign = TextAlign.Center,
     )
 
@@ -210,10 +211,10 @@ fun ListRequests(requests: List<ServiceRequest>) {
               modifier =
                   Modifier.fillMaxWidth()
                       .padding(8.dp)
-                      .background(color = Color(0xFFFAFAFA))
+                      .background(color = colorScheme.background)
                       .testTag("ServiceRequest")) {
                 HorizontalDivider(
-                    Modifier.border(width = 2.dp, color = Color(0xFFE0E0E0))
+                    Modifier.border(width = 2.dp, color = colorScheme.surface)
                         .padding(2.dp)
                         .fillMaxWidth()
                         .height(0.dp))
@@ -388,7 +389,7 @@ fun ServiceChip(
   var selectedText by remember { mutableStateOf(selectedService) }
   var showDropdown by remember { mutableStateOf(false) }
   val backgroundColor = if (selectedText != "Service") Color(0xFFFFFAF5) else Color(0xFFFFFFFF)
-  val borderTextColor = if (selectedText != "Service") Color(0xFF00C853) else Color(0xFFAFAFAF)
+  val borderTextColor = if (selectedText != "Service") colorScheme.secondary else Color(0xFFAFAFAF)
   // Box containing "Service" or a specific service if selected
   Box(
       modifier =
@@ -431,7 +432,7 @@ fun ServiceChip(
 @Composable
 fun FilterChip(label: String, isSelected: Boolean, onSelected: (Boolean) -> Unit) {
   val backgroundColor = if (isSelected) Color(0xFFFFFAF5) else Color(0xFFFFFFFF)
-  val borderTextColor = if (isSelected) Color(0xFF00C853) else Color(0xFFAFAFAF)
+  val borderTextColor = if (isSelected) colorScheme.secondary else Color(0xFFAFAFAF)
 
   val context = LocalContext.current
   Box(

@@ -72,15 +72,12 @@ import com.android.solvit.R
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
-import com.android.solvit.shared.ui.theme.GradientBlue
-import com.android.solvit.shared.ui.theme.GradientGreen
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-@SuppressLint("InvalidColorHexValue")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SignInScreen(
@@ -496,7 +493,7 @@ fun SignInButton(
               .background(
                   brush =
                       if (isFormComplete && goodFormEmail && passwordLengthComplete) {
-                        Brush.horizontalGradient(colors = listOf(GradientGreen, GradientBlue))
+                        Brush.horizontalGradient(colors = listOf(colorScheme.secondary, colorScheme.secondary))
                       } else {
                         Brush.horizontalGradient(
                             colors =

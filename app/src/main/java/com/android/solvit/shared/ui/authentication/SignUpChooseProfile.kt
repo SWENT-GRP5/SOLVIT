@@ -48,8 +48,8 @@ import com.android.solvit.R
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
-import com.android.solvit.shared.ui.theme.GradientBlue
-import com.android.solvit.shared.ui.theme.GradientGreen
+import com.android.solvit.shared.ui.theme.colorScheme.secondary
+import com.android.solvit.shared.ui.theme.colorScheme.secondary
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -158,7 +158,7 @@ fun ButtonCustomerProvider(
                     .height(50.dp)
                     .background(
                         brush =
-                            Brush.horizontalGradient(colors = listOf(GradientGreen, GradientBlue)),
+                            Brush.horizontalGradient(colors = listOf(colorScheme.secondary, colorScheme.secondary)),
                         shape = RoundedCornerShape(10.dp))
                     .clickable { onClickButton() },
             contentAlignment = Alignment.Center) {

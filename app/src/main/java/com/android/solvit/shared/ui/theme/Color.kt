@@ -36,9 +36,11 @@ val InvalidButtonColor = Color.DarkGray
 val GradientBlue = Color(0xFF0099FF)
 val GradientGreen = Color(0xFF00C853)
 val Orange = Color(0xFFFF6600)
+val Yellow = Color(0xFFFFCC00)
 val Black = Color(0xFF000000)
+val Transparent = Color.Transparent
 
 val Gradient1 = Color(0xFF2A5A52)
 val Gradient2 = Color(0xFFDBD1B9)
 val Gradient3 = Color(0xFFEFEBDE)
-val Gradient4 = Color(0x4D5652)
+val Gradient4 = Color(0xFF4D5652)

@@ -100,7 +100,7 @@ fun BottomNavigationMenu(
                           tab.icon,
                           contentDescription = null,
                           tint =
-                              if (tab.route == selectedItem) Color(0xFF0099FF)
+                              if (tab.route == selectedItem) colorScheme.primary
                               else Color(0xFFD8D8D8))
                     },
                     selected = tab.route == selectedItem,
@@ -123,7 +123,7 @@ fun BottomNavigationMenu(
                     .align(Alignment.TopCenter)
                     .testTag(TopLevelDestinations.CREATE_REQUEST.toString()),
             shape = CircleShape,
-            containerColor = Color(0xFF0099FF)) {
+            containerColor = colorScheme.primary) {
               Icon(
                   if (tabList == LIST_TOP_LEVEL_DESTINATION_CUSTOMER) Icons.Outlined.Add
                   else Icons.Outlined.CheckCircle,
