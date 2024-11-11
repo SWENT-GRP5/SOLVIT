@@ -22,6 +22,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Notifications
@@ -29,6 +30,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -56,7 +58,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.android.solvit.R
-import com.android.solvit.seeker.ui.navigation.SeekerBottomNavigationMenu
+import com.android.solvit.seeker.ui.navigation.BottomNavigationMenu
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
@@ -72,7 +74,8 @@ import java.util.Locale
 fun RequestsTopBar() {
   val context = LocalContext.current
   Row(
-      modifier = Modifier.fillMaxWidth().background(Color.White).testTag("RequestsTopBar"),
+      modifier =
+          Modifier.fillMaxWidth().background(colorScheme.background).testTag("RequestsTopBar"),
       horizontalArrangement = Arrangement.SpaceBetween,
       verticalAlignment = Alignment.CenterVertically) {
         IconButton(
@@ -91,7 +94,9 @@ fun RequestsTopBar() {
               text = "Solv",
               style =
                   TextStyle(
-                      fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color(0xFF333333)))
+                      fontSize = 20.sp,
+                      fontWeight = FontWeight.Bold,
+                      color = colorScheme.onSurface))
           Text(
               text = "It",
               style =
@@ -132,6 +137,7 @@ fun SearchBar(searchQuery: MutableState<String>) {
           Modifier.fillMaxWidth()
               .padding(horizontal = 16.dp)
               .height(56.dp)
+              .background(colorScheme.background)
               .border(3.dp, Color(0xFFFF6B00), RoundedCornerShape(12.dp))
               .testTag("SearchBar"),
       textStyle =
@@ -142,7 +148,10 @@ fun SearchBar(searchQuery: MutableState<String>) {
 @Composable
 fun ListRequests(requests: List<ServiceRequest>) {
   LazyColumn(
-      modifier = Modifier.fillMaxSize().padding(start = 16.dp, end = 16.dp).background(Color.White),
+      modifier =
+          Modifier.fillMaxSize()
+              .padding(start = 16.dp, end = 16.dp)
+              .background(colorScheme.background),
       verticalArrangement = Arrangement.spacedBy(8.dp)) {
         items(requests) { request -> ServiceRequestItem(request) }
       }
@@ -152,13 +161,13 @@ fun ListRequests(requests: List<ServiceRequest>) {
 fun ServiceRequestItem(request: ServiceRequest) {
   var selectedLocation by remember { mutableStateOf<Location?>(null) }
   val context = LocalContext.current
-  val onClick = { Toast.makeText(context, "Not Yet Implemented", Toast.LENGTH_LONG).show() }
+  val onClick = { Toast.makeText(context, "Not Yet Implemented", Toast.LENGTH_SHORT).show() }
   Column(
       modifier =
           Modifier.fillMaxWidth()
               .padding(8.dp)
               .border(1.dp, Color.Gray, RoundedCornerShape(12.dp))
-              .background(Color(0xFF407BFF), RoundedCornerShape(12.dp))
+              .background(Color(0xFF0099FF), RoundedCornerShape(12.dp))
               .padding(16.dp)
               .testTag("ServiceRequest")) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
@@ -173,14 +182,7 @@ fun ServiceRequestItem(request: ServiceRequest) {
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.White)
-            Text(
-                text =
-                    request.type.name
-                        .lowercase()
-                        .replaceFirstChar { it.uppercase() }
-                        .replace("_", " "),
-                fontSize = 14.sp,
-                color = Color.White)
+            Text(text = Services.format(request.type), fontSize = 14.sp, color = Color.White)
           }
           IconButton(onClick = { onClick() }) {
             Icon(
@@ -276,7 +278,7 @@ fun FilterBar(
   val filters = listOf("Service", "Near Me", "Due Time")
 
   LazyRow(
-      modifier = Modifier.testTag("FilterBar"),
+      modifier = Modifier.background(colorScheme.background).testTag("FilterBar"),
       horizontalArrangement = Arrangement.spacedBy(5.dp),
       verticalAlignment = Alignment.Top) {
         items(filters.size) { idx ->
@@ -303,21 +305,30 @@ fun ServiceChip(selectedService: String, onServiceSelected: (String) -> Unit) {
   var selectedText by remember { mutableStateOf(selectedService) }
   var showDropdown by remember { mutableStateOf(false) }
 
-  val backgroundColor = if (selectedText != "Service") Color(0xFFFFFAF5) else Color(0xFFFFFFFF)
   val borderTextColor = if (selectedText != "Service") Color(0xFFFFCD55) else Color(0xFF00C853)
 
   Box(
       modifier =
-          Modifier.testTag("ServiceChip").chipModifier(backgroundColor, borderTextColor).clickable {
-            showDropdown = !showDropdown
-          },
+          Modifier.testTag("ServiceChip")
+              .chipModifier(colorScheme.background, borderTextColor)
+              .clickable { showDropdown = !showDropdown },
       contentAlignment = Alignment.Center) {
-        Text(
-            text = selectedText,
-            fontSize = 16.sp,
-            lineHeight = 34.sp,
-            fontWeight = FontWeight(400),
-            color = borderTextColor)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically) {
+              Text(
+                  text = selectedText,
+                  fontSize = 16.sp,
+                  lineHeight = 34.sp,
+                  fontWeight = FontWeight(400),
+                  color = borderTextColor)
+              Icon(
+                  imageVector = Icons.Default.ArrowDropDown,
+                  contentDescription = "More Options",
+                  tint = borderTextColor,
+              )
+            }
       }
 
   DropdownMenu(
@@ -325,11 +336,10 @@ fun ServiceChip(selectedService: String, onServiceSelected: (String) -> Unit) {
       onDismissRequest = { showDropdown = false },
       modifier =
           Modifier.border(1.dp, Color.Gray, RoundedCornerShape(12.dp))
-              .background(Color.White, RoundedCornerShape(12.dp))
+              .background(colorScheme.background, RoundedCornerShape(12.dp))
               .testTag("ServiceDropdown")) {
         Services.entries.forEach { service ->
-          val serviceName =
-              service.name.replace("_", " ").lowercase().replaceFirstChar { it.uppercase() }
+          val serviceName = Services.format(service)
           DropdownMenuItem(
               modifier = Modifier.testTag(serviceName),
               text = { Text(serviceName) },
@@ -344,13 +354,12 @@ fun ServiceChip(selectedService: String, onServiceSelected: (String) -> Unit) {
 
 @Composable
 fun FilterChip(label: String, isSelected: Boolean, onSelected: (Boolean) -> Unit) {
-  val backgroundColor = if (isSelected) Color(0xFFFFFAF5) else Color(0xFFFFFFFF)
   val borderTextColor = if (isSelected) Color(0xFFFFCD55) else Color(0xFF00C853)
 
   val context = LocalContext.current
   Box(
       modifier =
-          Modifier.chipModifier(backgroundColor, borderTextColor).clickable {
+          Modifier.chipModifier(colorScheme.background, borderTextColor).clickable {
             onSelected(!isSelected)
             Toast.makeText(context, "Not Yet Implemented", Toast.LENGTH_LONG).show()
           },
@@ -385,7 +394,7 @@ fun ListRequestsFeedScreen(
   Scaffold(
       topBar = { RequestsTopBar() },
       bottomBar = {
-        SeekerBottomNavigationMenu(
+        BottomNavigationMenu(
             onTabSelect = { route -> navigationActions.navigateTo(route) },
             tabList = LIST_TOP_LEVEL_DESTINATION_PROVIDER,
             selectedItem = navigationActions.currentRoute())
@@ -394,7 +403,7 @@ fun ListRequestsFeedScreen(
             modifier =
                 Modifier.fillMaxSize()
                     .padding(paddingValues)
-                    .background(Color.White)
+                    .background(colorScheme.background)
                     .testTag("ScreenContent"),
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally) {
