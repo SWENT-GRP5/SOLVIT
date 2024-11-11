@@ -54,6 +54,7 @@ import com.android.solvit.seeker.ui.service.SERVICES_LIST
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestStatus
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
+import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_CUSTOMER
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
@@ -216,7 +217,7 @@ fun CategoriesFilter() {
       columns = GridCells.Fixed(2),
       modifier = Modifier.padding(16.dp).testTag("categoriesFilter")) {
         items(SERVICES_LIST.size) {
-          FilterItem(SERVICES_LIST[it].service.toString().lowercase().replace("_", " ")) {
+          FilterItem(Services.format(SERVICES_LIST[it].service)) {
             Toast.makeText(context, "This feature is not yet implemented", Toast.LENGTH_SHORT)
                 .show()
           }
@@ -287,7 +288,7 @@ fun RequestItemRow(request: ServiceRequest, onClick: () -> Unit) {
             Column {
               Text(text = request.title, fontSize = 16.sp, fontWeight = FontWeight.Bold)
               Text(
-                  text = request.type.name.lowercase().replaceFirstChar { it.uppercase() },
+                  text = Services.format(request.type),
                   fontSize = 14.sp,
               )
             }
@@ -297,7 +298,7 @@ fun RequestItemRow(request: ServiceRequest, onClick: () -> Unit) {
               modifier = Modifier.fillMaxWidth(),
               horizontalArrangement = Arrangement.SpaceBetween) {
                 Text(
-                    text = request.status.name.lowercase().replaceFirstChar { it.uppercase() },
+                    text = ServiceRequestStatus.format(request.status),
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
                     color = getStatusColor(request.status))
