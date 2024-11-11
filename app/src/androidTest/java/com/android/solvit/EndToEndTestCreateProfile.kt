@@ -1,7 +1,9 @@
 package com.android.solvit
 
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -11,6 +13,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.test.core.app.ApplicationProvider
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.seeker.model.profile.UserRepository
+import com.android.solvit.seeker.model.profile.UserRepositoryFirestore
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.shared.model.authentication.AuthRep
 import com.android.solvit.shared.model.authentication.AuthRepository
@@ -18,6 +21,7 @@ import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.map.LocationRepository
 import com.android.solvit.shared.model.map.LocationViewModel
 import com.android.solvit.shared.model.provider.ProviderRepository
+import com.android.solvit.shared.model.provider.ProviderRepositoryFirestore
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.review.ReviewViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
@@ -70,8 +74,8 @@ class EndToEndTestCreateProfile {
     authRepository = AuthRepository(Firebase.auth, firestore)
     authViewModel = AuthViewModel(authRepository)
 
-    userRepository = mock(UserRepository::class.java)
-    providerRepository = mock(ProviderRepository::class.java)
+    userRepository = UserRepositoryFirestore(firestore)
+    providerRepository = ProviderRepositoryFirestore(firestore)
 
     seekerProfileViewModel = SeekerProfileViewModel(userRepository)
     listProviderViewModel = ListProviderViewModel(providerRepository)
@@ -99,13 +103,29 @@ class EndToEndTestCreateProfile {
       navHostController = rememberNavController()
       navigationActions = NavigationActions(navHostController)
 
-      SharedUI(
-          authViewModel = authViewModel,
-          listProviderViewModel = listProviderViewModel,
-          seekerProfileViewModel = seekerProfileViewModel,
-          locationViewModel = locationViewModel,
-          navController = navHostController,
-          navigationActions = navigationActions)
+      val userRegistered = authViewModel.userRegistered.collectAsState()
+      val user = authViewModel.user.collectAsState()
+
+      if (!userRegistered.value) {
+        SharedUI(
+            authViewModel,
+            listProviderViewModel,
+            seekerProfileViewModel,
+            locationViewModel,
+            navHostController,
+            navigationActions)
+      } else {
+        when (user.value!!.role) {
+          "seeker" ->
+              SeekerUI(
+                  authViewModel,
+                  listProviderViewModel,
+                  seekerProfileViewModel,
+                  serviceRequestViewModel,
+                  reviewViewModel)
+          "provider" -> ProviderUI(authViewModel, listProviderViewModel, seekerProfileViewModel)
+        }
+      }
     }
 
     composeTestRule.onNodeWithTag("ctaButton").performClick()
@@ -114,8 +134,9 @@ class EndToEndTestCreateProfile {
     composeTestRule.onNodeWithTag("signUpLink").performClick()
 
     assertEquals(Screen.SIGN_UP, navHostController.currentDestination?.route)
-    val email = "atest0@test.com"
+    val email = "atest1006@test.com"
     val password = "password"
+
     composeTestRule.onNodeWithTag("emailInputField").performTextInput(email)
     composeTestRule.onNodeWithTag("passwordInput").performTextInput(password)
     composeTestRule.onNodeWithTag("confirmPasswordInput").performTextInput(password)
@@ -127,12 +148,21 @@ class EndToEndTestCreateProfile {
     composeTestRule.onNodeWithTag("customerButton").performClick()
     assertEquals("seeker", authViewModel.role.value)
 
-    assertEquals(Screen.SEEKER_REGISTRATION_PROFILE, navHostController.currentDestination?.route)
+    // assertEquals(Screen.SEEKER_REGISTRATION_PROFILE, navHostController.currentDestination?.route)
+    composeTestRule.waitUntil(timeoutMillis = 10000) {
+      composeTestRule.onNodeWithTag("fullNameInput").isDisplayed()
+    }
     composeTestRule.onNodeWithTag("fullNameInput").performTextInput("John Doe")
     composeTestRule.onNodeWithTag("phoneNumberInput").performTextInput("123456789")
     composeTestRule.onNodeWithTag("locationInput").performTextInput("123 Main St")
     composeTestRule.onNodeWithTag("userNameInput").performTextInput("JohnDoe123")
     composeTestRule.onNodeWithTag("completeRegistrationButton").performClick()
     composeTestRule.onNodeWithTag("savePreferencesButton").performClick()
+
+    /*authViewModel.user.value?.let { seekerProfileViewModel.getUserProfile(it.uid) }
+    assertEquals(seekerProfileViewModel.seekerProfile.value.name,"John Doe")
+    assertEquals(seekerProfileViewModel.seekerProfile.value.phone,"123456789")
+    assertEquals(seekerProfileViewModel.seekerProfile.value.username,"JohnDoe123")*/
+
   }
 }

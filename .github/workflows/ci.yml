@@ -117,22 +117,11 @@ jobs:
           # To run the CI with debug information, add --info
           ./gradlew assemble lint --parallel --build-cache
 
-      # Install Firebase CLI
-      - name: Install Firebase CLI
-        run: |
-          curl -sL https://firebase.tools | bash
 
-      # Start Firebase Emulators
-      - name: Start Firebase Emulators
-        run: |
-          firebase setup:emulators:firestore
-          firebase setup:emulators:auth
-          firebase emulators:start --only firestore,auth --project demo-project --import=./ --export-on-exit &
-          sleep 10
-        env:
-          FIREBASE_AUTH_EMULATOR_HOST: 'localhost:9099'
-          FIRESTORE_EMULATOR_HOST: 'localhost:8080'
-          GCLOUD_PROJECT: 'demo-project'
+      #Run e2e
+      - name : run e2e
+        run : |
+          ./gradlew connectedCheckWithEmulators --parallel --build-cache
 
       # Run Unit tests
       - name: Run tests
