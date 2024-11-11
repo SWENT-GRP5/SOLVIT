@@ -128,6 +128,7 @@ class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
 
   fun logout(onSuccess: () -> Unit) {
     authRepository.logout {
+      _userRegistered.value = false
       _user.value = null
       onSuccess()
     }
