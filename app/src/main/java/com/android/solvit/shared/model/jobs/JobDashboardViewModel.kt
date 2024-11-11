@@ -98,28 +98,30 @@ class JobDashboardViewModel(private val repository: JobDashboardRepository) : Vi
                 locationName = "Place de la Gare 1110 Morges"))
 
       // Divide jobs by status into respective lists
-      _pendingJobs.value = hardcodedJobs.filter { it.status == "PENDING" }
-      _currentJobs.value = hardcodedJobs.filter { it.status == "CURRENT" }
-      _historyJobs.value = hardcodedJobs.filter { it.status == "HISTORY" }
+      _pendingJobs.value = hardcodedJobs.filter { it.status == "PENDING" }.sortedWith(compareBy({ it.date }, { it.time }))
+      _currentJobs.value = hardcodedJobs.filter { it.status == "CURRENT" }.sortedWith(compareBy({ it.date }, { it.time }))
+      _historyJobs.value = hardcodedJobs.filter { it.status == "HISTORY" }.sortedWith(compareBy({ it.date }, { it.time }))
   }
 
   private fun loadJobs() {
-    viewModelScope.launch {
-      repository
-          .getCurrentJobs()
-          .catch { exception ->
-            // Handle error, e.g., log it or update an error state
-            Log.e("JobDashboardViewModel", "Error loading jobs", exception)
-          }
-          .collect { jobs -> _currentJobs.update { jobs } }
-    }
+      viewModelScope.launch {
+          repository.getCurrentJobs()
+              .catch { exception -> Log.e("JobDashboardViewModel", "Error loading current jobs", exception) }
+              .collect { jobs -> _currentJobs.value = jobs }
+          repository.getPendingJobs()
+              .catch { exception -> Log.e("JobDashboardViewModel", "Error loading pending jobs", exception) }
+              .collect { jobs -> _pendingJobs.value = jobs }
+          repository.getHistoryJobs()
+              .catch { exception -> Log.e("JobDashboardViewModel", "Error loading history jobs", exception) }
+              .collect { jobs -> _historyJobs.value = jobs }
+      }
   }
 
   fun getTodaySortedJobs(): List<Job> {
     val today = LocalDate.now()
     return _currentJobs.value
         .filter { it.date == today }
-        .sortedWith(compareBy({ it.date }, { it.time }))
+        .sortedBy { it.time }
   }
 
   // Function to confirm a pending job and move it to current

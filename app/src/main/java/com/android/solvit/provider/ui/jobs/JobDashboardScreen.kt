@@ -32,6 +32,8 @@ import com.android.solvit.shared.model.jobs.JobDashboardViewModel
 import com.android.solvit.shared.model.jobs.JobStatus
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.google.android.gms.maps.model.LatLng
+import androidx.compose.ui.platform.testTag
+
 
 
 @Composable
@@ -45,9 +47,15 @@ fun JobDashboardScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Job Dashboard", style = MaterialTheme.typography.h6, color = Color.Black) },
+                title = { Text(
+                    "Job Dashboard",
+                    style = MaterialTheme.typography.h6,
+                    color = Color.Black,
+                    modifier = Modifier.testTag("JobDashboardTitle")) },
                 navigationIcon = {
-                    IconButton(onClick = { navigationActions.goBack() }) {
+                    IconButton(
+                        onClick = { navigationActions.goBack() },
+                        modifier = Modifier.testTag("JobDashboardBackButton")) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
                             contentDescription = "Go back"
@@ -69,17 +77,20 @@ fun JobDashboardScreen(
                     Tab(
                         selected = selectedTab == 0,
                         onClick = { selectedTab = 0 },
-                        text = { Text("Pending", color = if (selectedTab == 0) Color.Black else Color.Gray) }
+                        text = { Text("Pending", color = if (selectedTab == 0) Color.Black else Color.Gray) },
+                        modifier = Modifier.testTag("Tab_Pending")
                     )
                     Tab(
                         selected = selectedTab == 1,
                         onClick = { selectedTab = 1 },
-                        text = { Text("Current", color = if (selectedTab == 1) Color.Black else Color.Gray) }
+                        text = { Text("Current", color = if (selectedTab == 1) Color.Black else Color.Gray) },
+                        modifier = Modifier.testTag("Tab_Current")
                     )
                     Tab(
                         selected = selectedTab == 2,
                         onClick = { selectedTab = 2 },
-                        text = { Text("History", color = if (selectedTab == 2) Color.Black else Color.Gray) }
+                        text = { Text("History", color = if (selectedTab == 2) Color.Black else Color.Gray) },
+                        modifier = Modifier.testTag("Tab_History")
                     )
                 }
 
@@ -101,13 +112,14 @@ fun CurrentJobsSection(viewModel: JobDashboardViewModel) {
     val currentLocation = LatLng(40.748817, -73.985428)
     val currentJobs by viewModel.currentJobs.collectAsState()
 
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).testTag("CurrentJobsSection")) {
         // "Navigate to All Jobs of the Day" button
         Button(
-            onClick = { navigateToAllSortedJobs(context, currentLocation, currentJobs) },
+            onClick = { navigateToAllSortedJobs(context, currentLocation, viewModel.getTodaySortedJobs()) },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 8.dp),
+                .padding(vertical = 8.dp)
+                .testTag("NavigateAllJobsButton"),
             colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF42A5F5))
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -121,7 +133,11 @@ fun CurrentJobsSection(viewModel: JobDashboardViewModel) {
 
         // Job list or message if no current jobs
         if (currentJobs.isEmpty()) {
-            Text("No current jobs available", style = MaterialTheme.typography.body2, color = Color.Gray)
+            Text(
+                "No current jobs available",
+                style = MaterialTheme.typography.body2,
+                color = Color.Gray,
+                modifier = Modifier.testTag("CurrentJobsEmptyText"))
         } else {
             currentJobs.forEach { job ->
                 JobItem(
@@ -144,9 +160,13 @@ fun PendingJobsSection(viewModel: JobDashboardViewModel) {
     val context = LocalContext.current
     val pendingJobs by viewModel.pendingJobs.collectAsState()
 
-    Column (Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+    Column (Modifier.fillMaxSize().verticalScroll(rememberScrollState()).testTag("PendingJobsSection")) {
         if (pendingJobs.isEmpty()) {
-            Text("No pending jobs", style = MaterialTheme.typography.body2, color = Color.Gray)
+            Text(
+                "No pending jobs",
+                style = MaterialTheme.typography.body2,
+                color = Color.Gray,
+                modifier = Modifier.testTag("PendingJobsEmptyText"))
         } else {
             pendingJobs.forEach { job ->
                 JobItem(
@@ -165,9 +185,13 @@ fun HistoryJobsSection(viewModel: JobDashboardViewModel) {
     val context = LocalContext.current
     val historyJobs by viewModel.historyJobs.collectAsState()
 
-    Column (Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+    Column (Modifier.fillMaxSize().verticalScroll(rememberScrollState()).testTag("HistoryJobsSection")) {
         if (historyJobs.isEmpty()) {
-            Text("No job history", style = MaterialTheme.typography.body2, color = Color.Gray)
+            Text(
+                "No job history",
+                style = MaterialTheme.typography.body2,
+                color = Color.Gray,
+                modifier = Modifier.testTag("HistoryJobsEmptyText"))
         } else {
             historyJobs.forEach { job ->
                 JobItem(
@@ -195,7 +219,8 @@ fun JobItem(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
+            .padding(vertical = 8.dp)
+            .testTag("JobItem_${status.name}_${job.id}"),
         elevation = 4.dp,
         backgroundColor = when (status) {
             JobStatus.PENDING -> Color(0xFFF3E5F5) // Light purple for pending jobs
@@ -219,7 +244,8 @@ fun JobItem(
                     onNavigateToJob?.let {
                         Button(
                             onClick = it,
-                            colors = ButtonDefaults.buttonColors(backgroundColor = Color.Black)
+                            colors = ButtonDefaults.buttonColors(backgroundColor = Color.Black,),
+                            modifier = Modifier.testTag("NavigateButton_${job.id}")
                         ) {
                             Text("Navigate", color = Color.White)
                         }
@@ -253,7 +279,7 @@ fun JobItem(
             }
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Buttons based on Job Status
+            // Buttons Row
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -261,7 +287,9 @@ fun JobItem(
             ) {
                 // Chat Button
                 onChat?.let {
-                    IconButton(onClick = it) {
+                    IconButton(
+                        onClick = it,
+                        modifier = Modifier.testTag("ChatButton_${job.id}")) {
                         Icon(Icons.Outlined.MailOutline, contentDescription = "Chat with Customer", tint = Color(0xFF42A5F5))
                     }
                 }
@@ -275,7 +303,8 @@ fun JobItem(
                                 onClick = it,
                                 colors = ButtonDefaults.buttonColors(
                                     backgroundColor = Color(0xFF66BB6A)
-                                )
+                                ),
+                                modifier = Modifier.testTag("ConfirmButton_${job.id}")
                             ) {
                                 Text("Confirm Request", color = Color.White)
                             }
@@ -284,14 +313,18 @@ fun JobItem(
                     JobStatus.CURRENT -> {
                         // Cancel and Complete Buttons for Current Jobs
                         onCancelRequest?.let {
-                            Button(onClick = it, colors = ButtonDefaults.buttonColors(backgroundColor = Color.Red)) {
+                            Button(onClick = it,
+                                colors = ButtonDefaults.buttonColors(backgroundColor = Color.Red),
+                                modifier = Modifier.testTag("CancelButton_${job.id}")) {
                                 Text("Cancel", color = Color.White, fontSize = 10.sp)
                             }
                         }
                         Spacer(modifier = Modifier.width(2.dp))
                         // Mark as Complete Button
                         onMarkAsCompleted?.let {
-                            Button(onClick = it, colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF66BB6A))) {
+                            Button(onClick = it,
+                                colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF66BB6A)),
+                                modifier = Modifier.testTag("CompleteButton_${job.id}")) {
                                 Text("Mark As Complete", color = Color.White, fontSize =10.sp)
                             }
                         }
@@ -301,14 +334,17 @@ fun JobItem(
                         Text(
                             text = if (job.status == "COMPLETED") "Completed" else "Cancelled",
                             color = if (job.status == "COMPLETED") Color.Green else Color.Red,
-                            style = MaterialTheme.typography.body2
+                            style = MaterialTheme.typography.body2,
+                            modifier = Modifier.testTag("StatusText_${job.id}")
                         )
                     }
                 }
 
                 // Call Button
                 onContactCustomer?.let {
-                    IconButton(onClick = it) {
+                    IconButton(
+                        onClick = it,
+                        modifier = Modifier.testTag("CallButton_${job.id}")) {
                         Icon(Icons.Outlined.Phone, contentDescription = "Contact Customer", tint = Color(0xFF42A5F5))
                     }
                 }
@@ -316,157 +352,3 @@ fun JobItem(
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-@Composable
-fun JobDashboardScreen(
-    navigationActions: NavigationActions,
-    jobDashboardViewModel: JobDashboardViewModel =
-        viewModel(factory = JobDashboardViewModel.Factory)
-) {
-  JobDashboardContent(viewModel = jobDashboardViewModel)
-}
-
- */
-/*
-@Composable
-fun JobDashboardContent(
-    viewModel: JobDashboardViewModel,
-    currentLocation: LatLng = LatLng(40.748817, -73.985428)
-) {
-  val context = LocalContext.current
-  val todaySortedJobs by viewModel.currentJobs.collectAsState()
-
-  Column(modifier = Modifier.fillMaxSize().padding(16.dp).verticalScroll(rememberScrollState())) {
-    Text(
-        "Current Jobs",
-        style = MaterialTheme.typography.h5,
-        modifier = Modifier.padding(bottom = 8.dp))
-
-    // Navigate to All Jobs Button
-    Button(
-        onClick = { navigateToAllSortedJobs(context, currentLocation, todaySortedJobs) },
-        modifier = Modifier.fillMaxWidth(),
-        colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF42A5F5))) {
-          Text("Optimize and Navigate All Jobs for Today", color = Color.White)
-        }
-
-    Spacer(modifier = Modifier.height(16.dp))
-
-    if (todaySortedJobs.isEmpty()) {
-      Text("No current jobs available", style = MaterialTheme.typography.body2, color = Color.Gray)
-    } else {
-      todaySortedJobs.forEach { job ->
-        CurrentJobItem(
-            job = job,
-            onNavigateToJob = {
-              navigateToSingleJob(context, job.location!!.latitude, job.location.longitude)
-            },
-            onContactCustomer = {
-              // Contact customer logic here
-            },
-            onMarkAsCompleted = {
-              // Mark as completed logic here
-            })
-      }
-    }
-  }
-}
-*/
-
-/*
-@Composable
-fun CurrentJobItem(
-    job: Job,
-    onNavigateToJob: () -> Unit,
-    onContactCustomer: () -> Unit,
-    onMarkAsCompleted: () -> Unit
-) {
-  Card(
-      modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-      elevation = 4.dp,
-      backgroundColor = Color(0xFFE3F2FD) // Light blue background for active jobs
-      ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-          // Job Title and Description
-          Text(job.title, style = MaterialTheme.typography.subtitle1, color = Color.Black)
-          Text(
-              job.description,
-              style = MaterialTheme.typography.body2,
-              color = Color.Gray,
-              textAlign = TextAlign.Start)
-          Spacer(modifier = Modifier.height(8.dp))
-
-          // Scheduled Date and Time
-          Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Default.DateRange, contentDescription = "Scheduled Time", tint = Color.Gray)
-            Text(
-                "Scheduled: ${job.date} at ${job.time}",
-                style = MaterialTheme.typography.caption,
-                color = Color.Gray)
-          }
-
-          Spacer(modifier = Modifier.height(8.dp))
-
-          // Location and Navigate Button
-          Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Outlined.Place, contentDescription = "Location", tint = Color.Gray)
-            Text(job.locationName, style = MaterialTheme.typography.caption, color = Color.Gray)
-            Spacer(modifier = Modifier.weight(1f))
-            Button(onClick = onNavigateToJob) { Text("Navigate") }
-          }
-
-          Spacer(modifier = Modifier.height(8.dp))
-
-          // Contact and Complete Buttons
-          Row(
-              modifier = Modifier.fillMaxWidth(),
-              horizontalArrangement = Arrangement.SpaceBetween,
-              verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = onContactCustomer) {
-                  Icon(
-                      Icons.Outlined.Phone,
-                      contentDescription = "Contact Customer",
-                      tint = Color(0xFF42A5F5))
-                }
-                Button(
-                    onClick = onMarkAsCompleted,
-                    colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF66BB6A))) {
-                      Text("Mark As Complete", color = Color.White)
-                    }
-              }
-        }
-      }
-}
-*/
-
