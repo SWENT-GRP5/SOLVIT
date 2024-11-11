@@ -1,6 +1,9 @@
 import java.io.FileInputStream
 import java.util.Properties
 
+configurations.configureEach {
+    exclude(group = "com.google.protobuf", module = "protobuf-lite")
+}
 plugins {
     jacoco
     alias(libs.plugins.androidApplication)
@@ -179,6 +182,7 @@ dependencies {
     implementation(libs.play.services.location)
     implementation(libs.androidx.navigation.testing)
     testImplementation(libs.testng)
+
 
 
     // ------------- Jetpack Compose ------------------
