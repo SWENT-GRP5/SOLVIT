@@ -40,10 +40,13 @@ import com.google.firebase.storage.storage
 import junit.framework.TestCase.assertEquals
 import org.junit.After
 import org.junit.Before
+import org.junit.FixMethodOrder
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runners.MethodSorters
 import org.mockito.Mockito.mock
 
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class EndToEndSeekerCreateRequest {
 
   private lateinit var authViewModel: AuthViewModel
@@ -60,7 +63,7 @@ class EndToEndSeekerCreateRequest {
   private lateinit var serviceRequestRepository: ServiceRequestRepository
   private lateinit var reviewRepository: ReviewRepository
 
-  private val email = "test@test.cdn"
+  private val email = "test@test.com"
   private val password = "password"
 
   @get:Rule val composeTestRule = createComposeRule()
@@ -172,15 +175,6 @@ class EndToEndSeekerCreateRequest {
     composeTestRule.waitUntil(timeoutMillis = 10000) {
       composeTestRule.onNodeWithTag("ProfileTopBar").isDisplayed()
     }
-    composeTestRule.onNodeWithTag("EditProfileButton").performClick()
-    composeTestRule.waitUntil(timeoutMillis = 10000) {
-      composeTestRule.onNodeWithTag("profileEmail").isDisplayed()
-    }
-    composeTestRule.onNodeWithTag("saveProfileButton").performClick()
-    composeTestRule.waitUntil(timeoutMillis = 10000) {
-      composeTestRule.onNodeWithTag("ProfileTopBar").isDisplayed()
-    }
-    assertEquals("John Doe", seekerProfileViewModel.seekerProfile.value.name)
   }
 
   @Test

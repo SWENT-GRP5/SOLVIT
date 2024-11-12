@@ -113,8 +113,7 @@ jobs:
 
       - name: Start Firebase emulators
         run: |
-          nohup firebase emulators:start --only auth,firestore,storage &
-          sleep 10 # wait for emulators to fully start
+          nohup firebase emulators:start --only auth,firestore,storage
 
       - name: Grant execute permission for gradlew
         run: |
