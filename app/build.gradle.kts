@@ -1,6 +1,10 @@
 import java.io.FileInputStream
 import java.util.Properties
 
+configurations.configureEach {
+    exclude(group = "com.google.protobuf", module = "protobuf-lite")
+}
+
 plugins {
     jacoco
     alias(libs.plugins.androidApplication)
