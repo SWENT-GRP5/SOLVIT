@@ -56,9 +56,7 @@ class MainActivity : ComponentActivity() {
     Firebase.auth.signOut()
     setContent {
       SampleAppTheme {
-        Surface(modifier = Modifier.fillMaxSize(), color = colorScheme.background) {
-          SolvitApp()
-        }
+        Surface(modifier = Modifier.fillMaxSize(), color = colorScheme.background) { SolvitApp() }
       }
     }
   }

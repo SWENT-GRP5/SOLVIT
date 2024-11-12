@@ -18,8 +18,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -95,35 +93,40 @@ fun ForgotPassword(navigationActions: NavigationActions) {
 
               VerticalSpacer(height = 20.dp)
 
-        Button(
-            onClick = {
-              if (email.isEmpty()) {
-                Toast.makeText(context, "Please enter your email address", Toast.LENGTH_LONG).show()
-              } else if (!(email.contains("@") && email.contains("."))) {
-                Toast.makeText(
-                        context, "your email must contain \"@\" and \".\"", Toast.LENGTH_LONG)
-                    .show()
-              } else {
-                Toast.makeText(context, "Not yet implemented", Toast.LENGTH_LONG).show()
-                // Toast.makeText(context, "An email has been send to $email",
-                // Toast.LENGTH_LONG).show()
-              }
-            },
-            colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-            shape = RoundedCornerShape(25.dp),
-            modifier =
-                Modifier.fillMaxWidth()
-                    .height(50.dp)
-                    .background(
-                        brush =
-                            if (email.isNotBlank() && email.contains("@") && email.contains(".")) {
-                              Brush.horizontalGradient(colors = listOf(colorScheme.secondary, colorScheme.secondary))
-                            } else {
-                              Brush.horizontalGradient(
-                                  colors =
-                                      listOf(
-                                          colorScheme.onSurfaceVariant,
-                                          colorScheme.onSurfaceVariant))
+              Button(
+                  onClick = {
+                    if (email.isEmpty()) {
+                      Toast.makeText(context, "Please enter your email address", Toast.LENGTH_LONG)
+                          .show()
+                    } else if (!(email.contains("@") && email.contains("."))) {
+                      Toast.makeText(
+                              context, "your email must contain \"@\" and \".\"", Toast.LENGTH_LONG)
+                          .show()
+                    } else {
+                      Toast.makeText(context, "Not yet implemented", Toast.LENGTH_LONG).show()
+                      // Toast.makeText(context, "An email has been send to $email",
+                      // Toast.LENGTH_LONG).show()
+                    }
+                  },
+                  colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+                  shape = RoundedCornerShape(25.dp),
+                  modifier =
+                      Modifier.fillMaxWidth()
+                          .height(50.dp)
+                          .background(
+                              brush =
+                                  if (email.isNotBlank() &&
+                                      email.contains("@") &&
+                                      email.contains(".")) {
+                                    Brush.horizontalGradient(
+                                        colors =
+                                            listOf(colorScheme.secondary, colorScheme.secondary))
+                                  } else {
+                                    Brush.horizontalGradient(
+                                        colors =
+                                            listOf(
+                                                colorScheme.onSurfaceVariant,
+                                                colorScheme.onSurfaceVariant))
                                   },
                               shape = RoundedCornerShape(25.dp))
                           .testTag("Send reset link")) {

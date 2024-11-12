@@ -116,9 +116,7 @@ fun ProviderTopBar(onBackClick: () -> Unit) {
 fun ProviderHeader(provider: Provider) {
   Box(
       modifier =
-          Modifier.fillMaxWidth()
-              .background(colorScheme.background)
-              .testTag("providerHeader")) {
+          Modifier.fillMaxWidth().background(colorScheme.background).testTag("providerHeader")) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -176,19 +174,13 @@ fun ProviderTabs(selectedTabIndex: Int, onTabSelected: (Int) -> Unit) {
             selected = selectedTabIndex == 0,
             onClick = { onTabSelected(0) },
             modifier = Modifier.testTag("profileTab")) {
-              Text(
-                  "Profile",
-                  modifier = Modifier.padding(16.dp),
-                  color = colorScheme.onPrimary)
+              Text("Profile", modifier = Modifier.padding(16.dp), color = colorScheme.onPrimary)
             }
         Tab(
             selected = selectedTabIndex == 1,
             onClick = { onTabSelected(1) },
             modifier = Modifier.testTag("reviewsTab")) {
-              Text(
-                  "Reviews",
-                  modifier = Modifier.padding(16.dp),
-                  color = colorScheme.onPrimary)
+              Text("Reviews", modifier = Modifier.padding(16.dp), color = colorScheme.onPrimary)
             }
       }
 }
@@ -199,8 +191,7 @@ fun ProviderDetails(provider: Provider, reviews: List<Review>) {
       modifier =
           Modifier.padding(16.dp)
               .fillMaxWidth()
-              .background(
-                  color = colorScheme.surface, shape = RoundedCornerShape(16.dp))
+              .background(color = colorScheme.surface, shape = RoundedCornerShape(16.dp))
               .testTag("providerDetails")) {
         Rubric(modifier = Modifier.testTag("detailsSection")) {
           Row(
@@ -288,8 +279,7 @@ fun Rubric(modifier: Modifier = Modifier, content: @Composable ColumnScope.() ->
       modifier =
           modifier
               .fillMaxWidth()
-              .background(
-                  color = colorScheme.surface, shape = RoundedCornerShape(16.dp))
+              .background(color = colorScheme.surface, shape = RoundedCornerShape(16.dp))
               .border(width = 2.dp, color = Color.Transparent, shape = RoundedCornerShape(16.dp))
               .padding(16.dp)) {
         content()
@@ -302,13 +292,11 @@ fun ProviderReviews(provider: Provider, reviews: List<Review>) {
       modifier =
           Modifier.padding(16.dp)
               .fillMaxWidth()
-              .background(
-                  color = colorScheme.surface, shape = RoundedCornerShape(16.dp))
+              .background(color = colorScheme.surface, shape = RoundedCornerShape(16.dp))
               .testTag("providerReviews")) {
         Column(
             Modifier.fillMaxWidth()
-                .background(
-                    color = colorScheme.surface, shape = RoundedCornerShape(16.dp))
+                .background(color = colorScheme.surface, shape = RoundedCornerShape(16.dp))
                 .border(width = 2.dp, color = Color.Transparent, shape = RoundedCornerShape(16.dp))
                 .padding(16.dp)
                 .testTag("reviewsOverview")) {
@@ -407,9 +395,7 @@ fun RatingStars(rating: Int) {
           painter = painterResource(id = R.drawable.star),
           modifier = Modifier.size(24.dp),
           contentDescription = "Rating Star",
-          tint =
-              if (index < rating) colorScheme.primary
-              else colorScheme.onSurfaceVariant)
+          tint = if (index < rating) colorScheme.primary else colorScheme.onSurfaceVariant)
     }
   }
 }
@@ -427,8 +413,7 @@ fun BottomBar() {
                     .background(colorScheme.primary)
                     .size(200.dp, 50.dp)
                     .testTag("bookNowButton"),
-            colors =
-                ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
+            colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
             onClick = { Toast.makeText(context, "Not implemented", Toast.LENGTH_SHORT).show() }) {
               Text(
                   "Book Now",

@@ -1,6 +1,5 @@
 package com.android.solvit.shared.ui.authentication
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
@@ -493,7 +492,8 @@ fun SignInButton(
               .background(
                   brush =
                       if (isFormComplete && goodFormEmail && passwordLengthComplete) {
-                        Brush.horizontalGradient(colors = listOf(colorScheme.secondary, colorScheme.secondary))
+                        Brush.horizontalGradient(
+                            colors = listOf(colorScheme.secondary, colorScheme.secondary))
                       } else {
                         Brush.horizontalGradient(
                             colors =

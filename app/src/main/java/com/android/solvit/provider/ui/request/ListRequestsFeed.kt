@@ -101,7 +101,9 @@ fun RequestsTopBar() {
               text = "It",
               style =
                   TextStyle(
-                      fontSize = 20.sp, fontWeight = FontWeight.Bold, color = colorScheme.secondary))
+                      fontSize = 20.sp,
+                      fontWeight = FontWeight.Bold,
+                      color = colorScheme.secondary))
         }
 
         IconButton(
@@ -124,7 +126,9 @@ fun SearchBar(searchQuery: MutableState<String>) {
             "Search requests",
             style =
                 TextStyle(
-                    color = colorScheme.onBackground, fontSize = 16.sp, fontWeight = FontWeight.Bold))
+                    color = colorScheme.onBackground,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold))
       },
       leadingIcon = {
         Icon(
@@ -141,7 +145,8 @@ fun SearchBar(searchQuery: MutableState<String>) {
               .border(3.dp, colorScheme.onBackground, RoundedCornerShape(12.dp))
               .testTag("SearchBar"),
       textStyle =
-          TextStyle(color = colorScheme.onBackground, fontSize = 16.sp, fontWeight = FontWeight.Bold),
+          TextStyle(
+              color = colorScheme.onBackground, fontSize = 16.sp, fontWeight = FontWeight.Bold),
       shape = RoundedCornerShape(12.dp))
 }
 
@@ -182,7 +187,10 @@ fun ServiceRequestItem(request: ServiceRequest) {
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
                 color = colorScheme.onPrimary)
-            Text(text = Services.format(request.type), fontSize = 14.sp, color = colorScheme.onPrimary)
+            Text(
+                text = Services.format(request.type),
+                fontSize = 14.sp,
+                color = colorScheme.onPrimary)
           }
           IconButton(onClick = { onClick() }) {
             Icon(
@@ -305,7 +313,8 @@ fun ServiceChip(selectedService: String, onServiceSelected: (String) -> Unit) {
   var selectedText by remember { mutableStateOf(selectedService) }
   var showDropdown by remember { mutableStateOf(false) }
 
-  val borderTextColor = if (selectedText != "Service") colorScheme.secondary else colorScheme.secondary
+  val borderTextColor =
+      if (selectedText != "Service") colorScheme.secondary else colorScheme.secondary
 
   Box(
       modifier =

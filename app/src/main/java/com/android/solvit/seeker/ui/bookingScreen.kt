@@ -14,7 +14,6 @@ import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -52,7 +51,10 @@ fun ServiceBookingScreen() {
               IconButton(
                   onClick = { /* Handle back navigation */},
                   modifier = Modifier.testTag("goBackButton")) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = colorScheme.onBackground)
+                    Icon(
+                        Icons.Default.ArrowBack,
+                        contentDescription = "Back",
+                        tint = colorScheme.onBackground)
                   }
             },
             actions = {
@@ -156,7 +158,10 @@ fun ServiceBookingScreen() {
                                                 text = "4.7", // Example rating value
                                                 fontSize = 16.sp,
                                                 fontWeight = FontWeight.Bold,
-                                                color = colorScheme.onSurfaceVariant, // White text for good contrast
+                                                color =
+                                                    colorScheme
+                                                        .onSurfaceVariant, // White text for good
+                                                                           // contrast
                                                 modifier = Modifier.testTag("rating_value"))
                                           }
                                     }

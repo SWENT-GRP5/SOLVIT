@@ -155,7 +155,8 @@ fun ButtonCustomerProvider(
                     .height(50.dp)
                     .background(
                         brush =
-                            Brush.horizontalGradient(colors = listOf(colorScheme.secondary, colorScheme.secondary)),
+                            Brush.horizontalGradient(
+                                colors = listOf(colorScheme.secondary, colorScheme.secondary)),
                         shape = RoundedCornerShape(10.dp))
                     .clickable { onClickButton() },
             contentAlignment = Alignment.Center) {

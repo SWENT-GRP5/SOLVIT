@@ -73,7 +73,10 @@ fun ProfileHeader(navigationActions: NavigationActions, provider: Provider) {
   Row(modifier = Modifier.fillMaxWidth()) {
     Column(
         modifier =
-            Modifier.background(colorScheme.secondaryContainer).height(400.dp).padding(8.dp).weight(1f),
+            Modifier.background(colorScheme.secondaryContainer)
+                .height(400.dp)
+                .padding(8.dp)
+                .weight(1f),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top) {
           Column(
@@ -272,7 +275,8 @@ fun StatsSection(provider: Provider) {
           Column(horizontalAlignment = Alignment.End) {
             // TODO : Change the hardcoded value to the actual number of jobs completed by the
             // provider
-            Text("37", fontSize = 40.sp, color = colorScheme.onPrimary, fontWeight = FontWeight.Bold)
+            Text(
+                "37", fontSize = 40.sp, color = colorScheme.onPrimary, fontWeight = FontWeight.Bold)
             Text("Jobs Completed", fontSize = 10.sp, color = colorScheme.onPrimary)
           }
         }
@@ -299,7 +303,11 @@ fun StatsSection(provider: Provider) {
         Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
           Column(horizontalAlignment = Alignment.Start) {
             // TODO : Change the hardcoded value to the actual availability of the provider
-            Text("Excellent", fontSize = 15.sp, color = colorScheme.onPrimary, fontWeight = FontWeight.Bold)
+            Text(
+                "Excellent",
+                fontSize = 15.sp,
+                color = colorScheme.onPrimary,
+                fontWeight = FontWeight.Bold)
             Text("Availability", fontSize = 10.sp, color = colorScheme.onPrimary)
           }
           Column(horizontalAlignment = Alignment.CenterHorizontally) {

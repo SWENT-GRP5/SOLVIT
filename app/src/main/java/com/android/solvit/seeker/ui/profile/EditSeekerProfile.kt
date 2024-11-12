@@ -242,7 +242,9 @@ fun EditSeekerProfileScreen(
                   modifier =
                       Modifier.fillMaxWidth()
                           .background(
-                              brush = Brush.horizontalGradient(listOf(colorScheme.secondary, colorScheme.secondary)),
+                              brush =
+                                  Brush.horizontalGradient(
+                                      listOf(colorScheme.secondary, colorScheme.secondary)),
                               shape = RoundedCornerShape(25.dp),
                               // add padding
                           )

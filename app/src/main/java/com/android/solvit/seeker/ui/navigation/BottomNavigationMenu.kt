@@ -36,7 +36,6 @@ import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_CUSTOM
 import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.navigation.TopLevelDestination
 import com.android.solvit.shared.ui.navigation.TopLevelDestinations
-import com.android.solvit.shared.ui.theme.Background
 
 @Composable
 fun BottomNavigationMenu(

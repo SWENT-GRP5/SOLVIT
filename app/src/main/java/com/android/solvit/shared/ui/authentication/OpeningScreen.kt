@@ -59,23 +59,24 @@ fun OpeningScreenPortrait(navigationActions: NavigationActions) {
                   painter = painterResource(id = R.drawable.logosolvit_firstpage),
                   contentDescription = null,
                   modifier = Modifier.size(200.dp).testTag("appLogoPortrait"))
-          Spacer(modifier = Modifier.height(7.dp))
-          Text(
-              text =
-                  buildAnnotatedString {
-                    append(
-                        AnnotatedString(
-                            "Solv",
-                            spanStyle =
-                                SpanStyle(
-                                    color = colorScheme.onBackground,
-                                    fontWeight = FontWeight.Bold)))
-                    append(
-                        AnnotatedString(
-                            "it",
-                            spanStyle =
-                                SpanStyle(
-                                    color = colorScheme.secondary, fontWeight = FontWeight.Bold)))
+              Spacer(modifier = Modifier.height(7.dp))
+              Text(
+                  text =
+                      buildAnnotatedString {
+                        append(
+                            AnnotatedString(
+                                "Solv",
+                                spanStyle =
+                                    SpanStyle(
+                                        color = colorScheme.onBackground,
+                                        fontWeight = FontWeight.Bold)))
+                        append(
+                            AnnotatedString(
+                                "it",
+                                spanStyle =
+                                    SpanStyle(
+                                        color = colorScheme.secondary,
+                                        fontWeight = FontWeight.Bold)))
                       },
                   fontSize = 60.sp,
                   modifier = Modifier.testTag("appNamePortrait"))
@@ -126,13 +127,13 @@ fun OpeningScreenLandscape(navigationActions: NavigationActions) {
                                       spanStyle =
                                           SpanStyle(
                                               color = colorScheme.onBackground,
-                                      fontWeight = FontWeight.Bold)))
-                      append(
-                          AnnotatedString(
-                              "it",
-                              spanStyle =
-                                  SpanStyle(
-                                      color = colorScheme.secondary,
+                                              fontWeight = FontWeight.Bold)))
+                              append(
+                                  AnnotatedString(
+                                      "it",
+                                      spanStyle =
+                                          SpanStyle(
+                                              color = colorScheme.secondary,
                                               fontWeight = FontWeight.Bold)))
                             },
                         fontSize = 60.sp,
