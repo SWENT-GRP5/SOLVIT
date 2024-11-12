@@ -252,6 +252,6 @@ class EditRequestScreenTest {
     composeTestRule.onNodeWithTag("serviceTypeResult").performClick()
     composeTestRule.onNodeWithTag("requestSubmit").performClick()
 
-    Mockito.verify(serviceRequestRepository).saveServiceRequestWithImage(any(), any(), any(), any())
+    Mockito.verify(serviceRequestRepository).saveServiceRequest(any(), any(), any())
   }
 }
