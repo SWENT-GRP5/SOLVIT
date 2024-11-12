@@ -36,11 +36,7 @@ class SignUpScreenTest {
   @Before
   fun setup() {
     // Set up the compose content before each test
-    composeTestRule.setContent {
-      SignUpScreen(
-        mockNavigationActions
-      )
-    }
+    composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
   }
 
   @Test
@@ -69,7 +65,9 @@ class SignUpScreenTest {
   @Test
   fun signUpScreen_emailInput() {
     // Test email input
-    runBlocking { composeTestRule.onNodeWithTag("emailInputField").performTextInput(" test@example.com") }
+    runBlocking {
+      composeTestRule.onNodeWithTag("emailInputField").performTextInput(" test@example.com")
+    }
   }
 
   @Test
