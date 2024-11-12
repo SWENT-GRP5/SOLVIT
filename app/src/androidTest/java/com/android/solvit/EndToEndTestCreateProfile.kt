@@ -15,14 +15,17 @@ import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.seeker.model.profile.UserRepository
 import com.android.solvit.seeker.model.profile.UserRepositoryFirestore
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
-import com.android.solvit.shared.model.authentication.AuthRep
 import com.android.solvit.shared.model.authentication.AuthRepository
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.map.LocationRepository
 import com.android.solvit.shared.model.map.LocationViewModel
 import com.android.solvit.shared.model.provider.ProviderRepository
 import com.android.solvit.shared.model.provider.ProviderRepositoryFirestore
+import com.android.solvit.shared.model.request.ServiceRequestRepository
+import com.android.solvit.shared.model.request.ServiceRequestRepositoryFirebase
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
+import com.android.solvit.shared.model.review.ReviewRepository
+import com.android.solvit.shared.model.review.ReviewRepositoryFirestore
 import com.android.solvit.shared.model.review.ReviewViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
@@ -33,6 +36,7 @@ import com.google.firebase.auth.auth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
+import com.google.firebase.storage.storage
 import junit.framework.TestCase.assertEquals
 import org.junit.After
 import org.junit.Before
@@ -48,14 +52,16 @@ class EndToEndTestCreateProfile {
   private lateinit var serviceRequestViewModel: ServiceRequestViewModel
   private lateinit var locationViewModel: LocationViewModel
   private lateinit var reviewViewModel: ReviewViewModel
-  private lateinit var navHostController: NavHostController
-  private lateinit var navigationActions: NavigationActions
 
-  private lateinit var authRepository: AuthRep
-  private lateinit var userRepository: UserRepository
+  private lateinit var authRepository: AuthRepository
+  private lateinit var seekerRepository: UserRepository
   private lateinit var providerRepository: ProviderRepository
   private lateinit var locationRepository: LocationRepository
+  private lateinit var serviceRequestRepository: ServiceRequestRepository
+  private lateinit var reviewRepository: ReviewRepository
 
+  private lateinit var navHostController: NavHostController
+  private lateinit var navigationActions: NavigationActions
   @get:Rule val composeTestRule = createComposeRule()
 
   @Before
@@ -70,16 +76,22 @@ class EndToEndTestCreateProfile {
     firestore.firestoreSettings =
         FirebaseFirestoreSettings.Builder().setPersistenceEnabled(false).build()
 
-    locationRepository = mock(LocationRepository::class.java)
+    val storage = Firebase.storage
+    storage.useEmulator("10.0.2.2", 9199)
+
     authRepository = AuthRepository(Firebase.auth, firestore)
-    authViewModel = AuthViewModel(authRepository)
-
-    userRepository = UserRepositoryFirestore(firestore)
+    seekerRepository = UserRepositoryFirestore(firestore)
     providerRepository = ProviderRepositoryFirestore(firestore)
+    locationRepository = mock(LocationRepository::class.java)
+    serviceRequestRepository = ServiceRequestRepositoryFirebase(firestore, storage)
+    reviewRepository = ReviewRepositoryFirestore(firestore)
 
-    seekerProfileViewModel = SeekerProfileViewModel(userRepository)
+    authViewModel = AuthViewModel(authRepository)
+    seekerProfileViewModel = SeekerProfileViewModel(seekerRepository)
     listProviderViewModel = ListProviderViewModel(providerRepository)
     locationViewModel = LocationViewModel(locationRepository)
+    serviceRequestViewModel = ServiceRequestViewModel(serviceRequestRepository)
+    reviewViewModel = ReviewViewModel(reviewRepository)
   }
 
   @After
@@ -134,7 +146,7 @@ class EndToEndTestCreateProfile {
     composeTestRule.onNodeWithTag("signUpLink").performClick()
 
     assertEquals(Screen.SIGN_UP, navHostController.currentDestination?.route)
-    val email = "atest1006@test.com"
+    val email = "atest3@test.com"
     val password = "password"
 
     composeTestRule.onNodeWithTag("emailInputField").performTextInput(email)
@@ -148,7 +160,6 @@ class EndToEndTestCreateProfile {
     composeTestRule.onNodeWithTag("customerButton").performClick()
     assertEquals("seeker", authViewModel.role.value)
 
-    // assertEquals(Screen.SEEKER_REGISTRATION_PROFILE, navHostController.currentDestination?.route)
     composeTestRule.waitUntil(timeoutMillis = 10000) {
       composeTestRule.onNodeWithTag("fullNameInput").isDisplayed()
     }
@@ -158,11 +169,16 @@ class EndToEndTestCreateProfile {
     composeTestRule.onNodeWithTag("userNameInput").performTextInput("JohnDoe123")
     composeTestRule.onNodeWithTag("completeRegistrationButton").performClick()
     composeTestRule.onNodeWithTag("savePreferencesButton").performClick()
+    composeTestRule.onNodeWithTag("exploreServicesButton").performClick()
 
-    /*authViewModel.user.value?.let { seekerProfileViewModel.getUserProfile(it.uid) }
-    assertEquals(seekerProfileViewModel.seekerProfile.value.name,"John Doe")
-    assertEquals(seekerProfileViewModel.seekerProfile.value.phone,"123456789")
-    assertEquals(seekerProfileViewModel.seekerProfile.value.username,"JohnDoe123")*/
+    composeTestRule.waitUntil(timeoutMillis = 10000) {
+      composeTestRule.onNodeWithTag("servicesScreen").isDisplayed()
+    }
+    composeTestRule.onNodeWithTag("servicesScreenCurrentLocation").performClick()
 
+    composeTestRule.onNodeWithTag("servicesScreenProfileImage").performClick()
+    composeTestRule.waitUntil(timeoutMillis = 10000) {
+      composeTestRule.onNodeWithTag("ProfileTopBar").isDisplayed()
+    }
   }
 }
