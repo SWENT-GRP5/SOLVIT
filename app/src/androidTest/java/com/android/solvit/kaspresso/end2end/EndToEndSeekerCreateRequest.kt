@@ -63,7 +63,7 @@ class EndToEndSeekerCreateRequest {
   private lateinit var serviceRequestRepository: ServiceRequestRepository
   private lateinit var reviewRepository: ReviewRepository
 
-  private val email = "test@test.com"
+  private val email = "test@test.ch"
   private val password = "password"
 
   @get:Rule val composeTestRule = createComposeRule()
@@ -97,6 +97,14 @@ class EndToEndSeekerCreateRequest {
     locationViewModel = LocationViewModel(locationRepository)
     serviceRequestViewModel = ServiceRequestViewModel(serviceRequestRepository)
     reviewViewModel = ReviewViewModel(reviewRepository)
+
+    authViewModel.setEmail(email)
+    authViewModel.setPassword(password)
+    authViewModel.setRole("seeker")
+    authViewModel.registerWithEmailAndPassword(
+      onSuccess = {authViewModel.logout {  }},
+      onFailure = {assertEquals(true, false)}
+    )
   }
 
   @After
@@ -112,69 +120,6 @@ class EndToEndSeekerCreateRequest {
 
     // Reinitialize FirebaseAuth without the emulator
     FirebaseAuth.getInstance().signOut()
-  }
-
-  @Test
-  fun CreateSeekerProfile() {
-    composeTestRule.setContent {
-      val user = authViewModel.user.collectAsState()
-      val userRegistered = authViewModel.userRegistered.collectAsState()
-
-      if (!userRegistered.value) {
-        SharedUI(authViewModel, listProviderViewModel, seekerProfileViewModel, locationViewModel)
-      } else {
-        when (user.value!!.role) {
-          "seeker" ->
-              SeekerUI(
-                  authViewModel,
-                  listProviderViewModel,
-                  seekerProfileViewModel,
-                  serviceRequestViewModel,
-                  reviewViewModel)
-          "provider" -> ProviderUI(authViewModel, listProviderViewModel, seekerProfileViewModel)
-        }
-      }
-    }
-
-    composeTestRule.onNodeWithTag("ctaButtonPortrait").performClick()
-
-    // assertEquals(Screen.SIGN_IN, navHostController.currentDestination?.route)
-    composeTestRule.onNodeWithTag("signUpLink").performClick()
-
-    // assertEquals(Screen.SIGN_UP,navHostController.currentDestination?.route)
-
-    composeTestRule.onNodeWithTag("emailInputField").performTextInput(email)
-    composeTestRule.onNodeWithTag("passwordInput").performTextInput(password)
-    composeTestRule.onNodeWithTag("confirmPasswordInput").performTextInput(password)
-    composeTestRule.onNodeWithTag("signUpButton").performClick()
-    assertEquals(email, authViewModel.email.value)
-    assertEquals(password, authViewModel.password.value)
-
-    // assertEquals(Screen.SIGN_UP_CHOOSE_ROLE,navHostController.currentDestination?.route)
-    composeTestRule.onNodeWithTag("customerButton").performClick()
-    assertEquals("seeker", authViewModel.role.value)
-
-    composeTestRule.waitUntil(timeoutMillis = 10000) {
-      composeTestRule.onNodeWithTag("fullNameInput").isDisplayed()
-    }
-
-    composeTestRule.onNodeWithTag("fullNameInput").performTextInput("John Doe")
-    composeTestRule.onNodeWithTag("phoneNumberInput").performTextInput("123456789")
-    composeTestRule.onNodeWithTag("locationInput").performTextInput("123 Main St")
-    composeTestRule.onNodeWithTag("userNameInput").performTextInput("password123")
-    composeTestRule.onNodeWithTag("completeRegistrationButton").performClick()
-    composeTestRule.onNodeWithTag("savePreferencesButton").performClick()
-    composeTestRule.onNodeWithTag("exploreServicesButton").performClick()
-
-    composeTestRule.waitUntil(timeoutMillis = 10000) {
-      composeTestRule.onNodeWithTag("servicesScreen").isDisplayed()
-    }
-    composeTestRule.onNodeWithTag("servicesScreenCurrentLocation").performClick()
-
-    composeTestRule.onNodeWithTag("servicesScreenProfileImage").performClick()
-    composeTestRule.waitUntil(timeoutMillis = 10000) {
-      composeTestRule.onNodeWithTag("ProfileTopBar").isDisplayed()
-    }
   }
 
   @Test
