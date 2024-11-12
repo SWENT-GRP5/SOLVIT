@@ -54,8 +54,10 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.solvit.R
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
+import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
 
@@ -282,7 +284,11 @@ fun ProfileOptionItem(optionName: String, onClick: () -> Unit = {}) {
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
-fun SeekerProfileScreen(viewModel: SeekerProfileViewModel, navigationActions: NavigationActions) {
+fun SeekerProfileScreen(
+    viewModel: SeekerProfileViewModel,
+    authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory),
+    navigationActions: NavigationActions
+) {
 
   // Lock Orientation to Portrait
   val context = LocalContext.current
@@ -409,7 +415,7 @@ fun SeekerProfileScreen(viewModel: SeekerProfileViewModel, navigationActions: Na
                             icon = Icons.Default.ExitToApp,
                             optionName = "Log out",
                             subtitle = "Log out of your account",
-                            onClick = { /* Handle log out */},
+                            onClick = { authViewModel.logout {} },
                             modifier = Modifier.testTag("LogoutOption") // testTag for option
                             )
                         Spacer(modifier = Modifier.height(8.dp))
