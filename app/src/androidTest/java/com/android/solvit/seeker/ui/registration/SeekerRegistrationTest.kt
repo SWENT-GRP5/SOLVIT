@@ -4,6 +4,8 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextEquals
+import androidx.compose.ui.test.isDisplayed
+import androidx.compose.ui.test.isNotDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
@@ -195,5 +197,59 @@ class SeekerRegistrationTest {
 
     // Check that the second step circle is visible (indicating the user is on step 2)
     composeTestRule.onNodeWithTag("stepCircle-2-incomplete").assertExists()
+  }
+
+  @Test
+  fun seekerRegistrationTest_errorShowInFullNameField() {
+    composeTestRule.setContent {
+      SeekerRegistrationScreen(
+          viewModel = seekerViewModel,
+          navigationActions = navigationActions,
+          locationViewModel = locationViewModel)
+    }
+
+    composeTestRule.onNodeWithTag("fullNameErrorSeekerRegistration").isNotDisplayed()
+    composeTestRule.onNodeWithTag("fullNameInput").performTextInput("Jo")
+    composeTestRule.onNodeWithTag("fullNameErrorSeekerRegistration").isDisplayed()
+    composeTestRule.onNodeWithTag("fullNameInput").performTextClearance()
+    composeTestRule.onNodeWithTag("fullNameInput").performTextInput("John Doe")
+    composeTestRule.onNodeWithTag("fullNameErrorSeekerRegistration").isNotDisplayed()
+  }
+
+  @Test
+  fun seekerRegistrationTest_errorShowInUserNameField() {
+    composeTestRule.setContent {
+      SeekerRegistrationScreen(
+          viewModel = seekerViewModel,
+          navigationActions = navigationActions,
+          locationViewModel = locationViewModel)
+    }
+
+    composeTestRule.onNodeWithTag("userNameErrorSeekerRegistration").isNotDisplayed()
+    composeTestRule.onNodeWithTag("userNameInput").performTextInput("Jo")
+    composeTestRule.onNodeWithTag("userNameErrorSeekerRegistration").isDisplayed()
+    composeTestRule.onNodeWithTag("userNameInput").performTextClearance()
+    composeTestRule.onNodeWithTag("userNameInput").performTextInput("John Doe")
+    composeTestRule.onNodeWithTag("userNameErrorSeekerRegistration").isNotDisplayed()
+  }
+
+  @Test
+  fun seekerRegistrationTest_errorShowInPhoneField() {
+    composeTestRule.setContent {
+      SeekerRegistrationScreen(
+          viewModel = seekerViewModel,
+          navigationActions = navigationActions,
+          locationViewModel = locationViewModel)
+    }
+
+    composeTestRule.onNodeWithTag("phoneNumberErrorSeekerRegistration").isNotDisplayed()
+    composeTestRule.onNodeWithTag("phoneNumberInput").performTextInput("12345")
+    composeTestRule.onNodeWithTag("phoneNumberErrorSeekerRegistration").isDisplayed()
+    composeTestRule.onNodeWithTag("phoneNumberInput").performTextClearance()
+    composeTestRule.onNodeWithTag("phoneNumberInput").performTextInput("John Doe")
+    composeTestRule.onNodeWithTag("phoneNumberErrorSeekerRegistration").isDisplayed()
+    composeTestRule.onNodeWithTag("phoneNumberInput").performTextClearance()
+    composeTestRule.onNodeWithTag("phoneNumberInput").performTextInput("123456")
+    composeTestRule.onNodeWithTag("phoneNumberErrorSeekerRegistration").isNotDisplayed()
   }
 }

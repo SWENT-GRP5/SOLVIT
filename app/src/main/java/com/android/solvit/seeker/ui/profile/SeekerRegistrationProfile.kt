@@ -30,10 +30,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -46,15 +44,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.solvit.R
 import com.android.solvit.seeker.model.profile.SeekerProfile
@@ -63,6 +58,7 @@ import com.android.solvit.seeker.ui.request.LocationDropdown
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.map.LocationViewModel
+import com.android.solvit.shared.ui.authentication.CustomOutlinedTextField
 import com.android.solvit.shared.ui.authentication.GoBackButton
 import com.android.solvit.shared.ui.navigation.NavigationActions
 
@@ -158,9 +154,11 @@ fun SeekerRegistrationScreen(
                     label = "Full Name",
                     placeholder = "Enter your full name",
                     isValueOk = isFullNameOk,
+                    errorMessage = "Your full name must be at least 3 characters",
                     leadingIcon = Icons.Default.Person,
                     leadingIconDescription = "Person Icon",
-                    testTag = "fullNameInput")
+                    testTag = "fullNameInput",
+                    errorTestTag = "fullNameErrorSeekerRegistration")
 
                 Spacer(modifier = Modifier.height(10.dp))
 
@@ -170,9 +168,11 @@ fun SeekerRegistrationScreen(
                     label = "User Name",
                     placeholder = "Enter your user name",
                     isValueOk = isUserNameOk,
+                    errorMessage = "Your user name must be at least 3 characters",
                     leadingIcon = Icons.Default.Person,
                     leadingIconDescription = "Person Icon",
-                    testTag = "userNameInput")
+                    testTag = "userNameInput",
+                    errorTestTag = "userNameErrorSeekerRegistration")
 
                 Spacer(modifier = Modifier.height(10.dp))
 
@@ -182,9 +182,11 @@ fun SeekerRegistrationScreen(
                     label = "Phone Number",
                     placeholder = "Enter your phone number",
                     isValueOk = isPhoneOk,
+                    errorMessage = "Your phone number must be at least 6 digits",
                     leadingIcon = Icons.Default.Phone,
                     leadingIconDescription = "Phone Icon",
-                    testTag = "phoneNumberInput")
+                    testTag = "phoneNumberInput",
+                    errorTestTag = "phoneNumberErrorSeekerRegistration")
 
                 Spacer(modifier = Modifier.height(10.dp))
 
@@ -316,78 +318,6 @@ fun SeekerRegistrationScreen(
               }
             }
       })
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun CustomOutlinedTextField(
-    value: String,
-    onValueChange: (String) -> Unit,
-    label: String,
-    placeholder: String,
-    isValueOk: Boolean,
-    modifier: Modifier = Modifier,
-    errorMessage: String = "Invalid input",
-    leadingIcon: ImageVector,
-    leadingIconDescription: String = "",
-    testTag: String
-) {
-  // State to track if the field has been "visited" (focused and then unfocused)
-  var hasBeenFocused by remember { mutableStateOf(false) }
-  var hasLostFocusAfterTyping by remember { mutableStateOf(false) }
-
-  Column(modifier = modifier.fillMaxWidth()) {
-    // Text field with focus management
-    OutlinedTextField(
-        value = value,
-        onValueChange = {
-          onValueChange(it)
-          // Reset the focus-loss tracking when the user starts typing
-          if (it.isNotEmpty()) {
-            hasLostFocusAfterTyping = false
-          }
-        },
-        label = { Text(label, color = Color.Black) },
-        singleLine = true,
-        placeholder = { Text(placeholder) },
-        leadingIcon = {
-          Icon(
-              leadingIcon,
-              contentDescription = leadingIconDescription,
-              tint = if (isValueOk) Color(0xFF5AC561) else Color.Gray)
-        },
-        modifier =
-            Modifier.fillMaxWidth().testTag(testTag).onFocusChanged { focusState ->
-              // Mark the field as "visited" as soon as it loses focus after an entry
-              if (!focusState.isFocused && value.isNotBlank()) {
-                hasBeenFocused = true
-                hasLostFocusAfterTyping = true
-              }
-            },
-        shape = RoundedCornerShape(12.dp),
-        colors =
-            TextFieldDefaults.outlinedTextFieldColors(
-                focusedTextColor = Color.Black,
-                unfocusedTextColor =
-                    if (value.isEmpty()) Color.Gray else if (!isValueOk) Color.Red else Color.Black,
-                focusedBorderColor = if (isValueOk) Color(0xFF5AC561) else Color.Blue,
-                unfocusedBorderColor =
-                    when {
-                      value.isEmpty() -> Color.Gray
-                      isValueOk -> Color(0xFF5AC561)
-                      else -> Color.Red
-                    }))
-
-    // Display the error message if the field has been visited, input is incorrect, and focus was
-    // lost after typing
-    if (!isValueOk && hasBeenFocused && hasLostFocusAfterTyping) {
-      Text(
-          text = errorMessage,
-          color = Color.Red,
-          fontSize = 15.sp, // Error text size
-          modifier = Modifier.padding(start = 16.dp, top = 4.dp))
-    }
-  }
 }
 
 @Composable

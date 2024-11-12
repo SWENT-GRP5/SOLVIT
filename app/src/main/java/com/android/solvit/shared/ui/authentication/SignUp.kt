@@ -28,17 +28,12 @@ import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -50,7 +45,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -60,15 +54,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.solvit.R
-import com.android.solvit.seeker.ui.profile.CustomOutlinedTextField
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
@@ -169,8 +160,9 @@ fun SignUpScreen(
                   label = "Password",
                   placeholder = "Enter your password",
                   contentDescription = "Password",
-                  testTag = "passwordInput",
-                  passwordLengthComplete = passwordLengthComplete)
+                  testTag = "passwordInputField",
+                  passwordLengthComplete = passwordLengthComplete,
+                  testTagErrorPassword = "passwordErrorMessage")
 
               Spacer(modifier = Modifier.height(10.dp))
 
@@ -181,8 +173,18 @@ fun SignUpScreen(
                   label = "Confirm Password",
                   placeholder = "Re-enter your password",
                   contentDescription = "Confirm Password",
-                  testTag = "confirmPasswordInput",
-                  passwordLengthComplete = (passwordLengthComplete && samePassword))
+                  testTag = "confirmPasswordInputField",
+                  passwordLengthComplete = (passwordLengthComplete && samePassword),
+                  testTagErrorPassword = "confirmPasswordErrorMessage")
+
+              if (!samePassword && confirmPassword.isNotEmpty() && password.isNotEmpty()) {
+                Text(
+                    text = "Password and Confirm Password must be the same",
+                    color = Color.Red,
+                    fontSize = 15.sp,
+                    textAlign = TextAlign.Start,
+                    modifier = Modifier.padding(top = 4.dp).fillMaxWidth())
+              }
 
               Text(
                   text = "Your passport must have at least 6 characters",
@@ -217,95 +219,6 @@ fun ScreenTitle(title: String, testTag: String) {
       text = title,
       style = MaterialTheme.typography.titleLarge,
       modifier = Modifier.testTag(testTag))
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun PasswordTextField(
-    value: String,
-    onValueChange: (String) -> Unit,
-    label: String,
-    placeholder: String,
-    contentDescription: String = "",
-    testTag: String,
-    passwordLengthComplete: Boolean,
-    errorMessage: String = "Password is too short"
-) {
-  var passwordVisible by remember { mutableStateOf(false) }
-
-  // State to track if the field has been focused and then unfocused
-  var hasBeenFocused by remember { mutableStateOf(false) }
-  var hasLostFocusAfterTyping by remember { mutableStateOf(false) }
-
-  Column(modifier = Modifier.fillMaxWidth()) {
-    OutlinedTextField(
-        value = value,
-        onValueChange = {
-          onValueChange(it)
-          // Reset focus-loss tracking when the user starts typing
-          if (it.isNotEmpty()) {
-            hasLostFocusAfterTyping = false
-          }
-        },
-        label = { Text(label, color = Color.Black) },
-        singleLine = true,
-        placeholder = { Text(placeholder) },
-        modifier =
-            Modifier.fillMaxWidth().testTag(testTag).onFocusChanged { focusState ->
-              // Mark the field as "visited" if it loses focus after an entry
-              if (!focusState.isFocused && value.isNotBlank()) {
-                hasBeenFocused = true
-                hasLostFocusAfterTyping = true
-              }
-            },
-        enabled = true,
-        shape = RoundedCornerShape(12.dp),
-        visualTransformation =
-            if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-        leadingIcon = {
-          Icon(
-              imageVector = Icons.Filled.Lock,
-              contentDescription = contentDescription,
-              tint = if (passwordLengthComplete) Color(0xFF5AC561) else Color.Gray,
-              modifier = Modifier.size(25.dp))
-        },
-        trailingIcon = {
-          val image =
-              if (passwordVisible) painterResource(id = android.R.drawable.ic_menu_view)
-              else painterResource(id = android.R.drawable.ic_secure)
-
-          IconButton(onClick = { passwordVisible = !passwordVisible }) {
-            Icon(
-                painter = image,
-                contentDescription = null,
-                tint = if (passwordLengthComplete) Color(0xFF5AC561) else Color.Gray,
-                modifier = Modifier.size(24.dp))
-          }
-        },
-        colors =
-            TextFieldDefaults.outlinedTextFieldColors(
-                focusedTextColor = Color.Black,
-                unfocusedTextColor =
-                    if (value.isEmpty()) Color.Gray
-                    else if (!passwordLengthComplete) Color.Red else Color.Black,
-                focusedBorderColor = if (passwordLengthComplete) Color(0xFF5AC561) else Color.Blue,
-                unfocusedBorderColor =
-                    when {
-                      value.isEmpty() -> Color.Gray
-                      passwordLengthComplete -> Color(0xFF5AC561)
-                      else -> Color.Red
-                    }))
-
-    // Display the error message if the field has been visited, input is incorrect, and focus was
-    // lost after typing
-    if (!passwordLengthComplete && hasBeenFocused && hasLostFocusAfterTyping) {
-      Text(
-          text = errorMessage,
-          color = Color.Red,
-          fontSize = 15.sp, // Error text size
-          modifier = Modifier.padding(start = 16.dp, top = 4.dp))
-    }
-  }
 }
 
 @Composable

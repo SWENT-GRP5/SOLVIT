@@ -50,13 +50,13 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.solvit.R
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
-import com.android.solvit.seeker.ui.profile.CustomOutlinedTextField
 import com.android.solvit.seeker.ui.profile.Stepper
 import com.android.solvit.seeker.ui.request.LocationDropdown
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.map.LocationViewModel
 import com.android.solvit.shared.model.provider.Provider
+import com.android.solvit.shared.ui.authentication.CustomOutlinedTextField
 import com.android.solvit.shared.ui.authentication.GoBackButton
 import com.android.solvit.shared.ui.navigation.NavigationActions
 
@@ -154,9 +154,11 @@ fun ProviderRegistrationScreen(
                     label = "Full Name",
                     placeholder = "Enter your full name",
                     isValueOk = isFullNameOk,
+                    errorMessage = "Your full name must be at least 3 characters",
                     leadingIcon = Icons.Default.Person,
                     leadingIconDescription = "Person Icon",
-                    testTag = "fullNameInput")
+                    testTag = "fullNameInput",
+                    errorTestTag = "fullNameErrorProviderRegistration")
 
                 Spacer(modifier = Modifier.height(10.dp))
 
@@ -167,9 +169,11 @@ fun ProviderRegistrationScreen(
                     label = "Phone Number",
                     placeholder = "Enter your phone number",
                     isValueOk = isPhoneOk,
+                    errorMessage = "Your phone number must be at least 6 digits",
                     leadingIcon = Icons.Default.Phone,
                     leadingIconDescription = "Phone Icon",
-                    testTag = "phoneNumberInput")
+                    testTag = "phoneNumberInput",
+                    errorTestTag = "phoneNumberErrorProviderRegistration")
 
                 Spacer(modifier = Modifier.height(10.dp))
 
@@ -179,9 +183,11 @@ fun ProviderRegistrationScreen(
                     label = "Business/Company Name",
                     placeholder = "Enter your business name (optional for independent providers)",
                     isValueOk = isFullNameOk,
+                    errorMessage = "Your company name must be at least 3 characters",
                     leadingIcon = Icons.Default.Build,
                     leadingIconDescription = "Company Icon",
-                    testTag = "companyNameInput")
+                    testTag = "companyNameInput",
+                    errorTestTag = "companyNameErrorProviderRegistration")
 
                 Spacer(modifier = Modifier.height(10.dp))
 

@@ -42,7 +42,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.android.solvit.R
-import com.android.solvit.seeker.ui.profile.CustomOutlinedTextField
 import com.android.solvit.shared.ui.navigation.NavigationActions
 
 @SuppressLint(
