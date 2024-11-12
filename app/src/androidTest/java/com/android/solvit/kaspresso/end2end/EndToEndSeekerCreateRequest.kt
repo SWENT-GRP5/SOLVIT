@@ -179,7 +179,7 @@ class EndToEndSeekerCreateRequest {
     composeTestRule.waitUntil {
       composeTestRule.onNodeWithTag("requestsOverviewScreen").isDisplayed()
     }
-    // composeTestRule.onNodeWithTag("noServiceRequestsScreen").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("noServiceRequestsScreen").assertIsDisplayed()
 
     // Create a new request
     composeTestRule.onNodeWithTag(TopLevelDestinations.CREATE_REQUEST.toString()).performClick()
@@ -207,9 +207,8 @@ class EndToEndSeekerCreateRequest {
     composeTestRule.onNodeWithTag("requestSubmit").performClick()
 
     // Assert the requests to be displayed
-    composeTestRule.waitUntil {
-      composeTestRule.onNodeWithTag("requestsOverviewScreen").isDisplayed()
+    composeTestRule.waitUntil(timeoutMillis = 10000) {
+      composeTestRule.onNodeWithTag("requestsList").isDisplayed()
     }
-    composeTestRule.onNodeWithTag("requestsList").assertIsDisplayed()
   }
 }
