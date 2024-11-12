@@ -140,13 +140,13 @@ class EndToEndTestCreateProfile {
       }
     }
 
-    composeTestRule.onNodeWithTag("ctaButton").performClick()
+    composeTestRule.onNodeWithTag("ctaButtonPortrait").performClick()
 
     assertEquals(Screen.SIGN_IN, navHostController.currentDestination?.route)
     composeTestRule.onNodeWithTag("signUpLink").performClick()
 
     assertEquals(Screen.SIGN_UP, navHostController.currentDestination?.route)
-    val email = "atest3@test.com"
+    val email = "atest4@test.com"
     val password = "password"
 
     composeTestRule.onNodeWithTag("emailInputField").performTextInput(email)
