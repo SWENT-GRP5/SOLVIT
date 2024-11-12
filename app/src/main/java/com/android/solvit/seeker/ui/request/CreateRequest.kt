@@ -84,6 +84,7 @@ fun CreateRequestScreen(
       onShowDropdownLocationChange = { showDropdownLocation = it },
       locationSuggestions = locationSuggestions.filterNotNull(),
       onLocationSelected = { selectedLocation = it },
+      selectedLocation = selectedLocation,
       dueDate = dueDate,
       onDueDateChange = { dueDate = it },
       selectedImageUri = selectedImageUri,

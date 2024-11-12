@@ -3,6 +3,7 @@ package com.android.solvit.shared.ui.navigation
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.DateRange
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.LocationOn
@@ -25,6 +26,7 @@ object Route {
   const val MAP_OF_SEEKERS = "Seekers Map"
   const val CALENDAR = "Calendar"
   const val PROVIDER_PROFILE = "Provider Profile"
+  const val MYJOBS = "My Jobs"
 }
 
 object Screen {
@@ -37,15 +39,15 @@ object Screen {
   const val SEEKER_REGISTRATION_PROFILE = "Seeker registration"
   const val PROVIDER_REGISTRATION_PROFILE = "Provider registration"
   const val CALENDAR = "Calendar"
+  const val MYJOBS = "My Jobs"
+  const val PROFESSIONAL_PROFILE = "Professional Profile"
 }
 
 data class TopLevelDestination(val route: String, val icon: ImageVector, val textId: String)
 
 object TopLevelDestinations {
 
-  val SERVICES =
-      TopLevelDestination(
-          route = Route.SERVICES, icon = Icons.Outlined.Home, textId = "Customer Home")
+  ////////////////////////////////// PROVIDER //////////////////////////////////
   val REQUEST_FEED =
       TopLevelDestination(
           route = Route.REQUESTS_FEED, icon = Icons.Outlined.Home, textId = "Professional Home")
@@ -55,7 +57,14 @@ object TopLevelDestinations {
   val CALENDAR =
       TopLevelDestination(
           route = Route.CALENDAR, icon = Icons.Outlined.DateRange, textId = "Professional Calendar")
+  val MYJOBS =
+      TopLevelDestination(
+          route = Route.MYJOBS, icon = Icons.Outlined.CheckCircle, textId = "My Jobs")
 
+  ////////////////////////////////// CUSTOMER //////////////////////////////////
+  val SERVICES =
+      TopLevelDestination(
+          route = Route.SERVICES, icon = Icons.Outlined.Home, textId = "Customer Home")
   val MESSAGE =
       TopLevelDestination(
           route = Route.MESSAGE, icon = Icons.Outlined.MailOutline, textId = "Message")
@@ -71,6 +80,11 @@ object TopLevelDestinations {
   val PROFILE =
       TopLevelDestination(
           route = Route.PROFILE, icon = Icons.Outlined.AccountCircle, textId = "Profile")
+  val PROFESSIONAL_PROFILE =
+      TopLevelDestination(
+          route = Screen.PROFESSIONAL_PROFILE,
+          icon = Icons.Outlined.AccountCircle,
+          textId = "Profile")
 }
 
 val LIST_TOP_LEVEL_DESTINATION_CUSTOMER =
@@ -84,7 +98,8 @@ val LIST_TOP_LEVEL_DESTINATION_PROVIDER =
     listOf(
         TopLevelDestinations.REQUEST_FEED,
         TopLevelDestinations.MAP_OF_SEEKERS,
-        TopLevelDestinations.CALENDAR)
+        TopLevelDestinations.CALENDAR,
+        TopLevelDestinations.PROFESSIONAL_PROFILE)
 
 open class NavigationActions(
     private val navController: NavController,
