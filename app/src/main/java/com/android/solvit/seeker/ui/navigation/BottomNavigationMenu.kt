@@ -13,13 +13,14 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.colorScheme
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Alignment
@@ -51,10 +52,13 @@ fun BottomNavigationMenu(
     onDispose { activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED }
   }
 
+  // Get the background color from the theme
+  val backgroundColor = MaterialTheme.colorScheme.background
+
   BoxWithConstraints(
       modifier =
           Modifier.fillMaxWidth()
-              .height(80.dp)
+              .height(60.dp)
               .background(Color.Transparent)
               .testTag("bottomNavigationMenu"),
       contentAlignment = Alignment.BottomCenter) {
@@ -72,8 +76,7 @@ fun BottomNavigationMenu(
                     0f,
                     size.width * 0.77f,
                     10.dp.toPx())
-                quadraticBezierTo(
-                    size.width * 0.86f, 60.dp.toPx(), size.width * 0.96f, 10.dp.toPx())
+                quadraticTo(size.width * 0.86f, 60.dp.toPx(), size.width * 0.96f, 10.dp.toPx())
 
                 cubicTo(
                     size.width * 0.96f, 10.dp.toPx(), size.width * 0.98f, 0f, size.width * 1f, 0f)
@@ -83,9 +86,7 @@ fun BottomNavigationMenu(
                 close()
               }
 
-          // TODO: Use the colorScheme from the MaterialTheme to accommodate dark mode, should be
-          // colorScheme.background
-          drawPath(path = path, color = Background, style = Fill)
+          drawPath(path = path, color = backgroundColor, style = Fill)
         }
 
         Row(
@@ -93,18 +94,23 @@ fun BottomNavigationMenu(
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically) {
               val filteredTabList = tabList.filter { it.route != Route.CREATE_REQUEST }
-              filteredTabList.forEachIndexed { index, tab ->
-                BottomNavigationItem(
+              filteredTabList.forEachIndexed { _, tab ->
+                NavigationBarItem(
                     icon = {
                       Icon(
                           tab.icon,
                           contentDescription = null,
                           tint =
-                              if (tab.route == selectedItem) colorScheme.primary
-                              else Color(0xFFD8D8D8))
+                              if (tab.route == selectedItem) MaterialTheme.colorScheme.onBackground
+                              else MaterialTheme.colorScheme.onSurfaceVariant)
                     },
                     selected = tab.route == selectedItem,
                     onClick = { onTabSelect(tab) },
+                    colors =
+                        NavigationBarItemDefaults.colors(
+                            selectedIconColor = MaterialTheme.colorScheme.primary,
+                            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)),
                     modifier = Modifier.testTag(tab.textId))
               }
             }
@@ -119,7 +125,7 @@ fun BottomNavigationMenu(
             modifier =
                 Modifier.size(height * 0.85f)
                     .offset(y = (-25).dp)
-                    .offset(x = width * 0.5f - 53.dp)
+                    .offset(x = width * 0.5f - 56.dp)
                     .align(Alignment.TopCenter)
                     .testTag(TopLevelDestinations.CREATE_REQUEST.toString()),
             shape = CircleShape,

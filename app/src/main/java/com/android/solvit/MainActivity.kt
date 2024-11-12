@@ -18,6 +18,7 @@ import androidx.navigation.navigation
 import com.android.solvit.provider.ui.calendar.ProviderCalendarScreen
 import com.android.solvit.provider.ui.map.ProviderMapScreen
 import com.android.solvit.provider.ui.profile.ProviderProfileScreen
+import com.android.solvit.provider.ui.request.ListRequestsFeedScreen
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.seeker.ui.map.SeekerMapScreen
@@ -45,7 +46,6 @@ import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.navigation.Screen
 import com.android.solvit.shared.ui.theme.SampleAppTheme
 import com.android.solvit.ui.message.MessageScreen
-import com.android.solvit.ui.requests.ListRequestsFeedScreen
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 
