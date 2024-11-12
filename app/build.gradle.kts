@@ -1,5 +1,6 @@
 import java.io.FileInputStream
 import java.util.Properties
+import com.android.build.api.dsl.ManagedVirtualDevice
 
 plugins {
     jacoco
@@ -33,6 +34,12 @@ android {
         manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunnerArguments += mapOf(
+            "clearPackageData" to "true",
+            "disableAnalytics" to "true",
+            "numShards" to (project.findProperty("android.testInstrumentationRunnerArguments.shard_count") as? String ?: "1"),
+            "shardIndex" to (project.findProperty("android.testInstrumentationRunnerArguments.shard_index") as? String ?: "0")
+        )
         vectorDrawables {
             useSupportLibrary = true
         }
@@ -57,9 +64,11 @@ android {
                 "proguard-rules.pro"
             )
             signingConfig = signingConfigs.getByName("release")
+            multiDexEnabled = true
         }
 
         debug {
+            multiDexEnabled = true
             enableUnitTestCoverage = true
             enableAndroidTestCoverage = true
         }
@@ -102,10 +111,32 @@ android {
         unitTests {
             isIncludeAndroidResources = true
             isReturnDefaultValues = true
+            all {
+                it.maxParallelForks = Runtime.getRuntime().availableProcessors().coerceAtLeast(4)
+            }
         }
+        
+        // Add these test optimizations
+        animationsDisabled = true
+        execution = "ANDROIDX_TEST_ORCHESTRATOR"
+        
         packaging {
             jniLibs {
                 useLegacyPackaging = true
+            }
+        }
+
+        // Configure test sharding
+        execution = "ANDROIDX_TEST_ORCHESTRATOR"
+        animationsDisabled = true
+
+        managedDevices {
+            devices {
+                maybeCreate<ManagedVirtualDevice>("pixel2api30").apply {
+                    device = "Pixel 2"
+                    apiLevel = 30
+                    systemImageSource = "google"
+                }
             }
         }
     }
@@ -253,6 +284,11 @@ dependencies {
 
     // ----------       Load Images from URL     ------------
     implementation("io.coil-kt:coil-compose:2.4.0")
+
+    androidTestUtil(libs.androidx.orchestrator)
+    androidTestImplementation(libs.androidx.runner)
+    androidTestImplementation(libs.androidx.rules)
+    androidTestImplementation(libs.androidx.espresso.core.v351)
 }
 
 tasks.withType<Test> {
