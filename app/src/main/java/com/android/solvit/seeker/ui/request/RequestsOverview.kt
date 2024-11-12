@@ -51,6 +51,7 @@ import coil.compose.AsyncImage
 import com.android.solvit.R
 import com.android.solvit.seeker.ui.navigation.BottomNavigationMenu
 import com.android.solvit.seeker.ui.service.SERVICES_LIST
+import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestStatus
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
@@ -60,8 +61,6 @@ import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.theme.LightBlue
 import com.android.solvit.shared.ui.theme.LightOrange
-import com.google.firebase.Firebase
-import com.google.firebase.auth.auth
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -69,7 +68,9 @@ import java.util.Locale
 @Composable
 fun RequestsOverviewScreen(
     navigationActions: NavigationActions,
-    requestViewModel: ServiceRequestViewModel = viewModel(factory = ServiceRequestViewModel.Factory)
+    requestViewModel: ServiceRequestViewModel =
+        viewModel(factory = ServiceRequestViewModel.Factory),
+    authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory),
 ) {
 
   // Lock Orientation to Portrait
@@ -87,7 +88,8 @@ fun RequestsOverviewScreen(
             tabList = LIST_TOP_LEVEL_DESTINATION_CUSTOMER,
             selectedItem = Route.REQUESTS_OVERVIEW)
       }) {
-        val userId = Firebase.auth.currentUser?.uid ?: "-1"
+        val user = authViewModel.user.collectAsState()
+        val userId = user.value?.uid ?: "-1"
         val requests =
             requestViewModel.requests.collectAsState().value.filter { it.userId == userId }
 
