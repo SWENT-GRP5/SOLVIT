@@ -64,7 +64,7 @@ fun ProviderProfileScreen(
       listProviderViewModel.providersList.collectAsState().value.first { it.uid == userId }
   Column(modifier = Modifier.fillMaxSize().background(Color.White)) {
     ProfileHeader(navigationActions, provider, authViewModel)
-    VerticalSpacer(10.dp)
+    Spacer(modifier = Modifier.height(10.dp))
     JobsDoneSection()
     Spacer(modifier = Modifier.height(10.dp))
     StatsSection(provider = provider)
@@ -130,7 +130,7 @@ fun ProfileHeader(
               fontWeight = FontWeight.Bold,
               textAlign = TextAlign.Center)
 
-          VerticalSpacer(40.dp)
+          Spacer(modifier = Modifier.height(40.dp))
 
           Button(
               onClick = { authViewModel.logout {} },
