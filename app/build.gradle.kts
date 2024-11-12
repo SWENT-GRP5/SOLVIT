@@ -297,19 +297,3 @@ tasks.register("jacocoTestReport", JacocoReport::class) {
     })
 }
 
-tasks.register("connectedCheckWithEmulators") {
-    doLast {
-        exec {
-            // Set the working directory to the root project directory
-            workingDir = rootProject.projectDir
-
-            // Run Firebase emulators and connectedCheck in a single command
-            commandLine = listOf(
-                "/bin/sh", "-c",
-                "firebase emulators:exec --debug --inspect-functions --project solvit-14cc1 --import=./end2end-data --only firestore,auth './gradlew connectedCheck'"
-            )
-            standardOutput = System.out
-            errorOutput = System.err
-        }
-    }
-}
