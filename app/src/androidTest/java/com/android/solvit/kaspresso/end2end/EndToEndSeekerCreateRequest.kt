@@ -113,6 +113,11 @@ class EndToEndSeekerCreateRequest {
     authViewModel.setRole("seeker")
     authViewModel.registerWithEmailAndPassword(
         onSuccess = { authViewModel.logout {} }, onFailure = {})
+    serviceRequestRepository.getServiceRequests(
+        onSuccess = { requests ->
+          requests.forEach { serviceRequestViewModel.deleteServiceRequestById(it.uid) }
+        },
+        onFailure = {})
   }
 
   @After
