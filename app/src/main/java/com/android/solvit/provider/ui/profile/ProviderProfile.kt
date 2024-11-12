@@ -19,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -58,7 +59,7 @@ fun ProviderProfileScreen(
   val userId = Firebase.auth.currentUser?.uid ?: "-1"
   val provider =
       listProviderViewModel.providersList.collectAsState().value.first { it.uid == userId }
-  Column(modifier = Modifier.fillMaxSize().background(Color.White)) {
+  Column(modifier = Modifier.fillMaxSize().background(colorScheme.background)) {
     ProfileHeader(navigationActions, provider)
     VerticalSpacer(10.dp)
     JobsDoneSection()
@@ -72,7 +73,7 @@ fun ProfileHeader(navigationActions: NavigationActions, provider: Provider) {
   Row(modifier = Modifier.fillMaxWidth()) {
     Column(
         modifier =
-            Modifier.background(Color(0, 121, 107, 100)).height(400.dp).padding(8.dp).weight(1f),
+            Modifier.background(colorScheme.secondaryContainer).height(400.dp).padding(8.dp).weight(1f),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top) {
           Column(
@@ -87,7 +88,7 @@ fun ProfileHeader(navigationActions: NavigationActions, provider: Provider) {
                             Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "GoBackButton",
                             modifier = Modifier.size(24.dp),
-                            tint = Color(239, 70, 55))
+                            tint = colorScheme.error)
                       }
                 }
               }
@@ -97,7 +98,7 @@ fun ProfileHeader(navigationActions: NavigationActions, provider: Provider) {
           Box(
               modifier =
                   Modifier.size(130.dp)
-                      .background(Color.White, shape = CircleShape)
+                      .background(colorScheme.background, shape = CircleShape)
                       .testTag("profileImage"),
               contentAlignment = Alignment.Center) {
                 AsyncImage(
@@ -108,7 +109,7 @@ fun ProfileHeader(navigationActions: NavigationActions, provider: Provider) {
                     modifier =
                         Modifier.size(110.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFFFFD1DC), shape = CircleShape),
+                            .background(colorScheme.surfaceVariant, shape = CircleShape),
                     contentScale = ContentScale.Crop)
               }
 
@@ -117,7 +118,7 @@ fun ProfileHeader(navigationActions: NavigationActions, provider: Provider) {
           Text(
               text = provider.name,
               modifier = Modifier.testTag("professionalName"),
-              color = Color.Black,
+              color = colorScheme.onBackground,
               fontSize = 24.sp,
               fontWeight = FontWeight.Bold,
               textAlign = TextAlign.Center)
@@ -127,8 +128,8 @@ fun ProfileHeader(navigationActions: NavigationActions, provider: Provider) {
         modifier = Modifier.padding(vertical = 20.dp).padding(8.dp).weight(1f),
         verticalArrangement = Arrangement.spacedBy(10.dp),
         horizontalAlignment = Alignment.Start) {
-          val titleColor = Color(0, 0, 1)
-          val bodyColor = Color(239, 70, 55)
+          val titleColor = colorScheme.onBackground
+          val bodyColor = colorScheme.error
 
           @Composable
           fun TitleText(text: String, fontSize: TextUnit = 21.sp, testTag: String = "") {
@@ -186,7 +187,7 @@ fun ProfileHeader(navigationActions: NavigationActions, provider: Provider) {
                   Box(
                       modifier =
                           Modifier.size(32.dp, 16.dp)
-                              .background(Color(0xFF4A4A4A), shape = CircleShape)
+                              .background(colorScheme.onSurface, shape = CircleShape)
                               .clickable { isOpen = !isOpen },
                       contentAlignment =
                           if (isOpen) Alignment.CenterEnd else Alignment.CenterStart) {
@@ -194,7 +195,7 @@ fun ProfileHeader(navigationActions: NavigationActions, provider: Provider) {
                             modifier =
                                 Modifier.size(12.dp)
                                     .background(
-                                        if (isOpen) Color.Green else Color(239, 70, 55),
+                                        if (isOpen) colorScheme.secondary else colorScheme.error,
                                         shape = CircleShape))
                       }
 
@@ -202,7 +203,7 @@ fun ProfileHeader(navigationActions: NavigationActions, provider: Provider) {
 
                   Text(
                       text = if (isOpen) "open" else "close",
-                      color = if (isOpen) Color.Green else Color(239, 70, 55),
+                      color = if (isOpen) colorScheme.secondary else colorScheme.error,
                       fontSize = 14.sp,
                       fontWeight = FontWeight.Bold)
                 }
@@ -214,7 +215,7 @@ fun ProfileHeader(navigationActions: NavigationActions, provider: Provider) {
 @Composable
 fun JobsDoneSection() {
   // TODO : Change the hardcoded value to jobs done by the provider
-  Column(modifier = Modifier.fillMaxWidth().background(Color.White).padding(16.dp)) {
+  Column(modifier = Modifier.fillMaxWidth().background(colorScheme.background).padding(16.dp)) {
     Text(
         "Jobs done",
         fontWeight = FontWeight.Bold,
@@ -236,7 +237,7 @@ fun JobItem(title: String) {
       modifier =
           Modifier.size(80.dp)
               .shadow(4.dp, shape = RoundedCornerShape(12.dp))
-              .background(Color.White, shape = RoundedCornerShape(12.dp))
+              .background(colorScheme.background, shape = RoundedCornerShape(12.dp))
               .padding(8.dp)
               .testTag("jobItem"),
       contentAlignment = Alignment.Center) {
@@ -245,7 +246,7 @@ fun JobItem(title: String) {
             fontSize = 14.sp,
             textAlign = TextAlign.Center,
             maxLines = 2,
-            color = Color(239, 70, 55))
+            color = colorScheme.error)
       }
 }
 
@@ -255,7 +256,7 @@ fun StatsSection(provider: Provider) {
       modifier =
           Modifier.fillMaxWidth()
               .height(400.dp)
-              .background(Color(0, 121, 107))
+              .background(colorScheme.secondaryContainer)
               .padding(16.dp)
               .testTag("statsSection"),
       horizontalAlignment = Alignment.Start) {
@@ -264,15 +265,15 @@ fun StatsSection(provider: Provider) {
             Text(
                 provider.rating.toString(),
                 fontSize = 40.sp,
-                color = Color.White,
+                color = colorScheme.onPrimary,
                 fontWeight = FontWeight.Bold)
-            Text("Average Rating", fontSize = 10.sp, color = Color.White)
+            Text("Average Rating", fontSize = 10.sp, color = colorScheme.onPrimary)
           }
           Column(horizontalAlignment = Alignment.End) {
             // TODO : Change the hardcoded value to the actual number of jobs completed by the
             // provider
-            Text("37", fontSize = 40.sp, color = Color.White, fontWeight = FontWeight.Bold)
-            Text("Jobs Completed", fontSize = 10.sp, color = Color.White)
+            Text("37", fontSize = 40.sp, color = colorScheme.onPrimary, fontWeight = FontWeight.Bold)
+            Text("Jobs Completed", fontSize = 10.sp, color = colorScheme.onPrimary)
           }
         }
         VerticalSpacer(30.dp)
@@ -281,25 +282,25 @@ fun StatsSection(provider: Provider) {
             Text(
                 provider.price.toString(),
                 fontSize = 20.sp,
-                color = Color.White,
+                color = colorScheme.onPrimary,
                 fontWeight = FontWeight.Bold)
-            Text("pay range", fontSize = 10.sp, color = Color.White)
+            Text("pay range", fontSize = 10.sp, color = colorScheme.onPrimary)
           }
           Column(horizontalAlignment = Alignment.End) {
             Text(
                 provider.deliveryTime.seconds.div(3600).toString() + " hours",
                 fontSize = 20.sp,
-                color = Color.White,
+                color = colorScheme.onPrimary,
                 fontWeight = FontWeight.Bold)
-            Text("delivery Time", fontSize = 10.sp, color = Color.White)
+            Text("delivery Time", fontSize = 10.sp, color = colorScheme.onPrimary)
           }
         }
         VerticalSpacer(30.dp)
         Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
           Column(horizontalAlignment = Alignment.Start) {
             // TODO : Change the hardcoded value to the actual availability of the provider
-            Text("Excellent", fontSize = 15.sp, color = Color.White, fontWeight = FontWeight.Bold)
-            Text("Availability", fontSize = 10.sp, color = Color.White)
+            Text("Excellent", fontSize = 15.sp, color = colorScheme.onPrimary, fontWeight = FontWeight.Bold)
+            Text("Availability", fontSize = 10.sp, color = colorScheme.onPrimary)
           }
           Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
@@ -307,7 +308,7 @@ fun StatsSection(provider: Provider) {
                   if (it.isLowerCase()) it.uppercase() else it.toString()
                 },
                 fontSize = 15.sp,
-                color = Color.White,
+                color = colorScheme.onPrimary,
                 fontWeight = FontWeight.Bold)
             Text("Popular", fontSize = 10.sp, color = Color.White)
           }
@@ -315,9 +316,9 @@ fun StatsSection(provider: Provider) {
             Text(
                 if (provider.languages.isEmpty()) "Not provided" else provider.languages.toString(),
                 fontSize = 15.sp,
-                color = Color.White,
+                color = colorScheme.onPrimary,
                 fontWeight = FontWeight.Bold)
-            Text("Languages", fontSize = 10.sp, color = Color.White)
+            Text("Languages", fontSize = 10.sp, color = colorScheme.onPrimary)
           }
         }
       }

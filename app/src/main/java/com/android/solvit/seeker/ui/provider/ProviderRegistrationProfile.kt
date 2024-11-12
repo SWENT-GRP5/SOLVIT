@@ -196,7 +196,7 @@ fun ProviderRegistrationScreen(
                 locationSuggestions = locationSuggestions.filterNotNull(),
                 onLocationSelected = { selectedLocation = it },
                 requestLocation = null,
-                backgroundColor = Color.White)
+                backgroundColor = colorScheme.background)
             // Location Input
             ExposedDropdownMenuBox(
                 expanded = showDropdown && locationSuggestions.isNotEmpty(),

@@ -22,6 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.android.solvit.R
+import com.android.solvit.shared.ui.theme.Yellow
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.rememberCameraPositionState
@@ -43,7 +44,7 @@ fun ServiceBookingScreen() {
               Box(
                   modifier = Modifier.fillMaxWidth(),
               ) {
-                Text("Your booking", color = Color.Black, fontWeight = FontWeight.Bold)
+                Text("Your booking", color = colorScheme.onBackground, fontWeight = FontWeight.Bold)
               }
             },
             navigationIcon = {
@@ -51,7 +52,7 @@ fun ServiceBookingScreen() {
               IconButton(
                   onClick = { /* Handle back navigation */},
                   modifier = Modifier.testTag("goBackButton")) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.Black)
+                    Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = colorScheme.onBackground)
                   }
             },
             actions = {
@@ -80,7 +81,7 @@ fun ServiceBookingScreen() {
                   text =
                       "I've been having an issue with the kitchen sink. It's draining very slowly, and every time I run the water, it starts to back up. I tried using a plunger, but it didn’t make a difference. The drain is making gurgling sounds, and it smells unpleasant, which suggests a blockage somewhere in the pipes. The issue seems to be getting worse, and I’m worried it might lead to more serious plumbing problems if not addressed soon.",
                   fontSize = 16.sp,
-                  color = Color.Gray, // Gray color for better readability
+                  color = colorScheme.onSurfaceVariant, // Gray color for better readability
                   modifier = Modifier.padding(bottom = 16.dp).testTag("problem_description"))
 
               // A row containing two parallel sections: Profile/Rating and Price/Appointment
@@ -145,7 +146,7 @@ fun ServiceBookingScreen() {
                                             Icon(
                                                 imageVector = Icons.Default.Star,
                                                 contentDescription = "Rating",
-                                                tint = Color.Yellow, // Yellow star color
+                                                tint = Yellow, // Yellow star color
                                                 modifier =
                                                     Modifier.size(24.dp)
                                                         .testTag("rating_star_icon"))
@@ -155,7 +156,7 @@ fun ServiceBookingScreen() {
                                                 text = "4.7", // Example rating value
                                                 fontSize = 16.sp,
                                                 fontWeight = FontWeight.Bold,
-                                                color = Color.White, // White text for good contrast
+                                                color = colorScheme.onSurfaceVariant, // White text for good contrast
                                                 modifier = Modifier.testTag("rating_value"))
                                           }
                                     }
@@ -170,7 +171,7 @@ fun ServiceBookingScreen() {
                             Modifier.weight(1f) // Takes up half of the available width
                                 .fillMaxHeight() // Match the height of the left box
                                 .background(
-                                    Color(0xFF2196F3),
+                                    colorScheme.primary,
                                     RoundedCornerShape(
                                         8.dp)) // Blue background with rounded corners
                                 .padding(16.dp) // Padding inside the box
@@ -187,7 +188,7 @@ fun ServiceBookingScreen() {
                                 Text(
                                     text = "Price agreed on:",
                                     fontWeight = FontWeight.Medium,
-                                    color = Color.Black)
+                                    color = colorScheme.secondaryContainer)
                                 Spacer(
                                     modifier =
                                         Modifier.height(8.dp)) // Space between the text and price
@@ -195,7 +196,7 @@ fun ServiceBookingScreen() {
                                     text = "$156.57", // Example price
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 20.sp,
-                                    color = Color.White // White text for contrast
+                                    color = colorScheme.onPrimary // White text for contrast
                                     )
 
                                 Spacer(
@@ -207,7 +208,7 @@ fun ServiceBookingScreen() {
                                 Text(
                                     text = "Your appointment:",
                                     fontWeight = FontWeight.Medium,
-                                    color = Color.Black)
+                                    color = colorScheme.secondaryContainer)
                                 Spacer(
                                     modifier =
                                         Modifier.height(8.dp)) // Space between the text and date
@@ -215,12 +216,12 @@ fun ServiceBookingScreen() {
                                     text = "24/05/2025", // Example date
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 20.sp,
-                                    color = Color.White)
+                                    color = colorScheme.onPrimary)
                                 Text(
                                     text = "14:30", // Example time
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 20.sp,
-                                    color = Color.White)
+                                    color = colorScheme.onPrimary)
                               }
                         }
                   }
@@ -246,7 +247,7 @@ fun ServiceBookingScreen() {
                       Modifier.fillMaxWidth() // Fill the available width
                           .height(200.dp) // Fixed height for the map
                           .background(
-                              Color.Gray,
+                              colorScheme.surface,
                               RoundedCornerShape(8.dp)) // Gray background with rounded corners
                           .testTag("google_map_container") // Test tag for UI testing
                   ) {

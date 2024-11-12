@@ -12,6 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -78,7 +79,7 @@ fun ProviderTopBar(onBackClick: () -> Unit) {
   Row(
       modifier =
           Modifier.fillMaxWidth()
-              .background(color = MaterialTheme.colorScheme.background)
+              .background(color = colorScheme.background)
               .testTag("ProviderTopBar"),
       verticalAlignment = Alignment.CenterVertically) {
         // Back button on the left
@@ -86,7 +87,7 @@ fun ProviderTopBar(onBackClick: () -> Unit) {
           Icon(
               Icons.AutoMirrored.Filled.ArrowBack,
               contentDescription = "Back",
-              tint = MaterialTheme.colorScheme.onBackground)
+              tint = colorScheme.onBackground)
         }
 
         // Title in the center
@@ -96,7 +97,7 @@ fun ProviderTopBar(onBackClick: () -> Unit) {
             fontWeight = FontWeight.Bold,
             modifier = Modifier.weight(1f).testTag("topBarTitle"),
             textAlign = TextAlign.Start,
-            color = MaterialTheme.colorScheme.onBackground)
+            color = colorScheme.onBackground)
 
         // Menu icon on the right
         IconButton(
@@ -106,7 +107,7 @@ fun ProviderTopBar(onBackClick: () -> Unit) {
                   painter = painterResource(id = R.drawable.menu_icon),
                   contentDescription = "Menu",
                   modifier = Modifier.size(24.dp),
-                  tint = MaterialTheme.colorScheme.onBackground)
+                  tint = colorScheme.onBackground)
             }
       }
 }
@@ -116,7 +117,7 @@ fun ProviderHeader(provider: Provider) {
   Box(
       modifier =
           Modifier.fillMaxWidth()
-              .background(MaterialTheme.colorScheme.background)
+              .background(colorScheme.background)
               .testTag("providerHeader")) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(16.dp),
@@ -141,10 +142,10 @@ fun ProviderHeader(provider: Provider) {
                       fontSize = 20.sp,
                       fontWeight = FontWeight.Bold,
                       modifier = Modifier.testTag("providerName"),
-                      color = MaterialTheme.colorScheme.onBackground)
+                      color = colorScheme.onBackground)
                   Text(
                       text = provider.companyName,
-                      color = MaterialTheme.colorScheme.onSurfaceVariant,
+                      color = colorScheme.onSurfaceVariant,
                       modifier = Modifier.testTag("providerCompanyName"))
                 }
               }
@@ -158,7 +159,7 @@ fun ProviderHeader(provider: Provider) {
                     Icon(
                         Icons.Default.Share,
                         contentDescription = "Share",
-                        tint = MaterialTheme.colorScheme.onBackground)
+                        tint = colorScheme.onBackground)
                   }
             }
       }
@@ -169,8 +170,8 @@ fun ProviderTabs(selectedTabIndex: Int, onTabSelected: (Int) -> Unit) {
   TabRow(
       selectedTabIndex = selectedTabIndex,
       modifier = Modifier.fillMaxWidth().testTag("providerTabs"),
-      containerColor = MaterialTheme.colorScheme.primary,
-      contentColor = MaterialTheme.colorScheme.onPrimary) {
+      containerColor = colorScheme.primary,
+      contentColor = colorScheme.onPrimary) {
         Tab(
             selected = selectedTabIndex == 0,
             onClick = { onTabSelected(0) },
@@ -178,7 +179,7 @@ fun ProviderTabs(selectedTabIndex: Int, onTabSelected: (Int) -> Unit) {
               Text(
                   "Profile",
                   modifier = Modifier.padding(16.dp),
-                  color = MaterialTheme.colorScheme.onPrimary)
+                  color = colorScheme.onPrimary)
             }
         Tab(
             selected = selectedTabIndex == 1,
@@ -187,7 +188,7 @@ fun ProviderTabs(selectedTabIndex: Int, onTabSelected: (Int) -> Unit) {
               Text(
                   "Reviews",
                   modifier = Modifier.padding(16.dp),
-                  color = MaterialTheme.colorScheme.onPrimary)
+                  color = colorScheme.onPrimary)
             }
       }
 }
@@ -199,7 +200,7 @@ fun ProviderDetails(provider: Provider, reviews: List<Review>) {
           Modifier.padding(16.dp)
               .fillMaxWidth()
               .background(
-                  color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(16.dp))
+                  color = colorScheme.surface, shape = RoundedCornerShape(16.dp))
               .testTag("providerDetails")) {
         Rubric(modifier = Modifier.testTag("detailsSection")) {
           Row(
@@ -209,11 +210,11 @@ fun ProviderDetails(provider: Provider, reviews: List<Review>) {
                 RatingStars(provider.rating.toInt())
                 Text(
                     text = "${reviews.size} Reviews",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = colorScheme.onSurfaceVariant,
                     modifier = Modifier.testTag("reviewsCount"))
                 Text(
                     text = "15 Jobs", // Replace with actual job count
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = colorScheme.onSurfaceVariant,
                     modifier = Modifier.testTag("jobsCount"))
               }
 
@@ -223,11 +224,11 @@ fun ProviderDetails(provider: Provider, reviews: List<Review>) {
               "Refrigerator repair",
               fontSize = 18.sp,
               fontWeight = FontWeight.Bold,
-              color = MaterialTheme.colorScheme.onBackground)
+              color = colorScheme.onBackground)
           Text(
               text = "CHF ${provider.price}/hour",
               fontSize = 16.sp,
-              color = MaterialTheme.colorScheme.onSurfaceVariant,
+              color = colorScheme.onSurfaceVariant,
               modifier = Modifier.padding(vertical = 4.dp).testTag("priceDisplay"))
         }
 
@@ -238,7 +239,7 @@ fun ProviderDetails(provider: Provider, reviews: List<Review>) {
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.testTag("descriptionTitle"),
-            color = MaterialTheme.colorScheme.onBackground)
+            color = colorScheme.onBackground)
 
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -246,7 +247,7 @@ fun ProviderDetails(provider: Provider, reviews: List<Review>) {
           Text(
               text = provider.description,
               modifier = Modifier.padding(vertical = 4.dp).testTag("descriptionText"),
-              color = MaterialTheme.colorScheme.onSurfaceVariant,
+              color = colorScheme.onSurfaceVariant,
               fontWeight = FontWeight.Medium)
         }
 
@@ -257,7 +258,7 @@ fun ProviderDetails(provider: Provider, reviews: List<Review>) {
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.testTag("contactTitle"),
-            color = MaterialTheme.colorScheme.onBackground)
+            color = colorScheme.onBackground)
 
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -269,12 +270,12 @@ fun ProviderDetails(provider: Provider, reviews: List<Review>) {
                     painter = painterResource(id = R.drawable.message),
                     contentDescription = "Message",
                     modifier = Modifier.size(64.dp).testTag("messageIcon"),
-                    tint = MaterialTheme.colorScheme.onBackground)
+                    tint = colorScheme.onBackground)
                 Text(
                     text =
                         "The contractor's contacts are visible only to its customers. If you are interested in the services of this contractor - offer him an order.",
                     modifier = Modifier.padding(vertical = 4.dp).testTag("contactText"),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = colorScheme.onSurfaceVariant,
                     fontWeight = FontWeight.Medium)
               }
         }
@@ -288,7 +289,7 @@ fun Rubric(modifier: Modifier = Modifier, content: @Composable ColumnScope.() ->
           modifier
               .fillMaxWidth()
               .background(
-                  color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(16.dp))
+                  color = colorScheme.surface, shape = RoundedCornerShape(16.dp))
               .border(width = 2.dp, color = Color.Transparent, shape = RoundedCornerShape(16.dp))
               .padding(16.dp)) {
         content()
@@ -302,12 +303,12 @@ fun ProviderReviews(provider: Provider, reviews: List<Review>) {
           Modifier.padding(16.dp)
               .fillMaxWidth()
               .background(
-                  color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(16.dp))
+                  color = colorScheme.surface, shape = RoundedCornerShape(16.dp))
               .testTag("providerReviews")) {
         Column(
             Modifier.fillMaxWidth()
                 .background(
-                    color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(16.dp))
+                    color = colorScheme.surface, shape = RoundedCornerShape(16.dp))
                 .border(width = 2.dp, color = Color.Transparent, shape = RoundedCornerShape(16.dp))
                 .padding(16.dp)
                 .testTag("reviewsOverview")) {
@@ -315,7 +316,7 @@ fun ProviderReviews(provider: Provider, reviews: List<Review>) {
                   "Overall",
                   fontSize = 18.sp,
                   fontWeight = FontWeight.Bold,
-                  color = MaterialTheme.colorScheme.onSurfaceVariant,
+                  color = colorScheme.onSurfaceVariant,
                   modifier = Modifier.testTag("overallTitle"))
 
               Spacer(modifier = Modifier.height(8.dp))
@@ -328,7 +329,7 @@ fun ProviderReviews(provider: Provider, reviews: List<Review>) {
                         provider.rating.toString(),
                         fontSize = 35.sp,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onBackground)
+                        color = colorScheme.onBackground)
                     RatingStars(provider.rating.toInt())
                   }
 
@@ -337,7 +338,7 @@ fun ProviderReviews(provider: Provider, reviews: List<Review>) {
               Text(
                   "${reviews.size} " + if (reviews.size > 1) "Reviews" else "Review",
                   modifier = Modifier.padding(vertical = 4.dp),
-                  color = MaterialTheme.colorScheme.onSurfaceVariant)
+                  color = colorScheme.onSurfaceVariant)
             }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -347,7 +348,7 @@ fun ProviderReviews(provider: Provider, reviews: List<Review>) {
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.testTag("reviewsTitle"),
-            color = MaterialTheme.colorScheme.onBackground)
+            color = colorScheme.onBackground)
 
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -357,7 +358,7 @@ fun ProviderReviews(provider: Provider, reviews: List<Review>) {
               Text(
                   "No reviews yet",
                   modifier = Modifier.padding(16.dp),
-                  color = MaterialTheme.colorScheme.onSurfaceVariant)
+                  color = colorScheme.onSurfaceVariant)
             }
           }
           items(reviews) { review -> ReviewRow(review) }
@@ -370,7 +371,7 @@ fun ReviewRow(review: Review) {
   Column(
       Modifier.fillMaxWidth()
           .padding(top = 16.dp)
-          .background(color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(16.dp))
+          .background(color = colorScheme.surface, shape = RoundedCornerShape(16.dp))
           .border(width = 2.dp, color = Color.Transparent, shape = RoundedCornerShape(16.dp))
           .padding(4.dp)
           .testTag("reviewRow")) {
@@ -392,7 +393,7 @@ fun ReviewRow(review: Review) {
         Text(
             review.comment,
             modifier = Modifier.padding(vertical = 4.dp).testTag("reviewComment"),
-            color = MaterialTheme.colorScheme.onSurfaceVariant)
+            color = colorScheme.onSurfaceVariant)
       }
 }
 
@@ -407,8 +408,8 @@ fun RatingStars(rating: Int) {
           modifier = Modifier.size(24.dp),
           contentDescription = "Rating Star",
           tint =
-              if (index < rating) MaterialTheme.colorScheme.primary
-              else MaterialTheme.colorScheme.onSurfaceVariant)
+              if (index < rating) colorScheme.primary
+              else colorScheme.onSurfaceVariant)
     }
   }
 }
@@ -423,15 +424,15 @@ fun BottomBar() {
             modifier =
                 Modifier.padding(16.dp)
                     .clip(RoundedCornerShape(16.dp))
-                    .background(MaterialTheme.colorScheme.primary)
+                    .background(colorScheme.primary)
                     .size(200.dp, 50.dp)
                     .testTag("bookNowButton"),
             colors =
-                ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
             onClick = { Toast.makeText(context, "Not implemented", Toast.LENGTH_SHORT).show() }) {
               Text(
                   "Book Now",
-                  color = MaterialTheme.colorScheme.onPrimary,
+                  color = colorScheme.onPrimary,
                   fontSize = 24.sp,
                   fontWeight = FontWeight.Bold)
             }

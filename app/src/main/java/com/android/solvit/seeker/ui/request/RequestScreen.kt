@@ -24,6 +24,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -151,10 +152,10 @@ fun RequestScreen(
                           selectedLocation != null,
                   colors =
                       ButtonDefaults.buttonColors(
-                          containerColor = Color(0xFFCA97FC),
-                          disabledContainerColor = Color(0xFFDECBFC),
-                          contentColor = Color.Black,
-                          disabledContentColor = Color.Gray)) {
+                          containerColor = colorScheme.primary,
+                          disabledContainerColor = colorScheme.primaryContainer,
+                          contentColor = colorScheme.onPrimary,
+                          disabledContentColor = colorScheme.onPrimaryContainer)) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.Center,

@@ -36,6 +36,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -130,8 +131,8 @@ fun ServiceTypeDropdown(
         modifier =
             Modifier.fillMaxWidth()
                 .heightIn(max = 200.dp)
-                .background(MaterialTheme.colorScheme.surface)
-                .border(1.dp, MaterialTheme.colorScheme.onSurface, shape = RoundedCornerShape(8.dp))
+                .background(colorScheme.surface)
+                .border(1.dp, colorScheme.onSurface, shape = RoundedCornerShape(8.dp))
                 .padding(start = 8.dp, end = 8.dp)
                 .testTag("serviceTypeMenu")) {
           filteredServiceTypes.forEach { serviceType ->
@@ -179,7 +180,7 @@ fun LocationDropdown(
     locationSuggestions: List<Location>,
     onLocationSelected: (Location) -> Unit,
     requestLocation: Location?,
-    backgroundColor: Color = MaterialTheme.colorScheme.surface,
+    backgroundColor: Color = colorScheme.surface,
     debounceDelay: Long = 1001L // we need more than 1 second debounce delay
 ) {
   val coroutineScope = rememberCoroutineScope()
@@ -220,7 +221,7 @@ fun LocationDropdown(
             Modifier.fillMaxWidth()
                 .heightIn(max = 200.dp)
                 .background(backgroundColor)
-                .border(1.dp, MaterialTheme.colorScheme.onSurface, shape = RoundedCornerShape(8.dp))
+                .border(1.dp, colorScheme.onSurface, shape = RoundedCornerShape(8.dp))
                 .padding(start = 8.dp, end = 8.dp)) {
           locationSuggestions.forEach { location ->
             DropdownMenuItem(
@@ -325,7 +326,7 @@ fun ImagePicker(
       modifier =
           Modifier.fillMaxWidth()
               .height(150.dp)
-              .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
+              .border(1.dp, colorScheme.onSurfaceVariant, shape = RoundedCornerShape(12.dp))
               .clip(RoundedCornerShape(12.dp))
               .background(Color.Transparent)
               .clickable { imagePickerLauncher.launch("image/*") }
@@ -338,11 +339,11 @@ fun ImagePicker(
                 Icon(
                     imageVector = Icons.Default.PlayArrow,
                     contentDescription = null,
-                    tint = Color.Gray, // Icon in grey
+                    tint = colorScheme.onSurfaceVariant, // Icon in grey
                     modifier = Modifier.size(24.dp))
                 Spacer(modifier = Modifier.width(8.dp)) // Space between icon and text
                 Text(
-                    "Upload Image", color = Color.Gray // Text in grey
+                    "Upload Image", color = colorScheme.onSurfaceVariant // Text in grey
                     )
               }
         } else {
@@ -381,9 +382,9 @@ fun DeleteButton(
               Icon(
                   imageVector = Icons.Default.Delete,
                   contentDescription = "Delete",
-                  tint = Color.Red,
+                  tint = colorScheme.error,
                   modifier = Modifier.padding(end = 8.dp))
-              Text("Delete", color = Color.Red)
+              Text("Delete", color = colorScheme.error)
             }
       }
 }

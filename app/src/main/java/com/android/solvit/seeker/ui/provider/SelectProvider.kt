@@ -183,8 +183,8 @@ fun SpFilterBar(display: () -> Unit, listProviderViewModel: ListProviderViewMode
             Box(
                 modifier =
                     Modifier.padding(8.dp)
-                        .border(1.dp, Color(0xFFAFAFAF), shape = RoundedCornerShape(50))
-                        .background(Color(0xFFFFFFFF), shape = RoundedCornerShape(50))
+                        .border(1.dp, colorScheme.onSurfaceVariant, shape = RoundedCornerShape(50))
+                        .background(colorScheme.background, shape = RoundedCornerShape(50))
                         .padding(12.dp, 6.dp)
                         .clickable {
                           Toast.makeText(context, "Not Yet Implemented", Toast.LENGTH_LONG).show()
@@ -576,7 +576,7 @@ fun RatingFilterField(list: List<String>, listProviderViewModel: ListProviderVie
                       contentDescription = "image description",
                       contentScale = ContentScale.Crop)
 
-                  Text(text = list[idx], color = Color.Black, fontSize = 14.sp)
+                  Text(text = list[idx], color = colorScheme.onBackground, fontSize = 14.sp)
                 }
           }
     }
@@ -809,7 +809,7 @@ fun FilterByLocation(
                     ))
           }
       // Add the line separator
-      HorizontalDivider(color = Color.LightGray)
+      HorizontalDivider(color = colorScheme.onSurfaceVariant)
 
       Spacer(Modifier.height(6.dp))
       Text(
@@ -891,7 +891,7 @@ fun SelectProviderScreen(
           ModalBottomSheet(
               onDismissRequest = { displayFilters = false },
               sheetState = sheetStateFilter,
-              containerColor = Color.White) {
+              containerColor = colorScheme.surface) {
                 FilterComposable(listProviderViewModel) { displayFilters = false }
               }
         }
@@ -900,7 +900,7 @@ fun SelectProviderScreen(
           ModalBottomSheet(
               onDismissRequest = { displayByLocation = false },
               sheetState = sheetStateLocation,
-              containerColor = Color.White) {
+              containerColor = colorScheme.surface) {
                 FilterByLocation(
                     userId,
                     seekerProfileViewModel,

@@ -200,7 +200,7 @@ fun ShortcutsSection(navigationActions: NavigationActions) {
                   horizontalArrangement = Arrangement.SpaceBetween) {
                     Text(
                         "Service\nProviders",
-                        color = Color.White,
+                        color = colorScheme.onPrimary,
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold)
                     Image(
@@ -228,7 +228,7 @@ fun ShortcutsSection(navigationActions: NavigationActions) {
                               Modifier.size(32.dp).clip(CircleShape).align(Alignment.End))
                           Text(
                               "All Orders",
-                              color = Color.White,
+                              color = colorScheme.onPrimary,
                               fontSize = 20.sp,
                               fontWeight = FontWeight.Bold)
                         }
@@ -249,7 +249,7 @@ fun ShortcutsSection(navigationActions: NavigationActions) {
                               Modifier.size(32.dp).clip(CircleShape).align(Alignment.End))
                           Text(
                               "Providers Map",
-                              color = Color.White,
+                              color = colorScheme.onPrimary,
                               fontSize = 20.sp,
                               fontWeight = FontWeight.Bold)
                         }

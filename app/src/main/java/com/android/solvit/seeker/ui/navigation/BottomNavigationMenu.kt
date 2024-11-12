@@ -53,7 +53,7 @@ fun BottomNavigationMenu(
   }
 
   // Get the background color from the theme
-  val backgroundColor = MaterialTheme.colorScheme.background
+  val backgroundColor = colorScheme.background
 
   BoxWithConstraints(
       modifier =
@@ -101,16 +101,16 @@ fun BottomNavigationMenu(
                           tab.icon,
                           contentDescription = null,
                           tint =
-                              if (tab.route == selectedItem) MaterialTheme.colorScheme.onBackground
-                              else MaterialTheme.colorScheme.onSurfaceVariant)
+                              if (tab.route == selectedItem) colorScheme.onBackground
+                              else colorScheme.onSurfaceVariant)
                     },
                     selected = tab.route == selectedItem,
                     onClick = { onTabSelect(tab) },
                     colors =
                         NavigationBarItemDefaults.colors(
-                            selectedIconColor = MaterialTheme.colorScheme.primary,
-                            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                            indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)),
+                            selectedIconColor = colorScheme.primary,
+                            unselectedIconColor = colorScheme.onSurfaceVariant,
+                            indicatorColor = colorScheme.primary.copy(alpha = 0.2f)),
                     modifier = Modifier.testTag(tab.textId))
               }
             }
@@ -135,7 +135,7 @@ fun BottomNavigationMenu(
                   else Icons.Outlined.CheckCircle,
                   contentDescription =
                       if (tabList == LIST_TOP_LEVEL_DESTINATION_CUSTOMER) "Add" else "Myjobs",
-                  tint = Color.White,
+                  tint = colorScheme.onPrimary,
                   modifier = Modifier.size(30.dp))
             }
       }
