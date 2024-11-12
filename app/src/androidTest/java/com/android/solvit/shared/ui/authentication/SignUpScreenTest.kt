@@ -17,6 +17,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.verify
+import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -32,10 +33,18 @@ class SignUpScreenTest {
 
   private val mockNavigationActions = mock(NavigationActions::class.java)
 
+  @Before
+  fun setup() {
+    // Set up the compose content before each test
+    composeTestRule.setContent {
+      SignUpScreen(
+        mockNavigationActions
+      )
+    }
+  }
+
   @Test
   fun signUpScreen_testAllTheTest() {
-    composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
-
     composeTestRule.onNodeWithTag("backButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("signUpIllustration").assertIsDisplayed()
     composeTestRule.onNodeWithTag("signUpTitle").assertIsDisplayed()
@@ -49,8 +58,6 @@ class SignUpScreenTest {
 
   @Test
   fun signUpScreen_testAllPerformClick() {
-    composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
-
     composeTestRule.onNodeWithTag("backButton").performClick()
     composeTestRule.onNodeWithTag("passwordInput").performClick()
     composeTestRule.onNodeWithTag("confirmPasswordInput").performClick()
@@ -61,15 +68,12 @@ class SignUpScreenTest {
 
   @Test
   fun signUpScreen_emailInput() {
-    composeTestRule.setContent { SignInScreen(mockNavigationActions) }
-
     // Test email input
-    composeTestRule.onNodeWithTag("emailInput").performTextInput("test@example.com")
+    runBlocking { composeTestRule.onNodeWithTag("emailInputField").performTextInput(" test@example.com") }
   }
 
   @Test
   fun googleSignInReturnsValidActivityResult() {
-    composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
     composeTestRule.onNodeWithTag("googleSignUpButton").performClick()
     // assert that an Intent resolving to Google Mobile Services has been sent (for sign-in)
     Intents.intended(IntentMatchers.toPackage("com.google.android.gms"))
@@ -77,18 +81,18 @@ class SignUpScreenTest {
 
   @Test
   fun formCompleteEnablesButton() {
-    composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
-    composeTestRule.waitForIdle()
-    composeTestRule.onNodeWithTag("emailInputField").performTextInput("test@test.com")
-    composeTestRule.onNodeWithTag("passwordInput").performTextInput("password")
-    composeTestRule.onNodeWithTag("confirmPasswordInput").performTextInput("password")
+    runBlocking {
+      // Fill in form fields
+      composeTestRule.onNodeWithTag("emailInputField").performTextInput("test@test.com")
+      composeTestRule.onNodeWithTag("passwordInput").performTextInput("password")
+      composeTestRule.onNodeWithTag("confirmPasswordInput").performTextInput("password")
 
-    composeTestRule.onNodeWithTag("signUpButton").assertIsEnabled()
+      composeTestRule.onNodeWithTag("signUpButton").assertIsEnabled()
+    }
   }
 
   @Test
   fun signUpButtonNavigatesToChooseRoleScreen() {
-    composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
     composeTestRule.onNodeWithTag("emailInputField").performTextInput("test@test.com")
     composeTestRule.onNodeWithTag("passwordInput").performTextInput("password")
     composeTestRule.onNodeWithTag("confirmPasswordInput").performTextInput("password")
