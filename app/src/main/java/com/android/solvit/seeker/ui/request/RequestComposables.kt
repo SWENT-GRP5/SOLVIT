@@ -59,6 +59,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.PopupProperties
 import coil.compose.AsyncImage
 import com.android.solvit.shared.model.map.Location
@@ -183,14 +184,19 @@ fun LocationDropdown(
     onLocationSelected: (Location) -> Unit,
     requestLocation: Location?,
     backgroundColor: Color = MaterialTheme.colorScheme.surface,
-    debounceDelay: Long = 1001L, // we need more than 1 second debounce delay,
-    isValueOk: Boolean = false
+    debounceDelay: Long = 1001L, // debounce delay longer than 1 second,
+    isValueOk: Boolean = false,
+    errorMessage: String = "Invalid location" // Default error message
 ) {
   val coroutineScope = rememberCoroutineScope()
   var debounceJob by remember { mutableStateOf<Job?>(null) }
 
   // Local state to update the text field instantly without triggering the API call
   var localQuery by remember { mutableStateOf(locationQuery) }
+
+  // State to manage whether the field has been "visited" (focused then unfocused)
+  var hasBeenFocused by remember { mutableStateOf(false) }
+  var hasLostFocusAfterTyping by remember { mutableStateOf(false) }
 
   Box(modifier = Modifier.fillMaxWidth()) {
     OutlinedTextField(
@@ -209,17 +215,29 @@ fun LocationDropdown(
                 onLocationQueryChange(query) // Call API after debounce
                 onShowDropdownLocationChange(true)
               }
+
+          // Reset focus-loss tracking when user starts typing
+          if (query.isNotEmpty()) {
+            hasLostFocusAfterTyping = false
+          }
         },
         label = { Text("Address") },
         placeholder = { requestLocation?.name?.let { Text(it) } ?: Text("Enter your address") },
         shape = RoundedCornerShape(12.dp),
-        modifier = Modifier.fillMaxWidth().testTag("inputRequestAddress"),
+        modifier =
+            Modifier.fillMaxWidth().testTag("inputRequestAddress").onFocusChanged { focusState ->
+              // Mark field as "visited" once it loses focus after user types
+              if (!focusState.isFocused && localQuery.isNotBlank()) {
+                hasBeenFocused = true
+                hasLostFocusAfterTyping = true
+              }
+            },
         singleLine = true,
         leadingIcon = {
           Icon(
               Icons.Default.Home,
               contentDescription = "Location Icon",
-              tint = if (isValueOk) Color(90, 197, 97) else Color.Gray)
+              tint = if (isValueOk) Color(0xFF5AC561) else Color.Gray)
         },
         colors =
             TextFieldDefaults.outlinedTextFieldColors(
@@ -236,6 +254,7 @@ fun LocationDropdown(
                     },
             ))
 
+    // Dropdown menu for location suggestions
     DropdownMenu(
         expanded = showDropdownLocation && locationSuggestions.isNotEmpty(),
         onDismissRequest = { onShowDropdownLocationChange(false) },
@@ -263,6 +282,16 @@ fun LocationDropdown(
             HorizontalDivider()
           }
         }
+
+    // Display the error message if the field has been visited, input is incorrect, and focus was
+    // lost after typing
+    if (!isValueOk && hasBeenFocused && hasLostFocusAfterTyping) {
+      Text(
+          text = errorMessage,
+          color = Color.Red,
+          fontSize = 15.sp, // Error text size
+          modifier = Modifier.padding(start = 16.dp, top = 65.dp))
+    }
   }
 }
 

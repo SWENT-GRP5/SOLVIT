@@ -177,7 +177,7 @@ fun ProviderRegistrationScreen(
                     value = companyName,
                     onValueChange = { companyName = it },
                     label = "Business/Company Name",
-                    placeholder = "Enter your business name (optional for independent providers",
+                    placeholder = "Enter your business name (optional for independent providers)",
                     isValueOk = isFullNameOk,
                     leadingIcon = Icons.Default.Build,
                     leadingIconDescription = "Company Icon",

@@ -50,6 +50,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -227,54 +228,84 @@ fun PasswordTextField(
     placeholder: String,
     contentDescription: String = "",
     testTag: String,
-    passwordLengthComplete: Boolean
+    passwordLengthComplete: Boolean,
+    errorMessage: String = "Password is too short"
 ) {
   var passwordVisible by remember { mutableStateOf(false) }
-  OutlinedTextField(
-      value = value,
-      onValueChange = onValueChange,
-      label = { Text(label, color = Color.Black) },
-      singleLine = true,
-      placeholder = { Text(placeholder) },
-      modifier = Modifier.fillMaxWidth().testTag(testTag),
-      enabled = true,
-      shape = RoundedCornerShape(12.dp),
-      visualTransformation =
-          if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-      leadingIcon = {
-        Icon(
-            imageVector = Icons.Filled.Lock,
-            contentDescription = contentDescription,
-            tint = if (passwordLengthComplete) Color(90, 197, 97) else Color.Gray,
-            modifier = Modifier.size(25.dp))
-      },
-      trailingIcon = {
-        val image =
-            if (passwordVisible) painterResource(id = android.R.drawable.ic_menu_view)
-            else painterResource(id = android.R.drawable.ic_secure)
 
-        IconButton(onClick = { passwordVisible = !passwordVisible }) {
+  // State to track if the field has been focused and then unfocused
+  var hasBeenFocused by remember { mutableStateOf(false) }
+  var hasLostFocusAfterTyping by remember { mutableStateOf(false) }
+
+  Column(modifier = Modifier.fillMaxWidth()) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = {
+          onValueChange(it)
+          // Reset focus-loss tracking when the user starts typing
+          if (it.isNotEmpty()) {
+            hasLostFocusAfterTyping = false
+          }
+        },
+        label = { Text(label, color = Color.Black) },
+        singleLine = true,
+        placeholder = { Text(placeholder) },
+        modifier =
+            Modifier.fillMaxWidth().testTag(testTag).onFocusChanged { focusState ->
+              // Mark the field as "visited" if it loses focus after an entry
+              if (!focusState.isFocused && value.isNotBlank()) {
+                hasBeenFocused = true
+                hasLostFocusAfterTyping = true
+              }
+            },
+        enabled = true,
+        shape = RoundedCornerShape(12.dp),
+        visualTransformation =
+            if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+        leadingIcon = {
           Icon(
-              painter = image,
-              contentDescription = null,
-              tint = if (passwordLengthComplete) Color(90, 197, 97) else Color.Gray,
-              modifier = Modifier.size(24.dp))
-        }
-      },
-      colors =
-          TextFieldDefaults.outlinedTextFieldColors(
-              focusedTextColor = Color.Black,
-              unfocusedTextColor =
-                  if (value.isEmpty()) Color.Gray
-                  else if (!passwordLengthComplete) Color.Red else Color.Black,
-              focusedBorderColor = if (passwordLengthComplete) Color(0xFF5AC561) else Color.Blue,
-              unfocusedBorderColor =
-                  when {
-                    value.isEmpty() -> Color.Gray
-                    passwordLengthComplete -> Color(0xFF5AC561)
-                    else -> Color.Red
-                  },
-          ))
+              imageVector = Icons.Filled.Lock,
+              contentDescription = contentDescription,
+              tint = if (passwordLengthComplete) Color(0xFF5AC561) else Color.Gray,
+              modifier = Modifier.size(25.dp))
+        },
+        trailingIcon = {
+          val image =
+              if (passwordVisible) painterResource(id = android.R.drawable.ic_menu_view)
+              else painterResource(id = android.R.drawable.ic_secure)
+
+          IconButton(onClick = { passwordVisible = !passwordVisible }) {
+            Icon(
+                painter = image,
+                contentDescription = null,
+                tint = if (passwordLengthComplete) Color(0xFF5AC561) else Color.Gray,
+                modifier = Modifier.size(24.dp))
+          }
+        },
+        colors =
+            TextFieldDefaults.outlinedTextFieldColors(
+                focusedTextColor = Color.Black,
+                unfocusedTextColor =
+                    if (value.isEmpty()) Color.Gray
+                    else if (!passwordLengthComplete) Color.Red else Color.Black,
+                focusedBorderColor = if (passwordLengthComplete) Color(0xFF5AC561) else Color.Blue,
+                unfocusedBorderColor =
+                    when {
+                      value.isEmpty() -> Color.Gray
+                      passwordLengthComplete -> Color(0xFF5AC561)
+                      else -> Color.Red
+                    }))
+
+    // Display the error message if the field has been visited, input is incorrect, and focus was
+    // lost after typing
+    if (!passwordLengthComplete && hasBeenFocused && hasLostFocusAfterTyping) {
+      Text(
+          text = errorMessage,
+          color = Color.Red,
+          fontSize = 15.sp, // Error text size
+          modifier = Modifier.padding(start = 16.dp, top = 4.dp))
+    }
+  }
 }
 
 @Composable

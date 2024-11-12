@@ -53,7 +53,7 @@ fun OpeningScreenPortrait(navigationActions: NavigationActions) {
       modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
       color = MaterialTheme.colorScheme.background) {
         Column(
-            modifier = Modifier.fillMaxSize().background(Color(0xFFFFFFFF)),
+            modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally) {
               Image(
@@ -103,7 +103,7 @@ fun OpeningScreenLandscape(navigationActions: NavigationActions) {
       modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
       color = MaterialTheme.colorScheme.background) {
         Row(
-            modifier = Modifier.fillMaxSize().background(Color(0xFFFFFFFF)).padding(16.dp),
+            modifier = Modifier.fillMaxSize().padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceEvenly) {
               // Logo Image

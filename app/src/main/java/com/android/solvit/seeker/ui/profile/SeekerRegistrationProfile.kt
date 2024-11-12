@@ -46,6 +46,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -53,6 +54,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.solvit.R
 import com.android.solvit.seeker.model.profile.SeekerProfile
@@ -324,37 +326,68 @@ fun CustomOutlinedTextField(
     label: String,
     placeholder: String,
     isValueOk: Boolean,
+    modifier: Modifier = Modifier,
+    errorMessage: String = "Invalid input",
     leadingIcon: ImageVector,
     leadingIconDescription: String = "",
-    @SuppressLint("ModifierParameter") modifier: Modifier = Modifier,
     testTag: String
 ) {
-  OutlinedTextField(
-      value = value,
-      onValueChange = onValueChange,
-      label = { Text(label, color = Color.Black) },
-      singleLine = true,
-      placeholder = { Text(placeholder) },
-      leadingIcon = {
-        Icon(
-            leadingIcon,
-            contentDescription = leadingIconDescription,
-            tint = if (isValueOk) Color(90, 197, 97) else Color.Gray)
-      },
-      modifier = modifier.fillMaxWidth().testTag(testTag),
-      shape = RoundedCornerShape(12.dp),
-      colors =
-          TextFieldDefaults.outlinedTextFieldColors(
-              focusedTextColor = Color.Black,
-              unfocusedTextColor =
-                  if (value.isEmpty()) Color.Gray else if (!isValueOk) Color.Red else Color.Black,
-              focusedBorderColor = if (isValueOk) Color(0xFF5AC561) else Color.Blue,
-              unfocusedBorderColor =
-                  when {
-                    value.isEmpty() -> Color.Gray
-                    isValueOk -> Color(0xFF5AC561)
-                    else -> Color.Red
-                  }))
+  // State to track if the field has been "visited" (focused and then unfocused)
+  var hasBeenFocused by remember { mutableStateOf(false) }
+  var hasLostFocusAfterTyping by remember { mutableStateOf(false) }
+
+  Column(modifier = modifier.fillMaxWidth()) {
+    // Text field with focus management
+    OutlinedTextField(
+        value = value,
+        onValueChange = {
+          onValueChange(it)
+          // Reset the focus-loss tracking when the user starts typing
+          if (it.isNotEmpty()) {
+            hasLostFocusAfterTyping = false
+          }
+        },
+        label = { Text(label, color = Color.Black) },
+        singleLine = true,
+        placeholder = { Text(placeholder) },
+        leadingIcon = {
+          Icon(
+              leadingIcon,
+              contentDescription = leadingIconDescription,
+              tint = if (isValueOk) Color(0xFF5AC561) else Color.Gray)
+        },
+        modifier =
+            Modifier.fillMaxWidth().testTag(testTag).onFocusChanged { focusState ->
+              // Mark the field as "visited" as soon as it loses focus after an entry
+              if (!focusState.isFocused && value.isNotBlank()) {
+                hasBeenFocused = true
+                hasLostFocusAfterTyping = true
+              }
+            },
+        shape = RoundedCornerShape(12.dp),
+        colors =
+            TextFieldDefaults.outlinedTextFieldColors(
+                focusedTextColor = Color.Black,
+                unfocusedTextColor =
+                    if (value.isEmpty()) Color.Gray else if (!isValueOk) Color.Red else Color.Black,
+                focusedBorderColor = if (isValueOk) Color(0xFF5AC561) else Color.Blue,
+                unfocusedBorderColor =
+                    when {
+                      value.isEmpty() -> Color.Gray
+                      isValueOk -> Color(0xFF5AC561)
+                      else -> Color.Red
+                    }))
+
+    // Display the error message if the field has been visited, input is incorrect, and focus was
+    // lost after typing
+    if (!isValueOk && hasBeenFocused && hasLostFocusAfterTyping) {
+      Text(
+          text = errorMessage,
+          color = Color.Red,
+          fontSize = 15.sp, // Error text size
+          modifier = Modifier.padding(start = 16.dp, top = 4.dp))
+    }
+  }
 }
 
 @Composable

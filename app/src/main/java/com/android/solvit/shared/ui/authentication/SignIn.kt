@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
@@ -58,6 +59,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -125,7 +127,10 @@ fun SignInScreen(
               passwordVisible = passwordVisible,
               onPasswordVisibilityChange = { passwordVisible = !passwordVisible },
               isChecked = isChecked,
-              onCheckedChange = { isChecked = it },
+              onCheckedChange = {
+                isChecked = it
+                Toast.makeText(context, "Not yet Implemented", Toast.LENGTH_SHORT).show()
+              },
               navigationActions = navigationActions,
               authViewModel = authViewModel,
               onSuccess = onSuccess,
@@ -144,7 +149,10 @@ fun SignInScreen(
               passwordVisible = passwordVisible,
               onPasswordVisibilityChange = { passwordVisible = !passwordVisible },
               isChecked = isChecked,
-              onCheckedChange = { isChecked = it },
+              onCheckedChange = {
+                isChecked = it
+                Toast.makeText(context, "Not yet Implemented", Toast.LENGTH_SHORT).show()
+              },
               navigationActions = navigationActions,
               authViewModel = authViewModel,
               onSuccess = onSuccess,
@@ -346,6 +354,13 @@ fun FormSection(
       testTag = "password",
       passwordLengthComplete = passwordLengthComplete)
 
+  Text(
+      text = "Your passport must have at least 6 characters",
+      color = Color.Gray,
+      fontSize = 12.sp,
+      textAlign = TextAlign.Start,
+      modifier = Modifier.padding(top = 4.dp).fillMaxWidth())
+
   Spacer(modifier = Modifier.height(8.dp))
 
   // Remember me & Forgot password
@@ -363,14 +378,17 @@ fun FormSection(
                       checkmarkColor = Color.White,
                       uncheckedColor = Color.Gray,
                       checkedColor = Color(90, 197, 97)))
-          Text(text = " Remember me", modifier = Modifier.testTag("rememberMeCheckbox"))
+          Text(
+              text = " Remember me",
+              modifier = Modifier.testTag("rememberMeCheckbox"),
+              color = Color.Gray)
         }
 
         ClickableText(
             text = AnnotatedString("Forgot password?"),
             onClick = { navigationActions.navigateTo(Screen.FORGOT_PASSWORD) },
             style = TextStyle(color = Color.Gray, textDecoration = TextDecoration.Underline),
-            modifier = Modifier.testTag("forgotPasswordLink"))
+            modifier = Modifier.wrapContentWidth(Alignment.End).testTag("forgotPasswordLink"))
       }
 
   Spacer(modifier = Modifier.height(16.dp))
