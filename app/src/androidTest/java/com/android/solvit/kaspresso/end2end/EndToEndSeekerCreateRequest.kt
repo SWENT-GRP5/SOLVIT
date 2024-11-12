@@ -40,13 +40,10 @@ import com.google.firebase.storage.storage
 import junit.framework.TestCase.assertEquals
 import org.junit.After
 import org.junit.Before
-import org.junit.FixMethodOrder
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runners.MethodSorters
 import org.mockito.Mockito.mock
 
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class EndToEndSeekerCreateRequest {
 
   private lateinit var authViewModel: AuthViewModel
