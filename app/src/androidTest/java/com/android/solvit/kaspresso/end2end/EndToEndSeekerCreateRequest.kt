@@ -179,7 +179,7 @@ class EndToEndSeekerCreateRequest {
     composeTestRule.waitUntil {
       composeTestRule.onNodeWithTag("requestsOverviewScreen").isDisplayed()
     }
-    //composeTestRule.onNodeWithTag("noServiceRequestsScreen").assertIsDisplayed()
+    // composeTestRule.onNodeWithTag("noServiceRequestsScreen").assertIsDisplayed()
 
     // Create a new request
     composeTestRule.onNodeWithTag(TopLevelDestinations.CREATE_REQUEST.toString()).performClick()
