@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
+import android.util.Patterns
 import android.widget.Toast
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -21,13 +22,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -50,8 +52,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -60,9 +64,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -109,8 +113,7 @@ fun SignInScreen(
         TopAppBar(
             title = { Text("") },
             navigationIcon = { GoBackButton(navigationActions) },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = backgroundColor),
-            modifier = Modifier.testTag("backButton"))
+            colors = TopAppBarDefaults.topAppBarColors(containerColor = backgroundColor))
       },
       content = { padding ->
         val modifier =
@@ -130,7 +133,10 @@ fun SignInScreen(
               passwordVisible = passwordVisible,
               onPasswordVisibilityChange = { passwordVisible = !passwordVisible },
               isChecked = isChecked,
-              onCheckedChange = { isChecked = it },
+              onCheckedChange = {
+                isChecked = it
+                Toast.makeText(context, "Not yet Implemented", Toast.LENGTH_SHORT).show()
+              },
               navigationActions = navigationActions,
               authViewModel = authViewModel,
               onSuccess = onSuccess,
@@ -149,7 +155,10 @@ fun SignInScreen(
               passwordVisible = passwordVisible,
               onPasswordVisibilityChange = { passwordVisible = !passwordVisible },
               isChecked = isChecked,
-              onCheckedChange = { isChecked = it },
+              onCheckedChange = {
+                isChecked = it
+                Toast.makeText(context, "Not yet Implemented", Toast.LENGTH_SHORT).show()
+              },
               navigationActions = navigationActions,
               authViewModel = authViewModel,
               onSuccess = onSuccess,
@@ -176,11 +185,9 @@ fun GoBackButton(navigationActions: NavigationActions) {
           }
         }
       },
+      modifier = Modifier.testTag("goBackButton"),
       enabled = canGoBack) {
-        Icon(
-            Icons.AutoMirrored.Filled.ArrowBack,
-            contentDescription = "goBackButton",
-            modifier = Modifier.testTag("backButton"))
+        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "goBackButton")
       }
 }
 
@@ -305,7 +312,6 @@ fun LogoSection() {
   }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FormSection(
     context: Context,
@@ -325,62 +331,41 @@ fun FormSection(
     navigationActions: NavigationActions
 ) {
   val isFormComplete = email.isNotBlank() && password.isNotBlank()
-  val goodFormEmail = email.contains("@") && email.contains(".")
   val passwordLengthComplete = password.length >= 6
-  // Email input
-  OutlinedTextField(
+  val goodFormEmail =
+      email.isNotBlank() &&
+          Patterns.EMAIL_ADDRESS.matcher(email).matches() &&
+          email.contains(".") &&
+          email.contains("@")
+
+  CustomOutlinedTextField(
       value = email,
       onValueChange = onEmailChange,
-      label = { Text("Email") },
-      singleLine = true,
-      modifier = Modifier.fillMaxWidth().testTag("emailInput"),
-      keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Email),
-      leadingIcon = {
-        Icon(
-            painter = painterResource(id = android.R.drawable.ic_dialog_email),
-            contentDescription = "Email Icon",
-            tint = Color(90, 197, 97))
-      },
-      shape = RoundedCornerShape(8.dp),
-      colors =
-          TextFieldDefaults.outlinedTextFieldColors(
-              focusedBorderColor = Color(0xFF5AC561), // Green color when focused
-              unfocusedBorderColor = Color(0xFF5AC561) // Green color when not focused
-              ))
+      label = "Email",
+      placeholder = "Enter your email",
+      isValueOk = goodFormEmail,
+      leadingIcon = Icons.Default.Email,
+      leadingIconDescription = "Email Icon",
+      testTag = "emailInput")
 
-  Spacer(modifier = Modifier.height(8.dp))
+  Spacer(modifier = Modifier.height(10.dp))
 
   // Password input
-  OutlinedTextField(
+  PasswordTextField(
       value = password,
       onValueChange = onPasswordChange,
-      label = { Text("Password") },
-      singleLine = true,
-      visualTransformation =
-          if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-      leadingIcon = {
-        Icon(Icons.Default.Lock, contentDescription = "Email Icon", tint = Color(90, 197, 97))
-      },
-      trailingIcon = {
-        val image =
-            if (passwordVisible) painterResource(id = android.R.drawable.ic_menu_view)
-            else painterResource(id = android.R.drawable.ic_secure)
+      label = "Password",
+      placeholder = "Enter your password",
+      contentDescription = "Password",
+      testTag = "passwordInput",
+      passwordLengthComplete = passwordLengthComplete)
 
-        IconButton(onClick = onPasswordVisibilityChange) {
-          Icon(
-              painter = image,
-              contentDescription = null,
-              tint = Color(90, 197, 97),
-              modifier = Modifier.size(24.dp))
-        }
-      },
-      shape = RoundedCornerShape(8.dp),
-      modifier = Modifier.fillMaxWidth().testTag("password"),
-      colors =
-          TextFieldDefaults.outlinedTextFieldColors(
-              focusedBorderColor = Color(0xFF5AC561), // Green color when focused
-              unfocusedBorderColor = Color(0xFF5AC561) // Green color when not focused
-              ))
+  Text(
+      text = "Your passport must have at least 6 characters",
+      color = Color.Gray,
+      fontSize = 12.sp,
+      textAlign = TextAlign.Start,
+      modifier = Modifier.padding(top = 4.dp).fillMaxWidth())
 
   Spacer(modifier = Modifier.height(8.dp))
 
@@ -397,16 +382,19 @@ fun FormSection(
               colors =
                   CheckboxDefaults.colors(
                       checkmarkColor = Color.White,
-                      uncheckedColor = Color(90, 197, 97),
+                      uncheckedColor = Color.Gray,
                       checkedColor = Color(90, 197, 97)))
-          Text(text = " Remember me", modifier = Modifier.testTag("rememberMeCheckbox"))
+          Text(
+              text = " Remember me",
+              modifier = Modifier.testTag("rememberMeCheckbox"),
+              color = Color.Gray)
         }
 
         ClickableText(
             text = AnnotatedString("Forgot password?"),
             onClick = { navigationActions.navigateTo(Screen.FORGOT_PASSWORD) },
             style = TextStyle(color = Color.Gray, textDecoration = TextDecoration.Underline),
-            modifier = Modifier.testTag("forgotPasswordLink"))
+            modifier = Modifier.wrapContentWidth(Alignment.End).testTag("forgotPasswordLink"))
       }
 
   Spacer(modifier = Modifier.height(16.dp))
@@ -552,6 +540,169 @@ fun googleSignInLauncher(
       }
     } catch (e: ApiException) {
       onFailure()
+    }
+  }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CustomOutlinedTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    placeholder: String,
+    isValueOk: Boolean,
+    modifier: Modifier = Modifier,
+    errorMessage: String = "Invalid input",
+    leadingIcon: ImageVector,
+    leadingIconDescription: String = "",
+    testTag: String,
+    errorTestTag: String = "emailErrorMessage"
+) {
+  // State to track if the field has been "visited" (focused and then unfocused)
+  var hasBeenFocused by remember { mutableStateOf(false) }
+  var hasLostFocusAfterTyping by remember { mutableStateOf(false) }
+
+  Column(modifier = modifier.fillMaxWidth()) {
+    // Text field with focus management
+    OutlinedTextField(
+        value = value,
+        onValueChange = {
+          onValueChange(it)
+          // Reset the focus-loss tracking when the user starts typing
+          if (it.isNotEmpty()) {
+            hasLostFocusAfterTyping = false
+          }
+        },
+        label = { Text(label, color = Color.Black) },
+        singleLine = true,
+        placeholder = { Text(placeholder) },
+        leadingIcon = {
+          Icon(
+              leadingIcon,
+              contentDescription = leadingIconDescription,
+              tint = if (isValueOk) Color(0xFF5AC561) else Color.Gray)
+        },
+        modifier =
+            Modifier.fillMaxWidth().testTag(testTag).onFocusChanged { focusState ->
+              // Mark the field as "visited" as soon as it loses focus after an entry
+              if (!focusState.isFocused && value.isNotBlank()) {
+                hasBeenFocused = true
+                hasLostFocusAfterTyping = true
+              }
+            },
+        shape = RoundedCornerShape(12.dp),
+        colors =
+            TextFieldDefaults.outlinedTextFieldColors(
+                focusedTextColor = Color.Black,
+                unfocusedTextColor =
+                    if (value.isEmpty()) Color.Gray else if (!isValueOk) Color.Red else Color.Black,
+                focusedBorderColor = if (isValueOk) Color(0xFF5AC561) else Color.Blue,
+                unfocusedBorderColor =
+                    when {
+                      value.isEmpty() -> Color.Gray
+                      isValueOk -> Color(0xFF5AC561)
+                      else -> Color.Red
+                    }))
+
+    // Display the error message if the field has been visited, input is incorrect, and focus was
+    // lost after typing
+    if (!isValueOk && hasBeenFocused && hasLostFocusAfterTyping) {
+      Text(
+          text = errorMessage,
+          color = Color.Red,
+          fontSize = 15.sp, // Error text size
+          modifier = Modifier.padding(start = 16.dp, top = 4.dp).testTag(errorTestTag))
+    }
+  }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PasswordTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    placeholder: String,
+    contentDescription: String = "",
+    testTag: String,
+    passwordLengthComplete: Boolean,
+    errorMessage: String = "Password is too short",
+    testTagErrorPassword: String = "passwordErrorMessage"
+) {
+  var passwordVisible by remember { mutableStateOf(false) }
+
+  // State to track if the field has been focused and then unfocused
+  var hasBeenFocused by remember { mutableStateOf(false) }
+  var hasLostFocusAfterTyping by remember { mutableStateOf(false) }
+
+  Column(modifier = Modifier.fillMaxWidth()) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = {
+          onValueChange(it)
+          // Reset focus-loss tracking when the user starts typing
+          if (it.isNotEmpty()) {
+            hasLostFocusAfterTyping = false
+          }
+        },
+        label = { Text(label, color = Color.Black) },
+        singleLine = true,
+        placeholder = { Text(placeholder) },
+        modifier =
+            Modifier.fillMaxWidth().testTag(testTag).onFocusChanged { focusState ->
+              // Mark the field as "visited" if it loses focus after an entry
+              if (!focusState.isFocused && value.isNotBlank()) {
+                hasBeenFocused = true
+                hasLostFocusAfterTyping = true
+              }
+            },
+        enabled = true,
+        shape = RoundedCornerShape(12.dp),
+        visualTransformation =
+            if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+        leadingIcon = {
+          Icon(
+              imageVector = Icons.Filled.Lock,
+              contentDescription = contentDescription,
+              tint = if (passwordLengthComplete) Color(0xFF5AC561) else Color.Gray,
+              modifier = Modifier.size(25.dp))
+        },
+        trailingIcon = {
+          val image =
+              if (passwordVisible) painterResource(id = android.R.drawable.ic_menu_view)
+              else painterResource(id = android.R.drawable.ic_secure)
+
+          IconButton(onClick = { passwordVisible = !passwordVisible }) {
+            Icon(
+                painter = image,
+                contentDescription = null,
+                tint = if (passwordLengthComplete) Color(0xFF5AC561) else Color.Gray,
+                modifier = Modifier.size(24.dp))
+          }
+        },
+        colors =
+            TextFieldDefaults.outlinedTextFieldColors(
+                focusedTextColor = Color.Black,
+                unfocusedTextColor =
+                    if (value.isEmpty()) Color.Gray
+                    else if (!passwordLengthComplete) Color.Red else Color.Black,
+                focusedBorderColor = if (passwordLengthComplete) Color(0xFF5AC561) else Color.Blue,
+                unfocusedBorderColor =
+                    when {
+                      value.isEmpty() -> Color.Gray
+                      passwordLengthComplete -> Color(0xFF5AC561)
+                      else -> Color.Red
+                    }))
+
+    // Display the error message if the field has been visited, input is incorrect, and focus was
+    // lost after typing
+    if (!passwordLengthComplete && hasBeenFocused && hasLostFocusAfterTyping) {
+      Text(
+          text = errorMessage,
+          color = Color.Red,
+          fontSize = 15.sp, // Error text size
+          modifier = Modifier.padding(start = 16.dp, top = 4.dp).testTag(testTagErrorPassword))
     }
   }
 }

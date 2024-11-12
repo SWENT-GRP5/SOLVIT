@@ -2,12 +2,14 @@ package com.android.solvit.shared.ui.authentication
 
 import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
+import android.util.Patterns
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -15,6 +17,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -40,13 +44,22 @@ import coil.compose.rememberAsyncImagePainter
 import com.android.solvit.R
 import com.android.solvit.shared.ui.navigation.NavigationActions
 
-@SuppressLint("SuspiciousIndentation")
+@SuppressLint(
+    "SuspiciousIndentation",
+    "UnusedMaterial3ScaffoldPaddingParameter",
+    "SourceLockedOrientationActivity")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ForgotPassword(navigationActions: NavigationActions) {
   var email by remember { mutableStateOf("") }
 
   val context = LocalContext.current
+
+  val goodFormEmail =
+      email.isNotBlank() &&
+          Patterns.EMAIL_ADDRESS.matcher(email).matches() &&
+          email.contains(".") &&
+          email.contains("@")
 
   DisposableEffect(Unit) {
     val activity = context as? ComponentActivity
@@ -61,19 +74,19 @@ fun ForgotPassword(navigationActions: NavigationActions) {
             navigationIcon = { GoBackButton(navigationActions) },
             modifier = Modifier.testTag("topAppBar"))
       },
-      content = { padding ->
+      content = {
         Column(
             modifier = Modifier.fillMaxWidth().padding(16.dp).verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top) {
-              VerticalSpacer(60.dp)
+              Spacer(modifier = Modifier.height(60.dp))
 
               Image(
                   painter = rememberAsyncImagePainter(R.drawable.passwordforgot),
                   contentDescription = "Checkmark",
                   modifier = Modifier.size(240.dp).testTag("forgotPasswordImage"))
 
-              VerticalSpacer(30.dp)
+              Spacer(modifier = Modifier.height(30.dp))
 
               Text(
                   text = "Please enter your email address to reset your password",
@@ -81,22 +94,26 @@ fun ForgotPassword(navigationActions: NavigationActions) {
                   fontSize = 20.sp,
                   modifier = Modifier.padding(top = 4.dp).fillMaxWidth().testTag("bigText"))
 
-              VerticalSpacer(height = 10.dp)
+              Spacer(modifier = Modifier.height(10.dp))
 
-              EmailTextField(
-                  email,
+              CustomOutlinedTextField(
+                  value = email,
                   onValueChange = { email = it },
-                  "Enter your email address",
-                  "emailInputField")
+                  label = "Email",
+                  placeholder = "Enter your email",
+                  isValueOk = goodFormEmail,
+                  leadingIcon = Icons.Default.Email,
+                  leadingIconDescription = "Email Icon",
+                  testTag = "emailInputField")
 
-              VerticalSpacer(height = 20.dp)
+              Spacer(modifier = Modifier.height(20.dp))
 
               Button(
                   onClick = {
                     if (email.isEmpty()) {
                       Toast.makeText(context, "Please enter your email address", Toast.LENGTH_LONG)
                           .show()
-                    } else if (!(email.contains("@") && email.contains("."))) {
+                    } else if (!goodFormEmail) {
                       Toast.makeText(
                               context, "your email must contain \"@\" and \".\"", Toast.LENGTH_LONG)
                           .show()
@@ -113,9 +130,7 @@ fun ForgotPassword(navigationActions: NavigationActions) {
                           .height(50.dp)
                           .background(
                               brush =
-                                  if (email.isNotBlank() &&
-                                      email.contains("@") &&
-                                      email.contains(".")) {
+                                  if (goodFormEmail) {
                                     Brush.horizontalGradient(
                                         colors = listOf(Color(0, 200, 83), Color(0, 153, 255)))
                                   } else {
