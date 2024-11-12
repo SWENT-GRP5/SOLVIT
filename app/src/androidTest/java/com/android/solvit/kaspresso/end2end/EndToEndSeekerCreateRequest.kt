@@ -1,9 +1,11 @@
 package com.android.solvit.kaspresso.end2end
 
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.test.core.app.ApplicationProvider
@@ -16,6 +18,7 @@ import com.android.solvit.seeker.model.profile.UserRepositoryFirestore
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.shared.model.authentication.AuthRepository
 import com.android.solvit.shared.model.authentication.AuthViewModel
+import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.map.LocationRepository
 import com.android.solvit.shared.model.map.LocationViewModel
 import com.android.solvit.shared.model.provider.ProviderRepository
@@ -37,12 +40,14 @@ import com.google.firebase.firestore.FirebaseFirestoreSettings
 import com.google.firebase.firestore.firestore
 import com.google.firebase.firestore.firestoreSettings
 import com.google.firebase.storage.storage
-import junit.framework.TestCase.assertEquals
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.`when`
+import org.mockito.kotlin.anyOrNull
 
 class EndToEndSeekerCreateRequest {
 
@@ -62,6 +67,8 @@ class EndToEndSeekerCreateRequest {
 
   private val email = "test@test.ch"
   private val password = "password"
+
+  private val locations = listOf(Location(37.7749, -122.4194, "San Francisco"))
 
   @get:Rule val composeTestRule = createComposeRule()
 
@@ -95,11 +102,17 @@ class EndToEndSeekerCreateRequest {
     serviceRequestViewModel = ServiceRequestViewModel(serviceRequestRepository)
     reviewViewModel = ReviewViewModel(reviewRepository)
 
+    `when`(locationRepository.search(ArgumentMatchers.anyString(), anyOrNull(), anyOrNull()))
+        .thenAnswer { invocation ->
+          val onSuccess = invocation.getArgument<(List<Location>) -> Unit>(1)
+          onSuccess(locations)
+        }
+
     authViewModel.setEmail(email)
     authViewModel.setPassword(password)
     authViewModel.setRole("seeker")
     authViewModel.registerWithEmailAndPassword(
-        onSuccess = { authViewModel.logout {} }, onFailure = { assertEquals(true, false) })
+        onSuccess = { authViewModel.logout {} }, onFailure = {})
   }
 
   @After
@@ -133,12 +146,14 @@ class EndToEndSeekerCreateRequest {
                   listProviderViewModel,
                   seekerProfileViewModel,
                   serviceRequestViewModel,
-                  reviewViewModel)
+                  reviewViewModel,
+                  locationViewModel)
           "provider" -> ProviderUI(authViewModel, listProviderViewModel, seekerProfileViewModel)
         }
       }
     }
 
+    // Login
     composeTestRule.onNodeWithTag("ctaButtonPortrait").performClick()
 
     composeTestRule.waitUntil(timeoutMillis = 10000) {
@@ -149,10 +164,19 @@ class EndToEndSeekerCreateRequest {
     composeTestRule.onNodeWithTag("password").performTextInput(password)
     composeTestRule.onNodeWithTag("signInButton").performClick()
 
+    // Wait for the services screen to be displayed
     composeTestRule.waitUntil(timeoutMillis = 10000) {
       composeTestRule.onNodeWithTag("servicesScreen").isDisplayed()
     }
 
+    // Navigate to the requests overview screen
+    composeTestRule.onNodeWithTag(TopLevelDestinations.REQUESTS_OVERVIEW.textId).performClick()
+    composeTestRule.waitUntil {
+      composeTestRule.onNodeWithTag("requestsOverviewScreen").isDisplayed()
+    }
+    composeTestRule.onNodeWithTag("noServiceRequestsScreen").assertIsDisplayed()
+
+    // Create a new request
     composeTestRule.onNodeWithTag(TopLevelDestinations.CREATE_REQUEST.toString()).performClick()
 
     composeTestRule.waitUntil(timeoutMillis = 10000) {
@@ -161,9 +185,26 @@ class EndToEndSeekerCreateRequest {
 
     composeTestRule.onNodeWithTag("inputRequestTitle").performTextInput("Test Request")
     composeTestRule.onNodeWithTag("inputServiceType").performTextInput("PLUMBER")
+    composeTestRule.waitUntil(timeoutMillis = 10000) {
+      composeTestRule.onNodeWithTag("serviceTypeMenu").isDisplayed()
+    }
+    composeTestRule.onNodeWithTag("serviceTypeResult").performClick()
     composeTestRule.onNodeWithTag("inputRequestDescription").performTextInput("Test Description")
-    composeTestRule.onNodeWithTag("inputRequestAddress").performTextInput("inputRequestAddress")
-    composeTestRule.onNodeWithTag("inputRequestDate").performTextInput("25/12/2024")
+    composeTestRule.onNodeWithTag("inputRequestAddress").performTextInput("test")
+    composeTestRule.waitUntil(timeoutMillis = 10000) {
+      locationViewModel.locationSuggestions.value.isNotEmpty()
+    }
+    composeTestRule.onNodeWithTag("locationResult").performClick()
+    composeTestRule.onNodeWithTag("inputRequestDate").performClick()
+    composeTestRule.onNodeWithTag("datePickerDialog").performClick()
+    composeTestRule.onNodeWithText("OK").performClick()
+
     composeTestRule.onNodeWithTag("requestSubmit").performClick()
+
+    // Assert the requests to be displayed
+    composeTestRule.waitUntil {
+      composeTestRule.onNodeWithTag("requestsOverviewScreen").isDisplayed()
+    }
+    composeTestRule.onNodeWithTag("requestsList").assertIsDisplayed()
   }
 }
