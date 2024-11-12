@@ -161,7 +161,7 @@ fun ServiceBookingScreen() {
                                                 color =
                                                     colorScheme
                                                         .onSurfaceVariant, // White text for good
-                                                                           // contrast
+                                                // contrast
                                                 modifier = Modifier.testTag("rating_value"))
                                           }
                                     }
