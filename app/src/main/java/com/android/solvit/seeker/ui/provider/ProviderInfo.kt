@@ -130,6 +130,7 @@ fun PackageCard(packageProposal: PackageProposal, isSelected: Boolean, modifier:
               // Price of the Package
               Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
+                    modifier = Modifier.testTag("price"),
                     text = "$${packageProposal.price}",
                     style =
                         MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
