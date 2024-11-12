@@ -1,5 +1,6 @@
 package com.android.solvit.provider.ui.profile
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -17,6 +18,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -42,6 +45,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.android.solvit.R
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
+import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
@@ -52,14 +56,15 @@ import com.google.firebase.auth.auth
 fun ProviderProfileScreen(
     listProviderViewModel: ListProviderViewModel =
         viewModel(factory = ListProviderViewModel.Factory),
+    authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory),
     navigationActions: NavigationActions
 ) {
   val userId = Firebase.auth.currentUser?.uid ?: "-1"
   val provider =
       listProviderViewModel.providersList.collectAsState().value.first { it.uid == userId }
   Column(modifier = Modifier.fillMaxSize().background(Color.White)) {
-    ProfileHeader(navigationActions, provider)
-    Spacer(modifier = Modifier.height(10.dp))
+    ProfileHeader(navigationActions, provider, authViewModel)
+    VerticalSpacer(10.dp)
     JobsDoneSection()
     Spacer(modifier = Modifier.height(10.dp))
     StatsSection(provider = provider)
@@ -67,7 +72,11 @@ fun ProviderProfileScreen(
 }
 
 @Composable
-fun ProfileHeader(navigationActions: NavigationActions, provider: Provider) {
+fun ProfileHeader(
+    navigationActions: NavigationActions,
+    provider: Provider,
+    authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory)
+) {
   Row(modifier = Modifier.fillMaxWidth()) {
     Column(
         modifier =
@@ -120,6 +129,19 @@ fun ProfileHeader(navigationActions: NavigationActions, provider: Provider) {
               fontSize = 24.sp,
               fontWeight = FontWeight.Bold,
               textAlign = TextAlign.Center)
+
+          VerticalSpacer(40.dp)
+
+          Button(
+              onClick = { authViewModel.logout {} },
+              modifier = Modifier.testTag("logoutButton"),
+              colors =
+                  ButtonDefaults.buttonColors(
+                      containerColor = Color.Transparent, contentColor = Color.Red),
+              border = BorderStroke(1.dp, Color.Red),
+          ) {
+            Text("Logout")
+          }
         }
 
     Column(

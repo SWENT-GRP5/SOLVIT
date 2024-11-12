@@ -68,6 +68,7 @@ class ProfessionalProfileScreenTest {
     composeTestRule.onNodeWithTag("location").assertIsDisplayed()
     composeTestRule.onNodeWithTag("positionTitle").assertIsDisplayed()
     composeTestRule.onNodeWithTag("position").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("logoutButton").assertIsDisplayed()
   }
 
   @Test
@@ -77,6 +78,14 @@ class ProfessionalProfileScreenTest {
 
     composeTestRule.onNodeWithTag("backButton").performClick()
     verify(mockNavigationActions).navigateTo(Route.REQUESTS_FEED)
+  }
+
+  @Test
+  fun professionalProfileScreen_logoutButton_performClick() {
+
+    composeTestRule.setContent { ProfileHeader(mockNavigationActions, provider) }
+
+    composeTestRule.onNodeWithTag("logoutButton").performClick()
   }
 
   @Test
