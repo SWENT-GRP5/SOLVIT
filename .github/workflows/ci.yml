@@ -106,11 +106,6 @@ jobs:
         run: |
           curl -sL https://firebase.tools | bash
 
-      #- name: Set Firebase Token
-      #  run: echo "$FIREBASE_TOKEN" | firebase login:ci --no-localhost
-      #  env:
-      #    FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
-
       - name: Start Firebase emulators
         run: |
           nohup firebase emulators:start --only auth,firestore,storage & sleep 10

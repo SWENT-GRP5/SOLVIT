@@ -102,9 +102,7 @@ class EndToEndSeekerCreateRequest {
     authViewModel.setPassword(password)
     authViewModel.setRole("seeker")
     authViewModel.registerWithEmailAndPassword(
-      onSuccess = {authViewModel.logout {  }},
-      onFailure = {assertEquals(true, false)}
-    )
+        onSuccess = { authViewModel.logout {} }, onFailure = { assertEquals(true, false) })
   }
 
   @After
