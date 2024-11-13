@@ -158,7 +158,7 @@ fun SeekerUI(
     composable(Route.MAP) { SeekerMapScreen(listProviderViewModel, navigationActions) }
     navigation(startDestination = Screen.PROFILE, route = Route.PROFILE) {
       composable(Screen.PROFILE) {
-        SeekerProfileScreen(seekerProfileViewModel, authViewModel, navigationActions)
+        SeekerProfileScreen(seekerProfileViewModel, navigationActions, authViewModel)
       }
       composable(Screen.EDIT_PROFILE) {
         EditSeekerProfileScreen(seekerProfileViewModel, navigationActions, authViewModel)

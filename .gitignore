@@ -35,6 +35,7 @@ keystore.properties
 /app/release
 upload-keystore.jks
 /scraping/firebase_credentials.json
+gradlew
 
 # MacOS
 **/.DS_Store
