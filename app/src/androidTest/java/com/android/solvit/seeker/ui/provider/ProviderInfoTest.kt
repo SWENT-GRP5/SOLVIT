@@ -13,6 +13,7 @@ import androidx.navigation.NavController
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.provider.Language
+import com.android.solvit.shared.model.provider.PackageProposal
 import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.provider.ProviderRepository
 import com.android.solvit.shared.model.review.Review
@@ -97,10 +98,14 @@ class ProviderInfoTest {
     composeTestRule.onNodeWithTag("providerTabs").assertIsDisplayed()
     composeTestRule.onNodeWithTag("profileTab").assertIsDisplayed()
     composeTestRule.onNodeWithTag("reviewsTab").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("packagesTab").assertIsDisplayed()
     composeTestRule.onNodeWithTag("profileTab").performClick()
+    composeTestRule.onNodeWithTag("packagesTab").assertIsDisplayed()
     assertEquals(0, selectedTabIndex)
-    composeTestRule.onNodeWithTag("reviewsTab").performClick()
+    composeTestRule.onNodeWithTag("packagesTab").performClick()
     assertEquals(1, selectedTabIndex)
+    composeTestRule.onNodeWithTag("reviewsTab").performClick()
+    assertEquals(2, selectedTabIndex)
   }
 
   @Test
@@ -135,6 +140,42 @@ class ProviderInfoTest {
     composeTestRule.onAllNodesWithTag("reviewComment")[0].assertTextEquals("Very good tutor")
     composeTestRule.onAllNodesWithTag("reviewComment")[1].assertTextEquals("Good tutor")
     composeTestRule.onAllNodesWithTag("reviewComment")[2].assertTextEquals("Average tutor")
+  }
+
+  @Test
+  fun providerPackagesDisplayCorrectly() {
+    composeTestRule.setContent {
+      ProviderPackages(
+          provider,
+          packages =
+              listOf(
+                  PackageProposal(
+                      uid = "1",
+                      title = "Basic Maintenance",
+                      description = "Ideal for minor repairs and maintenance tasks.",
+                      price = 49.99,
+                      bulletPoints =
+                          listOf(
+                              "Fix leaky faucets",
+                              "Unclog drains",
+                              "Inspect plumbing for minor issues")),
+                  PackageProposal(
+                      uid = "2",
+                      title = "Standard Service",
+                      description = "Comprehensive service for common plumbing needs.",
+                      price = 89.99,
+                      bulletPoints =
+                          listOf(
+                              "Repair leaks and clogs",
+                              "Replace faucets and fixtures",
+                              "Inspect and clear drain pipes")),
+              ))
+    }
+    composeTestRule.onNodeWithTag("packagesScrollableList").assertIsDisplayed()
+    assertEquals(
+        composeTestRule.onAllNodesWithTag("PackageCard").fetchSemanticsNodes().isNotEmpty(), true)
+    composeTestRule.onAllNodesWithTag("PackageCard")[0].assertIsDisplayed()
+    composeTestRule.onAllNodesWithTag("PackageCard")[1].assertIsDisplayed()
   }
 
   @Test
@@ -186,5 +227,7 @@ class ProviderInfoTest {
     composeTestRule.onNodeWithTag("providerDetails").assertIsDisplayed()
     composeTestRule.onNodeWithTag("reviewsTab").performClick()
     composeTestRule.onNodeWithTag("providerReviews").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("packagesTab").performClick()
+    composeTestRule.onNodeWithTag("packagesScrollableList").assertIsDisplayed()
   }
 }
