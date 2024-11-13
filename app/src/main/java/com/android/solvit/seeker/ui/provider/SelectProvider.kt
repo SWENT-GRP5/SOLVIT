@@ -114,9 +114,7 @@ fun SpTopAppBar(
         modifier = Modifier.fillMaxWidth().height(200.dp).testTag("serviceImage"),
         painter =
             painterResource(
-                id =
-                    ServicesImages().serviceMap[selectedService]
-                        ?: R.drawable.error), // TODO Link each service to an image
+                id = ServicesImages().serviceMap[selectedService] ?: R.drawable.cleaner_image),
         contentDescription = "image description",
         contentScale = ContentScale.FillBounds)
     Row(
@@ -880,8 +878,9 @@ fun SelectProviderScreen(
     locationViewModel: LocationViewModel = viewModel(factory = LocationViewModel.Factory)
 ) {
   val selectedService by listProviderViewModel.selectedService.collectAsState()
-  listProviderViewModel.filterProviders(
-      filter = { provider -> provider.service == selectedService }, "Service")
+  if (selectedService != null)
+      listProviderViewModel.filterProviders(
+          filter = { provider -> provider.service == selectedService }, "Service")
   val providers by listProviderViewModel.providersListFiltered.collectAsState()
 
   var displayFilters by remember { mutableStateOf(false) }
