@@ -113,7 +113,8 @@ fun SharedUI(
     }
     composable(Screen.FORGOT_PASSWORD) { ForgotPassword(navigationActions) }
     composable(Screen.SEEKER_REGISTRATION_PROFILE) {
-      SeekerRegistrationScreen(seekerProfileViewModel, navigationActions, authViewModel)
+      SeekerRegistrationScreen(
+          seekerProfileViewModel, navigationActions, locationViewModel, authViewModel)
     }
   }
 }
@@ -144,7 +145,7 @@ fun SeekerUI(
     composable(Route.PROVIDER_PROFILE) {
       ProviderInfoScreen(navigationActions, listProviderViewModel, reviewViewModel)
     }
-    composable(Route.MESSAGE) { MessageScreen(navigationActions) }
+    composable(Route.MESSAGE) { MessageScreen() }
     composable(Route.CREATE_REQUEST) {
       CreateRequestScreen(navigationActions, serviceRequestViewModel)
     }

@@ -3,6 +3,8 @@ package com.android.solvit.provider.ui.registration
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.isDisplayed
+import androidx.compose.ui.test.isNotDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
@@ -76,7 +78,7 @@ class ProviderRegistrationTest {
 
     composeTestRule.onNodeWithTag("goBackButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("signUpIcon").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("signUpProfessionalTitle").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("signUpProviderTitle").assertIsDisplayed()
     composeTestRule.onNodeWithTag("fullNameInput").assertIsDisplayed()
     composeTestRule.onNodeWithTag("phoneNumberInput").assertIsDisplayed()
     composeTestRule.onNodeWithTag("companyNameInput").assertIsDisplayed()
@@ -201,5 +203,59 @@ class ProviderRegistrationTest {
     composeTestRule.onAllNodesWithTag("locationResult")[2].performClick()
     assert(locationViewModel.locationSuggestions.value == locations)
     assert(locationViewModel.query.value == "New York")
+  }
+
+  @Test
+  fun providerRegistrationTest_errorShowInFullNameField() {
+    composeTestRule.setContent {
+      ProviderRegistrationScreen(
+          viewModel = listProviderViewModel,
+          navigationActions = navigationActions,
+          locationViewModel = locationViewModel)
+    }
+
+    composeTestRule.onNodeWithTag("fullNameErrorProviderRegistration").isNotDisplayed()
+    composeTestRule.onNodeWithTag("fullNameInput").performTextInput("Jo")
+    composeTestRule.onNodeWithTag("fullNameErrorProviderRegistration").isDisplayed()
+    composeTestRule.onNodeWithTag("fullNameInput").performTextClearance()
+    composeTestRule.onNodeWithTag("fullNameInput").performTextInput("John Doe")
+    composeTestRule.onNodeWithTag("fullNameErrorProviderRegistration").isNotDisplayed()
+  }
+
+  @Test
+  fun providerRegistrationTest_errorShowInPhoneField() {
+    composeTestRule.setContent {
+      ProviderRegistrationScreen(
+          viewModel = listProviderViewModel,
+          navigationActions = navigationActions,
+          locationViewModel = locationViewModel)
+    }
+
+    composeTestRule.onNodeWithTag("phoneNumberErrorProviderRegistration").isNotDisplayed()
+    composeTestRule.onNodeWithTag("phoneNumberInput").performTextInput("12345")
+    composeTestRule.onNodeWithTag("phoneNumberErrorProviderRegistration").isDisplayed()
+    composeTestRule.onNodeWithTag("phoneNumberInput").performTextClearance()
+    composeTestRule.onNodeWithTag("phoneNumberInput").performTextInput("John Doe")
+    composeTestRule.onNodeWithTag("phoneNumberErrorProviderRegistration").isDisplayed()
+    composeTestRule.onNodeWithTag("phoneNumberInput").performTextClearance()
+    composeTestRule.onNodeWithTag("phoneNumberInput").performTextInput("123456")
+    composeTestRule.onNodeWithTag("phoneNumberErrorProviderRegistration").isNotDisplayed()
+  }
+
+  @Test
+  fun providerRegistrationTest_errorShowInCompanyNameField() {
+    composeTestRule.setContent {
+      ProviderRegistrationScreen(
+          viewModel = listProviderViewModel,
+          navigationActions = navigationActions,
+          locationViewModel = locationViewModel)
+    }
+
+    composeTestRule.onNodeWithTag("companyNameErrorProviderRegistration").isNotDisplayed()
+    composeTestRule.onNodeWithTag("companyNameInput").performTextInput("Jo")
+    composeTestRule.onNodeWithTag("companyNameErrorProviderRegistration").isDisplayed()
+    composeTestRule.onNodeWithTag("companyNameInput").performTextClearance()
+    composeTestRule.onNodeWithTag("companyNameInput").performTextInput("John Doe")
+    composeTestRule.onNodeWithTag("companyNameErrorProviderRegistration").isNotDisplayed()
   }
 }
