@@ -7,10 +7,10 @@ import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 
-class AuthRepository(private val auth: FirebaseAuth, private val db: FirebaseFirestore) {
+class AuthRepository(private val auth: FirebaseAuth, private val db: FirebaseFirestore) : AuthRep {
   private val collectionPath = "users"
 
-  fun init(onSuccess: (user: User?) -> Unit) {
+  override fun init(onSuccess: (user: User?) -> Unit) {
     if (auth.currentUser != null) {
       val userId = auth.currentUser?.uid ?: return onSuccess(null)
       db.collection(collectionPath).document(userId).get().addOnSuccessListener { doc ->
@@ -26,11 +26,11 @@ class AuthRepository(private val auth: FirebaseAuth, private val db: FirebaseFir
     }
   }
 
-  fun getUserId(): String {
+  override fun getUserId(): String {
     return auth.currentUser?.uid ?: ""
   }
 
-  fun loginWithEmailAndPassword(
+  override fun loginWithEmailAndPassword(
       email: String,
       password: String,
       onSuccess: (user: User) -> Unit,
@@ -51,7 +51,7 @@ class AuthRepository(private val auth: FirebaseAuth, private val db: FirebaseFir
     }
   }
 
-  fun signInWithGoogle(
+  override fun signInWithGoogle(
       account: GoogleSignInAccount,
       onSuccess: (user: User) -> Unit,
       onFailure: (Exception) -> Unit
@@ -68,7 +68,7 @@ class AuthRepository(private val auth: FirebaseAuth, private val db: FirebaseFir
     }
   }
 
-  fun registerWithEmailAndPassword(
+  override fun registerWithEmailAndPassword(
       role: String,
       email: String,
       password: String,
@@ -91,7 +91,7 @@ class AuthRepository(private val auth: FirebaseAuth, private val db: FirebaseFir
     }
   }
 
-  fun registerWithGoogle(
+  override fun registerWithGoogle(
       account: GoogleSignInAccount,
       role: String,
       onSuccess: (user: User) -> Unit,
@@ -110,7 +110,7 @@ class AuthRepository(private val auth: FirebaseAuth, private val db: FirebaseFir
     }
   }
 
-  fun logout(onSuccess: () -> Unit) {
+  override fun logout(onSuccess: () -> Unit) {
     auth.signOut()
     onSuccess()
   }

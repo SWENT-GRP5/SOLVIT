@@ -1,6 +1,9 @@
 import java.io.FileInputStream
 import java.util.Properties
 
+configurations.configureEach {
+    exclude(group = "com.google.protobuf", module = "protobuf-lite")
+}
 plugins {
     jacoco
     alias(libs.plugins.androidApplication)
@@ -143,9 +146,9 @@ sonar {
         localProperties.load(FileInputStream(localPropertiesFile))
     }
     val sonarProjectKey : String = localProperties.getProperty("sonar_project_Key") ?:
-     System.getenv("SONAR_PROJECT_KEY") ?: ""
+    System.getenv("SONAR_PROJECT_KEY") ?: ""
     val sonarOrganization : String = localProperties.getProperty("sonar_organization") ?:
-     System.getenv("SONAR_ORGANIZATION") ?: ""
+    System.getenv("SONAR_ORGANIZATION") ?: ""
     properties {
         property("sonar.projectKey", sonarProjectKey)
         property("sonar.organization", sonarOrganization)
@@ -168,17 +171,18 @@ fun DependencyHandlerScope.globalTestImplementation(dep: Any) {
 dependencies {
     implementation(libs.core.ktx)
     implementation(libs.androidx.core.ktx)
-        implementation(libs.androidx.lifecycle.runtime.ktx)
-        implementation(libs.androidx.activity.compose)
-        implementation(libs.androidx.appcompat)
-        implementation(libs.androidx.constraintlayout)
-        implementation(libs.androidx.fragment.ktx)
-        implementation(libs.kotlinx.serialization.json)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.constraintlayout)
+    implementation(libs.androidx.fragment.ktx)
+    implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.navigation.runtime.ktx)
     implementation(libs.firebase.storage.ktx)
     implementation(libs.play.services.location)
     implementation(libs.androidx.navigation.testing)
     testImplementation(libs.testng)
+
 
 
     // ------------- Jetpack Compose ------------------
@@ -232,15 +236,15 @@ dependencies {
     // UI Tests
     globalTestImplementation(libs.androidx.junit)
     globalTestImplementation(libs.androidx.espresso.core)
-        androidTestImplementation(libs.androidx.espresso.intents)
-        globalTestImplementation(libs.androidx.ui.test.junit4)
+    androidTestImplementation(libs.androidx.espresso.intents)
+    globalTestImplementation(libs.androidx.ui.test.junit4)
     androidTestImplementation(platform(libs.androidx.compose.bom))
-        testImplementation(libs.mockito.core)
-        testImplementation(libs.mockito.inline)
-        testImplementation(libs.mockito.kotlin)
-        androidTestImplementation(libs.mockito.android)
-        androidTestImplementation(libs.mockito.kotlin)
-        testImplementation(libs.robolectric)
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.inline)
+    testImplementation(libs.mockito.kotlin)
+    androidTestImplementation(libs.mockito.android)
+    androidTestImplementation(libs.mockito.kotlin)
+    testImplementation(libs.robolectric)
 
 
     // --------- Kaspresso test framework ----------
@@ -292,3 +296,4 @@ tasks.register("jacocoTestReport", JacocoReport::class) {
         include("outputs/code_coverage/debugAndroidTest/connected/*/coverage.ec")
     })
 }
+
