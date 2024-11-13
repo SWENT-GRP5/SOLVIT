@@ -99,6 +99,7 @@ fun EditSeekerProfileScreen(
   }
 
   Scaffold(
+      backgroundColor = colorScheme.background,
       topBar = {
         TopAppBar(
             backgroundColor = colorScheme.background,
@@ -159,7 +160,7 @@ fun EditSeekerProfileScreen(
               OutlinedTextField(
                   value = fullName,
                   onValueChange = { fullName = it },
-                  label = { Text("Enter your full name") },
+                  label = { Text("Enter your full name", color = colorScheme.onBackground) },
                   modifier =
                       Modifier.fillMaxWidth()
                           .testTag("profileName")
@@ -175,7 +176,7 @@ fun EditSeekerProfileScreen(
               OutlinedTextField(
                   value = username,
                   onValueChange = { username = it },
-                  label = { Text("Enter your username") },
+                  label = { Text("Enter your username", color = colorScheme.onBackground) },
                   modifier =
                       Modifier.fillMaxWidth()
                           .testTag("profileUsername")
@@ -191,7 +192,7 @@ fun EditSeekerProfileScreen(
               OutlinedTextField(
                   value = email,
                   onValueChange = { email = it },
-                  label = { Text("Enter your email") },
+                  label = { Text("Enter your email", color = colorScheme.onBackground) },
                   modifier =
                       Modifier.fillMaxWidth().testTag("profileEmail").padding(horizontal = 16.dp),
                   colors =
@@ -211,7 +212,7 @@ fun EditSeekerProfileScreen(
               OutlinedTextField(
                   value = address,
                   onValueChange = { address = it },
-                  label = { Text("Enter your address") },
+                  label = { Text("Enter your address", color = colorScheme.onBackground) },
                   modifier =
                       Modifier.fillMaxWidth().testTag("profileAddress").padding(horizontal = 16.dp),
                   colors =
@@ -277,7 +278,7 @@ fun CountryDropdownMenu() {
     OutlinedTextField(
         value = selectedCountry.code,
         onValueChange = { /* Country code is static, don't update */},
-        label = { Text("Country code") },
+        label = { Text("Country code", color = colorScheme.onBackground) },
         modifier =
             Modifier.fillMaxWidth().padding(horizontal = 16.dp).testTag("CountryCode").clickable {
               expanded = true
@@ -294,7 +295,7 @@ fun CountryDropdownMenu() {
               }
         },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-        trailingIcon = { Icon(Icons.Default.ArrowDropDown, contentDescription = "Dropdown Icon") },
+        trailingIcon = { Icon(Icons.Default.ArrowDropDown, contentDescription = "Dropdown Icon", tint = colorScheme.onBackground) },
         colors =
             TextFieldDefaults.outlinedTextFieldColors(
                 focusedBorderColor = colorScheme.secondary,
@@ -329,7 +330,7 @@ fun CountryDropdownMenu() {
     OutlinedTextField(
         value = phoneNumber,
         onValueChange = { phoneNumber = it },
-        label = { Text("Enter your phone number") },
+        label = { Text("Enter your phone number", color = colorScheme.onBackground) },
         modifier = Modifier.fillMaxWidth().testTag("profilePhone").padding(horizontal = 16.dp),
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
         colors =
