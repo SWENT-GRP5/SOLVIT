@@ -182,7 +182,7 @@ fun SeekerRegistrationScreen(
                     label = "Phone Number",
                     placeholder = "Enter your phone number",
                     isValueOk = isPhoneOk,
-                    errorMessage = "Your phone number must be at least 6 digits",
+                    errorMessage = "Your phone number must be at least 7 digits",
                     leadingIcon = Icons.Default.Phone,
                     leadingIconDescription = "Phone Icon",
                     testTag = "phoneNumberInput",
