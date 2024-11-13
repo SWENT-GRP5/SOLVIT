@@ -584,14 +584,14 @@ fun CustomOutlinedTextField(
             hasLostFocusAfterTyping = false
           }
         },
-        label = { Text(label, color = Color.Black) },
+        label = { Text(label, color = colorScheme.onBackground) },
         singleLine = true,
         placeholder = { Text(placeholder) },
         leadingIcon = {
           Icon(
               leadingIcon,
               contentDescription = leadingIconDescription,
-              tint = if (isValueOk) Color(0xFF5AC561) else Color.Gray)
+              tint = if (isValueOk) colorScheme.secondary else colorScheme.onSurfaceVariant)
         },
         modifier =
             Modifier.fillMaxWidth().testTag(testTag).onFocusChanged { focusState ->
@@ -604,15 +604,15 @@ fun CustomOutlinedTextField(
         shape = RoundedCornerShape(12.dp),
         colors =
             TextFieldDefaults.outlinedTextFieldColors(
-                focusedTextColor = Color.Black,
+                focusedTextColor = colorScheme.onBackground,
                 unfocusedTextColor =
-                    if (value.isEmpty()) Color.Gray else if (!isValueOk) Color.Red else Color.Black,
-                focusedBorderColor = if (isValueOk) Color(0xFF5AC561) else Color.Blue,
+                    if (value.isEmpty()) colorScheme.onSurfaceVariant else if (!isValueOk) colorScheme.error else colorScheme.onBackground,
+                focusedBorderColor = if (isValueOk) colorScheme.secondary else colorScheme.primary,
                 unfocusedBorderColor =
                     when {
-                      value.isEmpty() -> Color.Gray
-                      isValueOk -> Color(0xFF5AC561)
-                      else -> Color.Red
+                      value.isEmpty() -> colorScheme.onSurfaceVariant
+                      isValueOk -> colorScheme.secondary
+                      else -> colorScheme.error
                     }))
 
     // Display the error message if the field has been visited, input is incorrect, and focus was
@@ -620,7 +620,7 @@ fun CustomOutlinedTextField(
     if (!isValueOk && hasBeenFocused && hasLostFocusAfterTyping) {
       Text(
           text = errorMessage,
-          color = Color.Red,
+          color = colorScheme.error,
           fontSize = 15.sp, // Error text size
           modifier = Modifier.padding(start = 16.dp, top = 4.dp).testTag(errorTestTag))
     }
@@ -656,7 +656,7 @@ fun PasswordTextField(
             hasLostFocusAfterTyping = false
           }
         },
-        label = { Text(label, color = Color.Black) },
+        label = { Text(label, color = colorScheme.onBackground) },
         singleLine = true,
         placeholder = { Text(placeholder) },
         modifier =
@@ -675,7 +675,7 @@ fun PasswordTextField(
           Icon(
               imageVector = Icons.Filled.Lock,
               contentDescription = contentDescription,
-              tint = if (passwordLengthComplete) Color(0xFF5AC561) else Color.Gray,
+              tint = if (passwordLengthComplete) colorScheme.secondary else colorScheme.onSurfaceVariant,
               modifier = Modifier.size(25.dp))
         },
         trailingIcon = {
@@ -687,22 +687,22 @@ fun PasswordTextField(
             Icon(
                 painter = image,
                 contentDescription = null,
-                tint = if (passwordLengthComplete) Color(0xFF5AC561) else Color.Gray,
+                tint = if (passwordLengthComplete) colorScheme.secondary else colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(24.dp))
           }
         },
         colors =
             TextFieldDefaults.outlinedTextFieldColors(
-                focusedTextColor = Color.Black,
+                focusedTextColor = colorScheme.onBackground,
                 unfocusedTextColor =
-                    if (value.isEmpty()) Color.Gray
-                    else if (!passwordLengthComplete) Color.Red else Color.Black,
-                focusedBorderColor = if (passwordLengthComplete) Color(0xFF5AC561) else Color.Blue,
+                    if (value.isEmpty()) colorScheme.onSurfaceVariant
+                    else if (!passwordLengthComplete) colorScheme.error else colorScheme.onBackground,
+                focusedBorderColor = if (passwordLengthComplete) colorScheme.secondary else colorScheme.primary,
                 unfocusedBorderColor =
                     when {
-                      value.isEmpty() -> Color.Gray
-                      passwordLengthComplete -> Color(0xFF5AC561)
-                      else -> Color.Red
+                      value.isEmpty() -> colorScheme.onSurfaceVariant
+                      passwordLengthComplete -> colorScheme.secondary
+                      else -> colorScheme.error
                     }))
 
     // Display the error message if the field has been visited, input is incorrect, and focus was
@@ -710,7 +710,7 @@ fun PasswordTextField(
     if (!passwordLengthComplete && hasBeenFocused && hasLostFocusAfterTyping) {
       Text(
           text = errorMessage,
-          color = Color.Red,
+          color = colorScheme.error,
           fontSize = 15.sp, // Error text size
           modifier = Modifier.padding(start = 16.dp, top = 4.dp).testTag(testTagErrorPassword))
     }

@@ -179,7 +179,7 @@ fun SignUpScreen(
               if (!samePassword && confirmPassword.isNotEmpty() && password.isNotEmpty()) {
                 Text(
                     text = "Password and Confirm Password must be the same",
-                    color = Color.Red,
+                    color = colorScheme.error,
                     fontSize = 15.sp,
                     textAlign = TextAlign.Start,
                     modifier = Modifier.padding(top = 4.dp).fillMaxWidth())
@@ -259,7 +259,7 @@ fun SignUpButton(
                         Brush.horizontalGradient(
                             colors = listOf(colorScheme.primary, colorScheme.secondary))
                       } else {
-                        Brush.horizontalGradient(colors = listOf(Color.Gray, Color.Gray))
+                        Brush.horizontalGradient(colors = listOf(colorScheme.onSurfaceVariant, colorScheme.onSurfaceVariant))
                       },
                   shape = RoundedCornerShape(25.dp))
               .testTag("signUpButton"),

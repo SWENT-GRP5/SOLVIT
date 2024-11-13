@@ -341,7 +341,7 @@ fun StatsSection(provider: Provider) {
                 fontSize = 15.sp,
                 color = colorScheme.onPrimary,
                 fontWeight = FontWeight.Bold)
-            Text("Popular", fontSize = 10.sp, color = Color.White)
+            Text("Popular", fontSize = 10.sp, color = colorScheme.onPrimary)
           }
           Column(horizontalAlignment = Alignment.End) {
             Text(

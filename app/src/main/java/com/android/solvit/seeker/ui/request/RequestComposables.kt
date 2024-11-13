@@ -237,20 +237,20 @@ fun LocationDropdown(
           Icon(
               Icons.Default.Home,
               contentDescription = "Location Icon",
-              tint = if (isValueOk) Color(0xFF5AC561) else Color.Gray)
+              tint = if (isValueOk) colorScheme.secondary else colorScheme.onSurfaceVariant)
         },
         colors =
             TextFieldDefaults.outlinedTextFieldColors(
-                focusedTextColor = Color.Black,
+                focusedTextColor = colorScheme.onBackground,
                 unfocusedTextColor =
-                    if (locationQuery.isEmpty()) Color.Gray
-                    else if (!isValueOk) Color.Red else Color.Black,
-                focusedBorderColor = if (isValueOk) Color(0xFF5AC561) else Color.Blue,
+                    if (locationQuery.isEmpty()) colorScheme.onSurfaceVariant
+                    else if (!isValueOk) colorScheme.error else colorScheme.onBackground,
+                focusedBorderColor = if (isValueOk) colorScheme.secondary else colorScheme.primary,
                 unfocusedBorderColor =
                     when {
-                      locationQuery.isEmpty() -> Color.Gray
-                      isValueOk -> Color(0xFF5AC561)
-                      else -> Color.Red
+                      locationQuery.isEmpty() -> colorScheme.onSurfaceVariant
+                      isValueOk -> colorScheme.secondary
+                      else -> colorScheme.error
                     },
             ))
 
@@ -288,7 +288,7 @@ fun LocationDropdown(
     if (!isValueOk && hasBeenFocused && hasLostFocusAfterTyping) {
       Text(
           text = errorMessage,
-          color = Color.Red,
+          color = colorScheme.error,
           fontSize = 15.sp, // Error text size
           modifier = Modifier.padding(start = 16.dp, top = 65.dp))
     }
