@@ -126,7 +126,8 @@ fun SharedUI(
     }
     composable(Screen.FORGOT_PASSWORD) { ForgotPassword(navigationActions) }
     composable(Screen.SEEKER_REGISTRATION_PROFILE) {
-      SeekerRegistrationScreen(seekerProfileViewModel, navigationActions, authViewModel)
+      SeekerRegistrationScreen(
+          seekerProfileViewModel, navigationActions, locationViewModel, authViewModel)
     }
   }
 }
@@ -157,7 +158,7 @@ fun SeekerUI(
     composable(Route.PROVIDER_PROFILE) {
       ProviderInfoScreen(navigationActions, listProviderViewModel, reviewViewModel)
     }
-    composable(Route.MESSAGE) { MessageScreen(navigationActions) }
+    composable(Route.MESSAGE) { MessageScreen() }
     composable(Route.CREATE_REQUEST) {
       CreateRequestScreen(navigationActions, serviceRequestViewModel)
     }
@@ -167,7 +168,9 @@ fun SeekerUI(
     composable(Route.EDIT_REQUEST) { EditRequestScreen(navigationActions, serviceRequestViewModel) }
     composable(Route.MAP) { SeekerMapScreen(listProviderViewModel, navigationActions) }
     navigation(startDestination = Screen.PROFILE, route = Route.PROFILE) {
-      composable(Screen.PROFILE) { SeekerProfileScreen(seekerProfileViewModel, navigationActions) }
+      composable(Screen.PROFILE) {
+        SeekerProfileScreen(seekerProfileViewModel, authViewModel, navigationActions)
+      }
       composable(Screen.EDIT_PROFILE) {
         EditSeekerProfileScreen(seekerProfileViewModel, navigationActions, authViewModel)
       }
@@ -191,7 +194,7 @@ fun ProviderUI(
     composable(Route.MAP_OF_SEEKERS) { ProviderMapScreen(navigationActions = navigationActions) }
     composable(Screen.CALENDAR) { ProviderCalendarScreen(navigationActions = navigationActions) }
     composable(Screen.PROFESSIONAL_PROFILE) {
-      ProviderProfileScreen(listProviderViewModel, navigationActions)
+      ProviderProfileScreen(listProviderViewModel, authViewModel, navigationActions)
     }
   }
 }
