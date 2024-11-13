@@ -146,7 +146,7 @@ class EndToEndTestCreateProfile {
     composeTestRule.onNodeWithTag("signUpLink").performClick()
 
     assertEquals(Screen.SIGN_UP, navHostController.currentDestination?.route)
-    val email = "atest4@test.com"
+    val email = "atest@test.com"
     val password = "password"
 
     composeTestRule.onNodeWithTag("emailInputField").performTextInput(email)
@@ -181,6 +181,6 @@ class EndToEndTestCreateProfile {
       composeTestRule.onNodeWithTag("ProfileTopBar").isDisplayed()
     }
 
-    // Firebase.auth.currentUser?.delete()
+    Firebase.auth.currentUser?.delete()
   }
 }
