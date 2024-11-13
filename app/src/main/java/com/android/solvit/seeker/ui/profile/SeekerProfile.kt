@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -53,6 +54,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -305,8 +307,10 @@ fun SeekerProfileScreen(
   // Display the profile information if it's available
   userProfile?.let { profile ->
     Scaffold(
+        modifier = Modifier.background(colorScheme.background),
+        backgroundColor = colorScheme.background,
         topBar = {
-          Column {
+          Column(modifier = Modifier.background(colorScheme.background)) {
             Text(
                 text = "Profile",
                 style =
@@ -317,6 +321,7 @@ fun SeekerProfileScreen(
                 modifier =
                     Modifier.padding(start = 16.dp, top = 16.dp)
                         .verticalScroll(scrollState)
+                        .background(colorScheme.background)
                         .testTag("ProfileTitle"), // testTag for the title
             )
             Spacer(modifier = Modifier.height(16.dp))
@@ -380,10 +385,11 @@ fun SeekerProfileScreen(
               modifier =
                   Modifier.fillMaxSize()
                       .padding(16.dp)
+                      .background(color = colorScheme.background)
                       .testTag("ProfileContent"), // Adding testTag for profile content
               horizontalAlignment = Alignment.CenterHorizontally) {
                 LazyColumn(
-                    modifier = Modifier.testTag("ProfileOptionsList") // testTag for options list
+                    modifier = Modifier.background(colorScheme.background).testTag("ProfileOptionsList") // testTag for options list
                     ) {
                       item {
                         ProfileOptionItem(
@@ -479,15 +485,14 @@ fun ProfileOptionItem(
         Spacer(modifier = Modifier.width(8.dp)) // Space between icon and text
 
         Column(modifier = Modifier.weight(1f)) {
-          Text(optionName, style = MaterialTheme.typography.body1)
+          Text(optionName, style = MaterialTheme.typography.body1.copy(color = colorScheme.onBackground))
           Text(
               text = subtitle,
               style =
                   TextStyle(
                       fontSize = 12.sp, // Set a smaller font size for the subtitle
                       color =
-                          colorScheme.onBackground.copy(
-                              alpha = 0.3F)), // Use onBackground color for the subtitle
+                          colorScheme.onSurfaceVariant),
               modifier = Modifier.padding(4.dp) // Padding for the subtitle
               )
         }
