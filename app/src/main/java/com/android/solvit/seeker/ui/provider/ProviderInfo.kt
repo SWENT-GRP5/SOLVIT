@@ -53,9 +53,10 @@ fun ProviderInfoScreen(
   var selectedTabIndex by remember { mutableIntStateOf(0) }
 
   Scaffold(
+      containerColor = colorScheme.surface,
       topBar = { ProviderTopBar(onBackClick = { navigationActions.goBack() }) },
       content = { padding ->
-        Column(modifier = Modifier.padding(padding)) {
+        Column(modifier = Modifier.background(colorScheme.surface).padding(padding)) {
           ProviderHeader(provider)
           ProviderTabs(selectedTabIndex) { newIndex -> selectedTabIndex = newIndex }
 
@@ -261,7 +262,7 @@ fun ProviderDetails(provider: Provider, reviews: List<Review>) {
                     painter = painterResource(id = R.drawable.message),
                     contentDescription = "Message",
                     modifier = Modifier.size(64.dp).testTag("messageIcon"),
-                    tint = colorScheme.onBackground)
+                    tint = Color.Unspecified)
                 Text(
                     text =
                         "The contractor's contacts are visible only to its customers. If you are interested in the services of this contractor - offer him an order.",
@@ -279,7 +280,7 @@ fun Rubric(modifier: Modifier = Modifier, content: @Composable ColumnScope.() ->
       modifier =
           modifier
               .fillMaxWidth()
-              .background(color = colorScheme.surface, shape = RoundedCornerShape(16.dp))
+              .background(color = colorScheme.background, shape = RoundedCornerShape(16.dp))
               .border(width = 2.dp, color = Color.Transparent, shape = RoundedCornerShape(16.dp))
               .padding(16.dp)) {
         content()
@@ -296,7 +297,7 @@ fun ProviderReviews(provider: Provider, reviews: List<Review>) {
               .testTag("providerReviews")) {
         Column(
             Modifier.fillMaxWidth()
-                .background(color = colorScheme.surface, shape = RoundedCornerShape(16.dp))
+                .background(color = colorScheme.background, shape = RoundedCornerShape(16.dp))
                 .border(width = 2.dp, color = Color.Transparent, shape = RoundedCornerShape(16.dp))
                 .padding(16.dp)
                 .testTag("reviewsOverview")) {
@@ -359,7 +360,7 @@ fun ReviewRow(review: Review) {
   Column(
       Modifier.fillMaxWidth()
           .padding(top = 16.dp)
-          .background(color = colorScheme.surface, shape = RoundedCornerShape(16.dp))
+          .background(color = colorScheme.background, shape = RoundedCornerShape(16.dp))
           .border(width = 2.dp, color = Color.Transparent, shape = RoundedCornerShape(16.dp))
           .padding(4.dp)
           .testTag("reviewRow")) {
@@ -404,7 +405,7 @@ fun RatingStars(rating: Int) {
 fun BottomBar() {
   val context = LocalContext.current
   Row(
-      modifier = Modifier.fillMaxWidth().testTag("bottomBar"),
+      modifier = Modifier.background(colorScheme.surface).fillMaxWidth().testTag("bottomBar"),
       horizontalArrangement = Arrangement.Center) {
         Button(
             modifier =
