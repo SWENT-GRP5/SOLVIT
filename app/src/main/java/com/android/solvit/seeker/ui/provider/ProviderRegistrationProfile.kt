@@ -27,6 +27,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -214,7 +215,7 @@ fun ProviderRegistrationScreen(
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(colorScheme.secondary) // Green button
                     ) {
-                      Text("Complete registration", color = Color.White)
+                      Text("Complete registration", color = colorScheme.onSecondary)
                     }
               }
               // Preferences Step
@@ -248,13 +249,13 @@ fun ProviderRegistrationScreen(
                           style = MaterialTheme.typography.bodyLarge,
                           modifier = Modifier.align(Alignment.CenterHorizontally),
                           textAlign = TextAlign.Center,
-                          color = Color.Blue)
+                          color = colorScheme.primary)
                       Spacer(modifier = Modifier.height(100.dp))
                       Button(
                           onClick = { currentStep = 3 },
                           modifier = Modifier.fillMaxWidth().testTag("savePreferencesButton"),
-                          colors = ButtonDefaults.buttonColors(Color(0xFF28A745))) {
-                            Text("Save Preferences", color = Color.White)
+                          colors = ButtonDefaults.buttonColors(colorScheme.secondary)) {
+                            Text("Save Preferences", color = colorScheme.onSecondary)
                           }
                       Text(
                           text = "You can always update your preferences in your profile settings.",
