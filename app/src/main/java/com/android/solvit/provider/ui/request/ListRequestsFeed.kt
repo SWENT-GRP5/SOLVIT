@@ -66,6 +66,7 @@ import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.map.GetDirectionsBubble
 import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_PROVIDER
 import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.android.solvit.shared.ui.theme.Orange
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -126,7 +127,7 @@ fun SearchBar(searchQuery: MutableState<String>) {
             "Search requests",
             style =
                 TextStyle(
-                    color = colorScheme.onBackground,
+                    color = Orange,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold))
       },
@@ -134,7 +135,7 @@ fun SearchBar(searchQuery: MutableState<String>) {
         Icon(
             painter = painterResource(id = R.drawable.search_icon),
             contentDescription = "Search icon",
-            tint = colorScheme.onBackground,
+            tint = Orange,
             modifier = Modifier.size(20.dp))
       },
       modifier =
@@ -142,11 +143,11 @@ fun SearchBar(searchQuery: MutableState<String>) {
               .padding(horizontal = 16.dp)
               .height(56.dp)
               .background(colorScheme.background)
-              .border(3.dp, colorScheme.onBackground, RoundedCornerShape(12.dp))
+              .border(3.dp, Orange, RoundedCornerShape(12.dp))
               .testTag("SearchBar"),
       textStyle =
           TextStyle(
-              color = colorScheme.onBackground, fontSize = 16.sp, fontWeight = FontWeight.Bold),
+              color = Orange, fontSize = 16.sp, fontWeight = FontWeight.Bold),
       shape = RoundedCornerShape(12.dp))
 }
 
