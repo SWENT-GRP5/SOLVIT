@@ -166,7 +166,7 @@ class EndToEndSeekerCreateRequest {
     }
 
     composeTestRule.onNodeWithTag("emailInput").performTextInput(email)
-    composeTestRule.onNodeWithTag("password").performTextInput(password)
+    composeTestRule.onNodeWithTag("passwordInput").performTextInput(password)
     composeTestRule.onNodeWithTag("signInButton").performClick()
 
     // Wait for the services screen to be displayed
