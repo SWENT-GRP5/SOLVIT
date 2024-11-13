@@ -134,7 +134,7 @@ fun SearchBar(searchQuery: MutableState<String>) {
         Icon(
             painter = painterResource(id = R.drawable.search_icon),
             contentDescription = "Search icon",
-            tint = colorScheme.onSurface,
+            tint = colorScheme.onBackground,
             modifier = Modifier.size(20.dp))
       },
       modifier =
