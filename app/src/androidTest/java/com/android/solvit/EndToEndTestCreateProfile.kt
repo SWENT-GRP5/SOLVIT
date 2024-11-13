@@ -150,7 +150,7 @@ class EndToEndTestCreateProfile {
     val password = "password"
 
     composeTestRule.onNodeWithTag("emailInputField").performTextInput(email)
-    composeTestRule.onNodeWithTag("passwordInput").performTextInput(password)
+    composeTestRule.onNodeWithTag("passwordInputField").performTextInput(password)
     composeTestRule.onNodeWithTag("confirmPasswordInput").performTextInput(password)
     composeTestRule.onNodeWithTag("signUpButton").performClick()
     assertEquals(email, authViewModel.email.value)
