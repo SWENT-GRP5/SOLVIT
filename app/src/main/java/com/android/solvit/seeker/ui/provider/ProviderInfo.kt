@@ -13,6 +13,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.material3.MaterialTheme.colorScheme
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -166,24 +167,44 @@ fun ProviderHeader(provider: Provider) {
 
 @Composable
 fun ProviderTabs(selectedTabIndex: Int, onTabSelected: (Int) -> Unit) {
-  TabRow(
-      selectedTabIndex = selectedTabIndex,
-      modifier = Modifier.fillMaxWidth().testTag("providerTabs"),
-      containerColor = colorScheme.primary,
-      contentColor = colorScheme.onPrimary) {
+    TabRow(
+        selectedTabIndex = selectedTabIndex,
+        modifier = Modifier.fillMaxWidth().testTag("providerTabs"),
+        containerColor = colorScheme.primary,
+        contentColor = colorScheme.onPrimary,
+        indicator = { tabPositions ->
+            TabRowDefaults.Indicator(
+                modifier = Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
+                height = 3.dp,
+                color = colorScheme.onPrimary
+            )
+        }
+    ) {
         Tab(
             selected = selectedTabIndex == 0,
             onClick = { onTabSelected(0) },
-            modifier = Modifier.testTag("profileTab")) {
-              Text("Profile", modifier = Modifier.padding(16.dp), color = colorScheme.onPrimary)
-            }
+            modifier = Modifier.testTag("profileTab"),
+        ) {
+            Text(
+                "Profile",
+                modifier = Modifier.padding(16.dp),
+                color = if (selectedTabIndex == 0) colorScheme.onPrimary else colorScheme.onPrimary.copy(alpha = 0.6f),
+                fontWeight = if (selectedTabIndex == 0) FontWeight.Bold else FontWeight.Normal
+            )
+        }
         Tab(
             selected = selectedTabIndex == 1,
             onClick = { onTabSelected(1) },
-            modifier = Modifier.testTag("reviewsTab")) {
-              Text("Reviews", modifier = Modifier.padding(16.dp), color = colorScheme.onPrimary)
-            }
-      }
+            modifier = Modifier.testTag("reviewsTab")
+        ) {
+            Text(
+                "Reviews",
+                modifier = Modifier.padding(16.dp),
+                color = if (selectedTabIndex == 1) colorScheme.onPrimary else colorScheme.onPrimary.copy(alpha = 0.6f),
+                fontWeight = if (selectedTabIndex == 1) FontWeight.Bold else FontWeight.Normal
+            )
+        }
+    }
 }
 
 @Composable
