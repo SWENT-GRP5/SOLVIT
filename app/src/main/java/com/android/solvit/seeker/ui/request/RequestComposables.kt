@@ -83,7 +83,11 @@ fun TitleInput(title: String, onTitleChange: (String) -> Unit) {
       placeholder = { Text("Name your Request") },
       shape = RoundedCornerShape(12.dp),
       modifier = Modifier.fillMaxWidth().testTag("inputRequestTitle"),
-      colors = OutlinedTextFieldDefaults.colors(unfocusedContainerColor = Color.Transparent))
+      colors = OutlinedTextFieldDefaults.colors(
+          unfocusedContainerColor = Color.Transparent,
+          focusedBorderColor = colorScheme.secondary,
+          unfocusedBorderColor = colorScheme.onSurfaceVariant
+      ))
 }
 
 @Composable
@@ -95,7 +99,11 @@ fun DescriptionInput(description: String, onDescriptionChange: (String) -> Unit)
       placeholder = { Text("Describe your request") },
       shape = RoundedCornerShape(12.dp),
       modifier = Modifier.fillMaxWidth().height(150.dp).testTag("inputRequestDescription"),
-      colors = OutlinedTextFieldDefaults.colors(unfocusedContainerColor = Color.Transparent))
+      colors = OutlinedTextFieldDefaults.colors(
+          unfocusedContainerColor = Color.Transparent,
+          focusedBorderColor = colorScheme.secondary,
+          unfocusedBorderColor = colorScheme.onSurfaceVariant
+      ))
 }
 
 @Composable
@@ -124,7 +132,12 @@ fun ServiceTypeDropdown(
             Modifier.fillMaxWidth().testTag("inputServiceType").onFocusChanged { focusState ->
               if (!focusState.isFocused) onShowDropdownTypeChange(false)
             },
-        singleLine = true)
+        singleLine = true,
+        colors = OutlinedTextFieldDefaults.colors(
+            unfocusedContainerColor = Color.Transparent,
+            focusedBorderColor = colorScheme.secondary,
+            unfocusedBorderColor = colorScheme.onSurfaceVariant
+        ))
 
     DropdownMenu(
         expanded = showDropdownType,
@@ -133,8 +146,8 @@ fun ServiceTypeDropdown(
         modifier =
             Modifier.fillMaxWidth()
                 .heightIn(max = 200.dp)
-                .background(colorScheme.surface)
-                .border(1.dp, colorScheme.onSurface, shape = RoundedCornerShape(8.dp))
+                .background(colorScheme.surfaceVariant)
+                .border(1.dp, colorScheme.onSurfaceVariant, shape = RoundedCornerShape(8.dp))
                 .padding(start = 8.dp, end = 8.dp)
                 .testTag("serviceTypeMenu")) {
           filteredServiceTypes.forEach { serviceType ->
@@ -183,7 +196,7 @@ fun LocationDropdown(
     locationSuggestions: List<Location>,
     onLocationSelected: (Location) -> Unit,
     requestLocation: Location?,
-    backgroundColor: Color = colorScheme.surface,
+    backgroundColor: Color = colorScheme.surfaceVariant,
     debounceDelay: Long = 1001L, // debounce delay longer than 1 second,
     isValueOk: Boolean = false,
     errorMessage: String = "Invalid location" // Default error message
@@ -263,7 +276,7 @@ fun LocationDropdown(
             Modifier.fillMaxWidth()
                 .heightIn(max = 200.dp)
                 .background(backgroundColor)
-                .border(1.dp, colorScheme.onSurface, shape = RoundedCornerShape(8.dp))
+                .border(1.dp, colorScheme.onSurfaceVariant, shape = RoundedCornerShape(8.dp))
                 .padding(start = 8.dp, end = 8.dp)) {
           locationSuggestions.forEach { location ->
             DropdownMenuItem(
@@ -342,7 +355,12 @@ fun DatePickerFieldToModal(
                 showModal = true
               }
             }
-          })
+          },
+      colors = OutlinedTextFieldDefaults.colors(
+          unfocusedContainerColor = Color.Transparent,
+          focusedBorderColor = colorScheme.secondary,
+          unfocusedBorderColor = colorScheme.onSurfaceVariant
+      ))
 
   if (showModal) {
     DatePickerModal(
