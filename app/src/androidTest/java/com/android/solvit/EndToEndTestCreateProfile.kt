@@ -181,6 +181,6 @@ class EndToEndTestCreateProfile {
       composeTestRule.onNodeWithTag("ProfileTopBar").isDisplayed()
     }
 
-    Firebase.auth.currentUser?.delete()
+    // Firebase.auth.currentUser?.delete()
   }
 }
