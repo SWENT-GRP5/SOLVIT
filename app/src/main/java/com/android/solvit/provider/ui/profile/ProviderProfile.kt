@@ -49,8 +49,6 @@ import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
-import com.google.firebase.Firebase
-import com.google.firebase.auth.auth
 
 @Composable
 fun ProviderProfileScreen(
@@ -59,9 +57,10 @@ fun ProviderProfileScreen(
     authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory),
     navigationActions: NavigationActions
 ) {
-  val userId = Firebase.auth.currentUser?.uid ?: "-1"
+  val user = authViewModel.user.collectAsState()
+  val userId = user.value?.uid ?: "-1"
   val provider =
-      listProviderViewModel.providersList.collectAsState().value.first { it.uid == userId }
+      listProviderViewModel.providersList.collectAsState().value.find { it.uid == userId } ?: return
   Column(modifier = Modifier.fillMaxSize().background(Color.White)) {
     ProfileHeader(navigationActions, provider, authViewModel)
     Spacer(modifier = Modifier.height(10.dp))
