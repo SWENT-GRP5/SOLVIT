@@ -167,44 +167,43 @@ fun ProviderHeader(provider: Provider) {
 
 @Composable
 fun ProviderTabs(selectedTabIndex: Int, onTabSelected: (Int) -> Unit) {
-    TabRow(
-        selectedTabIndex = selectedTabIndex,
-        modifier = Modifier.fillMaxWidth().testTag("providerTabs"),
-        containerColor = colorScheme.primary,
-        contentColor = colorScheme.onPrimary,
-        indicator = { tabPositions ->
-            TabRowDefaults.Indicator(
-                modifier = Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
-                height = 3.dp,
-                color = colorScheme.onPrimary
-            )
-        }
-    ) {
+  TabRow(
+      selectedTabIndex = selectedTabIndex,
+      modifier = Modifier.fillMaxWidth().testTag("providerTabs"),
+      containerColor = colorScheme.primary,
+      contentColor = colorScheme.onPrimary,
+      indicator = { tabPositions ->
+        TabRowDefaults.Indicator(
+            modifier = Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
+            height = 3.dp,
+            color = colorScheme.onPrimary)
+      }) {
         Tab(
             selected = selectedTabIndex == 0,
             onClick = { onTabSelected(0) },
             modifier = Modifier.testTag("profileTab"),
         ) {
-            Text(
-                "Profile",
-                modifier = Modifier.padding(16.dp),
-                color = if (selectedTabIndex == 0) colorScheme.onPrimary else colorScheme.onPrimary.copy(alpha = 0.6f),
-                fontWeight = if (selectedTabIndex == 0) FontWeight.Bold else FontWeight.Normal
-            )
+          Text(
+              "Profile",
+              modifier = Modifier.padding(16.dp),
+              color =
+                  if (selectedTabIndex == 0) colorScheme.onPrimary
+                  else colorScheme.onPrimary.copy(alpha = 0.6f),
+              fontWeight = if (selectedTabIndex == 0) FontWeight.Bold else FontWeight.Normal)
         }
         Tab(
             selected = selectedTabIndex == 1,
             onClick = { onTabSelected(1) },
-            modifier = Modifier.testTag("reviewsTab")
-        ) {
-            Text(
-                "Reviews",
-                modifier = Modifier.padding(16.dp),
-                color = if (selectedTabIndex == 1) colorScheme.onPrimary else colorScheme.onPrimary.copy(alpha = 0.6f),
-                fontWeight = if (selectedTabIndex == 1) FontWeight.Bold else FontWeight.Normal
-            )
-        }
-    }
+            modifier = Modifier.testTag("reviewsTab")) {
+              Text(
+                  "Reviews",
+                  modifier = Modifier.padding(16.dp),
+                  color =
+                      if (selectedTabIndex == 1) colorScheme.onPrimary
+                      else colorScheme.onPrimary.copy(alpha = 0.6f),
+                  fontWeight = if (selectedTabIndex == 1) FontWeight.Bold else FontWeight.Normal)
+            }
+      }
 }
 
 @Composable
