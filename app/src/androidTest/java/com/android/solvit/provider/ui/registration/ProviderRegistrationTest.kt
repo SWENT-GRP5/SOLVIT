@@ -20,6 +20,7 @@ import com.android.solvit.shared.model.map.LocationViewModel
 import com.android.solvit.shared.model.provider.ProviderRepository
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
+import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -173,19 +174,22 @@ class ProviderRegistrationTest {
 
   @Test
   fun locMenuExpandsWithInput() {
-    composeTestRule.setContent {
-      ProviderRegistrationScreen(
+    runBlocking {
+      composeTestRule.setContent {
+        ProviderRegistrationScreen(
           viewModel = listProviderViewModel,
           navigationActions = navigationActions,
-          locationViewModel = locationViewModel)
+          locationViewModel = locationViewModel
+        )
+      }
+
+      composeTestRule.onNodeWithTag("inputRequestAddress").performTextInput("USA")
+      composeTestRule.waitUntil { locationViewModel.locationSuggestions.value.isNotEmpty() }
+
+      composeTestRule.onAllNodesWithTag("locationResult")[0].assertIsDisplayed()
+      composeTestRule.onAllNodesWithTag("locationResult")[1].assertIsDisplayed()
+      composeTestRule.onAllNodesWithTag("locationResult")[2].assertIsDisplayed()
     }
-
-    composeTestRule.onNodeWithTag("inputRequestAddress").performTextInput("USA")
-    composeTestRule.waitUntil { locationViewModel.locationSuggestions.value.isNotEmpty() }
-
-    composeTestRule.onAllNodesWithTag("locationResult")[0].assertIsDisplayed()
-    composeTestRule.onAllNodesWithTag("locationResult")[1].assertIsDisplayed()
-    composeTestRule.onAllNodesWithTag("locationResult")[2].assertIsDisplayed()
   }
 
   @Test

@@ -184,7 +184,9 @@ fun SpFilterBar(display: () -> Unit, listProviderViewModel: ListProviderViewMode
           filters.forEach { filter ->
             Card(
                 modifier =
-                    Modifier.wrapContentSize().clickable {
+                    Modifier
+                        .testTag("filterIcon")
+                        .wrapContentSize().clickable {
                       Toast.makeText(context, "Not Yet Implemented", Toast.LENGTH_LONG).show()
                     },
                 elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
@@ -218,7 +220,7 @@ fun SpFilterBar(display: () -> Unit, listProviderViewModel: ListProviderViewMode
                   painter =
                       painterResource(id = R.drawable.tune), // Make sure to use your SVG resource
                   contentDescription = "filter options",
-                  modifier = Modifier.padding(8.dp).size(32.dp).testTag("filterIcon"),
+                  modifier = Modifier.padding(8.dp).size(32.dp),
                   tint = colorScheme.onBackground)
             }
       }
