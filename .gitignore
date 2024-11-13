@@ -37,4 +37,4 @@ upload-keystore.jks
 /scraping/firebase_credentials.json
 
 # MacOS
-**/.DS_Store
+**/.DS_Storesecret.properties
