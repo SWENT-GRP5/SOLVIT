@@ -606,7 +606,8 @@ fun CustomOutlinedTextField(
             TextFieldDefaults.outlinedTextFieldColors(
                 focusedTextColor = colorScheme.onBackground,
                 unfocusedTextColor =
-                    if (value.isEmpty()) colorScheme.onSurfaceVariant else if (!isValueOk) colorScheme.error else colorScheme.onBackground,
+                    if (value.isEmpty()) colorScheme.onSurfaceVariant
+                    else if (!isValueOk) colorScheme.error else colorScheme.onBackground,
                 focusedBorderColor = if (isValueOk) colorScheme.secondary else colorScheme.primary,
                 unfocusedBorderColor =
                     when {
@@ -675,7 +676,9 @@ fun PasswordTextField(
           Icon(
               imageVector = Icons.Filled.Lock,
               contentDescription = contentDescription,
-              tint = if (passwordLengthComplete) colorScheme.secondary else colorScheme.onSurfaceVariant,
+              tint =
+                  if (passwordLengthComplete) colorScheme.secondary
+                  else colorScheme.onSurfaceVariant,
               modifier = Modifier.size(25.dp))
         },
         trailingIcon = {
@@ -687,7 +690,9 @@ fun PasswordTextField(
             Icon(
                 painter = image,
                 contentDescription = null,
-                tint = if (passwordLengthComplete) colorScheme.secondary else colorScheme.onSurfaceVariant,
+                tint =
+                    if (passwordLengthComplete) colorScheme.secondary
+                    else colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(24.dp))
           }
         },
@@ -696,8 +701,10 @@ fun PasswordTextField(
                 focusedTextColor = colorScheme.onBackground,
                 unfocusedTextColor =
                     if (value.isEmpty()) colorScheme.onSurfaceVariant
-                    else if (!passwordLengthComplete) colorScheme.error else colorScheme.onBackground,
-                focusedBorderColor = if (passwordLengthComplete) colorScheme.secondary else colorScheme.primary,
+                    else if (!passwordLengthComplete) colorScheme.error
+                    else colorScheme.onBackground,
+                focusedBorderColor =
+                    if (passwordLengthComplete) colorScheme.secondary else colorScheme.primary,
                 unfocusedBorderColor =
                     when {
                       value.isEmpty() -> colorScheme.onSurfaceVariant

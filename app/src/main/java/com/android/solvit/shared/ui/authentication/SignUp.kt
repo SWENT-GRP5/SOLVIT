@@ -259,7 +259,9 @@ fun SignUpButton(
                         Brush.horizontalGradient(
                             colors = listOf(colorScheme.primary, colorScheme.secondary))
                       } else {
-                        Brush.horizontalGradient(colors = listOf(colorScheme.onSurfaceVariant, colorScheme.onSurfaceVariant))
+                        Brush.horizontalGradient(
+                            colors =
+                                listOf(colorScheme.onSurfaceVariant, colorScheme.onSurfaceVariant))
                       },
                   shape = RoundedCornerShape(25.dp))
               .testTag("signUpButton"),
