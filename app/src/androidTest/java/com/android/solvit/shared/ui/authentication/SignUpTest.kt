@@ -20,6 +20,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.verify
+import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -125,13 +126,15 @@ class SignUpScreenTest {
 
   @Test
   fun signUp_formCompleteEnablesButton() {
-    composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
-    composeTestRule.waitForIdle()
-    composeTestRule.onNodeWithTag("emailInputField").performTextInput("test@test.com")
-    composeTestRule.onNodeWithTag("passwordInputField").performTextInput("password")
-    composeTestRule.onNodeWithTag("confirmPasswordInputField").performTextInput("password")
+    runBlocking {
+      composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
+      composeTestRule.waitForIdle()
+      composeTestRule.onNodeWithTag("emailInputField").performTextInput("test@test.com")
+      composeTestRule.onNodeWithTag("passwordInputField").performTextInput("password")
+      composeTestRule.onNodeWithTag("confirmPasswordInputField").performTextInput("password")
 
-    composeTestRule.onNodeWithTag("signUpButton").assertIsEnabled()
+      composeTestRule.onNodeWithTag("signUpButton").assertIsEnabled()
+    }
   }
 
   @Test
