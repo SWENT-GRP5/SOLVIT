@@ -180,5 +180,7 @@ class EndToEndTestCreateProfile {
     composeTestRule.waitUntil(timeoutMillis = 10000) {
       composeTestRule.onNodeWithTag("ProfileTopBar").isDisplayed()
     }
+
+    Firebase.auth.currentUser?.delete()
   }
 }
