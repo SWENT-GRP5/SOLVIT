@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -61,6 +62,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -70,6 +72,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -226,10 +229,11 @@ fun Title(title: String) {
 }
 
 @Composable
-fun Note(note: String = "5") {
+fun Note(note: String = "5", modifier: Modifier = Modifier) {
   Box(
       modifier =
-          Modifier.width(46.dp)
+          modifier
+              .width(46.dp)
               .height(24.dp)
               .background(color = Color(0xFF4D5652), shape = RoundedCornerShape(size = 59.dp))
               .testTag("Rating")) {
@@ -257,7 +261,6 @@ fun DisplayPopularProviders(
     listProviderViewModel: ListProviderViewModel,
     navigationActions: NavigationActions
 ) {
-
   LazyRow(
       modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("popularProviders"),
       horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.Start),
@@ -265,19 +268,32 @@ fun DisplayPopularProviders(
       userScrollEnabled = true,
   ) {
     items(providers.filter { it.popular }) { provider ->
+      val configuration = LocalConfiguration.current
+      val screenWidth = configuration.screenWidthDp.dp
+      // Calculate dynamic width based on screen size, e.g., make it 30% of screen width
+      val itemWidth = screenWidth * 0.3f
       Box(
           modifier =
-              Modifier.clip(RoundedCornerShape(16.dp)).clickable {
-                listProviderViewModel.selectProvider(provider)
-                navigationActions.navigateTo(Route.PROVIDER_PROFILE)
-              }) {
-            AsyncImage(
-                modifier = Modifier.width(141.dp).height(172.dp),
-                model = provider.imageUrl,
-                placeholder = painterResource(id = R.drawable.loading),
-                error = painterResource(id = R.drawable.error),
-                contentDescription = "provider image",
-                contentScale = ContentScale.Crop)
+              Modifier.width(itemWidth) // Dynamically set width
+                  .aspectRatio(0.82f) // Maintain aspect ratio for height
+                  .clip(RoundedCornerShape(16.dp))
+                  .clickable {
+                    listProviderViewModel.selectProvider(provider)
+                    navigationActions.navigateTo(Route.PROVIDER_PROFILE)
+                  }) {
+            Box {
+              AsyncImage(
+                  modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(16.dp)),
+                  model = provider.imageUrl.ifEmpty { R.drawable.empty_profile_img },
+                  placeholder = painterResource(id = R.drawable.loading),
+                  error = painterResource(id = R.drawable.error),
+                  contentDescription = "provider image",
+                  contentScale = ContentScale.Crop)
+              // Position Note in the top-left corner
+              Note(
+                  provider.rating.toString(),
+                  modifier = Modifier.align(Alignment.TopEnd).padding(4.dp))
+            }
             Box(
                 modifier =
                     Modifier.fillMaxWidth()
@@ -300,10 +316,10 @@ fun DisplayPopularProviders(
                           TextStyle(
                               fontSize = 16.sp,
                               fontWeight = FontWeight(400),
-                              color = Color(0xFFFFFFFF),
-                          ))
-                  Spacer(Modifier.width(40.dp))
-                  Note(provider.rating.toString())
+                              color = Color.White,
+                          ),
+                      maxLines = 2,
+                      overflow = TextOverflow.Ellipsis)
                 }
           }
     }
@@ -863,16 +879,15 @@ fun SelectProviderScreen(
     navigationActions: NavigationActions,
     locationViewModel: LocationViewModel = viewModel(factory = LocationViewModel.Factory)
 ) {
-
-  val providers by listProviderViewModel.providersListFiltered.collectAsState()
   val selectedService by listProviderViewModel.selectedService.collectAsState()
+  listProviderViewModel.filterProviders(
+      filter = { provider -> provider.service == selectedService }, "Service")
+  val providers by listProviderViewModel.providersListFiltered.collectAsState()
 
   var displayFilters by remember { mutableStateOf(false) }
   var displayByLocation by remember { mutableStateOf(false) }
   val sheetStateFilter = rememberModalBottomSheetState()
   val sheetStateLocation = rememberModalBottomSheetState()
-  Log.e("Select Provider Screen", "providers : $providers")
-  Log.e("Seeker UID", "${userId}")
   Scaffold(
       modifier = Modifier.fillMaxSize(),
       topBar = {
