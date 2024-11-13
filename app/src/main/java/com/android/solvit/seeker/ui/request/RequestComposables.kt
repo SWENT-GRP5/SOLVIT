@@ -83,11 +83,11 @@ fun TitleInput(title: String, onTitleChange: (String) -> Unit) {
       placeholder = { Text("Name your Request") },
       shape = RoundedCornerShape(12.dp),
       modifier = Modifier.fillMaxWidth().testTag("inputRequestTitle"),
-      colors = OutlinedTextFieldDefaults.colors(
-          unfocusedContainerColor = Color.Transparent,
-          focusedBorderColor = colorScheme.secondary,
-          unfocusedBorderColor = colorScheme.onSurfaceVariant
-      ))
+      colors =
+          OutlinedTextFieldDefaults.colors(
+              unfocusedContainerColor = Color.Transparent,
+              focusedBorderColor = colorScheme.secondary,
+              unfocusedBorderColor = colorScheme.onSurfaceVariant))
 }
 
 @Composable
@@ -99,11 +99,11 @@ fun DescriptionInput(description: String, onDescriptionChange: (String) -> Unit)
       placeholder = { Text("Describe your request") },
       shape = RoundedCornerShape(12.dp),
       modifier = Modifier.fillMaxWidth().height(150.dp).testTag("inputRequestDescription"),
-      colors = OutlinedTextFieldDefaults.colors(
-          unfocusedContainerColor = Color.Transparent,
-          focusedBorderColor = colorScheme.secondary,
-          unfocusedBorderColor = colorScheme.onSurfaceVariant
-      ))
+      colors =
+          OutlinedTextFieldDefaults.colors(
+              unfocusedContainerColor = Color.Transparent,
+              focusedBorderColor = colorScheme.secondary,
+              unfocusedBorderColor = colorScheme.onSurfaceVariant))
 }
 
 @Composable
@@ -133,11 +133,11 @@ fun ServiceTypeDropdown(
               if (!focusState.isFocused) onShowDropdownTypeChange(false)
             },
         singleLine = true,
-        colors = OutlinedTextFieldDefaults.colors(
-            unfocusedContainerColor = Color.Transparent,
-            focusedBorderColor = colorScheme.secondary,
-            unfocusedBorderColor = colorScheme.onSurfaceVariant
-        ))
+        colors =
+            OutlinedTextFieldDefaults.colors(
+                unfocusedContainerColor = Color.Transparent,
+                focusedBorderColor = colorScheme.secondary,
+                unfocusedBorderColor = colorScheme.onSurfaceVariant))
 
     DropdownMenu(
         expanded = showDropdownType,
@@ -356,11 +356,11 @@ fun DatePickerFieldToModal(
               }
             }
           },
-      colors = OutlinedTextFieldDefaults.colors(
-          unfocusedContainerColor = Color.Transparent,
-          focusedBorderColor = colorScheme.secondary,
-          unfocusedBorderColor = colorScheme.onSurfaceVariant
-      ))
+      colors =
+          OutlinedTextFieldDefaults.colors(
+              unfocusedContainerColor = Color.Transparent,
+              focusedBorderColor = colorScheme.secondary,
+              unfocusedBorderColor = colorScheme.onSurfaceVariant))
 
   if (showModal) {
     DatePickerModal(
