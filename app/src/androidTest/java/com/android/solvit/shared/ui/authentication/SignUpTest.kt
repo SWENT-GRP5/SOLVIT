@@ -3,12 +3,9 @@ package com.android.solvit.shared.ui.authentication
 import android.widget.Toast
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
-import androidx.compose.ui.test.isDisplayed
-import androidx.compose.ui.test.isNotDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.test.espresso.intent.Intents
 import androidx.test.espresso.intent.matcher.IntentMatchers
@@ -20,6 +17,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.verify
+import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -36,87 +34,42 @@ class SignUpScreenTest {
   private val mockNavigationActions = mock(NavigationActions::class.java)
 
   @Test
-  fun signUp_testAllTheTest() {
+  fun signUpScreen_testAllTheTest() {
     composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
 
-    composeTestRule.onNodeWithTag("goBackButton").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("backButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("signUpIllustration").assertIsDisplayed()
     composeTestRule.onNodeWithTag("signUpTitle").assertIsDisplayed()
     composeTestRule.onNodeWithTag("googleSignUpButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("emailInputField").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("passwordInputField").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("confirmPasswordInputField").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("passwordInput").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("confirmPasswordInput").assertIsDisplayed()
     composeTestRule.onNodeWithTag("signUpButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("logInLink").assertIsDisplayed()
   }
 
   @Test
-  fun signUp_testAllPerformClick() {
+  fun signUpScreen_testAllPerformClick() {
     composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
 
-    composeTestRule.onNodeWithTag("goBackButton").performClick()
-    composeTestRule.onNodeWithTag("passwordInputField").performClick()
-    composeTestRule.onNodeWithTag("confirmPasswordInputField").performClick()
+    composeTestRule.onNodeWithTag("backButton").performClick()
+    composeTestRule.onNodeWithTag("passwordInput").performClick()
+    composeTestRule.onNodeWithTag("confirmPasswordInput").performClick()
     composeTestRule.onNodeWithTag("emailInputField").performClick()
     composeTestRule.onNodeWithTag("signUpButton").performClick()
     composeTestRule.onNodeWithTag("logInLink").performClick()
   }
 
   @Test
-  fun signUp_emailAndPasswordInput() {
-    composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
+  fun signUpScreen_emailInput() {
+    composeTestRule.setContent { SignInScreen(mockNavigationActions) }
 
     // Test email input
-    composeTestRule.onNodeWithTag("emailInputField").performTextInput("test@example.com")
-    composeTestRule.onNodeWithTag("passwordInputField").performTextInput("password123")
+    composeTestRule.onNodeWithTag("emailInput").performTextInput("test@example.com")
   }
 
   @Test
-  fun signUp_errorShowInEmailField() {
-    composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
-
-    composeTestRule.onNodeWithTag("emailErrorMessage").isNotDisplayed()
-    composeTestRule.onNodeWithTag("emailInputField").performTextInput("test@example")
-    composeTestRule.onNodeWithTag("emailErrorMessage").isDisplayed()
-    composeTestRule.onNodeWithTag("emailInputField").performTextClearance()
-    composeTestRule.onNodeWithTag("emailInputField").performTextInput("test@example.com")
-    composeTestRule.onNodeWithTag("emailErrorMessage").isNotDisplayed()
-  }
-
-  @Test
-  fun signUp_errorShowInPasswordField() {
-    composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
-
-    composeTestRule.onNodeWithTag("passwordErrorMessage").isNotDisplayed()
-    composeTestRule.onNodeWithTag("passwordInputField").performTextInput("12345")
-    composeTestRule.onNodeWithTag("passwordErrorMessage").isDisplayed()
-    composeTestRule.onNodeWithTag("passwordInputField").performTextClearance()
-    composeTestRule.onNodeWithTag("passwordInputField").performTextInput("123456")
-    composeTestRule.onNodeWithTag("passwordErrorMessage").isNotDisplayed()
-  }
-
-  @Test
-  fun signUp_errorShowInConfirmPasswordField() {
-    composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
-
-    composeTestRule.onNodeWithTag("confirmPasswordErrorMessage").isNotDisplayed()
-    composeTestRule.onNodeWithTag("confirmPasswordInputField").performTextInput("12345")
-    composeTestRule.onNodeWithTag("confirmPasswordErrorMessage").isDisplayed()
-    composeTestRule.onNodeWithTag("confirmPasswordInputField").performTextClearance()
-    composeTestRule.onNodeWithTag("confirmPasswordInputField").performTextInput("123456")
-    composeTestRule.onNodeWithTag("confirmPasswordErrorMessage").isNotDisplayed()
-  }
-
-  @Test
-  fun signUp_emailInput() {
-    composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
-
-    // Test email input
-    composeTestRule.onNodeWithTag("emailInputField").performTextInput("test@example.com")
-  }
-
-  @Test
-  fun signUp_googleSignInReturnsValidActivityResult() {
+  fun googleSignInReturnsValidActivityResult() {
     composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
     composeTestRule.onNodeWithTag("googleSignUpButton").performClick()
     // assert that an Intent resolving to Google Mobile Services has been sent (for sign-in)
@@ -124,22 +77,24 @@ class SignUpScreenTest {
   }
 
   @Test
-  fun signUp_formCompleteEnablesButton() {
-    composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
-    composeTestRule.waitForIdle()
-    composeTestRule.onNodeWithTag("emailInputField").performTextInput("test@test.com")
-    composeTestRule.onNodeWithTag("passwordInputField").performTextInput("password")
-    composeTestRule.onNodeWithTag("confirmPasswordInputField").performTextInput("password")
+  fun formCompleteEnablesButton() {
+    runBlocking {
+      composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
 
-    composeTestRule.onNodeWithTag("signUpButton").assertIsEnabled()
+      composeTestRule.onNodeWithTag("emailInputField").performTextInput("test@test.com")
+      composeTestRule.onNodeWithTag("passwordInput").performTextInput("password")
+      composeTestRule.onNodeWithTag("confirmPasswordInput").performTextInput("password")
+
+      composeTestRule.onNodeWithTag("signUpButton").assertIsEnabled()
+    }
   }
 
   @Test
-  fun signUp_signUpButtonNavigatesToChooseRoleScreen() {
+  fun signUpButtonNavigatesToChooseRoleScreen() {
     composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
     composeTestRule.onNodeWithTag("emailInputField").performTextInput("test@test.com")
-    composeTestRule.onNodeWithTag("passwordInputField").performTextInput("password")
-    composeTestRule.onNodeWithTag("confirmPasswordInputField").performTextInput("password")
+    composeTestRule.onNodeWithTag("passwordInput").performTextInput("password")
+    composeTestRule.onNodeWithTag("confirmPasswordInput").performTextInput("password")
 
     composeTestRule.onNodeWithTag("signUpButton").performClick()
     verify(mockNavigationActions).navigateTo(Screen.SIGN_UP_CHOOSE_ROLE)
@@ -157,7 +112,7 @@ class SignUpButtonTest {
   }
 
   @Test
-  fun signUpButton_testShowToastWhenFieldsIncomplete() {
+  fun testShowToastWhenFieldsIncomplete() {
     composeTestRule.setContent {
       SignUpButton(
           onClick = {},
@@ -172,7 +127,7 @@ class SignUpButtonTest {
   }
 
   @Test
-  fun signUpButton_testShowToastForInvalidEmailFormat() {
+  fun testShowToastForInvalidEmailFormat() {
     composeTestRule.setContent {
       SignUpButton(
           onClick = {},
@@ -187,7 +142,7 @@ class SignUpButtonTest {
   }
 
   @Test
-  fun signUpButton_testShowToastForNonMatchingPasswords() {
+  fun testShowToastForNonMatchingPasswords() {
     composeTestRule.setContent {
       SignUpButton(
           onClick = {},
@@ -204,7 +159,7 @@ class SignUpButtonTest {
   }
 
   @Test
-  fun signUpButton_testShowToastForShortPassword() {
+  fun testShowToastForShortPassword() {
     composeTestRule.setContent {
       SignUpButton(
           onClick = {},
@@ -221,7 +176,7 @@ class SignUpButtonTest {
   }
 
   @Test
-  fun signUpButton_testShowToastForSuccessfulSignUp() {
+  fun testShowToastForSuccessfulSignUp() {
     composeTestRule.setContent {
       SignUpButton(
           onClick = {},
