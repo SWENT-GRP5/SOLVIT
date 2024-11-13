@@ -23,11 +23,11 @@ class SignUpChooseProfileTest {
   fun signUpChooseProfile_displaysAllComponents() {
     composeTestRule.setContent { SignUpChooseProfile(mockNavigationActions) }
 
-    composeTestRule.onNodeWithTag("backButton", useUnmergedTree = true).assertIsDisplayed()
+    composeTestRule.onNodeWithTag("goBackButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("roleIllustration").assertIsDisplayed()
     composeTestRule.onNodeWithTag("signUpAsTitle").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("customerButton").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("professionalButton").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("seekerButton").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("providerButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("learnMoreLink").assertIsDisplayed()
   }
 
@@ -35,9 +35,9 @@ class SignUpChooseProfileTest {
   fun signUpChooseProfile_performClick() {
     composeTestRule.setContent { SignUpChooseProfile(mockNavigationActions) }
 
-    composeTestRule.onNodeWithTag("backButton", useUnmergedTree = true).performClick()
-    composeTestRule.onNodeWithTag("customerButton").performClick()
-    composeTestRule.onNodeWithTag("professionalButton").performClick()
+    composeTestRule.onNodeWithTag("goBackButton").performClick()
+    composeTestRule.onNodeWithTag("seekerButton").performClick()
+    composeTestRule.onNodeWithTag("providerButton").performClick()
     composeTestRule.onNodeWithTag("learnMoreLink").performClick()
 
     verify(mockNavigationActions).goBack()

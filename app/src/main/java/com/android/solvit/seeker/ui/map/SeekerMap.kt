@@ -4,6 +4,7 @@ import android.content.pm.ActivityInfo
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -11,13 +12,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.android.solvit.R
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
-import com.android.solvit.seeker.ui.navigation.SeekerBottomNavigationMenu
+import com.android.solvit.seeker.ui.navigation.BottomNavigationMenu
 import com.android.solvit.shared.ui.map.MapScreen
 import com.android.solvit.shared.ui.map.MarkerData
 import com.android.solvit.shared.ui.map.RequestLocationPermission
+import com.android.solvit.shared.ui.map.imageBitmapFromUrl
 import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_CUSTOMER
 import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.android.solvit.shared.ui.navigation.Route
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
 
@@ -53,23 +57,36 @@ fun SeekerMapScreen(
   }
 
   // Create markers with detailed information for each provider
-  val providerMarkers =
-      providers.map { provider ->
-        MarkerData(
-            location = LatLng(provider.location.latitude, provider.location.longitude),
-            title = provider.name,
-            snippet = "${provider.description} - Rating: ${provider.rating}",
-            tag = "providerMarker-${provider.uid}")
-      }
+  val providerMarkers = remember { mutableStateOf<List<MarkerData>>(emptyList()) }
+
+  LaunchedEffect(providers) {
+    val markers =
+        providers.map { provider ->
+          val imageBitmap =
+              imageBitmapFromUrl(context, provider.imageUrl, R.drawable.empty_profile_img)
+          MarkerData(
+              location = LatLng(provider.location.latitude, provider.location.longitude),
+              title = provider.name,
+              snippet =
+                  provider.service.toString().replace("_", " ") + "\n" + provider.rating.toString(),
+              tag = "providerMarker-${provider.uid}",
+              image = imageBitmap,
+              onClick = {
+                providerViewModel.selectProvider(provider)
+                navigationActions.navigateTo(Route.PROVIDER_PROFILE)
+              })
+        }
+    providerMarkers.value = markers
+  }
 
   // Display the map with user location and provider markers
   MapScreen(
       userLocation = userLocation,
-      markers = providerMarkers,
+      markers = providerMarkers.value,
       bottomBar = {
-        SeekerBottomNavigationMenu(
+        BottomNavigationMenu(
             onTabSelect = { route -> navigationActions.navigateTo(route) },
             tabList = LIST_TOP_LEVEL_DESTINATION_CUSTOMER,
-            selectedItem = navigationActions.currentRoute())
+            selectedItem = Route.MAP)
       })
 }

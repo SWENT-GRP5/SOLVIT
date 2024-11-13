@@ -20,10 +20,10 @@ class ForgotPasswordTest {
   private val mockNavigationActions = mock(NavigationActions::class.java)
 
   @Test
-  fun signUpChooseProfile_displaysAllComponents() {
+  fun forgotPasswordTest_displaysAllComponents() {
     composeTestRule.setContent { ForgotPassword(mockNavigationActions) }
 
-    composeTestRule.onNodeWithTag("backButton", useUnmergedTree = true).assertIsDisplayed()
+    composeTestRule.onNodeWithTag("goBackButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("forgotPasswordImage").assertIsDisplayed()
     composeTestRule.onNodeWithTag("topAppBar").assertIsDisplayed()
     composeTestRule.onNodeWithTag("bigText").assertIsDisplayed()
@@ -32,10 +32,10 @@ class ForgotPasswordTest {
   }
 
   @Test
-  fun signUpChooseProfile_performClick() {
+  fun forgotPasswordTest_performClick() {
     composeTestRule.setContent { ForgotPassword(mockNavigationActions) }
 
-    composeTestRule.onNodeWithTag("backButton", useUnmergedTree = true).performClick()
+    composeTestRule.onNodeWithTag("goBackButton").performClick()
     composeTestRule.onNodeWithTag("emailInputField").performClick()
     composeTestRule.onNodeWithTag("Send reset link").performClick()
 

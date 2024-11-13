@@ -18,6 +18,7 @@ import androidx.navigation.navigation
 import com.android.solvit.provider.ui.calendar.ProviderCalendarScreen
 import com.android.solvit.provider.ui.map.ProviderMapScreen
 import com.android.solvit.provider.ui.profile.ProviderProfileScreen
+import com.android.solvit.provider.ui.request.ListRequestsFeedScreen
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.seeker.ui.map.SeekerMapScreen
@@ -45,7 +46,6 @@ import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.navigation.Screen
 import com.android.solvit.shared.ui.theme.SampleAppTheme
 import com.android.solvit.ui.message.MessageScreen
-import com.android.solvit.ui.requests.ListRequestsFeedScreen
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 
@@ -116,7 +116,8 @@ fun SharedUI(
     }
     composable(Screen.FORGOT_PASSWORD) { ForgotPassword(navigationActions) }
     composable(Screen.SEEKER_REGISTRATION_PROFILE) {
-      SeekerRegistrationScreen(seekerProfileViewModel, navigationActions, authViewModel)
+      SeekerRegistrationScreen(
+          seekerProfileViewModel, navigationActions, locationViewModel, authViewModel)
     }
   }
 }
@@ -148,7 +149,7 @@ fun SeekerUI(
     composable(Route.PROVIDER_PROFILE) {
       ProviderInfoScreen(navigationActions, listProviderViewModel, reviewViewModel)
     }
-    composable(Route.MESSAGE) { MessageScreen(navigationActions) }
+    composable(Route.MESSAGE) { MessageScreen() }
     composable(Route.CREATE_REQUEST) {
       CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
     }
@@ -160,7 +161,9 @@ fun SeekerUI(
     }
     composable(Route.MAP) { SeekerMapScreen(listProviderViewModel, navigationActions) }
     navigation(startDestination = Screen.PROFILE, route = Route.PROFILE) {
-      composable(Screen.PROFILE) { SeekerProfileScreen(seekerProfileViewModel, navigationActions) }
+      composable(Screen.PROFILE) {
+        SeekerProfileScreen(seekerProfileViewModel, authViewModel, navigationActions)
+      }
       composable(Screen.EDIT_PROFILE) {
         EditSeekerProfileScreen(seekerProfileViewModel, navigationActions, authViewModel)
       }
@@ -184,7 +187,7 @@ fun ProviderUI(
     composable(Route.MAP_OF_SEEKERS) { ProviderMapScreen(navigationActions = navigationActions) }
     composable(Screen.CALENDAR) { ProviderCalendarScreen(navigationActions = navigationActions) }
     composable(Screen.PROFESSIONAL_PROFILE) {
-      ProviderProfileScreen(listProviderViewModel, navigationActions)
+      ProviderProfileScreen(listProviderViewModel, authViewModel, navigationActions)
     }
   }
 }

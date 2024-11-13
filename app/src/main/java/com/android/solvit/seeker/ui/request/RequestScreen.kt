@@ -35,10 +35,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import com.android.solvit.seeker.ui.navigation.BottomNavigationMenu
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.service.Services
+import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_CUSTOMER
 import com.android.solvit.shared.ui.navigation.NavigationActions
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -82,7 +84,14 @@ fun RequestScreen(
   }
   Scaffold(
       modifier = Modifier.padding(16.dp).testTag("requestScreen"),
-      bottomBar = {},
+      bottomBar = {
+        if (screenTitle == "Create a new request") {
+          BottomNavigationMenu(
+              onTabSelect = { route -> navigationActions.navigateTo(route) },
+              tabList = LIST_TOP_LEVEL_DESTINATION_CUSTOMER,
+              selectedItem = navigationActions.currentRoute())
+        }
+      },
       topBar = {
         TopAppBar(
             title = { Text(screenTitle, Modifier.testTag("screenTitle")) },
