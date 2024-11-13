@@ -5,6 +5,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
@@ -17,6 +18,7 @@ import com.android.solvit.seeker.model.profile.UserRepositoryFirestore
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.shared.model.authentication.AuthRepository
 import com.android.solvit.shared.model.authentication.AuthViewModel
+import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.map.LocationRepository
 import com.android.solvit.shared.model.map.LocationViewModel
 import com.android.solvit.shared.model.provider.ProviderRepository
@@ -42,7 +44,10 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.`when`
+import org.mockito.kotlin.anyOrNull
 
 class EndToEndTestCreateProfile {
 
@@ -62,6 +67,12 @@ class EndToEndTestCreateProfile {
 
   private lateinit var navHostController: NavHostController
   private lateinit var navigationActions: NavigationActions
+  private val locations =
+      listOf(
+          Location(37.7749, -122.4194, "San Francisco"),
+          Location(34.0522, -118.2437, "Los Angeles"),
+          Location(40.7128, -74.0060, "New York"))
+
   @get:Rule val composeTestRule = createComposeRule()
 
   @Before
@@ -92,6 +103,12 @@ class EndToEndTestCreateProfile {
     locationViewModel = LocationViewModel(locationRepository)
     serviceRequestViewModel = ServiceRequestViewModel(serviceRequestRepository)
     reviewViewModel = ReviewViewModel(reviewRepository)
+
+    `when`(locationRepository.search(ArgumentMatchers.anyString(), anyOrNull(), anyOrNull()))
+        .thenAnswer { invocation ->
+          val onSuccess = invocation.getArgument<(List<Location>) -> Unit>(1)
+          onSuccess(locations)
+        }
   }
 
   @After
@@ -146,27 +163,30 @@ class EndToEndTestCreateProfile {
     composeTestRule.onNodeWithTag("signUpLink").performClick()
 
     assertEquals(Screen.SIGN_UP, navHostController.currentDestination?.route)
-    val email = "atest@test.com"
+    val email = "e2eTest20@test.com"
     val password = "password"
 
     composeTestRule.onNodeWithTag("emailInputField").performTextInput(email)
     composeTestRule.onNodeWithTag("passwordInputField").performTextInput(password)
-    composeTestRule.onNodeWithTag("confirmPasswordInput").performTextInput(password)
+    composeTestRule.onNodeWithTag("confirmPasswordInputField").performTextInput(password)
     composeTestRule.onNodeWithTag("signUpButton").performClick()
     assertEquals(email, authViewModel.email.value)
     assertEquals(password, authViewModel.password.value)
 
     assertEquals(Screen.SIGN_UP_CHOOSE_ROLE, navHostController.currentDestination?.route)
-    composeTestRule.onNodeWithTag("customerButton").performClick()
+    composeTestRule.onNodeWithTag("seekerButton").performClick()
     assertEquals("seeker", authViewModel.role.value)
 
     composeTestRule.waitUntil(timeoutMillis = 10000) {
       composeTestRule.onNodeWithTag("fullNameInput").isDisplayed()
     }
     composeTestRule.onNodeWithTag("fullNameInput").performTextInput("John Doe")
-    composeTestRule.onNodeWithTag("phoneNumberInput").performTextInput("123456789")
-    composeTestRule.onNodeWithTag("locationInput").performTextInput("123 Main St")
     composeTestRule.onNodeWithTag("userNameInput").performTextInput("JohnDoe123")
+    composeTestRule.onNodeWithTag("phoneNumberInput").performTextInput("123456789")
+    composeTestRule.onNodeWithTag("inputRequestAddress").performTextInput("EPFL")
+    composeTestRule.waitUntil { locationViewModel.locationSuggestions.value.isNotEmpty() }
+    composeTestRule.onAllNodesWithTag("locationResult")[0].performClick()
+
     composeTestRule.onNodeWithTag("completeRegistrationButton").performClick()
     composeTestRule.onNodeWithTag("savePreferencesButton").performClick()
     composeTestRule.onNodeWithTag("exploreServicesButton").performClick()
