@@ -295,7 +295,12 @@ fun CountryDropdownMenu() {
               }
         },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-        trailingIcon = { Icon(Icons.Default.ArrowDropDown, contentDescription = "Dropdown Icon", tint = colorScheme.onBackground) },
+        trailingIcon = {
+          Icon(
+              Icons.Default.ArrowDropDown,
+              contentDescription = "Dropdown Icon",
+              tint = colorScheme.onBackground)
+        },
         colors =
             TextFieldDefaults.outlinedTextFieldColors(
                 focusedBorderColor = colorScheme.secondary,
