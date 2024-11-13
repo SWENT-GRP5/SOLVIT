@@ -53,7 +53,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
@@ -67,8 +66,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.DefaultShadowColor
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -175,70 +172,57 @@ fun SpTopAppBar(
   }
 }
 
-@Composable 
+@Composable
 fun SpFilterBar(display: () -> Unit, listProviderViewModel: ListProviderViewModel) {
   val context = LocalContext.current
   val filters = listOf("Top Rates", "Top Prices", "Time")
 
   Row(
-      modifier = Modifier
-          .fillMaxWidth()
-          .padding(16.dp)
-          .testTag("filterBar"),
+      modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("filterBar"),
       horizontalArrangement = Arrangement.SpaceBetween,
-      verticalAlignment = Alignment.CenterVertically
-  ) {
-    Row(
-        modifier = Modifier.weight(1f),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-      filters.forEach { filter ->
-        Card(
-            modifier = Modifier
-                .wrapContentSize()
-                .clickable {
-                  Toast.makeText(context, "Not Yet Implemented", Toast.LENGTH_LONG).show()
-                },
-            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-            colors = CardDefaults.cardColors(containerColor = colorScheme.background),
-            border = BorderStroke(1.dp, colorScheme.primary),
-            shape = RoundedCornerShape(50)
-        ) {
-          Text(
-              text = filter,
-              fontSize = 16.sp,
-              lineHeight = 34.sp,
-              fontFamily = FontFamily(Font(R.font.roboto)),
-              fontWeight = FontWeight(400),
-              color = colorScheme.primary,
-              modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-          )
+      verticalAlignment = Alignment.CenterVertically) {
+        Row(modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+          filters.forEach { filter ->
+            Card(
+                modifier =
+                    Modifier.wrapContentSize().clickable {
+                      Toast.makeText(context, "Not Yet Implemented", Toast.LENGTH_LONG).show()
+                    },
+                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+                colors = CardDefaults.cardColors(containerColor = colorScheme.background),
+                border = BorderStroke(1.dp, colorScheme.primary),
+                shape = RoundedCornerShape(50)) {
+                  Text(
+                      text = filter,
+                      fontSize = 16.sp,
+                      lineHeight = 34.sp,
+                      fontFamily = FontFamily(Font(R.font.roboto)),
+                      fontWeight = FontWeight(400),
+                      color = colorScheme.primary,
+                      modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp))
+                }
+          }
         }
-      }
-    }
 
-    Spacer(modifier = Modifier.width(16.dp))
+        Spacer(modifier = Modifier.width(16.dp))
 
-      Card(
-          modifier = Modifier
-              .clickable {
-                  listProviderViewModel.refreshFilters()
-                  display()
-              }
-              .testTag("filterOption"),
-          elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-          colors = CardDefaults.cardColors(containerColor = colorScheme.background)
-      ) {
-          Icon(
-              painter = painterResource(id = R.drawable.tune), // Make sure to use your SVG resource
-              contentDescription = "filter options",
-              modifier = Modifier
-                  .padding(8.dp)
-                  .size(32.dp),
-              tint = colorScheme.onBackground
-          )
+        Card(
+            modifier =
+                Modifier.clickable {
+                      listProviderViewModel.refreshFilters()
+                      display()
+                    }
+                    .testTag("filterOption"),
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+            colors = CardDefaults.cardColors(containerColor = colorScheme.background)) {
+              Icon(
+                  painter =
+                      painterResource(id = R.drawable.tune), // Make sure to use your SVG resource
+                  contentDescription = "filter options",
+                  modifier = Modifier.padding(8.dp).size(32.dp),
+                  tint = colorScheme.onBackground)
+            }
       }
-  }
 }
 
 @Composable
@@ -298,12 +282,16 @@ fun DisplayPopularProviders(
     items(providers.filter { it.popular }) { provider ->
       Box(
           modifier =
-              Modifier
-                  .shadow(16.dp, shape = RoundedCornerShape(16.dp), ambientColor = colorScheme.primary, spotColor = colorScheme.primary)
-                  .clip(RoundedCornerShape(16.dp)).clickable {
-                listProviderViewModel.selectProvider(provider)
-                navigationActions.navigateTo(Route.PROVIDER_PROFILE)
-              }) {
+              Modifier.shadow(
+                      16.dp,
+                      shape = RoundedCornerShape(16.dp),
+                      ambientColor = colorScheme.primary,
+                      spotColor = colorScheme.primary)
+                  .clip(RoundedCornerShape(16.dp))
+                  .clickable {
+                    listProviderViewModel.selectProvider(provider)
+                    navigationActions.navigateTo(Route.PROVIDER_PROFILE)
+                  }) {
             AsyncImage(
                 modifier = Modifier.width(141.dp).height(172.dp),
                 model = provider.imageUrl,
@@ -351,58 +339,60 @@ fun ListProviders(
     items(providers) { provider ->
       Row(
           modifier = Modifier.fillMaxWidth(),
-          horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.Start)
-      ) {
-        Card(
-            modifier = Modifier.padding(horizontal = 16.dp).fillMaxWidth(),
-            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-        ) {
-          Row(
-              modifier =
-                  Modifier.fillMaxWidth()
-                      .background(
-                          color = colorScheme.background, shape = RoundedCornerShape(size = 16.dp))
-                      .clickable {
-                        listProviderViewModel.selectProvider(provider)
-                        navigationActions.navigateTo(Route.PROVIDER_PROFILE)
-                      },
-              horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.Start)) {
-                AsyncImage(
-                    modifier = Modifier.width(116.dp).height(85.dp).clip(RoundedCornerShape(12.dp)),
-                    model = provider.imageUrl,
-                    placeholder = painterResource(id = R.drawable.loading),
-                    error = painterResource(id = R.drawable.plumbierprvd),
-                    contentDescription = "provider image",
-                    contentScale = ContentScale.Crop)
-                Column(modifier = Modifier.weight(1f).padding(10.dp)) {
-                  Row {
-                    Text(
-                        text = provider.name,
-                        style =
-                            TextStyle(
-                                fontSize = 16.sp,
-                                lineHeight = 24.sp,
-                                fontWeight = FontWeight(400),
-                                color = colorScheme.onBackground,
-                                textAlign = TextAlign.Center,
-                            ))
-                    Spacer(Modifier.weight(1f))
-                    Note(provider.rating.toString())
-                  }
-                  Spacer(Modifier.height(12.dp))
-                  Text(
-                      text = provider.description,
-                      style =
-                          TextStyle(
-                              fontSize = 8.sp,
-                              lineHeight = 10.sp,
-                              fontWeight = FontWeight(400),
-                              color = colorScheme.onBackground.copy(alpha = 0.6f),
-                          ))
+          horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.Start)) {
+            Card(
+                modifier = Modifier.padding(horizontal = 16.dp).fillMaxWidth(),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)) {
+                  Row(
+                      modifier =
+                          Modifier.fillMaxWidth()
+                              .background(
+                                  color = colorScheme.background,
+                                  shape = RoundedCornerShape(size = 16.dp))
+                              .clickable {
+                                listProviderViewModel.selectProvider(provider)
+                                navigationActions.navigateTo(Route.PROVIDER_PROFILE)
+                              },
+                      horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.Start)) {
+                        AsyncImage(
+                            modifier =
+                                Modifier.width(116.dp)
+                                    .height(85.dp)
+                                    .clip(RoundedCornerShape(12.dp)),
+                            model = provider.imageUrl,
+                            placeholder = painterResource(id = R.drawable.loading),
+                            error = painterResource(id = R.drawable.plumbierprvd),
+                            contentDescription = "provider image",
+                            contentScale = ContentScale.Crop)
+                        Column(modifier = Modifier.weight(1f).padding(10.dp)) {
+                          Row {
+                            Text(
+                                text = provider.name,
+                                style =
+                                    TextStyle(
+                                        fontSize = 16.sp,
+                                        lineHeight = 24.sp,
+                                        fontWeight = FontWeight(400),
+                                        color = colorScheme.onBackground,
+                                        textAlign = TextAlign.Center,
+                                    ))
+                            Spacer(Modifier.weight(1f))
+                            Note(provider.rating.toString())
+                          }
+                          Spacer(Modifier.height(12.dp))
+                          Text(
+                              text = provider.description,
+                              style =
+                                  TextStyle(
+                                      fontSize = 8.sp,
+                                      lineHeight = 10.sp,
+                                      fontWeight = FontWeight(400),
+                                      color = colorScheme.onBackground.copy(alpha = 0.6f),
+                                  ))
+                        }
+                      }
                 }
-              }
-        }
-      }
+          }
     }
   }
 }
