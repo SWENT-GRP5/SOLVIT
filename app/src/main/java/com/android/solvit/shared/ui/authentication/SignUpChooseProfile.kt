@@ -158,7 +158,11 @@ fun ButtonCustomerProvider(
                         shape = RoundedCornerShape(10.dp))
                     .clickable { onClickButton() },
             contentAlignment = Alignment.Center) {
-              Text(text = text, color = colorScheme.onPrimary, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+              Text(
+                  text = text,
+                  color = colorScheme.onPrimary,
+                  fontWeight = FontWeight.Bold,
+                  fontSize = 20.sp)
             }
 
         Spacer(modifier = Modifier.height(8.dp))

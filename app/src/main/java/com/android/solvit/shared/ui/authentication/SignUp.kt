@@ -265,7 +265,11 @@ fun SignUpButton(
               .testTag("signUpButton"),
       shape = RoundedCornerShape(25.dp),
       colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)) {
-        Text("Sign Up", color = colorScheme.onPrimary, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+        Text(
+            "Sign Up",
+            color = colorScheme.onPrimary,
+            fontWeight = FontWeight.Bold,
+            fontSize = 16.sp)
       }
 }
 

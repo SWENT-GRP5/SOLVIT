@@ -30,10 +30,8 @@ import org.mockito.kotlin.verify
 @RunWith(AndroidJUnit4::class)
 class SignUpScreenTest {
 
-  @get:Rule
-  val composeTestRule = createComposeRule()
-  @get:Rule
-  val intentsTestRule = IntentsRule()
+  @get:Rule val composeTestRule = createComposeRule()
+  @get:Rule val intentsTestRule = IntentsRule()
 
   private val mockNavigationActions = mock(NavigationActions::class.java)
 
@@ -150,8 +148,7 @@ class SignUpScreenTest {
   }
 
   class SignUpButtonTest {
-    @get:Rule
-    val composeTestRule = createComposeRule()
+    @get:Rule val composeTestRule = createComposeRule()
 
     @Before
     fun setup() {
@@ -164,12 +161,11 @@ class SignUpScreenTest {
     fun signUpButton_testShowToastWhenFieldsIncomplete() {
       composeTestRule.setContent {
         SignUpButton(
-          onClick = {},
-          isComplete = false,
-          goodFormEmail = true,
-          passwordLengthComplete = true,
-          samePassword = true
-        )
+            onClick = {},
+            isComplete = false,
+            goodFormEmail = true,
+            passwordLengthComplete = true,
+            samePassword = true)
       }
       composeTestRule.onNodeWithTag("signUpButton").performClick()
 
@@ -180,12 +176,11 @@ class SignUpScreenTest {
     fun signUpButton_testShowToastForInvalidEmailFormat() {
       composeTestRule.setContent {
         SignUpButton(
-          onClick = {},
-          isComplete = true,
-          goodFormEmail = false,
-          passwordLengthComplete = true,
-          samePassword = true
-        )
+            onClick = {},
+            isComplete = true,
+            goodFormEmail = false,
+            passwordLengthComplete = true,
+            samePassword = true)
       }
       composeTestRule.onNodeWithTag("signUpButton").performClick()
 
@@ -196,12 +191,11 @@ class SignUpScreenTest {
     fun signUpButton_testShowToastForNonMatchingPasswords() {
       composeTestRule.setContent {
         SignUpButton(
-          onClick = {},
-          isComplete = true,
-          goodFormEmail = true,
-          passwordLengthComplete = true,
-          samePassword = false
-        )
+            onClick = {},
+            isComplete = true,
+            goodFormEmail = true,
+            passwordLengthComplete = true,
+            samePassword = false)
       }
       composeTestRule.onNodeWithTag("signUpButton").performClick()
 
@@ -214,12 +208,11 @@ class SignUpScreenTest {
     fun signUpButton_testShowToastForShortPassword() {
       composeTestRule.setContent {
         SignUpButton(
-          onClick = {},
-          isComplete = true,
-          goodFormEmail = true,
-          passwordLengthComplete = false,
-          samePassword = true
-        )
+            onClick = {},
+            isComplete = true,
+            goodFormEmail = true,
+            passwordLengthComplete = false,
+            samePassword = true)
       }
       composeTestRule.onNodeWithTag("signUpButton").performClick()
 
@@ -232,12 +225,11 @@ class SignUpScreenTest {
     fun signUpButton_testShowToastForSuccessfulSignUp() {
       composeTestRule.setContent {
         SignUpButton(
-          onClick = {},
-          isComplete = true,
-          goodFormEmail = true,
-          passwordLengthComplete = true,
-          samePassword = true
-        )
+            onClick = {},
+            isComplete = true,
+            goodFormEmail = true,
+            passwordLengthComplete = true,
+            samePassword = true)
       }
       composeTestRule.onNodeWithTag("signUpButton").performClick()
 

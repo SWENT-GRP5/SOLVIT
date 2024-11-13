@@ -394,7 +394,10 @@ fun FormSection(
         ClickableText(
             text = AnnotatedString("Forgot password?"),
             onClick = { navigationActions.navigateTo(Screen.FORGOT_PASSWORD) },
-            style = TextStyle(color = colorScheme.onSurfaceVariant, textDecoration = TextDecoration.Underline),
+            style =
+                TextStyle(
+                    color = colorScheme.onSurfaceVariant,
+                    textDecoration = TextDecoration.Underline),
             modifier = Modifier.wrapContentWidth(Alignment.End).testTag("forgotPasswordLink"))
       }
 
