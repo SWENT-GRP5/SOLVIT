@@ -13,11 +13,14 @@ class MarketDataTest {
             location = LatLng(45.0, 90.0),
             title = "Test Marker",
             snippet = "Test Snippet",
-            tag = "Test Tag")
+            tag = "Test Tag",
+            image = null,
+            onClick = {})
     assertEquals(45.0, markerData.location.latitude, 0.0)
     assertEquals(90.0, markerData.location.longitude, 0.0)
     assertEquals("Test Marker", markerData.title)
     assertEquals("Test Snippet", markerData.snippet)
+    assertEquals("Test Tag", markerData.tag)
   }
 
   @Test
@@ -27,7 +30,9 @@ class MarketDataTest {
             location = LatLng(-45.0, -90.0),
             title = "Negative Marker",
             snippet = "Negative Snippet",
-            tag = "Negative Tag")
+            tag = "Negative Tag",
+            image = null,
+            onClick = {})
     assertEquals(-45.0, markerData.location.latitude, 0.0)
     assertEquals(-90.0, markerData.location.longitude, 0.0)
     assertEquals("Negative Marker", markerData.title)
@@ -41,7 +46,9 @@ class MarketDataTest {
             location = LatLng(45.0, 90.0),
             title = "Test Marker",
             snippet = "Test Snippet",
-            tag = "Test Tag")
+            tag = "Test Tag",
+            image = null,
+            onClick = {})
     assertEquals(LatLng(45.0, 90.0), markerData.location)
   }
 
@@ -52,7 +59,9 @@ class MarketDataTest {
             location = LatLng(45.0, 90.0),
             title = "Test Marker",
             snippet = "Test Snippet",
-            tag = "Test Tag")
+            tag = "Test Tag",
+            image = null,
+            onClick = {})
     assertEquals("Test Marker", markerData.title)
   }
 
@@ -63,7 +72,9 @@ class MarketDataTest {
             location = LatLng(45.0, 90.0),
             title = "Test Marker",
             snippet = "Test Snippet",
-            tag = "Test Tag")
+            tag = "Test Tag",
+            image = null,
+            onClick = {})
     assertEquals("Test Snippet", markerData.snippet)
   }
 
@@ -74,7 +85,9 @@ class MarketDataTest {
             location = LatLng(45.0, 90.0),
             title = "Test Marker",
             snippet = "Test Snippet",
-            tag = "Test Tag")
+            tag = "Test Tag",
+            image = null,
+            onClick = {})
     assertEquals("Test Tag", markerData.tag)
   }
 }
