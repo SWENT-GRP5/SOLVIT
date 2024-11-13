@@ -27,6 +27,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -83,7 +84,8 @@ fun OpeningScreenPortrait(navigationActions: NavigationActions) {
                   text = "Your Problem, Our Priority",
                   fontSize = 18.sp,
                   color = Color(102, 102, 102),
-                  modifier = Modifier.testTag("taglinePortrait"))
+                  modifier = Modifier.testTag("taglinePortrait"),
+                  textAlign = TextAlign.Center)
               Text(
                   text = "Tap to Continue",
                   fontSize = 18.sp,
@@ -144,7 +146,8 @@ fun OpeningScreenLandscape(navigationActions: NavigationActions) {
                         text = "Your Problem, Our Priority",
                         fontSize = 18.sp,
                         color = Color(102, 102, 102),
-                        modifier = Modifier.testTag("taglineLandscape"))
+                        modifier = Modifier.testTag("taglineLandscape"),
+                        textAlign = TextAlign.Center)
 
                     Spacer(modifier = Modifier.height(8.dp))
 

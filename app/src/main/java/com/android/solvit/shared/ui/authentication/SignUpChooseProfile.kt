@@ -10,7 +10,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,6 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -34,10 +34,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -181,24 +184,32 @@ fun SectionTitle(text: String, testTag: String = "") {
 fun LearnMoreSection() {
   val context = LocalContext.current
 
-  Column(
-      horizontalAlignment = Alignment.CenterHorizontally,
-      verticalArrangement = Arrangement.Center,
-      modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-          Text("Not sure? ", color = Color.Gray)
-          Text(
-              text = "Learn more",
-              color = Color(0, 153, 255),
-              style = TextStyle(textDecoration = TextDecoration.Underline),
-              modifier =
-                  Modifier.clickable {
-                        Toast.makeText(context, "Not implemented yet", Toast.LENGTH_SHORT).show()
-                      }
-                      .testTag("learnMoreLink"))
-          Text(" about becoming a", color = Color.Gray)
+  val annotatedText = buildAnnotatedString {
+    append("Not sure? ")
+
+    pushStringAnnotation(tag = "URL", annotation = "learn_more")
+    withStyle(
+        style = SpanStyle(color = Color(0, 153, 255), textDecoration = TextDecoration.Underline)) {
+          append("Learn more")
         }
-        Spacer(modifier = Modifier.height(5.dp))
-        Text("Customer or Provider.", color = Color.Gray)
-      }
+    pop()
+
+    append(" about becoming a Customer or Provider.")
+  }
+
+  Box(
+      modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
+      contentAlignment = Alignment.Center,
+  ) {
+    ClickableText(
+        text = annotatedText,
+        style = TextStyle(color = Color.Gray, fontSize = 16.sp, textAlign = TextAlign.Center),
+        onClick = { offset ->
+          annotatedText
+              .getStringAnnotations(tag = "URL", start = offset, end = offset)
+              .firstOrNull()
+              ?.let { Toast.makeText(context, "Not implemented yet", Toast.LENGTH_SHORT).show() }
+        },
+        modifier = Modifier.fillMaxWidth().testTag("learnMoreLink"))
+  }
 }

@@ -324,9 +324,9 @@ fun SeekerRegistrationScreen(
 fun Stepper(currentStep: Int, isFormComplete: Boolean) {
   val stepLabels = listOf("Information", "Details", "All Done")
   Row(
-      modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
-      horizontalArrangement = Arrangement.SpaceBetween,
-      verticalAlignment = Alignment.CenterVertically) {
+      modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+      horizontalArrangement = Arrangement.Start,
+      verticalAlignment = Alignment.Top) {
         stepLabels.forEachIndexed { index, label ->
           StepCircle(
               stepNumber = index + 1,
@@ -335,7 +335,7 @@ fun Stepper(currentStep: Int, isFormComplete: Boolean) {
           )
 
           if (index < stepLabels.size - 1) {
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.weight(1f))
           }
         }
       }
@@ -343,20 +343,17 @@ fun Stepper(currentStep: Int, isFormComplete: Boolean) {
 
 @Composable
 fun StepCircle(stepNumber: Int, isCompleted: Boolean, label: String) {
-
-  // Use a Column to stack the circle and the label vertically
   val testTag = "stepCircle-$stepNumber-${if (isCompleted) "completed" else "incomplete"}"
 
   Column(
       horizontalAlignment = Alignment.CenterHorizontally,
-      verticalArrangement = Arrangement.Center,
-      modifier = Modifier.width(80.dp).testTag(testTag) // Set a width for alignment
-      ) {
+      modifier = Modifier.width(100.dp).testTag(testTag)) {
         Box(
             modifier =
                 Modifier.size(40.dp)
                     .background(
-                        if (isCompleted) Color(0xFF28A745) else Color.Gray, shape = CircleShape),
+                        color = if (isCompleted) Color(0xFF28A745) else Color.Gray,
+                        shape = CircleShape),
             contentAlignment = Alignment.Center) {
               Text(
                   text = if (isCompleted) "✔" else stepNumber.toString(),
@@ -364,12 +361,11 @@ fun StepCircle(stepNumber: Int, isCompleted: Boolean, label: String) {
                   style = MaterialTheme.typography.titleLarge)
             }
 
-        // Display the label below the circle
         Text(
             text = label,
-            color = Color.Black, // You can customize this color
+            color = Color.Black,
             style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(top = 4.dp) // Add space between circle and label
-            )
+            modifier = Modifier.padding(top = 4.dp),
+            textAlign = TextAlign.Center)
       }
 }

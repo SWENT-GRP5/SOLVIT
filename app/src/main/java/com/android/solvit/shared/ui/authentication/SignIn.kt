@@ -13,7 +13,9 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -22,7 +24,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
@@ -61,13 +63,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -307,7 +311,6 @@ fun LogoSection() {
         fontWeight = FontWeight.Bold,
         color = Color(0, 153, 255),
         modifier = Modifier.testTag("welcomeText"))
-    // Spacer(modifier = Modifier.height(4.dp))
     Text(text = "Sign in to continue", color = Color.Black)
   }
 }
@@ -370,11 +373,12 @@ fun FormSection(
   Spacer(modifier = Modifier.height(8.dp))
 
   // Remember me & Forgot password
-  Row(
-      modifier = Modifier.fillMaxWidth(),
-      horizontalArrangement = Arrangement.SpaceBetween,
-      verticalAlignment = Alignment.CenterVertically) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+  Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+    // Section Remember Me
+    Row(
+        modifier = Modifier.weight(1f),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center) {
           Checkbox(
               checked = isChecked,
               onCheckedChange = onCheckedChange,
@@ -384,18 +388,29 @@ fun FormSection(
                       checkmarkColor = Color.White,
                       uncheckedColor = Color.Gray,
                       checkedColor = Color(90, 197, 97)))
+          Spacer(modifier = Modifier.width(4.dp))
           Text(
-              text = " Remember me",
+              text = "Remember me",
               modifier = Modifier.testTag("rememberMeCheckbox"),
-              color = Color.Gray)
+              color = Color.Gray,
+              fontSize = 16.sp)
         }
 
-        ClickableText(
-            text = AnnotatedString("Forgot password?"),
-            onClick = { navigationActions.navigateTo(Screen.FORGOT_PASSWORD) },
-            style = TextStyle(color = Color.Gray, textDecoration = TextDecoration.Underline),
-            modifier = Modifier.wrapContentWidth(Alignment.End).testTag("forgotPasswordLink"))
-      }
+    // Section Forgot Password
+    Row(
+        modifier = Modifier.weight(1f),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically) {
+          Text(
+              text = "Forgot password?",
+              color = Color.Gray,
+              fontSize = 16.sp,
+              textDecoration = TextDecoration.Underline,
+              modifier =
+                  Modifier.clickable { navigationActions.navigateTo(Screen.FORGOT_PASSWORD) }
+                      .testTag("forgotPasswordLink"))
+        }
+  }
 
   Spacer(modifier = Modifier.height(16.dp))
 
@@ -431,13 +446,30 @@ fun FormSection(
 
 @Composable
 fun SignUpSection(navigationActions: NavigationActions) {
-  Row(verticalAlignment = Alignment.CenterVertically) {
-    Text("I'm new user, ", color = Color.Gray)
+  val annotatedText = buildAnnotatedString {
+    append("I'm new user, ")
+
+    pushStringAnnotation(tag = "Sign up", annotation = "sign up")
+    withStyle(style = SpanStyle(color = Color.Blue, textDecoration = TextDecoration.Underline)) {
+      append("Sign up")
+    }
+    pop()
+  }
+
+  Box(
+      modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
+      contentAlignment = Alignment.Center,
+  ) {
     ClickableText(
-        text = AnnotatedString("Sign up"),
-        onClick = { navigationActions.navigateTo(Screen.SIGN_UP) },
-        style = TextStyle(color = Color.Blue, textDecoration = TextDecoration.Underline),
-        modifier = Modifier.testTag("signUpLink"))
+        text = annotatedText,
+        style = TextStyle(color = Color.Gray, fontSize = 16.sp, textAlign = TextAlign.Center),
+        onClick = { offset ->
+          annotatedText
+              .getStringAnnotations(tag = "Sign up", start = offset, end = offset)
+              .firstOrNull()
+              ?.let { navigationActions.navigateTo(Screen.SIGN_UP) }
+        },
+        modifier = Modifier.fillMaxWidth().testTag("signUpLink"))
   }
 }
 

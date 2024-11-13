@@ -14,6 +14,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -51,11 +52,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -316,12 +319,29 @@ fun googleRegisterLauncher(
 
 @Composable
 fun AlreadyHaveAccountText(navigationActions: NavigationActions) {
-  Row(verticalAlignment = Alignment.CenterVertically) {
-    Text("Already have an account? ", color = Color.Gray)
+  val annotatedText = buildAnnotatedString {
+    append("Already have an account? ")
+
+    pushStringAnnotation(tag = "Log in", annotation = "log_in")
+    withStyle(style = SpanStyle(color = Color.Blue, textDecoration = TextDecoration.Underline)) {
+      append("Log up in here !")
+    }
+    pop()
+  }
+
+  Box(
+      modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
+      contentAlignment = Alignment.Center,
+  ) {
     ClickableText(
-        text = AnnotatedString("Log up in here!"),
-        onClick = { navigationActions.navigateTo(Screen.SIGN_IN) },
-        style = TextStyle(color = Color.Blue, textDecoration = TextDecoration.Underline),
-        modifier = Modifier.testTag("logInLink"))
+        text = annotatedText,
+        style = TextStyle(color = Color.Gray, fontSize = 16.sp, textAlign = TextAlign.Center),
+        onClick = { offset ->
+          annotatedText
+              .getStringAnnotations(tag = "Log in", start = offset, end = offset)
+              .firstOrNull()
+              ?.let { navigationActions.navigateTo(Screen.SIGN_IN) }
+        },
+        modifier = Modifier.fillMaxWidth().testTag("logInLink"))
   }
 }
