@@ -73,239 +73,235 @@ fun SeekerProfileScreen(
     navigationActions: NavigationActions,
     authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory)
 ) {
-    // Lock Orientation to Portrait
-    val context = LocalContext.current
-    DisposableEffect(Unit) {
-        val activity = context as? ComponentActivity
-        activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-        onDispose { activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED }
-    }
-    // Collect the user profile from the StateFlow
-    val user by authViewModel.user.collectAsState()
-    val userProfile by viewModel.seekerProfile.collectAsState()
-    user?.let { viewModel.getUserProfile(it.uid) }
+  // Lock Orientation to Portrait
+  val context = LocalContext.current
+  DisposableEffect(Unit) {
+    val activity = context as? ComponentActivity
+    activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+    onDispose { activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED }
+  }
+  // Collect the user profile from the StateFlow
+  val user by authViewModel.user.collectAsState()
+  val userProfile by viewModel.seekerProfile.collectAsState()
+  user?.let { viewModel.getUserProfile(it.uid) }
 
-    var fullName by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
+  var fullName by remember { mutableStateOf("") }
+  var email by remember { mutableStateOf("") }
 
-    LaunchedEffect(userProfile) {
-        fullName = userProfile.name
-        email = userProfile.email
-    }
+  LaunchedEffect(userProfile) {
+    fullName = userProfile.name
+    email = userProfile.email
+  }
 
+  // State for logout dialog
+  var showLogoutDialog by remember { mutableStateOf(false) }
 
-    // State for logout dialog
-    var showLogoutDialog by remember { mutableStateOf(false) }
-
-    // Display the profile information if it's available
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = { Text("Profile", modifier = Modifier.testTag("ProfileTitle")) },
-                    navigationIcon = {
-                        IconButton(onClick = { navigationActions.goBack() }, modifier = Modifier.testTag("BackButton")) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                        }
-                    },
-                    actions = {
-                        IconButton(onClick = { showLogoutDialog = true }, modifier = Modifier.testTag("LogoutButton")) {
-                            Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = "Log out")
-                        }
-                    },
-                    modifier = Modifier.testTag("ProfileTopBar"),
-                )
+  // Display the profile information if it's available
+  Scaffold(
+      topBar = {
+        TopAppBar(
+            title = { Text("Profile", modifier = Modifier.testTag("ProfileTitle")) },
+            navigationIcon = {
+              IconButton(
+                  onClick = { navigationActions.goBack() },
+                  modifier = Modifier.testTag("BackButton")) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                  }
             },
-            bottomBar = {
-                BottomNavigationMenu(
-                    onTabSelect = { route -> navigationActions.navigateTo(route) },
-                    tabList = LIST_TOP_LEVEL_DESTINATION_CUSTOMER,
-                    selectedItem = Route.PROFILE
-                )
+            actions = {
+              IconButton(
+                  onClick = { showLogoutDialog = true },
+                  modifier = Modifier.testTag("LogoutButton")) {
+                    Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = "Log out")
+                  }
             },
-            containerColor = Color.Transparent,
-        ) { paddingValues ->
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(16.dp)
-                    .testTag("ProfileContent"),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                item {
-                    // Profile Info Card with Edit Button
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .testTag("ProfileInfoCard"),
-                        colors = CardDefaults.cardColors(containerColor = colorScheme.primary),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp)
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Image(
-                                    painter = painterResource(id = R.drawable.empty_profile_img),
-                                    contentDescription = "Profile Picture",
-                                    modifier = Modifier
-                                        .size(50.dp)
-                                        .clip(CircleShape)
-                                        .border(4.dp, colorScheme.onPrimary, CircleShape)
-                                        .testTag("ProfileImage")
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Column {
-                                    Text(
-                                        text = fullName,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 20.sp,
-                                        color = colorScheme.onPrimary,
-                                        modifier = Modifier.testTag("ProfileName")
-                                    )
-                                    Text(
-                                        text = email,
-                                        fontSize = 14.sp,
-                                        color = colorScheme.onPrimary.copy(alpha = 0.6f),
-                                        modifier = Modifier.testTag("ProfileEmail")
-                                    )
-                                }
+            modifier = Modifier.testTag("ProfileTopBar"),
+        )
+      },
+      bottomBar = {
+        BottomNavigationMenu(
+            onTabSelect = { route -> navigationActions.navigateTo(route) },
+            tabList = LIST_TOP_LEVEL_DESTINATION_CUSTOMER,
+            selectedItem = Route.PROFILE)
+      },
+      containerColor = Color.Transparent,
+  ) { paddingValues ->
+    LazyColumn(
+        modifier =
+            Modifier.fillMaxSize().padding(paddingValues).padding(16.dp).testTag("ProfileContent"),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(16.dp)) {
+          item {
+            // Profile Info Card with Edit Button
+            Card(
+                modifier = Modifier.fillMaxWidth().testTag("ProfileInfoCard"),
+                colors = CardDefaults.cardColors(containerColor = colorScheme.primary),
+                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)) {
+                  Row(
+                      verticalAlignment = Alignment.CenterVertically,
+                      horizontalArrangement = Arrangement.SpaceBetween,
+                      modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                          Image(
+                              painter = painterResource(id = R.drawable.empty_profile_img),
+                              contentDescription = "Profile Picture",
+                              modifier =
+                                  Modifier.size(50.dp)
+                                      .clip(CircleShape)
+                                      .border(4.dp, colorScheme.onPrimary, CircleShape)
+                                      .testTag("ProfileImage"))
+                          Spacer(modifier = Modifier.width(8.dp))
+                          Column {
+                            Text(
+                                text = fullName,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 20.sp,
+                                color = colorScheme.onPrimary,
+                                modifier = Modifier.testTag("ProfileName"))
+                            Text(
+                                text = email,
+                                fontSize = 14.sp,
+                                color = colorScheme.onPrimary.copy(alpha = 0.6f),
+                                modifier = Modifier.testTag("ProfileEmail"))
+                          }
+                        }
+                        IconButton(
+                            onClick = { navigationActions.navigateTo(Screen.EDIT_PROFILE) },
+                            modifier = Modifier.testTag("EditProfileButton")) {
+                              Icon(Icons.Default.Edit, contentDescription = "Edit Profile")
                             }
-                            IconButton(
-                                onClick = { navigationActions.navigateTo(Screen.EDIT_PROFILE) },
-                                modifier = Modifier.testTag("EditProfileButton")
-                            ) {
-                                Icon(Icons.Default.Edit, contentDescription = "Edit Profile")
-                            }
-                        }
-                    }
+                      }
                 }
+          }
 
-                item {
-                    // First Group of Profile Options
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .testTag("FirstGroupCard"),
-                        colors = CardDefaults.cardColors(containerColor = colorScheme.background),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-                    ) {
-                        Column(
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                            modifier = Modifier.padding(16.dp)
-                        ) {
-                            ProfileOptionItem(
-                                icon = Icons.Default.Person,
-                                optionName = "My Account",
-                                subtitle = "Make changes to your account",
-                                onClick = { Toast.makeText(context, "Not implemented yet", Toast.LENGTH_SHORT).show() },
-                                modifier = Modifier.testTag("MyAccountOption")
-                            )
-                            ProfileOptionItem(
-                                icon = Icons.Default.ShoppingCart,
-                                optionName = "Order History",
-                                subtitle = "Manage your requested services and their statuses",
-                                onClick = { Toast.makeText(context, "Not implemented yet", Toast.LENGTH_SHORT).show() },
-                                modifier = Modifier.testTag("OrdersOption")
-                            )
-                            ProfileOptionItem(
-                                icon = Icons.Default.Lock,
-                                optionName = "Privacy Settings",
-                                subtitle = "Manage your privacy settings",
-                                onClick = { Toast.makeText(context, "Not implemented yet", Toast.LENGTH_SHORT).show() },
-                                modifier = Modifier.testTag("PrivacySettingsOption")
-                            )
-                            ProfileOptionItem(
-                                icon = Icons.Default.Lock,
-                                optionName = "Billing",
-                                subtitle = "Manage your billing information",
-                                onClick = { Toast.makeText(context, "Not implemented yet", Toast.LENGTH_SHORT).show() },
-                                modifier = Modifier.testTag("BillingOption")
-                            )
-                            ProfileOptionItem(
-                                icon = Icons.Default.Favorite,
-                                optionName = "Preferences",
-                                subtitle = "Set your preferences",
-                                onClick = { Toast.makeText(context, "Not implemented yet", Toast.LENGTH_SHORT).show() },
-                                modifier = Modifier.testTag("PreferencesOption")
-                            )
-                        }
-                    }
+          item {
+            // First Group of Profile Options
+            Card(
+                modifier = Modifier.fillMaxWidth().testTag("FirstGroupCard"),
+                colors = CardDefaults.cardColors(containerColor = colorScheme.background),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)) {
+                  Column(
+                      verticalArrangement = Arrangement.spacedBy(8.dp),
+                      modifier = Modifier.padding(16.dp)) {
+                        ProfileOptionItem(
+                            icon = Icons.Default.Person,
+                            optionName = "My Account",
+                            subtitle = "Make changes to your account",
+                            onClick = {
+                              Toast.makeText(context, "Not implemented yet", Toast.LENGTH_SHORT)
+                                  .show()
+                            },
+                            modifier = Modifier.testTag("MyAccountOption"))
+                        ProfileOptionItem(
+                            icon = Icons.Default.ShoppingCart,
+                            optionName = "Order History",
+                            subtitle = "Manage your requested services and their statuses",
+                            onClick = {
+                              Toast.makeText(context, "Not implemented yet", Toast.LENGTH_SHORT)
+                                  .show()
+                            },
+                            modifier = Modifier.testTag("OrdersOption"))
+                        ProfileOptionItem(
+                            icon = Icons.Default.Lock,
+                            optionName = "Privacy Settings",
+                            subtitle = "Manage your privacy settings",
+                            onClick = {
+                              Toast.makeText(context, "Not implemented yet", Toast.LENGTH_SHORT)
+                                  .show()
+                            },
+                            modifier = Modifier.testTag("PrivacySettingsOption"))
+                        ProfileOptionItem(
+                            icon = Icons.Default.Lock,
+                            optionName = "Billing",
+                            subtitle = "Manage your billing information",
+                            onClick = {
+                              Toast.makeText(context, "Not implemented yet", Toast.LENGTH_SHORT)
+                                  .show()
+                            },
+                            modifier = Modifier.testTag("BillingOption"))
+                        ProfileOptionItem(
+                            icon = Icons.Default.Favorite,
+                            optionName = "Preferences",
+                            subtitle = "Set your preferences",
+                            onClick = {
+                              Toast.makeText(context, "Not implemented yet", Toast.LENGTH_SHORT)
+                                  .show()
+                            },
+                            modifier = Modifier.testTag("PreferencesOption"))
+                      }
                 }
+          }
 
-                item {
-                    // Text "More Options" to indicate more options, aligned to the left. Bold text.
-                    Text(
-                        text = "More Options",
-                        style = TextStyle(
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 16.sp,
-                            color = colorScheme.onSurfaceVariant
-                        ),
-                        modifier = Modifier.padding(start = 16.dp).testTag("MoreOptionsText")
-                    )
-                }
+          item {
+            // Text "More Options" to indicate more options, aligned to the left. Bold text.
+            Text(
+                text = "More Options",
+                style =
+                    TextStyle(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp,
+                        color = colorScheme.onSurfaceVariant),
+                modifier = Modifier.padding(start = 16.dp).testTag("MoreOptionsText"))
+          }
 
-                item {
-                    // Second Group of Profile Options
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .testTag("SecondGroupCard"),
-                        colors = CardDefaults.cardColors(containerColor = colorScheme.background),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-                    ) {
-                        Column(
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                            modifier = Modifier.padding(16.dp)
-                        ) {
-                            ProfileOptionItem(
-                                icon = Icons.Default.Notifications,
-                                optionName = "Help & Support",
-                                onClick = { Toast.makeText(context, "Not implemented yet", Toast.LENGTH_SHORT).show() },
-                                modifier = Modifier.testTag("HelpSupportOption")
-                            )
-                            ProfileOptionItem(
-                                icon = Icons.Default.Settings,
-                                optionName = "About App",
-                                onClick = { Toast.makeText(context, "Not implemented yet", Toast.LENGTH_SHORT).show() },
-                                modifier = Modifier.testTag("AboutAppOption")
-                            )
-                        }
-                    }
+          item {
+            // Second Group of Profile Options
+            Card(
+                modifier = Modifier.fillMaxWidth().testTag("SecondGroupCard"),
+                colors = CardDefaults.cardColors(containerColor = colorScheme.background),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)) {
+                  Column(
+                      verticalArrangement = Arrangement.spacedBy(8.dp),
+                      modifier = Modifier.padding(16.dp)) {
+                        ProfileOptionItem(
+                            icon = Icons.Default.Notifications,
+                            optionName = "Help & Support",
+                            onClick = {
+                              Toast.makeText(context, "Not implemented yet", Toast.LENGTH_SHORT)
+                                  .show()
+                            },
+                            modifier = Modifier.testTag("HelpSupportOption"))
+                        ProfileOptionItem(
+                            icon = Icons.Default.Settings,
+                            optionName = "About App",
+                            onClick = {
+                              Toast.makeText(context, "Not implemented yet", Toast.LENGTH_SHORT)
+                                  .show()
+                            },
+                            modifier = Modifier.testTag("AboutAppOption"))
+                      }
                 }
-            }
+          }
         }
+  }
 
-        // Logout Confirmation Dialog
-        if (showLogoutDialog) {
-            AlertDialog(
-                onDismissRequest = { showLogoutDialog = false },
-                title = { Text("Log out", modifier = Modifier.testTag("LogoutDialogTitle")) },
-                text = { Text("Are you sure you want to log out?", modifier = Modifier.testTag("LogoutDialogText")) },
-                confirmButton = {
-                    Button(onClick = {
-                        authViewModel.logout {}
-                        showLogoutDialog = false
-                    }, modifier = Modifier.testTag("LogoutDialogConfirmButton")) {
-                        Text("Log out")
-                    }
-                },
-                dismissButton = {
-                    Button(onClick = { showLogoutDialog = false }, modifier = Modifier.testTag("LogoutDialogDismissButton")) {
-                        Text("Cancel")
-                    }
-                },
-                modifier = Modifier.testTag("LogoutDialog")
-            )
-        }
+  // Logout Confirmation Dialog
+  if (showLogoutDialog) {
+    AlertDialog(
+        onDismissRequest = { showLogoutDialog = false },
+        title = { Text("Log out", modifier = Modifier.testTag("LogoutDialogTitle")) },
+        text = {
+          Text("Are you sure you want to log out?", modifier = Modifier.testTag("LogoutDialogText"))
+        },
+        confirmButton = {
+          Button(
+              onClick = {
+                authViewModel.logout {}
+                showLogoutDialog = false
+              },
+              modifier = Modifier.testTag("LogoutDialogConfirmButton")) {
+                Text("Log out")
+              }
+        },
+        dismissButton = {
+          Button(
+              onClick = { showLogoutDialog = false },
+              modifier = Modifier.testTag("LogoutDialogDismissButton")) {
+                Text("Cancel")
+              }
+        },
+        modifier = Modifier.testTag("LogoutDialog"))
+  }
 }
 
 @Composable
@@ -317,38 +313,40 @@ fun ProfileOptionItem(
     iconColor: Color = colorScheme.onSurfaceVariant,
     modifier: Modifier = Modifier
 ) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable { onClick() }
-            .padding(vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
+  Row(
+      modifier = modifier.fillMaxWidth().clickable { onClick() }.padding(vertical = 12.dp),
+      verticalAlignment = Alignment.CenterVertically) {
         Icon(
             imageVector = icon,
             contentDescription = optionName,
             tint = iconColor,
-            modifier = Modifier.size(32.dp).testTag("ProfileOptionIcon")
-        )
+            modifier = Modifier.size(32.dp).testTag("ProfileOptionIcon"))
         Spacer(modifier = Modifier.width(8.dp))
         Column(modifier = Modifier.weight(1f)) {
-            Text(optionName, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.testTag("ProfileOptionName"))
-            subtitle?.let {
-                Text(
-                    text = it,
-                    style = TextStyle(
-                        fontSize = 12.sp,
-                        color = Color(0xFFABABAB)
-                    ),
-                    modifier = Modifier.padding(4.dp).testTag("ProfileOptionSubtitle")
-                )
-            }
+          Text(
+              optionName,
+              style = MaterialTheme.typography.bodyLarge,
+              modifier = Modifier.testTag("ProfileOptionName"))
+          subtitle?.let {
+            Text(
+                text = it,
+                style = TextStyle(fontSize = 12.sp, color = Color(0xFFABABAB)),
+                modifier = Modifier.padding(4.dp).testTag("ProfileOptionSubtitle"))
+          }
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
-            if (optionName == "My Account") {
-                Icon(Icons.Default.Warning, contentDescription = "Attention", tint = colorScheme.error, modifier = Modifier.testTag("AttentionIcon"))
-            }
-            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = iconColor, modifier = Modifier.testTag("ArrowIcon"))
+          if (optionName == "My Account") {
+            Icon(
+                Icons.Default.Warning,
+                contentDescription = "Attention",
+                tint = colorScheme.error,
+                modifier = Modifier.testTag("AttentionIcon"))
+          }
+          Icon(
+              Icons.AutoMirrored.Filled.KeyboardArrowRight,
+              contentDescription = null,
+              tint = iconColor,
+              modifier = Modifier.testTag("ArrowIcon"))
         }
-    }
+      }
 }
