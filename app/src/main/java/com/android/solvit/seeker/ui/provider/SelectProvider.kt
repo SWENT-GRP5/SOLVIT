@@ -11,7 +11,6 @@ import androidx.activity.ComponentActivity
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -219,7 +218,7 @@ fun SpFilterBar(display: () -> Unit, listProviderViewModel: ListProviderViewMode
                   painter =
                       painterResource(id = R.drawable.tune), // Make sure to use your SVG resource
                   contentDescription = "filter options",
-                  modifier = Modifier.padding(8.dp).size(32.dp),
+                  modifier = Modifier.padding(8.dp).size(32.dp).testTag("filterIcon"),
                   tint = colorScheme.onBackground)
             }
       }
@@ -896,7 +895,7 @@ fun SelectProviderScreen(
   val sheetStateFilter = rememberModalBottomSheetState()
   val sheetStateLocation = rememberModalBottomSheetState()
   Log.e("Select Provider Screen", "providers : $providers")
-  Log.e("Seeker UID", "${userId}")
+  Log.e("Seeker UID", userId)
   Scaffold(
       modifier = Modifier.fillMaxSize(),
       topBar = {
