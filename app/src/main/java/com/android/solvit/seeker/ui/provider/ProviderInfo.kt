@@ -1,15 +1,19 @@
 package com.android.solvit.seeker.ui.provider
 
 import android.widget.Toast
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.material3.MaterialTheme.colorScheme
@@ -18,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -36,6 +41,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.android.solvit.R
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
+import com.android.solvit.shared.model.provider.PackageProposal
 import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.review.Review
 import com.android.solvit.shared.model.review.ReviewViewModel
@@ -53,6 +59,39 @@ fun ProviderInfoScreen(
 
   var selectedTabIndex by remember { mutableIntStateOf(0) }
 
+  // Since We still don't give the possibility to provider to add packages (for the moment we're use
+  // a default list of packages for all providers)
+  val packages =
+      listOf(
+          PackageProposal(
+              uid = "1",
+              title = "Basic Maintenance",
+              description = "Ideal for minor repairs and maintenance tasks.",
+              price = 49.99,
+              bulletPoints =
+                  listOf(
+                      "Fix leaky faucets", "Unclog drains", "Inspect plumbing for minor issues")),
+          PackageProposal(
+              uid = "2",
+              title = "Standard Service",
+              description = "Comprehensive service for common plumbing needs.",
+              price = 89.99,
+              bulletPoints =
+                  listOf(
+                      "Repair leaks and clogs",
+                      "Replace faucets and fixtures",
+                      "Inspect and clear drain pipes")),
+          PackageProposal(
+              uid = "3",
+              title = "Premium Installation",
+              description = "For extensive plumbing work, including installations.",
+              price = 149.99,
+              bulletPoints =
+                  listOf(
+                      "Install new water heater",
+                      "Full pipe installation or replacement",
+                      "Advanced leak detection and repair")))
+
   Scaffold(
       containerColor = colorScheme.surface,
       topBar = { ProviderTopBar(onBackClick = { navigationActions.goBack() }) },
@@ -66,13 +105,120 @@ fun ProviderInfoScreen(
             0 ->
                 ProviderDetails(
                     provider, reviews) // Display ProviderDetails if "Profile" tab is selected
-            1 ->
+            1 -> ProviderPackages(provider, packages) // Display packages proposals of provider
+            2 ->
                 ProviderReviews(
                     provider, reviews) // Display ProviderReviews if "Reviews" tab is selected
           }
         }
       },
       bottomBar = { BottomBar() })
+}
+
+@Composable
+fun PackageCard(packageProposal: PackageProposal, isSelected: Boolean, modifier: Modifier) {
+  val context = LocalContext.current
+  Card(
+      modifier = modifier.fillMaxHeight(),
+      shape = RoundedCornerShape(16.dp),
+      elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+      colors =
+          CardDefaults.cardColors(
+              containerColor =
+                  if (!isSelected) MaterialTheme.colorScheme.surface else Color(0xFF1C1651),
+          )) {
+        Column(
+            modifier = Modifier.padding(25.dp).fillMaxHeight().testTag("PackageContent"),
+            horizontalAlignment = Alignment.Start) {
+              // Price of the Package
+              Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    modifier = Modifier.testTag("price"),
+                    text = "$${packageProposal.price}",
+                    style =
+                        MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                    color = if (!isSelected) Color(0xFF231D4F) else Color.White)
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = "/hour",
+                    style = MaterialTheme.typography.bodySmall, // Smaller style for the unit
+                    color = if (!isSelected) Color(0xFF231D4F) else Color.White)
+              }
+              // Title of the Package
+              Text(
+                  text = packageProposal.title,
+                  style = MaterialTheme.typography.titleMedium,
+                  color = if (!isSelected) Color(0xFF231D4F) else Color.White)
+              Spacer(modifier = Modifier.height(8.dp))
+              // Description of the Package
+              Text(
+                  text = packageProposal.description,
+                  style = MaterialTheme.typography.bodyMedium,
+                  color = if (!isSelected) MaterialTheme.colorScheme.onSurface else Color.White)
+              Spacer(modifier = Modifier.height(8.dp))
+              // Important infos about the package
+              Column {
+                packageProposal.bulletPoints.forEach { feature ->
+                  Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.CheckCircle,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(16.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = feature,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color =
+                            if (!isSelected) MaterialTheme.colorScheme.onSurface else Color.White)
+                  }
+                }
+              }
+              Spacer(modifier = Modifier.weight(1f)) // Pushes the button to the bottom
+              Button(
+                  onClick = {
+                    Toast.makeText(context, "Not implemented", Toast.LENGTH_SHORT).show()
+                  },
+                  colors =
+                      ButtonDefaults.buttonColors(
+                          containerColor =
+                              if (isSelected) Color(0xFFBB6BD9) else Color(0xFF49746F)),
+                  modifier = Modifier.align(Alignment.CenterHorizontally)) {
+                    Text("Choose plan")
+                  }
+            }
+      }
+}
+
+@Composable
+fun ProviderPackages(provider: Provider, packages: List<PackageProposal>) {
+  var selectedIndex by remember { mutableStateOf(-1) }
+  Box(
+      modifier = Modifier.fillMaxSize(), // Fills the entire available space
+      contentAlignment = Alignment.Center // Centers the LazyRow within the Box
+      ) {
+        // Horizontal scrollable list
+        LazyRow(
+            modifier = Modifier.fillMaxWidth().testTag("packagesScrollableList"),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = PaddingValues(top = 30.dp, start = 8.dp, end = 8.dp),
+        ) {
+          items(packages.size) { index ->
+            // If package is selected, we display it bigger
+            val isSelected = selectedIndex == index
+            val size by animateDpAsState(targetValue = if (isSelected) 335.dp else 320.dp)
+
+            PackageCard(
+                packageProposal = packages[index],
+                isSelected = isSelected,
+                modifier =
+                    Modifier.width(250.dp)
+                        .height(size)
+                        .clickable { selectedIndex = if (isSelected) -1 else index }
+                        .testTag("PackageCard"))
+          }
+        }
+      }
 }
 
 @Composable
@@ -194,6 +340,12 @@ fun ProviderTabs(selectedTabIndex: Int, onTabSelected: (Int) -> Unit) {
         Tab(
             selected = selectedTabIndex == 1,
             onClick = { onTabSelected(1) },
+            modifier = Modifier.testTag("packagesTab")) {
+              Text("Packages", modifier = Modifier.padding(16.dp))
+            }
+        Tab(
+            selected = selectedTabIndex == 2,
+            onClick = { onTabSelected(2) },
             modifier = Modifier.testTag("reviewsTab")) {
               Text(
                   "Reviews",
