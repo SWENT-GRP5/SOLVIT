@@ -6,6 +6,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.solvit.shared.ui.navigation.NavigationActions
+import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -32,7 +33,7 @@ class SignUpChooseProfileTest {
   }
 
   @Test
-  fun signUpChooseProfile_performClick() {
+  fun signUpChooseProfile_performClick() { runBlocking {
     composeTestRule.setContent { SignUpChooseProfile(mockNavigationActions) }
 
     composeTestRule.onNodeWithTag("goBackButton").performClick()
@@ -41,5 +42,6 @@ class SignUpChooseProfileTest {
     composeTestRule.onNodeWithTag("learnMoreLink").performClick()
 
     verify(mockNavigationActions).goBack()
+  }
   }
 }
