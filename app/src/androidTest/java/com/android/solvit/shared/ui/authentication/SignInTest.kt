@@ -27,6 +27,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.verify
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
 import org.junit.Before
 import org.junit.Rule
@@ -238,11 +239,13 @@ class SignInScreenLandscapeTest {
   @Test
   fun testSignInLandscape_displaysAllComponents() {
 
-    composeTestRule.setContent { SignInScreen(mockNavigationActions) }
+      runBlocking {
+          composeTestRule.setContent { SignInScreen(mockNavigationActions) }
 
-    // Test the display of UI components
-    composeTestRule.onNodeWithTag("landscapeLayout").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("leftColumnLandScape").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("rightColumnLandScape").assertIsDisplayed()
+          // Test the display of UI components
+          composeTestRule.onNodeWithTag("landscapeLayout").assertIsDisplayed()
+          composeTestRule.onNodeWithTag("leftColumnLandScape").assertIsDisplayed()
+          composeTestRule.onNodeWithTag("rightColumnLandScape").assertIsDisplayed()
+      }
   }
 }
