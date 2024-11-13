@@ -20,6 +20,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.verify
+import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -64,11 +65,13 @@ class SignUpScreenTest {
 
   @Test
   fun signUp_emailAndPasswordInput() {
-    composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
+    runBlocking {
+      composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
 
-    // Test email input
-    composeTestRule.onNodeWithTag("emailInputField").performTextInput("test@example.com")
-    composeTestRule.onNodeWithTag("passwordInputField").performTextInput("password123")
+      // Test email input
+      composeTestRule.onNodeWithTag("emailInputField").performTextInput("test@example.com")
+      composeTestRule.onNodeWithTag("passwordInputField").performTextInput("password123")
+    }
   }
 
   @Test
