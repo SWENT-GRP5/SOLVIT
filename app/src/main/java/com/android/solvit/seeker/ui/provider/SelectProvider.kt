@@ -184,9 +184,7 @@ fun SpFilterBar(display: () -> Unit, listProviderViewModel: ListProviderViewMode
           filters.forEach { filter ->
             Card(
                 modifier =
-                    Modifier
-                        .testTag("filterIcon")
-                        .wrapContentSize().clickable {
+                    Modifier.testTag("filterIcon").wrapContentSize().clickable {
                       Toast.makeText(context, "Not Yet Implemented", Toast.LENGTH_LONG).show()
                     },
                 elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),

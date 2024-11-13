@@ -177,10 +177,9 @@ class ProviderRegistrationTest {
     runBlocking {
       composeTestRule.setContent {
         ProviderRegistrationScreen(
-          viewModel = listProviderViewModel,
-          navigationActions = navigationActions,
-          locationViewModel = locationViewModel
-        )
+            viewModel = listProviderViewModel,
+            navigationActions = navigationActions,
+            locationViewModel = locationViewModel)
       }
 
       composeTestRule.onNodeWithTag("inputRequestAddress").performTextInput("USA")
