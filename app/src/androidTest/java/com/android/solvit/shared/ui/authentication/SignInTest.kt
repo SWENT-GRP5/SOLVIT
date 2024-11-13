@@ -239,13 +239,13 @@ class SignInScreenLandscapeTest {
   @Test
   fun testSignInLandscape_displaysAllComponents() {
 
-      runBlocking {
-          composeTestRule.setContent { SignInScreen(mockNavigationActions) }
+    runBlocking {
+      composeTestRule.setContent { SignInScreen(mockNavigationActions) }
 
-          // Test the display of UI components
-          composeTestRule.onNodeWithTag("landscapeLayout").assertIsDisplayed()
-          composeTestRule.onNodeWithTag("leftColumnLandScape").assertIsDisplayed()
-          composeTestRule.onNodeWithTag("rightColumnLandScape").assertIsDisplayed()
-      }
+      // Test the display of UI components
+      composeTestRule.onNodeWithTag("landscapeLayout").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("leftColumnLandScape").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("rightColumnLandScape").assertIsDisplayed()
+    }
   }
 }
