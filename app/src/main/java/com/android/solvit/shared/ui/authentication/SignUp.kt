@@ -10,13 +10,11 @@ import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -129,16 +127,21 @@ fun SignUpScreen(
 
               ScreenTitle("Sign up", "signUpTitle")
               Spacer(modifier = Modifier.height(30.dp))
-              SocialSignUpButton {
-                authViewModel.setRole("seeker")
-                val gso =
-                    GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                        .requestIdToken(token)
-                        .requestEmail()
-                        .build()
-                val googleSignInClient = GoogleSignIn.getClient(context, gso)
-                launcher.launch(googleSignInClient.signInIntent)
-              }
+
+              GoogleButton(
+                  onSignInClick = {
+                    authViewModel.setRole("seeker")
+                    val gso =
+                        GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                            .requestIdToken(token)
+                            .requestEmail()
+                            .build()
+                    val googleSignInClient = GoogleSignIn.getClient(context, gso)
+                    launcher.launch(googleSignInClient.signInIntent)
+                  },
+                  text = "Sign up with Google",
+                  testTag = "googleSignUpButton",
+                  roundedCornerShape = RoundedCornerShape(12.dp))
 
               Spacer(modifier = Modifier.height(20.dp))
               Text("OR", color = Color.Gray)
@@ -153,7 +156,9 @@ fun SignUpScreen(
                   isValueOk = goodFormEmail,
                   leadingIcon = Icons.Default.Email,
                   leadingIconDescription = "Email Icon",
-                  testTag = "emailInputField")
+                  testTag = "emailInputField",
+                  errorMessage = "Your email must have \"@\" and \".\"",
+                  errorTestTag = "emailErrorMessage")
 
               Spacer(modifier = Modifier.height(10.dp))
 
@@ -190,10 +195,10 @@ fun SignUpScreen(
               }
 
               Text(
-                  text = "Your passport must have at least 6 characters",
+                  text = "Your password must have at least 6 characters",
                   color = Color.Gray,
-                  fontSize = 12.sp,
                   textAlign = TextAlign.Start,
+                  style = TextStyle(fontSize = 12.sp, lineHeight = 16.sp),
                   modifier = Modifier.padding(top = 4.dp).fillMaxWidth())
 
               Spacer(modifier = Modifier.height(20.dp))
@@ -270,28 +275,6 @@ fun SignUpButton(
       shape = RoundedCornerShape(25.dp),
       colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)) {
         Text("Sign Up", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-      }
-}
-
-@Composable
-fun SocialSignUpButton(onClick: () -> Unit) {
-  Button(
-      onClick = onClick,
-      colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-      shape = RoundedCornerShape(8.dp),
-      border = BorderStroke(1.dp, Color.LightGray),
-      modifier = Modifier.fillMaxWidth().height(48.dp).testTag("googleSignUpButton")) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier.fillMaxWidth()) {
-              Image(
-                  painter = painterResource(id = R.drawable.google_logo),
-                  contentDescription = "Google Logo",
-                  modifier = Modifier.size(30.dp).padding(end = 8.dp))
-              Text(text = "Sign Up with Google", color = Color.Gray, fontSize = 16.sp)
-              Spacer(Modifier.size(25.dp))
-            }
       }
 }
 

@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
@@ -71,6 +72,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -349,7 +351,9 @@ fun FormSection(
       isValueOk = goodFormEmail,
       leadingIcon = Icons.Default.Email,
       leadingIconDescription = "Email Icon",
-      testTag = "emailInput")
+      testTag = "emailInput",
+      errorMessage = "Your email must have \"@\" and \".\"",
+      errorTestTag = "emailErrorMessage")
 
   Spacer(modifier = Modifier.height(10.dp))
 
@@ -364,42 +368,39 @@ fun FormSection(
       passwordLengthComplete = passwordLengthComplete)
 
   Text(
-      text = "Your passport must have at least 6 characters",
+      text = "Your password must have at least 6 characters",
       color = Color.Gray,
-      fontSize = 12.sp,
       textAlign = TextAlign.Start,
+      style = TextStyle(fontSize = 12.sp, lineHeight = 16.sp),
       modifier = Modifier.padding(top = 4.dp).fillMaxWidth())
 
   Spacer(modifier = Modifier.height(8.dp))
 
   // Remember me & Forgot password
-  Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+  Row(modifier = Modifier.fillMaxWidth()) {
     // Section Remember Me
-    Row(
-        modifier = Modifier.weight(1f),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center) {
-          Checkbox(
-              checked = isChecked,
-              onCheckedChange = onCheckedChange,
-              modifier = Modifier.size(24.dp),
-              colors =
-                  CheckboxDefaults.colors(
-                      checkmarkColor = Color.White,
-                      uncheckedColor = Color.Gray,
-                      checkedColor = Color(90, 197, 97)))
-          Spacer(modifier = Modifier.width(4.dp))
-          Text(
-              text = "Remember me",
-              modifier = Modifier.testTag("rememberMeCheckbox"),
-              color = Color.Gray,
-              fontSize = 16.sp)
-        }
+    Row(modifier = Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
+      Checkbox(
+          checked = isChecked,
+          onCheckedChange = onCheckedChange,
+          modifier = Modifier.size(24.dp),
+          colors =
+              CheckboxDefaults.colors(
+                  checkmarkColor = Color.White,
+                  uncheckedColor = Color.Gray,
+                  checkedColor = Color(90, 197, 97)))
+      Spacer(modifier = Modifier.width(4.dp))
+      Text(
+          text = "Remember me",
+          modifier = Modifier.testTag("rememberMeCheckbox"),
+          color = Color.Gray,
+          fontSize = 16.sp)
+    }
 
     // Section Forgot Password
     Row(
         modifier = Modifier.weight(1f),
-        horizontalArrangement = Arrangement.Center,
+        horizontalArrangement = Arrangement.End,
         verticalAlignment = Alignment.CenterVertically) {
           Text(
               text = "Forgot password?",
@@ -408,7 +409,8 @@ fun FormSection(
               textDecoration = TextDecoration.Underline,
               modifier =
                   Modifier.clickable { navigationActions.navigateTo(Screen.FORGOT_PASSWORD) }
-                      .testTag("forgotPasswordLink"))
+                      .testTag("forgotPasswordLink"),
+              textAlign = TextAlign.End)
         }
   }
 
@@ -432,7 +434,7 @@ fun FormSection(
   Spacer(modifier = Modifier.height(4.dp))
 
   // Google sign in button
-  GoogleSignInButton(
+  GoogleButton(
       onSignInClick = {
         val gso =
             GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -441,7 +443,10 @@ fun FormSection(
                 .build()
         val googleSignInClient = GoogleSignIn.getClient(context, gso)
         launcher.launch(googleSignInClient.signInIntent)
-      })
+      },
+      text = "Sign in with Google",
+      testTag = "googleSignInButton",
+      roundedCornerShape = RoundedCornerShape(25.dp))
 }
 
 @Composable
@@ -522,35 +527,33 @@ fun SignInButton(
 }
 
 @Composable
-fun GoogleSignInButton(onSignInClick: () -> Unit) {
+fun GoogleButton(
+    onSignInClick: () -> Unit,
+    text: String,
+    testTag: String,
+    roundedCornerShape: RoundedCornerShape
+) {
   Button(
       onClick = onSignInClick,
-      colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent), // Button color
-      shape = RoundedCornerShape(25.dp), // Circular edges for the button
-      border = BorderStroke(1.dp, Color.LightGray),
-      modifier =
-          Modifier.fillMaxWidth()
-              .height(50.dp) // Adjust height as needed
-              .testTag("googleSignInButton")) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxWidth()) {
-              // Load the Google logo from resources
-              Image(
-                  painter = painterResource(id = R.drawable.google_logo),
-                  contentDescription = "Google Logo",
-                  modifier =
-                      Modifier.size(30.dp) // Size of the Google logo
-                          .padding(end = 8.dp))
+      colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+      shape = roundedCornerShape,
+      border = BorderStroke(1.dp, Color.Gray),
+      modifier = Modifier.fillMaxWidth().wrapContentHeight().testTag(testTag)) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+          Image(
+              painter = painterResource(id = R.drawable.google_logo),
+              contentDescription = "Google Logo",
+              modifier = Modifier.size(30.dp).padding(end = 8.dp))
 
-              // Text for the button
-              Text(
-                  text = "Sign in with Google",
-                  color = Color.Gray, // Text color
-                  fontSize = 16.sp, // Font size
-                  fontWeight = FontWeight.Medium)
-            }
+          Text(
+              text = text,
+              color = Color.Gray,
+              fontSize = 16.sp,
+              maxLines = 2,
+              overflow = TextOverflow.Ellipsis,
+              modifier = Modifier.weight(1f),
+              textAlign = TextAlign.Center)
+        }
       }
 }
 
@@ -589,7 +592,7 @@ fun CustomOutlinedTextField(
     leadingIcon: ImageVector,
     leadingIconDescription: String = "",
     testTag: String,
-    errorTestTag: String = "emailErrorMessage"
+    errorTestTag: String = "errorMessage"
 ) {
   // State to track if the field has been "visited" (focused and then unfocused)
   var hasBeenFocused by remember { mutableStateOf(false) }

@@ -182,7 +182,7 @@ fun ProviderRegistrationScreen(
                     onValueChange = { companyName = it },
                     label = "Business/Company Name",
                     placeholder = "Enter your business name (optional for independent providers)",
-                    isValueOk = isFullNameOk,
+                    isValueOk = isCompanyNameOk,
                     errorMessage = "Your company name must be at least 3 characters",
                     leadingIcon = Icons.Default.Build,
                     leadingIconDescription = "Company Icon",
