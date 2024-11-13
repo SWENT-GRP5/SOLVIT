@@ -125,11 +125,7 @@ fun SearchBar(searchQuery: MutableState<String>) {
       placeholder = {
         Text(
             "Search requests",
-            style =
-                TextStyle(
-                    color = Orange,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold))
+            style = TextStyle(color = Orange, fontSize = 16.sp, fontWeight = FontWeight.Bold))
       },
       leadingIcon = {
         Icon(
@@ -145,9 +141,7 @@ fun SearchBar(searchQuery: MutableState<String>) {
               .background(colorScheme.background)
               .border(3.dp, Orange, RoundedCornerShape(12.dp))
               .testTag("SearchBar"),
-      textStyle =
-          TextStyle(
-              color = Orange, fontSize = 16.sp, fontWeight = FontWeight.Bold),
+      textStyle = TextStyle(color = Orange, fontSize = 16.sp, fontWeight = FontWeight.Bold),
       shape = RoundedCornerShape(12.dp))
 }
 
