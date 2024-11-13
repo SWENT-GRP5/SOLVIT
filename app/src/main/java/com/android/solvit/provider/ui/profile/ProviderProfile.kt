@@ -81,7 +81,7 @@ fun ProfileHeader(
   Row(modifier = Modifier.fillMaxWidth()) {
     Column(
         modifier =
-            Modifier.background(colorScheme.secondaryContainer)
+            Modifier.background(colorScheme.primaryContainer)
                 .height(400.dp)
                 .padding(8.dp)
                 .weight(1f),
@@ -280,7 +280,7 @@ fun StatsSection(provider: Provider) {
       modifier =
           Modifier.fillMaxWidth()
               .height(400.dp)
-              .background(colorScheme.secondaryContainer)
+              .background(colorScheme.primary)
               .padding(16.dp)
               .testTag("statsSection"),
       horizontalAlignment = Alignment.Start) {
