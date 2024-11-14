@@ -11,7 +11,6 @@ import androidx.compose.material.icons.outlined.MailOutline
 import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavController
-import androidx.navigation.NavGraph.Companion.findStartDestination
 
 object Route {
   const val AUTH = "Auth"
@@ -114,7 +113,7 @@ open class NavigationActions(
    */
   open fun navigateTo(destination: TopLevelDestination) {
     navController.navigate(destination.route) {
-      popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+      popUpTo(navController.graph.startDestinationId) { inclusive = true }
       launchSingleTop = true
       restoreState = true
     }
