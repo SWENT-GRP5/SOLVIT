@@ -105,8 +105,13 @@ fun SeekerProfileScreen(
   Scaffold(
       topBar = {
         TopAppBar(
-            title = { Text("Profile", modifier = Modifier.testTag("ProfileTitle"),
-                fontWeight = FontWeight.Bold,) },
+            title = {
+              Text(
+                  "Profile",
+                  modifier = Modifier.testTag("ProfileTitle"),
+                  fontWeight = FontWeight.Bold,
+              )
+            },
             navigationIcon = {
               IconButton(
                   onClick = { navigationActions.goBack() },
@@ -122,10 +127,14 @@ fun SeekerProfileScreen(
                   }
             },
             modifier = Modifier.testTag("ProfileTopBar"),
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background, navigationIconContentColor = colorScheme.onBackground, titleContentColor = colorScheme.onBackground, actionIconContentColor = colorScheme.onBackground)
-        )
+            colors =
+                TopAppBarDefaults.topAppBarColors(
+                    containerColor = colorScheme.background,
+                    navigationIconContentColor = colorScheme.onBackground,
+                    titleContentColor = colorScheme.onBackground,
+                    actionIconContentColor = colorScheme.onBackground))
       },
-      bottomBar = { },
+      bottomBar = {},
       containerColor = Color.Transparent,
   ) { paddingValues ->
     LazyColumn(
@@ -333,7 +342,9 @@ fun ProfileOptionItem(
           subtitle?.let {
             Text(
                 text = it,
-                style = TextStyle(fontSize = 12.sp, color = colorScheme.onBackground.copy(alpha = 0.5f)),
+                style =
+                    TextStyle(
+                        fontSize = 12.sp, color = colorScheme.onBackground.copy(alpha = 0.5f)),
                 modifier = Modifier.padding(4.dp).testTag("ProfileOptionSubtitle"))
           }
         }
