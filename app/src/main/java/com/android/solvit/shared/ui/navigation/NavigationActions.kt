@@ -104,47 +104,41 @@ val LIST_TOP_LEVEL_DESTINATION_PROVIDER =
 open class NavigationActions(
     private val navController: NavController,
 ) {
-    private var previousRoute: String? = null
-    
-    /**
-     * Navigate to a top level destination
-     */
-    open fun navigateTo(destination: TopLevelDestination) {
-        previousRoute = currentRoute()
-        navController.navigate(destination.route) {
-            // Don't clear backstack, just add to it
-            launchSingleTop = true
-            restoreState = true
-        }
-    }
+  private var previousRoute: String? = null
 
-    /**
-     * Navigate to a screen
-     */
-    open fun navigateTo(screen: String) {
-        previousRoute = currentRoute()
-        navController.navigate(screen) {
-            launchSingleTop = true
-            restoreState = true
-        }
+  /** Navigate to a top level destination */
+  open fun navigateTo(destination: TopLevelDestination) {
+    previousRoute = currentRoute()
+    navController.navigate(destination.route) {
+      // Don't clear backstack, just add to it
+      launchSingleTop = true
+      restoreState = true
     }
+  }
 
-    /**
-     * Navigate back with proper state handling
-     */
-    open fun goBack() {
-        previousRoute?.let { prevRoute ->
-            // Navigate back to previous route
-            navController.navigate(prevRoute) {
-                // Remove the current destination from back stack
-                popUpTo(currentRoute()) { inclusive = true }
-                launchSingleTop = true
-                restoreState = true
-            }
-        } ?: navController.popBackStack()
+  /** Navigate to a screen */
+  open fun navigateTo(screen: String) {
+    previousRoute = currentRoute()
+    navController.navigate(screen) {
+      launchSingleTop = true
+      restoreState = true
     }
+  }
 
-    open fun currentRoute(): String {
-        return navController.currentDestination?.route ?: ""
-    }
+  /** Navigate back with proper state handling */
+  open fun goBack() {
+    previousRoute?.let { prevRoute ->
+      // Navigate back to previous route
+      navController.navigate(prevRoute) {
+        // Remove the current destination from back stack
+        popUpTo(currentRoute()) { inclusive = true }
+        launchSingleTop = true
+        restoreState = true
+      }
+    } ?: navController.popBackStack()
+  }
+
+  open fun currentRoute(): String {
+    return navController.currentDestination?.route ?: ""
+  }
 }
