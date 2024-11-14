@@ -21,6 +21,8 @@
       "port": 9199
     }
   },
+  "database": {
+    "rules": "database.rules.json"
   "storage": {
     "rules": "storage.rules"
   }

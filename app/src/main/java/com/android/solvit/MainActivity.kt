@@ -11,6 +11,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -53,7 +54,9 @@ class MainActivity : ComponentActivity() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+
     Firebase.auth.signOut()
+
     setContent {
       SampleAppTheme {
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
@@ -77,9 +80,17 @@ fun SolvitApp() {
       viewModel<ServiceRequestViewModel>(factory = ServiceRequestViewModel.Factory)
   val locationViewModel = viewModel<LocationViewModel>(factory = LocationViewModel.Factory)
   val reviewViewModel = viewModel<ReviewViewModel>(factory = ReviewViewModel.Factory)
+  val navController = rememberNavController()
+  val navigationActions = NavigationActions(navController)
 
   if (!userRegistered.value) {
-    SharedUI(authViewModel, listProviderViewModel, seekerProfileViewModel, locationViewModel)
+    SharedUI(
+        authViewModel,
+        listProviderViewModel,
+        seekerProfileViewModel,
+        locationViewModel,
+        navController,
+        navigationActions)
   } else {
     when (user.value!!.role) {
       "seeker" ->
@@ -100,10 +111,10 @@ fun SharedUI(
     authViewModel: AuthViewModel,
     listProviderViewModel: ListProviderViewModel,
     seekerProfileViewModel: SeekerProfileViewModel,
-    locationViewModel: LocationViewModel
+    locationViewModel: LocationViewModel,
+    navController: NavHostController,
+    navigationActions: NavigationActions
 ) {
-  val navController = rememberNavController()
-  val navigationActions = NavigationActions(navController)
 
   NavHost(navController = navController, startDestination = Route.AUTH) {
     composable(Route.AUTH) { OpeningScreen(navigationActions) }
