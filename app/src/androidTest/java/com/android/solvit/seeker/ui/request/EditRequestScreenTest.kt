@@ -21,7 +21,6 @@ import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.google.firebase.Timestamp
-import java.util.GregorianCalendar
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -32,6 +31,7 @@ import org.mockito.Mockito.`when`
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.never
+import java.util.GregorianCalendar
 
 class EditRequestScreenTest {
   private lateinit var serviceRequestRepository: ServiceRequestRepository

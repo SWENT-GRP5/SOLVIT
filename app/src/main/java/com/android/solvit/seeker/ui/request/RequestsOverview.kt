@@ -131,7 +131,7 @@ fun TopOrdersSection(navigationActions: NavigationActions) {
               .testTag("topOrdersSection"),
       horizontalArrangement = Arrangement.SpaceBetween,
       verticalAlignment = Alignment.CenterVertically) {
-      val context = LocalContext.current
+        val context = LocalContext.current
         Row {
           Icon(
               imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -147,8 +147,11 @@ fun TopOrdersSection(navigationActions: NavigationActions) {
         Icon(
             imageVector = Icons.Default.Menu,
             contentDescription = null,
-            modifier = Modifier.clickable { Toast.makeText(context, "This feature is not yet implemented", Toast.LENGTH_SHORT)
-                .show()})
+            modifier =
+                Modifier.clickable {
+                  Toast.makeText(context, "This feature is not yet implemented", Toast.LENGTH_SHORT)
+                      .show()
+                })
       }
 }
 

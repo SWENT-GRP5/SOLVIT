@@ -16,13 +16,13 @@ import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_PROVID
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
 import com.google.firebase.Timestamp
-import java.util.GregorianCalendar
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
 import org.mockito.kotlin.any
+import java.util.GregorianCalendar
 
 class ProviderMapScreenTest {
   private lateinit var serviceRequestRepository: ServiceRequestRepository

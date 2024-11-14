@@ -3,8 +3,10 @@ package com.android.solvit.shared.ui.map
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import androidx.compose.ui.test.*
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
 import com.android.solvit.shared.model.map.Location
 import org.junit.Rule

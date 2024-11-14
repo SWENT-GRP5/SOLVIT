@@ -16,13 +16,13 @@ import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
 import com.google.firebase.Timestamp
-import java.util.Calendar
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
 import org.mockito.kotlin.any
+import java.util.Calendar
 
 // Test class for ListServicesRequestsScreen functionality
 class ListServicesRequestsScreenTest {
