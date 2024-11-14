@@ -72,7 +72,6 @@ class SignInScreenTest {
 
   @Test
   fun testSignIn_errorShowInEmailField() {
-    runBlocking {
       composeTestRule.setContent { SignInScreen(mockNavigationActions) }
 
       composeTestRule.onNodeWithTag("emailErrorMessage").isNotDisplayed()
@@ -81,7 +80,6 @@ class SignInScreenTest {
       composeTestRule.onNodeWithTag("emailInput").performTextClearance()
       composeTestRule.onNodeWithTag("emailInput").performTextInput("test@example.com")
       composeTestRule.onNodeWithTag("emailErrorMessage").isNotDisplayed()
-    }
   }
 
   @Test
