@@ -26,6 +26,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -57,8 +58,13 @@ import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_CUSTOMER
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
+import com.android.solvit.shared.ui.theme.ACCEPTED_color
+import com.android.solvit.shared.ui.theme.ARCHIVED_color
+import com.android.solvit.shared.ui.theme.ENDED_color
 import com.android.solvit.shared.ui.theme.LightBlue
 import com.android.solvit.shared.ui.theme.LightOrange
+import com.android.solvit.shared.ui.theme.PENDING_color
+import com.android.solvit.shared.ui.theme.STARTED_color
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import java.text.SimpleDateFormat
@@ -152,7 +158,7 @@ fun NoRequestsText() {
         text = "You have no active service request.\nCreate one.",
         fontSize = 20.sp,
         fontWeight = FontWeight.Bold,
-        color = Color(0xFF4E616D))
+        color = colorScheme.onSurfaceVariant)
   }
 }
 
@@ -180,7 +186,7 @@ fun CategoriesFiltersSection() {
                     Text(
                         text = "Category Settings",
                         fontWeight = FontWeight.Bold,
-                        color = Color.White)
+                        color = colorScheme.onPrimary)
                   }
             }
         Box(
@@ -197,7 +203,7 @@ fun CategoriesFiltersSection() {
                     painter = painterResource(id = R.drawable.filter_circle),
                     contentDescription = "categories sort",
                     modifier = Modifier.size(24.dp))
-                Text(text = "Sort", fontWeight = FontWeight.Bold, color = Color.White)
+                Text(text = "Sort", fontWeight = FontWeight.Bold, color = colorScheme.onPrimary)
               }
         }
       }
@@ -248,7 +254,7 @@ fun CategoriesSort() {
 @Composable
 fun FilterItem(text: String, filter: () -> Unit) {
   var isFilterSelected by remember { mutableStateOf(false) }
-  val borderColor = if (isFilterSelected) Color.Black else Color.LightGray
+  val borderColor = if (isFilterSelected) colorScheme.onBackground else colorScheme.onSurfaceVariant
   Box(
       modifier =
           Modifier.padding(8.dp)
@@ -272,7 +278,7 @@ fun RequestItemRow(request: ServiceRequest, onClick: () -> Unit) {
       modifier =
           Modifier.fillMaxWidth()
               .clickable { onClick() }
-              .border(1.dp, Color.LightGray, RoundedCornerShape(16.dp))
+              .border(1.dp, colorScheme.onSurfaceVariant, RoundedCornerShape(16.dp))
               .padding(horizontal = 16.dp, vertical = 12.dp)
               .testTag("requestListItem")) {
         Column {
@@ -312,10 +318,10 @@ fun RequestItemRow(request: ServiceRequest, onClick: () -> Unit) {
 
 fun getStatusColor(status: ServiceRequestStatus): Color {
   return when (status) {
-    ServiceRequestStatus.PENDING -> Color(0xFFE5A800)
-    ServiceRequestStatus.ACCEPTED -> Color(0xFF00A3FF)
-    ServiceRequestStatus.STARTED -> Color(0xFF00BFA5)
-    ServiceRequestStatus.ENDED -> Color(0xFF02F135)
-    ServiceRequestStatus.ARCHIVED -> Color(0xFF000000)
+    ServiceRequestStatus.PENDING -> PENDING_color
+    ServiceRequestStatus.ACCEPTED -> ACCEPTED_color
+    ServiceRequestStatus.STARTED -> STARTED_color
+    ServiceRequestStatus.ENDED -> ENDED_color
+    ServiceRequestStatus.ARCHIVED -> ARCHIVED_color
   }
 }

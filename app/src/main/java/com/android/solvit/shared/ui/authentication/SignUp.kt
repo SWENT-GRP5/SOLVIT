@@ -32,6 +32,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -101,20 +102,18 @@ fun SignUpScreen(
 
   val isFormComplete = goodFormEmail && passwordLengthComplete && samePassword
 
-  val backgroundColor = Color(0xFFFFFFFF)
-
   Scaffold(
       topBar = {
         TopAppBar(
             title = { Text("") },
             navigationIcon = { GoBackButton(navigationActions) },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = backgroundColor))
+            colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background))
       },
       content = {
         Column(
             modifier =
                 Modifier.fillMaxSize()
-                    .background(backgroundColor)
+                    .background(colorScheme.background)
                     .padding(16.dp)
                     .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -138,7 +137,7 @@ fun SignUpScreen(
               }
 
               Spacer(modifier = Modifier.height(20.dp))
-              Text("OR", color = Color.Gray)
+              Text("OR", color = colorScheme.onSurfaceVariant)
 
               Spacer(modifier = Modifier.height(10.dp))
 
@@ -180,7 +179,7 @@ fun SignUpScreen(
               if (!samePassword && confirmPassword.isNotEmpty() && password.isNotEmpty()) {
                 Text(
                     text = "Password and Confirm Password must be the same",
-                    color = Color.Red,
+                    color = colorScheme.error,
                     fontSize = 15.sp,
                     textAlign = TextAlign.Start,
                     modifier = Modifier.padding(top = 4.dp).fillMaxWidth())
@@ -188,7 +187,7 @@ fun SignUpScreen(
 
               Text(
                   text = "Your passport must have at least 6 characters",
-                  color = Color.Gray,
+                  color = colorScheme.onSurfaceVariant,
                   fontSize = 12.sp,
                   textAlign = TextAlign.Start,
                   modifier = Modifier.padding(top = 4.dp).fillMaxWidth())
@@ -258,15 +257,21 @@ fun SignUpButton(
                   brush =
                       if (isComplete && goodFormEmail && passwordLengthComplete && samePassword) {
                         Brush.horizontalGradient(
-                            colors = listOf(Color(0, 200, 83), Color(0, 153, 255)))
+                            colors = listOf(colorScheme.primary, colorScheme.secondary))
                       } else {
-                        Brush.horizontalGradient(colors = listOf(Color.Gray, Color.Gray))
+                        Brush.horizontalGradient(
+                            colors =
+                                listOf(colorScheme.onSurfaceVariant, colorScheme.onSurfaceVariant))
                       },
                   shape = RoundedCornerShape(25.dp))
               .testTag("signUpButton"),
       shape = RoundedCornerShape(25.dp),
       colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)) {
-        Text("Sign Up", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+        Text(
+            "Sign Up",
+            color = colorScheme.onPrimary,
+            fontWeight = FontWeight.Bold,
+            fontSize = 16.sp)
       }
 }
 
@@ -276,7 +281,7 @@ fun SocialSignUpButton(onClick: () -> Unit) {
       onClick = onClick,
       colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
       shape = RoundedCornerShape(8.dp),
-      border = BorderStroke(1.dp, Color.LightGray),
+      border = BorderStroke(1.dp, colorScheme.onSurface),
       modifier = Modifier.fillMaxWidth().height(48.dp).testTag("googleSignUpButton")) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -286,7 +291,7 @@ fun SocialSignUpButton(onClick: () -> Unit) {
                   painter = painterResource(id = R.drawable.google_logo),
                   contentDescription = "Google Logo",
                   modifier = Modifier.size(30.dp).padding(end = 8.dp))
-              Text(text = "Sign Up with Google", color = Color.Gray, fontSize = 16.sp)
+              Text(text = "Sign Up with Google", color = colorScheme.onSurface, fontSize = 16.sp)
               Spacer(Modifier.size(25.dp))
             }
       }
@@ -317,11 +322,11 @@ fun googleRegisterLauncher(
 @Composable
 fun AlreadyHaveAccountText(navigationActions: NavigationActions) {
   Row(verticalAlignment = Alignment.CenterVertically) {
-    Text("Already have an account? ", color = Color.Gray)
+    Text("Already have an account? ", color = colorScheme.onSurface)
     ClickableText(
         text = AnnotatedString("Log up in here!"),
         onClick = { navigationActions.navigateTo(Screen.SIGN_IN) },
-        style = TextStyle(color = Color.Blue, textDecoration = TextDecoration.Underline),
+        style = TextStyle(color = colorScheme.primary, textDecoration = TextDecoration.Underline),
         modifier = Modifier.testTag("logInLink"))
   }
 }

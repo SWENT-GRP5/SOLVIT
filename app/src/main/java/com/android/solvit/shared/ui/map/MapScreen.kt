@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,7 +33,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
@@ -75,7 +75,7 @@ fun MapScreen(userLocation: LatLng?, markers: List<MarkerData>, bottomBar: @Comp
             modifier =
                 Modifier.fillMaxSize()
                     .padding(paddingValues)
-                    .background(color = Color.White, shape = RoundedCornerShape(18.dp))
+                    .background(color = colorScheme.background, shape = RoundedCornerShape(18.dp))
                     .testTag("mapScreen"),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -134,8 +134,8 @@ fun MapMarker(markerData: MarkerData) {
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier =
                 Modifier.clip(RoundedCornerShape(8.dp))
-                    .background(Color.White)
-                    .border(1.dp, Color.Black, RoundedCornerShape(8.dp))
+                    .background(colorScheme.background)
+                    .border(1.dp, colorScheme.onBackground, RoundedCornerShape(8.dp))
                     .testTag(markerData.tag)) {
               Image(
                   markerData.image ?: ImageBitmap.imageResource(R.drawable.empty_profile_img),
@@ -145,7 +145,7 @@ fun MapMarker(markerData: MarkerData) {
                       Modifier.padding(top = 4.dp, start = 6.dp, end = 6.dp)
                           .size(50.dp)
                           .clip(CircleShape)
-                          .border(2.dp, Color.Black, CircleShape)
+                          .border(2.dp, colorScheme.onBackground, CircleShape)
                           .testTag(markerData.tag + "Image"))
               Text(
                   maxLines = 1,
