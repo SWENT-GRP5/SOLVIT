@@ -24,6 +24,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -31,7 +32,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
@@ -75,104 +75,104 @@ fun RequestScreen(
     onSubmit: () -> Unit,
     submitButtonText: String
 ) {
-  // Lock Orientation to Portrait
-  val context = LocalContext.current
-  DisposableEffect(Unit) {
-    val activity = context as? ComponentActivity
-    activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-    onDispose { activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED }
-  }
-  Scaffold(
-      modifier = Modifier.padding(16.dp).testTag("requestScreen"),
-      bottomBar = {
-        if (screenTitle == "Create a new request") {
-          BottomNavigationMenu(
-              onTabSelect = { route -> navigationActions.navigateTo(route) },
-              tabList = LIST_TOP_LEVEL_DESTINATION_CUSTOMER,
-              selectedItem = navigationActions.currentRoute())
-        }
-      },
-      topBar = {
-        TopAppBar(
-            title = { Text(screenTitle, Modifier.testTag("screenTitle")) },
-            navigationIcon = {
-              IconButton(
-                  onClick = {
-                    // HJ : Comment this line as these screens have a bottom navigation menu
-                    navigationActions.goBack()
-                  },
-                  modifier = Modifier.testTag("goBackButton")) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-                        contentDescription = "Back")
-                  }
-            })
-      },
-      content = { paddingValues ->
-        Column(
-            modifier =
+    // Lock Orientation to Portrait
+    val context = LocalContext.current
+    DisposableEffect(Unit) {
+        val activity = context as? ComponentActivity
+        activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        onDispose { activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED }
+    }
+    Scaffold(
+        modifier = Modifier.padding(16.dp).testTag("requestScreen"),
+        bottomBar = {
+            if (screenTitle == "Create a new request") {
+                BottomNavigationMenu(
+                    onTabSelect = { route -> navigationActions.navigateTo(route) },
+                    tabList = LIST_TOP_LEVEL_DESTINATION_CUSTOMER,
+                    selectedItem = navigationActions.currentRoute())
+            }
+        },
+        topBar = {
+            TopAppBar(
+                title = { Text(screenTitle, Modifier.testTag("screenTitle")) },
+                navigationIcon = {
+                    IconButton(
+                        onClick = {
+                            // HJ : Comment this line as these screens have a bottom navigation menu
+                            navigationActions.goBack()
+                        },
+                        modifier = Modifier.testTag("goBackButton")) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
+                            contentDescription = "Back")
+                    }
+                })
+        },
+        content = { paddingValues ->
+            Column(
+                modifier =
                 Modifier.fillMaxSize()
                     .padding(16.dp)
                     .padding(paddingValues)
                     .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally) {
-              TitleInput(title, onTitleChange)
-              ServiceTypeDropdown(
-                  typeQuery,
-                  onTypeQueryChange,
-                  showDropdownType,
-                  onShowDropdownTypeChange,
-                  filteredServiceTypes,
-                  onServiceTypeSelected)
-              DescriptionInput(description, onDescriptionChange)
-              LocationDropdown(
-                  locationQuery,
-                  onLocationQueryChange,
-                  showDropdownLocation,
-                  onShowDropdownLocationChange,
-                  locationSuggestions,
-                  onLocationSelected,
-                  selectedRequest?.location)
-              DatePickerFieldToModal(dueDate = dueDate, onDateChange = onDueDateChange)
-              ImagePicker(selectedImageUri, imageUrl, onImageSelected)
-              Button(
-                  onClick = onSubmit,
-                  modifier =
-                      Modifier.fillMaxWidth()
-                          .padding(start = 80.dp, end = 80.dp)
-                          .height(40.dp)
-                          .testTag("requestSubmit"),
-                  shape = RoundedCornerShape(25.dp),
-                  enabled =
-                      title.isNotBlank() &&
-                          description.isNotBlank() &&
-                          dueDate.isNotBlank() &&
-                          selectedLocation != null,
-                  colors =
-                      ButtonDefaults.buttonColors(
-                          containerColor = Color(0xFFCA97FC),
-                          disabledContainerColor = Color(0xFFDECBFC),
-                          contentColor = Color.Black,
-                          disabledContentColor = Color.Gray)) {
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally) {
+                TitleInput(title, onTitleChange)
+                ServiceTypeDropdown(
+                    typeQuery,
+                    onTypeQueryChange,
+                    showDropdownType,
+                    onShowDropdownTypeChange,
+                    filteredServiceTypes,
+                    onServiceTypeSelected)
+                DescriptionInput(description, onDescriptionChange)
+                LocationDropdown(
+                    locationQuery,
+                    onLocationQueryChange,
+                    showDropdownLocation,
+                    onShowDropdownLocationChange,
+                    locationSuggestions,
+                    onLocationSelected,
+                    selectedRequest?.location)
+                DatePickerFieldToModal(dueDate = dueDate, onDateChange = onDueDateChange)
+                ImagePicker(selectedImageUri, imageUrl, onImageSelected)
+                Button(
+                    onClick = onSubmit,
+                    modifier =
+                    Modifier.fillMaxWidth()
+                        .padding(start = 80.dp, end = 80.dp)
+                        .height(40.dp)
+                        .testTag("requestSubmit"),
+                    shape = RoundedCornerShape(25.dp),
+                    enabled =
+                    title.isNotBlank() &&
+                            description.isNotBlank() &&
+                            dueDate.isNotBlank() &&
+                            selectedLocation != null,
+                    colors =
+                    ButtonDefaults.buttonColors(
+                        containerColor = colorScheme.primary,
+                        disabledContainerColor = colorScheme.primaryContainer,
+                        contentColor = colorScheme.onPrimary,
+                        disabledContentColor = colorScheme.onPrimaryContainer)) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.Center,
                         modifier = Modifier.fillMaxSize()) {
-                          Icon(
-                              imageVector = Icons.Default.Done,
-                              contentDescription = null,
-                              modifier = Modifier.size(24.dp))
-                          Spacer(modifier = Modifier.width(8.dp))
-                          Text(submitButtonText)
-                        }
-                  }
-              if (selectedRequest != null) {
-                DeleteButton(
-                    request = selectedRequest,
-                    requestViewModel = requestViewModel,
-                    navigationActions)
-              }
+                        Icon(
+                            imageVector = Icons.Default.Done,
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(submitButtonText)
+                    }
+                }
+                if (selectedRequest != null) {
+                    DeleteButton(
+                        request = selectedRequest,
+                        requestViewModel = requestViewModel,
+                        navigationActions)
+                }
             }
-      })
+        })
 }

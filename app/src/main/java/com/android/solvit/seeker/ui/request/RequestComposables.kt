@@ -36,7 +36,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -76,26 +76,34 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun TitleInput(title: String, onTitleChange: (String) -> Unit) {
-  OutlinedTextField(
-      value = title,
-      onValueChange = onTitleChange,
-      label = { Text("Title") },
-      placeholder = { Text("Name your Request") },
-      shape = RoundedCornerShape(12.dp),
-      modifier = Modifier.fillMaxWidth().testTag("inputRequestTitle"),
-      colors = OutlinedTextFieldDefaults.colors(unfocusedContainerColor = Color.Transparent))
+    OutlinedTextField(
+        value = title,
+        onValueChange = onTitleChange,
+        label = { Text("Title") },
+        placeholder = { Text("Name your Request") },
+        shape = RoundedCornerShape(12.dp),
+        modifier = Modifier.fillMaxWidth().testTag("inputRequestTitle"),
+        colors =
+        OutlinedTextFieldDefaults.colors(
+            unfocusedContainerColor = Color.Transparent,
+            focusedBorderColor = colorScheme.secondary,
+            unfocusedBorderColor = colorScheme.onSurfaceVariant))
 }
 
 @Composable
 fun DescriptionInput(description: String, onDescriptionChange: (String) -> Unit) {
-  OutlinedTextField(
-      value = description,
-      onValueChange = onDescriptionChange,
-      label = { Text("Description") },
-      placeholder = { Text("Describe your request") },
-      shape = RoundedCornerShape(12.dp),
-      modifier = Modifier.fillMaxWidth().height(150.dp).testTag("inputRequestDescription"),
-      colors = OutlinedTextFieldDefaults.colors(unfocusedContainerColor = Color.Transparent))
+    OutlinedTextField(
+        value = description,
+        onValueChange = onDescriptionChange,
+        label = { Text("Description") },
+        placeholder = { Text("Describe your request") },
+        shape = RoundedCornerShape(12.dp),
+        modifier = Modifier.fillMaxWidth().height(150.dp).testTag("inputRequestDescription"),
+        colors =
+        OutlinedTextFieldDefaults.colors(
+            unfocusedContainerColor = Color.Transparent,
+            focusedBorderColor = colorScheme.secondary,
+            unfocusedBorderColor = colorScheme.onSurfaceVariant))
 }
 
 @Composable
@@ -107,70 +115,75 @@ fun ServiceTypeDropdown(
     filteredServiceTypes: List<Services>,
     onServiceTypeSelected: (Services) -> Unit
 ) {
-  Box(modifier = Modifier.fillMaxWidth()) {
-    OutlinedTextField(
-        value =
+    Box(modifier = Modifier.fillMaxWidth()) {
+        OutlinedTextField(
+            value =
             typeQuery.replace("_", " ").lowercase(Locale.getDefault()).replaceFirstChar {
-              it.uppercase(Locale.getDefault())
+                it.uppercase(Locale.getDefault())
             },
-        onValueChange = {
-          onTypeQueryChange(it)
-          onShowDropdownTypeChange(true)
-        },
-        label = { Text("Service Type") },
-        placeholder = { Text("Select a Service Type") },
-        shape = RoundedCornerShape(12.dp),
-        modifier =
+            onValueChange = {
+                onTypeQueryChange(it)
+                onShowDropdownTypeChange(true)
+            },
+            label = { Text("Service Type") },
+            placeholder = { Text("Select a Service Type") },
+            shape = RoundedCornerShape(12.dp),
+            modifier =
             Modifier.fillMaxWidth().testTag("inputServiceType").onFocusChanged { focusState ->
-              if (!focusState.isFocused) onShowDropdownTypeChange(false)
+                if (!focusState.isFocused) onShowDropdownTypeChange(false)
             },
-        singleLine = true)
+            singleLine = true,
+            colors =
+            OutlinedTextFieldDefaults.colors(
+                unfocusedContainerColor = Color.Transparent,
+                focusedBorderColor = colorScheme.secondary,
+                unfocusedBorderColor = colorScheme.onSurfaceVariant))
 
-    DropdownMenu(
-        expanded = showDropdownType,
-        onDismissRequest = { onShowDropdownTypeChange(false) },
-        properties = PopupProperties(focusable = false),
-        modifier =
+        DropdownMenu(
+            expanded = showDropdownType,
+            onDismissRequest = { onShowDropdownTypeChange(false) },
+            properties = PopupProperties(focusable = false),
+            modifier =
             Modifier.fillMaxWidth()
                 .heightIn(max = 200.dp)
-                .background(MaterialTheme.colorScheme.surface)
-                .border(1.dp, MaterialTheme.colorScheme.onSurface, shape = RoundedCornerShape(8.dp))
+                .background(colorScheme.surfaceVariant)
+                .border(1.dp, colorScheme.onSurfaceVariant, shape = RoundedCornerShape(8.dp))
                 .padding(start = 8.dp, end = 8.dp)
                 .testTag("serviceTypeMenu")) {
-          filteredServiceTypes.forEach { serviceType ->
-            DropdownMenuItem(
-                modifier = Modifier.testTag("serviceTypeResult"),
-                text = {
-                  Text(
-                      serviceType.name
-                          .replace("_", " ")
-                          .lowercase(Locale.getDefault())
-                          .replaceFirstChar { it.uppercase(Locale.getDefault()) })
-                },
-                onClick = {
-                  onServiceTypeSelected(serviceType)
-                  onShowDropdownTypeChange(false)
-                })
-            HorizontalDivider()
-          }
+            filteredServiceTypes.forEach { serviceType ->
+                DropdownMenuItem(
+                    modifier = Modifier.testTag("serviceTypeResult"),
+                    text = {
+                        Text(
+                            serviceType.name
+                                .replace("_", " ")
+                                .lowercase(Locale.getDefault())
+                                .replaceFirstChar { it.uppercase(Locale.getDefault()) })
+                    },
+                    onClick = {
+                        onServiceTypeSelected(serviceType)
+                        onShowDropdownTypeChange(false)
+                    })
+                HorizontalDivider()
+            }
 
-          if (filteredServiceTypes.isEmpty()) {
-            DropdownMenuItem(
-                modifier = Modifier.testTag("serviceTypeResult"),
-                text = {
-                  Text(
-                      Services.OTHER.name.lowercase(Locale.getDefault()).replaceFirstChar {
-                        it.uppercase(Locale.getDefault())
-                      })
-                },
-                onClick = {
-                  onServiceTypeSelected(Services.OTHER)
-                  onShowDropdownTypeChange(false)
-                })
-            HorizontalDivider()
-          }
+            if (filteredServiceTypes.isEmpty()) {
+                DropdownMenuItem(
+                    modifier = Modifier.testTag("serviceTypeResult"),
+                    text = {
+                        Text(
+                            Services.OTHER.name.lowercase(Locale.getDefault()).replaceFirstChar {
+                                it.uppercase(Locale.getDefault())
+                            })
+                    },
+                    onClick = {
+                        onServiceTypeSelected(Services.OTHER)
+                        onShowDropdownTypeChange(false)
+                    })
+                HorizontalDivider()
+            }
         }
-  }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -183,138 +196,138 @@ fun LocationDropdown(
     locationSuggestions: List<Location>,
     onLocationSelected: (Location) -> Unit,
     requestLocation: Location?,
-    backgroundColor: Color = MaterialTheme.colorScheme.surface,
+    backgroundColor: Color = colorScheme.surfaceVariant,
     debounceDelay: Long = 1001L, // debounce delay longer than 1 second,
     isValueOk: Boolean = false,
     errorMessage: String = "Invalid location" // Default error message
 ) {
-  val coroutineScope = rememberCoroutineScope()
-  var debounceJob by remember { mutableStateOf<Job?>(null) }
+    val coroutineScope = rememberCoroutineScope()
+    var debounceJob by remember { mutableStateOf<Job?>(null) }
 
-  // Local state to update the text field instantly without triggering the API call
-  var localQuery by remember { mutableStateOf(locationQuery) }
+    // Local state to update the text field instantly without triggering the API call
+    var localQuery by remember { mutableStateOf(locationQuery) }
 
-  // State to manage whether the field has been "visited" (focused then unfocused)
-  var hasBeenFocused by remember { mutableStateOf(false) }
-  var hasLostFocusAfterTyping by remember { mutableStateOf(false) }
+    // State to manage whether the field has been "visited" (focused then unfocused)
+    var hasBeenFocused by remember { mutableStateOf(false) }
+    var hasLostFocusAfterTyping by remember { mutableStateOf(false) }
 
-  Box(modifier = Modifier.fillMaxWidth()) {
-    OutlinedTextField(
-        value = localQuery,
-        onValueChange = { query ->
-          // Update the local query immediately
-          localQuery = query
+    Box(modifier = Modifier.fillMaxWidth()) {
+        OutlinedTextField(
+            value = localQuery,
+            onValueChange = { query ->
+                // Update the local query immediately
+                localQuery = query
 
-          // Cancel any previous debounce job
-          debounceJob?.cancel()
+                // Cancel any previous debounce job
+                debounceJob?.cancel()
 
-          // Start a new coroutine for debouncing the API call
-          debounceJob =
-              coroutineScope.launch {
-                delay(debounceDelay)
-                onLocationQueryChange(query) // Call API after debounce
-                onShowDropdownLocationChange(true)
-              }
+                // Start a new coroutine for debouncing the API call
+                debounceJob =
+                    coroutineScope.launch {
+                        delay(debounceDelay)
+                        onLocationQueryChange(query) // Call API after debounce
+                        onShowDropdownLocationChange(true)
+                    }
 
-          // Reset focus-loss tracking when user starts typing
-          if (query.isNotEmpty()) {
-            hasLostFocusAfterTyping = false
-          }
-        },
-        label = { Text("Address") },
-        placeholder = { requestLocation?.name?.let { Text(it) } ?: Text("Enter your address") },
-        shape = RoundedCornerShape(12.dp),
-        modifier =
-            Modifier.fillMaxWidth().testTag("inputRequestAddress").onFocusChanged { focusState ->
-              // Mark field as "visited" once it loses focus after user types
-              if (!focusState.isFocused && localQuery.isNotBlank()) {
-                hasBeenFocused = true
-                hasLostFocusAfterTyping = true
-              }
+                // Reset focus-loss tracking when user starts typing
+                if (query.isNotEmpty()) {
+                    hasLostFocusAfterTyping = false
+                }
             },
-        singleLine = true,
-        leadingIcon = {
-          Icon(
-              Icons.Default.Home,
-              contentDescription = "Location Icon",
-              tint = if (isValueOk) Color(0xFF5AC561) else Color.Gray)
-        },
-        colors =
+            label = { Text("Address") },
+            placeholder = { requestLocation?.name?.let { Text(it) } ?: Text("Enter your address") },
+            shape = RoundedCornerShape(12.dp),
+            modifier =
+            Modifier.fillMaxWidth().testTag("inputRequestAddress").onFocusChanged { focusState ->
+                // Mark field as "visited" once it loses focus after user types
+                if (!focusState.isFocused && localQuery.isNotBlank()) {
+                    hasBeenFocused = true
+                    hasLostFocusAfterTyping = true
+                }
+            },
+            singleLine = true,
+            leadingIcon = {
+                Icon(
+                    Icons.Default.Home,
+                    contentDescription = "Location Icon",
+                    tint = if (isValueOk) colorScheme.secondary else colorScheme.onSurfaceVariant)
+            },
+            colors =
             TextFieldDefaults.outlinedTextFieldColors(
-                focusedTextColor = Color.Black,
+                focusedTextColor = colorScheme.onBackground,
                 unfocusedTextColor =
-                    if (locationQuery.isEmpty()) Color.Gray
-                    else if (!isValueOk) Color.Red else Color.Black,
-                focusedBorderColor = if (isValueOk) Color(0xFF5AC561) else Color.Blue,
+                if (locationQuery.isEmpty()) colorScheme.onSurfaceVariant
+                else if (!isValueOk) colorScheme.error else colorScheme.onBackground,
+                focusedBorderColor = if (isValueOk) colorScheme.secondary else colorScheme.primary,
                 unfocusedBorderColor =
-                    when {
-                      locationQuery.isEmpty() -> Color.Gray
-                      isValueOk -> Color(0xFF5AC561)
-                      else -> Color.Red
-                    },
+                when {
+                    locationQuery.isEmpty() -> colorScheme.onSurfaceVariant
+                    isValueOk -> colorScheme.secondary
+                    else -> colorScheme.error
+                },
             ))
 
-    // Dropdown menu for location suggestions
-    DropdownMenu(
-        expanded = showDropdownLocation && locationSuggestions.isNotEmpty(),
-        onDismissRequest = { onShowDropdownLocationChange(false) },
-        properties = PopupProperties(focusable = false),
-        modifier =
+        // Dropdown menu for location suggestions
+        DropdownMenu(
+            expanded = showDropdownLocation && locationSuggestions.isNotEmpty(),
+            onDismissRequest = { onShowDropdownLocationChange(false) },
+            properties = PopupProperties(focusable = false),
+            modifier =
             Modifier.fillMaxWidth()
                 .heightIn(max = 200.dp)
                 .background(backgroundColor)
-                .border(1.dp, MaterialTheme.colorScheme.onSurface, shape = RoundedCornerShape(8.dp))
+                .border(1.dp, colorScheme.onSurfaceVariant, shape = RoundedCornerShape(8.dp))
                 .padding(start = 8.dp, end = 8.dp)) {
-          locationSuggestions.forEach { location ->
-            DropdownMenuItem(
-                modifier = Modifier.padding(start = 8.dp, end = 8.dp).testTag("locationResult"),
-                text = {
-                  Text(
-                      text = location.name.take(50) + if (location.name.length > 50) "..." else "",
-                      maxLines = 1)
-                },
-                onClick = {
-                  onLocationQueryChange(location.name)
-                  localQuery = location.name
-                  onLocationSelected(location)
-                  onShowDropdownLocationChange(false)
-                })
-            HorizontalDivider()
-          }
+            locationSuggestions.forEach { location ->
+                DropdownMenuItem(
+                    modifier = Modifier.padding(start = 8.dp, end = 8.dp).testTag("locationResult"),
+                    text = {
+                        Text(
+                            text = location.name.take(50) + if (location.name.length > 50) "..." else "",
+                            maxLines = 1)
+                    },
+                    onClick = {
+                        onLocationQueryChange(location.name)
+                        localQuery = location.name
+                        onLocationSelected(location)
+                        onShowDropdownLocationChange(false)
+                    })
+                HorizontalDivider()
+            }
         }
 
-    // Display the error message if the field has been visited, input is incorrect, and focus was
-    // lost after typing
-    if (!isValueOk && hasBeenFocused && hasLostFocusAfterTyping) {
-      Text(
-          text = errorMessage,
-          color = Color.Red,
-          fontSize = 15.sp, // Error text size
-          modifier = Modifier.padding(start = 16.dp, top = 65.dp))
+        // Display the error message if the field has been visited, input is incorrect, and focus was
+        // lost after typing
+        if (!isValueOk && hasBeenFocused && hasLostFocusAfterTyping) {
+            Text(
+                text = errorMessage,
+                color = colorScheme.error,
+                fontSize = 15.sp, // Error text size
+                modifier = Modifier.padding(start = 16.dp, top = 65.dp))
+        }
     }
-  }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DatePickerModal(onDateSelected: (Long?) -> Unit, onDismiss: () -> Unit) {
-  val datePickerState = rememberDatePickerState()
+    val datePickerState = rememberDatePickerState()
 
-  DatePickerDialog(
-      onDismissRequest = onDismiss,
-      modifier = Modifier.testTag("datePickerDialog"),
-      confirmButton = {
-        TextButton(
-            onClick = {
-              onDateSelected(datePickerState.selectedDateMillis)
-              onDismiss()
-            }) {
-              Text("OK")
+    DatePickerDialog(
+        onDismissRequest = onDismiss,
+        modifier = Modifier.testTag("datePickerDialog"),
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    onDateSelected(datePickerState.selectedDateMillis)
+                    onDismiss()
+                }) {
+                Text("OK")
             }
-      },
-      dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } }) {
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } }) {
         DatePicker(state = datePickerState)
-      }
+    }
 }
 
 @Composable
@@ -323,43 +336,48 @@ fun DatePickerFieldToModal(
     dueDate: String,
     onDateChange: (String) -> Unit
 ) {
-  var selectedDate by remember { mutableStateOf<Long?>(null) }
-  var showModal by remember { mutableStateOf(false) }
+    var selectedDate by remember { mutableStateOf<Long?>(null) }
+    var showModal by remember { mutableStateOf(false) }
 
-  OutlinedTextField(
-      value = selectedDate?.let { convertMillisToDate(it) } ?: dueDate,
-      onValueChange = {},
-      label = { Text("Deadline") },
-      placeholder = { Text("DD/MM/YYYY") },
-      trailingIcon = { Icon(Icons.Default.DateRange, contentDescription = "Select date") },
-      shape = RoundedCornerShape(12.dp),
-      modifier =
-          modifier.fillMaxWidth().testTag("inputRequestDate").pointerInput(selectedDate) {
+    OutlinedTextField(
+        value = selectedDate?.let { convertMillisToDate(it) } ?: dueDate,
+        onValueChange = {},
+        label = { Text("Deadline") },
+        placeholder = { Text("DD/MM/YYYY") },
+        trailingIcon = { Icon(Icons.Default.DateRange, contentDescription = "Select date") },
+        shape = RoundedCornerShape(12.dp),
+        modifier =
+        modifier.fillMaxWidth().testTag("inputRequestDate").pointerInput(selectedDate) {
             awaitEachGesture {
-              awaitFirstDown(pass = PointerEventPass.Initial)
-              val upEvent = waitForUpOrCancellation(pass = PointerEventPass.Initial)
-              if (upEvent != null) {
-                showModal = true
-              }
+                awaitFirstDown(pass = PointerEventPass.Initial)
+                val upEvent = waitForUpOrCancellation(pass = PointerEventPass.Initial)
+                if (upEvent != null) {
+                    showModal = true
+                }
             }
-          })
-
-  if (showModal) {
-    DatePickerModal(
-        onDateSelected = {
-          selectedDate = it
-          it?.let { millis ->
-            val formattedDate = convertMillisToDate(millis)
-            onDateChange(formattedDate)
-          }
         },
-        onDismiss = { showModal = false })
-  }
+        colors =
+        OutlinedTextFieldDefaults.colors(
+            unfocusedContainerColor = Color.Transparent,
+            focusedBorderColor = colorScheme.secondary,
+            unfocusedBorderColor = colorScheme.onSurfaceVariant))
+
+    if (showModal) {
+        DatePickerModal(
+            onDateSelected = {
+                selectedDate = it
+                it?.let { millis ->
+                    val formattedDate = convertMillisToDate(millis)
+                    onDateChange(formattedDate)
+                }
+            },
+            onDismiss = { showModal = false })
+    }
 }
 
 fun convertMillisToDate(millis: Long): String {
-  val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-  return formatter.format(Date(millis))
+    val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+    return formatter.format(Date(millis))
 }
 
 @Composable
@@ -368,47 +386,47 @@ fun ImagePicker(
     imageUrl: String?, // URL of the image to display if no image is selected
     onImageSelected: (Uri?) -> Unit
 ) {
-  val imagePickerLauncher =
-      rememberLauncherForActivityResult(
-          contract = ActivityResultContracts.GetContent(),
-          onResult = { uri: Uri? -> onImageSelected(uri) })
+    val imagePickerLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.GetContent(),
+            onResult = { uri: Uri? -> onImageSelected(uri) })
 
-  // Using Box instead of Button for full control over image filling
-  Box(
-      modifier =
-          Modifier.fillMaxWidth()
-              .height(150.dp)
-              .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
-              .clip(RoundedCornerShape(12.dp))
-              .background(Color.Transparent)
-              .clickable { imagePickerLauncher.launch("image/*") }
-              .testTag("imagePickerButton")) {
+    // Using Box instead of Button for full control over image filling
+    Box(
+        modifier =
+        Modifier.fillMaxWidth()
+            .height(150.dp)
+            .border(1.dp, colorScheme.onSurfaceVariant, shape = RoundedCornerShape(12.dp))
+            .clip(RoundedCornerShape(12.dp))
+            .background(Color.Transparent)
+            .clickable { imagePickerLauncher.launch("image/*") }
+            .testTag("imagePickerButton")) {
         if (selectedImageUri == null && imageUrl == null) {
-          Row(
-              verticalAlignment = Alignment.CenterVertically,
-              horizontalArrangement = Arrangement.Center,
-              modifier = Modifier.fillMaxSize()) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxSize()) {
                 Icon(
                     imageVector = Icons.Default.PlayArrow,
                     contentDescription = null,
-                    tint = Color.Gray, // Icon in grey
+                    tint = colorScheme.onSurfaceVariant, // Icon in grey
                     modifier = Modifier.size(24.dp))
                 Spacer(modifier = Modifier.width(8.dp)) // Space between icon and text
                 Text(
-                    "Upload Image", color = Color.Gray // Text in grey
-                    )
-              }
+                    "Upload Image", color = colorScheme.onSurfaceVariant // Text in grey
+                )
+            }
         } else {
-          AsyncImage(
-              model =
-                  selectedImageUri?.toString()
-                      ?: imageUrl, // Show selected image URI or fallback URL
-              contentDescription = "Service Request Image",
-              contentScale = ContentScale.Crop, // Crop to fill the space
-              modifier = Modifier.fillMaxSize() // Fill the entire box
-              )
+            AsyncImage(
+                model =
+                selectedImageUri?.toString()
+                    ?: imageUrl, // Show selected image URI or fallback URL
+                contentDescription = "Service Request Image",
+                contentScale = ContentScale.Crop, // Crop to fill the space
+                modifier = Modifier.fillMaxSize() // Fill the entire box
+            )
         }
-      }
+    }
 }
 
 @Composable
@@ -417,26 +435,26 @@ fun DeleteButton(
     requestViewModel: ServiceRequestViewModel,
     navigationActions: NavigationActions
 ) {
-  Button(
-      modifier = Modifier.testTag("deleteRequestButton").fillMaxWidth().height(40.dp),
-      colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-      onClick = {
-        try {
-          requestViewModel.deleteServiceRequestById(request.uid)
-          navigationActions.goBack()
-        } catch (e: Exception) {
-          Log.e("EditRequestScreen", "Error deleting request", e)
-        }
-      }) {
+    Button(
+        modifier = Modifier.testTag("deleteRequestButton").fillMaxWidth().height(40.dp),
+        colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+        onClick = {
+            try {
+                requestViewModel.deleteServiceRequestById(request.uid)
+                navigationActions.goBack()
+            } catch (e: Exception) {
+                Log.e("EditRequestScreen", "Error deleting request", e)
+            }
+        }) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center) {
-              Icon(
-                  imageVector = Icons.Default.Delete,
-                  contentDescription = "Delete",
-                  tint = Color.Red,
-                  modifier = Modifier.padding(end = 8.dp))
-              Text("Delete", color = Color.Red)
-            }
-      }
+            Icon(
+                imageVector = Icons.Default.Delete,
+                contentDescription = "Delete",
+                tint = colorScheme.error,
+                modifier = Modifier.padding(end = 8.dp))
+            Text("Delete", color = colorScheme.error)
+        }
+    }
 }
