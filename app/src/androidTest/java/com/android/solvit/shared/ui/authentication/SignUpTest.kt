@@ -20,7 +20,6 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.verify
-import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -65,13 +64,11 @@ class SignUpScreenTest {
 
   @Test
   fun signUp_emailAndPasswordInput() {
-    runBlocking {
-      composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
+    composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
 
-      // Test email input
-      composeTestRule.onNodeWithTag("emailInputField").performTextInput("test@example.com")
-      composeTestRule.onNodeWithTag("passwordInputField").performTextInput("password123")
-    }
+    // Test email input
+    composeTestRule.onNodeWithTag("emailInputField").performTextInput("test@example.com")
+    composeTestRule.onNodeWithTag("passwordInputField").performTextInput("password123")
   }
 
   @Test
@@ -140,103 +137,101 @@ class SignUpScreenTest {
   @Test
   fun signUp_signUpButtonNavigatesToChooseRoleScreen() {
     composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
-    fun signUpButtonNavigatesToChooseRoleScreen() {
-      composeTestRule.onNodeWithTag("emailInputField").performTextInput("test@test.com")
-      composeTestRule.onNodeWithTag("passwordInputField").performTextInput("password")
-      composeTestRule.onNodeWithTag("confirmPasswordInputField").performTextInput("password")
+    composeTestRule.onNodeWithTag("emailInputField").performTextInput("test@test.com")
+    composeTestRule.onNodeWithTag("passwordInputField").performTextInput("password")
+    composeTestRule.onNodeWithTag("confirmPasswordInputField").performTextInput("password")
 
-      composeTestRule.onNodeWithTag("signUpButton").performClick()
-      verify(mockNavigationActions).navigateTo(Screen.SIGN_UP_CHOOSE_ROLE)
+    composeTestRule.onNodeWithTag("signUpButton").performClick()
+    verify(mockNavigationActions).navigateTo(Screen.SIGN_UP_CHOOSE_ROLE)
+  }
+}
+
+class SignUpButtonTest {
+  @get:Rule val composeTestRule = createComposeRule()
+
+  @Before
+  fun setup() {
+    // Mock the Toast.makeText function to intercept the Toast messages
+    mockkStatic(Toast::class)
+    every { Toast.makeText(any(), any<String>(), any()) } answers { mockk(relaxed = true) }
+  }
+
+  @Test
+  fun signUpButton_testShowToastWhenFieldsIncomplete() {
+    composeTestRule.setContent {
+      SignUpButton(
+          onClick = {},
+          isComplete = false,
+          goodFormEmail = true,
+          passwordLengthComplete = true,
+          samePassword = true)
+    }
+    composeTestRule.onNodeWithTag("signUpButton").performClick()
+
+    verify { Toast.makeText(any(), "Please fill in all required fields", Toast.LENGTH_SHORT) }
+  }
+
+  @Test
+  fun signUpButton_testShowToastForInvalidEmailFormat() {
+    composeTestRule.setContent {
+      SignUpButton(
+          onClick = {},
+          isComplete = true,
+          goodFormEmail = false,
+          passwordLengthComplete = true,
+          samePassword = true)
+    }
+    composeTestRule.onNodeWithTag("signUpButton").performClick()
+
+    verify { Toast.makeText(any(), "Your email must have \"@\" and \".\"", Toast.LENGTH_SHORT) }
+  }
+
+  @Test
+  fun signUpButton_testShowToastForNonMatchingPasswords() {
+    composeTestRule.setContent {
+      SignUpButton(
+          onClick = {},
+          isComplete = true,
+          goodFormEmail = true,
+          passwordLengthComplete = true,
+          samePassword = false)
+    }
+    composeTestRule.onNodeWithTag("signUpButton").performClick()
+
+    verify {
+      Toast.makeText(any(), "Password and Confirm Password must be the same", Toast.LENGTH_SHORT)
     }
   }
 
-  class SignUpButtonTest {
-    @get:Rule val composeTestRule = createComposeRule()
-
-    @Before
-    fun setup() {
-      // Mock the Toast.makeText function to intercept the Toast messages
-      mockkStatic(Toast::class)
-      every { Toast.makeText(any(), any<String>(), any()) } answers { mockk(relaxed = true) }
+  @Test
+  fun signUpButton_testShowToastForShortPassword() {
+    composeTestRule.setContent {
+      SignUpButton(
+          onClick = {},
+          isComplete = true,
+          goodFormEmail = true,
+          passwordLengthComplete = false,
+          samePassword = true)
     }
+    composeTestRule.onNodeWithTag("signUpButton").performClick()
 
-    @Test
-    fun signUpButton_testShowToastWhenFieldsIncomplete() {
-      composeTestRule.setContent {
-        SignUpButton(
-            onClick = {},
-            isComplete = false,
-            goodFormEmail = true,
-            passwordLengthComplete = true,
-            samePassword = true)
-      }
-      composeTestRule.onNodeWithTag("signUpButton").performClick()
-
-      verify { Toast.makeText(any(), "Please fill in all required fields", Toast.LENGTH_SHORT) }
+    verify {
+      Toast.makeText(any(), "Your password must have at least 6 characters", Toast.LENGTH_SHORT)
     }
+  }
 
-    @Test
-    fun signUpButton_testShowToastForInvalidEmailFormat() {
-      composeTestRule.setContent {
-        SignUpButton(
-            onClick = {},
-            isComplete = true,
-            goodFormEmail = false,
-            passwordLengthComplete = true,
-            samePassword = true)
-      }
-      composeTestRule.onNodeWithTag("signUpButton").performClick()
-
-      verify { Toast.makeText(any(), "Your email must have \"@\" and \".\"", Toast.LENGTH_SHORT) }
+  @Test
+  fun signUpButton_testShowToastForSuccessfulSignUp() {
+    composeTestRule.setContent {
+      SignUpButton(
+          onClick = {},
+          isComplete = true,
+          goodFormEmail = true,
+          passwordLengthComplete = true,
+          samePassword = true)
     }
+    composeTestRule.onNodeWithTag("signUpButton").performClick()
 
-    @Test
-    fun signUpButton_testShowToastForNonMatchingPasswords() {
-      composeTestRule.setContent {
-        SignUpButton(
-            onClick = {},
-            isComplete = true,
-            goodFormEmail = true,
-            passwordLengthComplete = true,
-            samePassword = false)
-      }
-      composeTestRule.onNodeWithTag("signUpButton").performClick()
-
-      verify {
-        Toast.makeText(any(), "Password and Confirm Password must be the same", Toast.LENGTH_SHORT)
-      }
-    }
-
-    @Test
-    fun signUpButton_testShowToastForShortPassword() {
-      composeTestRule.setContent {
-        SignUpButton(
-            onClick = {},
-            isComplete = true,
-            goodFormEmail = true,
-            passwordLengthComplete = false,
-            samePassword = true)
-      }
-      composeTestRule.onNodeWithTag("signUpButton").performClick()
-
-      verify {
-        Toast.makeText(any(), "Your password must have at least 6 characters", Toast.LENGTH_SHORT)
-      }
-    }
-
-    @Test
-    fun signUpButton_testShowToastForSuccessfulSignUp() {
-      composeTestRule.setContent {
-        SignUpButton(
-            onClick = {},
-            isComplete = true,
-            goodFormEmail = true,
-            passwordLengthComplete = true,
-            samePassword = true)
-      }
-      composeTestRule.onNodeWithTag("signUpButton").performClick()
-
-      verify { Toast.makeText(any(), "You are Signed up!", Toast.LENGTH_SHORT) }
-    }
+    verify { Toast.makeText(any(), "You are Signed up!", Toast.LENGTH_SHORT) }
   }
 }
