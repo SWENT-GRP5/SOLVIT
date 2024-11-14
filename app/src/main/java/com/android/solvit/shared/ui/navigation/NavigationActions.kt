@@ -113,7 +113,7 @@ open class NavigationActions(
    */
   open fun navigateTo(destination: TopLevelDestination) {
     navController.navigate(destination.route) {
-      popUpTo(navController.graph.startDestinationId) { inclusive = true }
+      popUpTo(navController.graph.startDestinationId) { saveState = true }
       launchSingleTop = true
       restoreState = true
     }
