@@ -465,7 +465,7 @@ fun SignUpSection(navigationActions: NavigationActions) {
   }
 
   Box(
-      modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp).testTag("signUpLink"),
+      modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
       contentAlignment = Alignment.Center,
   ) {
     ClickableText(
@@ -473,12 +473,7 @@ fun SignUpSection(navigationActions: NavigationActions) {
         style =
             TextStyle(
                 color = colorScheme.onSurface, fontSize = 16.sp, textAlign = TextAlign.Center),
-        onClick = { offset ->
-          annotatedText
-              .getStringAnnotations(tag = "Sign up", start = offset, end = offset)
-              .firstOrNull()
-              ?.let { navigationActions.navigateTo(Screen.SIGN_UP) }
-        },
+        onClick = { navigationActions.navigateTo(Screen.SIGN_UP) },
         modifier = Modifier.fillMaxWidth().testTag("signUpLink"))
   }
 }
