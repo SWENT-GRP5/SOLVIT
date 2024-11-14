@@ -65,7 +65,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -187,9 +186,11 @@ fun SpFilterBar(display: () -> Unit, listProviderViewModel: ListProviderViewMode
           filters.forEach { filter ->
             Card(
                 modifier =
-                    Modifier.wrapContentSize().clickable {
-                      Toast.makeText(context, "Not Yet Implemented", Toast.LENGTH_LONG).show()
-                    }.testTag("filterIcon"),
+                    Modifier.wrapContentSize()
+                        .clickable {
+                          Toast.makeText(context, "Not Yet Implemented", Toast.LENGTH_LONG).show()
+                        }
+                        .testTag("filterIcon"),
                 elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
                 colors = CardDefaults.cardColors(containerColor = colorScheme.background),
                 border = BorderStroke(1.dp, colorScheme.primary),
@@ -244,37 +245,31 @@ fun Title(title: String) {
 
 @Composable
 fun Note(note: String = "5") {
-    Box(
-        modifier = Modifier
-            .width(46.dp)
-            .height(24.dp)
-            .background(color = colorScheme.onSurface, shape = RoundedCornerShape(size = 59.dp))
-            .testTag("Rating")
-    ) {
+  Box(
+      modifier =
+          Modifier.width(46.dp)
+              .height(24.dp)
+              .background(color = colorScheme.onSurface, shape = RoundedCornerShape(size = 59.dp))
+              .testTag("Rating")) {
         Row(
             modifier = Modifier.fillMaxSize(),
             horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = Icons.Default.Star,
-                contentDescription = "Rating star",
-                modifier = Modifier
-                    .size(24.dp)
-                    .padding(2.dp),
-                tint = Yellow
-            )
-            
-            Spacer(modifier = Modifier.width(2.dp))
-            
-            Text(
-                text = note,
-                color = colorScheme.surface,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium
-            )
-        }
-    }
+            verticalAlignment = Alignment.CenterVertically) {
+              Icon(
+                  imageVector = Icons.Default.Star,
+                  contentDescription = "Rating star",
+                  modifier = Modifier.size(24.dp).padding(2.dp),
+                  tint = Yellow)
+
+              Spacer(modifier = Modifier.width(2.dp))
+
+              Text(
+                  text = note,
+                  color = colorScheme.surface,
+                  fontSize = 14.sp,
+                  fontWeight = FontWeight.Medium)
+            }
+      }
 }
 
 @Composable
@@ -283,80 +278,64 @@ fun DisplayPopularProviders(
     listProviderViewModel: ListProviderViewModel,
     navigationActions: NavigationActions
 ) {
-    LazyRow(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-            .testTag("popularProviders"),
-        horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.Start),
-        verticalAlignment = Alignment.Top,
-        userScrollEnabled = true,
-    ) {
-        items(providers.filter { it.popular }) { provider ->
-            Card(
-                modifier = Modifier
-                    .width(141.dp)
-                    .height(172.dp)
-                    .clickable {
-                        listProviderViewModel.selectProvider(provider)
-                        navigationActions.navigateTo(Route.PROVIDER_PROFILE)
-                    },
-                elevation = CardDefaults.cardElevation(
-                    defaultElevation = 8.dp,
-                    pressedElevation = 4.dp,
-                    focusedElevation = 10.dp
-                ),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Box(modifier = Modifier.fillMaxSize()) {
-                    AsyncImage(
-                        modifier = Modifier.fillMaxSize(),
-                        model = provider.imageUrl,
-                        placeholder = painterResource(id = R.drawable.loading),
-                        error = painterResource(id = R.drawable.error),
-                        contentDescription = "provider image",
-                        contentScale = ContentScale.Crop
-                    )
-                    
-                    // Add gradient overlay
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(72.dp)
-                            .align(Alignment.BottomCenter)
-                            .background(
-                                brush = Brush.verticalGradient(
-                                    colors = listOf(Color.Transparent, colorScheme.background)
-                                )
-                            )
-                    )
+  LazyRow(
+      modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("popularProviders"),
+      horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.Start),
+      verticalAlignment = Alignment.Top,
+      userScrollEnabled = true,
+  ) {
+    items(providers.filter { it.popular }) { provider ->
+      Card(
+          modifier =
+              Modifier.width(141.dp).height(172.dp).clickable {
+                listProviderViewModel.selectProvider(provider)
+                navigationActions.navigateTo(Route.PROVIDER_PROFILE)
+              },
+          elevation =
+              CardDefaults.cardElevation(
+                  defaultElevation = 8.dp, pressedElevation = 4.dp, focusedElevation = 10.dp),
+          shape = RoundedCornerShape(16.dp)) {
+            Box(modifier = Modifier.fillMaxSize()) {
+              AsyncImage(
+                  modifier = Modifier.fillMaxSize(),
+                  model = provider.imageUrl,
+                  placeholder = painterResource(id = R.drawable.loading),
+                  error = painterResource(id = R.drawable.error),
+                  contentDescription = "provider image",
+                  contentScale = ContentScale.Crop)
 
-                    Row(
-                        modifier = Modifier
-                            .align(Alignment.BottomStart)
-                            .fillMaxWidth()
-                            .padding(8.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = provider.name.uppercase(),
-                            style = TextStyle(
+              // Add gradient overlay
+              Box(
+                  modifier =
+                      Modifier.fillMaxWidth()
+                          .height(72.dp)
+                          .align(Alignment.BottomCenter)
+                          .background(
+                              brush =
+                                  Brush.verticalGradient(
+                                      colors = listOf(Color.Transparent, colorScheme.background))))
+
+              Row(
+                  modifier = Modifier.align(Alignment.BottomStart).fillMaxWidth().padding(8.dp),
+                  horizontalArrangement = Arrangement.SpaceBetween,
+                  verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = provider.name.uppercase(),
+                        style =
+                            TextStyle(
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight(400),
-                                color = colorScheme.onBackground
-                            ),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.weight(1f)
-                        )
-                        Spacer(Modifier.width(8.dp))
-                        Note(provider.rating.toString())
-                    }
-                }
+                                color = colorScheme.onBackground),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f))
+                    Spacer(Modifier.width(8.dp))
+                    Note(provider.rating.toString())
+                  }
             }
-        }
+          }
     }
+  }
 }
 
 @Composable
@@ -441,53 +420,54 @@ fun PriceFilter(listProviderViewModel: ListProviderViewModel) {
   Column {
     Row(
         horizontalArrangement = Arrangement.spacedBy(16.dp),
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
-    ) {
-      BasicTextField(
-          value = minPrice,
-          textStyle = TextStyle(color = colorScheme.onSurfaceVariant),
-          onValueChange = {
-            minPrice = it
-            val minPriceValue = it.toDoubleOrNull()
-            if (minPriceValue != null) {
-              listProviderViewModel.filterProviders(
-                  filter = { provider -> provider.price >= minPriceValue }, "Price")
-            } else {
-              listProviderViewModel.filterProviders(
-                  filter = { provider -> provider.price >= 0 }, "Price")
-            }
-          },
-          modifier =
-              Modifier.weight(1f)
-                  .background(color = colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
-                  .padding(16.dp)
-                  .testTag("minPrice"),
-          singleLine = true,
-          keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+          BasicTextField(
+              value = minPrice,
+              textStyle = TextStyle(color = colorScheme.onSurfaceVariant),
+              onValueChange = {
+                minPrice = it
+                val minPriceValue = it.toDoubleOrNull()
+                if (minPriceValue != null) {
+                  listProviderViewModel.filterProviders(
+                      filter = { provider -> provider.price >= minPriceValue }, "Price")
+                } else {
+                  listProviderViewModel.filterProviders(
+                      filter = { provider -> provider.price >= 0 }, "Price")
+                }
+              },
+              modifier =
+                  Modifier.weight(1f)
+                      .background(color = colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
+                      .padding(16.dp)
+                      .testTag("minPrice"),
+              singleLine = true,
+              keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
 
-      BasicTextField(
-          value = maxPrice,
-          textStyle = TextStyle(color = colorScheme.onSurfaceVariant),
-          onValueChange = {
-            maxPrice = it
-            val maxPriceValue = it.toDoubleOrNull()
-            val minPriceValue = minPrice.toDoubleOrNull()
-            if (maxPriceValue != null && minPriceValue != null && minPriceValue < maxPriceValue) {
-              listProviderViewModel.filterProviders(
-                  { provider -> maxPriceValue >= provider.price }, "Price")
-            } else {
-              listProviderViewModel.filterProviders(
-                  filter = { provider -> provider.price >= 0 }, "Price")
-            }
-          },
-          modifier =
-              Modifier.weight(1f)
-                  .background(colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
-                  .padding(16.dp)
-                  .testTag("maxPrice"),
-          singleLine = true,
-          keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
-    }
+          BasicTextField(
+              value = maxPrice,
+              textStyle = TextStyle(color = colorScheme.onSurfaceVariant),
+              onValueChange = {
+                maxPrice = it
+                val maxPriceValue = it.toDoubleOrNull()
+                val minPriceValue = minPrice.toDoubleOrNull()
+                if (maxPriceValue != null &&
+                    minPriceValue != null &&
+                    minPriceValue < maxPriceValue) {
+                  listProviderViewModel.filterProviders(
+                      { provider -> maxPriceValue >= provider.price }, "Price")
+                } else {
+                  listProviderViewModel.filterProviders(
+                      filter = { provider -> provider.price >= 0 }, "Price")
+                }
+              },
+              modifier =
+                  Modifier.weight(1f)
+                      .background(colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
+                      .padding(16.dp)
+                      .testTag("maxPrice"),
+              singleLine = true,
+              keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
+        }
 
     Spacer(Modifier.height(8.dp))
     RangeSlider(
@@ -554,125 +534,113 @@ fun filterStringFields(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun LanguageFilterField(list: List<String>, listProviderViewModel: ListProviderViewModel) {
-    var selectedFields by remember { mutableStateOf(listOf<String>()) }
-    var iconsPressed by remember { mutableStateOf(List(list.size) { false }) }
-    var iconsColor by remember { mutableStateOf(List(list.size) { SurfaceVariant }) }
+  var selectedFields by remember { mutableStateOf(listOf<String>()) }
+  var iconsPressed by remember { mutableStateOf(List(list.size) { false }) }
+  var iconsColor by remember { mutableStateOf(List(list.size) { SurfaceVariant }) }
 
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(list.size/2),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
+  LazyVerticalGrid(
+      columns = GridCells.Fixed(list.size / 2),
+      modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
+      horizontalArrangement = Arrangement.spacedBy(8.dp),
+      verticalArrangement = Arrangement.spacedBy(8.dp)) {
         items(list.size) { idx ->
-            Box(
-                Modifier
-                    .fillMaxWidth()
-                    .background(
-                        color = if (iconsPressed[idx]) colorScheme.primary else colorScheme.surfaceVariant,
-                        shape = RoundedCornerShape(size = 8.dp)
-                    )
-                    .testTag("filterAct")
-                    .padding(8.dp)
-                    .clickable {
-                        filterStringFields(
-                            selectedFields.toMutableList(),
-                            iconsPressed.toMutableList(),
-                            iconsColor.toMutableList(),
-                            { a -> selectedFields = a.toMutableList() },
-                            { b -> iconsPressed = b.toMutableList() },
-                            { c -> iconsColor = c.toMutableList() },
-                            idx,
-                            list[idx],
-                            listProviderViewModel,
-                            { provider ->
-                                selectedFields
-                                    .map { u -> Language.valueOf(u.uppercase()) }
-                                    .intersect(provider.languages.toSet())
-                                    .isNotEmpty()
-                            },
-                            { provider -> provider.languages.isNotEmpty() },
-                            "Language"
-                        )
-                    }
-            ) {
+          Box(
+              Modifier.fillMaxWidth()
+                  .background(
+                      color =
+                          if (iconsPressed[idx]) colorScheme.primary
+                          else colorScheme.surfaceVariant,
+                      shape = RoundedCornerShape(size = 8.dp))
+                  .testTag("filterAct")
+                  .padding(8.dp)
+                  .clickable {
+                    filterStringFields(
+                        selectedFields.toMutableList(),
+                        iconsPressed.toMutableList(),
+                        iconsColor.toMutableList(),
+                        { a -> selectedFields = a.toMutableList() },
+                        { b -> iconsPressed = b.toMutableList() },
+                        { c -> iconsColor = c.toMutableList() },
+                        idx,
+                        list[idx],
+                        listProviderViewModel,
+                        { provider ->
+                          selectedFields
+                              .map { u -> Language.valueOf(u.uppercase()) }
+                              .intersect(provider.languages.toSet())
+                              .isNotEmpty()
+                        },
+                        { provider -> provider.languages.isNotEmpty() },
+                        "Language")
+                  }) {
                 Text(
                     text = list[idx],
                     fontSize = 18.sp,
                     modifier = Modifier.padding(3.dp).align(Alignment.Center),
-                    color = if (iconsPressed[idx]) colorScheme.onPrimary else colorScheme.onSurfaceVariant
-                )
-            }
+                    color =
+                        if (iconsPressed[idx]) colorScheme.onPrimary
+                        else colorScheme.onSurfaceVariant)
+              }
         }
-    }
+      }
 }
 
 @Composable
 fun RatingFilterField(list: List<String>, listProviderViewModel: ListProviderViewModel) {
-    var selectedFields by remember { mutableStateOf(listOf<String>()) }
-    var iconsPressed by remember { mutableStateOf(List(list.size) { false }) }
-    var colors by remember { mutableStateOf(List(list.size) { SurfaceVariant }) }
+  var selectedFields by remember { mutableStateOf(listOf<String>()) }
+  var iconsPressed by remember { mutableStateOf(List(list.size) { false }) }
+  var colors by remember { mutableStateOf(List(list.size) { SurfaceVariant }) }
 
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
+  Row(
+      modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
+      horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         list.asReversed().forEachIndexed { idx, rating ->
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .height(30.dp)
-                    .background(
-                        color = if (iconsPressed[idx]) colorScheme.primary else colorScheme.surfaceVariant,
-                        shape = RoundedCornerShape(size = 59.dp)
-                    )
-                    .testTag("filterRating")
-            ) {
+          Box(
+              modifier =
+                  Modifier.weight(1f)
+                      .height(30.dp)
+                      .background(
+                          color =
+                              if (iconsPressed[idx]) colorScheme.primary
+                              else colorScheme.surfaceVariant,
+                          shape = RoundedCornerShape(size = 59.dp))
+                      .testTag("filterRating")) {
                 Row(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clickable {
-                            filterStringFields(
-                                selectedFields.toMutableList(),
-                                iconsPressed.toMutableList(),
-                                colors.toMutableList(),
-                                { a -> selectedFields = a.toMutableList() },
-                                { b -> iconsPressed = b.toMutableList() },
-                                { c -> colors = c.toMutableList() },
-                                idx,
-                                rating,
-                                listProviderViewModel,
-                                { provider ->
-                                    selectedFields.map { u -> u.toDouble() }.contains(provider.rating)
-                                },
-                                { provider -> provider.rating >= 1.0 },
-                                "Rating"
-                            )
+                    modifier =
+                        Modifier.fillMaxSize().clickable {
+                          filterStringFields(
+                              selectedFields.toMutableList(),
+                              iconsPressed.toMutableList(),
+                              colors.toMutableList(),
+                              { a -> selectedFields = a.toMutableList() },
+                              { b -> iconsPressed = b.toMutableList() },
+                              { c -> colors = c.toMutableList() },
+                              idx,
+                              rating,
+                              listProviderViewModel,
+                              { provider ->
+                                selectedFields.map { u -> u.toDouble() }.contains(provider.rating)
+                              },
+                              { provider -> provider.rating >= 1.0 },
+                              "Rating")
                         },
                     horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Star,
-                        contentDescription = "Rating star",
-                        modifier = Modifier
-                            .size(24.dp)
-                            .padding(end = 4.dp),
-                        tint = Yellow
-                    )
-                    Text(
-                        text = rating,
-                        color = if (iconsPressed[idx]) colorScheme.onPrimary else colorScheme.onSurfaceVariant,
-                        fontSize = 14.sp
-                    )
-                }
-            }
+                    verticalAlignment = Alignment.CenterVertically) {
+                      Icon(
+                          imageVector = Icons.Default.Star,
+                          contentDescription = "Rating star",
+                          modifier = Modifier.size(24.dp).padding(end = 4.dp),
+                          tint = Yellow)
+                      Text(
+                          text = rating,
+                          color =
+                              if (iconsPressed[idx]) colorScheme.onPrimary
+                              else colorScheme.onSurfaceVariant,
+                          fontSize = 14.sp)
+                    }
+              }
         }
-    }
+      }
 }
 
 @Composable
@@ -732,7 +700,7 @@ fun FilterComposable(listProviderViewModel: ListProviderViewModel, display: () -
             listProviderViewModel)
         FilterSubText("Rating")
         RatingFilterField(listOf("5", "4", "3", "2", "1"), listProviderViewModel)
-      Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(16.dp))
         ApplyButton(listProviderViewModel, display)
       }
 }
@@ -781,7 +749,8 @@ fun LocationSuggestion(location: Location, index: Int, onClickAction: () -> Unit
   Row(
       modifier =
           Modifier.fillMaxWidth()
-              .background(if (index == 0) colorScheme.surfaceVariant.copy(1.5f) else Color.Transparent)
+              .background(
+                  if (index == 0) colorScheme.surfaceVariant.copy(1.5f) else Color.Transparent)
               .clickable { onClickAction() }
               .padding(16.dp)
               .testTag("suggestedLocation"),

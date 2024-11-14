@@ -124,8 +124,7 @@ fun PackageCard(packageProposal: PackageProposal, isSelected: Boolean, modifier:
       elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
       colors =
           CardDefaults.cardColors(
-              containerColor =
-                  if (!isSelected) colorScheme.surface else colorScheme.secondary,
+              containerColor = if (!isSelected) colorScheme.surface else colorScheme.secondary,
           )) {
         Column(
             modifier = Modifier.padding(25.dp).fillMaxHeight().testTag("PackageContent"),
@@ -137,18 +136,21 @@ fun PackageCard(packageProposal: PackageProposal, isSelected: Boolean, modifier:
                     text = "$${packageProposal.price}",
                     style =
                         MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-                    color = if (!isSelected) colorScheme.onPrimaryContainer else colorScheme.onPrimary)
+                    color =
+                        if (!isSelected) colorScheme.onPrimaryContainer else colorScheme.onPrimary)
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
                     text = "/hour",
                     style = MaterialTheme.typography.bodySmall, // Smaller style for the unit
-                    color = if (!isSelected) colorScheme.onPrimaryContainer else colorScheme.onPrimary)
+                    color =
+                        if (!isSelected) colorScheme.onPrimaryContainer else colorScheme.onPrimary)
               }
               // Title of the Package
               Text(
                   text = packageProposal.title,
                   style = MaterialTheme.typography.titleMedium,
-                  color = if (!isSelected) colorScheme.onPrimaryContainer else colorScheme.onPrimary)
+                  color =
+                      if (!isSelected) colorScheme.onPrimaryContainer else colorScheme.onPrimary)
               Spacer(modifier = Modifier.height(8.dp))
               // Description of the Package
               Text(
@@ -169,8 +171,7 @@ fun PackageCard(packageProposal: PackageProposal, isSelected: Boolean, modifier:
                     Text(
                         text = feature,
                         style = MaterialTheme.typography.bodyMedium,
-                        color =
-                            if (!isSelected) colorScheme.onSurface else colorScheme.onPrimary)
+                        color = if (!isSelected) colorScheme.onSurface else colorScheme.onPrimary)
                   }
                 }
               }
@@ -345,8 +346,8 @@ fun ProviderTabs(selectedTabIndex: Int, onTabSelected: (Int) -> Unit) {
                   "Packages",
                   modifier = Modifier.padding(16.dp),
                   color =
-                  if (selectedTabIndex == 1) colorScheme.onPrimary
-                  else colorScheme.onPrimary.copy(alpha = 0.6f),
+                      if (selectedTabIndex == 1) colorScheme.onPrimary
+                      else colorScheme.onPrimary.copy(alpha = 0.6f),
                   fontWeight = if (selectedTabIndex == 1) FontWeight.Bold else FontWeight.Normal)
             }
         Tab(
