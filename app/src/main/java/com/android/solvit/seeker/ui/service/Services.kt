@@ -2,6 +2,7 @@ package com.android.solvit.seeker.ui.service
 
 import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -56,6 +57,7 @@ import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.seeker.model.service.SearchServicesViewModel
 import com.android.solvit.seeker.ui.navigation.BottomNavigationMenu
 import com.android.solvit.shared.model.provider.Provider
+import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_CUSTOMER
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
@@ -90,7 +92,7 @@ fun ServicesScreen(
         Column(modifier = Modifier.fillMaxSize()) {
           TopSection(searchViewModel, listProviderViewModel, navigationActions)
           LazyColumn(modifier = Modifier.fillMaxSize()) {
-            item { ShortcutsSection(navigationActions) }
+            item { ShortcutsSection(navigationActions, listProviderViewModel) }
             item { CategoriesSection(searchViewModel, listProviderViewModel, navigationActions) }
             item { PerformersSection(listProviderViewModel, navigationActions) }
             item { Spacer(Modifier.size(80.dp)) }
@@ -119,13 +121,15 @@ fun TopSection(
               .testTag("servicesScreenTopSection"),
       verticalArrangement = Arrangement.spacedBy(16.dp),
       horizontalAlignment = Alignment.CenterHorizontally) {
+        val context = LocalContext.current
+        val toast = Toast.makeText(context, "Not implemented yet", Toast.LENGTH_SHORT)
         Spacer(Modifier.height(8.dp))
         Row(
             modifier = Modifier.height(50.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(70.dp)) {
               Image(
-                  painterResource(id = R.drawable.empty_profile_img),
+                  painterResource(id = R.drawable.default_pdp),
                   contentDescription = "profile picture",
                   Modifier.size(40.dp)
                       .clip(CircleShape)
@@ -138,16 +142,17 @@ fun TopSection(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                   Text("Current location", fontSize = 14.sp)
                   IconButton(
-                      onClick = { /*TODO*/},
+                      onClick = { toast.show() },
                       modifier = Modifier.size(16.dp).testTag("servicesScreenLocationButton")) {
                         Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = null)
                       }
                 }
-                Text("Dubai, USA", fontSize = 15.sp)
+                Text("Lausanne, VD", fontSize = 15.sp)
               }
-              IconButton(onClick = { /*TODO*/}, modifier = Modifier.testTag("servicesScreenMenu")) {
-                Icon(imageVector = Icons.Default.Menu, contentDescription = null)
-              }
+              IconButton(
+                  onClick = { toast.show() }, modifier = Modifier.testTag("servicesScreenMenu")) {
+                    Icon(imageVector = Icons.Default.Menu, contentDescription = null)
+                  }
             }
         DockedSearchBar(
             query = searchText,
@@ -163,12 +168,7 @@ fun TopSection(
                   verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     items(searchResults.size) { index ->
                       Text(
-                          searchResults[index]
-                              .service
-                              .toString()
-                              .replace("_", " ")
-                              .lowercase()
-                              .replaceFirstChar { it.uppercase() },
+                          Services.format(searchResults[index].service),
                           modifier =
                               Modifier.clickable {
                                 listProviderViewModel.selectService(searchResults[index].service)
@@ -182,7 +182,10 @@ fun TopSection(
 }
 
 @Composable
-fun ShortcutsSection(navigationActions: NavigationActions) {
+fun ShortcutsSection(
+    navigationActions: NavigationActions,
+    listProviderViewModel: ListProviderViewModel
+) {
   Column(
       modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("servicesScreenShortcuts"),
       verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -191,30 +194,33 @@ fun ShortcutsSection(navigationActions: NavigationActions) {
             modifier =
                 Modifier.fillMaxWidth()
                     .background(LightOrange, shape = RoundedCornerShape(16.dp))
-                    .clickable { navigationActions.navigateTo(Route.PROVIDERS) }
+                    .clickable {
+                      listProviderViewModel.getProviders()
+                      navigationActions.navigateTo(Route.PROVIDERS)
+                    }
                     .testTag("servicesScreenProvidersShortcut")) {
               Row(
                   modifier = Modifier.padding(16.dp).fillMaxWidth(),
                   verticalAlignment = Alignment.CenterVertically,
                   horizontalArrangement = Arrangement.SpaceBetween) {
                     Text(
-                        "Service\nProviders",
+                        "Service Providers",
                         color = colorScheme.onPrimary,
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold)
                     Image(
-                        painterResource(id = R.drawable.providers_ovw_image),
+                        painter = painterResource(id = R.drawable.providers_ovw_image),
                         contentDescription = "service providers",
-                        Modifier.size(32.dp).clip(CircleShape))
+                        modifier = Modifier.size(32.dp).clip(CircleShape))
                   }
             }
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween) {
+            horizontalArrangement = Arrangement.spacedBy(16.dp)) {
               Box(
                   modifier =
-                      Modifier.fillMaxWidth(.5f)
+                      Modifier.weight(1f)
                           .background(LightBlue, shape = RoundedCornerShape(16.dp))
                           .clickable { navigationActions.navigateTo(Route.REQUESTS_OVERVIEW) }
                           .testTag("servicesScreenOrdersShortcut")) {
@@ -222,9 +228,10 @@ fun ShortcutsSection(navigationActions: NavigationActions) {
                         modifier = Modifier.padding(16.dp).fillMaxWidth(),
                         verticalArrangement = Arrangement.spacedBy(16.dp)) {
                           Image(
-                              painterResource(id = R.drawable.orders_ovw_image),
+                              painter = painterResource(id = R.drawable.orders_ovw_image),
                               contentDescription = "All Orders",
-                              Modifier.size(32.dp).clip(CircleShape).align(Alignment.End))
+                              modifier =
+                                  Modifier.size(32.dp).clip(CircleShape).align(Alignment.End))
                           Text(
                               "All Orders",
                               color = colorScheme.onPrimary,
@@ -232,10 +239,9 @@ fun ShortcutsSection(navigationActions: NavigationActions) {
                               fontWeight = FontWeight.Bold)
                         }
                   }
-              Spacer(Modifier.size(16.dp))
               Box(
                   modifier =
-                      Modifier.fillMaxWidth()
+                      Modifier.weight(1f)
                           .background(LightRed, shape = RoundedCornerShape(16.dp))
                           .clickable { navigationActions.navigateTo(Route.MAP) }
                           .testTag("servicesScreenMapShortcut")) {
@@ -243,9 +249,10 @@ fun ShortcutsSection(navigationActions: NavigationActions) {
                         modifier = Modifier.padding(16.dp).fillMaxWidth(),
                         verticalArrangement = Arrangement.spacedBy(16.dp)) {
                           Image(
-                              painterResource(id = R.drawable.map_ovw_image),
+                              painter = painterResource(id = R.drawable.map_ovw_image),
                               contentDescription = "providers map",
-                              Modifier.size(32.dp).clip(CircleShape).align(Alignment.End))
+                              modifier =
+                                  Modifier.size(32.dp).clip(CircleShape).align(Alignment.End))
                           Text(
                               "Providers Map",
                               color = colorScheme.onPrimary,
@@ -332,10 +339,7 @@ fun ServiceItem(service: ServicesListItem, onClick: () -> Unit) {
               contentDescription = null,
               modifier = Modifier.fillMaxSize().alpha(0.3f))
           Text(
-              text =
-                  service.service.toString().replace("_", " ").lowercase().replaceFirstChar {
-                    it.uppercase()
-                  },
+              text = Services.format(service.service),
               modifier = Modifier.padding(20.dp).align(Alignment.BottomStart),
               fontSize = 20.sp,
               fontWeight = FontWeight.Bold,
@@ -361,12 +365,7 @@ fun ProviderItem(provider: Provider, onClick: () -> Unit) {
               modifier = Modifier.fillMaxSize().padding(16.dp),
               verticalArrangement = Arrangement.SpaceBetween,
               horizontalAlignment = Alignment.Start) {
-                Text(
-                    text =
-                        provider.service.toString().replace("_", " ").lowercase().replaceFirstChar {
-                          it.uppercase()
-                        },
-                    fontWeight = FontWeight.Bold)
+                Text(text = Services.format(provider.service), fontWeight = FontWeight.Bold)
                 Row(modifier = Modifier.align(Alignment.End)) {
                   Text(text = provider.rating.toString(), fontWeight = FontWeight.Bold)
                   Icon(

@@ -52,9 +52,11 @@ import coil.compose.AsyncImage
 import com.android.solvit.R
 import com.android.solvit.seeker.ui.navigation.BottomNavigationMenu
 import com.android.solvit.seeker.ui.service.SERVICES_LIST
+import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestStatus
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
+import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_CUSTOMER
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
@@ -65,8 +67,6 @@ import com.android.solvit.shared.ui.theme.LightBlue
 import com.android.solvit.shared.ui.theme.LightOrange
 import com.android.solvit.shared.ui.theme.PENDING_color
 import com.android.solvit.shared.ui.theme.STARTED_color
-import com.google.firebase.Firebase
-import com.google.firebase.auth.auth
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -74,7 +74,9 @@ import java.util.Locale
 @Composable
 fun RequestsOverviewScreen(
     navigationActions: NavigationActions,
-    requestViewModel: ServiceRequestViewModel = viewModel(factory = ServiceRequestViewModel.Factory)
+    requestViewModel: ServiceRequestViewModel =
+        viewModel(factory = ServiceRequestViewModel.Factory),
+    authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory),
 ) {
 
   // Lock Orientation to Portrait
@@ -92,7 +94,8 @@ fun RequestsOverviewScreen(
             tabList = LIST_TOP_LEVEL_DESTINATION_CUSTOMER,
             selectedItem = Route.REQUESTS_OVERVIEW)
       }) {
-        val userId = Firebase.auth.currentUser?.uid ?: "-1"
+        val user = authViewModel.user.collectAsState()
+        val userId = user.value?.uid ?: "-1"
         val requests =
             requestViewModel.requests.collectAsState().value.filter { it.userId == userId }
 
@@ -128,6 +131,7 @@ fun TopOrdersSection(navigationActions: NavigationActions) {
               .testTag("topOrdersSection"),
       horizontalArrangement = Arrangement.SpaceBetween,
       verticalAlignment = Alignment.CenterVertically) {
+        val context = LocalContext.current
         Row {
           Icon(
               imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -143,7 +147,11 @@ fun TopOrdersSection(navigationActions: NavigationActions) {
         Icon(
             imageVector = Icons.Default.Menu,
             contentDescription = null,
-            modifier = Modifier.clickable { /*TODO*/})
+            modifier =
+                Modifier.clickable {
+                  Toast.makeText(context, "This feature is not yet implemented", Toast.LENGTH_SHORT)
+                      .show()
+                })
       }
 }
 
@@ -222,7 +230,7 @@ fun CategoriesFilter() {
       columns = GridCells.Fixed(2),
       modifier = Modifier.padding(16.dp).testTag("categoriesFilter")) {
         items(SERVICES_LIST.size) {
-          FilterItem(SERVICES_LIST[it].service.toString().lowercase().replace("_", " ")) {
+          FilterItem(Services.format(SERVICES_LIST[it].service)) {
             Toast.makeText(context, "This feature is not yet implemented", Toast.LENGTH_SHORT)
                 .show()
           }
@@ -283,8 +291,9 @@ fun RequestItemRow(request: ServiceRequest, onClick: () -> Unit) {
               .testTag("requestListItem")) {
         Column {
           Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            val image = request.imageUrl
             AsyncImage(
-                model = request.imageUrl,
+                model = if (!image.isNullOrEmpty()) image else R.drawable.no_photo,
                 placeholder = painterResource(id = R.drawable.loading),
                 error = painterResource(id = R.drawable.error),
                 contentDescription = "service request image",
@@ -293,7 +302,7 @@ fun RequestItemRow(request: ServiceRequest, onClick: () -> Unit) {
             Column {
               Text(text = request.title, fontSize = 16.sp, fontWeight = FontWeight.Bold)
               Text(
-                  text = request.type.name.lowercase().replaceFirstChar { it.uppercase() },
+                  text = Services.format(request.type),
                   fontSize = 14.sp,
               )
             }
@@ -303,7 +312,7 @@ fun RequestItemRow(request: ServiceRequest, onClick: () -> Unit) {
               modifier = Modifier.fillMaxWidth(),
               horizontalArrangement = Arrangement.SpaceBetween) {
                 Text(
-                    text = request.status.name.lowercase().replaceFirstChar { it.uppercase() },
+                    text = ServiceRequestStatus.format(request.status),
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
                     color = getStatusColor(request.status))
