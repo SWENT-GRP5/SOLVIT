@@ -19,6 +19,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
+import org.mockito.kotlin.verify
 
 @RunWith(AndroidJUnit4::class)
 class ProfessionalProfileScreenTest {
@@ -75,6 +76,7 @@ class ProfessionalProfileScreenTest {
     composeTestRule.setContent { ProfileHeader(mockNavigationActions, provider) }
 
     composeTestRule.onNodeWithTag("backButton").performClick()
+    verify(mockNavigationActions).goBack()
   }
 
   @Test
