@@ -4,6 +4,7 @@ import java.util.Properties
 configurations.configureEach {
     exclude(group = "com.google.protobuf", module = "protobuf-lite")
 }
+
 plugins {
     jacoco
     alias(libs.plugins.androidApplication)
@@ -146,9 +147,9 @@ sonar {
         localProperties.load(FileInputStream(localPropertiesFile))
     }
     val sonarProjectKey : String = localProperties.getProperty("sonar_project_Key") ?:
-    System.getenv("SONAR_PROJECT_KEY") ?: ""
+     System.getenv("SONAR_PROJECT_KEY") ?: ""
     val sonarOrganization : String = localProperties.getProperty("sonar_organization") ?:
-    System.getenv("SONAR_ORGANIZATION") ?: ""
+     System.getenv("SONAR_ORGANIZATION") ?: ""
     properties {
         property("sonar.projectKey", sonarProjectKey)
         property("sonar.organization", sonarOrganization)

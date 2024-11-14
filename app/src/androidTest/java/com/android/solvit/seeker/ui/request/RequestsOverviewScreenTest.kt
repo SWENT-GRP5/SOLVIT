@@ -143,7 +143,7 @@ class RequestsOverviewScreenTest {
     every { Toast.makeText(any(), any<String>(), any()) } returns toastMock
 
     composeTestRule.onNodeWithTag("categoriesSettings").performClick()
-    composeTestRule.onNodeWithTag("plumber FilterItem").performClick()
+    composeTestRule.onNodeWithTag("Plumber FilterItem").performClick()
     io.mockk.verify { toastMock.show() }
   }
 

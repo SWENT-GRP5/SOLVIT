@@ -245,8 +245,8 @@ class EditRequestScreenTest {
     composeTestRule.onNodeWithTag("inputRequestDescription").performTextInput("Description")
     composeTestRule.onNodeWithTag("inputRequestAddress").performTextClearance()
     composeTestRule.onNodeWithTag("inputRequestAddress").performTextInput("USA")
-    composeTestRule.onNodeWithTag("inputRequestDate").performTextClearance()
-    composeTestRule.onNodeWithTag("inputRequestDate").performTextInput("01/01/2022")
+    composeTestRule.waitUntil { locationViewModel.locationSuggestions.value.isNotEmpty() }
+    composeTestRule.onAllNodesWithTag("locationResult")[0].performClick()
     composeTestRule.onNodeWithTag("inputServiceType").performTextClearance()
     composeTestRule.onNodeWithTag("inputServiceType").performTextInput("Plumbing")
     composeTestRule.onNodeWithTag("serviceTypeResult").performClick()

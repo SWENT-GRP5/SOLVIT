@@ -98,7 +98,8 @@ fun SolvitApp() {
               listProviderViewModel,
               seekerProfileViewModel,
               serviceRequestViewModel,
-              reviewViewModel)
+              reviewViewModel,
+              locationViewModel)
       "provider" -> ProviderUI(authViewModel, listProviderViewModel, seekerProfileViewModel)
     }
   }
@@ -137,7 +138,8 @@ fun SeekerUI(
     listProviderViewModel: ListProviderViewModel,
     seekerProfileViewModel: SeekerProfileViewModel,
     serviceRequestViewModel: ServiceRequestViewModel,
-    reviewViewModel: ReviewViewModel
+    reviewViewModel: ReviewViewModel,
+    locationViewModel: LocationViewModel
 ) {
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
@@ -151,7 +153,7 @@ fun SeekerUI(
             listProviderViewModel = listProviderViewModel,
             navigationActions = navigationActions,
             userId = it1.uid,
-        )
+            locationViewModel = locationViewModel)
       }
     }
     composable(Route.PROVIDER_PROFILE) {
@@ -159,12 +161,14 @@ fun SeekerUI(
     }
     composable(Route.MESSAGE) { MessageScreen() }
     composable(Route.CREATE_REQUEST) {
-      CreateRequestScreen(navigationActions, serviceRequestViewModel)
+      CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
     }
     composable(Route.REQUESTS_OVERVIEW) {
-      RequestsOverviewScreen(navigationActions, serviceRequestViewModel)
+      RequestsOverviewScreen(navigationActions, serviceRequestViewModel, authViewModel)
     }
-    composable(Route.EDIT_REQUEST) { EditRequestScreen(navigationActions, serviceRequestViewModel) }
+    composable(Route.EDIT_REQUEST) {
+      EditRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
+    }
     composable(Route.MAP) { SeekerMapScreen(listProviderViewModel, navigationActions) }
     navigation(startDestination = Screen.PROFILE, route = Route.PROFILE) {
       composable(Screen.PROFILE) {

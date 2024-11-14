@@ -15,7 +15,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -124,9 +123,7 @@ fun SpTopAppBar(
         modifier = Modifier.fillMaxWidth().height(200.dp).testTag("serviceImage"),
         painter =
             painterResource(
-                id =
-                    ServicesImages().serviceMap[selectedService]
-                        ?: R.drawable.error), // TODO Link each service to an image
+                id = ServicesImages().serviceMap[selectedService] ?: R.drawable.cleaner_image),
         contentDescription = "image description",
         contentScale = ContentScale.FillBounds)
     Row(
@@ -298,7 +295,7 @@ fun DisplayPopularProviders(
             Box(modifier = Modifier.fillMaxSize()) {
               AsyncImage(
                   modifier = Modifier.fillMaxSize(),
-                  model = provider.imageUrl,
+                  model = provider.imageUrl.ifEmpty { R.drawable.empty_profile_img },
                   placeholder = painterResource(id = R.drawable.loading),
                   error = painterResource(id = R.drawable.error),
                   contentDescription = "provider image",
@@ -330,7 +327,7 @@ fun DisplayPopularProviders(
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f))
                     Spacer(Modifier.width(8.dp))
-                    Note(provider.rating.toString())
+                    Note(provider.rating.toInt().toString())
                   }
             }
           }
@@ -373,9 +370,9 @@ fun ListProviders(
                                 Modifier.width(116.dp)
                                     .height(85.dp)
                                     .clip(RoundedCornerShape(12.dp)),
-                            model = provider.imageUrl,
+                            model = provider.imageUrl.ifEmpty { R.drawable.empty_profile_img },
                             placeholder = painterResource(id = R.drawable.loading),
-                            error = painterResource(id = R.drawable.plumbierprvd),
+                            error = painterResource(id = R.drawable.error),
                             contentDescription = "provider image",
                             contentScale = ContentScale.Crop)
                         Column(modifier = Modifier.weight(1f).padding(10.dp)) {
@@ -391,18 +388,20 @@ fun ListProviders(
                                         textAlign = TextAlign.Center,
                                     ))
                             Spacer(Modifier.weight(1f))
-                            Note(provider.rating.toString())
+                            Note(provider.rating.toInt().toString())
                           }
                           Spacer(Modifier.height(12.dp))
                           Text(
                               text = provider.description,
                               style =
                                   TextStyle(
-                                      fontSize = 8.sp,
-                                      lineHeight = 10.sp,
+                                      fontSize = 14.sp,
+                                      lineHeight = 15.sp,
                                       fontWeight = FontWeight(400),
                                       color = colorScheme.onBackground.copy(alpha = 0.6f),
-                                  ))
+                                  ),
+                              maxLines = 2,
+                              overflow = TextOverflow.Ellipsis)
                         }
                       }
                 }
@@ -531,7 +530,6 @@ fun filterStringFields(
   }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun LanguageFilterField(list: List<String>, listProviderViewModel: ListProviderViewModel) {
   var selectedFields by remember { mutableStateOf(listOf<String>()) }
@@ -923,16 +921,16 @@ fun SelectProviderScreen(
     navigationActions: NavigationActions,
     locationViewModel: LocationViewModel = viewModel(factory = LocationViewModel.Factory)
 ) {
-
-  val providers by listProviderViewModel.providersListFiltered.collectAsState()
   val selectedService by listProviderViewModel.selectedService.collectAsState()
+  if (selectedService != null)
+      listProviderViewModel.filterProviders(
+          filter = { provider -> provider.service == selectedService }, "Service")
+  val providers by listProviderViewModel.providersListFiltered.collectAsState()
 
   var displayFilters by remember { mutableStateOf(false) }
   var displayByLocation by remember { mutableStateOf(false) }
   val sheetStateFilter = rememberModalBottomSheetState()
   val sheetStateLocation = rememberModalBottomSheetState()
-  Log.e("Select Provider Screen", "providers : $providers")
-  Log.e("Seeker UID", userId)
   Scaffold(
       modifier = Modifier.fillMaxSize(),
       topBar = {
