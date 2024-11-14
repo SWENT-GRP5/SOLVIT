@@ -2,10 +2,11 @@ package com.android.solvit.provider.ui.jobs
 
 // Jetpack Compose Testing
 import androidx.activity.ComponentActivity
-import androidx.compose.ui.test.*
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.solvit.shared.model.jobs.JobDashboardRepository
 import com.android.solvit.shared.model.jobs.JobDashboardViewModel

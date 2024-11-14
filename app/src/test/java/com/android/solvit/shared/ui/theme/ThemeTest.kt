@@ -1,6 +1,6 @@
 package com.android.solvit.shared.ui.theme
 
-import junit.framework.TestCase.assertEquals
+import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class ThemeTest {
