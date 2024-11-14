@@ -49,8 +49,7 @@ import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.ui.navigation.NavigationActions
-import com.google.firebase.Firebase
-import com.google.firebase.auth.auth
+import com.android.solvit.shared.ui.navigation.Route
 
 @Composable
 fun ProviderProfileScreen(
@@ -59,9 +58,10 @@ fun ProviderProfileScreen(
     authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory),
     navigationActions: NavigationActions
 ) {
-  val userId = Firebase.auth.currentUser?.uid ?: "-1"
+  val user = authViewModel.user.collectAsState()
+  val userId = user.value?.uid ?: "-1"
   val provider =
-      listProviderViewModel.providersList.collectAsState().value.first { it.uid == userId }
+      listProviderViewModel.providersList.collectAsState().value.find { it.uid == userId } ?: return
   Column(modifier = Modifier.fillMaxSize().background(colorScheme.background)) {
     ProfileHeader(navigationActions, provider, authViewModel)
     Spacer(modifier = Modifier.height(10.dp))
@@ -303,9 +303,9 @@ fun StatsSection(provider: Provider) {
 
         Spacer(modifier = Modifier.height(30.dp))
         Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
-          Column(horizontalAlignment = Alignment.Start) {
+          Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
-                provider.price.toString(),
+                "1500-2300$", // TODO : modify later with real value
                 fontSize = 20.sp,
                 color = colorScheme.onPrimary,
                 fontWeight = FontWeight.Bold)
@@ -313,7 +313,7 @@ fun StatsSection(provider: Provider) {
           }
           Column(horizontalAlignment = Alignment.End) {
             Text(
-                provider.deliveryTime.seconds.div(3600).toString() + " hours",
+                "5 days", // TODO : modify later with real value
                 fontSize = 20.sp,
                 color = colorScheme.onPrimary,
                 fontWeight = FontWeight.Bold)

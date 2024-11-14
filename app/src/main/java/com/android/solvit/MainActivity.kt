@@ -162,7 +162,7 @@ fun SeekerUI(
       CreateRequestScreen(navigationActions, serviceRequestViewModel)
     }
     composable(Route.REQUESTS_OVERVIEW) {
-      RequestsOverviewScreen(navigationActions, serviceRequestViewModel)
+      RequestsOverviewScreen(navigationActions, serviceRequestViewModel, authViewModel)
     }
     composable(Route.EDIT_REQUEST) { EditRequestScreen(navigationActions, serviceRequestViewModel) }
     composable(Route.MAP) { SeekerMapScreen(listProviderViewModel, navigationActions) }
