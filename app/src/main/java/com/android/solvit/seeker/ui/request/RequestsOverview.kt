@@ -170,7 +170,7 @@ fun CategoriesFiltersSection() {
                     .clickable { showFilters = !showFilters }
                     .testTag("categoriesSettings")) {
               Row(
-                  modifier = Modifier.padding(horizontal = 32.dp, vertical = 16.dp),
+                  modifier = Modifier.padding(16.dp),
                   verticalAlignment = Alignment.CenterVertically,
                   horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Image(
@@ -190,7 +190,7 @@ fun CategoriesFiltersSection() {
                     .testTag("categoriesSort"),
         ) {
           Row(
-              modifier = Modifier.padding(horizontal = 32.dp, vertical = 16.dp),
+              modifier = Modifier.padding(16.dp),
               verticalAlignment = Alignment.CenterVertically,
               horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Image(
