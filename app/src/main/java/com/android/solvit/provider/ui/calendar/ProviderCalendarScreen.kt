@@ -62,7 +62,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.android.solvit.shared.ui.navigation.NavigationActions
-import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.theme.*
 import java.time.DayOfWeek
 import java.time.Instant
