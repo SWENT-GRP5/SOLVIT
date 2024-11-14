@@ -63,10 +63,10 @@ import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.theme.ACCEPTED_color
 import com.android.solvit.shared.ui.theme.ARCHIVED_color
 import com.android.solvit.shared.ui.theme.ENDED_color
-import com.android.solvit.shared.ui.theme.PENDING_color
-import com.android.solvit.shared.ui.theme.STARTED_color
 import com.android.solvit.shared.ui.theme.LightBlue
 import com.android.solvit.shared.ui.theme.LightOrange
+import com.android.solvit.shared.ui.theme.PENDING_color
+import com.android.solvit.shared.ui.theme.STARTED_color
 import java.text.SimpleDateFormat
 import java.util.Locale
 
