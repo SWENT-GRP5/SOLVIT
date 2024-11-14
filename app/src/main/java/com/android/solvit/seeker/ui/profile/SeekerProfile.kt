@@ -5,6 +5,7 @@ import android.content.pm.ActivityInfo
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -24,6 +25,7 @@ import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.BottomAppBarDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -32,9 +34,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
+import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -100,7 +104,8 @@ fun SeekerProfileScreen(
   Scaffold(
       topBar = {
         TopAppBar(
-            title = { Text("Profile", modifier = Modifier.testTag("ProfileTitle")) },
+            title = { Text("Profile", modifier = Modifier.testTag("ProfileTitle"),
+                fontWeight = FontWeight.Bold,) },
             navigationIcon = {
               IconButton(
                   onClick = { navigationActions.goBack() },
@@ -116,14 +121,10 @@ fun SeekerProfileScreen(
                   }
             },
             modifier = Modifier.testTag("ProfileTopBar"),
+            colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background, navigationIconContentColor = colorScheme.onBackground, titleContentColor = colorScheme.onBackground, actionIconContentColor = colorScheme.onBackground)
         )
       },
-      bottomBar = {
-        BottomNavigationMenu(
-            onTabSelect = { route -> navigationActions.navigateTo(route) },
-            tabList = LIST_TOP_LEVEL_DESTINATION_CUSTOMER,
-            selectedItem = Route.PROFILE)
-      },
+      bottomBar = { },
       containerColor = Color.Transparent,
   ) { paddingValues ->
     LazyColumn(
@@ -326,11 +327,12 @@ fun ProfileOptionItem(
           Text(
               optionName,
               style = MaterialTheme.typography.bodyLarge,
+              color = colorScheme.onBackground,
               modifier = Modifier.testTag("ProfileOptionName"))
           subtitle?.let {
             Text(
                 text = it,
-                style = TextStyle(fontSize = 12.sp, color = Color(0xFFABABAB)),
+                style = TextStyle(fontSize = 12.sp, color = colorScheme.onBackground.copy(alpha = 0.5f)),
                 modifier = Modifier.padding(4.dp).testTag("ProfileOptionSubtitle"))
           }
         }
