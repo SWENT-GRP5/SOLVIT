@@ -114,8 +114,8 @@ open class NavigationActions(
   open fun navigateTo(destination: TopLevelDestination) {
     navController.navigate(destination.route) {
       popUpTo(navController.graph.startDestinationId) { saveState = true }
-        launchSingleTop = true
-        restoreState = true
+      launchSingleTop = true
+      restoreState = true
     }
   }
 
