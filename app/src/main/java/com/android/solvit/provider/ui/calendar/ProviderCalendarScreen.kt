@@ -62,9 +62,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.android.solvit.shared.ui.navigation.NavigationActions
-import com.android.solvit.shared.ui.theme.Available
-import com.android.solvit.shared.ui.theme.Busy
-import com.android.solvit.shared.ui.theme.Unavailable
+import com.android.solvit.shared.ui.navigation.Route
+import com.android.solvit.shared.ui.theme.*
 import java.time.DayOfWeek
 import java.time.Instant
 import java.time.LocalDate
@@ -104,7 +103,7 @@ fun ProviderCalendarScreen(navigationActions: NavigationActions) {
             },
             navigationIcon = {
               IconButton(
-                  onClick = { navigationActions.goBack() },
+                  onClick = { navigationActions.navigateTo(Route.REQUESTS_FEED) },
                   modifier = Modifier.testTag("backButton")) {
                     Icon(
                         Icons.AutoMirrored.Filled.ArrowBack,

@@ -49,6 +49,9 @@ import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.android.solvit.shared.ui.navigation.Route
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 
 @Composable
 fun ProviderProfileScreen(
@@ -57,10 +60,9 @@ fun ProviderProfileScreen(
     authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory),
     navigationActions: NavigationActions
 ) {
-  val user = authViewModel.user.collectAsState()
-  val userId = user.value?.uid ?: "-1"
+  val userId = Firebase.auth.currentUser?.uid ?: "-1"
   val provider =
-      listProviderViewModel.providersList.collectAsState().value.find { it.uid == userId } ?: return
+      listProviderViewModel.providersList.collectAsState().value.first { it.uid == userId }
   Column(modifier = Modifier.fillMaxSize().background(colorScheme.background)) {
     ProfileHeader(navigationActions, provider, authViewModel)
     Spacer(modifier = Modifier.height(10.dp))
@@ -91,7 +93,7 @@ fun ProfileHeader(
               verticalArrangement = Arrangement.Bottom) {
                 Box {
                   IconButton(
-                      onClick = { navigationActions.goBack() },
+                      onClick = { navigationActions.navigateTo(Route.REQUESTS_FEED) },
                       modifier = Modifier.testTag("backButton")) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
@@ -302,9 +304,9 @@ fun StatsSection(provider: Provider) {
 
         Spacer(modifier = Modifier.height(30.dp))
         Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
-          Column(horizontalAlignment = Alignment.CenterHorizontally) {
+          Column(horizontalAlignment = Alignment.Start) {
             Text(
-                "1500-2300$", // TODO : modify later with real value
+                provider.price.toString(),
                 fontSize = 20.sp,
                 color = colorScheme.onPrimary,
                 fontWeight = FontWeight.Bold)
@@ -312,7 +314,7 @@ fun StatsSection(provider: Provider) {
           }
           Column(horizontalAlignment = Alignment.End) {
             Text(
-                "5 days", // TODO : modify later with real value
+                provider.deliveryTime.seconds.div(3600).toString() + " hours",
                 fontSize = 20.sp,
                 color = colorScheme.onPrimary,
                 fontWeight = FontWeight.Bold)

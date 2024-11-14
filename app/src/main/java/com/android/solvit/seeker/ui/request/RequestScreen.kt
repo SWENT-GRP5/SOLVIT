@@ -28,7 +28,6 @@ import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Alignment
@@ -36,10 +35,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import com.android.solvit.seeker.ui.navigation.BottomNavigationMenu
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.service.Services
+import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_CUSTOMER
 import com.android.solvit.shared.ui.navigation.NavigationActions
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -83,21 +84,23 @@ fun RequestScreen(
   }
   Scaffold(
       modifier = Modifier.padding(16.dp).testTag("requestScreen"),
-      bottomBar = {},
+      bottomBar = {
+        if (screenTitle == "Create a new request") {
+          BottomNavigationMenu(
+              onTabSelect = { route -> navigationActions.navigateTo(route) },
+              tabList = LIST_TOP_LEVEL_DESTINATION_CUSTOMER,
+              selectedItem = navigationActions.currentRoute())
+        }
+      },
       topBar = {
         TopAppBar(
-            colors =
-                TopAppBarColors(
-                    containerColor = colorScheme.background,
-                    scrolledContainerColor = colorScheme.background,
-                    navigationIconContentColor = colorScheme.onBackground,
-                    titleContentColor = colorScheme.onBackground,
-                    actionIconContentColor = colorScheme.onBackground,
-                ),
             title = { Text(screenTitle, Modifier.testTag("screenTitle")) },
             navigationIcon = {
               IconButton(
-                  onClick = { navigationActions.goBack() },
+                  onClick = {
+                    // HJ : Comment this line as these screens have a bottom navigation menu
+                    navigationActions.goBack()
+                  },
                   modifier = Modifier.testTag("goBackButton")) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
@@ -124,14 +127,13 @@ fun RequestScreen(
                   onServiceTypeSelected)
               DescriptionInput(description, onDescriptionChange)
               LocationDropdown(
-                  locationQuery = locationQuery,
-                  onLocationQueryChange = onLocationQueryChange,
-                  showDropdownLocation = showDropdownLocation,
-                  onShowDropdownLocationChange = onShowDropdownLocationChange,
-                  locationSuggestions = locationSuggestions,
-                  onLocationSelected = onLocationSelected,
-                  requestLocation = selectedRequest?.location,
-                  isValueOk = selectedLocation != null)
+                  locationQuery,
+                  onLocationQueryChange,
+                  showDropdownLocation,
+                  onShowDropdownLocationChange,
+                  locationSuggestions,
+                  onLocationSelected,
+                  selectedRequest?.location)
               DatePickerFieldToModal(dueDate = dueDate, onDateChange = onDueDateChange)
               ImagePicker(selectedImageUri, imageUrl, onImageSelected)
               Button(

@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
@@ -30,6 +29,7 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Favorite
@@ -63,227 +63,6 @@ import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
 
-/*
-@Composable
-fun ProfileScreen(viewModel: ProfileViewModel, navigationActions: NavigationActions) {
-    // Collect the user profile from the StateFlow
-    val userProfile by viewModel.userProfile.collectAsState()
-
-    // Display the profile information if it's available
-    if (userProfile.isNotEmpty()) {
-        val profile = userProfile[0]  // Assuming only one profile in the list for simplicity
-
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            // Profile Picture
-            Image(
-                painter = painterResource(id = R.drawable.empty_profile_img),
-                contentDescription = "Profile Picture",
-                modifier = Modifier
-                    .size(128.dp)
-                    .padding(bottom = 16.dp)
-            )
-            // Header Section with Title and Edit Icon
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Profile",
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                IconButton(onClick = { navigationActions.navigateTo(Screen.EDIT_PROFILE) }) {
-                    Icon(Icons.Filled.Edit, contentDescription = "Edit Profile")
-                }
-            }
-
-            // Display Name
-            ProfileField(label = "Name", value = profile.name)
-
-            // Spacer between fields
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Display Email with Icon
-            ProfileFieldWithIcon(
-                icon = Icons.Filled.Email,
-                label = "Email",
-                value = profile.email
-            )
-
-            // Spacer between fields
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Display Phone with Icon
-            ProfileFieldWithIcon(
-                icon = Icons.Filled.Phone,
-                label = "Phone",
-                value = profile.phone
-            )
-        }
-    } else {
-        // Fallback UI when the profile data is not available
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(text = "No profile data available", style = MaterialTheme.typography.body1)
-        }
-    }
-}
-
-// Reusable composable for displaying a profile field
-@Composable
-fun ProfileField(label: String, value: String) {
-    Column {
-        Text(text = label, fontWeight = FontWeight.SemiBold)
-        Text(
-            text = value,
-            modifier = Modifier.padding(vertical = 4.dp),
-            style = MaterialTheme.typography.body1
-        )
-    }
-}
-
-@Composable
-fun ProfileFieldWithIcon(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, value: String) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            modifier = Modifier.size(24.dp)
-        )
-        Spacer(modifier = Modifier.width(8.dp))
-        Column {
-            Text(text = label, fontWeight = FontWeight.SemiBold)
-            Text(
-                text = value,
-                modifier = Modifier.padding(vertical = 4.dp),
-                style = MaterialTheme.typography.body1
-            )
-        }
-    }
-}
-*/
-/*
-@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
-@Composable
-fun ProfileScreen(viewModel: ProfileViewModel, navigationActions: NavigationActions) {
-    // Collect the user profile from the StateFlow
-    val userProfile by viewModel.userProfile.collectAsState()
-
-    // Display the profile information if it's available
-    userProfile.firstOrNull()?.let { profile ->
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = { Text("Profile") },
-                    navigationIcon = {
-                        IconButton(onClick = { navigationActions.goBack() }) {
-                            Icon(Icons.Default.ArrowBack, contentDescription = "Back")
-                        }
-                    },
-                    actions = {
-                        IconButton(onClick = { /* Handle notification click */ }) {
-                            Icon(Icons.Default.Notifications, contentDescription = "Notifications")
-                        }
-                    }
-                )
-            }
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                // Profile Picture
-                Image(
-                    painter = painterResource(id = R.drawable.empty_profile_img), // Replace with actual profile image later
-                    contentDescription = "Profile Picture",
-                    modifier = Modifier
-                        .size(100.dp)
-                        .clip(CircleShape)
-                        .border(2.dp, Color.Gray, CircleShape)
-                        .padding(bottom = 16.dp)
-                )
-
-                // Edit Profile Button
-                Button(
-                    onClick = { navigationActions.navigateTo(Screen.EDIT_PROFILE) },
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                ) {
-                    Text("Edit Profile")
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Sections
-                LazyColumn {
-                    item {
-                        SectionTitle("Mimi Headline")
-                        ProfileOptionItem("Popular")
-                        ProfileOptionItem("Trending")
-                        ProfileOptionItem("Today")
-                    }
-                    item {
-                        SectionTitle("Content")
-                        ProfileOptionItem("Favourite")
-                        ProfileOptionItem("Download")
-                    }
-                    item {
-                        SectionTitle("Preferences")
-                        ProfileOptionItem("Language")
-                        ProfileOptionItem("Darkmode")
-                        ProfileOptionItem("Only Download via Wifi")
-                    }
-                }
-            }
-        }
-    } ?: run {
-        // Fallback when no profile data is available
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(text = "No profile data available")
-        }
-    }
-}
-
-@Composable
-fun SectionTitle(title: String) {
-    Text(
-        text = title,
-        style = MaterialTheme.typography.subtitle1,
-        modifier = Modifier.padding(vertical = 8.dp)
-    )
-}
-
-@Composable
-fun ProfileOptionItem(optionName: String, onClick: () -> Unit = {}) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() }
-            .padding(vertical = 12.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text(optionName)
-        Icon(Icons.Default.ArrowForward, contentDescription = null)
-    }
-}
-*/
-
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun SeekerProfileScreen(
@@ -291,7 +70,6 @@ fun SeekerProfileScreen(
     authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory),
     navigationActions: NavigationActions
 ) {
-
   // Lock Orientation to Portrait
   val context = LocalContext.current
   DisposableEffect(Unit) {
@@ -299,6 +77,7 @@ fun SeekerProfileScreen(
     activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
     onDispose { activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED }
   }
+
   // Collect the user profile from the StateFlow
   val userProfile by viewModel.seekerProfile.collectAsState()
   val scrollState = rememberScrollState()
@@ -310,23 +89,29 @@ fun SeekerProfileScreen(
         backgroundColor = colorScheme.background,
         topBar = {
           Column(modifier = Modifier.background(colorScheme.background)) {
-            Text(
-                text = "Profile",
-                style =
-                    TextStyle(
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = colorScheme.onBackground),
-                modifier =
-                    Modifier.padding(start = 16.dp, top = 16.dp)
-                        .verticalScroll(scrollState)
-                        .background(colorScheme.background)
-                        .testTag("ProfileTitle"), // testTag for the title
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-
             TopAppBar(
                 modifier = Modifier.testTag("ProfileTopBar"),
+                backgroundColor = colorScheme.background,
+                navigationIcon = {
+                  IconButton(
+                      onClick = { navigationActions.goBack() },
+                      modifier = Modifier.testTag("BackButton")) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                      }
+                },
+                title = {
+                  Text(
+                      text = "Profile",
+                      style =
+                          TextStyle(
+                              fontSize = 24.sp,
+                              fontWeight = FontWeight.Bold,
+                              color = colorScheme.onBackground),
+                      modifier = Modifier.testTag("ProfileTitle"))
+                })
+
+            TopAppBar(
+                // modifier = Modifier.testTag("ProfileTopBar"),
                 backgroundColor = colorScheme.primary, // Match background color from Figma
                 contentPadding = PaddingValues(16.dp)) {
                   // Row layout for profile image, name, email, and edit icon
@@ -383,71 +168,69 @@ fun SeekerProfileScreen(
           Column(
               modifier =
                   Modifier.fillMaxSize()
-                      .padding(16.dp)
+                      .padding(horizontal = 16.dp, vertical = 8.dp)
                       .background(color = colorScheme.background)
-                      .testTag("ProfileContent"), // Adding testTag for profile content
+                      .testTag("ProfileContent"),
               horizontalAlignment = Alignment.CenterHorizontally) {
+                // Profile Options List
                 LazyColumn(
                     modifier =
-                        Modifier.background(colorScheme.background)
-                            .testTag("ProfileOptionsList") // testTag for options list
-                    ) {
+                        Modifier.background(colorScheme.background).testTag("ProfileOptionsList"),
+                    contentPadding = PaddingValues(vertical = 8.dp)) {
                       item {
                         ProfileOptionItem(
                             icon = Icons.Default.Person,
                             optionName = "My Account",
                             subtitle = "Make changes to your account",
                             onClick = { /* Handle click */},
-                            modifier = Modifier.testTag("MyAccountOption") // testTag for option
-                            )
+                            modifier = Modifier.testTag("MyAccountOption"))
                         Spacer(modifier = Modifier.height(8.dp))
+
                         ProfileOptionItem(
                             icon = Icons.Default.ShoppingCart,
                             optionName = "Order History",
                             subtitle = "Manage your requested services and their statuses",
                             onClick = { /* Handle click */},
-                            modifier = Modifier.testTag("OrdersOption") // testTag for option
-                            )
+                            modifier = Modifier.testTag("OrdersOption"))
                         Spacer(modifier = Modifier.height(8.dp))
+
                         ProfileOptionItem(
                             icon = Icons.Default.Lock,
                             optionName = "Billing",
                             subtitle = "Manage your billing information",
                             onClick = { /* Handle click */},
-                            modifier = Modifier.testTag("BillingOption") // testTag for option
-                            )
+                            modifier = Modifier.testTag("BillingOption"))
                         Spacer(modifier = Modifier.height(8.dp))
+
                         ProfileOptionItem(
                             icon = Icons.Default.Favorite,
                             optionName = "Preferences",
-                            subtitle = "Set your preferences", // Added subtitle
+                            subtitle = "Set your preferences",
                             onClick = { /* Handle click */},
-                            modifier = Modifier.testTag("PreferencesOption") // testTag for option
-                            )
+                            modifier = Modifier.testTag("PreferencesOption"))
                         Spacer(modifier = Modifier.height(8.dp))
+
                         ProfileOptionItem(
                             icon = Icons.Default.ExitToApp,
                             optionName = "Log out",
                             subtitle = "Log out of your account",
                             onClick = { authViewModel.logout {} },
-                            modifier = Modifier.testTag("LogoutOption") // testTag for option
-                            )
+                            modifier = Modifier.testTag("LogoutOption"))
                         Spacer(modifier = Modifier.height(8.dp))
 
                         ProfileOptionItem(
                             icon = Icons.Default.Notifications,
                             optionName = "Help & Support",
-                            onClick = { /* Handle click */},
                             subtitle = "Get help and support",
-                            modifier = Modifier.testTag("HelpSupportOption") // testTag for option
-                            )
+                            onClick = { /* Handle click */},
+                            modifier = Modifier.testTag("HelpSupportOption"))
+
                         ProfileOptionItem(
                             icon = Icons.Default.Settings,
                             optionName = "About App",
-                            onClick = { /* Handle click */},
                             subtitle = "Learn more about the app",
-                            modifier = Modifier.testTag("AboutAppOption") // testTag for option
-                            )
+                            onClick = { /* Handle click */},
+                            modifier = Modifier.testTag("AboutAppOption"))
                       }
                     }
               }
@@ -465,25 +248,24 @@ fun SeekerProfileScreen(
 fun ProfileOptionItem(
     icon: ImageVector,
     optionName: String,
-    subtitle: String, // New parameter for subtitle
+    subtitle: String,
     onClick: () -> Unit = {},
     iconColor: Color = colorScheme.onBackground,
-    modifier: Modifier = Modifier // Adding modifier for testTag
+    modifier: Modifier = Modifier
 ) {
   Row(
       modifier =
           modifier
               .fillMaxWidth()
               .clickable { onClick() }
-              .padding(vertical = 12.dp), // Padding for the whole row
-      verticalAlignment = Alignment.CenterVertically // Center vertically for icon and text
-      ) {
+              .padding(vertical = 12.dp), // Adjust vertical padding for uniformity across screens
+      verticalAlignment = Alignment.CenterVertically) {
         Icon(
             imageVector = icon,
             contentDescription = optionName,
             tint = iconColor,
             modifier = Modifier.size(24.dp))
-        Spacer(modifier = Modifier.width(8.dp)) // Space between icon and text
+        Spacer(modifier = Modifier.width(8.dp))
 
         Column(modifier = Modifier.weight(1f)) {
           Text(
@@ -491,12 +273,8 @@ fun ProfileOptionItem(
               style = MaterialTheme.typography.body1.copy(color = colorScheme.onBackground))
           Text(
               text = subtitle,
-              style =
-                  TextStyle(
-                      fontSize = 12.sp, // Set a smaller font size for the subtitle
-                      color = colorScheme.onSurfaceVariant),
-              modifier = Modifier.padding(4.dp) // Padding for the subtitle
-              )
+              style = TextStyle(fontSize = 12.sp, color = colorScheme.onSurfaceVariant),
+              modifier = Modifier.padding(4.dp))
         }
         Icon(Icons.Default.KeyboardArrowRight, contentDescription = null, tint = iconColor)
       }
