@@ -127,14 +127,10 @@ fun SeekerProfileScreen(
                 ) {
                     // Profile Header Row (Profile Image, Name, Email, Edit Icon)
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        // Profile Picture, Name, and Email on the left
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier.fillMaxWidth().background(colorScheme.primary).padding(16.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
+                        // Profile Picture, Name, and Email on the left
                             Image(
                                 painter = painterResource(id = R.drawable.empty_profile_img),
                                 contentDescription = "Profile Picture",
@@ -167,7 +163,7 @@ fun SeekerProfileScreen(
                             Icon(
                                 Icons.Default.Edit,
                                 contentDescription = "Edit Profile",
-                                tint = colorScheme.onPrimary
+                                tint = colorScheme.onBackground
                             )
                         }
                     }
@@ -238,7 +234,7 @@ fun SeekerProfileScreen(
                                 icon = Icons.Default.Settings,
                                 optionName = "About App",
                                 subtitle = "Learn more about the app",
-                                onClick = {  Toast.makeText(context, "Not yet implemented", Toast.LENGTH_SHORT).show() },
+                                onClick = { Toast.makeText(context, "Not yet implemented", Toast.LENGTH_SHORT).show()},
                                 modifier = Modifier.testTag("AboutAppOption")
                             )
                         }
