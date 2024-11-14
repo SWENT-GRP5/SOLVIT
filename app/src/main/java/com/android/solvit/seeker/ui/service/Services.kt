@@ -116,14 +116,14 @@ fun TopSection(
           Modifier.fillMaxWidth()
               .background(
                   Purple80, shape = RoundedCornerShape(bottomEnd = 16.dp, bottomStart = 16.dp))
+              .padding(16.dp)
               .testTag("servicesScreenTopSection"),
       verticalArrangement = Arrangement.spacedBy(16.dp),
       horizontalAlignment = Alignment.CenterHorizontally) {
-        Spacer(Modifier.height(8.dp))
         Row(
-            modifier = Modifier.height(50.dp),
+            modifier = Modifier.height(50.dp).fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(70.dp)) {
+            horizontalArrangement = Arrangement.SpaceBetween) {
               Image(
                   painterResource(id = R.drawable.empty_profile_img),
                   contentDescription = "profile picture",
@@ -143,7 +143,7 @@ fun TopSection(
                         Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = null)
                       }
                 }
-                Text("Dubai, USA", fontSize = 15.sp)
+                Text("SF, USA", fontSize = 15.sp)
               }
               IconButton(onClick = { /*TODO*/}, modifier = Modifier.testTag("servicesScreenMenu")) {
                 Icon(imageVector = Icons.Default.Menu, contentDescription = null)
@@ -177,7 +177,6 @@ fun TopSection(
                     }
                   }
             }
-        Spacer(Modifier.height(8.dp))
       }
 }
 
@@ -366,15 +365,24 @@ fun ProviderItem(provider: Provider, onClick: () -> Unit) {
                         provider.service.toString().replace("_", " ").lowercase().replaceFirstChar {
                           it.uppercase()
                         },
-                    fontWeight = FontWeight.Bold)
-                Row(modifier = Modifier.align(Alignment.End)) {
-                  Text(text = provider.rating.toString(), fontWeight = FontWeight.Bold)
-                  Icon(
-                      imageVector = Icons.Default.Star,
-                      contentDescription = null,
-                      modifier = Modifier.size(16.dp))
-                }
-                Text(text = provider.name, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 14.sp)
+                Row(
+                    modifier =
+                        Modifier.align(Alignment.End)
+                            .background(Color.LightGray, RoundedCornerShape(8.dp)),
+                    verticalAlignment = Alignment.CenterVertically) {
+                      Text(text = provider.rating.toString(), fontWeight = FontWeight.Bold)
+                      Icon(
+                          imageVector = Icons.Default.Star,
+                          contentDescription = null,
+                          modifier = Modifier.size(16.dp))
+                    }
+                Text(
+                    text = provider.name,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1)
               }
         }
       }
