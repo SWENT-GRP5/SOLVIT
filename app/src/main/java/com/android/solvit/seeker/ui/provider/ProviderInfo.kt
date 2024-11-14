@@ -151,7 +151,7 @@ fun PackageCard(packageProposal: PackageProposal, isSelected: Boolean, modifier:
               containerColor = if (!isSelected) colorScheme.surface else colorScheme.secondary,
           )) {
         Column(
-            modifier = Modifier.padding(25.dp).fillMaxHeight().testTag("PackageContent"),
+            modifier = Modifier.padding(20.dp).fillMaxHeight().testTag("PackageContent"),
             horizontalAlignment = Alignment.Start) {
               // Price of the Package
               Row(verticalAlignment = Alignment.CenterVertically) {
@@ -162,10 +162,10 @@ fun PackageCard(packageProposal: PackageProposal, isSelected: Boolean, modifier:
                         MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
                     color =
                         if (!isSelected) colorScheme.onPrimaryContainer else colorScheme.onPrimary)
-                Spacer(modifier = Modifier.width(4.dp))
+                Spacer(modifier = Modifier.width(8.dp)) // Increased space between price and unit
                 Text(
                     text = "/hour",
-                    style = MaterialTheme.typography.bodySmall, // Smaller style for the unit
+                    style = MaterialTheme.typography.bodySmall,
                     color =
                         if (!isSelected) colorScheme.onPrimaryContainer else colorScheme.onPrimary)
               }
@@ -175,13 +175,17 @@ fun PackageCard(packageProposal: PackageProposal, isSelected: Boolean, modifier:
                   style = MaterialTheme.typography.titleMedium,
                   color =
                       if (!isSelected) colorScheme.onPrimaryContainer else colorScheme.onPrimary)
-              Spacer(modifier = Modifier.height(8.dp))
+              Spacer(
+                  modifier =
+                      Modifier.height(12.dp)) // Increased space between title and description
               // Description of the Package
               Text(
                   text = packageProposal.description,
                   style = MaterialTheme.typography.bodyMedium,
                   color = if (!isSelected) colorScheme.onSurface else colorScheme.onPrimary)
-              Spacer(modifier = Modifier.height(8.dp))
+              Spacer(
+                  modifier =
+                      Modifier.height(12.dp)) // Increased space between description and features
               // Important infos about the package
               Column {
                 packageProposal.bulletPoints.forEach { feature ->
@@ -190,8 +194,9 @@ fun PackageCard(packageProposal: PackageProposal, isSelected: Boolean, modifier:
                         imageVector = Icons.Default.CheckCircle,
                         contentDescription = null,
                         tint = colorScheme.primary,
-                        modifier = Modifier.size(16.dp))
-                    Spacer(modifier = Modifier.width(4.dp))
+                        modifier =
+                            Modifier.size(18.dp)) // Slightly bigger icon for better visibility
+                    Spacer(modifier = Modifier.width(8.dp)) // Increased space between icon and text
                     Text(
                         text = feature,
                         style = MaterialTheme.typography.bodyMedium,
@@ -225,19 +230,20 @@ fun ProviderPackages(provider: Provider, packages: List<PackageProposal>) {
         // Horizontal scrollable list
         LazyRow(
             modifier = Modifier.fillMaxWidth().testTag("packagesScrollableList"),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            contentPadding = PaddingValues(top = 30.dp, start = 8.dp, end = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(20.dp), // Adjusted for spacing
+            contentPadding =
+                PaddingValues(top = 40.dp, start = 12.dp, end = 12.dp), // Increased padding
         ) {
           items(packages.size) { index ->
             // If package is selected, we display it bigger
             val isSelected = selectedIndex == index
-            val size by animateDpAsState(targetValue = if (isSelected) 335.dp else 320.dp)
+            val size by animateDpAsState(targetValue = if (isSelected) 350.dp else 320.dp)
 
             PackageCard(
                 packageProposal = packages[index],
                 isSelected = isSelected,
                 modifier =
-                    Modifier.width(250.dp)
+                    Modifier.width(260.dp) // Slightly wider for better touch targets
                         .height(size)
                         .clickable { selectedIndex = if (isSelected) -1 else index }
                         .testTag("PackageCard"))
@@ -356,7 +362,8 @@ fun ProviderTabs(selectedTabIndex: Int, onTabSelected: (Int) -> Unit) {
         ) {
           Text(
               "Profile",
-              modifier = Modifier.padding(16.dp),
+              modifier =
+                  Modifier.padding(horizontal = 20.dp, vertical = 12.dp), // Increased padding
               color =
                   if (selectedTabIndex == 0) colorScheme.onPrimary
                   else colorScheme.onPrimary.copy(alpha = 0.6f),
@@ -368,7 +375,8 @@ fun ProviderTabs(selectedTabIndex: Int, onTabSelected: (Int) -> Unit) {
             modifier = Modifier.testTag("packagesTab")) {
               Text(
                   "Packages",
-                  modifier = Modifier.padding(16.dp),
+                  modifier =
+                      Modifier.padding(horizontal = 20.dp, vertical = 12.dp), // Increased padding
                   color =
                       if (selectedTabIndex == 1) colorScheme.onPrimary
                       else colorScheme.onPrimary.copy(alpha = 0.6f),
@@ -380,7 +388,8 @@ fun ProviderTabs(selectedTabIndex: Int, onTabSelected: (Int) -> Unit) {
             modifier = Modifier.testTag("reviewsTab")) {
               Text(
                   "Reviews",
-                  modifier = Modifier.padding(16.dp),
+                  modifier =
+                      Modifier.padding(horizontal = 20.dp, vertical = 12.dp), // Increased padding
                   color =
                       if (selectedTabIndex == 2) colorScheme.onPrimary
                       else colorScheme.onPrimary.copy(alpha = 0.6f),
