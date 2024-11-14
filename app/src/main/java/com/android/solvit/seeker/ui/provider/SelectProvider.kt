@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -29,6 +28,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -38,6 +39,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -45,6 +47,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.RangeSlider
@@ -75,6 +78,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -91,12 +95,11 @@ import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.map.RequestLocationPermission
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
-import com.android.solvit.shared.ui.theme.Gradient1
-import com.android.solvit.shared.ui.theme.Gradient2
-import com.android.solvit.shared.ui.theme.Gradient3
-import com.android.solvit.shared.ui.theme.Gradient4
+import com.android.solvit.shared.ui.theme.GradientBlue
+import com.android.solvit.shared.ui.theme.GradientGreen
 import com.android.solvit.shared.ui.theme.OnSurfaceVariant
 import com.android.solvit.shared.ui.theme.SurfaceVariant
+import com.android.solvit.shared.ui.theme.Yellow
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
 import java.util.Locale
@@ -184,16 +187,16 @@ fun SpFilterBar(display: () -> Unit, listProviderViewModel: ListProviderViewMode
           filters.forEach { filter ->
             Card(
                 modifier =
-                    Modifier.testTag("filterIcon").wrapContentSize().clickable {
+                    Modifier.wrapContentSize().clickable {
                       Toast.makeText(context, "Not Yet Implemented", Toast.LENGTH_LONG).show()
-                    },
+                    }.testTag("filterIcon"),
                 elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
                 colors = CardDefaults.cardColors(containerColor = colorScheme.background),
                 border = BorderStroke(1.dp, colorScheme.primary),
                 shape = RoundedCornerShape(50)) {
                   Text(
                       text = filter,
-                      fontSize = 16.sp,
+                      fontSize = MaterialTheme.typography.bodySmall.fontSize,
                       lineHeight = 34.sp,
                       fontFamily = FontFamily(Font(R.font.roboto)),
                       fontWeight = FontWeight(400),
@@ -218,7 +221,7 @@ fun SpFilterBar(display: () -> Unit, listProviderViewModel: ListProviderViewMode
                   painter =
                       painterResource(id = R.drawable.tune), // Make sure to use your SVG resource
                   contentDescription = "filter options",
-                  modifier = Modifier.padding(8.dp).size(32.dp),
+                  modifier = Modifier.padding(8.dp).size(32.dp).testTag("filterIcon"),
                   tint = colorScheme.onBackground)
             }
       }
@@ -241,28 +244,37 @@ fun Title(title: String) {
 
 @Composable
 fun Note(note: String = "5") {
-  Box(
-      modifier =
-          Modifier.width(46.dp)
-              .height(24.dp)
-              .background(color = colorScheme.onSurface, shape = RoundedCornerShape(size = 59.dp))
-              .testTag("Rating")) {
+    Box(
+        modifier = Modifier
+            .width(46.dp)
+            .height(24.dp)
+            .background(color = colorScheme.onSurface, shape = RoundedCornerShape(size = 59.dp))
+            .testTag("Rating")
+    ) {
         Row(
-            verticalAlignment = Alignment.CenterVertically,
-            // part has to be modified we can add function here
-            modifier = Modifier.clickable {}) {
-              Image(
-                  modifier = Modifier.padding(1.90667.dp).width(16.dp).height(16.dp),
-                  painter = painterResource(id = R.drawable.star),
-                  contentDescription = "image description",
-                  contentScale = ContentScale.Crop)
-
-              Text(
-                  text = note, // TODO
-                  color = colorScheme.surface,
-                  fontSize = 14.sp)
-            }
-      }
+            modifier = Modifier.fillMaxSize(),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.Default.Star,
+                contentDescription = "Rating star",
+                modifier = Modifier
+                    .size(24.dp)
+                    .padding(2.dp),
+                tint = Yellow
+            )
+            
+            Spacer(modifier = Modifier.width(2.dp))
+            
+            Text(
+                text = note,
+                color = colorScheme.surface,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium
+            )
+        }
+    }
 }
 
 @Composable
@@ -271,57 +283,80 @@ fun DisplayPopularProviders(
     listProviderViewModel: ListProviderViewModel,
     navigationActions: NavigationActions
 ) {
+    LazyRow(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+            .testTag("popularProviders"),
+        horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.Start),
+        verticalAlignment = Alignment.Top,
+        userScrollEnabled = true,
+    ) {
+        items(providers.filter { it.popular }) { provider ->
+            Card(
+                modifier = Modifier
+                    .width(141.dp)
+                    .height(172.dp)
+                    .clickable {
+                        listProviderViewModel.selectProvider(provider)
+                        navigationActions.navigateTo(Route.PROVIDER_PROFILE)
+                    },
+                elevation = CardDefaults.cardElevation(
+                    defaultElevation = 8.dp,
+                    pressedElevation = 4.dp,
+                    focusedElevation = 10.dp
+                ),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    AsyncImage(
+                        modifier = Modifier.fillMaxSize(),
+                        model = provider.imageUrl,
+                        placeholder = painterResource(id = R.drawable.loading),
+                        error = painterResource(id = R.drawable.error),
+                        contentDescription = "provider image",
+                        contentScale = ContentScale.Crop
+                    )
+                    
+                    // Add gradient overlay
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(72.dp)
+                            .align(Alignment.BottomCenter)
+                            .background(
+                                brush = Brush.verticalGradient(
+                                    colors = listOf(Color.Transparent, colorScheme.background)
+                                )
+                            )
+                    )
 
-  LazyRow(
-      modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("popularProviders"),
-      horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.Start),
-      verticalAlignment = Alignment.Top,
-      userScrollEnabled = true,
-  ) {
-    items(providers.filter { it.popular }) { provider ->
-      Box(
-          modifier =
-              Modifier.shadow(
-                      16.dp,
-                      shape = RoundedCornerShape(16.dp),
-                      ambientColor = colorScheme.primary,
-                      spotColor = colorScheme.primary)
-                  .clip(RoundedCornerShape(16.dp))
-                  .clickable {
-                    listProviderViewModel.selectProvider(provider)
-                    navigationActions.navigateTo(Route.PROVIDER_PROFILE)
-                  }) {
-            AsyncImage(
-                modifier = Modifier.width(141.dp).height(172.dp),
-                model = provider.imageUrl,
-                placeholder = painterResource(id = R.drawable.loading),
-                error = painterResource(id = R.drawable.error),
-                contentDescription = "provider image",
-                contentScale = ContentScale.Crop)
-            Box(
-                modifier =
-                    Modifier.fillMaxWidth()
-                        .height(50.dp)
-                        .align(Alignment.BottomCenter)
-                        .background(
-                            brush = Brush.verticalGradient(colors = listOf(Gradient1, Gradient2))))
-
-            Row(
-                modifier = Modifier.align(Alignment.BottomStart).padding(8.dp),
-                verticalAlignment = Alignment.CenterVertically) {
-                  Text(
-                      text = provider.name.uppercase(),
-                      style =
-                          TextStyle(
-                              fontSize = 16.sp,
-                              fontWeight = FontWeight(400),
-                              color = colorScheme.onPrimary))
-                  Spacer(Modifier.width(40.dp))
-                  Note(provider.rating.toString())
+                    Row(
+                        modifier = Modifier
+                            .align(Alignment.BottomStart)
+                            .fillMaxWidth()
+                            .padding(8.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = provider.name.uppercase(),
+                            style = TextStyle(
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight(400),
+                                color = colorScheme.onBackground
+                            ),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f)
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Note(provider.rating.toString())
+                    }
                 }
-          }
+            }
+        }
     }
-  }
 }
 
 @Composable
@@ -341,7 +376,8 @@ fun ListProviders(
           horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.Start)) {
             Card(
                 modifier = Modifier.padding(horizontal = 16.dp).fillMaxWidth(),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)) {
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.Transparent)) {
                   Row(
                       modifier =
                           Modifier.fillMaxWidth()
@@ -405,9 +441,11 @@ fun PriceFilter(listProviderViewModel: ListProviderViewModel) {
   Column {
     Row(
         horizontalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
     ) {
       BasicTextField(
           value = minPrice,
+          textStyle = TextStyle(color = colorScheme.onSurfaceVariant),
           onValueChange = {
             minPrice = it
             val minPriceValue = it.toDoubleOrNull()
@@ -429,6 +467,7 @@ fun PriceFilter(listProviderViewModel: ListProviderViewModel) {
 
       BasicTextField(
           value = maxPrice,
+          textStyle = TextStyle(color = colorScheme.onSurfaceVariant),
           onValueChange = {
             maxPrice = it
             val maxPriceValue = it.toDoubleOrNull()
@@ -468,7 +507,8 @@ fun FilterSubText(text: String) {
               fontSize = 17.sp,
               fontWeight = FontWeight(500),
               color = colorScheme.onBackground,
-          ))
+          ),
+      modifier = Modifier.padding(top = 24.dp, bottom = 4.dp))
 }
 
 fun filterStringFields(
@@ -514,98 +554,125 @@ fun filterStringFields(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun LanguageFilterField(list: List<String>, listProviderViewModel: ListProviderViewModel) {
-  var selectedFields by remember { mutableStateOf(listOf<String>()) }
-  var iconsPressed by remember { mutableStateOf(List(list.size) { false }) }
-  var iconsColor by remember { mutableStateOf(List(list.size) { SurfaceVariant }) }
-  Log.e("COLORS", "$iconsColor")
-  Log.e("Icons Pressed", "$iconsPressed")
+    var selectedFields by remember { mutableStateOf(listOf<String>()) }
+    var iconsPressed by remember { mutableStateOf(List(list.size) { false }) }
+    var iconsColor by remember { mutableStateOf(List(list.size) { SurfaceVariant }) }
 
-  FlowRow(
-      Modifier.padding(20.dp).fillMaxWidth(),
-      horizontalArrangement = Arrangement.spacedBy(8.dp),
-      verticalArrangement = Arrangement.spacedBy(8.dp),
-  ) {
-    repeat(list.size) { idx ->
-      Box(
-          Modifier.background(color = iconsColor[idx], shape = RoundedCornerShape(size = 8.dp))
-              .testTag("filterAct")
-              .padding(8.dp)
-              .clickable {
-                filterStringFields(
-                    selectedFields.toMutableList(),
-                    iconsPressed.toMutableList(),
-                    iconsColor.toMutableList(),
-                    { a -> selectedFields = a.toMutableList() },
-                    { b -> iconsPressed = b.toMutableList() },
-                    { c -> iconsColor = c.toMutableList() },
-                    idx,
-                    list[idx],
-                    listProviderViewModel,
-                    { provider ->
-                      selectedFields
-                          .map { u -> Language.valueOf(u.uppercase()) }
-                          .intersect(provider.languages.toSet())
-                          .isNotEmpty()
-                    },
-                    { provider -> provider.languages.isNotEmpty() },
-                    "Language")
-              }) {
-            Text(text = list[idx], fontSize = 18.sp, modifier = Modifier.padding(3.dp))
-          }
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(list.size/2),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items(list.size) { idx ->
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .background(
+                        color = if (iconsPressed[idx]) colorScheme.primary else colorScheme.surfaceVariant,
+                        shape = RoundedCornerShape(size = 8.dp)
+                    )
+                    .testTag("filterAct")
+                    .padding(8.dp)
+                    .clickable {
+                        filterStringFields(
+                            selectedFields.toMutableList(),
+                            iconsPressed.toMutableList(),
+                            iconsColor.toMutableList(),
+                            { a -> selectedFields = a.toMutableList() },
+                            { b -> iconsPressed = b.toMutableList() },
+                            { c -> iconsColor = c.toMutableList() },
+                            idx,
+                            list[idx],
+                            listProviderViewModel,
+                            { provider ->
+                                selectedFields
+                                    .map { u -> Language.valueOf(u.uppercase()) }
+                                    .intersect(provider.languages.toSet())
+                                    .isNotEmpty()
+                            },
+                            { provider -> provider.languages.isNotEmpty() },
+                            "Language"
+                        )
+                    }
+            ) {
+                Text(
+                    text = list[idx],
+                    fontSize = 18.sp,
+                    modifier = Modifier.padding(3.dp).align(Alignment.Center),
+                    color = if (iconsPressed[idx]) colorScheme.onPrimary else colorScheme.onSurfaceVariant
+                )
+            }
+        }
     }
-  }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun RatingFilterField(list: List<String>, listProviderViewModel: ListProviderViewModel) {
-  var selectedFields by remember { mutableStateOf(listOf<String>()) }
-  var iconsPressed by remember { mutableStateOf(List(list.size) { false }) }
-  var colors by remember { mutableStateOf(List(list.size) { SurfaceVariant }) }
+    var selectedFields by remember { mutableStateOf(listOf<String>()) }
+    var iconsPressed by remember { mutableStateOf(List(list.size) { false }) }
+    var colors by remember { mutableStateOf(List(list.size) { SurfaceVariant }) }
 
-  FlowRow(
-      Modifier.padding(20.dp).fillMaxWidth(),
-      horizontalArrangement = Arrangement.spacedBy(8.dp),
-      verticalArrangement = Arrangement.spacedBy(8.dp),
-  ) {
-    repeat(list.size) { idx ->
-      Box(
-          modifier =
-              Modifier.width(55.dp)
-                  .height(30.dp)
-                  .background(color = colors[idx], shape = RoundedCornerShape(size = 59.dp))
-                  .testTag("filterRating")) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier =
-                    Modifier.clickable {
-                      filterStringFields(
-                          selectedFields.toMutableList(),
-                          iconsPressed.toMutableList(),
-                          colors.toMutableList(),
-                          { a -> selectedFields = a.toMutableList() },
-                          { b -> iconsPressed = b.toMutableList() },
-                          { c -> colors = c.toMutableList() },
-                          idx,
-                          list[idx],
-                          listProviderViewModel,
-                          { provider ->
-                            selectedFields.map { u -> u.toDouble() }.contains(provider.rating)
-                          },
-                          { provider -> provider.rating >= 1.0 },
-                          "Rating")
-                    }) {
-                  Image(
-                      modifier = Modifier.padding(1.90667.dp).width(16.dp).height(16.dp),
-                      painter = painterResource(id = R.drawable.star),
-                      contentDescription = "image description",
-                      contentScale = ContentScale.Crop)
-
-                  Text(text = list[idx], color = colorScheme.onBackground, fontSize = 14.sp)
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        list.asReversed().forEachIndexed { idx, rating ->
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(30.dp)
+                    .background(
+                        color = if (iconsPressed[idx]) colorScheme.primary else colorScheme.surfaceVariant,
+                        shape = RoundedCornerShape(size = 59.dp)
+                    )
+                    .testTag("filterRating")
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clickable {
+                            filterStringFields(
+                                selectedFields.toMutableList(),
+                                iconsPressed.toMutableList(),
+                                colors.toMutableList(),
+                                { a -> selectedFields = a.toMutableList() },
+                                { b -> iconsPressed = b.toMutableList() },
+                                { c -> colors = c.toMutableList() },
+                                idx,
+                                rating,
+                                listProviderViewModel,
+                                { provider ->
+                                    selectedFields.map { u -> u.toDouble() }.contains(provider.rating)
+                                },
+                                { provider -> provider.rating >= 1.0 },
+                                "Rating"
+                            )
+                        },
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Star,
+                        contentDescription = "Rating star",
+                        modifier = Modifier
+                            .size(24.dp)
+                            .padding(end = 4.dp),
+                        tint = Yellow
+                    )
+                    Text(
+                        text = rating,
+                        color = if (iconsPressed[idx]) colorScheme.onPrimary else colorScheme.onSurfaceVariant,
+                        fontSize = 14.sp
+                    )
                 }
-          }
+            }
+        }
     }
-  }
 }
 
 @Composable
@@ -615,9 +682,9 @@ fun ApplyButton(listProviderViewModel: ListProviderViewModel, display: () -> Uni
       modifier =
           Modifier.testTag("applyFilterButton")
               .width(249.dp)
-              .height(43.dp)
+              .height(56.dp)
               .background(
-                  brush = Brush.horizontalGradient(colors = listOf(Gradient3, Gradient4)),
+                  brush = Brush.horizontalGradient(colors = listOf(GradientBlue, GradientGreen)),
                   shape = RoundedCornerShape(50))
               .clickable {
                 listProviderViewModel.applyFilters()
@@ -633,12 +700,12 @@ fun ApplyButton(listProviderViewModel: ListProviderViewModel, display: () -> Uni
               text = "Apply", // TODO()
               fontWeight = FontWeight.Bold,
               fontSize = 14.sp,
-              color = colorScheme.onBackground)
+              color = colorScheme.onPrimary)
           Text(
               text = "${filteredList.size} providers", // TODO()
               fontWeight = FontWeight.Bold,
               fontSize = 14.sp,
-              color = colorScheme.onBackground)
+              color = colorScheme.onPrimary)
         }
   }
 }
@@ -646,7 +713,7 @@ fun ApplyButton(listProviderViewModel: ListProviderViewModel, display: () -> Uni
 @Composable
 fun FilterComposable(listProviderViewModel: ListProviderViewModel, display: () -> Unit) {
   Column(
-      modifier = Modifier.fillMaxWidth().testTag("filterSheet"),
+      modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("filterSheet"),
       verticalArrangement = Arrangement.spacedBy(12.dp),
       horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
@@ -665,6 +732,7 @@ fun FilterComposable(listProviderViewModel: ListProviderViewModel, display: () -
             listProviderViewModel)
         FilterSubText("Rating")
         RatingFilterField(listOf("5", "4", "3", "2", "1"), listProviderViewModel)
+      Spacer(Modifier.height(16.dp))
         ApplyButton(listProviderViewModel, display)
       }
 }
@@ -713,7 +781,7 @@ fun LocationSuggestion(location: Location, index: Int, onClickAction: () -> Unit
   Row(
       modifier =
           Modifier.fillMaxWidth()
-              .background(if (index == 0) colorScheme.surface else Color.Transparent)
+              .background(if (index == 0) colorScheme.surfaceVariant.copy(1.5f) else Color.Transparent)
               .clickable { onClickAction() }
               .padding(16.dp)
               .testTag("suggestedLocation"),
@@ -740,7 +808,7 @@ fun LocationSuggestion(location: Location, index: Int, onClickAction: () -> Unit
                       fontSize = 16.sp,
                       lineHeight = 20.sp,
                       fontWeight = FontWeight(500),
-                      color = colorScheme.onSurface,
+                      color = colorScheme.onBackground,
                   ))
         }
       }

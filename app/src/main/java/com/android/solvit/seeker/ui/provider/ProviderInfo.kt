@@ -125,7 +125,7 @@ fun PackageCard(packageProposal: PackageProposal, isSelected: Boolean, modifier:
       colors =
           CardDefaults.cardColors(
               containerColor =
-                  if (!isSelected) MaterialTheme.colorScheme.surface else Color(0xFF1C1651),
+                  if (!isSelected) colorScheme.surface else colorScheme.secondary,
           )) {
         Column(
             modifier = Modifier.padding(25.dp).fillMaxHeight().testTag("PackageContent"),
@@ -137,24 +137,24 @@ fun PackageCard(packageProposal: PackageProposal, isSelected: Boolean, modifier:
                     text = "$${packageProposal.price}",
                     style =
                         MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-                    color = if (!isSelected) Color(0xFF231D4F) else Color.White)
+                    color = if (!isSelected) colorScheme.onPrimaryContainer else colorScheme.onPrimary)
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
                     text = "/hour",
                     style = MaterialTheme.typography.bodySmall, // Smaller style for the unit
-                    color = if (!isSelected) Color(0xFF231D4F) else Color.White)
+                    color = if (!isSelected) colorScheme.onPrimaryContainer else colorScheme.onPrimary)
               }
               // Title of the Package
               Text(
                   text = packageProposal.title,
                   style = MaterialTheme.typography.titleMedium,
-                  color = if (!isSelected) Color(0xFF231D4F) else Color.White)
+                  color = if (!isSelected) colorScheme.onPrimaryContainer else colorScheme.onPrimary)
               Spacer(modifier = Modifier.height(8.dp))
               // Description of the Package
               Text(
                   text = packageProposal.description,
                   style = MaterialTheme.typography.bodyMedium,
-                  color = if (!isSelected) MaterialTheme.colorScheme.onSurface else Color.White)
+                  color = if (!isSelected) colorScheme.onSurface else colorScheme.onPrimary)
               Spacer(modifier = Modifier.height(8.dp))
               // Important infos about the package
               Column {
@@ -163,14 +163,14 @@ fun PackageCard(packageProposal: PackageProposal, isSelected: Boolean, modifier:
                     Icon(
                         imageVector = Icons.Default.CheckCircle,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
+                        tint = colorScheme.primary,
                         modifier = Modifier.size(16.dp))
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         text = feature,
                         style = MaterialTheme.typography.bodyMedium,
                         color =
-                            if (!isSelected) MaterialTheme.colorScheme.onSurface else Color.White)
+                            if (!isSelected) colorScheme.onSurface else colorScheme.onPrimary)
                   }
                 }
               }
@@ -182,7 +182,7 @@ fun PackageCard(packageProposal: PackageProposal, isSelected: Boolean, modifier:
                   colors =
                       ButtonDefaults.buttonColors(
                           containerColor =
-                              if (isSelected) Color(0xFFBB6BD9) else Color(0xFF49746F)),
+                              if (isSelected) colorScheme.primary else colorScheme.surfaceVariant),
                   modifier = Modifier.align(Alignment.CenterHorizontally)) {
                     Text("Choose plan")
                   }
@@ -341,7 +341,13 @@ fun ProviderTabs(selectedTabIndex: Int, onTabSelected: (Int) -> Unit) {
             selected = selectedTabIndex == 1,
             onClick = { onTabSelected(1) },
             modifier = Modifier.testTag("packagesTab")) {
-              Text("Packages", modifier = Modifier.padding(16.dp))
+              Text(
+                  "Packages",
+                  modifier = Modifier.padding(16.dp),
+                  color =
+                  if (selectedTabIndex == 1) colorScheme.onPrimary
+                  else colorScheme.onPrimary.copy(alpha = 0.6f),
+                  fontWeight = if (selectedTabIndex == 1) FontWeight.Bold else FontWeight.Normal)
             }
         Tab(
             selected = selectedTabIndex == 2,
@@ -351,9 +357,9 @@ fun ProviderTabs(selectedTabIndex: Int, onTabSelected: (Int) -> Unit) {
                   "Reviews",
                   modifier = Modifier.padding(16.dp),
                   color =
-                      if (selectedTabIndex == 1) colorScheme.onPrimary
+                      if (selectedTabIndex == 2) colorScheme.onPrimary
                       else colorScheme.onPrimary.copy(alpha = 0.6f),
-                  fontWeight = if (selectedTabIndex == 1) FontWeight.Bold else FontWeight.Normal)
+                  fontWeight = if (selectedTabIndex == 2) FontWeight.Bold else FontWeight.Normal)
             }
       }
 }

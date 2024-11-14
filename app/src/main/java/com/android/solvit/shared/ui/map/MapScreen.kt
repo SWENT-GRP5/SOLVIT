@@ -135,8 +135,8 @@ fun MapMarker(markerData: MarkerData) {
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier =
                 Modifier.clip(RoundedCornerShape(8.dp))
-                    .background(Color.White)
-                    .border(1.dp, Color.Black, RoundedCornerShape(8.dp))
+                    .background(colorScheme.background)
+                    .border(1.dp, colorScheme.onBackground, RoundedCornerShape(8.dp))
                     .testTag(markerData.tag)) {
               Image(
                   markerData.image ?: ImageBitmap.imageResource(R.drawable.empty_profile_img),
@@ -146,7 +146,7 @@ fun MapMarker(markerData: MarkerData) {
                       Modifier.padding(top = 4.dp, start = 6.dp, end = 6.dp)
                           .size(50.dp)
                           .clip(CircleShape)
-                          .border(2.dp, Color.Black, CircleShape)
+                          .border(2.dp, colorScheme.onBackground, CircleShape)
                           .testTag(markerData.tag + "Image"))
               Text(
                   maxLines = 1,
