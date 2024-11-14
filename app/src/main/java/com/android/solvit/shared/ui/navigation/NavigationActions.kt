@@ -105,49 +105,45 @@ val LIST_TOP_LEVEL_DESTINATION_PROVIDER =
 open class NavigationActions(
     private val navController: NavController,
 ) {
-    /**
-     * Navigate to the specified [TopLevelDestination]
-     *
-     * @param destination The top level destination to navigate to.
-     *
-     * Clear the back stack when navigating to a new destination.
-     */
-    open fun navigateTo(destination: TopLevelDestination) {
-        navController.navigate(destination.route) {
-            popUpTo(navController.graph.findStartDestination().id) {
-                saveState = true
-            }
-            launchSingleTop = true
-            restoreState = true
-        }
+  /**
+   * Navigate to the specified [TopLevelDestination]
+   *
+   * @param destination The top level destination to navigate to.
+   *
+   * Clear the back stack when navigating to a new destination.
+   */
+  open fun navigateTo(destination: TopLevelDestination) {
+    navController.navigate(destination.route) {
+      popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+      launchSingleTop = true
+      restoreState = true
     }
+  }
 
-    /**
-     * Navigate to the specified screen.
-     *
-     * @param screen The screen to navigate to
-     */
-    open fun navigateTo(screen: String) {
-        navController.navigate(screen) {
-            popUpTo(navController.graph.findStartDestination().id) {
-                saveState = true
-            }
-            launchSingleTop = true
-            restoreState = true
-        }
+  /**
+   * Navigate to the specified screen.
+   *
+   * @param screen The screen to navigate to
+   */
+  open fun navigateTo(screen: String) {
+    navController.navigate(screen) {
+      popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+      launchSingleTop = true
+      restoreState = true
     }
+  }
 
-    /** Navigate back to the previous screen. */
-    open fun goBack() {
-        navController.popBackStack()
-    }
+  /** Navigate back to the previous screen. */
+  open fun goBack() {
+    navController.popBackStack()
+  }
 
-    /**
-     * Get the current route of the navigation controller.
-     *
-     * @return The current route
-     */
-    open fun currentRoute(): String {
-        return navController.currentDestination?.route ?: ""
-    }
+  /**
+   * Get the current route of the navigation controller.
+   *
+   * @return The current route
+   */
+  open fun currentRoute(): String {
+    return navController.currentDestination?.route ?: ""
+  }
 }
