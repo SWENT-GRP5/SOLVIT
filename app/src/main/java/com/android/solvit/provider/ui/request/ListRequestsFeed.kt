@@ -66,6 +66,7 @@ import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.map.GetDirectionsBubble
 import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_PROVIDER
 import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.android.solvit.shared.ui.theme.Orange
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -101,7 +102,9 @@ fun RequestsTopBar() {
               text = "It",
               style =
                   TextStyle(
-                      fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color(0xFF3D823B)))
+                      fontSize = 20.sp,
+                      fontWeight = FontWeight.Bold,
+                      color = colorScheme.secondary))
         }
 
         IconButton(
@@ -122,15 +125,13 @@ fun SearchBar(searchQuery: MutableState<String>) {
       placeholder = {
         Text(
             "Search requests",
-            style =
-                TextStyle(
-                    color = Color(0xFFFF6B00), fontSize = 16.sp, fontWeight = FontWeight.Bold))
+            style = TextStyle(color = Orange, fontSize = 16.sp, fontWeight = FontWeight.Bold))
       },
       leadingIcon = {
         Icon(
             painter = painterResource(id = R.drawable.search_icon),
             contentDescription = "Search icon",
-            tint = Color(0xFFFF6B00),
+            tint = Orange,
             modifier = Modifier.size(20.dp))
       },
       modifier =
@@ -138,10 +139,9 @@ fun SearchBar(searchQuery: MutableState<String>) {
               .padding(horizontal = 16.dp)
               .height(56.dp)
               .background(colorScheme.background)
-              .border(3.dp, Color(0xFFFF6B00), RoundedCornerShape(12.dp))
+              .border(3.dp, Orange, RoundedCornerShape(12.dp))
               .testTag("SearchBar"),
-      textStyle =
-          TextStyle(color = Color(0xFFFF6B00), fontSize = 16.sp, fontWeight = FontWeight.Bold),
+      textStyle = TextStyle(color = Orange, fontSize = 16.sp, fontWeight = FontWeight.Bold),
       shape = RoundedCornerShape(12.dp))
 }
 
@@ -166,8 +166,8 @@ fun ServiceRequestItem(request: ServiceRequest) {
       modifier =
           Modifier.fillMaxWidth()
               .padding(8.dp)
-              .border(1.dp, Color.Gray, RoundedCornerShape(12.dp))
-              .background(Color(0xFF0099FF), RoundedCornerShape(12.dp))
+              .border(1.dp, colorScheme.onSurfaceVariant, RoundedCornerShape(12.dp))
+              .background(colorScheme.primary, RoundedCornerShape(12.dp))
               .padding(16.dp)
               .testTag("ServiceRequest")) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
@@ -181,14 +181,17 @@ fun ServiceRequestItem(request: ServiceRequest) {
                 text = request.title,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.White)
-            Text(text = Services.format(request.type), fontSize = 14.sp, color = Color.White)
+                color = colorScheme.onPrimary)
+            Text(
+                text = Services.format(request.type),
+                fontSize = 14.sp,
+                color = colorScheme.onPrimary)
           }
           IconButton(onClick = { onClick() }) {
             Icon(
                 imageVector = Icons.Default.MoreVert,
                 contentDescription = "Menu",
-                tint = Color.White)
+                tint = colorScheme.onPrimary)
           }
         }
         Row {
@@ -196,20 +199,20 @@ fun ServiceRequestItem(request: ServiceRequest) {
               text = "Deadline: ",
               fontSize = 15.sp,
               fontWeight = FontWeight.Bold,
-              color = Color.White)
+              color = colorScheme.onPrimary)
           Text(
               text =
                   SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
                       .format(request.dueDate.toDate()),
               fontSize = 15.sp,
               fontWeight = FontWeight.Bold,
-              color = Color(0xFFFF6B00))
+              color = colorScheme.error)
         }
         request.location?.let {
           Text(
               text = if (it.name.length > 50) "${it.name.take(50)}..." else it.name,
               fontSize = 12.sp,
-              color = Color.White,
+              color = colorScheme.onPrimary,
               modifier = Modifier.clickable { selectedLocation = it })
         }
         Spacer(modifier = Modifier.height(8.dp))
@@ -218,7 +221,7 @@ fun ServiceRequestItem(request: ServiceRequest) {
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold,
             lineHeight = 18.sp,
-            color = Color.White)
+            color = colorScheme.onPrimary)
         Spacer(modifier = Modifier.height(8.dp))
         val imageUrl = request.imageUrl
         if (!imageUrl.isNullOrEmpty()) {
@@ -230,7 +233,7 @@ fun ServiceRequestItem(request: ServiceRequest) {
               modifier =
                   Modifier.fillMaxWidth()
                       .height(160.dp)
-                      .border(1.dp, Color.White, RoundedCornerShape(12.dp))
+                      .border(1.dp, colorScheme.onPrimary, RoundedCornerShape(12.dp))
                       .clip(RoundedCornerShape(12.dp)),
               contentScale = ContentScale.Crop)
         } else {
@@ -238,10 +241,10 @@ fun ServiceRequestItem(request: ServiceRequest) {
               modifier =
                   Modifier.fillMaxWidth()
                       .height(160.dp)
-                      .border(1.dp, Color.White, RoundedCornerShape(12.dp))
+                      .border(1.dp, colorScheme.onPrimary, RoundedCornerShape(12.dp))
                       .clip(RoundedCornerShape(12.dp)),
               contentAlignment = Alignment.Center) {
-                Text(text = "No Image Provided", fontSize = 16.sp, color = Color.White)
+                Text(text = "No Image Provided", fontSize = 16.sp, color = colorScheme.onPrimary)
               }
         }
         Spacer(modifier = Modifier.height(8.dp))
@@ -257,12 +260,12 @@ fun ServiceRequestItem(request: ServiceRequest) {
 @Composable
 fun InteractionBar(text: String, icon: Int, onClick: () -> Unit = {}) {
   Column(horizontalAlignment = Alignment.CenterHorizontally) {
-    Text(text = text, fontSize = 14.sp, color = Color.White)
+    Text(text = text, fontSize = 14.sp, color = colorScheme.onPrimary)
     IconButton(onClick = { onClick() }) {
       Image(
           painter = painterResource(id = icon),
           contentDescription = text,
-          colorFilter = ColorFilter.tint(Color.White),
+          colorFilter = ColorFilter.tint(colorScheme.onPrimary),
           modifier = Modifier.size(21.dp))
     }
   }
@@ -305,7 +308,8 @@ fun ServiceChip(selectedService: String, onServiceSelected: (String) -> Unit) {
   var selectedText by remember { mutableStateOf(selectedService) }
   var showDropdown by remember { mutableStateOf(false) }
 
-  val borderTextColor = if (selectedText != "Service") Color(0xFFFFCD55) else Color(0xFF00C853)
+  val borderTextColor =
+      if (selectedText != "Service") colorScheme.secondary else colorScheme.secondary
 
   Box(
       modifier =
@@ -335,7 +339,7 @@ fun ServiceChip(selectedService: String, onServiceSelected: (String) -> Unit) {
       expanded = showDropdown,
       onDismissRequest = { showDropdown = false },
       modifier =
-          Modifier.border(1.dp, Color.Gray, RoundedCornerShape(12.dp))
+          Modifier.border(1.dp, colorScheme.onSurface, RoundedCornerShape(12.dp))
               .background(colorScheme.background, RoundedCornerShape(12.dp))
               .testTag("ServiceDropdown")) {
         Services.entries.forEach { service ->
@@ -354,7 +358,7 @@ fun ServiceChip(selectedService: String, onServiceSelected: (String) -> Unit) {
 
 @Composable
 fun FilterChip(label: String, isSelected: Boolean, onSelected: (Boolean) -> Unit) {
-  val borderTextColor = if (isSelected) Color(0xFFFFCD55) else Color(0xFF00C853)
+  val borderTextColor = if (isSelected) colorScheme.secondary else colorScheme.secondary
 
   val context = LocalContext.current
   Box(

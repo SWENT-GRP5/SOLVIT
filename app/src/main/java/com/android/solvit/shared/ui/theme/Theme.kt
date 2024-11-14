@@ -15,29 +15,52 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-private val DarkColorScheme =
-    darkColorScheme(primary = Purple80, secondary = PurpleGrey80, tertiary = Pink80)
+internal val DarkColorScheme =
+    darkColorScheme(
+        primary = Primary,
+        onPrimary = OnPrimary,
+        primaryContainer = PrimaryContainer,
+        onPrimaryContainer = OnPrimaryContainer,
+        secondary = Secondary,
+        onSecondary = OnSecondary,
+        secondaryContainer = SecondaryContainer,
+        onSecondaryContainer = OnSecondaryContainer,
+        error = Error,
+        onError = OnError,
+        errorContainer = ErrorContainer,
+        onErrorContainer = OnErrorContainer,
+        background = OnBackground,
+        onBackground = Background,
+        surface = OnSurface,
+        onSurface = Surface,
+        surfaceVariant = OnSurfaceVariant,
+        onSurfaceVariant = SurfaceVariant)
 
-private val LightColorScheme =
+internal val LightColorScheme =
     lightColorScheme(
-        primary = Purple40, secondary = PurpleGrey40, tertiary = Pink40
-
-        /* Other default colors to override
-        background = Color(0xFFFFFBFE),
-        surface = Color(0xFFFFFBFE),
-        onPrimary = Color.White,
-        onSecondary = Color.White,
-        onTertiary = Color.White,
-        onBackground = Color(0xFF1C1B1F),
-        onSurface = Color(0xFF1C1B1F),
-        */
-        )
+        primary = Primary,
+        onPrimary = OnPrimary,
+        primaryContainer = PrimaryContainer,
+        onPrimaryContainer = OnPrimaryContainer,
+        secondary = Secondary,
+        onSecondary = OnSecondary,
+        secondaryContainer = SecondaryContainer,
+        onSecondaryContainer = OnSecondaryContainer,
+        error = Error,
+        onError = OnError,
+        errorContainer = ErrorContainer,
+        onErrorContainer = OnErrorContainer,
+        background = Background,
+        onBackground = OnBackground,
+        surface = Surface,
+        onSurface = OnSurface,
+        surfaceVariant = SurfaceVariant,
+        onSurfaceVariant = OnSurfaceVariant)
 
 @Composable
 fun SampleAppTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
   val colorScheme =
