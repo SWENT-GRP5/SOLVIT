@@ -21,5 +21,11 @@ enum class ServiceRequestStatus {
   ACCEPTED,
   STARTED,
   ENDED,
-  ARCHIVED
+  ARCHIVED;
+
+  companion object {
+    fun format(status: ServiceRequestStatus): String {
+      return status.name.lowercase().replaceFirstChar { it.uppercase() }
+    }
+  }
 }
