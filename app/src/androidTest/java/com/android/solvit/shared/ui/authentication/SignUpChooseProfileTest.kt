@@ -33,13 +33,13 @@ class SignUpChooseProfileTest {
 
   @Test
   fun signUpChooseProfile_performClick() {
-      composeTestRule.setContent { SignUpChooseProfile(mockNavigationActions) }
+    composeTestRule.setContent { SignUpChooseProfile(mockNavigationActions) }
 
-      composeTestRule.onNodeWithTag("goBackButton").performClick()
-      composeTestRule.onNodeWithTag("seekerButton").performClick()
-      composeTestRule.onNodeWithTag("providerButton").performClick()
-      composeTestRule.onNodeWithTag("learnMoreLink").performClick()
+    composeTestRule.onNodeWithTag("goBackButton").performClick()
+    composeTestRule.onNodeWithTag("seekerButton").performClick()
+    composeTestRule.onNodeWithTag("providerButton").performClick()
+    composeTestRule.onNodeWithTag("learnMoreLink").performClick()
 
-      verify(mockNavigationActions).goBack()
+    verify(mockNavigationActions).goBack()
   }
 }
