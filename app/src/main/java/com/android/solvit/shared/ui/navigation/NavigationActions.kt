@@ -115,7 +115,7 @@ open class NavigationActions(
     navController.navigate(destination.route) {
       launchSingleTop = true
       restoreState = true
-      popUpTo(navController.graph.startDestinationId) { inclusive = true }
+      popUpTo(navController.graph.startDestinationId) { saveState = true }
     }
   }
 
