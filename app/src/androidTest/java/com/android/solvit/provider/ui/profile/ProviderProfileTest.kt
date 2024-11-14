@@ -14,7 +14,6 @@ import com.android.solvit.shared.model.provider.Language
 import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.provider.ProviderRepository
 import com.android.solvit.shared.ui.navigation.NavigationActions
-import com.android.solvit.shared.ui.navigation.Route
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -77,7 +76,7 @@ class ProfessionalProfileScreenTest {
     composeTestRule.setContent { ProfileHeader(mockNavigationActions, provider) }
 
     composeTestRule.onNodeWithTag("backButton").performClick()
-    verify(mockNavigationActions).navigateTo(Route.REQUESTS_FEED)
+    verify(mockNavigationActions).goBack()
   }
 
   @Test
