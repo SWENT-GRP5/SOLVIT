@@ -457,7 +457,7 @@ fun SignUpSection(navigationActions: NavigationActions) {
     append("I'm a new user, ")
 
     pushStringAnnotation(tag = "Sign up", annotation = "sign up")
-    withStyle(style = SpanStyle(color = colorScheme.onSurface, textDecoration = TextDecoration.Underline)) {
+    withStyle(style = SpanStyle(color = colorScheme.primary, textDecoration = TextDecoration.Underline)) {
       append("Sign up")
     }
     pop()
@@ -469,7 +469,7 @@ fun SignUpSection(navigationActions: NavigationActions) {
   ) {
     ClickableText(
         text = annotatedText,
-        style = TextStyle(color = colorScheme.primary, fontSize = 16.sp, textAlign = TextAlign.Center),
+        style = TextStyle(color = colorScheme.onSurface, fontSize = 16.sp, textAlign = TextAlign.Center),
         onClick = { offset ->
           annotatedText
               .getStringAnnotations(tag = "Sign up", start = offset, end = offset)
