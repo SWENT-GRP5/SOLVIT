@@ -317,7 +317,7 @@ fun AlreadyHaveAccountText(navigationActions: NavigationActions) {
       withStyle(
           style =
               SpanStyle(color = colorScheme.primary, textDecoration = TextDecoration.Underline)) {
-            append("Log up in here !")
+            append("Log-In here !")
           }
       pop()
     }

@@ -459,7 +459,7 @@ fun SignUpSection(navigationActions: NavigationActions) {
     pushStringAnnotation(tag = "Sign up", annotation = "sign up")
     withStyle(
         style = SpanStyle(color = colorScheme.primary, textDecoration = TextDecoration.Underline)) {
-          append("Sign up")
+          append("Sign-Up")
         }
     pop()
   }
