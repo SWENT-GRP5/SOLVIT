@@ -49,7 +49,6 @@ import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.ui.navigation.NavigationActions
-import com.android.solvit.shared.ui.navigation.Route
 
 @Composable
 fun ProviderProfileScreen(
