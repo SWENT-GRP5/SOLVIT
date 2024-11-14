@@ -3,6 +3,7 @@ package com.android.solvit.seeker.ui.profile
 import android.content.pm.ActivityInfo
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -16,21 +17,25 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
-import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme.colorScheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -42,6 +47,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -58,6 +64,7 @@ import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditSeekerProfileScreen(
     viewModel: SeekerProfileViewModel = viewModel(factory = SeekerProfileViewModel.Factory),
@@ -92,19 +99,23 @@ fun EditSeekerProfileScreen(
   }
 
   Scaffold(
+      backgroundColor = colorScheme.background,
       topBar = {
         TopAppBar(
-            backgroundColor = Color.White,
+            backgroundColor = colorScheme.background,
             title = {
               Box(
                   modifier = Modifier.fillMaxWidth().testTag("goBackButton"),
                   contentAlignment = Alignment.Center) {
-                    Text("Bio-data", color = Color.Black, fontWeight = FontWeight.Bold)
+                    Text("Bio-data", color = colorScheme.onBackground, fontWeight = FontWeight.Bold)
                   }
             },
             navigationIcon = {
               IconButton(onClick = { navigationActions.goBack() }) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.Black)
+                Icon(
+                    Icons.Default.ArrowBack,
+                    contentDescription = "Back",
+                    tint = colorScheme.onBackground)
               }
             },
             // Set actions parameter to an empty Box to balance the alignment caused by
@@ -122,23 +133,22 @@ fun EditSeekerProfileScreen(
                   painter = painterResource(id = R.drawable.empty_profile_img),
                   contentDescription = "Profile Picture",
                   modifier =
-                      Modifier.size(72.dp)
+                      Modifier.size(74.dp)
                           .clip(CircleShape)
-                          .border(2.dp, Color.Gray, CircleShape)
-                          .padding(bottom = 16.dp))
+                          .border(2.dp, colorScheme.primaryContainer, CircleShape))
 
               Text(
                   text = fullName,
                   fontWeight = FontWeight.Bold,
                   fontSize = 20.sp,
-                  color = Color.Black,
+                  color = colorScheme.onBackground,
                   textAlign = TextAlign.Center,
                   modifier = Modifier.padding(top = 8.dp))
 
               Text(
                   text = email,
                   fontSize = 14.sp,
-                  color = Color.Gray,
+                  color = colorScheme.onSurfaceVariant,
                   textAlign = TextAlign.Center,
                   modifier = Modifier.padding(top = 4.dp))
 
@@ -150,12 +160,15 @@ fun EditSeekerProfileScreen(
               OutlinedTextField(
                   value = fullName,
                   onValueChange = { fullName = it },
-                  label = { Text("Enter your full name") },
+                  label = { Text("Enter your full name", color = colorScheme.onBackground) },
                   modifier =
                       Modifier.fillMaxWidth()
                           .testTag("profileName")
-                          .padding(horizontal = 16.dp) // Add padding to avoid edge clipping
-                  )
+                          .padding(horizontal = 16.dp), // Add padding to avoid edge clipping
+                  colors =
+                      TextFieldDefaults.outlinedTextFieldColors(
+                          focusedBorderColor = colorScheme.secondary,
+                          unfocusedBorderColor = colorScheme.onSurfaceVariant))
 
               Spacer(modifier = Modifier.height(16.dp))
 
@@ -163,11 +176,15 @@ fun EditSeekerProfileScreen(
               OutlinedTextField(
                   value = username,
                   onValueChange = { username = it },
-                  label = { Text("Enter your username") },
+                  label = { Text("Enter your username", color = colorScheme.onBackground) },
                   modifier =
                       Modifier.fillMaxWidth()
                           .testTag("profileUsername")
-                          .padding(horizontal = 16.dp))
+                          .padding(horizontal = 16.dp),
+                  colors =
+                      TextFieldDefaults.outlinedTextFieldColors(
+                          focusedBorderColor = colorScheme.secondary,
+                          unfocusedBorderColor = colorScheme.onSurfaceVariant))
 
               Spacer(modifier = Modifier.height(16.dp))
 
@@ -175,9 +192,13 @@ fun EditSeekerProfileScreen(
               OutlinedTextField(
                   value = email,
                   onValueChange = { email = it },
-                  label = { Text("Enter your email") },
+                  label = { Text("Enter your email", color = colorScheme.onBackground) },
                   modifier =
-                      Modifier.fillMaxWidth().testTag("profileEmail").padding(horizontal = 16.dp))
+                      Modifier.fillMaxWidth().testTag("profileEmail").padding(horizontal = 16.dp),
+                  colors =
+                      TextFieldDefaults.outlinedTextFieldColors(
+                          focusedBorderColor = colorScheme.secondary,
+                          unfocusedBorderColor = colorScheme.onSurfaceVariant))
 
               Spacer(modifier = Modifier.height(16.dp))
 
@@ -191,9 +212,13 @@ fun EditSeekerProfileScreen(
               OutlinedTextField(
                   value = address,
                   onValueChange = { address = it },
-                  label = { Text("Enter your address") },
+                  label = { Text("Enter your address", color = colorScheme.onBackground) },
                   modifier =
-                      Modifier.fillMaxWidth().testTag("profileAddress").padding(horizontal = 16.dp))
+                      Modifier.fillMaxWidth().testTag("profileAddress").padding(horizontal = 16.dp),
+                  colors =
+                      TextFieldDefaults.outlinedTextFieldColors(
+                          focusedBorderColor = colorScheme.secondary,
+                          unfocusedBorderColor = colorScheme.onSurfaceVariant))
 
               Spacer(modifier = Modifier.height(16.dp))
 
@@ -213,13 +238,22 @@ fun EditSeekerProfileScreen(
                     }
                     navigationActions.goBack()
                   },
+                  colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+                  shape = RoundedCornerShape(25.dp),
                   modifier =
                       Modifier.fillMaxWidth()
+                          .background(
+                              brush =
+                                  Brush.horizontalGradient(
+                                      listOf(colorScheme.secondary, colorScheme.secondary)),
+                              shape = RoundedCornerShape(25.dp),
+                              // add padding
+                          )
                           .height(60.dp)
-                          .padding(horizontal = 16.dp), // Add padding to button
-                  colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF00C853))) {
-                    Text("Update Profile", color = Color.White)
-                  }
+                          .padding(horizontal = 32.dp), // Add padding to button
+              ) {
+                Text("Update Profile", color = colorScheme.onPrimary)
+              }
             }
       }
 }
@@ -233,6 +267,7 @@ val countries =
         Country("France", "+33", R.drawable.france_flag),
         Country("Switzerland", "+41", R.drawable.switzerland_flag))
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CountryDropdownMenu() {
   var expanded by remember { mutableStateOf(false) }
@@ -243,7 +278,7 @@ fun CountryDropdownMenu() {
     OutlinedTextField(
         value = selectedCountry.code,
         onValueChange = { /* Country code is static, don't update */},
-        label = { Text("Country code") },
+        label = { Text("Country code", color = colorScheme.onBackground) },
         modifier =
             Modifier.fillMaxWidth().padding(horizontal = 16.dp).testTag("CountryCode").clickable {
               expanded = true
@@ -260,7 +295,16 @@ fun CountryDropdownMenu() {
               }
         },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-        trailingIcon = { Icon(Icons.Default.ArrowDropDown, contentDescription = "Dropdown Icon") })
+        trailingIcon = {
+          Icon(
+              Icons.Default.ArrowDropDown,
+              contentDescription = "Dropdown Icon",
+              tint = colorScheme.onBackground)
+        },
+        colors =
+            TextFieldDefaults.outlinedTextFieldColors(
+                focusedBorderColor = colorScheme.secondary,
+                unfocusedBorderColor = colorScheme.onSurfaceVariant))
 
     // Dropdown Menu
     DropdownMenu(
@@ -291,8 +335,12 @@ fun CountryDropdownMenu() {
     OutlinedTextField(
         value = phoneNumber,
         onValueChange = { phoneNumber = it },
-        label = { Text("Enter your phone number") },
+        label = { Text("Enter your phone number", color = colorScheme.onBackground) },
         modifier = Modifier.fillMaxWidth().testTag("profilePhone").padding(horizontal = 16.dp),
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone))
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+        colors =
+            TextFieldDefaults.outlinedTextFieldColors(
+                focusedBorderColor = colorScheme.secondary,
+                unfocusedBorderColor = colorScheme.onSurfaceVariant))
   }
 }

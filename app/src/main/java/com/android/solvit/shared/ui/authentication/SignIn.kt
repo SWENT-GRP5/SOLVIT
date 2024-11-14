@@ -41,6 +41,7 @@ import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -112,7 +113,7 @@ fun SignInScreen(
   val launcher = googleSignInLauncher(authViewModel, onSuccess, onFailure)
   val token = stringResource(R.string.default_web_client_id)
 
-  val backgroundColor = Color(0xFFFFFFFF) // White background color
+    val backgroundColor = colorScheme.background // White background color
 
   Scaffold(
       topBar = {
@@ -311,9 +312,9 @@ fun LogoSection() {
         text = "Welcome!",
         fontSize = 28.sp,
         fontWeight = FontWeight.Bold,
-        color = Color(0, 153, 255),
+        color = colorScheme.primary,
         modifier = Modifier.testTag("welcomeText"))
-    Text(text = "Sign in to continue", color = Color.Black)
+    Text(text = "Sign in to continue", color = colorScheme.onBackground)
   }
 }
 
@@ -369,7 +370,8 @@ fun FormSection(
 
   Text(
       text = "Your password must have at least 6 characters",
-      color = Color.Gray,
+      color = colorScheme.onSurfaceVariant,
+      fontSize = 12.sp,
       textAlign = TextAlign.Start,
       style = TextStyle(fontSize = 12.sp, lineHeight = 16.sp),
       modifier = Modifier.padding(top = 4.dp).fillMaxWidth())
@@ -386,14 +388,14 @@ fun FormSection(
           modifier = Modifier.size(24.dp),
           colors =
               CheckboxDefaults.colors(
-                  checkmarkColor = Color.White,
-                  uncheckedColor = Color.Gray,
-                  checkedColor = Color(90, 197, 97)))
+                  checkmarkColor = colorScheme.onSecondary,
+                  uncheckedColor = colorScheme.onSurfaceVariant,
+                  checkedColor = colorScheme.secondary))
       Spacer(modifier = Modifier.width(4.dp))
       Text(
           text = "Remember me",
           modifier = Modifier.testTag("rememberMeCheckbox"),
-          color = Color.Gray,
+          color = colorScheme.onSurfaceVariant,
           fontSize = 16.sp)
     }
 
@@ -404,7 +406,7 @@ fun FormSection(
         verticalAlignment = Alignment.CenterVertically) {
           Text(
               text = "Forgot password?",
-              color = Color.Gray,
+              color = colorScheme.onSurfaceVariant,
               fontSize = 16.sp,
               textDecoration = TextDecoration.Underline,
               modifier =
@@ -429,7 +431,7 @@ fun FormSection(
 
   Spacer(modifier = Modifier.height(4.dp))
 
-  Text("OR", color = Color.Gray)
+  Text("OR", color = colorScheme.onSurface)
 
   Spacer(modifier = Modifier.height(4.dp))
 
@@ -452,10 +454,10 @@ fun FormSection(
 @Composable
 fun SignUpSection(navigationActions: NavigationActions) {
   val annotatedText = buildAnnotatedString {
-    append("I'm new user, ")
+    append("I'm a new user, ")
 
     pushStringAnnotation(tag = "Sign up", annotation = "sign up")
-    withStyle(style = SpanStyle(color = Color.Blue, textDecoration = TextDecoration.Underline)) {
+    withStyle(style = SpanStyle(color = colorScheme.onSurface, textDecoration = TextDecoration.Underline)) {
       append("Sign up")
     }
     pop()
@@ -467,7 +469,7 @@ fun SignUpSection(navigationActions: NavigationActions) {
   ) {
     ClickableText(
         text = annotatedText,
-        style = TextStyle(color = Color.Gray, fontSize = 16.sp, textAlign = TextAlign.Center),
+        style = TextStyle(color = colorScheme.primary, fontSize = 16.sp, textAlign = TextAlign.Center),
         onClick = { offset ->
           annotatedText
               .getStringAnnotations(tag = "Sign up", start = offset, end = offset)
@@ -516,13 +518,19 @@ fun SignInButton(
                   brush =
                       if (isFormComplete && goodFormEmail && passwordLengthComplete) {
                         Brush.horizontalGradient(
-                            colors = listOf(Color(0, 200, 83), Color(0, 153, 255)))
+                            colors = listOf(colorScheme.secondary, colorScheme.secondary))
                       } else {
-                        Brush.horizontalGradient(colors = listOf(Color.Gray, Color.Gray))
+                        Brush.horizontalGradient(
+                            colors =
+                                listOf(colorScheme.onSurfaceVariant, colorScheme.onSurfaceVariant))
                       },
                   shape = RoundedCornerShape(25.dp))
               .testTag("signInButton")) {
-        Text("Sign in", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+        Text(
+            "Sign in",
+            color = colorScheme.background,
+            fontWeight = FontWeight.Bold,
+            fontSize = 16.sp)
       }
 }
 
@@ -537,7 +545,7 @@ fun GoogleButton(
       onClick = onSignInClick,
       colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
       shape = roundedCornerShape,
-      border = BorderStroke(1.dp, Color.Gray),
+      border = BorderStroke(1.dp, colorScheme.onSurfaceVariant),
       modifier = Modifier.fillMaxWidth().wrapContentHeight().testTag(testTag)) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
           Image(
@@ -547,7 +555,7 @@ fun GoogleButton(
 
           Text(
               text = text,
-              color = Color.Gray,
+              color = colorScheme.onSurface,
               fontSize = 16.sp,
               maxLines = 2,
               overflow = TextOverflow.Ellipsis,
@@ -609,14 +617,14 @@ fun CustomOutlinedTextField(
             hasLostFocusAfterTyping = false
           }
         },
-        label = { Text(label, color = Color.Black) },
+        label = { Text(label, color = colorScheme.onBackground) },
         singleLine = true,
         placeholder = { Text(placeholder) },
         leadingIcon = {
           Icon(
               leadingIcon,
               contentDescription = leadingIconDescription,
-              tint = if (isValueOk) Color(0xFF5AC561) else Color.Gray)
+              tint = if (isValueOk) colorScheme.secondary else colorScheme.onSurfaceVariant)
         },
         modifier =
             Modifier.fillMaxWidth().testTag(testTag).onFocusChanged { focusState ->
@@ -629,15 +637,16 @@ fun CustomOutlinedTextField(
         shape = RoundedCornerShape(12.dp),
         colors =
             TextFieldDefaults.outlinedTextFieldColors(
-                focusedTextColor = Color.Black,
+                focusedTextColor = colorScheme.onBackground,
                 unfocusedTextColor =
-                    if (value.isEmpty()) Color.Gray else if (!isValueOk) Color.Red else Color.Black,
-                focusedBorderColor = if (isValueOk) Color(0xFF5AC561) else Color.Blue,
+                    if (value.isEmpty()) colorScheme.onSurfaceVariant
+                    else if (!isValueOk) colorScheme.error else colorScheme.onBackground,
+                focusedBorderColor = if (isValueOk) colorScheme.secondary else colorScheme.primary,
                 unfocusedBorderColor =
                     when {
-                      value.isEmpty() -> Color.Gray
-                      isValueOk -> Color(0xFF5AC561)
-                      else -> Color.Red
+                      value.isEmpty() -> colorScheme.onSurfaceVariant
+                      isValueOk -> colorScheme.secondary
+                      else -> colorScheme.error
                     }))
 
     // Display the error message if the field has been visited, input is incorrect, and focus was
@@ -645,7 +654,7 @@ fun CustomOutlinedTextField(
     if (!isValueOk && hasBeenFocused && hasLostFocusAfterTyping) {
       Text(
           text = errorMessage,
-          color = Color.Red,
+          color = colorScheme.error,
           fontSize = 15.sp, // Error text size
           modifier = Modifier.padding(start = 16.dp, top = 4.dp).testTag(errorTestTag))
     }
@@ -681,7 +690,7 @@ fun PasswordTextField(
             hasLostFocusAfterTyping = false
           }
         },
-        label = { Text(label, color = Color.Black) },
+        label = { Text(label, color = colorScheme.onBackground) },
         singleLine = true,
         placeholder = { Text(placeholder) },
         modifier =
@@ -700,7 +709,9 @@ fun PasswordTextField(
           Icon(
               imageVector = Icons.Filled.Lock,
               contentDescription = contentDescription,
-              tint = if (passwordLengthComplete) Color(0xFF5AC561) else Color.Gray,
+              tint =
+                  if (passwordLengthComplete) colorScheme.secondary
+                  else colorScheme.onSurfaceVariant,
               modifier = Modifier.size(25.dp))
         },
         trailingIcon = {
@@ -712,22 +723,26 @@ fun PasswordTextField(
             Icon(
                 painter = image,
                 contentDescription = null,
-                tint = if (passwordLengthComplete) Color(0xFF5AC561) else Color.Gray,
+                tint =
+                    if (passwordLengthComplete) colorScheme.secondary
+                    else colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(24.dp))
           }
         },
         colors =
             TextFieldDefaults.outlinedTextFieldColors(
-                focusedTextColor = Color.Black,
+                focusedTextColor = colorScheme.onBackground,
                 unfocusedTextColor =
-                    if (value.isEmpty()) Color.Gray
-                    else if (!passwordLengthComplete) Color.Red else Color.Black,
-                focusedBorderColor = if (passwordLengthComplete) Color(0xFF5AC561) else Color.Blue,
+                    if (value.isEmpty()) colorScheme.onSurfaceVariant
+                    else if (!passwordLengthComplete) colorScheme.error
+                    else colorScheme.onBackground,
+                focusedBorderColor =
+                    if (passwordLengthComplete) colorScheme.secondary else colorScheme.primary,
                 unfocusedBorderColor =
                     when {
-                      value.isEmpty() -> Color.Gray
-                      passwordLengthComplete -> Color(0xFF5AC561)
-                      else -> Color.Red
+                      value.isEmpty() -> colorScheme.onSurfaceVariant
+                      passwordLengthComplete -> colorScheme.secondary
+                      else -> colorScheme.error
                     }))
 
     // Display the error message if the field has been visited, input is incorrect, and focus was
@@ -735,7 +750,7 @@ fun PasswordTextField(
     if (!passwordLengthComplete && hasBeenFocused && hasLostFocusAfterTyping) {
       Text(
           text = errorMessage,
-          color = Color.Red,
+          color = colorScheme.error,
           fontSize = 15.sp, // Error text size
           modifier = Modifier.padding(start = 16.dp, top = 4.dp).testTag(testTagErrorPassword))
     }

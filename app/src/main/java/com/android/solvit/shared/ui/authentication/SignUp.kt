@@ -15,6 +15,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -31,6 +32,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -50,6 +52,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -102,20 +105,18 @@ fun SignUpScreen(
 
   val isFormComplete = goodFormEmail && passwordLengthComplete && samePassword
 
-  val backgroundColor = Color(0xFFFFFFFF)
-
   Scaffold(
       topBar = {
         TopAppBar(
             title = { Text("") },
             navigationIcon = { GoBackButton(navigationActions) },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = backgroundColor))
+            colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background))
       },
       content = {
         Column(
             modifier =
                 Modifier.fillMaxSize()
-                    .background(backgroundColor)
+                    .background(colorScheme.background)
                     .padding(16.dp)
                     .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -144,7 +145,7 @@ fun SignUpScreen(
                   roundedCornerShape = RoundedCornerShape(12.dp))
 
               Spacer(modifier = Modifier.height(20.dp))
-              Text("OR", color = Color.Gray)
+              Text("OR", color = colorScheme.onSurfaceVariant)
 
               Spacer(modifier = Modifier.height(10.dp))
 
@@ -188,7 +189,7 @@ fun SignUpScreen(
               if (!samePassword && confirmPassword.isNotEmpty() && password.isNotEmpty()) {
                 Text(
                     text = "Password and Confirm Password must be the same",
-                    color = Color.Red,
+                    color = colorScheme.error,
                     fontSize = 15.sp,
                     textAlign = TextAlign.Start,
                     modifier = Modifier.padding(top = 4.dp).fillMaxWidth())
@@ -196,7 +197,8 @@ fun SignUpScreen(
 
               Text(
                   text = "Your password must have at least 6 characters",
-                  color = Color.Gray,
+                  color = colorScheme.onSurfaceVariant,
+                  fontSize = 12.sp,
                   textAlign = TextAlign.Start,
                   style = TextStyle(fontSize = 12.sp, lineHeight = 16.sp),
                   modifier = Modifier.padding(top = 4.dp).fillMaxWidth())
@@ -266,15 +268,21 @@ fun SignUpButton(
                   brush =
                       if (isComplete && goodFormEmail && passwordLengthComplete && samePassword) {
                         Brush.horizontalGradient(
-                            colors = listOf(Color(0, 200, 83), Color(0, 153, 255)))
+                            colors = listOf(colorScheme.primary, colorScheme.secondary))
                       } else {
-                        Brush.horizontalGradient(colors = listOf(Color.Gray, Color.Gray))
+                        Brush.horizontalGradient(
+                            colors =
+                                listOf(colorScheme.onSurfaceVariant, colorScheme.onSurfaceVariant))
                       },
                   shape = RoundedCornerShape(25.dp))
               .testTag("signUpButton"),
       shape = RoundedCornerShape(25.dp),
       colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)) {
-        Text("Sign Up", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+        Text(
+            "Sign Up",
+            color = colorScheme.onPrimary,
+            fontWeight = FontWeight.Bold,
+            fontSize = 16.sp)
       }
 }
 
@@ -302,29 +310,41 @@ fun googleRegisterLauncher(
 
 @Composable
 fun AlreadyHaveAccountText(navigationActions: NavigationActions) {
-  val annotatedText = buildAnnotatedString {
-    append("Already have an account? ")
+  Row(verticalAlignment = Alignment.CenterVertically) {
+      Text("Already have an account? ", color = colorScheme.onSurface)
+      val annotatedText = buildAnnotatedString {
+          append("Already have an account? ")
 
-    pushStringAnnotation(tag = "Log in", annotation = "log_in")
-    withStyle(style = SpanStyle(color = Color.Blue, textDecoration = TextDecoration.Underline)) {
-      append("Log up in here !")
-    }
-    pop()
-  }
+          pushStringAnnotation(tag = "Log in", annotation = "log_in")
+          withStyle(
+              style = SpanStyle(
+                  color = Color.Blue,
+                  textDecoration = TextDecoration.Underline
+              )
+          ) {
+              append("Log up in here !")
+          }
+          pop()
+      }
 
-  Box(
-      modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
-      contentAlignment = Alignment.Center,
-  ) {
-    ClickableText(
-        text = annotatedText,
-        style = TextStyle(color = Color.Gray, fontSize = 16.sp, textAlign = TextAlign.Center),
-        onClick = { offset ->
-          annotatedText
-              .getStringAnnotations(tag = "Log in", start = offset, end = offset)
-              .firstOrNull()
-              ?.let { navigationActions.navigateTo(Screen.SIGN_IN) }
-        },
-        modifier = Modifier.fillMaxWidth().testTag("logInLink"))
-  }
-}
+      Box(
+          modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
+          contentAlignment = Alignment.Center,
+      ) {
+          ClickableText(
+              text = annotatedText,
+              style = TextStyle(
+                  color = colorScheme.primary,
+                  fontSize = 16.sp,
+                  textAlign = TextAlign.Center
+              ),
+              onClick = { offset ->
+                  annotatedText
+                      .getStringAnnotations(tag = "Log in", start = offset, end = offset)
+                      .firstOrNull()
+                      ?.let { navigationActions.navigateTo(Screen.SIGN_IN) }
+              },
+              modifier = Modifier.fillMaxWidth().testTag("logInLink")
+          )
+      }
+  }}
