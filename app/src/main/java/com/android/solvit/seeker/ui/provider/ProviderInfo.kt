@@ -117,109 +117,111 @@ fun ProviderInfoScreen(
 
 @Composable
 fun PackageCard(packageProposal: PackageProposal, isSelected: Boolean, modifier: Modifier) {
-  val context = LocalContext.current
-  Card(
-      modifier = modifier.fillMaxHeight(),
-      shape = RoundedCornerShape(16.dp),
-      elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-      colors =
-          CardDefaults.cardColors(
-              containerColor = if (!isSelected) colorScheme.surface else colorScheme.secondary,
-          )) {
+    val context = LocalContext.current
+    Card(
+        modifier = modifier.fillMaxHeight(),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+        colors =
+        CardDefaults.cardColors(
+            containerColor = if (!isSelected) colorScheme.surface else colorScheme.secondary,
+        )) {
         Column(
-            modifier = Modifier.padding(25.dp).fillMaxHeight().testTag("PackageContent"),
+            modifier = Modifier.padding(20.dp) // Increased padding for more spacing
+                .fillMaxHeight()
+                .testTag("PackageContent"),
             horizontalAlignment = Alignment.Start) {
-              // Price of the Package
-              Row(verticalAlignment = Alignment.CenterVertically) {
+            // Price of the Package
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     modifier = Modifier.testTag("price"),
                     text = "$${packageProposal.price}",
                     style =
-                        MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                    MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
                     color =
-                        if (!isSelected) colorScheme.onPrimaryContainer else colorScheme.onPrimary)
-                Spacer(modifier = Modifier.width(4.dp))
+                    if (!isSelected) colorScheme.onPrimaryContainer else colorScheme.onPrimary)
+                Spacer(modifier = Modifier.width(8.dp)) // Increased space between price and unit
                 Text(
                     text = "/hour",
-                    style = MaterialTheme.typography.bodySmall, // Smaller style for the unit
+                    style = MaterialTheme.typography.bodySmall,
                     color =
-                        if (!isSelected) colorScheme.onPrimaryContainer else colorScheme.onPrimary)
-              }
-              // Title of the Package
-              Text(
-                  text = packageProposal.title,
-                  style = MaterialTheme.typography.titleMedium,
-                  color =
-                      if (!isSelected) colorScheme.onPrimaryContainer else colorScheme.onPrimary)
-              Spacer(modifier = Modifier.height(8.dp))
-              // Description of the Package
-              Text(
-                  text = packageProposal.description,
-                  style = MaterialTheme.typography.bodyMedium,
-                  color = if (!isSelected) colorScheme.onSurface else colorScheme.onPrimary)
-              Spacer(modifier = Modifier.height(8.dp))
-              // Important infos about the package
-              Column {
-                packageProposal.bulletPoints.forEach { feature ->
-                  Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Default.CheckCircle,
-                        contentDescription = null,
-                        tint = colorScheme.primary,
-                        modifier = Modifier.size(16.dp))
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = feature,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = if (!isSelected) colorScheme.onSurface else colorScheme.onPrimary)
-                  }
-                }
-              }
-              Spacer(modifier = Modifier.weight(1f)) // Pushes the button to the bottom
-              Button(
-                  onClick = {
-                    Toast.makeText(context, "Not implemented", Toast.LENGTH_SHORT).show()
-                  },
-                  colors =
-                      ButtonDefaults.buttonColors(
-                          containerColor =
-                              if (isSelected) colorScheme.primary else colorScheme.surfaceVariant),
-                  modifier = Modifier.align(Alignment.CenterHorizontally)) {
-                    Text("Choose plan")
-                  }
+                    if (!isSelected) colorScheme.onPrimaryContainer else colorScheme.onPrimary)
             }
-      }
+            // Title of the Package
+            Text(
+                text = packageProposal.title,
+                style = MaterialTheme.typography.titleMedium,
+                color =
+                if (!isSelected) colorScheme.onPrimaryContainer else colorScheme.onPrimary)
+            Spacer(modifier = Modifier.height(12.dp)) // Increased space between title and description
+            // Description of the Package
+            Text(
+                text = packageProposal.description,
+                style = MaterialTheme.typography.bodyMedium,
+                color = if (!isSelected) colorScheme.onSurface else colorScheme.onPrimary)
+            Spacer(modifier = Modifier.height(12.dp)) // Increased space between description and features
+            // Important infos about the package
+            Column {
+                packageProposal.bulletPoints.forEach { feature ->
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.CheckCircle,
+                            contentDescription = null,
+                            tint = colorScheme.primary,
+                            modifier = Modifier.size(18.dp)) // Slightly bigger icon for better visibility
+                        Spacer(modifier = Modifier.width(8.dp)) // Increased space between icon and text
+                        Text(
+                            text = feature,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = if (!isSelected) colorScheme.onSurface else colorScheme.onPrimary)
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.weight(1f)) // Pushes the button to the bottom
+            Button(
+                onClick = {
+                    Toast.makeText(context, "Not implemented", Toast.LENGTH_SHORT).show()
+                },
+                colors =
+                ButtonDefaults.buttonColors(
+                    containerColor =
+                    if (isSelected) colorScheme.primary else colorScheme.surfaceVariant),
+                modifier = Modifier.align(Alignment.CenterHorizontally)) {
+                Text("Choose plan")
+            }
+        }
+    }
 }
 
 @Composable
 fun ProviderPackages(provider: Provider, packages: List<PackageProposal>) {
-  var selectedIndex by remember { mutableStateOf(-1) }
-  Box(
-      modifier = Modifier.fillMaxSize(), // Fills the entire available space
-      contentAlignment = Alignment.Center // Centers the LazyRow within the Box
-      ) {
+    var selectedIndex by remember { mutableStateOf(-1) }
+    Box(
+        modifier = Modifier.fillMaxSize(), // Fills the entire available space
+        contentAlignment = Alignment.Center // Centers the LazyRow within the Box
+    ) {
         // Horizontal scrollable list
         LazyRow(
             modifier = Modifier.fillMaxWidth().testTag("packagesScrollableList"),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            contentPadding = PaddingValues(top = 30.dp, start = 8.dp, end = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(20.dp), // Adjusted for spacing
+            contentPadding = PaddingValues(top = 40.dp, start = 12.dp, end = 12.dp), // Increased padding
         ) {
-          items(packages.size) { index ->
-            // If package is selected, we display it bigger
-            val isSelected = selectedIndex == index
-            val size by animateDpAsState(targetValue = if (isSelected) 335.dp else 320.dp)
+            items(packages.size) { index ->
+                // If package is selected, we display it bigger
+                val isSelected = selectedIndex == index
+                val size by animateDpAsState(targetValue = if (isSelected) 350.dp else 320.dp)
 
-            PackageCard(
-                packageProposal = packages[index],
-                isSelected = isSelected,
-                modifier =
-                    Modifier.width(250.dp)
+                PackageCard(
+                    packageProposal = packages[index],
+                    isSelected = isSelected,
+                    modifier =
+                    Modifier.width(260.dp) // Slightly wider for better touch targets
                         .height(size)
                         .clickable { selectedIndex = if (isSelected) -1 else index }
                         .testTag("PackageCard"))
-          }
+            }
         }
-      }
+    }
 }
 
 @Composable
@@ -311,59 +313,59 @@ fun ProviderHeader(provider: Provider) {
             }
       }
 }
-
 @Composable
 fun ProviderTabs(selectedTabIndex: Int, onTabSelected: (Int) -> Unit) {
-  TabRow(
-      selectedTabIndex = selectedTabIndex,
-      modifier = Modifier.fillMaxWidth().testTag("providerTabs"),
-      containerColor = colorScheme.primary,
-      contentColor = colorScheme.onPrimary,
-      indicator = { tabPositions ->
-        TabRowDefaults.Indicator(
-            modifier = Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
-            height = 3.dp,
-            color = colorScheme.onPrimary)
-      }) {
+    TabRow(
+        selectedTabIndex = selectedTabIndex,
+        modifier = Modifier.fillMaxWidth().testTag("providerTabs"),
+        containerColor = colorScheme.primary,
+        contentColor = colorScheme.onPrimary,
+        indicator = { tabPositions ->
+            TabRowDefaults.Indicator(
+                modifier = Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
+                height = 3.dp,
+                color = colorScheme.onPrimary)
+        }) {
         Tab(
             selected = selectedTabIndex == 0,
             onClick = { onTabSelected(0) },
             modifier = Modifier.testTag("profileTab"),
         ) {
-          Text(
-              "Profile",
-              modifier = Modifier.padding(16.dp),
-              color =
-                  if (selectedTabIndex == 0) colorScheme.onPrimary
-                  else colorScheme.onPrimary.copy(alpha = 0.6f),
-              fontWeight = if (selectedTabIndex == 0) FontWeight.Bold else FontWeight.Normal)
+            Text(
+                "Profile",
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp), // Increased padding
+                color =
+                if (selectedTabIndex == 0) colorScheme.onPrimary
+                else colorScheme.onPrimary.copy(alpha = 0.6f),
+                fontWeight = if (selectedTabIndex == 0) FontWeight.Bold else FontWeight.Normal)
         }
         Tab(
             selected = selectedTabIndex == 1,
             onClick = { onTabSelected(1) },
             modifier = Modifier.testTag("packagesTab")) {
-              Text(
-                  "Packages",
-                  modifier = Modifier.padding(16.dp),
-                  color =
-                      if (selectedTabIndex == 1) colorScheme.onPrimary
-                      else colorScheme.onPrimary.copy(alpha = 0.6f),
-                  fontWeight = if (selectedTabIndex == 1) FontWeight.Bold else FontWeight.Normal)
-            }
+            Text(
+                "Packages",
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp), // Increased padding
+                color =
+                if (selectedTabIndex == 1) colorScheme.onPrimary
+                else colorScheme.onPrimary.copy(alpha = 0.6f),
+                fontWeight = if (selectedTabIndex == 1) FontWeight.Bold else FontWeight.Normal)
+        }
         Tab(
             selected = selectedTabIndex == 2,
             onClick = { onTabSelected(2) },
             modifier = Modifier.testTag("reviewsTab")) {
-              Text(
-                  "Reviews",
-                  modifier = Modifier.padding(16.dp),
-                  color =
-                      if (selectedTabIndex == 2) colorScheme.onPrimary
-                      else colorScheme.onPrimary.copy(alpha = 0.6f),
-                  fontWeight = if (selectedTabIndex == 2) FontWeight.Bold else FontWeight.Normal)
-            }
-      }
+            Text(
+                "Reviews",
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp), // Increased padding
+                color =
+                if (selectedTabIndex == 2) colorScheme.onPrimary
+                else colorScheme.onPrimary.copy(alpha = 0.6f),
+                fontWeight = if (selectedTabIndex == 2) FontWeight.Bold else FontWeight.Normal)
+        }
+    }
 }
+
 
 @Composable
 fun ProviderDetails(provider: Provider, reviews: List<Review>) {
