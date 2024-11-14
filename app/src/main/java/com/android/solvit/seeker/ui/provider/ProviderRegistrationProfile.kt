@@ -27,6 +27,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -41,7 +42,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -91,13 +91,13 @@ fun ProviderRegistrationScreen(
   val locationSuggestions by
       locationViewModel.locationSuggestions.collectAsState(initial = emptyList<Location?>())
 
-  // represent the current authentified user
+  // represent the current authenticated user
   val user by authViewModel.user.collectAsState()
 
   // Step tracking: Role, Details, Preferences
   var currentStep by remember { mutableIntStateOf(1) }
 
-  val backgroundColor = Color(0xFFFFFFFF)
+  val backgroundColor = colorScheme.background
 
   val isFullNameOk = fullName.isNotBlank() && fullName.length > 2
   val isPhoneOk = phone.isNotBlank() && phone.all { it.isDigit() || it == '+' } && phone.length > 6
@@ -199,7 +199,7 @@ fun ProviderRegistrationScreen(
                     locationSuggestions = locationSuggestions.filterNotNull(),
                     onLocationSelected = { selectedLocation = it },
                     requestLocation = null,
-                    backgroundColor = Color.White,
+                    backgroundColor = colorScheme.background,
                     isValueOk = isLocationOK)
 
                 Spacer(modifier = Modifier.height(30.dp))
@@ -213,9 +213,9 @@ fun ProviderRegistrationScreen(
                         Modifier.fillMaxWidth().height(60.dp).testTag("completeRegistrationButton"),
                     enabled = isFormComplete,
                     shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(Color(0xFF28A745)) // Green button
+                    colors = ButtonDefaults.buttonColors(colorScheme.secondary) // Green button
                     ) {
-                      Text("Complete registration", color = Color.White)
+                      Text("Complete registration", color = colorScheme.onSecondary)
                     }
               }
               // Preferences Step
@@ -249,13 +249,13 @@ fun ProviderRegistrationScreen(
                           style = MaterialTheme.typography.bodyLarge,
                           modifier = Modifier.align(Alignment.CenterHorizontally),
                           textAlign = TextAlign.Center,
-                          color = Color.Blue)
+                          color = colorScheme.primary)
                       Spacer(modifier = Modifier.height(100.dp))
                       Button(
                           onClick = { currentStep = 3 },
                           modifier = Modifier.fillMaxWidth().testTag("savePreferencesButton"),
-                          colors = ButtonDefaults.buttonColors(Color(0xFF28A745))) {
-                            Text("Save Preferences", color = Color.White)
+                          colors = ButtonDefaults.buttonColors(colorScheme.secondary)) {
+                            Text("Save Preferences", color = colorScheme.onSecondary)
                           }
                       Text(
                           text = "You can always update your preferences in your profile settings.",
@@ -317,9 +317,9 @@ fun ProviderRegistrationScreen(
                       // navigationActions.goBack() // Navigate after saving
                     },
                     modifier = Modifier.fillMaxWidth().testTag("continueDashboardButton"),
-                    colors = ButtonDefaults.buttonColors(Color(0xFF28A745)) // Green button
+                    colors = ButtonDefaults.buttonColors(colorScheme.secondary) // Green button
                     ) {
-                      Text("Continue to My Dashboard", color = Color.White)
+                      Text("Continue to My Dashboard", color = colorScheme.onSecondary)
                     }
               }
             }
