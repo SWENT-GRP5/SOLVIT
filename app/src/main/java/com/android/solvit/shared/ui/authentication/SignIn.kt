@@ -437,7 +437,7 @@ fun FormSection(
 
   // Google sign in button
   GoogleButton(
-      onSignInClick = {
+      onClick = {
         val gso =
             GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(token)
@@ -539,13 +539,13 @@ fun SignInButton(
 
 @Composable
 fun GoogleButton(
-    onSignInClick: () -> Unit,
+    onClick: () -> Unit,
     text: String,
     testTag: String,
     roundedCornerShape: RoundedCornerShape
 ) {
   Button(
-      onClick = onSignInClick,
+      onClick = onClick,
       colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
       shape = roundedCornerShape,
       border = BorderStroke(1.dp, colorScheme.onSurfaceVariant),
@@ -609,7 +609,7 @@ fun CustomOutlinedTextField(
   var hasBeenFocused by remember { mutableStateOf(false) }
   var hasLostFocusAfterTyping by remember { mutableStateOf(false) }
 
-  Column(modifier = Modifier.fillMaxWidth()) {
+  Column(modifier = modifier.fillMaxWidth()) {
     // Text field with focus management
     OutlinedTextField(
         value = value,
@@ -630,7 +630,7 @@ fun CustomOutlinedTextField(
               tint = if (isValueOk) colorScheme.secondary else colorScheme.onSurfaceVariant)
         },
         modifier =
-            modifier.fillMaxWidth().testTag(testTag).onFocusChanged { focusState ->
+            Modifier.fillMaxWidth().testTag(testTag).onFocusChanged { focusState ->
               // Mark the field as "visited" as soon as it loses focus after an entry
               if (!focusState.isFocused && value.isNotBlank()) {
                 hasBeenFocused = true

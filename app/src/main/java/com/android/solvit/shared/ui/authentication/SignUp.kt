@@ -129,7 +129,7 @@ fun SignUpScreen(
               Spacer(modifier = Modifier.height(30.dp))
 
               GoogleButton(
-                  onSignInClick = {
+                  onClick = {
                     authViewModel.setRole("seeker")
                     val gso =
                         GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
