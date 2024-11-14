@@ -83,171 +83,171 @@ fun SeekerProfileScreen(
   val userProfile by viewModel.seekerProfile.collectAsState()
   val scrollState = rememberScrollState()
 
-    userProfile?.let { profile ->
-        Scaffold(
-            modifier = Modifier.background(colorScheme.background),
-            backgroundColor = colorScheme.background,
-            topBar = {
-                TopAppBar(
-                    modifier = Modifier.testTag("ProfileTopBar"),
-                    backgroundColor = colorScheme.background,
-                    navigationIcon = {
-                        IconButton(
-                            onClick = { navigationActions.goBack() },
-                            modifier = Modifier.testTag("BackButton")
-                        ) {
-                            Icon(
-                                Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Back",
-                                tint = colorScheme.onBackground
-                            )
-                        }
-                    },
-                    title = {
-                        Text(
-                            text = "Profile",
-                            style = TextStyle(
-                                fontSize = 24.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = colorScheme.onBackground
-                            ),
-                            modifier = Modifier.testTag("ProfileTitle")
-                        )
+  userProfile?.let { profile ->
+    Scaffold(
+        modifier = Modifier.background(colorScheme.background),
+        backgroundColor = colorScheme.background,
+        topBar = {
+          TopAppBar(
+              modifier = Modifier.testTag("ProfileTopBar"),
+              backgroundColor = colorScheme.background,
+              navigationIcon = {
+                IconButton(
+                    onClick = { navigationActions.goBack() },
+                    modifier = Modifier.testTag("BackButton")) {
+                      Icon(
+                          Icons.AutoMirrored.Filled.ArrowBack,
+                          contentDescription = "Back",
+                          tint = colorScheme.onBackground)
                     }
-                )
-            },
-            content = {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                        .background(colorScheme.background)
-                        .testTag("ProfileContent"),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    // Profile Header Row (Profile Image, Name, Email, Edit Icon)
-                    Row(
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        modifier = Modifier.fillMaxWidth().background(colorScheme.primary).padding(16.dp)) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
+              },
+              title = {
+                Text(
+                    text = "Profile",
+                    style =
+                        TextStyle(
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = colorScheme.onBackground),
+                    modifier = Modifier.testTag("ProfileTitle"))
+              })
+        },
+        content = {
+          Column(
+              modifier =
+                  Modifier.fillMaxSize()
+                      .padding(horizontal = 16.dp, vertical = 8.dp)
+                      .background(colorScheme.background)
+                      .testTag("ProfileContent"),
+              horizontalAlignment = Alignment.CenterHorizontally) {
+                // Profile Header Row (Profile Image, Name, Email, Edit Icon)
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier =
+                        Modifier.fillMaxWidth().background(colorScheme.primary).padding(16.dp)) {
+                      Row(verticalAlignment = Alignment.CenterVertically) {
                         // Profile Picture, Name, and Email on the left
-                            Image(
-                                painter = painterResource(id = R.drawable.empty_profile_img),
-                                contentDescription = "Profile Picture",
-                                modifier = Modifier
-                                    .size(53.dp)
+                        Image(
+                            painter = painterResource(id = R.drawable.empty_profile_img),
+                            contentDescription = "Profile Picture",
+                            modifier =
+                                Modifier.size(53.dp)
                                     .clip(CircleShape)
                                     .border(2.dp, colorScheme.onPrimary, CircleShape)
-                                    .testTag("ProfileImage")
-                            )
-                            Spacer(modifier = Modifier.width(16.dp))
-                            Column {
-                                Text(
-                                    text = profile.name,
-                                    fontWeight = FontWeight.Bold,
-                                    style = MaterialTheme.typography.h6.copy(color = colorScheme.onPrimary),
-                                    modifier = Modifier.testTag("ProfileName")
-                                )
-                                Text(
-                                    text = profile.email,
-                                    style = MaterialTheme.typography.body2.copy(color = colorScheme.onPrimary),
-                                    modifier = Modifier.testTag("ProfileEmail")
-                                )
-                            }
+                                    .testTag("ProfileImage"))
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Column {
+                          Text(
+                              text = profile.name,
+                              fontWeight = FontWeight.Bold,
+                              style =
+                                  MaterialTheme.typography.h6.copy(color = colorScheme.onPrimary),
+                              modifier = Modifier.testTag("ProfileName"))
+                          Text(
+                              text = profile.email,
+                              style =
+                                  MaterialTheme.typography.body2.copy(
+                                      color = colorScheme.onPrimary),
+                              modifier = Modifier.testTag("ProfileEmail"))
                         }
+                      }
 
-                        // Edit icon on the right
-                        IconButton(
-                            onClick = { navigationActions.navigateTo(Screen.EDIT_PROFILE) }
-                        ) {
-                            Icon(
-                                Icons.Default.Edit,
-                                contentDescription = "Edit Profile",
-                                tint = colorScheme.onBackground
-                            )
-                        }
+                      // Edit icon on the right
+                      IconButton(onClick = { navigationActions.navigateTo(Screen.EDIT_PROFILE) }) {
+                        Icon(
+                            Icons.Default.Edit,
+                            contentDescription = "Edit Profile",
+                            tint = colorScheme.onBackground)
+                      }
                     }
 
-                    // Profile Options List
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxWidth()
+                // Profile Options List
+                LazyColumn(
+                    modifier =
+                        Modifier.fillMaxWidth()
                             .background(colorScheme.background)
                             .testTag("ProfileOptionsList"),
-                        contentPadding = PaddingValues(vertical = 8.dp)
-                    ) {
-                        item {
-                            ProfileOptionItem(
-                                icon = Icons.Default.Person,
-                                optionName = "My Account",
-                                subtitle = "Make changes to your account",
-                                onClick = { /* Handle click */ },
-                                modifier = Modifier.testTag("MyAccountOption")
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
+                    contentPadding = PaddingValues(vertical = 8.dp)) {
+                      item {
+                        ProfileOptionItem(
+                            icon = Icons.Default.Person,
+                            optionName = "My Account",
+                            subtitle = "Make changes to your account",
+                            onClick = { /* Handle click */},
+                            modifier = Modifier.testTag("MyAccountOption"))
+                        Spacer(modifier = Modifier.height(8.dp))
 
-                            ProfileOptionItem(
-                                icon = Icons.Default.ShoppingCart,
-                                optionName = "Order History",
-                                subtitle = "Manage your requested services and their statuses",
-                                onClick = {  Toast.makeText(context, "Not yet implemented", Toast.LENGTH_SHORT).show() },
-                                modifier = Modifier.testTag("OrdersOption")
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
+                        ProfileOptionItem(
+                            icon = Icons.Default.ShoppingCart,
+                            optionName = "Order History",
+                            subtitle = "Manage your requested services and their statuses",
+                            onClick = {
+                              Toast.makeText(context, "Not yet implemented", Toast.LENGTH_SHORT)
+                                  .show()
+                            },
+                            modifier = Modifier.testTag("OrdersOption"))
+                        Spacer(modifier = Modifier.height(8.dp))
 
-                            ProfileOptionItem(
-                                icon = Icons.Default.Lock,
-                                optionName = "Billing",
-                                subtitle = "Manage your billing information",
-                                onClick = {  Toast.makeText(context, "Not yet implemented", Toast.LENGTH_SHORT).show() },
-                                modifier = Modifier.testTag("BillingOption")
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
+                        ProfileOptionItem(
+                            icon = Icons.Default.Lock,
+                            optionName = "Billing",
+                            subtitle = "Manage your billing information",
+                            onClick = {
+                              Toast.makeText(context, "Not yet implemented", Toast.LENGTH_SHORT)
+                                  .show()
+                            },
+                            modifier = Modifier.testTag("BillingOption"))
+                        Spacer(modifier = Modifier.height(8.dp))
 
-                            ProfileOptionItem(
-                                icon = Icons.Default.Favorite,
-                                optionName = "Preferences",
-                                subtitle = "Set your preferences",
-                                onClick = {  Toast.makeText(context, "Not yet implemented", Toast.LENGTH_SHORT).show()},
-                                modifier = Modifier.testTag("PreferencesOption")
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
+                        ProfileOptionItem(
+                            icon = Icons.Default.Favorite,
+                            optionName = "Preferences",
+                            subtitle = "Set your preferences",
+                            onClick = {
+                              Toast.makeText(context, "Not yet implemented", Toast.LENGTH_SHORT)
+                                  .show()
+                            },
+                            modifier = Modifier.testTag("PreferencesOption"))
+                        Spacer(modifier = Modifier.height(8.dp))
 
-                            ProfileOptionItem(
-                                icon = Icons.Default.ExitToApp,
-                                optionName = "Log out",
-                                subtitle = "Log out of your account",
-                                onClick = { authViewModel.logout {} },
-                                modifier = Modifier.testTag("LogoutOption")
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
+                        ProfileOptionItem(
+                            icon = Icons.Default.ExitToApp,
+                            optionName = "Log out",
+                            subtitle = "Log out of your account",
+                            onClick = { authViewModel.logout {} },
+                            modifier = Modifier.testTag("LogoutOption"))
+                        Spacer(modifier = Modifier.height(8.dp))
 
-                            ProfileOptionItem(
-                                icon = Icons.Default.Notifications,
-                                optionName = "Help & Support",
-                                subtitle = "Get help and support",
-                                onClick = {  Toast.makeText(context, "Not yet implemented", Toast.LENGTH_SHORT).show() },
-                                modifier = Modifier.testTag("HelpSupportOption")
-                            )
+                        ProfileOptionItem(
+                            icon = Icons.Default.Notifications,
+                            optionName = "Help & Support",
+                            subtitle = "Get help and support",
+                            onClick = {
+                              Toast.makeText(context, "Not yet implemented", Toast.LENGTH_SHORT)
+                                  .show()
+                            },
+                            modifier = Modifier.testTag("HelpSupportOption"))
 
-                            ProfileOptionItem(
-                                icon = Icons.Default.Settings,
-                                optionName = "About App",
-                                subtitle = "Learn more about the app",
-                                onClick = { Toast.makeText(context, "Not yet implemented", Toast.LENGTH_SHORT).show()},
-                                modifier = Modifier.testTag("AboutAppOption")
-                            )
-                        }
+                        ProfileOptionItem(
+                            icon = Icons.Default.Settings,
+                            optionName = "About App",
+                            subtitle = "Learn more about the app",
+                            onClick = {
+                              Toast.makeText(context, "Not yet implemented", Toast.LENGTH_SHORT)
+                                  .show()
+                            },
+                            modifier = Modifier.testTag("AboutAppOption"))
+                      }
                     }
-                }
-            }
-        )
-    } ?: run {
+              }
+        })
+  }
+      ?: run {
         // Fallback when no profile data is available
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text(text = "No profile data available")
+          Text(text = "No profile data available")
         }
-    }
+      }
 }
 
 @Composable

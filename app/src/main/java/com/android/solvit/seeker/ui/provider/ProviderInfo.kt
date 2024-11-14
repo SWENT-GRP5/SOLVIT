@@ -127,10 +127,7 @@ fun PackageCard(packageProposal: PackageProposal, isSelected: Boolean, modifier:
               containerColor = if (!isSelected) colorScheme.surface else colorScheme.secondary,
           )) {
         Column(
-            modifier =
-                Modifier.padding(20.dp) // Increased padding for more spacing
-                    .fillMaxHeight()
-                    .testTag("PackageContent"),
+            modifier = Modifier.padding(20.dp).fillMaxHeight().testTag("PackageContent"),
             horizontalAlignment = Alignment.Start) {
               // Price of the Package
               Row(verticalAlignment = Alignment.CenterVertically) {
