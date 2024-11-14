@@ -103,7 +103,7 @@ fun ProviderCalendarScreen(navigationActions: NavigationActions) {
             },
             navigationIcon = {
               IconButton(
-                  onClick = { navigationActions.navigateTo(Route.REQUESTS_FEED) },
+                  onClick = { navigationActions.goBack() },
                   modifier = Modifier.testTag("backButton")) {
                     Icon(
                         Icons.AutoMirrored.Filled.ArrowBack,
