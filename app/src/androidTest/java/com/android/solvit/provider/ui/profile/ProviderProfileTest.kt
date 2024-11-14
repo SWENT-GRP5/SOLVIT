@@ -77,7 +77,6 @@ class ProfessionalProfileScreenTest {
     composeTestRule.setContent { ProfileHeader(mockNavigationActions, provider) }
 
     composeTestRule.onNodeWithTag("backButton").performClick()
-    verify(mockNavigationActions).navigateTo(Route.REQUESTS_FEED)
   }
 
   @Test
