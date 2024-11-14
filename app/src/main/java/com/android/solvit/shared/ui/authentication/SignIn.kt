@@ -465,7 +465,7 @@ fun SignUpSection(navigationActions: NavigationActions) {
   }
 
   Box(
-      modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
+      modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp).testTag("signUpLink"),
       contentAlignment = Alignment.Center,
   ) {
     ClickableText(
