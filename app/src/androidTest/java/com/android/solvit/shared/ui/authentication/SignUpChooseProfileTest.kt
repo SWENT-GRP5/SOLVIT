@@ -34,7 +34,6 @@ class SignUpChooseProfileTest {
 
   @Test
   fun signUpChooseProfile_performClick() {
-    runBlocking {
       composeTestRule.setContent { SignUpChooseProfile(mockNavigationActions) }
 
       composeTestRule.onNodeWithTag("goBackButton").performClick()
@@ -43,6 +42,5 @@ class SignUpChooseProfileTest {
       composeTestRule.onNodeWithTag("learnMoreLink").performClick()
 
       verify(mockNavigationActions).goBack()
-    }
   }
 }
