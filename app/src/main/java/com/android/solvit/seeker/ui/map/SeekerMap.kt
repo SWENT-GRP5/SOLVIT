@@ -85,7 +85,7 @@ fun SeekerMapScreen(
       markers = providerMarkers.value,
       bottomBar = {
         BottomNavigationMenu(
-            onTabSelect = { route -> navigationActions.navigateTo(route) },
+            onTabSelect = { navigationActions.navigateTo(it.route) },
             tabList = LIST_TOP_LEVEL_DESTINATION_CUSTOMER,
             selectedItem = Route.MAP)
       })
