@@ -409,7 +409,7 @@ fun ImagePicker(
                 Icon(
                     imageVector = Icons.Default.PlayArrow,
                     contentDescription = null,
-                    tint = Color.Gray, // Icon in grey
+                    tint = colorScheme.onSurfaceVariant, // Icon in grey
                     modifier = Modifier.size(24.dp))
                 Spacer(modifier = Modifier.width(8.dp)) // Space between icon and text
                 Text(
