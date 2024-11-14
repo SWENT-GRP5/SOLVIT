@@ -1,7 +1,7 @@
 package com.android.solvit.shared.model.map
 
-import okhttp3.OkHttpClient
 import java.net.URLEncoder
+import okhttp3.OkHttpClient
 
 class NominatimLocationRepository(private val client: OkHttpClient) : LocationRepository {
   override fun search(

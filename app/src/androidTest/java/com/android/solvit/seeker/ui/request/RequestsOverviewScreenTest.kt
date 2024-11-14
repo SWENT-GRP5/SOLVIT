@@ -19,6 +19,9 @@ import com.google.firebase.Timestamp
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
+import java.text.SimpleDateFormat
+import java.util.GregorianCalendar
+import java.util.Locale
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -26,9 +29,6 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
 import org.mockito.kotlin.any
 import org.mockito.kotlin.verify
-import java.text.SimpleDateFormat
-import java.util.GregorianCalendar
-import java.util.Locale
 
 class RequestsOverviewScreenTest {
   private lateinit var navigationActions: NavigationActions

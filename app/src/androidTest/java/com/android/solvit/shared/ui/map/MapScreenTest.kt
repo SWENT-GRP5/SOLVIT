@@ -12,6 +12,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.tasks.Tasks
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 import junit.framework.TestCase.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -19,8 +21,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
 
 @RunWith(AndroidJUnit4::class)
 class MapScreenTest {
