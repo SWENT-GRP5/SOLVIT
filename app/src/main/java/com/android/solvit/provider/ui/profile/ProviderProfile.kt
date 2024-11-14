@@ -303,9 +303,9 @@ fun StatsSection(provider: Provider) {
 
         Spacer(modifier = Modifier.height(30.dp))
         Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
-          Column(horizontalAlignment = Alignment.Start) {
+          Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
-                provider.price.toString(),
+                "1500-2300$", // TODO : modify later with real value
                 fontSize = 20.sp,
                 color = colorScheme.onPrimary,
                 fontWeight = FontWeight.Bold)
@@ -313,7 +313,7 @@ fun StatsSection(provider: Provider) {
           }
           Column(horizontalAlignment = Alignment.End) {
             Text(
-                provider.deliveryTime.seconds.div(3600).toString() + " hours",
+                "5 days", // TODO : modify later with real value
                 fontSize = 20.sp,
                 color = colorScheme.onPrimary,
                 fontWeight = FontWeight.Bold)

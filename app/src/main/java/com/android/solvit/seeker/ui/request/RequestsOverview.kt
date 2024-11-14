@@ -286,8 +286,9 @@ fun RequestItemRow(request: ServiceRequest, onClick: () -> Unit) {
               .testTag("requestListItem")) {
         Column {
           Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            val image = request.imageUrl
             AsyncImage(
-                model = request.imageUrl,
+                model = if (!image.isNullOrEmpty()) image else R.drawable.no_photo,
                 placeholder = painterResource(id = R.drawable.loading),
                 error = painterResource(id = R.drawable.error),
                 contentDescription = "service request image",

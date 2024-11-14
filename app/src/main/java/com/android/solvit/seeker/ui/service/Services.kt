@@ -129,7 +129,7 @@ fun TopSection(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(70.dp)) {
               Image(
-                  painterResource(id = R.drawable.empty_profile_img),
+                  painterResource(id = R.drawable.default_pdp),
                   contentDescription = "profile picture",
                   Modifier.size(40.dp)
                       .clip(CircleShape)

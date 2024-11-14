@@ -146,7 +146,7 @@ fun ServiceTypeDropdown(
         modifier =
             Modifier.fillMaxWidth()
                 .heightIn(max = 200.dp)
-                .background(colorScheme.surfaceVariant)
+                .background(colorScheme.background)
                 .border(1.dp, colorScheme.onSurfaceVariant, shape = RoundedCornerShape(8.dp))
                 .padding(start = 8.dp, end = 8.dp)
                 .testTag("serviceTypeMenu")) {
@@ -196,7 +196,7 @@ fun LocationDropdown(
     locationSuggestions: List<Location>,
     onLocationSelected: (Location) -> Unit,
     requestLocation: Location?,
-    backgroundColor: Color = colorScheme.surfaceVariant,
+    backgroundColor: Color = colorScheme.background,
     debounceDelay: Long = 1001L, // debounce delay longer than 1 second,
     isValueOk: Boolean = false,
     errorMessage: String = "Invalid location" // Default error message

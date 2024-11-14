@@ -3,6 +3,7 @@ package com.android.solvit.seeker.ui.request
 import android.content.pm.ActivityInfo
 import android.net.Uri
 import androidx.activity.ComponentActivity
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -28,6 +29,7 @@ import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Alignment
@@ -85,13 +87,18 @@ fun RequestScreen(
       bottomBar = {},
       topBar = {
         TopAppBar(
+            colors =
+                TopAppBarColors(
+                    containerColor = colorScheme.background,
+                    scrolledContainerColor = colorScheme.background,
+                    navigationIconContentColor = colorScheme.onBackground,
+                    titleContentColor = colorScheme.onBackground,
+                    actionIconContentColor = colorScheme.onBackground,
+                ),
             title = { Text(screenTitle, Modifier.testTag("screenTitle")) },
             navigationIcon = {
               IconButton(
-                  onClick = {
-                    // HJ : Comment this line as these screens have a bottom navigation menu
-                    navigationActions.goBack()
-                  },
+                  onClick = { navigationActions.goBack() },
                   modifier = Modifier.testTag("goBackButton")) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
@@ -118,13 +125,14 @@ fun RequestScreen(
                   onServiceTypeSelected)
               DescriptionInput(description, onDescriptionChange)
               LocationDropdown(
-                  locationQuery,
-                  onLocationQueryChange,
-                  showDropdownLocation,
-                  onShowDropdownLocationChange,
-                  locationSuggestions,
-                  onLocationSelected,
-                  selectedRequest?.location)
+                  locationQuery = locationQuery,
+                  onLocationQueryChange = onLocationQueryChange,
+                  showDropdownLocation = showDropdownLocation,
+                  onShowDropdownLocationChange = onShowDropdownLocationChange,
+                  locationSuggestions = locationSuggestions,
+                  onLocationSelected = onLocationSelected,
+                  requestLocation = selectedRequest?.location,
+                  isValueOk = selectedLocation != null)
               DatePickerFieldToModal(dueDate = dueDate, onDateChange = onDueDateChange)
               ImagePicker(selectedImageUri, imageUrl, onImageSelected)
               Button(
