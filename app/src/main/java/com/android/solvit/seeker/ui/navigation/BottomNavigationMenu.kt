@@ -18,7 +18,7 @@ import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.runtime.Composable
@@ -52,7 +52,7 @@ fun BottomNavigationMenu(
   }
 
   // Get the background color from the theme
-  val backgroundColor = MaterialTheme.colorScheme.background
+  val backgroundColor = colorScheme.background
 
   BoxWithConstraints(
       modifier =
@@ -100,16 +100,16 @@ fun BottomNavigationMenu(
                           tab.icon,
                           contentDescription = null,
                           tint =
-                              if (tab.route == selectedItem) MaterialTheme.colorScheme.onBackground
-                              else MaterialTheme.colorScheme.onSurfaceVariant)
+                              if (tab.route == selectedItem) colorScheme.onBackground
+                              else colorScheme.onSurfaceVariant)
                     },
                     selected = tab.route == selectedItem,
                     onClick = { onTabSelect(tab) },
                     colors =
                         NavigationBarItemDefaults.colors(
-                            selectedIconColor = MaterialTheme.colorScheme.primary,
-                            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                            indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)),
+                            selectedIconColor = colorScheme.primary,
+                            unselectedIconColor = colorScheme.onSurfaceVariant,
+                            indicatorColor = colorScheme.primary.copy(alpha = 0.2f)),
                     modifier = Modifier.testTag(tab.textId))
               }
             }
@@ -128,13 +128,13 @@ fun BottomNavigationMenu(
                     .align(Alignment.TopCenter)
                     .testTag(TopLevelDestinations.CREATE_REQUEST.toString()),
             shape = CircleShape,
-            containerColor = Color(0xFF0099FF)) {
+            containerColor = colorScheme.primary) {
               Icon(
                   if (tabList == LIST_TOP_LEVEL_DESTINATION_CUSTOMER) Icons.Outlined.Add
                   else Icons.Outlined.CheckCircle,
                   contentDescription =
                       if (tabList == LIST_TOP_LEVEL_DESTINATION_CUSTOMER) "Add" else "Myjobs",
-                  tint = Color.White,
+                  tint = colorScheme.onPrimary,
                   modifier = Modifier.size(30.dp))
             }
       }

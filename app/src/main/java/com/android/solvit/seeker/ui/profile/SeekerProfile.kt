@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -38,6 +39,7 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
@@ -304,22 +306,28 @@ fun SeekerProfileScreen(
   // Display the profile information if it's available
   userProfile?.let { profile ->
     Scaffold(
+        modifier = Modifier.background(colorScheme.background),
+        backgroundColor = colorScheme.background,
         topBar = {
-          Column {
+          Column(modifier = Modifier.background(colorScheme.background)) {
             Text(
                 text = "Profile",
                 style =
-                    TextStyle(fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Color.Black),
+                    TextStyle(
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = colorScheme.onBackground),
                 modifier =
                     Modifier.padding(start = 16.dp, top = 16.dp)
                         .verticalScroll(scrollState)
+                        .background(colorScheme.background)
                         .testTag("ProfileTitle"), // testTag for the title
             )
             Spacer(modifier = Modifier.height(16.dp))
 
             TopAppBar(
                 modifier = Modifier.testTag("ProfileTopBar"),
-                backgroundColor = Color(0xFF0099FF), // Match background color from Figma
+                backgroundColor = colorScheme.primary, // Match background color from Figma
                 contentPadding = PaddingValues(16.dp)) {
                   // Row layout for profile image, name, email, and edit icon
                   Row(
@@ -336,7 +344,7 @@ fun SeekerProfileScreen(
                               modifier =
                                   Modifier.size(53.dp) // Set size to 53px
                                       .clip(CircleShape)
-                                      .border(2.dp, Color.White, CircleShape)
+                                      .border(2.dp, colorScheme.onPrimary, CircleShape)
                                       .testTag("ProfileImage") // testTag for profile image
                               )
                           Spacer(modifier = Modifier.width(16.dp))
@@ -346,12 +354,15 @@ fun SeekerProfileScreen(
                             Text(
                                 text = profile.name,
                                 fontWeight = FontWeight.Bold,
-                                style = MaterialTheme.typography.h6.copy(color = Color.White),
+                                style =
+                                    MaterialTheme.typography.h6.copy(color = colorScheme.onPrimary),
                                 modifier = Modifier.testTag("ProfileName") // testTag for name
                                 )
                             Text(
                                 text = profile.email,
-                                style = MaterialTheme.typography.body2.copy(color = Color.White),
+                                style =
+                                    MaterialTheme.typography.body2.copy(
+                                        color = colorScheme.onPrimary),
                                 modifier = Modifier.testTag("ProfileEmail") // testTag for email
                                 )
                           }
@@ -363,7 +374,7 @@ fun SeekerProfileScreen(
                               Icon(
                                   Icons.Default.Edit,
                                   contentDescription = "Edit Profile",
-                                  tint = Color.White)
+                                  tint = colorScheme.onPrimary)
                             }
                       }
                 }
@@ -373,10 +384,13 @@ fun SeekerProfileScreen(
               modifier =
                   Modifier.fillMaxSize()
                       .padding(16.dp)
+                      .background(color = colorScheme.background)
                       .testTag("ProfileContent"), // Adding testTag for profile content
               horizontalAlignment = Alignment.CenterHorizontally) {
                 LazyColumn(
-                    modifier = Modifier.testTag("ProfileOptionsList") // testTag for options list
+                    modifier =
+                        Modifier.background(colorScheme.background)
+                            .testTag("ProfileOptionsList") // testTag for options list
                     ) {
                       item {
                         ProfileOptionItem(
@@ -453,7 +467,7 @@ fun ProfileOptionItem(
     optionName: String,
     subtitle: String, // New parameter for subtitle
     onClick: () -> Unit = {},
-    iconColor: Color = Color.Gray,
+    iconColor: Color = colorScheme.onBackground,
     modifier: Modifier = Modifier // Adding modifier for testTag
 ) {
   Row(
@@ -472,13 +486,15 @@ fun ProfileOptionItem(
         Spacer(modifier = Modifier.width(8.dp)) // Space between icon and text
 
         Column(modifier = Modifier.weight(1f)) {
-          Text(optionName, style = MaterialTheme.typography.body1)
+          Text(
+              optionName,
+              style = MaterialTheme.typography.body1.copy(color = colorScheme.onBackground))
           Text(
               text = subtitle,
               style =
                   TextStyle(
                       fontSize = 12.sp, // Set a smaller font size for the subtitle
-                      color = Color(0xFFABABAB)),
+                      color = colorScheme.onSurfaceVariant),
               modifier = Modifier.padding(4.dp) // Padding for the subtitle
               )
         }

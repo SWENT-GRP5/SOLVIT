@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -90,7 +91,7 @@ fun ForgotPassword(navigationActions: NavigationActions) {
 
               Text(
                   text = "Please enter your email address to reset your password",
-                  color = Color.DarkGray,
+                  color = colorScheme.onSurfaceVariant,
                   fontSize = 20.sp,
                   modifier = Modifier.padding(top = 4.dp).fillMaxWidth().testTag("bigText"))
 
@@ -132,16 +133,20 @@ fun ForgotPassword(navigationActions: NavigationActions) {
                               brush =
                                   if (goodFormEmail) {
                                     Brush.horizontalGradient(
-                                        colors = listOf(Color(0, 200, 83), Color(0, 153, 255)))
+                                        colors =
+                                            listOf(colorScheme.secondary, colorScheme.secondary))
                                   } else {
                                     Brush.horizontalGradient(
-                                        colors = listOf(Color.Gray, Color.Gray))
+                                        colors =
+                                            listOf(
+                                                colorScheme.onSurfaceVariant,
+                                                colorScheme.onSurfaceVariant))
                                   },
                               shape = RoundedCornerShape(25.dp))
                           .testTag("Send reset link")) {
                     Text(
                         "Send reset link",
-                        color = Color.White,
+                        color = colorScheme.onPrimary,
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp)
                   }

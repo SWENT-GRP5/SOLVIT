@@ -36,7 +36,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -83,7 +83,11 @@ fun TitleInput(title: String, onTitleChange: (String) -> Unit) {
       placeholder = { Text("Name your Request") },
       shape = RoundedCornerShape(12.dp),
       modifier = Modifier.fillMaxWidth().testTag("inputRequestTitle"),
-      colors = OutlinedTextFieldDefaults.colors(unfocusedContainerColor = Color.Transparent))
+      colors =
+          OutlinedTextFieldDefaults.colors(
+              unfocusedContainerColor = Color.Transparent,
+              focusedBorderColor = colorScheme.secondary,
+              unfocusedBorderColor = colorScheme.onSurfaceVariant))
 }
 
 @Composable
@@ -95,7 +99,11 @@ fun DescriptionInput(description: String, onDescriptionChange: (String) -> Unit)
       placeholder = { Text("Describe your request") },
       shape = RoundedCornerShape(12.dp),
       modifier = Modifier.fillMaxWidth().height(150.dp).testTag("inputRequestDescription"),
-      colors = OutlinedTextFieldDefaults.colors(unfocusedContainerColor = Color.Transparent))
+      colors =
+          OutlinedTextFieldDefaults.colors(
+              unfocusedContainerColor = Color.Transparent,
+              focusedBorderColor = colorScheme.secondary,
+              unfocusedBorderColor = colorScheme.onSurfaceVariant))
 }
 
 @Composable
@@ -124,7 +132,12 @@ fun ServiceTypeDropdown(
             Modifier.fillMaxWidth().testTag("inputServiceType").onFocusChanged { focusState ->
               if (!focusState.isFocused) onShowDropdownTypeChange(false)
             },
-        singleLine = true)
+        singleLine = true,
+        colors =
+            OutlinedTextFieldDefaults.colors(
+                unfocusedContainerColor = Color.Transparent,
+                focusedBorderColor = colorScheme.secondary,
+                unfocusedBorderColor = colorScheme.onSurfaceVariant))
 
     DropdownMenu(
         expanded = showDropdownType,
@@ -133,8 +146,8 @@ fun ServiceTypeDropdown(
         modifier =
             Modifier.fillMaxWidth()
                 .heightIn(max = 200.dp)
-                .background(MaterialTheme.colorScheme.surface)
-                .border(1.dp, MaterialTheme.colorScheme.onSurface, shape = RoundedCornerShape(8.dp))
+                .background(colorScheme.surfaceVariant)
+                .border(1.dp, colorScheme.onSurfaceVariant, shape = RoundedCornerShape(8.dp))
                 .padding(start = 8.dp, end = 8.dp)
                 .testTag("serviceTypeMenu")) {
           filteredServiceTypes.forEach { serviceType ->
@@ -183,7 +196,7 @@ fun LocationDropdown(
     locationSuggestions: List<Location>,
     onLocationSelected: (Location) -> Unit,
     requestLocation: Location?,
-    backgroundColor: Color = MaterialTheme.colorScheme.surface,
+    backgroundColor: Color = colorScheme.surfaceVariant,
     debounceDelay: Long = 1001L, // debounce delay longer than 1 second,
     isValueOk: Boolean = false,
     errorMessage: String = "Invalid location" // Default error message
@@ -237,20 +250,20 @@ fun LocationDropdown(
           Icon(
               Icons.Default.Home,
               contentDescription = "Location Icon",
-              tint = if (isValueOk) Color(0xFF5AC561) else Color.Gray)
+              tint = if (isValueOk) colorScheme.secondary else colorScheme.onSurfaceVariant)
         },
         colors =
             TextFieldDefaults.outlinedTextFieldColors(
-                focusedTextColor = Color.Black,
+                focusedTextColor = colorScheme.onBackground,
                 unfocusedTextColor =
-                    if (locationQuery.isEmpty()) Color.Gray
-                    else if (!isValueOk) Color.Red else Color.Black,
-                focusedBorderColor = if (isValueOk) Color(0xFF5AC561) else Color.Blue,
+                    if (locationQuery.isEmpty()) colorScheme.onSurfaceVariant
+                    else if (!isValueOk) colorScheme.error else colorScheme.onBackground,
+                focusedBorderColor = if (isValueOk) colorScheme.secondary else colorScheme.primary,
                 unfocusedBorderColor =
                     when {
-                      locationQuery.isEmpty() -> Color.Gray
-                      isValueOk -> Color(0xFF5AC561)
-                      else -> Color.Red
+                      locationQuery.isEmpty() -> colorScheme.onSurfaceVariant
+                      isValueOk -> colorScheme.secondary
+                      else -> colorScheme.error
                     },
             ))
 
@@ -263,7 +276,7 @@ fun LocationDropdown(
             Modifier.fillMaxWidth()
                 .heightIn(max = 200.dp)
                 .background(backgroundColor)
-                .border(1.dp, MaterialTheme.colorScheme.onSurface, shape = RoundedCornerShape(8.dp))
+                .border(1.dp, colorScheme.onSurfaceVariant, shape = RoundedCornerShape(8.dp))
                 .padding(start = 8.dp, end = 8.dp)) {
           locationSuggestions.forEach { location ->
             DropdownMenuItem(
@@ -288,7 +301,7 @@ fun LocationDropdown(
     if (!isValueOk && hasBeenFocused && hasLostFocusAfterTyping) {
       Text(
           text = errorMessage,
-          color = Color.Red,
+          color = colorScheme.error,
           fontSize = 15.sp, // Error text size
           modifier = Modifier.padding(start = 16.dp, top = 65.dp))
     }
@@ -342,7 +355,12 @@ fun DatePickerFieldToModal(
                 showModal = true
               }
             }
-          })
+          },
+      colors =
+          OutlinedTextFieldDefaults.colors(
+              unfocusedContainerColor = Color.Transparent,
+              focusedBorderColor = colorScheme.secondary,
+              unfocusedBorderColor = colorScheme.onSurfaceVariant))
 
   if (showModal) {
     DatePickerModal(
@@ -378,7 +396,7 @@ fun ImagePicker(
       modifier =
           Modifier.fillMaxWidth()
               .height(150.dp)
-              .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
+              .border(1.dp, colorScheme.onSurfaceVariant, shape = RoundedCornerShape(12.dp))
               .clip(RoundedCornerShape(12.dp))
               .background(Color.Transparent)
               .clickable { imagePickerLauncher.launch("image/*") }
@@ -391,11 +409,11 @@ fun ImagePicker(
                 Icon(
                     imageVector = Icons.Default.PlayArrow,
                     contentDescription = null,
-                    tint = Color.Gray, // Icon in grey
+                    tint = colorScheme.onSurfaceVariant, // Icon in grey
                     modifier = Modifier.size(24.dp))
                 Spacer(modifier = Modifier.width(8.dp)) // Space between icon and text
                 Text(
-                    "Upload Image", color = Color.Gray // Text in grey
+                    "Upload Image", color = colorScheme.onSurfaceVariant // Text in grey
                     )
               }
         } else {
@@ -434,9 +452,9 @@ fun DeleteButton(
               Icon(
                   imageVector = Icons.Default.Delete,
                   contentDescription = "Delete",
-                  tint = Color.Red,
+                  tint = colorScheme.error,
                   modifier = Modifier.padding(end = 8.dp))
-              Text("Delete", color = Color.Red)
+              Text("Delete", color = colorScheme.error)
             }
       }
 }
