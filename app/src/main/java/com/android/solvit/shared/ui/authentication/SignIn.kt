@@ -515,20 +515,17 @@ fun SignInButton(
       colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
       shape = RoundedCornerShape(25.dp),
       modifier =
-          Modifier.fillMaxWidth()
-              .height(50.dp)
-              .background(
+          Modifier.fillMaxWidth().height(50.dp).background(
                   brush =
                       if (isFormComplete && goodFormEmail && passwordLengthComplete) {
-                        Brush.horizontalGradient(
-                            colors = listOf(colorScheme.secondary, colorScheme.secondary))
+                          Brush.horizontalGradient(
+                              colors = listOf(colorScheme.primary, colorScheme.secondary))
                       } else {
-                        Brush.horizontalGradient(
-                            colors =
-                                listOf(colorScheme.onSurfaceVariant, colorScheme.onSurfaceVariant))
+                          Brush.horizontalGradient(
+                              colors =
+                              listOf(colorScheme.onSurfaceVariant, colorScheme.onSurfaceVariant))
                       },
-                  shape = RoundedCornerShape(25.dp))
-              .testTag("signInButton")) {
+      shape = RoundedCornerShape(25.dp)).testTag("signInButton")) {
         Text(
             "Sign in",
             color = colorScheme.background,
@@ -609,7 +606,7 @@ fun CustomOutlinedTextField(
   var hasBeenFocused by remember { mutableStateOf(false) }
   var hasLostFocusAfterTyping by remember { mutableStateOf(false) }
 
-  Column(modifier = modifier.fillMaxWidth()) {
+  Column(modifier = Modifier.fillMaxWidth()) {
     // Text field with focus management
     OutlinedTextField(
         value = value,
@@ -630,7 +627,7 @@ fun CustomOutlinedTextField(
               tint = if (isValueOk) colorScheme.secondary else colorScheme.onSurfaceVariant)
         },
         modifier =
-            Modifier.fillMaxWidth().testTag(testTag).onFocusChanged { focusState ->
+            modifier.fillMaxWidth().testTag(testTag).onFocusChanged { focusState ->
               // Mark the field as "visited" as soon as it loses focus after an entry
               if (!focusState.isFocused && value.isNotBlank()) {
                 hasBeenFocused = true
