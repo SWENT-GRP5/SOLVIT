@@ -27,7 +27,6 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.verify
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
 import org.junit.Before
 import org.junit.Rule
@@ -72,14 +71,14 @@ class SignInScreenTest {
 
   @Test
   fun testSignIn_errorShowInEmailField() {
-      composeTestRule.setContent { SignInScreen(mockNavigationActions) }
+    composeTestRule.setContent { SignInScreen(mockNavigationActions) }
 
-      composeTestRule.onNodeWithTag("emailErrorMessage").isNotDisplayed()
-      composeTestRule.onNodeWithTag("emailInput").performTextInput("test@example")
-      composeTestRule.onNodeWithTag("emailErrorMessage").isDisplayed()
-      composeTestRule.onNodeWithTag("emailInput").performTextClearance()
-      composeTestRule.onNodeWithTag("emailInput").performTextInput("test@example.com")
-      composeTestRule.onNodeWithTag("emailErrorMessage").isNotDisplayed()
+    composeTestRule.onNodeWithTag("emailErrorMessage").isNotDisplayed()
+    composeTestRule.onNodeWithTag("emailInput").performTextInput("test@example")
+    composeTestRule.onNodeWithTag("emailErrorMessage").isDisplayed()
+    composeTestRule.onNodeWithTag("emailInput").performTextClearance()
+    composeTestRule.onNodeWithTag("emailInput").performTextInput("test@example.com")
+    composeTestRule.onNodeWithTag("emailErrorMessage").isNotDisplayed()
   }
 
   @Test
