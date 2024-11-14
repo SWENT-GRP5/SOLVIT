@@ -238,53 +238,52 @@ fun SignUpButton(
     passwordLengthComplete: Boolean = false,
     samePassword: Boolean = false
 ) {
-    val context = LocalContext.current
-    Button(
-        onClick = {
-            if (isComplete && goodFormEmail && samePassword && passwordLengthComplete) {
-                onClick()
-            }
-            if (!isComplete) {
-                Toast.makeText(context, "Please fill in all required fields", Toast.LENGTH_SHORT).show()
-            } else if (!goodFormEmail) {
-                Toast.makeText(context, "Your email must have \"@\" and \".\"", Toast.LENGTH_SHORT).show()
-            } else if (!samePassword) {
-                Toast.makeText(
-                    context, "Password and Confirm Password must be the same", Toast.LENGTH_SHORT)
-                    .show()
-            } else if (!passwordLengthComplete) {
-                Toast.makeText(
-                    context, "Your password must have at least 6 characters", Toast.LENGTH_SHORT)
-                    .show()
-            } else {
-                Toast.makeText(context, "You are Signed up!", Toast.LENGTH_SHORT).show()
-            }
-        },
-        modifier =
-        Modifier.fillMaxWidth()
-            .height(50.dp)
-            .background(
-                brush =
-                if (isComplete && goodFormEmail && passwordLengthComplete && samePassword) {
-                    Brush.horizontalGradient(
-                        colors = listOf(colorScheme.primary, colorScheme.secondary))
-                } else {
-                    Brush.horizontalGradient(
-                        colors =
-                        listOf(colorScheme.onSurfaceVariant, colorScheme.onSurfaceVariant))
-                },
-                shape = RoundedCornerShape(25.dp))
-            .testTag("signUpButton"),
-        shape = RoundedCornerShape(25.dp),
-        colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)) {
+  val context = LocalContext.current
+  Button(
+      onClick = {
+        if (isComplete && goodFormEmail && samePassword && passwordLengthComplete) {
+          onClick()
+        }
+        if (!isComplete) {
+          Toast.makeText(context, "Please fill in all required fields", Toast.LENGTH_SHORT).show()
+        } else if (!goodFormEmail) {
+          Toast.makeText(context, "Your email must have \"@\" and \".\"", Toast.LENGTH_SHORT).show()
+        } else if (!samePassword) {
+          Toast.makeText(
+                  context, "Password and Confirm Password must be the same", Toast.LENGTH_SHORT)
+              .show()
+        } else if (!passwordLengthComplete) {
+          Toast.makeText(
+                  context, "Your password must have at least 6 characters", Toast.LENGTH_SHORT)
+              .show()
+        } else {
+          Toast.makeText(context, "You are Signed up!", Toast.LENGTH_SHORT).show()
+        }
+      },
+      modifier =
+          Modifier.fillMaxWidth()
+              .height(50.dp)
+              .background(
+                  brush =
+                      if (isComplete && goodFormEmail && passwordLengthComplete && samePassword) {
+                        Brush.horizontalGradient(
+                            colors = listOf(colorScheme.primary, colorScheme.secondary))
+                      } else {
+                        Brush.horizontalGradient(
+                            colors =
+                                listOf(colorScheme.onSurfaceVariant, colorScheme.onSurfaceVariant))
+                      },
+                  shape = RoundedCornerShape(25.dp))
+              .testTag("signUpButton"),
+      shape = RoundedCornerShape(25.dp),
+      colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)) {
         Text(
             "Sign Up",
             color = colorScheme.onPrimary,
             fontWeight = FontWeight.Bold,
             fontSize = 16.sp)
-    }
+      }
 }
-
 
 @Composable
 fun googleRegisterLauncher(
@@ -311,39 +310,34 @@ fun googleRegisterLauncher(
 @Composable
 fun AlreadyHaveAccountText(navigationActions: NavigationActions) {
   Row(verticalAlignment = Alignment.CenterVertically) {
-      val annotatedText = buildAnnotatedString {
-          append("Already have an account? ")
+    val annotatedText = buildAnnotatedString {
+      append("Already have an account? ")
 
-          pushStringAnnotation(tag = "Log in", annotation = "log_in")
-          withStyle(
-              style = SpanStyle(
-                  color = colorScheme.primary,
-                  textDecoration = TextDecoration.Underline
-              )
-          ) {
-              append("Log up in here !")
+      pushStringAnnotation(tag = "Log in", annotation = "log_in")
+      withStyle(
+          style =
+              SpanStyle(color = colorScheme.primary, textDecoration = TextDecoration.Underline)) {
+            append("Log up in here !")
           }
-          pop()
-      }
+      pop()
+    }
 
-      Box(
-          modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
-          contentAlignment = Alignment.Center,
-      ) {
-          ClickableText(
-              text = annotatedText,
-              style = TextStyle(
-                  color = colorScheme.onSurface,
-                  fontSize = 16.sp,
-                  textAlign = TextAlign.Center
-              ),
-              onClick = { offset ->
-                  annotatedText
-                      .getStringAnnotations(tag = "Log in", start = offset, end = offset)
-                      .firstOrNull()
-                      ?.let { navigationActions.navigateTo(Screen.SIGN_IN) }
-              },
-              modifier = Modifier.fillMaxWidth().testTag("logInLink")
-          )
-      }
-  }}
+    Box(
+        modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+      ClickableText(
+          text = annotatedText,
+          style =
+              TextStyle(
+                  color = colorScheme.onSurface, fontSize = 16.sp, textAlign = TextAlign.Center),
+          onClick = { offset ->
+            annotatedText
+                .getStringAnnotations(tag = "Log in", start = offset, end = offset)
+                .firstOrNull()
+                ?.let { navigationActions.navigateTo(Screen.SIGN_IN) }
+          },
+          modifier = Modifier.fillMaxWidth().testTag("logInLink"))
+    }
+  }
+}

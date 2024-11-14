@@ -210,7 +210,11 @@ fun LearnMoreSection() {
   ) {
     ClickableText(
         text = annotatedText,
-        style = TextStyle(color = colorScheme.onSurfaceVariant, fontSize = 16.sp, textAlign = TextAlign.Center),
+        style =
+            TextStyle(
+                color = colorScheme.onSurfaceVariant,
+                fontSize = 16.sp,
+                textAlign = TextAlign.Center),
         onClick = { offset ->
           annotatedText
               .getStringAnnotations(tag = "URL", start = offset, end = offset)
