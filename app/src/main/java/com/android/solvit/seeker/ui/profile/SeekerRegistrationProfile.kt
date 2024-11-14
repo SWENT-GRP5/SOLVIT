@@ -30,6 +30,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -44,7 +45,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -98,7 +98,7 @@ fun SeekerRegistrationScreen(
   // Step tracking: Role, Details, Preferences
   var currentStep by remember { mutableIntStateOf(1) }
 
-  val backgroundColor = Color(0xFFFFFFFF)
+  val backgroundColor = colorScheme.background
 
   val isFullNameOk = fullName.isNotBlank() && fullName.length > 2
   val isUserNameOk = userName.isNotBlank() && userName.length > 2
@@ -198,7 +198,7 @@ fun SeekerRegistrationScreen(
                     locationSuggestions = locationSuggestions.filterNotNull(),
                     onLocationSelected = { selectedLocation = it },
                     requestLocation = null,
-                    backgroundColor = Color.White,
+                    backgroundColor = colorScheme.background,
                     isValueOk = isLocationOK)
 
                 Spacer(modifier = Modifier.height(30.dp))
@@ -209,9 +209,9 @@ fun SeekerRegistrationScreen(
                         Modifier.fillMaxWidth().height(60.dp).testTag("completeRegistrationButton"),
                     enabled = isFormComplete,
                     shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(Color(0xFF28A745)) // Green button
+                    colors = ButtonDefaults.buttonColors(colorScheme.secondary) // Green button
                     ) {
-                      Text("Complete registration", color = Color.White)
+                      Text("Complete registration", color = colorScheme.onSecondary)
                     }
               }
               // Preferences Step
@@ -245,13 +245,13 @@ fun SeekerRegistrationScreen(
                           style = MaterialTheme.typography.bodyLarge,
                           modifier = Modifier.align(Alignment.CenterHorizontally),
                           textAlign = TextAlign.Center,
-                          color = Color.Blue)
+                          color = colorScheme.primary)
                       Spacer(modifier = Modifier.height(100.dp))
                       Button(
                           onClick = { currentStep = 3 },
                           modifier = Modifier.fillMaxWidth().testTag("savePreferencesButton"),
-                          colors = ButtonDefaults.buttonColors(Color(0xFF28A745))) {
-                            Text("Save Preferences", color = Color.White)
+                          colors = ButtonDefaults.buttonColors(colorScheme.secondary)) {
+                            Text("Save Preferences", color = colorScheme.onSecondary)
                           }
                       Text(
                           text = "You can always update your preferences in your profile settings.",
@@ -311,9 +311,9 @@ fun SeekerRegistrationScreen(
                       // navigationActions.goBack() // Navigate after saving
                     },
                     modifier = Modifier.fillMaxWidth().testTag("exploreServicesButton"),
-                    colors = ButtonDefaults.buttonColors(Color(0xFF28A745)) // Green button
+                    colors = ButtonDefaults.buttonColors(colorScheme.secondary) // Green button
                     ) {
-                      Text("Continue to Explore Services", color = Color.White)
+                      Text("Continue to Explore Services", color = colorScheme.onSecondary)
                     }
               }
             }
@@ -356,18 +356,19 @@ fun StepCircle(stepNumber: Int, isCompleted: Boolean, label: String) {
             modifier =
                 Modifier.size(40.dp)
                     .background(
-                        if (isCompleted) Color(0xFF28A745) else Color.Gray, shape = CircleShape),
+                        if (isCompleted) colorScheme.secondary else colorScheme.onSurfaceVariant,
+                        shape = CircleShape),
             contentAlignment = Alignment.Center) {
               Text(
                   text = if (isCompleted) "✔" else stepNumber.toString(),
-                  color = Color.White,
+                  color = colorScheme.onSecondary,
                   style = MaterialTheme.typography.titleLarge)
             }
 
         // Display the label below the circle
         Text(
             text = label,
-            color = Color.Black, // You can customize this color
+            color = colorScheme.onBackground, // You can customize this color
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.padding(top = 4.dp) // Add space between circle and label
             )

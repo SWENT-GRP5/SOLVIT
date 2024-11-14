@@ -229,6 +229,8 @@ dependencies {
     androidTestImplementation(libs.mockk.android)
     androidTestImplementation(libs.mockk.agent)
     testImplementation(libs.json)
+    testImplementation(libs.kotlin.test)
+    testImplementation(libs.kotlin.test.junit)
 
     // Integration with ViewModels
     implementation(libs.compose.viewmodel)

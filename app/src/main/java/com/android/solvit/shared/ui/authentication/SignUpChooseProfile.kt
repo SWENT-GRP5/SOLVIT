@@ -21,6 +21,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -30,7 +31,6 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -55,7 +55,6 @@ fun SignUpChooseProfile(
     authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory)
 ) {
 
-  val backgroundColor = Color(0xFFFFFFFF)
   val context = LocalContext.current
 
   DisposableEffect(Unit) {
@@ -69,12 +68,12 @@ fun SignUpChooseProfile(
         TopAppBar(
             title = { Text("Choose your profile") },
             navigationIcon = { GoBackButton(navigationActions) },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = backgroundColor))
+            colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background))
       },
       content = { padding ->
         Column(
             modifier =
-                Modifier.background(backgroundColor)
+                Modifier.background(colorScheme.background)
                     .padding(padding)
                     .fillMaxSize()
                     .padding(16.dp)
@@ -155,16 +154,24 @@ fun ButtonCustomerProvider(
                     .background(
                         brush =
                             Brush.horizontalGradient(
-                                colors = listOf(Color(0, 200, 81), Color(0, 153, 255))),
+                                colors = listOf(colorScheme.secondary, colorScheme.secondary)),
                         shape = RoundedCornerShape(10.dp))
                     .clickable { onClickButton() },
             contentAlignment = Alignment.Center) {
-              Text(text = text, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+              Text(
+                  text = text,
+                  color = colorScheme.onPrimary,
+                  fontWeight = FontWeight.Bold,
+                  fontSize = 20.sp)
             }
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        Text(text = description, fontSize = 12.sp, color = Color.Gray, textAlign = TextAlign.Center)
+        Text(
+            text = description,
+            fontSize = 12.sp,
+            color = colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center)
       }
 }
 
@@ -173,7 +180,7 @@ fun SectionTitle(text: String, testTag: String = "") {
   Text(
       text = text,
       fontSize = 25.sp,
-      color = Color(51, 51, 51),
+      color = colorScheme.onBackground,
       modifier = Modifier.testTag(testTag))
 }
 
@@ -186,19 +193,19 @@ fun LearnMoreSection() {
       verticalArrangement = Arrangement.Center,
       modifier = Modifier.fillMaxWidth().padding(16.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-          Text("Not sure? ", color = Color.Gray)
+          Text("Not sure? ", color = colorScheme.onSurfaceVariant)
           Text(
               text = "Learn more",
-              color = Color(0, 153, 255),
+              color = colorScheme.primary,
               style = TextStyle(textDecoration = TextDecoration.Underline),
               modifier =
                   Modifier.clickable {
                         Toast.makeText(context, "Not implemented yet", Toast.LENGTH_SHORT).show()
                       }
                       .testTag("learnMoreLink"))
-          Text(" about becoming a", color = Color.Gray)
+          Text(" about becoming a", color = colorScheme.onSurfaceVariant)
         }
         Spacer(modifier = Modifier.height(5.dp))
-        Text("Customer or Provider.", color = Color.Gray)
+        Text("Customer or Provider.", color = colorScheme.onSurfaceVariant)
       }
 }

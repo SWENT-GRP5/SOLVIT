@@ -31,6 +31,7 @@ import androidx.compose.material3.DockedSearchBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -42,7 +43,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -62,7 +62,6 @@ import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.theme.LightBlue
 import com.android.solvit.shared.ui.theme.LightOrange
 import com.android.solvit.shared.ui.theme.LightRed
-import com.android.solvit.shared.ui.theme.Purple80
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -116,7 +115,6 @@ fun TopSection(
           Modifier.fillMaxWidth()
               .background(
                   Purple80, shape = RoundedCornerShape(bottomEnd = 16.dp, bottomStart = 16.dp))
-              .padding(16.dp)
               .testTag("servicesScreenTopSection"),
       verticalArrangement = Arrangement.spacedBy(16.dp),
       horizontalAlignment = Alignment.CenterHorizontally) {
@@ -198,7 +196,7 @@ fun ShortcutsSection(navigationActions: NavigationActions) {
                   horizontalArrangement = Arrangement.SpaceBetween) {
                     Text(
                         "Service\nProviders",
-                        color = Color.White,
+                        color = colorScheme.onPrimary,
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold)
                     Image(
@@ -226,7 +224,7 @@ fun ShortcutsSection(navigationActions: NavigationActions) {
                               Modifier.size(32.dp).clip(CircleShape).align(Alignment.End))
                           Text(
                               "All Orders",
-                              color = Color.White,
+                              color = colorScheme.onPrimary,
                               fontSize = 20.sp,
                               fontWeight = FontWeight.Bold)
                         }
@@ -247,7 +245,7 @@ fun ShortcutsSection(navigationActions: NavigationActions) {
                               Modifier.size(32.dp).clip(CircleShape).align(Alignment.End))
                           Text(
                               "Providers Map",
-                              color = Color.White,
+                              color = colorScheme.onPrimary,
                               fontSize = 20.sp,
                               fontWeight = FontWeight.Bold)
                         }

@@ -33,11 +33,13 @@ import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -61,6 +63,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
+import com.android.solvit.shared.ui.theme.*
 import java.time.DayOfWeek
 import java.time.Instant
 import java.time.LocalDate
@@ -71,9 +74,6 @@ import java.time.format.TextStyle
 import java.time.temporal.TemporalAdjusters
 import java.util.Locale
 import kotlin.math.abs
-
-// Add this color definition at the top of the file
-val SolvitBlue = Color(0xFF0099FF)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -98,6 +98,7 @@ fun ProviderCalendarScreen(navigationActions: NavigationActions) {
                   fontWeight = FontWeight.ExtraBold,
                   lineHeight = 24.sp,
                   textAlign = TextAlign.Left,
+                  color = colorScheme.onBackground,
                   modifier = Modifier.testTag("calendarTitle"))
             },
             navigationIcon = {
@@ -107,19 +108,20 @@ fun ProviderCalendarScreen(navigationActions: NavigationActions) {
                     Icon(
                         Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Back",
-                        tint = Color.Black)
+                        tint = colorScheme.onBackground)
                   }
             },
             actions = {
               IconButton(
                   onClick = { /* TODO: Implement menu action */},
                   modifier = Modifier.testTag("menuButton")) {
-                    Icon(Icons.Default.Menu, contentDescription = "Menu", tint = Color(0xFF0099FF))
+                    Icon(
+                        Icons.Default.Menu, contentDescription = "Menu", tint = colorScheme.primary)
                   }
             },
-            modifier = Modifier.testTag("topAppBar"))
+            colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background))
       },
-      containerColor = Color.White) { paddingValues ->
+      containerColor = colorScheme.background) { paddingValues ->
         Column(modifier = Modifier.fillMaxSize().padding(paddingValues).testTag("calendarColumn")) {
           CalendarViewToggle(calendarView) { newView ->
             calendarView = newView
@@ -169,13 +171,13 @@ fun ProviderCalendarScreen(navigationActions: NavigationActions) {
     ModalBottomSheet(
         onDismissRequest = { showBottomSheet = false },
         sheetState = rememberModalBottomSheetState(),
-        containerColor = Color.White,
+        containerColor = colorScheme.surface,
         shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
         modifier = Modifier.testTag("bottomSheetDayView")) {
           DayView(
               currentViewDate = selectedDate,
-              onViewDateChanged = { /* No action needed here */},
-              onHeaderClick = { /* No action needed here */},
+              onViewDateChanged = { currentViewDate = it },
+              onHeaderClick = { showDatePicker = true },
               timeSlots = timeSlots,
               onTimeSlotsChanged = { date, newTimeSlots ->
                 timeSlots = timeSlots.toMutableMap().apply { put(date, newTimeSlots) }
@@ -206,28 +208,28 @@ fun ProviderCalendarScreen(navigationActions: NavigationActions) {
                 }
               },
               modifier = Modifier.testTag("confirmDateButton")) {
-                Text("OK", color = SolvitBlue)
+                Text("OK", color = colorScheme.primary)
               }
         },
         dismissButton = {
           TextButton(
               onClick = { showDatePicker = false },
               modifier = Modifier.testTag("cancelDateButton")) {
-                Text("Cancel", color = SolvitBlue)
+                Text("Cancel", color = colorScheme.primary)
               }
         },
         modifier = Modifier.testTag("datePickerDialog"),
         colors =
             DatePickerDefaults.colors(
-                containerColor = Color.White,
-                selectedDayContainerColor = SolvitBlue,
-                todayContentColor = SolvitBlue,
-                todayDateBorderColor = SolvitBlue,
-                selectedYearContainerColor = SolvitBlue,
-                currentYearContentColor = SolvitBlue,
-                dayContentColor = SolvitBlue,
-                selectedDayContentColor = Color.White,
-                weekdayContentColor = SolvitBlue)) {
+                containerColor = colorScheme.surface,
+                selectedDayContainerColor = colorScheme.primary,
+                todayContentColor = colorScheme.primary,
+                todayDateBorderColor = colorScheme.primary,
+                selectedYearContainerColor = colorScheme.primary,
+                currentYearContentColor = colorScheme.primary,
+                dayContentColor = colorScheme.primary,
+                selectedDayContentColor = colorScheme.onPrimary,
+                weekdayContentColor = colorScheme.primary)) {
           DatePicker(state = datePickerState)
         }
   }
@@ -243,9 +245,14 @@ fun CalendarViewToggle(currentView: CalendarView, onViewChange: (CalendarView) -
               onClick = { onViewChange(view) },
               colors =
                   ButtonDefaults.buttonColors(
-                      containerColor = if (currentView == view) SolvitBlue else Color.LightGray),
+                      containerColor =
+                          if (currentView == view) colorScheme.primary
+                          else colorScheme.surfaceVariant),
               modifier = Modifier.testTag("toggleButton_${view.name.lowercase()}")) {
-                Text(view.name, color = if (currentView == view) Color.White else Color.Black)
+                Text(
+                    view.name,
+                    color =
+                        if (currentView == view) colorScheme.onPrimary else colorScheme.onSurface)
               }
         }
       }
@@ -300,7 +307,8 @@ fun MonthView(
                           .padding(vertical = 8.dp)
                           .testTag("monthHeader"),
                   fontSize = 16.sp,
-                  fontWeight = FontWeight.Bold)
+                  fontWeight = FontWeight.Bold,
+                  color = colorScheme.onSurface)
             }
         Spacer(modifier = Modifier.height(16.dp))
         LazyVerticalGrid(
@@ -314,7 +322,8 @@ fun MonthView(
                     modifier = Modifier.padding(8.dp),
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Normal,
-                    textAlign = TextAlign.Center)
+                    textAlign = TextAlign.Center,
+                    color = colorScheme.onSurface)
               }
 
               // Calendar days
@@ -344,11 +353,11 @@ fun DayItem(
 ) {
   val backgroundColor =
       when {
-        isSelected -> SolvitBlue
-        isCurrentDay -> Color.LightGray
+        isSelected -> colorScheme.primary
+        isCurrentDay -> colorScheme.surfaceVariant
         else -> Color.Transparent
       }
-  val textColor = if (isSelected || isCurrentDay) Color.White else Color.Black
+  val textColor = if (isSelected || isCurrentDay) colorScheme.onPrimary else colorScheme.onSurface
 
   Column(
       horizontalAlignment = Alignment.CenterHorizontally,
@@ -381,14 +390,16 @@ fun StatusIndicator(status: TimeSlotStatus) {
               .background(
                   color =
                       when (status) {
-                        TimeSlotStatus.AVAILABLE -> Color(0xFF00C853)
-                        TimeSlotStatus.UNAVAILABLE -> Color(0xFFEC5865)
-                        TimeSlotStatus.BUSY -> Color(0xFF0099FF)
+                        TimeSlotStatus.AVAILABLE -> Available
+                        TimeSlotStatus.UNAVAILABLE -> Unavailable
+                        TimeSlotStatus.BUSY -> Busy
                       },
                   shape = CircleShape)) {
         Box(
             modifier =
-                Modifier.size(4.dp).background(Color.White, CircleShape).align(Alignment.Center))
+                Modifier.size(4.dp)
+                    .background(colorScheme.surface, CircleShape)
+                    .align(Alignment.Center))
       }
 }
 
@@ -445,7 +456,7 @@ fun DayView(
         Spacer(modifier = Modifier.height(16.dp))
         TimeSlots(
             timeSlots = timeSlots[currentDay] ?: emptyList(),
-            textColor = Color.Black,
+            textColor = colorScheme.onSurface,
             showDescription = true,
             onTimeSlotsChanged = { newTimeSlots -> onTimeSlotsChanged(currentDay, newTimeSlots) })
       }
@@ -534,20 +545,20 @@ fun WeekDayItem(
 ) {
   val borderColor =
       when {
-        isSelected -> Color(0xFF0099FF)
-        isCurrentDay -> Color.Gray
-        else -> Color.LightGray
+        isSelected -> colorScheme.primary
+        isCurrentDay -> colorScheme.surfaceVariant
+        else -> Color.Transparent
       }
-  val textColor =
+  val textColor = colorScheme.onSurface
+  val dayDigitColor =
       when {
-        isSelected -> Color.White
-        isCurrentDay -> Color.White
-        else -> Color.Black
+        isSelected -> colorScheme.onPrimary
+        else -> colorScheme.onSurface
       }
   val dayBackgroundColor =
       when {
-        isSelected -> Color(0xFF0099FF)
-        isCurrentDay -> Color.Gray
+        isSelected -> colorScheme.primary
+        isCurrentDay -> colorScheme.surfaceVariant
         else -> Color.Transparent
       }
 
@@ -566,17 +577,17 @@ fun WeekDayItem(
                     Text(
                         text = date.dayOfMonth.toString(),
                         fontWeight = FontWeight.Bold,
-                        color = textColor)
+                        color = dayDigitColor)
                   }
               Spacer(modifier = Modifier.width(8.dp))
               Text(
-                  text = date.format(DateTimeFormatter.ofPattern("EEEE, MMMM d")),
+                  text = date.format(DateTimeFormatter.ofPattern("EEEE")),
                   fontWeight = FontWeight.Bold,
-                  color = Color.Black)
+                  color = textColor)
             }
         TimeSlots(
             timeSlots = timeSlots,
-            textColor = Color.Black,
+            textColor = colorScheme.onSurface,
             showDescription = false,
             onTimeSlotsChanged = onTimeSlotsChanged)
       }
@@ -585,7 +596,7 @@ fun WeekDayItem(
 @Composable
 fun TimeSlots(
     timeSlots: List<TimeSlot>,
-    textColor: Color = Color.Black,
+    textColor: Color = colorScheme.onSurface,
     showDescription: Boolean = true,
     onTimeSlotsChanged: (List<TimeSlot>) -> Unit
 ) {
@@ -626,18 +637,18 @@ fun TimeSlotItem(
 ) {
   val backgroundColor =
       when (slot.status) {
-        "Available" -> Color(0xFF00C853).copy(alpha = 0.1f)
-        "Unavailable" -> Color(0xFFEC5865).copy(alpha = 0.1f)
-        "Busy" -> Color(0xFF0099FF).copy(alpha = 0.1f)
-        else -> Color.Gray.copy(alpha = 0.1f)
+        "Available" -> Available.copy(alpha = 0.1f)
+        "Unavailable" -> Unavailable.copy(alpha = 0.1f)
+        "Busy" -> Busy.copy(alpha = 0.1f)
+        else -> colorScheme.surfaceVariant.copy(alpha = 0.1f)
       }
 
   val statusColor =
       when (slot.status) {
-        "Available" -> Color(0xFF00C853)
-        "Unavailable" -> Color(0xFFEC5865)
-        "Busy" -> Color(0xFF0099FF)
-        else -> Color.Gray
+        "Available" -> Available
+        "Unavailable" -> Unavailable
+        "Busy" -> Busy
+        else -> colorScheme.surfaceVariant
       }
 
   Column(

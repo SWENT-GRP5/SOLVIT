@@ -16,6 +16,8 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
+import androidx.compose.material3.MaterialTheme.colorScheme
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -91,9 +93,10 @@ fun ProviderInfoScreen(
                       "Advanced leak detection and repair")))
 
   Scaffold(
+      containerColor = colorScheme.surface,
       topBar = { ProviderTopBar(onBackClick = { navigationActions.goBack() }) },
       content = { padding ->
-        Column(modifier = Modifier.padding(padding)) {
+        Column(modifier = Modifier.background(colorScheme.surface).padding(padding)) {
           ProviderHeader(provider)
           ProviderTabs(selectedTabIndex) { newIndex -> selectedTabIndex = newIndex }
 
@@ -121,8 +124,7 @@ fun PackageCard(packageProposal: PackageProposal, isSelected: Boolean, modifier:
       elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
       colors =
           CardDefaults.cardColors(
-              containerColor =
-                  if (!isSelected) MaterialTheme.colorScheme.surface else Color(0xFF1C1651),
+              containerColor = if (!isSelected) colorScheme.surface else colorScheme.secondary,
           )) {
         Column(
             modifier = Modifier.padding(25.dp).fillMaxHeight().testTag("PackageContent"),
@@ -134,24 +136,27 @@ fun PackageCard(packageProposal: PackageProposal, isSelected: Boolean, modifier:
                     text = "$${packageProposal.price}",
                     style =
                         MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-                    color = if (!isSelected) Color(0xFF231D4F) else Color.White)
+                    color =
+                        if (!isSelected) colorScheme.onPrimaryContainer else colorScheme.onPrimary)
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
                     text = "/hour",
                     style = MaterialTheme.typography.bodySmall, // Smaller style for the unit
-                    color = if (!isSelected) Color(0xFF231D4F) else Color.White)
+                    color =
+                        if (!isSelected) colorScheme.onPrimaryContainer else colorScheme.onPrimary)
               }
               // Title of the Package
               Text(
                   text = packageProposal.title,
                   style = MaterialTheme.typography.titleMedium,
-                  color = if (!isSelected) Color(0xFF231D4F) else Color.White)
+                  color =
+                      if (!isSelected) colorScheme.onPrimaryContainer else colorScheme.onPrimary)
               Spacer(modifier = Modifier.height(8.dp))
               // Description of the Package
               Text(
                   text = packageProposal.description,
                   style = MaterialTheme.typography.bodyMedium,
-                  color = if (!isSelected) MaterialTheme.colorScheme.onSurface else Color.White)
+                  color = if (!isSelected) colorScheme.onSurface else colorScheme.onPrimary)
               Spacer(modifier = Modifier.height(8.dp))
               // Important infos about the package
               Column {
@@ -160,14 +165,13 @@ fun PackageCard(packageProposal: PackageProposal, isSelected: Boolean, modifier:
                     Icon(
                         imageVector = Icons.Default.CheckCircle,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
+                        tint = colorScheme.primary,
                         modifier = Modifier.size(16.dp))
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         text = feature,
                         style = MaterialTheme.typography.bodyMedium,
-                        color =
-                            if (!isSelected) MaterialTheme.colorScheme.onSurface else Color.White)
+                        color = if (!isSelected) colorScheme.onSurface else colorScheme.onPrimary)
                   }
                 }
               }
@@ -179,7 +183,7 @@ fun PackageCard(packageProposal: PackageProposal, isSelected: Boolean, modifier:
                   colors =
                       ButtonDefaults.buttonColors(
                           containerColor =
-                              if (isSelected) Color(0xFFBB6BD9) else Color(0xFF49746F)),
+                              if (isSelected) colorScheme.primary else colorScheme.surfaceVariant),
                   modifier = Modifier.align(Alignment.CenterHorizontally)) {
                     Text("Choose plan")
                   }
@@ -222,11 +226,17 @@ fun ProviderPackages(provider: Provider, packages: List<PackageProposal>) {
 fun ProviderTopBar(onBackClick: () -> Unit) {
   val context = LocalContext.current
   Row(
-      modifier = Modifier.fillMaxWidth().background(color = Color.White).testTag("ProviderTopBar"),
+      modifier =
+          Modifier.fillMaxWidth()
+              .background(color = colorScheme.background)
+              .testTag("ProviderTopBar"),
       verticalAlignment = Alignment.CenterVertically) {
         // Back button on the left
         IconButton(onClick = onBackClick, modifier = Modifier.testTag("backButton")) {
-          Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+          Icon(
+              Icons.AutoMirrored.Filled.ArrowBack,
+              contentDescription = "Back",
+              tint = colorScheme.onBackground)
         }
 
         // Title in the center
@@ -235,7 +245,8 @@ fun ProviderTopBar(onBackClick: () -> Unit) {
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.weight(1f).testTag("topBarTitle"),
-            textAlign = TextAlign.Start)
+            textAlign = TextAlign.Start,
+            color = colorScheme.onBackground)
 
         // Menu icon on the right
         IconButton(
@@ -245,51 +256,60 @@ fun ProviderTopBar(onBackClick: () -> Unit) {
                   painter = painterResource(id = R.drawable.menu_icon),
                   contentDescription = "Menu",
                   modifier = Modifier.size(24.dp),
-                  tint = Color.Unspecified)
+                  tint = colorScheme.onBackground)
             }
       }
 }
 
 @Composable
 fun ProviderHeader(provider: Provider) {
-  Box(modifier = Modifier.fillMaxWidth().background(Color.White).testTag("providerHeader")) {
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween) {
-          val context = LocalContext.current
-          Row(verticalAlignment = Alignment.CenterVertically) {
-            AsyncImage(
-                model = if (provider.imageUrl != "") provider.imageUrl else R.drawable.default_pdp,
-                contentDescription = "Profile Picture",
-                contentScale = ContentScale.Crop,
-                modifier =
-                    Modifier.size(128.dp)
-                        .border(2.dp, Color.Transparent, RoundedCornerShape(16.dp))
-                        .clip(RoundedCornerShape(16.dp))
-                        .testTag("providerImage"))
-            Spacer(modifier = Modifier.width(16.dp))
-            Column {
-              Text(
-                  text = provider.name,
-                  fontSize = 20.sp,
-                  fontWeight = FontWeight.Bold,
-                  modifier = Modifier.testTag("providerName"))
-              Text(
-                  text = provider.companyName,
-                  color = Color.Gray,
-                  modifier = Modifier.testTag("providerCompanyName"))
-            }
-          }
-
-          // Share icon on the right
-          IconButton(
-              onClick = { Toast.makeText(context, "Not implemented", Toast.LENGTH_SHORT).show() },
-              modifier = Modifier.testTag("shareButton")) {
-                Icon(Icons.Default.Share, contentDescription = "Share")
+  Box(
+      modifier =
+          Modifier.fillMaxWidth().background(colorScheme.background).testTag("providerHeader")) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween) {
+              val context = LocalContext.current
+              Row(verticalAlignment = Alignment.CenterVertically) {
+                AsyncImage(
+                    model =
+                        if (provider.imageUrl != "") provider.imageUrl else R.drawable.default_pdp,
+                    contentDescription = "Profile Picture",
+                    contentScale = ContentScale.Crop,
+                    modifier =
+                        Modifier.size(128.dp)
+                            .border(2.dp, Color.Transparent, RoundedCornerShape(16.dp))
+                            .clip(RoundedCornerShape(16.dp))
+                            .testTag("providerImage"))
+                Spacer(modifier = Modifier.width(16.dp))
+                Column {
+                  Text(
+                      text = provider.name,
+                      fontSize = 20.sp,
+                      fontWeight = FontWeight.Bold,
+                      modifier = Modifier.testTag("providerName"),
+                      color = colorScheme.onBackground)
+                  Text(
+                      text = provider.companyName,
+                      color = colorScheme.onSurfaceVariant,
+                      modifier = Modifier.testTag("providerCompanyName"))
+                }
               }
-        }
-  }
+
+              // Share icon on the right
+              IconButton(
+                  onClick = {
+                    Toast.makeText(context, "Not implemented", Toast.LENGTH_SHORT).show()
+                  },
+                  modifier = Modifier.testTag("shareButton")) {
+                    Icon(
+                        Icons.Default.Share,
+                        contentDescription = "Share",
+                        tint = colorScheme.onBackground)
+                  }
+            }
+      }
 }
 
 @Composable
@@ -297,25 +317,50 @@ fun ProviderTabs(selectedTabIndex: Int, onTabSelected: (Int) -> Unit) {
   TabRow(
       selectedTabIndex = selectedTabIndex,
       modifier = Modifier.fillMaxWidth().testTag("providerTabs"),
-      containerColor = Color(0xFF0099FF),
-      contentColor = Color.White) {
+      containerColor = colorScheme.primary,
+      contentColor = colorScheme.onPrimary,
+      indicator = { tabPositions ->
+        TabRowDefaults.Indicator(
+            modifier = Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
+            height = 3.dp,
+            color = colorScheme.onPrimary)
+      }) {
         Tab(
             selected = selectedTabIndex == 0,
             onClick = { onTabSelected(0) },
-            modifier = Modifier.testTag("profileTab")) {
-              Text("Profile", modifier = Modifier.padding(16.dp))
-            }
+            modifier = Modifier.testTag("profileTab"),
+        ) {
+          Text(
+              "Profile",
+              modifier = Modifier.padding(16.dp),
+              color =
+                  if (selectedTabIndex == 0) colorScheme.onPrimary
+                  else colorScheme.onPrimary.copy(alpha = 0.6f),
+              fontWeight = if (selectedTabIndex == 0) FontWeight.Bold else FontWeight.Normal)
+        }
         Tab(
             selected = selectedTabIndex == 1,
             onClick = { onTabSelected(1) },
             modifier = Modifier.testTag("packagesTab")) {
-              Text("Packages", modifier = Modifier.padding(16.dp))
+              Text(
+                  "Packages",
+                  modifier = Modifier.padding(16.dp),
+                  color =
+                      if (selectedTabIndex == 1) colorScheme.onPrimary
+                      else colorScheme.onPrimary.copy(alpha = 0.6f),
+                  fontWeight = if (selectedTabIndex == 1) FontWeight.Bold else FontWeight.Normal)
             }
         Tab(
             selected = selectedTabIndex == 2,
             onClick = { onTabSelected(2) },
             modifier = Modifier.testTag("reviewsTab")) {
-              Text("Reviews", modifier = Modifier.padding(16.dp))
+              Text(
+                  "Reviews",
+                  modifier = Modifier.padding(16.dp),
+                  color =
+                      if (selectedTabIndex == 2) colorScheme.onPrimary
+                      else colorScheme.onPrimary.copy(alpha = 0.6f),
+                  fontWeight = if (selectedTabIndex == 2) FontWeight.Bold else FontWeight.Normal)
             }
       }
 }
@@ -326,7 +371,7 @@ fun ProviderDetails(provider: Provider, reviews: List<Review>) {
       modifier =
           Modifier.padding(16.dp)
               .fillMaxWidth()
-              .background(color = Color.Transparent, shape = RoundedCornerShape(16.dp))
+              .background(color = colorScheme.surface, shape = RoundedCornerShape(16.dp))
               .testTag("providerDetails")) {
         Rubric(modifier = Modifier.testTag("detailsSection")) {
           Row(
@@ -336,21 +381,25 @@ fun ProviderDetails(provider: Provider, reviews: List<Review>) {
                 RatingStars(provider.rating.toInt())
                 Text(
                     text = "${reviews.size} Reviews",
-                    color = Color.Gray,
+                    color = colorScheme.onSurfaceVariant,
                     modifier = Modifier.testTag("reviewsCount"))
                 Text(
                     text = "15 Jobs", // Replace with actual job count
-                    color = Color.Gray,
+                    color = colorScheme.onSurfaceVariant,
                     modifier = Modifier.testTag("jobsCount"))
               }
 
           Spacer(modifier = Modifier.height(8.dp))
 
-          Text("Refrigerator repair", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+          Text(
+              "Refrigerator repair",
+              fontSize = 18.sp,
+              fontWeight = FontWeight.Bold,
+              color = colorScheme.onBackground)
           Text(
               text = "CHF ${provider.price}/hour",
               fontSize = 16.sp,
-              color = Color.Gray,
+              color = colorScheme.onSurfaceVariant,
               modifier = Modifier.padding(vertical = 4.dp).testTag("priceDisplay"))
         }
 
@@ -360,7 +409,8 @@ fun ProviderDetails(provider: Provider, reviews: List<Review>) {
             text = "Descriptions",
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.testTag("descriptionTitle"))
+            modifier = Modifier.testTag("descriptionTitle"),
+            color = colorScheme.onBackground)
 
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -368,7 +418,7 @@ fun ProviderDetails(provider: Provider, reviews: List<Review>) {
           Text(
               text = provider.description,
               modifier = Modifier.padding(vertical = 4.dp).testTag("descriptionText"),
-              color = Color.Gray,
+              color = colorScheme.onSurfaceVariant,
               fontWeight = FontWeight.Medium)
         }
 
@@ -378,7 +428,8 @@ fun ProviderDetails(provider: Provider, reviews: List<Review>) {
             text = "Contact",
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.testTag("contactTitle"))
+            modifier = Modifier.testTag("contactTitle"),
+            color = colorScheme.onBackground)
 
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -393,11 +444,9 @@ fun ProviderDetails(provider: Provider, reviews: List<Review>) {
                     tint = Color.Unspecified)
                 Text(
                     text =
-                        "The contractor's contacts are visible only to its customers." +
-                            "If you are interested in the services of this contractor" +
-                            " - offer him an order.",
+                        "The contractor's contacts are visible only to its customers. If you are interested in the services of this contractor - offer him an order.",
                     modifier = Modifier.padding(vertical = 4.dp).testTag("contactText"),
-                    color = Color.Gray,
+                    color = colorScheme.onSurfaceVariant,
                     fontWeight = FontWeight.Medium)
               }
         }
@@ -410,7 +459,7 @@ fun Rubric(modifier: Modifier = Modifier, content: @Composable ColumnScope.() ->
       modifier =
           modifier
               .fillMaxWidth()
-              .background(color = Color.White, shape = RoundedCornerShape(16.dp))
+              .background(color = colorScheme.background, shape = RoundedCornerShape(16.dp))
               .border(width = 2.dp, color = Color.Transparent, shape = RoundedCornerShape(16.dp))
               .padding(16.dp)) {
         content()
@@ -423,11 +472,11 @@ fun ProviderReviews(provider: Provider, reviews: List<Review>) {
       modifier =
           Modifier.padding(16.dp)
               .fillMaxWidth()
-              .background(color = Color.Transparent, shape = RoundedCornerShape(16.dp))
+              .background(color = colorScheme.surface, shape = RoundedCornerShape(16.dp))
               .testTag("providerReviews")) {
         Column(
             Modifier.fillMaxWidth()
-                .background(color = Color.White, shape = RoundedCornerShape(16.dp))
+                .background(color = colorScheme.background, shape = RoundedCornerShape(16.dp))
                 .border(width = 2.dp, color = Color.Transparent, shape = RoundedCornerShape(16.dp))
                 .padding(16.dp)
                 .testTag("reviewsOverview")) {
@@ -435,7 +484,7 @@ fun ProviderReviews(provider: Provider, reviews: List<Review>) {
                   "Overall",
                   fontSize = 18.sp,
                   fontWeight = FontWeight.Bold,
-                  color = Color.Gray,
+                  color = colorScheme.onSurfaceVariant,
                   modifier = Modifier.testTag("overallTitle"))
 
               Spacer(modifier = Modifier.height(8.dp))
@@ -444,7 +493,11 @@ fun ProviderReviews(provider: Provider, reviews: List<Review>) {
                   verticalAlignment = Alignment.CenterVertically,
                   horizontalArrangement = Arrangement.SpaceBetween,
                   modifier = Modifier.fillMaxWidth().testTag("overallRating")) {
-                    Text(provider.rating.toString(), fontSize = 35.sp, fontWeight = FontWeight.Bold)
+                    Text(
+                        provider.rating.toString(),
+                        fontSize = 35.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = colorScheme.onBackground)
                     RatingStars(provider.rating.toInt())
                   }
 
@@ -453,7 +506,7 @@ fun ProviderReviews(provider: Provider, reviews: List<Review>) {
               Text(
                   "${reviews.size} " + if (reviews.size > 1) "Reviews" else "Review",
                   modifier = Modifier.padding(vertical = 4.dp),
-                  color = Color.Gray)
+                  color = colorScheme.onSurfaceVariant)
             }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -462,13 +515,19 @@ fun ProviderReviews(provider: Provider, reviews: List<Review>) {
             "Reviews",
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.testTag("reviewsTitle"))
+            modifier = Modifier.testTag("reviewsTitle"),
+            color = colorScheme.onBackground)
 
         Spacer(modifier = Modifier.height(8.dp))
 
         LazyColumn {
           if (reviews.isEmpty()) {
-            item { Text("No reviews yet", modifier = Modifier.padding(16.dp), color = Color.Gray) }
+            item {
+              Text(
+                  "No reviews yet",
+                  modifier = Modifier.padding(16.dp),
+                  color = colorScheme.onSurfaceVariant)
+            }
           }
           items(reviews) { review -> ReviewRow(review) }
         }
@@ -480,7 +539,7 @@ fun ReviewRow(review: Review) {
   Column(
       Modifier.fillMaxWidth()
           .padding(top = 16.dp)
-          .background(color = Color.White, shape = RoundedCornerShape(16.dp))
+          .background(color = colorScheme.background, shape = RoundedCornerShape(16.dp))
           .border(width = 2.dp, color = Color.Transparent, shape = RoundedCornerShape(16.dp))
           .padding(4.dp)
           .testTag("reviewRow")) {
@@ -502,7 +561,7 @@ fun ReviewRow(review: Review) {
         Text(
             review.comment,
             modifier = Modifier.padding(vertical = 4.dp).testTag("reviewComment"),
-            color = Color.Gray)
+            color = colorScheme.onSurfaceVariant)
       }
 }
 
@@ -516,7 +575,7 @@ fun RatingStars(rating: Int) {
           painter = painterResource(id = R.drawable.star),
           modifier = Modifier.size(24.dp),
           contentDescription = "Rating Star",
-          tint = if (index < rating) Color(0xFF0099FF) else Color.Gray)
+          tint = if (index < rating) colorScheme.primary else colorScheme.onSurfaceVariant)
     }
   }
 }
@@ -525,18 +584,22 @@ fun RatingStars(rating: Int) {
 fun BottomBar() {
   val context = LocalContext.current
   Row(
-      modifier = Modifier.fillMaxWidth().testTag("bottomBar"),
+      modifier = Modifier.background(colorScheme.surface).fillMaxWidth().testTag("bottomBar"),
       horizontalArrangement = Arrangement.Center) {
         Button(
             modifier =
                 Modifier.padding(16.dp)
                     .clip(RoundedCornerShape(16.dp))
-                    .background(Color(0xFF0099FF))
+                    .background(colorScheme.primary)
                     .size(200.dp, 50.dp)
                     .testTag("bookNowButton"),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0099FF)),
+            colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
             onClick = { Toast.makeText(context, "Not implemented", Toast.LENGTH_SHORT).show() }) {
-              Text("Book Now", color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.Bold)
+              Text(
+                  "Book Now",
+                  color = colorScheme.onPrimary,
+                  fontSize = 24.sp,
+                  fontWeight = FontWeight.Bold)
             }
       }
 }
