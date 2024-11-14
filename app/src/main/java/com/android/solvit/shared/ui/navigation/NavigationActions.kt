@@ -125,11 +125,7 @@ open class NavigationActions(
    * @param screen The screen to navigate to
    */
   open fun navigateTo(screen: String) {
-    navController.navigate(screen) {
-        popUpTo(navController.graph.startDestinationId) { saveState = true }
-            launchSingleTop = true
-            restoreState = true
-    }
+    navController.navigate(screen)
   }
 
   /** Navigate back to the previous screen. */
