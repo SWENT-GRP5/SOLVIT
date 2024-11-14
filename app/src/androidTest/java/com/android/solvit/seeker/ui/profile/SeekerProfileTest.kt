@@ -58,6 +58,14 @@ class SeekerProfileTest {
     composeTestRule.onNodeWithTag("ProfileTopBar").isDisplayed()
     composeTestRule.onNodeWithTag("ProfileContent").isDisplayed()
     composeTestRule.onNodeWithTag("EditProfileButton").isDisplayed()
+    composeTestRule.onNodeWithTag("MyAccountOption").isDisplayed()
+    composeTestRule.onNodeWithTag("ProfileOptionsList").isDisplayed()
+    composeTestRule.onNodeWithTag("OrdersOption").isDisplayed()
+    composeTestRule.onNodeWithTag("BillingOption").isDisplayed()
+    composeTestRule.onNodeWithTag("PreferencesOption").isDisplayed()
+    composeTestRule.onNodeWithTag("PreferencesOption").isDisplayed()
+    composeTestRule.onNodeWithTag("HelpSupportOption").isDisplayed()
+    composeTestRule.onNodeWithTag("AboutAppOption").isDisplayed()
   }
 
   @Test

@@ -1,10 +1,11 @@
 package com.android.solvit
 
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.navigation.NavHostController
@@ -28,16 +29,17 @@ import com.android.solvit.shared.model.review.ReviewRepository
 import com.android.solvit.shared.model.review.ReviewRepositoryFirestore
 import com.android.solvit.shared.model.review.ReviewViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
-import com.android.solvit.shared.ui.navigation.Screen
+import com.android.solvit.shared.ui.navigation.TopLevelDestinations
 import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
-import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.database
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
+import com.google.firebase.firestore.firestore
+import com.google.firebase.firestore.firestoreSettings
 import com.google.firebase.storage.storage
-import junit.framework.TestCase.assertEquals
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -47,7 +49,7 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
 import org.mockito.kotlin.anyOrNull
 
-class EndToEndTestCreateProfile {
+class EndToEndSeekerCreateRequest {
 
   private lateinit var authViewModel: AuthViewModel
   private lateinit var listProviderViewModel: ListProviderViewModel
@@ -65,25 +67,26 @@ class EndToEndTestCreateProfile {
 
   private lateinit var navHostController: NavHostController
   private lateinit var navigationActions: NavigationActions
-  private val locations =
-      listOf(
-          Location(37.7749, -122.4194, "San Francisco"),
-          Location(34.0522, -118.2437, "Los Angeles"),
-          Location(40.7128, -74.0060, "New York"))
+
+  private val email = "test@test.ch"
+  private val password = "password"
+
+  private val locations = listOf(Location(37.7749, -122.4194, "San Francisco"))
 
   @get:Rule val composeTestRule = createComposeRule()
 
   @Before
   fun setUp() {
-    // Initialize Firebase App
-    val firestore = FirebaseFirestore.getInstance()
-    firestore.useEmulator("10.0.2.2", 8080)
-    FirebaseAuth.getInstance().useEmulator("10.0.2.2", 9099)
-
-    val database = FirebaseDatabase.getInstance()
+    val database = Firebase.database
     database.useEmulator("10.0.2.2", 9000)
-    firestore.firestoreSettings =
-        FirebaseFirestoreSettings.Builder().setPersistenceEnabled(false).build()
+
+    val auth = Firebase.auth
+    auth.useEmulator("10.0.2.2", 9099)
+
+    val firestore = Firebase.firestore
+    firestore.useEmulator("10.0.2.2", 8080)
+
+    firestore.firestoreSettings = firestoreSettings { isPersistenceEnabled = false }
 
     val storage = Firebase.storage
     storage.useEmulator("10.0.2.2", 9199)
@@ -107,6 +110,17 @@ class EndToEndTestCreateProfile {
           val onSuccess = invocation.getArgument<(List<Location>) -> Unit>(1)
           onSuccess(locations)
         }
+
+    authViewModel.setEmail(email)
+    authViewModel.setPassword(password)
+    authViewModel.setRole("seeker")
+    authViewModel.registerWithEmailAndPassword(
+        onSuccess = { authViewModel.logout {} }, onFailure = {})
+    serviceRequestRepository.getServiceRequests(
+        onSuccess = { requests ->
+          requests.forEach { serviceRequestViewModel.deleteServiceRequestById(it.uid) }
+        },
+        onFailure = {})
   }
 
   @After
@@ -125,13 +139,13 @@ class EndToEndTestCreateProfile {
   }
 
   @Test
-  fun CreateSeekerProfile() {
+  fun CreateServiceRequest() {
     composeTestRule.setContent {
       navHostController = rememberNavController()
       navigationActions = NavigationActions(navHostController)
 
-      val userRegistered = authViewModel.userRegistered.collectAsState()
       val user = authViewModel.user.collectAsState()
+      val userRegistered = authViewModel.userRegistered.collectAsState()
 
       if (!userRegistered.value) {
         SharedUI(
@@ -156,50 +170,57 @@ class EndToEndTestCreateProfile {
       }
     }
 
+    // Login
     composeTestRule.onNodeWithTag("ctaButtonPortrait").performClick()
 
-    assertEquals(Screen.SIGN_IN, navHostController.currentDestination?.route)
-    composeTestRule.onNodeWithTag("signUpLink").performClick()
-
-    assertEquals(Screen.SIGN_UP, navHostController.currentDestination?.route)
-    val email = "e2eTest20@test.com"
-    val password = "password"
-
-    composeTestRule.onNodeWithTag("emailInputField").performTextInput(email)
-    composeTestRule.onNodeWithTag("passwordInputField").performTextInput(password)
-    composeTestRule.onNodeWithTag("confirmPasswordInputField").performTextInput(password)
-    composeTestRule.onNodeWithTag("signUpButton").performClick()
-    assertEquals(email, authViewModel.email.value)
-    assertEquals(password, authViewModel.password.value)
-
-    assertEquals(Screen.SIGN_UP_CHOOSE_ROLE, navHostController.currentDestination?.route)
-    composeTestRule.onNodeWithTag("seekerButton").performClick()
-    assertEquals("seeker", authViewModel.role.value)
-
     composeTestRule.waitUntil(timeoutMillis = 10000) {
-      composeTestRule.onNodeWithTag("fullNameInput").isDisplayed()
+      composeTestRule.onNodeWithTag("loginImage").isDisplayed()
     }
-    composeTestRule.onNodeWithTag("fullNameInput").performTextInput("John Doe")
-    composeTestRule.onNodeWithTag("userNameInput").performTextInput("JohnDoe123")
-    composeTestRule.onNodeWithTag("phoneNumberInput").performTextInput("123456789")
-    composeTestRule.onNodeWithTag("inputRequestAddress").performTextInput("EPFL")
-    composeTestRule.waitUntil { locationViewModel.locationSuggestions.value.isNotEmpty() }
-    composeTestRule.onAllNodesWithTag("locationResult")[0].performClick()
 
-    composeTestRule.onNodeWithTag("completeRegistrationButton").performClick()
-    composeTestRule.onNodeWithTag("savePreferencesButton").performClick()
-    composeTestRule.onNodeWithTag("exploreServicesButton").performClick()
+    composeTestRule.onNodeWithTag("emailInput").performTextInput(email)
+    composeTestRule.onNodeWithTag("passwordInput").performTextInput(password)
+    composeTestRule.onNodeWithTag("signInButton").performClick()
 
+    // Wait for the services screen to be displayed
     composeTestRule.waitUntil(timeoutMillis = 10000) {
       composeTestRule.onNodeWithTag("servicesScreen").isDisplayed()
     }
-    composeTestRule.onNodeWithTag("servicesScreenCurrentLocation").performClick()
 
-    composeTestRule.onNodeWithTag("servicesScreenProfileImage").performClick()
+    // Navigate to the requests overview screen
+    composeTestRule.onNodeWithTag(TopLevelDestinations.REQUESTS_OVERVIEW.textId).performClick()
+    composeTestRule.waitUntil {
+      composeTestRule.onNodeWithTag("requestsOverviewScreen").isDisplayed()
+    }
+    composeTestRule.onNodeWithTag("noServiceRequestsScreen").assertIsDisplayed()
+
+    // Create a new request
+    composeTestRule.onNodeWithTag(TopLevelDestinations.CREATE_REQUEST.toString()).performClick()
+
     composeTestRule.waitUntil(timeoutMillis = 10000) {
-      composeTestRule.onNodeWithTag("ProfileTopBar").isDisplayed()
+      composeTestRule.onNodeWithTag("requestScreen").isDisplayed()
     }
 
-    Firebase.auth.currentUser?.delete()
+    composeTestRule.onNodeWithTag("inputRequestTitle").performTextInput("Test Request")
+    composeTestRule.onNodeWithTag("inputServiceType").performTextInput("PLUMBER")
+    composeTestRule.waitUntil(timeoutMillis = 10000) {
+      composeTestRule.onNodeWithTag("serviceTypeMenu").isDisplayed()
+    }
+    composeTestRule.onNodeWithTag("serviceTypeResult").performClick()
+    composeTestRule.onNodeWithTag("inputRequestDescription").performTextInput("Test Description")
+    composeTestRule.onNodeWithTag("inputRequestAddress").performTextInput("test")
+    composeTestRule.waitUntil(timeoutMillis = 10000) {
+      locationViewModel.locationSuggestions.value.isNotEmpty()
+    }
+    composeTestRule.onNodeWithTag("locationResult").performClick()
+    composeTestRule.onNodeWithTag("inputRequestDate").performClick()
+    composeTestRule.onNodeWithTag("datePickerDialog").performClick()
+    composeTestRule.onNodeWithText("OK").performClick()
+
+    composeTestRule.onNodeWithTag("requestSubmit").performClick()
+
+    // Assert the requests to be displayed
+    composeTestRule.waitUntil(timeoutMillis = 10000) {
+      composeTestRule.onNodeWithTag("requestsList").isDisplayed()
+    }
   }
 }

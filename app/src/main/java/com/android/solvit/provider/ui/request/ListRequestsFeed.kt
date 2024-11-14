@@ -399,7 +399,7 @@ fun ListRequestsFeedScreen(
       topBar = { RequestsTopBar() },
       bottomBar = {
         BottomNavigationMenu(
-            onTabSelect = { route -> navigationActions.navigateTo(route) },
+            onTabSelect = { navigationActions.navigateTo(it.route) },
             tabList = LIST_TOP_LEVEL_DESTINATION_PROVIDER,
             selectedItem = navigationActions.currentRoute())
       }) { paddingValues ->

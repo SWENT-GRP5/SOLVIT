@@ -104,12 +104,11 @@ jobs:
 
       - name: Install Firebase CLI
         run: |
-              curl -sL https://firebase.tools | bash
+          curl -sL https://firebase.tools | bash
 
       - name: Start Firebase emulators
         run: |
-              nohup firebase emulators:start --only auth,firestore,storage & sleep 10
-
+          nohup firebase emulators:start --only auth,firestore,database,storage & sleep 10
 
       - name: Grant execute permission for gradlew
         run: |
@@ -125,7 +124,6 @@ jobs:
         run: |
           # To run the CI with debug information, add --info
           ./gradlew assemble lint --parallel --build-cache
-
 
       # Run Unit tests
       - name: Run tests

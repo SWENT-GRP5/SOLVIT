@@ -49,7 +49,6 @@ import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.ui.navigation.NavigationActions
-import com.android.solvit.shared.ui.navigation.Route
 
 @Composable
 fun ProviderProfileScreen(
@@ -92,7 +91,7 @@ fun ProfileHeader(
               verticalArrangement = Arrangement.Bottom) {
                 Box {
                   IconButton(
-                      onClick = { navigationActions.navigateTo(Route.REQUESTS_FEED) },
+                      onClick = { navigationActions.goBack() },
                       modifier = Modifier.testTag("backButton")) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
