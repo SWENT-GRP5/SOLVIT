@@ -114,7 +114,9 @@ fun TopSection(
       modifier =
           Modifier.fillMaxWidth()
               .background(
-                  Purple80, shape = RoundedCornerShape(bottomEnd = 16.dp, bottomStart = 16.dp))
+                  colorScheme.primary,
+                  shape = RoundedCornerShape(bottomEnd = 16.dp, bottomStart = 16.dp))
+              .padding(16.dp)
               .testTag("servicesScreenTopSection"),
       verticalArrangement = Arrangement.spacedBy(16.dp),
       horizontalAlignment = Alignment.CenterHorizontally) {
@@ -368,7 +370,8 @@ fun ProviderItem(provider: Provider, onClick: () -> Unit) {
                 Row(
                     modifier =
                         Modifier.align(Alignment.End)
-                            .background(Color.LightGray, RoundedCornerShape(8.dp)),
+                            .background(colorScheme.primaryContainer, RoundedCornerShape(8.dp))
+                            .padding(2.dp),
                     verticalAlignment = Alignment.CenterVertically) {
                       Text(text = provider.rating.toString(), fontWeight = FontWeight.Bold)
                       Icon(
