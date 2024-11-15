@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
-import com.android.solvit.shared.model.jobs.Job
+import com.android.solvit.shared.model.request.ServiceRequest
 import com.google.android.gms.maps.model.LatLng
 
 fun navigateToSingleJob(context: Context, jobLatitude: Double, jobLongitude: Double) {
@@ -22,24 +22,27 @@ fun navigateToSingleJob(context: Context, jobLatitude: Double, jobLongitude: Dou
   }
 }
 
-fun navigateToAllSortedJobs(context: Context, currentLocation: LatLng, jobs: List<Job>) {
-  if (jobs.isEmpty()) {
+fun navigateToAllSortedJobs(
+    context: Context,
+    currentLocation: LatLng,
+    requests: List<ServiceRequest>
+) {
+  if (requests.isEmpty()) {
     Toast.makeText(context, "No jobs available for navigation", Toast.LENGTH_SHORT).show()
     return
   }
 
   // Ensure jobs are sorted by date and time for optimal routing
-  val sortedJobs = jobs.sortedWith(compareBy({ it.date }, { it.time }))
+  val sortedJobs = requests.sortedWith(compareBy({ it.dueDate }))
 
   // Format the current location, destination, and waypoints for the Google Maps URL
   val origin = "${currentLocation.latitude},${currentLocation.longitude}"
   val destination =
       "${sortedJobs.last().location!!.latitude},${sortedJobs.last().location!!.longitude}"
   val waypoints =
-      sortedJobs
-          .dropLast(1)
-          .mapNotNull { job -> job.location!!.let { "${it.latitude},${it.longitude}" } }
-          .joinToString("|")
+      sortedJobs.dropLast(1).joinToString("|") { job ->
+        job.location!!.let { "${it.latitude},${it.longitude}" }
+      }
 
   // Construct the Google Maps URL with optimized waypoints
   val uri =

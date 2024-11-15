@@ -51,41 +51,6 @@ class ServiceRequestRepositoryFirebase(
     }
   }
 
-  override fun getPendingServiceRequests(
-      onSuccess: (List<ServiceRequest>) -> Unit,
-      onFailure: (Exception) -> Unit
-  ) {
-    getServiceRequestsByStatus(ServiceRequestStatus.PENDING, onSuccess, onFailure)
-  }
-
-  override fun getAcceptedServiceRequests(
-      onSuccess: (List<ServiceRequest>) -> Unit,
-      onFailure: (Exception) -> Unit
-  ) {
-    getServiceRequestsByStatus(ServiceRequestStatus.ACCEPTED, onSuccess, onFailure)
-  }
-
-  override fun getScheduledServiceRequests(
-      onSuccess: (List<ServiceRequest>) -> Unit,
-      onFailure: (Exception) -> Unit
-  ) {
-    getServiceRequestsByStatus(ServiceRequestStatus.SCHEDULED, onSuccess, onFailure)
-  }
-
-  override fun getCompletedServiceRequests(
-      onSuccess: (List<ServiceRequest>) -> Unit,
-      onFailure: (Exception) -> Unit
-  ) {
-    getServiceRequestsByStatus(ServiceRequestStatus.COMPLETED, onSuccess, onFailure)
-  }
-
-  override fun getArchivedServiceRequests(
-      onSuccess: (List<ServiceRequest>) -> Unit,
-      onFailure: (Exception) -> Unit
-  ) {
-    getServiceRequestsByStatus(ServiceRequestStatus.ARCHIVED, onSuccess, onFailure)
-  }
-
   override fun saveServiceRequest(
       serviceRequest: ServiceRequest,
       onSuccess: () -> Unit,
@@ -189,23 +154,5 @@ class ServiceRequestRepositoryFirebase(
               .addOnFailureListener { exception -> onFailure(exception) }
         }
         .addOnFailureListener { exception -> onFailure(exception) }
-  }
-
-  private fun getServiceRequestsByStatus(
-      status: ServiceRequestStatus,
-      onSuccess: (List<ServiceRequest>) -> Unit,
-      onFailure: (Exception) -> Unit
-  ) {
-    db.collection(collectionPath).whereEqualTo("status", status.name).get().addOnCompleteListener {
-        result ->
-      if (result.isSuccessful) {
-        val serviceRequests =
-            result.result?.mapNotNull { documentToServiceRequest(it) } ?: emptyList()
-        onSuccess(serviceRequests)
-      } else {
-        val exception = result.exception ?: Exception("Unknown error")
-        onFailure(exception)
-      }
-    }
   }
 }

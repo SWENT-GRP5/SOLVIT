@@ -7,6 +7,9 @@ import androidx.lifecycle.ViewModelProvider
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.storage
+import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.util.Locale
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -33,7 +36,14 @@ open class ServiceRequestViewModel(private val repository: ServiceRequestReposit
   val archivedRequests: StateFlow<List<ServiceRequest>> = _archivedRequests
 
   init {
-    repository.init { getServiceRequests() }
+    repository.init {
+      getServiceRequests()
+      getPendingRequests()
+      getAcceptedRequests()
+      getScheduledRequests()
+      getCompletedRequests()
+      getArchivedRequests()
+    }
   }
 
   // Create factory
@@ -61,44 +71,26 @@ open class ServiceRequestViewModel(private val repository: ServiceRequestReposit
         })
   }
 
-  fun getPendingRequests() {
-    repository.getPendingServiceRequests(
-        onSuccess = { _pendingRequests.value = it },
-        onFailure = { exception ->
-          Log.e("ServiceRequestViewModel", "Error fetching ServiceRequests", exception)
-        })
+  private fun getPendingRequests() {
+    _pendingRequests.value = _requests.value.filter { it.status == ServiceRequestStatus.PENDING }
   }
 
-  fun getAcceptedRequests() {
-    repository.getAcceptedServiceRequests(
-        onSuccess = { _acceptedRequests.value = it },
-        onFailure = { exception ->
-          Log.e("ServiceRequestViewModel", "Error fetching ServiceRequests", exception)
-        })
+  private fun getAcceptedRequests() {
+    _acceptedRequests.value = _requests.value.filter { it.status == ServiceRequestStatus.ACCEPTED }
   }
 
-  fun getScheduledRequests() {
-    repository.getScheduledServiceRequests(
-        onSuccess = { _scheduledRequests.value = it },
-        onFailure = { exception ->
-          Log.e("ServiceRequestViewModel", "Error fetching ServiceRequests", exception)
-        })
+  private fun getScheduledRequests() {
+    _scheduledRequests.value =
+        _requests.value.filter { it.status == ServiceRequestStatus.SCHEDULED }
   }
 
-  fun getCompletedRequests() {
-    repository.getCompletedServiceRequests(
-        onSuccess = { _completedRequests.value = it },
-        onFailure = { exception ->
-          Log.e("ServiceRequestViewModel", "Error fetching ServiceRequests", exception)
-        })
+  private fun getCompletedRequests() {
+    _completedRequests.value =
+        _requests.value.filter { it.status == ServiceRequestStatus.COMPLETED }
   }
 
-  fun getArchivedRequests() {
-    repository.getArchivedServiceRequests(
-        onSuccess = { _archivedRequests.value = it },
-        onFailure = { exception ->
-          Log.e("ServiceRequestViewModel", "Error fetching ServiceRequests", exception)
-        })
+  private fun getArchivedRequests() {
+    _archivedRequests.value = _requests.value.filter { it.status == ServiceRequestStatus.ARCHIVED }
   }
 
   fun saveServiceRequest(serviceRequest: ServiceRequest) {
@@ -131,5 +123,41 @@ open class ServiceRequestViewModel(private val repository: ServiceRequestReposit
 
   fun selectRequest(serviceRequest: ServiceRequest) {
     _selectedRequest.value = serviceRequest
+  }
+
+  fun unConfirmRequest(serviceRequest: ServiceRequest) {
+    saveServiceRequest(serviceRequest.copy(status = ServiceRequestStatus.PENDING))
+  }
+
+  fun confirmRequest(serviceRequest: ServiceRequest) {
+    saveServiceRequest(serviceRequest.copy(status = ServiceRequestStatus.ACCEPTED))
+  }
+
+  fun scheduleRequest(serviceRequest: ServiceRequest) {
+    saveServiceRequest(serviceRequest.copy(status = ServiceRequestStatus.SCHEDULED))
+  }
+
+  fun completeRequest(serviceRequest: ServiceRequest) {
+    saveServiceRequest(serviceRequest.copy(status = ServiceRequestStatus.COMPLETED))
+  }
+
+  fun archiveRequest(serviceRequest: ServiceRequest) {
+    saveServiceRequest(serviceRequest.copy(status = ServiceRequestStatus.ARCHIVED))
+  }
+
+  fun getTodayScheduledRequests(): List<ServiceRequest> {
+    val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+    val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+    val today = dateFormat.format(LocalDate.now())
+    return _scheduledRequests.value
+        .filter {
+          val date = dateFormat.format(it.meetingDate?.toDate() ?: it.dueDate.toDate())
+
+          date == today
+        }
+        .sortedBy {
+          val time = timeFormat.format(it.meetingDate?.toDate() ?: it.dueDate.toDate())
+          time
+        }
   }
 }
