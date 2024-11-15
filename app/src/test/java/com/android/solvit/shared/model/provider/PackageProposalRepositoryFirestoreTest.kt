@@ -1,6 +1,8 @@
 package com.android.solvit.shared.model.provider
 
 import androidx.test.core.app.ApplicationProvider
+import com.android.solvit.shared.model.packages.PackageProposal
+import com.android.solvit.shared.model.packages.PackageProposalRepositoryFirestore
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.FirebaseApp
 import com.google.firebase.firestore.CollectionReference

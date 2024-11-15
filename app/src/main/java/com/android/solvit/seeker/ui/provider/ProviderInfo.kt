@@ -65,7 +65,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.android.solvit.R
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
-import com.android.solvit.shared.model.provider.PackageProposal
+import com.android.solvit.shared.model.packages.PackageProposal
 import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.review.Review
 import com.android.solvit.shared.model.review.ReviewViewModel

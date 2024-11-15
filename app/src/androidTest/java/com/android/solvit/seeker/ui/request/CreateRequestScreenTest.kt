@@ -51,15 +51,15 @@ class CreateRequestScreenTest {
 
   private val serviceRequest =
       ServiceRequest(
-          "uid",
-          "title",
-          Services.CLEANER,
-          "description",
-          "-1",
-          Timestamp(GregorianCalendar(2024, 0, 1).time),
-          Location(37.7749, -122.4194, "San Francisco"),
-          "imageUrl",
-          ServiceRequestStatus.PENDING)
+          uid = "uid",
+          title = "title",
+          type = Services.CLEANER,
+          description = "description",
+          userId = "-1",
+          dueDate = Timestamp(GregorianCalendar(2024, 0, 1).time),
+          location = Location(37.7749, -122.4194, "San Francisco"),
+          imageUrl = "imageUrl",
+          status = ServiceRequestStatus.PENDING)
 
   @Before
   fun setUp() {

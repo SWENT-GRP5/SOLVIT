@@ -24,10 +24,14 @@ class ServiceRequestViewModelTest {
           title = "Test Request",
           description = "Test Description",
           userId = "1",
+          providerId = "1",
           dueDate = Timestamp.now(),
+          meetingDate = Timestamp.now(),
           location = Location(name = "EPFL", latitude = 0.0, longitude = 0.0),
           imageUrl = null,
-          type = Services.CLEANER,
+          packageId = "1",
+          agreedPrice = 200.15,
+          type = Services.PLUMBER,
           status = ServiceRequestStatus.PENDING)
 
   @Before

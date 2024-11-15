@@ -346,7 +346,7 @@ fun getStatusColor(status: ServiceRequestStatus): Color {
   return when (status) {
     ServiceRequestStatus.PENDING -> PENDING_color
     ServiceRequestStatus.ACCEPTED -> ACCEPTED_color
-    ServiceRequestStatus.STARTED -> STARTED_color
+    ServiceRequestStatus.SCHEDULED -> STARTED_color
     ServiceRequestStatus.ENDED -> ENDED_color
     ServiceRequestStatus.ARCHIVED -> ARCHIVED_color
   }

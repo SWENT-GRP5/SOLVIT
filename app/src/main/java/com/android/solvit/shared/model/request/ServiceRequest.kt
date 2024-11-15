@@ -10,16 +10,20 @@ data class ServiceRequest(
     val type: Services,
     val description: String,
     val userId: String,
+    val providerId: String? = null,
     val dueDate: Timestamp,
+    val meetingDate: Timestamp? = null,
     val location: Location?,
-    val imageUrl: String?,
-    val status: ServiceRequestStatus
+    val imageUrl: String? = null,
+    val packageId: String? = null,
+    val agreedPrice: Double? = null,
+    val status: ServiceRequestStatus = ServiceRequestStatus.PENDING,
 )
 
 enum class ServiceRequestStatus {
   PENDING,
   ACCEPTED,
-  STARTED,
+  SCHEDULED,
   ENDED,
   ARCHIVED;
 

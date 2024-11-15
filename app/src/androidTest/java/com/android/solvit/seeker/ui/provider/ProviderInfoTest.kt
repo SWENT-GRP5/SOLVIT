@@ -12,8 +12,8 @@ import androidx.compose.ui.test.performClick
 import androidx.navigation.NavController
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.shared.model.map.Location
+import com.android.solvit.shared.model.packages.PackageProposal
 import com.android.solvit.shared.model.provider.Language
-import com.android.solvit.shared.model.provider.PackageProposal
 import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.provider.ProviderRepository
 import com.android.solvit.shared.model.review.Review

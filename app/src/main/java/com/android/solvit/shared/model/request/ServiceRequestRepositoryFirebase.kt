@@ -116,13 +116,17 @@ class ServiceRequestRepositoryFirebase(
           title = document.getString("title") ?: "",
           description = document.getString("description") ?: "",
           userId = document.getString("userId") ?: "",
+          providerId = document.getString("providerId"),
           dueDate = document.getTimestamp("dueDate") ?: Timestamp.now(),
+          meetingDate = document.getTimestamp("meetingDate"),
           location =
               Location(
                   latitude = document.getDouble("location.latitude") ?: 0.0,
                   longitude = document.getDouble("location.longitude") ?: 0.0,
                   name = document.getString("location.name") ?: ""),
           imageUrl = document.getString("imageUrl"),
+          packageId = document.getString("packageId"),
+          agreedPrice = document.getDouble("agreedPrice"),
           type = Services.valueOf(document.getString("type") ?: Services.OTHER.name),
           status =
               ServiceRequestStatus.valueOf(
@@ -134,7 +138,7 @@ class ServiceRequestRepositoryFirebase(
   }
 
   // Handle image uploads to Firebase Storage
-  fun uploadImageToStorage(
+  private fun uploadImageToStorage(
       imageUri: Uri,
       onSuccess: (String) -> Unit,
       onFailure: (Exception) -> Unit

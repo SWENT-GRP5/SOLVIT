@@ -1,4 +1,4 @@
-package com.android.solvit.shared.model.provider
+package com.android.solvit.shared.model.packages
 
 import android.util.Log
 import com.google.android.gms.tasks.Task
