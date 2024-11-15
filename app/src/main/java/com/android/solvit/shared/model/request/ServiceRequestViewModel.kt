@@ -17,6 +17,21 @@ open class ServiceRequestViewModel(private val repository: ServiceRequestReposit
   private val _selectedRequest = MutableStateFlow<ServiceRequest?>(null)
   val selectedRequest: StateFlow<ServiceRequest?> = _selectedRequest
 
+  private val _pendingRequests = MutableStateFlow<List<ServiceRequest>>(emptyList())
+  val pendingRequests: StateFlow<List<ServiceRequest>> = _pendingRequests
+
+  private val _acceptedRequests = MutableStateFlow<List<ServiceRequest>>(emptyList())
+  val acceptedRequests: StateFlow<List<ServiceRequest>> = _acceptedRequests
+
+  private val _scheduledRequests = MutableStateFlow<List<ServiceRequest>>(emptyList())
+  val scheduledRequests: StateFlow<List<ServiceRequest>> = _scheduledRequests
+
+  private val _completedRequests = MutableStateFlow<List<ServiceRequest>>(emptyList())
+  val completedRequests: StateFlow<List<ServiceRequest>> = _completedRequests
+
+  private val _archivedRequests = MutableStateFlow<List<ServiceRequest>>(emptyList())
+  val archivedRequests: StateFlow<List<ServiceRequest>> = _archivedRequests
+
   init {
     repository.init { getServiceRequests() }
   }
@@ -41,6 +56,46 @@ open class ServiceRequestViewModel(private val repository: ServiceRequestReposit
   fun getServiceRequests() {
     repository.getServiceRequests(
         onSuccess = { _requests.value = it },
+        onFailure = { exception ->
+          Log.e("ServiceRequestViewModel", "Error fetching ServiceRequests", exception)
+        })
+  }
+
+  fun getPendingRequests() {
+    repository.getPendingServiceRequests(
+        onSuccess = { _pendingRequests.value = it },
+        onFailure = { exception ->
+          Log.e("ServiceRequestViewModel", "Error fetching ServiceRequests", exception)
+        })
+  }
+
+  fun getAcceptedRequests() {
+    repository.getAcceptedServiceRequests(
+        onSuccess = { _acceptedRequests.value = it },
+        onFailure = { exception ->
+          Log.e("ServiceRequestViewModel", "Error fetching ServiceRequests", exception)
+        })
+  }
+
+  fun getScheduledRequests() {
+    repository.getScheduledServiceRequests(
+        onSuccess = { _scheduledRequests.value = it },
+        onFailure = { exception ->
+          Log.e("ServiceRequestViewModel", "Error fetching ServiceRequests", exception)
+        })
+  }
+
+  fun getCompletedRequests() {
+    repository.getCompletedServiceRequests(
+        onSuccess = { _completedRequests.value = it },
+        onFailure = { exception ->
+          Log.e("ServiceRequestViewModel", "Error fetching ServiceRequests", exception)
+        })
+  }
+
+  fun getArchivedRequests() {
+    repository.getArchivedServiceRequests(
+        onSuccess = { _archivedRequests.value = it },
         onFailure = { exception ->
           Log.e("ServiceRequestViewModel", "Error fetching ServiceRequests", exception)
         })

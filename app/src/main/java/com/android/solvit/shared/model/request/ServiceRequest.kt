@@ -24,7 +24,7 @@ enum class ServiceRequestStatus {
   PENDING,
   ACCEPTED,
   SCHEDULED,
-  ENDED,
+  COMPLETED,
   ARCHIVED;
 
   companion object {
