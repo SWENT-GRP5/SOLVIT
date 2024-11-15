@@ -40,6 +40,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -174,52 +175,68 @@ fun NoRequestsText() {
 fun CategoriesFiltersSection() {
   var showFilters by remember { mutableStateOf(false) }
   var showSort by remember { mutableStateOf(false) }
-  Row(
-      modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).testTag("filterRequestsBar"),
-      horizontalArrangement = Arrangement.SpaceBetween,
-      verticalAlignment = Alignment.CenterVertically) {
-        Box(
-            modifier =
-                Modifier.background(LightBlue, shape = RoundedCornerShape(16.dp))
-                    .clickable { showFilters = !showFilters }
-                    .testTag("categoriesSettings")) {
-              Row(
-                  modifier = Modifier.padding(horizontal = 32.dp, vertical = 16.dp),
-                  verticalAlignment = Alignment.CenterVertically,
-                  horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Image(
-                        painter = painterResource(id = R.drawable.filter_square),
-                        contentDescription = "categories filter",
-                        modifier = Modifier.size(24.dp))
-                    Text(
-                        text = "Category Settings",
-                        fontWeight = FontWeight.Bold,
-                        color = colorScheme.onPrimary)
-                  }
-            }
-        Box(
-            modifier =
-                Modifier.background(LightOrange, shape = RoundedCornerShape(16.dp))
-                    .clickable { showSort = !showSort }
-                    .testTag("categoriesSort"),
-        ) {
-          Row(
-              modifier = Modifier.padding(horizontal = 32.dp, vertical = 16.dp),
-              verticalAlignment = Alignment.CenterVertically,
-              horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Image(
-                    painter = painterResource(id = R.drawable.filter_circle),
-                    contentDescription = "categories sort",
-                    modifier = Modifier.size(24.dp))
-                Text(text = "Sort", fontWeight = FontWeight.Bold, color = colorScheme.onPrimary)
+  Column {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).testTag("filterRequestsBar"),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically) {
+          Box(
+              modifier =
+                  Modifier.weight(1f)
+                      .background(LightBlue, shape = RoundedCornerShape(16.dp))
+                      .clickable { showFilters = !showFilters }
+                      .testTag("categoriesSettings")) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center) {
+                      Image(
+                          painter = painterResource(id = R.drawable.filter_square),
+                          contentDescription = "categories filter",
+                          modifier = Modifier.size(24.dp).weight(0.3f).padding(horizontal = 4.dp),
+                          colorFilter = ColorFilter.tint(colorScheme.onPrimary))
+                      Text(
+                          text = "Services",
+                          fontWeight = FontWeight.Bold,
+                          color = colorScheme.onPrimary,
+                          modifier = Modifier.weight(0.8f),
+                          maxLines = 1,
+                          softWrap = false)
+                    }
+              }
+
+          Box(
+              modifier =
+                  Modifier.weight(1f)
+                      .background(LightOrange, shape = RoundedCornerShape(16.dp))
+                      .clickable { showSort = !showSort }
+                      .testTag("categoriesSort")) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center) {
+                      Image(
+                          painter = painterResource(id = R.drawable.filter_circle),
+                          contentDescription = "categories sort",
+                          modifier = Modifier.size(24.dp).weight(0.3f).padding(horizontal = 4.dp),
+                          colorFilter = ColorFilter.tint(colorScheme.onPrimary))
+                      Text(
+                          text = "Sort",
+                          fontWeight = FontWeight.Bold,
+                          color = colorScheme.onPrimary,
+                          modifier = Modifier.weight(0.8f),
+                          maxLines = 1,
+                          softWrap = false)
+                    }
               }
         }
-      }
-  if (showFilters) {
-    CategoriesFilter()
-  }
-  if (showSort) {
-    CategoriesSort()
+
+    if (showFilters) {
+      CategoriesFilter()
+    }
+    if (showSort) {
+      CategoriesSort()
+    }
   }
 }
 
