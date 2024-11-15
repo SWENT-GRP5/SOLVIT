@@ -72,25 +72,43 @@ open class ServiceRequestViewModel(private val repository: ServiceRequestReposit
   }
 
   private fun getPendingRequests() {
-    _pendingRequests.value = _requests.value.filter { it.status == ServiceRequestStatus.PENDING }
+    repository.getPendingServiceRequests(
+        onSuccess = { _pendingRequests.value = it },
+        onFailure = { exception ->
+          Log.e("ServiceRequestViewModel", "Error fetching ServiceRequests", exception)
+        })
   }
 
   private fun getAcceptedRequests() {
-    _acceptedRequests.value = _requests.value.filter { it.status == ServiceRequestStatus.ACCEPTED }
+    repository.getAcceptedServiceRequests(
+        onSuccess = { _acceptedRequests.value = it },
+        onFailure = { exception ->
+          Log.e("ServiceRequestViewModel", "Error fetching ServiceRequests", exception)
+        })
   }
 
   private fun getScheduledRequests() {
-    _scheduledRequests.value =
-        _requests.value.filter { it.status == ServiceRequestStatus.SCHEDULED }
+    repository.getScheduledServiceRequests(
+        onSuccess = { _scheduledRequests.value = it },
+        onFailure = { exception ->
+          Log.e("ServiceRequestViewModel", "Error fetching ServiceRequests", exception)
+        })
   }
 
   private fun getCompletedRequests() {
-    _completedRequests.value =
-        _requests.value.filter { it.status == ServiceRequestStatus.COMPLETED }
+    repository.getCompletedServiceRequests(
+        onSuccess = { _completedRequests.value = it },
+        onFailure = { exception ->
+          Log.e("ServiceRequestViewModel", "Error fetching ServiceRequests", exception)
+        })
   }
 
   private fun getArchivedRequests() {
-    _archivedRequests.value = _requests.value.filter { it.status == ServiceRequestStatus.ARCHIVED }
+    repository.getArchivedServiceRequests(
+        onSuccess = { _archivedRequests.value = it },
+        onFailure = { exception ->
+          Log.e("ServiceRequestViewModel", "Error fetching ServiceRequests", exception)
+        })
   }
 
   fun saveServiceRequest(serviceRequest: ServiceRequest) {

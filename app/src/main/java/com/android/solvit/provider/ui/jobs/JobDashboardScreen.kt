@@ -139,7 +139,7 @@ fun JobDashboardScreen(
 fun CurrentJobsSection(viewModel: ServiceRequestViewModel) {
   val context = LocalContext.current
   val currentLocation = LatLng(40.748817, -73.985428)
-  val currentJobs by viewModel.scheduledRequests.collectAsState()
+  val scheduledRequests by viewModel.scheduledRequests.collectAsState()
 
   Column(
       Modifier.fillMaxSize().verticalScroll(rememberScrollState()).testTag("CurrentJobsSection")) {
@@ -165,14 +165,14 @@ fun CurrentJobsSection(viewModel: ServiceRequestViewModel) {
         Spacer(modifier = Modifier.height(8.dp))
 
         // Job list or message if no current jobs
-        if (currentJobs.isEmpty()) {
+        if (scheduledRequests.isEmpty()) {
           Text(
               "No current jobs available",
               style = MaterialTheme.typography.body2,
               color = Color.Gray,
               modifier = Modifier.testTag("CurrentJobsEmptyText"))
         } else {
-          currentJobs.forEach { request ->
+          scheduledRequests.forEach { request ->
             JobItem(
                 request = request,
                 status = ServiceRequestStatus.SCHEDULED,
@@ -201,18 +201,18 @@ fun CurrentJobsSection(viewModel: ServiceRequestViewModel) {
 @Composable
 fun PendingJobsSection(viewModel: ServiceRequestViewModel) {
   val context = LocalContext.current
-  val pendingJobs by viewModel.pendingRequests.collectAsState()
+  val pendingRequests by viewModel.pendingRequests.collectAsState()
 
   Column(
       Modifier.fillMaxSize().verticalScroll(rememberScrollState()).testTag("PendingJobsSection")) {
-        if (pendingJobs.isEmpty()) {
+        if (pendingRequests.isEmpty()) {
           Text(
               "No pending jobs",
               style = MaterialTheme.typography.body2,
               color = Color.Gray,
               modifier = Modifier.testTag("PendingJobsEmptyText"))
         } else {
-          pendingJobs.forEach { request ->
+          pendingRequests.forEach { request ->
             JobItem(
                 request = request,
                 status = ServiceRequestStatus.PENDING,
@@ -236,18 +236,18 @@ fun PendingJobsSection(viewModel: ServiceRequestViewModel) {
 @Composable
 fun HistoryJobsSection(viewModel: ServiceRequestViewModel) {
   val context = LocalContext.current
-  val historyJobs by viewModel.archivedRequests.collectAsState()
+  val archivedRequests by viewModel.archivedRequests.collectAsState()
 
   Column(
       Modifier.fillMaxSize().verticalScroll(rememberScrollState()).testTag("HistoryJobsSection")) {
-        if (historyJobs.isEmpty()) {
+        if (archivedRequests.isEmpty()) {
           Text(
               "No job history",
               style = MaterialTheme.typography.body2,
               color = Color.Gray,
               modifier = Modifier.testTag("HistoryJobsEmptyText"))
         } else {
-          historyJobs.forEach { request ->
+          archivedRequests.forEach { request ->
             JobItem(
                 request = request,
                 status = ServiceRequestStatus.ARCHIVED,
