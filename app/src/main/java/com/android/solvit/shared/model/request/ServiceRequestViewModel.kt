@@ -7,8 +7,9 @@ import androidx.lifecycle.ViewModelProvider
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.storage
-import java.text.SimpleDateFormat
 import java.time.LocalDate
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -166,18 +167,21 @@ open class ServiceRequestViewModel(private val repository: ServiceRequestReposit
   }
 
   fun getTodayScheduledRequests(): List<ServiceRequest> {
-    val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-    val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
-    val today = dateFormat.format(LocalDate.now())
+    val dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.getDefault())
+    val timeFormatter = DateTimeFormatter.ofPattern("HH:mm", Locale.getDefault())
+    val today = LocalDate.now().format(dateFormatter)
     return _scheduledRequests.value
         .filter {
-          val date = dateFormat.format(it.meetingDate?.toDate() ?: it.dueDate.toDate())
-
-          date == today
+          val date =
+              it.meetingDate?.toDate()?.toInstant()?.atZone(ZoneId.systemDefault())?.toLocalDate()
+                  ?: it.dueDate.toDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+          date.format(dateFormatter) == today
         }
         .sortedBy {
-          val time = timeFormat.format(it.meetingDate?.toDate() ?: it.dueDate.toDate())
-          time
+          val time =
+              it.meetingDate?.toDate()?.toInstant()?.atZone(ZoneId.systemDefault())?.toLocalTime()
+                  ?: it.dueDate.toDate().toInstant().atZone(ZoneId.systemDefault()).toLocalTime()
+          time.format(timeFormatter)
         }
   }
 }

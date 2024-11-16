@@ -74,6 +74,7 @@ firebaseStorageKtx = "21.0.0"
 playServicesLocation = "21.3.0"
 testng = "6.9.6"
 navigationTesting = "2.8.2"
+coreI18n = "1.0.0-alpha01"
 
 [libraries]
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
@@ -139,6 +140,7 @@ androidx-navigation-testing = { group = "androidx.navigation", name = "navigatio
 testng = { group = "org.testng", name = "testng", version.ref = "testng" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
+androidx-core-i18n = { group = "androidx.core", name = "core-i18n", version.ref = "coreI18n" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
