@@ -36,14 +36,7 @@ open class ServiceRequestViewModel(private val repository: ServiceRequestReposit
   val archivedRequests: StateFlow<List<ServiceRequest>> = _archivedRequests
 
   init {
-    repository.init {
-      getServiceRequests()
-      getPendingRequests()
-      getAcceptedRequests()
-      getScheduledRequests()
-      getCompletedRequests()
-      getArchivedRequests()
-    }
+    repository.init { updateAllRequests() }
   }
 
   // Create factory
@@ -111,10 +104,19 @@ open class ServiceRequestViewModel(private val repository: ServiceRequestReposit
         })
   }
 
+  private fun updateAllRequests() {
+    getServiceRequests()
+    getPendingRequests()
+    getAcceptedRequests()
+    getScheduledRequests()
+    getCompletedRequests()
+    getArchivedRequests()
+  }
+
   fun saveServiceRequest(serviceRequest: ServiceRequest) {
     repository.saveServiceRequest(
         serviceRequest,
-        onSuccess = { getServiceRequests() },
+        onSuccess = { updateAllRequests() },
         onFailure = { exception ->
           Log.e("ServiceRequestViewModel", "Error saving ServiceRequest", exception)
         })
@@ -124,7 +126,7 @@ open class ServiceRequestViewModel(private val repository: ServiceRequestReposit
     repository.saveServiceRequestWithImage(
         serviceRequest,
         imageUri,
-        onSuccess = { getServiceRequests() },
+        onSuccess = { updateAllRequests() },
         onFailure = { exception ->
           Log.e("ServiceRequestViewModel", "Error saving ServiceRequest", exception)
         })
@@ -133,7 +135,7 @@ open class ServiceRequestViewModel(private val repository: ServiceRequestReposit
   fun deleteServiceRequestById(id: String) {
     repository.deleteServiceRequestById(
         id,
-        onSuccess = { getServiceRequests() },
+        onSuccess = { updateAllRequests() },
         onFailure = { exception ->
           Log.e("ServiceRequestViewModel", "Error deleting ServiceRequest", exception)
         })
