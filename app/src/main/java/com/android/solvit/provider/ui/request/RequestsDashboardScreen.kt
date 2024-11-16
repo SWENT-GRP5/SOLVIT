@@ -1,4 +1,4 @@
-package com.android.solvit.provider.ui.jobs
+package com.android.solvit.provider.ui.request
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
@@ -61,7 +61,7 @@ import java.util.Locale
  * @param serviceRequestViewModel ViewModel instance containing the list of jobs.
  */
 @Composable
-fun JobDashboardScreen(
+fun RequestsDashboardScreen(
     navigationActions: NavigationActions,
     serviceRequestViewModel: ServiceRequestViewModel =
         viewModel(factory = ServiceRequestViewModel.Factory)

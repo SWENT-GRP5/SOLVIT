@@ -1,4 +1,4 @@
-package com.android.solvit.provider.ui.jobs
+package com.android.solvit.provider.ui.request
 
 import android.content.Context
 import android.content.Intent

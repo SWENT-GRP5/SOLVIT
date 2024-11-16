@@ -1,4 +1,4 @@
-package com.android.solvit.provider.ui.jobs
+package com.android.solvit.provider.ui.request
 
 // Jetpack Compose Testing
 import androidx.activity.ComponentActivity
@@ -18,7 +18,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
 
 @RunWith(AndroidJUnit4::class)
-class JobDashboardScreenTest {
+class RequestsDashboardScreenTest {
 
   @get:Rule val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
@@ -36,7 +36,7 @@ class JobDashboardScreenTest {
   @Test
   fun testInitialTabIsCurrent() {
     composeTestRule.setContent {
-      JobDashboardScreen(navigationActions, serviceRequestViewModel = viewModel)
+      RequestsDashboardScreen(navigationActions, serviceRequestViewModel = viewModel)
     }
 
     // Verify that the "Current" tab is selected by default
@@ -46,7 +46,7 @@ class JobDashboardScreenTest {
   @Test
   fun testNavigateToAllJobsButtonInCurrentTab() {
     composeTestRule.setContent {
-      JobDashboardScreen(navigationActions, serviceRequestViewModel = viewModel)
+      RequestsDashboardScreen(navigationActions, serviceRequestViewModel = viewModel)
     }
 
     // Verify that the "Navigate to All Jobs of the Day" button is displayed and clickable
@@ -56,7 +56,7 @@ class JobDashboardScreenTest {
   @Test
   fun testPendingSectionDisplaysOnlyPendingJobs() {
     composeTestRule.setContent {
-      JobDashboardScreen(navigationActions, serviceRequestViewModel = viewModel)
+      RequestsDashboardScreen(navigationActions, serviceRequestViewModel = viewModel)
     }
 
     // Switch to Pending tab
@@ -75,7 +75,7 @@ class JobDashboardScreenTest {
   @Test
   fun testCurrentSectionDisplaysOnlyCurrentJobs() {
     composeTestRule.setContent {
-      JobDashboardScreen(navigationActions, serviceRequestViewModel = viewModel)
+      RequestsDashboardScreen(navigationActions, serviceRequestViewModel = viewModel)
     }
 
     // Check if jobs in the Current section have the correct status tag
@@ -93,7 +93,7 @@ class JobDashboardScreenTest {
   @Test
   fun testHistorySectionDisplaysOnlyHistoryJobs() {
     composeTestRule.setContent {
-      JobDashboardScreen(navigationActions, serviceRequestViewModel = viewModel)
+      RequestsDashboardScreen(navigationActions, serviceRequestViewModel = viewModel)
     }
 
     // Switch to History tab
@@ -112,7 +112,7 @@ class JobDashboardScreenTest {
   @Test
   fun testConfirmPendingJobMovesToCurrent() {
     composeTestRule.setContent {
-      JobDashboardScreen(navigationActions, serviceRequestViewModel = viewModel)
+      RequestsDashboardScreen(navigationActions, serviceRequestViewModel = viewModel)
     }
 
     // Switch to Pending tab
@@ -129,7 +129,7 @@ class JobDashboardScreenTest {
   @Test
   fun testCompleteCurrentJobMovesToHistory() {
     composeTestRule.setContent {
-      JobDashboardScreen(navigationActions, serviceRequestViewModel = viewModel)
+      RequestsDashboardScreen(navigationActions, serviceRequestViewModel = viewModel)
     }
 
     // Get the first current job and mark it as completed
@@ -146,7 +146,7 @@ class JobDashboardScreenTest {
   @Test
   fun testCancelCurrentJobMovesToHistoryAsCancelled() {
     composeTestRule.setContent {
-      JobDashboardScreen(navigationActions, serviceRequestViewModel = viewModel)
+      RequestsDashboardScreen(navigationActions, serviceRequestViewModel = viewModel)
     }
 
     // Get the first current job and mark it as cancelled
@@ -163,7 +163,7 @@ class JobDashboardScreenTest {
   @Test
   fun testChatButtonShowsToast() {
     composeTestRule.setContent {
-      JobDashboardScreen(navigationActions, serviceRequestViewModel = viewModel)
+      RequestsDashboardScreen(navigationActions, serviceRequestViewModel = viewModel)
     }
 
     // Verify Chat button presence and functionality on a job in the Current tab
