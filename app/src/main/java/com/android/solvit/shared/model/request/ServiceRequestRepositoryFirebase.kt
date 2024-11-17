@@ -79,6 +79,13 @@ class ServiceRequestRepositoryFirebase(
     getServiceRequestsByStatus(ServiceRequestStatus.COMPLETED, onSuccess, onFailure)
   }
 
+  override fun getCancelledServiceRequests(
+      onSuccess: (List<ServiceRequest>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    getServiceRequestsByStatus(ServiceRequestStatus.CANCELED, onSuccess, onFailure)
+  }
+
   override fun getArchivedServiceRequests(
       onSuccess: (List<ServiceRequest>) -> Unit,
       onFailure: (Exception) -> Unit

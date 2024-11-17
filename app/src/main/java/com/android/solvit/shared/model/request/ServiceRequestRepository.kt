@@ -32,6 +32,11 @@ interface ServiceRequestRepository {
       onFailure: (Exception) -> Unit
   )
 
+  fun getCancelledServiceRequests(
+      onSuccess: (List<ServiceRequest>) -> Unit,
+      onFailure: (Exception) -> Unit
+  )
+
   fun getArchivedServiceRequests(
       onSuccess: (List<ServiceRequest>) -> Unit,
       onFailure: (Exception) -> Unit

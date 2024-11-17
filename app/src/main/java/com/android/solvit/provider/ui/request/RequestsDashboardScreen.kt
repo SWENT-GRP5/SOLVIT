@@ -1,6 +1,7 @@
 package com.android.solvit.provider.ui.request
 
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,23 +14,28 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Card
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Tab
-import androidx.compose.material.TabRow
-import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.outlined.MailOutline
 import androidx.compose.material.icons.outlined.Phone
 import androidx.compose.material.icons.outlined.Place
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme.colorScheme
+import androidx.compose.material3.MaterialTheme.typography
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -47,6 +53,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestStatus
+import com.android.solvit.shared.model.request.ServiceRequestStatus.Companion.format
+import com.android.solvit.shared.model.request.ServiceRequestStatus.Companion.getStatusColor
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.google.android.gms.maps.model.LatLng
@@ -60,6 +68,7 @@ import java.util.Locale
  * @param navigationActions Actions for navigating back to the previous screen.
  * @param serviceRequestViewModel ViewModel instance containing the list of jobs.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RequestsDashboardScreen(
     navigationActions: NavigationActions,
@@ -75,8 +84,8 @@ fun RequestsDashboardScreen(
             title = {
               Text(
                   "Job Dashboard",
-                  style = MaterialTheme.typography.h6,
-                  color = Color.Black,
+                  style = typography.titleLarge,
+                  color = colorScheme.onBackground,
                   modifier = Modifier.testTag("JobDashboardTitle"))
             },
             navigationIcon = {
@@ -88,44 +97,63 @@ fun RequestsDashboardScreen(
                         contentDescription = "Go back")
                   }
             },
-            backgroundColor = Color.White, // Set background color to white or any preferred color
-            elevation = 0.dp // Remove shadow for a flat look, adjust as needed
-            )
+            colors =
+                TopAppBarColors(
+                    containerColor = colorScheme.background,
+                    scrolledContainerColor = colorScheme.background,
+                    navigationIconContentColor = colorScheme.onBackground,
+                    titleContentColor = colorScheme.onBackground,
+                    actionIconContentColor = colorScheme.onBackground,
+                ))
       },
       content = { innerPadding ->
-        Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
-          // Tabs for Pending, Current, and History
-          TabRow(selectedTabIndex = selectedTab, backgroundColor = Color.Transparent) {
-            Tab(
-                selected = selectedTab == 0,
-                onClick = { selectedTab = 0 },
-                text = {
-                  Text("Pending", color = if (selectedTab == 0) Color.Black else Color.Gray)
-                },
-                modifier = Modifier.testTag("Tab_Pending"))
-            Tab(
-                selected = selectedTab == 1,
-                onClick = { selectedTab = 1 },
-                text = {
-                  Text("Current", color = if (selectedTab == 1) Color.Black else Color.Gray)
-                },
-                modifier = Modifier.testTag("Tab_Current"))
-            Tab(
-                selected = selectedTab == 2,
-                onClick = { selectedTab = 2 },
-                text = {
-                  Text("History", color = if (selectedTab == 2) Color.Black else Color.Gray)
-                },
-                modifier = Modifier.testTag("Tab_History"))
-          }
+        Column(
+            modifier =
+                Modifier.fillMaxSize().background(colorScheme.background).padding(innerPadding)) {
+              // Tabs for Pending, Current, and History
+              TabRow(selectedTabIndex = selectedTab, containerColor = Color.Transparent) {
+                Tab(
+                    selected = selectedTab == 0,
+                    onClick = { selectedTab = 0 },
+                    text = {
+                      Text(
+                          "Pending",
+                          color =
+                              if (selectedTab == 0) colorScheme.onBackground
+                              else colorScheme.onSurfaceVariant)
+                    },
+                    modifier = Modifier.testTag("Tab_Pending"))
+                Tab(
+                    selected = selectedTab == 1,
+                    onClick = { selectedTab = 1 },
+                    text = {
+                      Text(
+                          "Current",
+                          color =
+                              if (selectedTab == 1) colorScheme.onBackground
+                              else colorScheme.onSurfaceVariant)
+                    },
+                    modifier = Modifier.testTag("Tab_Current"))
+                Tab(
+                    selected = selectedTab == 2,
+                    onClick = { selectedTab = 2 },
+                    text = {
+                      Text(
+                          "History",
+                          color =
+                              if (selectedTab == 2) colorScheme.onBackground
+                              else colorScheme.onSurfaceVariant)
+                    },
+                    modifier = Modifier.testTag("Tab_History"))
+              }
 
-          // Show content based on selected tab
-          when (selectedTab) {
-            0 -> PendingJobsSection(viewModel = serviceRequestViewModel)
-            1 -> CurrentJobsSection(viewModel = serviceRequestViewModel)
-            2 -> HistoryJobsSection(viewModel = serviceRequestViewModel)
-          }
-        }
+              // Show content based on selected tab
+              when (selectedTab) {
+                0 -> PendingJobsSection(viewModel = serviceRequestViewModel)
+                1 -> CurrentJobsSection(viewModel = serviceRequestViewModel)
+                2 -> HistoryJobsSection(viewModel = serviceRequestViewModel)
+              }
+            }
       })
 }
 
@@ -142,7 +170,10 @@ fun CurrentJobsSection(viewModel: ServiceRequestViewModel) {
   val scheduledRequests by viewModel.scheduledRequests.collectAsState()
 
   Column(
-      Modifier.fillMaxSize().verticalScroll(rememberScrollState()).testTag("CurrentJobsSection")) {
+      Modifier.fillMaxSize()
+          .verticalScroll(rememberScrollState())
+          .padding(16.dp)
+          .testTag("CurrentJobsSection")) {
         // "Navigate to All Jobs of the Day" button
         Button(
             onClick = {
@@ -151,14 +182,14 @@ fun CurrentJobsSection(viewModel: ServiceRequestViewModel) {
             },
             modifier =
                 Modifier.fillMaxWidth().padding(vertical = 8.dp).testTag("NavigateAllJobsButton"),
-            colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF42A5F5))) {
+            colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)) {
               Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     imageVector = Icons.Outlined.Place,
                     contentDescription = null,
-                    tint = Color.Black)
+                    tint = colorScheme.onBackground)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Navigate to All Jobs of the Day", color = Color.Black)
+                Text("Navigate to All Jobs of the Day", color = colorScheme.onBackground)
               }
             }
 
@@ -168,14 +199,14 @@ fun CurrentJobsSection(viewModel: ServiceRequestViewModel) {
         if (scheduledRequests.isEmpty()) {
           Text(
               "No current jobs available",
-              style = MaterialTheme.typography.body2,
-              color = Color.Gray,
+              style = typography.bodySmall,
+              color = colorScheme.onSurfaceVariant,
               modifier = Modifier.testTag("CurrentJobsEmptyText"))
         } else {
           scheduledRequests.forEach { request ->
             JobItem(
                 request = request,
-                status = ServiceRequestStatus.SCHEDULED,
+                status = request.status,
                 onNavigateToJob = {
                   request.location?.let { navigateToSingleJob(context, it.latitude, it.longitude) }
                 },
@@ -183,7 +214,7 @@ fun CurrentJobsSection(viewModel: ServiceRequestViewModel) {
                   Toast.makeText(context, "Contact Not yet Implemented", Toast.LENGTH_SHORT).show()
                 },
                 onMarkAsCompleted = { viewModel.completeRequest(request) }, // Move to history
-                onCancelRequest = { viewModel.completeRequest(request) }, // Move to history
+                onCancelRequest = { viewModel.cancelRequest(request) }, // Move to history
                 onChat = {
                   Toast.makeText(context, "Chat Not yet Implemented", Toast.LENGTH_SHORT).show()
                 })
@@ -204,18 +235,21 @@ fun PendingJobsSection(viewModel: ServiceRequestViewModel) {
   val pendingRequests by viewModel.pendingRequests.collectAsState()
 
   Column(
-      Modifier.fillMaxSize().verticalScroll(rememberScrollState()).testTag("PendingJobsSection")) {
+      Modifier.fillMaxSize()
+          .verticalScroll(rememberScrollState())
+          .padding(16.dp)
+          .testTag("PendingJobsSection")) {
         if (pendingRequests.isEmpty()) {
           Text(
               "No pending jobs",
-              style = MaterialTheme.typography.body2,
-              color = Color.Gray,
+              style = typography.bodySmall,
+              color = colorScheme.onSurfaceVariant,
               modifier = Modifier.testTag("PendingJobsEmptyText"))
         } else {
           pendingRequests.forEach { request ->
             JobItem(
                 request = request,
-                status = ServiceRequestStatus.PENDING,
+                status = request.status,
                 onContactCustomer = {
                   Toast.makeText(context, "Contact Not yet Implemented", Toast.LENGTH_SHORT).show()
                 },
@@ -237,20 +271,25 @@ fun PendingJobsSection(viewModel: ServiceRequestViewModel) {
 fun HistoryJobsSection(viewModel: ServiceRequestViewModel) {
   val context = LocalContext.current
   val archivedRequests by viewModel.archivedRequests.collectAsState()
+  val cancelledRequests by viewModel.cancelledRequests.collectAsState()
+  val requests = archivedRequests + cancelledRequests
 
   Column(
-      Modifier.fillMaxSize().verticalScroll(rememberScrollState()).testTag("HistoryJobsSection")) {
-        if (archivedRequests.isEmpty()) {
+      Modifier.fillMaxSize()
+          .verticalScroll(rememberScrollState())
+          .padding(16.dp)
+          .testTag("HistoryJobsSection")) {
+        if (requests.isEmpty()) {
           Text(
               "No job history",
-              style = MaterialTheme.typography.body2,
-              color = Color.Gray,
+              style = typography.bodySmall,
+              color = colorScheme.onSurfaceVariant,
               modifier = Modifier.testTag("HistoryJobsEmptyText"))
         } else {
-          archivedRequests.forEach { request ->
+          requests.forEach { request ->
             JobItem(
                 request = request,
-                status = ServiceRequestStatus.ARCHIVED,
+                status = request.status,
                 onContactCustomer = {
                   Toast.makeText(context, "Contact Not yet Implemented", Toast.LENGTH_SHORT).show()
                 },
@@ -291,15 +330,20 @@ fun JobItem(
           Modifier.fillMaxWidth()
               .padding(vertical = 8.dp)
               .testTag("JobItem_${status.name}_${request.uid}"),
-      elevation = 4.dp,
-      backgroundColor =
-          when (status) {
-            ServiceRequestStatus.PENDING -> Color(0xFFF3E5F5) // Light purple for pending jobs
-            ServiceRequestStatus.ACCEPTED -> Color(0xFFE8F5E9) // Light green for accepted jobs
-            ServiceRequestStatus.SCHEDULED -> Color(0xFFE3F2FD) // Light blue for current jobs
-            ServiceRequestStatus.COMPLETED -> Color(0xFFE0F2F1) // Light teal for completed jobs
-            ServiceRequestStatus.ARCHIVED -> Color(0xFFECEFF1) // Light gray for history
-          },
+      elevation =
+          CardDefaults.cardElevation(
+              defaultElevation = 4.dp,
+              pressedElevation = 8.dp,
+              focusedElevation = 8.dp,
+              hoveredElevation = 8.dp,
+              draggedElevation = 8.dp,
+              disabledElevation = 0.dp),
+      colors =
+          CardColors(
+              containerColor = colorScheme.surface,
+              contentColor = colorScheme.onSurface,
+              disabledContentColor = colorScheme.onSurfaceVariant,
+              disabledContainerColor = colorScheme.surfaceVariant),
       shape = RoundedCornerShape(12.dp)) {
         Column(modifier = Modifier.padding(16.dp)) {
           // Title and Navigate Button
@@ -308,19 +352,17 @@ fun JobItem(
               horizontalArrangement = Arrangement.SpaceBetween,
               verticalAlignment = Alignment.CenterVertically) {
                 // Job Title
-                Text(request.title, style = MaterialTheme.typography.subtitle1, color = Color.Black)
+                Text(
+                    request.title, style = typography.titleMedium, color = colorScheme.onBackground)
 
                 // Navigate Button for Current Jobs
                 if (status == ServiceRequestStatus.SCHEDULED) {
                   onNavigateToJob?.let {
                     Button(
                         onClick = it,
-                        colors =
-                            ButtonDefaults.buttonColors(
-                                backgroundColor = Color.Black,
-                            ),
+                        colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
                         modifier = Modifier.testTag("NavigateButton_${request.uid}")) {
-                          Text("Navigate", color = Color.White)
+                          Text("Navigate", color = colorScheme.background)
                         }
                   }
                 }
@@ -328,8 +370,8 @@ fun JobItem(
           // Job  Description
           Text(
               request.description,
-              style = MaterialTheme.typography.body2,
-              color = Color.Gray,
+              style = typography.bodyMedium,
+              color = colorScheme.onSurface,
               textAlign = TextAlign.Start)
           Spacer(modifier = Modifier.height(8.dp))
 
@@ -339,19 +381,25 @@ fun JobItem(
           val time = timeFormat.format(request.meetingDate?.toDate() ?: request.dueDate.toDate())
           // Scheduled Date and Time
           Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Default.DateRange, contentDescription = "Scheduled Time", tint = Color.Gray)
+            Icon(
+                Icons.Default.DateRange,
+                contentDescription = "Scheduled Time",
+                tint = colorScheme.onSurfaceVariant)
             Text(
                 "Scheduled: $date at $time",
-                style = MaterialTheme.typography.caption,
-                color = Color.Gray)
+                style = typography.bodySmall,
+                color = colorScheme.onSurfaceVariant)
           }
           Spacer(modifier = Modifier.height(8.dp))
 
           // Location
           Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Outlined.Place, contentDescription = "Location", tint = Color.Gray)
+            Icon(
+                Icons.Outlined.Place,
+                contentDescription = "Location",
+                tint = colorScheme.onSurfaceVariant)
             request.location?.let {
-              Text(it.name, style = MaterialTheme.typography.caption, color = Color.Gray)
+              Text(it.name, style = typography.bodySmall, color = colorScheme.onSurfaceVariant)
             }
           }
           Spacer(modifier = Modifier.height(8.dp))
@@ -368,7 +416,7 @@ fun JobItem(
                         Icon(
                             Icons.Outlined.MailOutline,
                             contentDescription = "Chat with Customer",
-                            tint = Color(0xFF42A5F5))
+                            tint = colorScheme.primary)
                       }
                 }
 
@@ -379,9 +427,10 @@ fun JobItem(
                     onConfirmRequest?.let {
                       Button(
                           onClick = it,
-                          colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF66BB6A)),
+                          colors =
+                              ButtonDefaults.buttonColors(containerColor = colorScheme.secondary),
                           modifier = Modifier.testTag("ConfirmButton_${request.uid}")) {
-                            Text("Confirm Request", color = Color.White)
+                            Text("Confirm Request", color = colorScheme.onSecondary)
                           }
                     }
                   }
@@ -390,9 +439,11 @@ fun JobItem(
                     onCancelRequest?.let {
                       Button(
                           onClick = it,
-                          colors = ButtonDefaults.buttonColors(backgroundColor = Color.Red),
+                          colors =
+                              ButtonDefaults.buttonColors(
+                                  containerColor = colorScheme.errorContainer),
                           modifier = Modifier.testTag("CancelButton_${request.uid}")) {
-                            Text("Cancel", color = Color.White, fontSize = 10.sp)
+                            Text("Cancel", color = colorScheme.error, fontSize = 10.sp)
                           }
                     }
                     Spacer(modifier = Modifier.width(2.dp))
@@ -400,22 +451,29 @@ fun JobItem(
                     onMarkAsCompleted?.let {
                       Button(
                           onClick = it,
-                          colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF66BB6A)),
+                          colors =
+                              ButtonDefaults.buttonColors(containerColor = colorScheme.secondary),
                           modifier = Modifier.testTag("CompleteButton_${request.uid}")) {
-                            Text("Mark As Complete", color = Color.White, fontSize = 10.sp)
+                            Text(
+                                "Mark As Complete",
+                                color = colorScheme.onSecondary,
+                                fontSize = 10.sp)
                           }
                     }
                   }
                   ServiceRequestStatus.ARCHIVED -> {
                     // Status Indicator (Completed or Cancelled)
                     Text(
-                        text =
-                            if (request.status == ServiceRequestStatus.COMPLETED) "Completed"
-                            else "Cancelled",
-                        color =
-                            if (request.status == ServiceRequestStatus.COMPLETED) Color.Green
-                            else Color.Red,
-                        style = MaterialTheme.typography.body2,
+                        text = format(ServiceRequestStatus.ARCHIVED),
+                        color = getStatusColor(ServiceRequestStatus.ARCHIVED),
+                        style = typography.bodySmall,
+                        modifier = Modifier.testTag("StatusText_${request.uid}"))
+                  }
+                  ServiceRequestStatus.CANCELED -> {
+                    Text(
+                        text = format(ServiceRequestStatus.CANCELED),
+                        color = getStatusColor(ServiceRequestStatus.CANCELED),
+                        style = typography.bodySmall,
                         modifier = Modifier.testTag("StatusText_${request.uid}"))
                   }
                   ServiceRequestStatus.ACCEPTED -> TODO()
@@ -429,7 +487,7 @@ fun JobItem(
                         Icon(
                             Icons.Outlined.Phone,
                             contentDescription = "Contact Customer",
-                            tint = Color(0xFF42A5F5))
+                            tint = colorScheme.primary)
                       }
                 }
               }

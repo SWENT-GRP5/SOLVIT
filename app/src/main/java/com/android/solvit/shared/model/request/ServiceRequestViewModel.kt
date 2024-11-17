@@ -33,6 +33,9 @@ open class ServiceRequestViewModel(private val repository: ServiceRequestReposit
   private val _completedRequests = MutableStateFlow<List<ServiceRequest>>(emptyList())
   val completedRequests: StateFlow<List<ServiceRequest>> = _completedRequests
 
+  private val _cancelledRequests = MutableStateFlow<List<ServiceRequest>>(emptyList())
+  val cancelledRequests: StateFlow<List<ServiceRequest>> = _cancelledRequests
+
   private val _archivedRequests = MutableStateFlow<List<ServiceRequest>>(emptyList())
   val archivedRequests: StateFlow<List<ServiceRequest>> = _archivedRequests
 
@@ -97,6 +100,14 @@ open class ServiceRequestViewModel(private val repository: ServiceRequestReposit
         })
   }
 
+  private fun getCancelledRequests() {
+    repository.getCancelledServiceRequests(
+        onSuccess = { _cancelledRequests.value = it },
+        onFailure = { exception ->
+          Log.e("ServiceRequestViewModel", "Error fetching ServiceRequests", exception)
+        })
+  }
+
   private fun getArchivedRequests() {
     repository.getArchivedServiceRequests(
         onSuccess = { _archivedRequests.value = it },
@@ -111,6 +122,7 @@ open class ServiceRequestViewModel(private val repository: ServiceRequestReposit
     getAcceptedRequests()
     getScheduledRequests()
     getCompletedRequests()
+    getCancelledRequests()
     getArchivedRequests()
   }
 
@@ -160,6 +172,10 @@ open class ServiceRequestViewModel(private val repository: ServiceRequestReposit
 
   fun completeRequest(serviceRequest: ServiceRequest) {
     saveServiceRequest(serviceRequest.copy(status = ServiceRequestStatus.COMPLETED))
+  }
+
+  fun cancelRequest(serviceRequest: ServiceRequest) {
+    saveServiceRequest(serviceRequest.copy(status = ServiceRequestStatus.CANCELED))
   }
 
   fun archiveRequest(serviceRequest: ServiceRequest) {

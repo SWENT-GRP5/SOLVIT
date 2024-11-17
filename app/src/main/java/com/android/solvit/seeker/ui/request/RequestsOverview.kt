@@ -39,7 +39,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -56,18 +55,14 @@ import com.android.solvit.seeker.ui.service.SERVICES_LIST
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestStatus
+import com.android.solvit.shared.model.request.ServiceRequestStatus.Companion.getStatusColor
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_CUSTOMER
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
-import com.android.solvit.shared.ui.theme.ACCEPTED_color
-import com.android.solvit.shared.ui.theme.ARCHIVED_color
-import com.android.solvit.shared.ui.theme.ENDED_color
 import com.android.solvit.shared.ui.theme.LightBlue
 import com.android.solvit.shared.ui.theme.LightOrange
-import com.android.solvit.shared.ui.theme.PENDING_color
-import com.android.solvit.shared.ui.theme.STARTED_color
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -340,14 +335,4 @@ fun RequestItemRow(request: ServiceRequest, onClick: () -> Unit) {
               }
         }
       }
-}
-
-fun getStatusColor(status: ServiceRequestStatus): Color {
-  return when (status) {
-    ServiceRequestStatus.PENDING -> PENDING_color
-    ServiceRequestStatus.ACCEPTED -> ACCEPTED_color
-    ServiceRequestStatus.SCHEDULED -> STARTED_color
-    ServiceRequestStatus.COMPLETED -> ENDED_color
-    ServiceRequestStatus.ARCHIVED -> ARCHIVED_color
-  }
 }
