@@ -10,11 +10,11 @@ import kotlinx.coroutines.flow.asStateFlow
 
 class PackageProposalViewModel(private val repository: PackageProposalRepository) : ViewModel() {
 
-  private val proposal_ = MutableStateFlow<List<PackageProposal>>(emptyList())
-  val proposal: StateFlow<List<PackageProposal>> = proposal_.asStateFlow()
+  private val _proposal = MutableStateFlow<List<PackageProposal>>(emptyList())
+  val proposal: StateFlow<List<PackageProposal>> = _proposal.asStateFlow()
 
-  private val selectedPackage_ = MutableStateFlow<PackageProposal?>(null)
-  open val selectedPackage: StateFlow<PackageProposal?> = selectedPackage_.asStateFlow()
+  private val _selectedPackage = MutableStateFlow<PackageProposal?>(null)
+  val selectedPackage: StateFlow<PackageProposal?> = _selectedPackage.asStateFlow()
 
   init {
     repository.init { getPackageProposal() }
@@ -42,7 +42,7 @@ class PackageProposalViewModel(private val repository: PackageProposalRepository
 
   /** Gets all Packages documents. */
   fun getPackageProposal() {
-    repository.getPackageProposal(onSuccess = { proposal_.value = it }, onFailure = {})
+    repository.getPackageProposal(onSuccess = { _proposal.value = it }, onFailure = {})
   }
 
   /**
@@ -80,6 +80,6 @@ class PackageProposalViewModel(private val repository: PackageProposalRepository
    * @param proposal The PackageProposal document to be selected.
    */
   fun selectPackage(proposal: PackageProposal) {
-    selectedPackage_.value = proposal
+    _selectedPackage.value = proposal
   }
 }

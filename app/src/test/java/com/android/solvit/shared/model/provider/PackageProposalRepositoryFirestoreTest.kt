@@ -5,18 +5,23 @@ import com.android.solvit.shared.model.packages.PackageProposal
 import com.android.solvit.shared.model.packages.PackageProposalRepositoryFirestore
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.FirebaseApp
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
 import junit.framework.TestCase
+import kotlin.test.assertEquals
 import org.hamcrest.CoreMatchers
 import org.hamcrest.MatcherAssert
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.Mockito
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
@@ -27,6 +32,7 @@ import org.robolectric.RobolectricTestRunner
 class PackageProposalRepositoryFirestoreTest {
 
   @Mock private lateinit var mockFirestore: FirebaseFirestore
+  @Mock private lateinit var mockAuth: FirebaseAuth
   @Mock private lateinit var mockDocumentReference: DocumentReference
   @Mock private lateinit var mockCollectionReference: CollectionReference
   @Mock private lateinit var mockQuerySnapshot: QuerySnapshot
@@ -46,43 +52,69 @@ class PackageProposalRepositoryFirestoreTest {
 
     proposalRepositoryFirestore = PackageProposalRepositoryFirestore(mockFirestore)
 
-    Mockito.`when`(mockFirestore.collection(any())).thenReturn(mockCollectionReference)
-    Mockito.`when`(mockCollectionReference.document(any())).thenReturn(mockDocumentReference)
-    Mockito.`when`(mockCollectionReference.document()).thenReturn(mockDocumentReference)
+    `when`(mockFirestore.collection(any())).thenReturn(mockCollectionReference)
+    `when`(mockCollectionReference.document(any())).thenReturn(mockDocumentReference)
+    `when`(mockCollectionReference.document()).thenReturn(mockDocumentReference)
+  }
+
+  @Test
+  fun init_doesNotCallOnSuccessWhenUserIsNotAuthenticated() {
+    `when`(mockAuth.currentUser).thenReturn(null)
+
+    var onSuccessCalled = false
+    proposalRepositoryFirestore.init { onSuccessCalled = true }
+
+    Assert.assertFalse(onSuccessCalled)
   }
 
   @Test
   fun getNewUid() {
-    Mockito.`when`(mockDocumentReference.id).thenReturn("test uid")
+    `when`(mockDocumentReference.id).thenReturn("test uid")
     MatcherAssert.assertThat(proposalRepositoryFirestore.getNewUid(), CoreMatchers.`is`("test uid"))
   }
 
   @Test
   fun addPackage() {
-    Mockito.`when`(mockDocumentReference.set(any())).thenReturn(Tasks.forResult(null))
+    `when`(mockDocumentReference.set(any())).thenReturn(Tasks.forResult(null))
     proposalRepositoryFirestore.addPackageProposal(proposal, {}, {})
     verify(mockDocumentReference).set(eq(proposal))
   }
 
   @Test
   fun deletePackage() {
-    Mockito.`when`(mockDocumentReference.delete()).thenReturn(Tasks.forResult(null))
+    `when`(mockDocumentReference.delete()).thenReturn(Tasks.forResult(null))
     proposalRepositoryFirestore.deletePackageProposal(proposal.uid, {}, {})
     verify(mockDocumentReference).delete()
   }
 
   @Test
   fun updatePackage() {
-    Mockito.`when`(mockDocumentReference.set(any())).thenReturn(Tasks.forResult(null))
+    `when`(mockDocumentReference.set(any())).thenReturn(Tasks.forResult(null))
     proposalRepositoryFirestore.updatePackageProposal(proposal, {}, {})
     verify(mockDocumentReference).set(eq(proposal))
   }
 
   @Test
   fun getPackages() {
-    Mockito.`when`(mockCollectionReference.get()).thenReturn(Tasks.forResult(mockQuerySnapshot))
-    Mockito.`when`(mockQuerySnapshot.documents).thenReturn(listOf())
+    `when`(mockCollectionReference.get()).thenReturn(Tasks.forResult(mockQuerySnapshot))
+    `when`(mockQuerySnapshot.documents).thenReturn(listOf())
     proposalRepositoryFirestore.getPackageProposal({}, { TestCase.fail("Should not fail") })
     verify(mockCollectionReference).get()
+  }
+
+  @Test
+  fun documentToPackageProposal() {
+    val document = mock(DocumentSnapshot::class.java)
+    `when`(document.id).thenReturn("1")
+    `when`(document.getString("title")).thenReturn("title")
+    `when`(document.getString("description")).thenReturn("description")
+    `when`(document.getDouble("price")).thenReturn(0.0)
+    `when`(document.get("bulletPoints")).thenReturn(emptyList<String>())
+    val proposal = proposalRepositoryFirestore.documentToPackageProposal(document)
+    assertEquals("1", proposal?.uid)
+    assertEquals("title", proposal?.title)
+    assertEquals("description", proposal?.description)
+    assertEquals(0.0, proposal?.price)
+    assertEquals(emptyList(), proposal?.bulletPoints)
   }
 }

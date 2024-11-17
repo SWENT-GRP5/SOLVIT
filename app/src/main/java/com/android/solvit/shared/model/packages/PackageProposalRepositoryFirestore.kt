@@ -88,7 +88,7 @@ class PackageProposalRepositoryFirestore(private val db: FirebaseFirestore) :
     }
   }
 
-  private fun documentToPackageProposal(document: DocumentSnapshot): PackageProposal? {
+  fun documentToPackageProposal(document: DocumentSnapshot): PackageProposal? {
     return try {
       val uid = document.id
       val title = document.getString("title") ?: return null
