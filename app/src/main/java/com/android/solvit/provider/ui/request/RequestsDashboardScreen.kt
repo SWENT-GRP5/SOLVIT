@@ -187,9 +187,9 @@ fun CurrentJobsSection(viewModel: ServiceRequestViewModel) {
                 Icon(
                     imageVector = Icons.Outlined.Place,
                     contentDescription = null,
-                    tint = colorScheme.onBackground)
+                    tint = colorScheme.onPrimary)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Navigate to All Jobs of the Day", color = colorScheme.onBackground)
+                Text("Navigate to All Jobs of the Day", color = colorScheme.onPrimary)
               }
             }
 
@@ -362,7 +362,7 @@ fun JobItem(
                         onClick = it,
                         colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
                         modifier = Modifier.testTag("NavigateButton_${request.uid}")) {
-                          Text("Navigate", color = colorScheme.background)
+                          Text("Navigate", color = colorScheme.onPrimary)
                         }
                   }
                 }
