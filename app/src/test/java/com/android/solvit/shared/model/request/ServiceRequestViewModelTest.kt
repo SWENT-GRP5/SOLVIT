@@ -24,10 +24,14 @@ class ServiceRequestViewModelTest {
           title = "Test Request",
           description = "Test Description",
           userId = "1",
+          providerId = "1",
           dueDate = Timestamp.now(),
+          meetingDate = Timestamp.now(),
           location = Location(name = "EPFL", latitude = 0.0, longitude = 0.0),
           imageUrl = null,
-          type = Services.CLEANER,
+          packageId = "1",
+          agreedPrice = 200.15,
+          type = Services.PLUMBER,
           status = ServiceRequestStatus.PENDING)
 
   @Before
@@ -136,5 +140,53 @@ class ServiceRequestViewModelTest {
     serviceRequestViewModel.deleteServiceRequestById(id)
 
     assertThat(serviceRequestViewModel.requests.value, `is`(emptyList()))
+  }
+
+  @Test
+  fun unConfirmRequest_callsRepository() {
+    serviceRequestViewModel.unConfirmRequest(serviceRequest)
+    verify(serviceRequestRepository)
+        .saveServiceRequest(
+            eq(serviceRequest.copy(status = ServiceRequestStatus.PENDING)), any(), any())
+  }
+
+  @Test
+  fun confirmRequest_callsRepository() {
+    serviceRequestViewModel.confirmRequest(serviceRequest)
+    verify(serviceRequestRepository)
+        .saveServiceRequest(
+            eq(serviceRequest.copy(status = ServiceRequestStatus.ACCEPTED)), any(), any())
+  }
+
+  @Test
+  fun scheduleRequest_callsRepository() {
+    serviceRequestViewModel.scheduleRequest(serviceRequest)
+    verify(serviceRequestRepository)
+        .saveServiceRequest(
+            eq(serviceRequest.copy(status = ServiceRequestStatus.SCHEDULED)), any(), any())
+  }
+
+  @Test
+  fun completeRequest_callsRepository() {
+    serviceRequestViewModel.completeRequest(serviceRequest)
+    verify(serviceRequestRepository)
+        .saveServiceRequest(
+            eq(serviceRequest.copy(status = ServiceRequestStatus.COMPLETED)), any(), any())
+  }
+
+  @Test
+  fun cancelRequest_callsRepository() {
+    serviceRequestViewModel.cancelRequest(serviceRequest)
+    verify(serviceRequestRepository)
+        .saveServiceRequest(
+            eq(serviceRequest.copy(status = ServiceRequestStatus.CANCELED)), any(), any())
+  }
+
+  @Test
+  fun archiveRequest_callsRepository() {
+    serviceRequestViewModel.archiveRequest(serviceRequest)
+    verify(serviceRequestRepository)
+        .saveServiceRequest(
+            eq(serviceRequest.copy(status = ServiceRequestStatus.ARCHIVED)), any(), any())
   }
 }

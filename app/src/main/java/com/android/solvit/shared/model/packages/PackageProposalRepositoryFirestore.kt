@@ -1,4 +1,4 @@
-package com.android.solvit.shared.model.provider
+package com.android.solvit.shared.model.packages
 
 import android.util.Log
 import com.google.android.gms.tasks.Task
@@ -88,7 +88,7 @@ class PackageProposalRepositoryFirestore(private val db: FirebaseFirestore) :
     }
   }
 
-  private fun documentToPackageProposal(document: DocumentSnapshot): PackageProposal? {
+  fun documentToPackageProposal(document: DocumentSnapshot): PackageProposal? {
     return try {
       val uid = document.id
       val title = document.getString("title") ?: return null

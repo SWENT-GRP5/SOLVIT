@@ -1,5 +1,8 @@
 package com.android.solvit.shared.model.provider
 
+import com.android.solvit.shared.model.packages.PackageProposal
+import com.android.solvit.shared.model.packages.PackageProposalRepository
+import com.android.solvit.shared.model.packages.PackageProposalViewModel
 import org.hamcrest.CoreMatchers
 import org.hamcrest.MatcherAssert
 import org.junit.Before

@@ -17,10 +17,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navigation
 import com.android.solvit.provider.ui.calendar.ProviderCalendarScreen
-import com.android.solvit.provider.ui.jobs.JobDashboardScreen
 import com.android.solvit.provider.ui.map.ProviderMapScreen
 import com.android.solvit.provider.ui.profile.ProviderProfileScreen
 import com.android.solvit.provider.ui.request.ListRequestsFeedScreen
+import com.android.solvit.provider.ui.request.RequestsDashboardScreen
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.seeker.ui.map.SeekerMapScreen
@@ -196,7 +196,7 @@ fun ProviderUI(
     }
     composable(Route.MAP_OF_SEEKERS) { ProviderMapScreen(navigationActions = navigationActions) }
     composable(Screen.CALENDAR) { ProviderCalendarScreen(navigationActions = navigationActions) }
-    composable(Screen.MYJOBS) { JobDashboardScreen(navigationActions = navigationActions) }
+    composable(Screen.MYJOBS) { RequestsDashboardScreen(navigationActions = navigationActions) }
     composable(Screen.PROFESSIONAL_PROFILE) {
       ProviderProfileScreen(listProviderViewModel, authViewModel, navigationActions)
     }
