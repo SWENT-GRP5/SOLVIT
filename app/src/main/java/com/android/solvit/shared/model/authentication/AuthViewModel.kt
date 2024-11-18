@@ -39,7 +39,12 @@ class AuthViewModel(private val authRepository: AuthRep) : ViewModel() {
   }
 
   init {
-    authRepository.init { _user.value = it }
+    authRepository.init {
+      _user.value = it
+      if (it != null) {
+        _userRegistered.value = true
+      }
+    }
   }
 
   fun setRole(role: String) {
