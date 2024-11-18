@@ -2,32 +2,47 @@ package com.android.solvit.seeker.ui.provider
 
 import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
+import android.graphics.Bitmap
+import android.net.Uri
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Checkbox
+import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -37,17 +52,23 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
 import com.android.solvit.R
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.seeker.ui.profile.Stepper
@@ -55,7 +76,10 @@ import com.android.solvit.seeker.ui.request.LocationDropdown
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.map.LocationViewModel
+import com.android.solvit.shared.model.provider.Language
 import com.android.solvit.shared.model.provider.Provider
+import com.android.solvit.shared.model.service.Services
+import com.android.solvit.shared.model.utils.loadBitmapFromUri
 import com.android.solvit.shared.ui.authentication.CustomOutlinedTextField
 import com.android.solvit.shared.ui.authentication.GoBackButton
 import com.android.solvit.shared.ui.navigation.NavigationActions
@@ -324,4 +348,164 @@ fun ProviderRegistrationScreen(
               }
             }
       })
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ProviderDetails() {
+  var servicesExpanded by remember { mutableStateOf(false) }
+  var languagesExpanded by remember { mutableStateOf(false) }
+  var selectedService by remember { mutableStateOf("") }
+  var description by remember { mutableStateOf("") }
+  var startingPrice by remember { mutableStateOf("") }
+  val selectedLanguages = remember { mutableStateListOf<String>() }
+  var providerImageUri by remember { mutableStateOf<Uri?>(null) }
+  var providerImageBitmap by remember { mutableStateOf<Bitmap?>(null) }
+
+  val services = Services.entries.toTypedArray()
+  val availableLanguages = Language.entries.toList().map { it.toString() }
+
+  val localContext = LocalContext.current
+
+  val isDescriptionOk = description.isNotBlank()
+  val isStartingPriceOk = startingPrice.isNotBlank() && startingPrice.all { it.isDigit() }
+
+  Column(
+      modifier = Modifier.fillMaxSize().padding(16.dp).verticalScroll(rememberScrollState()),
+      verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        // DropDown Menu to select provider's service
+        ExposedDropdownMenuBox(
+            expanded = servicesExpanded,
+            onExpandedChange = { servicesExpanded = !servicesExpanded }) {
+              OutlinedTextField(
+                  value = selectedService,
+                  onValueChange = { selectedService = it },
+                  label = { Text("What Services Do You Offer?") },
+                  readOnly = true,
+                  modifier = Modifier.fillMaxWidth().menuAnchor())
+              ExposedDropdownMenu(
+                  expanded = servicesExpanded, onDismissRequest = { servicesExpanded = false }) {
+                    services.forEach { service ->
+                      DropdownMenuItem(
+                          onClick = {
+                            selectedService = service.toString()
+                            servicesExpanded = false
+                          }) {
+                            Text(text = service.toString())
+                          }
+                    }
+                  }
+            }
+
+        // Upload photo provider section
+        UploadImage(
+            selectedImageUri = providerImageUri,
+            imageUrl = null,
+            onImageSelected = { uri ->
+              providerImageUri = uri
+              uri?.let { providerImageBitmap = loadBitmapFromUri(localContext, it) }
+            })
+
+        // Enter Provider Brief description
+        CustomOutlinedTextField(
+            value = description,
+            onValueChange = { description = it },
+            label = "About you",
+            placeholder =
+                "Briefly describe your services, skills, and what sets you apart to attract clients.",
+            isValueOk = isDescriptionOk,
+            errorMessage = "Enter a valid Description",
+            leadingIcon = Icons.Default.Check,
+            leadingIconDescription = "Check Icon",
+            testTag = "descriptionInputProviderRegistration",
+            errorTestTag = "descriptionErrorInputProviderRegistration")
+
+        // Enter Provider Starting Price
+        CustomOutlinedTextField(
+            value = startingPrice,
+            onValueChange = { startingPrice = it },
+            label = "Starting Price",
+            placeholder = "Enter the minimum price at which your services are available. (CHF)",
+            isValueOk = isDescriptionOk,
+            errorMessage = "Enter a valid starting price",
+            leadingIcon = Icons.Default.Check,
+            leadingIconDescription = "Check Icon",
+            testTag = "startingPriceInputProviderRegistration",
+            errorTestTag = "startingPriceErrorInputProviderRegistration")
+
+        // Dropdown menu to select provider's languages
+        DropdownMenu(
+            expanded = languagesExpanded,
+            onDismissRequest = { languagesExpanded = false },
+            modifier = Modifier.fillMaxWidth()) {
+              availableLanguages.forEach { language ->
+                val isSelected = language in selectedLanguages
+                DropdownMenuItem(
+                    onClick = {
+                      if (isSelected) {
+                        selectedLanguages.remove(language)
+                      } else {
+                        selectedLanguages.add(language)
+                      }
+                    }) {
+                      Row(verticalAlignment = Alignment.CenterVertically) {
+                        Checkbox(
+                            checked = isSelected,
+                            onCheckedChange = null // Handle click on row instead
+                            )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(text = language)
+                      }
+                    }
+              }
+            }
+      }
+}
+
+@Composable
+fun UploadImage(selectedImageUri: Uri?, imageUrl: String?, onImageSelected: (Uri?) -> Unit) {
+  // Manage the interaction to upload an image from user's gallery
+  val imagePickerLauncher =
+      rememberLauncherForActivityResult(
+          contract = ActivityResultContracts.GetContent(),
+          onResult = { uri: Uri? -> onImageSelected(uri) })
+
+  Box(
+      modifier =
+          Modifier.fillMaxWidth()
+              .height(150.dp)
+              .border(
+                  1.dp,
+                  MaterialTheme.colorScheme.onSurfaceVariant,
+                  shape = RoundedCornerShape(12.dp))
+              .clip(RoundedCornerShape(12.dp))
+              .background(Color.Transparent)
+              .testTag("providerImageButton"),
+      contentAlignment = Alignment.Center) {
+        if (selectedImageUri == null && imageUrl == null) {
+          Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Icon(
+                imageVector = Icons.Default.Person,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(48.dp))
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                "Click to upload",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.clickable { imagePickerLauncher.launch("image/*") },
+                style =
+                    MaterialTheme.typography.bodyLarge.copy(
+                        textDecoration = TextDecoration.Underline))
+          }
+        } else {
+          AsyncImage(
+              model =
+                  selectedImageUri?.toString()
+                      ?: imageUrl, // Show selected image URI or fallback URL
+              contentDescription = "Uploaded Image",
+              contentScale = ContentScale.Crop,
+              modifier = Modifier.fillMaxSize())
+        }
+      }
 }
