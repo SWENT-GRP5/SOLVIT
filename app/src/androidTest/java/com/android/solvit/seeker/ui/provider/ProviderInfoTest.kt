@@ -2,6 +2,7 @@ package com.android.solvit.seeker.ui.provider
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
@@ -16,6 +17,8 @@ import com.android.solvit.shared.model.packages.PackageProposal
 import com.android.solvit.shared.model.provider.Language
 import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.provider.ProviderRepository
+import com.android.solvit.shared.model.request.ServiceRequestRepository
+import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.review.Review
 import com.android.solvit.shared.model.review.ReviewRepository
 import com.android.solvit.shared.model.review.ReviewViewModel
@@ -32,6 +35,8 @@ import org.mockito.Mockito.mock
 class ProviderInfoTest {
   private lateinit var providerRepository: ProviderRepository
   private lateinit var providerViewModel: ListProviderViewModel
+  private lateinit var requestRepository: ServiceRequestRepository
+  private lateinit var requestViewModel: ServiceRequestViewModel
   private lateinit var reviewRepository: ReviewRepository
   private lateinit var reviewViewModel: ReviewViewModel
   private lateinit var navController: NavController
@@ -53,11 +58,33 @@ class ProviderInfoTest {
           Timestamp.now(),
           listOf(Language.ENGLISH, Language.FRENCH))
 
-  val reviews =
+  private val reviews =
       listOf(
           Review("1", "1", "1", "1", 5, "Very good tutor"),
           Review("2", "1", "1", "1", 4, "Good tutor"),
           Review("3", "1", "1", "1", 3, "Average tutor"))
+
+  private val packageProposals =
+      listOf(
+          PackageProposal(
+              uid = "1",
+              title = "Basic Maintenance",
+              description = "Ideal for minor repairs and maintenance tasks.",
+              price = 49.99,
+              bulletPoints =
+                  listOf(
+                      "Fix leaky faucets", "Unclog drains", "Inspect plumbing for minor issues")),
+          PackageProposal(
+              uid = "2",
+              title = "Standard Service",
+              description = "Comprehensive service for common plumbing needs.",
+              price = 89.99,
+              bulletPoints =
+                  listOf(
+                      "Repair leaks and clogs",
+                      "Replace faucets and fixtures",
+                      "Inspect and clear drain pipes")),
+      )
 
   @get:Rule val composeTestRule = createComposeRule()
 
@@ -69,6 +96,8 @@ class ProviderInfoTest {
     reviewViewModel = ReviewViewModel(reviewRepository)
     navController = mock(NavController::class.java)
     navigationActions = mock(NavigationActions::class.java)
+    requestRepository = mock(ServiceRequestRepository::class.java)
+    requestViewModel = ServiceRequestViewModel(requestRepository)
 
     providerViewModel.selectProvider(provider)
   }
@@ -111,7 +140,17 @@ class ProviderInfoTest {
   @Test
   fun providerDetailsDisplayCorrectly() {
     // Act
-    composeTestRule.setContent { ProviderDetails(provider, reviews) }
+    composeTestRule.setContent {
+      ProviderDetails(
+          provider = provider,
+          reviews = reviews,
+          showDialog = mutableStateOf(false),
+          requestViewModel = requestViewModel,
+          userId = "1",
+          navigationActions = navigationActions,
+          selectedPackage = mutableStateOf(null),
+      )
+    }
 
     // Assert
     composeTestRule.onNodeWithTag("providerDetails").assertIsDisplayed()
@@ -126,7 +165,17 @@ class ProviderInfoTest {
   @Test
   fun providerReviewsDisplayCorrectly() {
     // Act
-    composeTestRule.setContent { ProviderReviews(provider, reviews) }
+    composeTestRule.setContent {
+      ProviderReviews(
+          provider = provider,
+          reviews = reviews,
+          showDialog = mutableStateOf(false),
+          requestViewModel = requestViewModel,
+          userId = "1",
+          navigationActions = navigationActions,
+          selectedPackage = mutableStateOf(null),
+      )
+    }
 
     // Assert
     composeTestRule.onNodeWithTag("providerReviews").assertIsDisplayed()
@@ -147,29 +196,12 @@ class ProviderInfoTest {
     composeTestRule.setContent {
       ProviderPackages(
           provider,
-          packages =
-              listOf(
-                  PackageProposal(
-                      uid = "1",
-                      title = "Basic Maintenance",
-                      description = "Ideal for minor repairs and maintenance tasks.",
-                      price = 49.99,
-                      bulletPoints =
-                          listOf(
-                              "Fix leaky faucets",
-                              "Unclog drains",
-                              "Inspect plumbing for minor issues")),
-                  PackageProposal(
-                      uid = "2",
-                      title = "Standard Service",
-                      description = "Comprehensive service for common plumbing needs.",
-                      price = 89.99,
-                      bulletPoints =
-                          listOf(
-                              "Repair leaks and clogs",
-                              "Replace faucets and fixtures",
-                              "Inspect and clear drain pipes")),
-              ))
+          packages = packageProposals,
+          selectedPackage = mutableStateOf(null),
+          showDialog = mutableStateOf(false),
+          requestViewModel = requestViewModel,
+          userId = "1",
+          navigationActions = navigationActions)
     }
     composeTestRule.onNodeWithTag("packagesScrollableList").assertIsDisplayed()
     assertEquals(
@@ -199,7 +231,11 @@ class ProviderInfoTest {
 
   @Test
   fun bottomBarDisplaysCorrectly() {
-    composeTestRule.setContent { BottomBar() }
+    composeTestRule.setContent {
+      BottomBar(
+          showDialog = mutableStateOf(false),
+      )
+    }
 
     composeTestRule.onNodeWithTag("bottomBar").assertIsDisplayed()
     composeTestRule.onNodeWithTag("bookNowButton").assertIsDisplayed()

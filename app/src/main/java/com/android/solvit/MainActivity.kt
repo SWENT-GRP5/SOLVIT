@@ -158,7 +158,12 @@ fun SeekerUI(
       }
     }
     composable(Route.PROVIDER_PROFILE) {
-      ProviderInfoScreen(navigationActions, listProviderViewModel, reviewViewModel)
+      ProviderInfoScreen(
+          navigationActions,
+          listProviderViewModel,
+          reviewViewModel,
+          serviceRequestViewModel,
+          authViewModel)
     }
     composable(Route.MESSAGE) { MessageScreen() }
     composable(Route.CREATE_REQUEST) {

@@ -34,15 +34,17 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
+import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
-import androidx.compose.material3.TabRowDefaults
+import androidx.compose.material3.TabRowDefaults.SecondaryIndicator
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -59,29 +61,43 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.android.solvit.R
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
+import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.packages.PackageProposal
 import com.android.solvit.shared.model.provider.Provider
+import com.android.solvit.shared.model.request.ServiceRequest
+import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.review.Review
 import com.android.solvit.shared.model.review.ReviewViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.android.solvit.shared.ui.navigation.Route
 
 @Composable
 fun ProviderInfoScreen(
     navigationActions: NavigationActions,
     providerViewModel: ListProviderViewModel = viewModel(factory = ListProviderViewModel.Factory),
-    reviewsViewModel: ReviewViewModel = viewModel(factory = ReviewViewModel.Factory)
+    reviewsViewModel: ReviewViewModel = viewModel(factory = ReviewViewModel.Factory),
+    requestViewModel: ServiceRequestViewModel =
+        viewModel(factory = ServiceRequestViewModel.Factory),
+    authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory)
 ) {
   val provider = providerViewModel.selectedProvider.collectAsState().value ?: return
   val reviews =
       reviewsViewModel.reviews.collectAsState().value.filter { it.providerId == provider.uid }
 
   var selectedTabIndex by remember { mutableIntStateOf(0) }
+  val selectedPackage = remember { mutableStateOf<PackageProposal?>(null) }
+  val showDialog = remember { mutableStateOf(false) }
+
+  val user = authViewModel.user.collectAsState()
+  val userId = user.value?.uid ?: "-1"
 
   // Since We still don't give the possibility to provider to add packages (for the moment we're use
   // a default list of packages for all providers)
@@ -128,20 +144,44 @@ fun ProviderInfoScreen(
           when (selectedTabIndex) {
             0 ->
                 ProviderDetails(
-                    provider, reviews) // Display ProviderDetails if "Profile" tab is selected
-            1 -> ProviderPackages(provider, packages) // Display packages proposals of provider
+                    provider,
+                    selectedPackage,
+                    reviews,
+                    showDialog,
+                    requestViewModel,
+                    userId,
+                    navigationActions)
+            1 ->
+                ProviderPackages(
+                    provider,
+                    packages,
+                    selectedPackage,
+                    showDialog,
+                    requestViewModel,
+                    userId,
+                    navigationActions)
             2 ->
                 ProviderReviews(
-                    provider, reviews) // Display ProviderReviews if "Reviews" tab is selected
+                    provider,
+                    selectedPackage,
+                    reviews,
+                    showDialog,
+                    requestViewModel,
+                    userId,
+                    navigationActions)
           }
         }
       },
-      bottomBar = { BottomBar() })
+      bottomBar = { BottomBar(showDialog = showDialog) })
 }
 
 @Composable
-fun PackageCard(packageProposal: PackageProposal, isSelected: Boolean, modifier: Modifier) {
-  val context = LocalContext.current
+fun PackageCard(
+    packageProposal: PackageProposal,
+    isSelected: Boolean,
+    modifier: Modifier,
+    selectedPackage: MutableState<PackageProposal?>
+) {
   Card(
       modifier = modifier.fillMaxHeight(),
       shape = RoundedCornerShape(16.dp),
@@ -158,21 +198,20 @@ fun PackageCard(packageProposal: PackageProposal, isSelected: Boolean, modifier:
                 Text(
                     modifier = Modifier.testTag("price"),
                     text = "$${packageProposal.price}",
-                    style =
-                        MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                    style = typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
                     color =
                         if (!isSelected) colorScheme.onPrimaryContainer else colorScheme.onPrimary)
                 Spacer(modifier = Modifier.width(8.dp)) // Increased space between price and unit
                 Text(
                     text = "/hour",
-                    style = MaterialTheme.typography.bodySmall,
+                    style = typography.bodySmall,
                     color =
                         if (!isSelected) colorScheme.onPrimaryContainer else colorScheme.onPrimary)
               }
               // Title of the Package
               Text(
                   text = packageProposal.title,
-                  style = MaterialTheme.typography.titleMedium,
+                  style = typography.titleMedium,
                   color =
                       if (!isSelected) colorScheme.onPrimaryContainer else colorScheme.onPrimary)
               Spacer(
@@ -181,7 +220,7 @@ fun PackageCard(packageProposal: PackageProposal, isSelected: Boolean, modifier:
               // Description of the Package
               Text(
                   text = packageProposal.description,
-                  style = MaterialTheme.typography.bodyMedium,
+                  style = typography.bodyMedium,
                   color = if (!isSelected) colorScheme.onSurface else colorScheme.onPrimary)
               Spacer(
                   modifier =
@@ -199,30 +238,35 @@ fun PackageCard(packageProposal: PackageProposal, isSelected: Boolean, modifier:
                     Spacer(modifier = Modifier.width(8.dp)) // Increased space between icon and text
                     Text(
                         text = feature,
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = typography.bodyMedium,
                         color = if (!isSelected) colorScheme.onSurface else colorScheme.onPrimary)
                   }
                 }
               }
               Spacer(modifier = Modifier.weight(1f)) // Pushes the button to the bottom
               Button(
-                  onClick = {
-                    Toast.makeText(context, "Not implemented", Toast.LENGTH_SHORT).show()
-                  },
-                  colors =
-                      ButtonDefaults.buttonColors(
-                          containerColor =
-                              if (isSelected) colorScheme.primary else colorScheme.surfaceVariant),
+                  enabled = isSelected,
+                  onClick = { selectedPackage.value = packageProposal },
+                  colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
                   modifier = Modifier.align(Alignment.CenterHorizontally)) {
-                    Text("Choose plan")
+                    if (selectedPackage.value == packageProposal) Text("You selected this package")
+                    else Text("Choose package")
                   }
             }
       }
 }
 
 @Composable
-fun ProviderPackages(provider: Provider, packages: List<PackageProposal>) {
-  var selectedIndex by remember { mutableStateOf(-1) }
+fun ProviderPackages(
+    provider: Provider,
+    packages: List<PackageProposal>,
+    selectedPackage: MutableState<PackageProposal?>,
+    showDialog: MutableState<Boolean>,
+    requestViewModel: ServiceRequestViewModel,
+    userId: String,
+    navigationActions: NavigationActions
+) {
+  var selectedIndex by remember { mutableIntStateOf(-1) }
   Box(
       modifier = Modifier.fillMaxSize(), // Fills the entire available space
       contentAlignment = Alignment.Center // Centers the LazyRow within the Box
@@ -237,8 +281,9 @@ fun ProviderPackages(provider: Provider, packages: List<PackageProposal>) {
           items(packages.size) { index ->
             // If package is selected, we display it bigger
             val isSelected = selectedIndex == index
-            val size by animateDpAsState(targetValue = if (isSelected) 350.dp else 320.dp)
-
+            val size by
+                animateDpAsState(
+                    targetValue = if (isSelected) 350.dp else 320.dp, label = "PackageCardSize")
             PackageCard(
                 packageProposal = packages[index],
                 isSelected = isSelected,
@@ -246,8 +291,18 @@ fun ProviderPackages(provider: Provider, packages: List<PackageProposal>) {
                     Modifier.width(260.dp) // Slightly wider for better touch targets
                         .height(size)
                         .clickable { selectedIndex = if (isSelected) -1 else index }
-                        .testTag("PackageCard"))
+                        .testTag("PackageCard"),
+                selectedPackage = selectedPackage)
           }
+        }
+        if (showDialog.value) {
+          SelectRequestDialog(
+              provider.uid,
+              selectedPackage,
+              showDialog,
+              requestViewModel,
+              userId,
+              navigationActions)
         }
       }
 }
@@ -350,7 +405,7 @@ fun ProviderTabs(selectedTabIndex: Int, onTabSelected: (Int) -> Unit) {
       containerColor = colorScheme.primary,
       contentColor = colorScheme.onPrimary,
       indicator = { tabPositions ->
-        TabRowDefaults.Indicator(
+        SecondaryIndicator(
             modifier = Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
             height = 3.dp,
             color = colorScheme.onPrimary)
@@ -399,7 +454,15 @@ fun ProviderTabs(selectedTabIndex: Int, onTabSelected: (Int) -> Unit) {
 }
 
 @Composable
-fun ProviderDetails(provider: Provider, reviews: List<Review>) {
+fun ProviderDetails(
+    provider: Provider,
+    selectedPackage: MutableState<PackageProposal?>,
+    reviews: List<Review>,
+    showDialog: MutableState<Boolean>,
+    requestViewModel: ServiceRequestViewModel,
+    userId: String,
+    navigationActions: NavigationActions
+) {
   Column(
       modifier =
           Modifier.padding(16.dp)
@@ -483,6 +546,15 @@ fun ProviderDetails(provider: Provider, reviews: List<Review>) {
                     fontWeight = FontWeight.Medium)
               }
         }
+        if (showDialog.value) {
+          SelectRequestDialog(
+              provider.uid,
+              selectedPackage,
+              showDialog,
+              requestViewModel,
+              userId,
+              navigationActions)
+        }
       }
 }
 
@@ -500,7 +572,15 @@ fun Rubric(modifier: Modifier = Modifier, content: @Composable ColumnScope.() ->
 }
 
 @Composable
-fun ProviderReviews(provider: Provider, reviews: List<Review>) {
+fun ProviderReviews(
+    provider: Provider,
+    selectedPackage: MutableState<PackageProposal?>,
+    reviews: List<Review>,
+    showDialog: MutableState<Boolean>,
+    requestViewModel: ServiceRequestViewModel,
+    userId: String,
+    navigationActions: NavigationActions
+) {
   Column(
       modifier =
           Modifier.padding(16.dp)
@@ -564,6 +644,16 @@ fun ProviderReviews(provider: Provider, reviews: List<Review>) {
           }
           items(reviews) { review -> ReviewRow(review) }
         }
+
+        if (showDialog.value) {
+          SelectRequestDialog(
+              provider.uid,
+              selectedPackage,
+              showDialog,
+              requestViewModel,
+              userId,
+              navigationActions)
+        }
       }
 }
 
@@ -614,8 +704,7 @@ fun RatingStars(rating: Int) {
 }
 
 @Composable
-fun BottomBar() {
-  val context = LocalContext.current
+fun BottomBar(showDialog: MutableState<Boolean>) {
   Row(
       modifier = Modifier.background(colorScheme.surface).fillMaxWidth().testTag("bottomBar"),
       horizontalArrangement = Arrangement.Center) {
@@ -627,7 +716,7 @@ fun BottomBar() {
                     .size(200.dp, 50.dp)
                     .testTag("bookNowButton"),
             colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
-            onClick = { Toast.makeText(context, "Not implemented", Toast.LENGTH_SHORT).show() }) {
+            onClick = { showDialog.value = true }) {
               Text(
                   "Book Now",
                   color = colorScheme.onPrimary,
@@ -635,4 +724,136 @@ fun BottomBar() {
                   fontWeight = FontWeight.Bold)
             }
       }
+}
+
+@Composable
+fun SelectRequestDialog(
+    providerId: String,
+    selectedPackage: MutableState<PackageProposal?>,
+    showDialog: MutableState<Boolean>,
+    requestViewModel: ServiceRequestViewModel,
+    userId: String,
+    navigationActions: NavigationActions
+) {
+  val requests =
+      requestViewModel.pendingRequests.collectAsState().value.filter { it.userId == userId }
+
+  val selectedRequest = remember { mutableStateOf<ServiceRequest?>(null) }
+
+  Dialog(onDismissRequest = { showDialog.value = false }) {
+    Card(
+        modifier =
+            Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                .height(400.dp)
+                .testTag("dialogCard"),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = colorScheme.surface)) {
+          Column(
+              modifier = Modifier.padding(16.dp),
+              verticalArrangement = Arrangement.Top,
+              horizontalAlignment = Alignment.CenterHorizontally) {
+                // Title
+                Text(
+                    text = "Choose the concerned service request:",
+                    style = typography.titleMedium,
+                    modifier = Modifier.padding(bottom = 16.dp),
+                    color = colorScheme.onSurface)
+
+                // LazyColumn to display requests
+                LazyColumn(
+                    modifier =
+                        Modifier.fillMaxWidth()
+                            .weight(
+                                1f), // Allows the list to scroll properly when content overflows
+                    verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                      items(requests) { request ->
+                        Card(
+                            modifier =
+                                Modifier.fillMaxWidth()
+                                    .border(
+                                        2.dp,
+                                        if (selectedRequest.value == request) colorScheme.primary
+                                        else colorScheme.surface,
+                                        RoundedCornerShape(12.dp))
+                                    .clickable { selectedRequest.value = request },
+                            shape = RoundedCornerShape(12.dp),
+                            colors =
+                                CardDefaults.cardColors(
+                                    containerColor = colorScheme.primaryContainer)) {
+                              Column(
+                                  modifier = Modifier.padding(12.dp),
+                                  verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                          Text(
+                                              text = "Title:",
+                                              style = typography.bodyMedium,
+                                              color = colorScheme.onPrimaryContainer)
+                                          Text(
+                                              text = request.title,
+                                              style = typography.bodyMedium,
+                                              color = colorScheme.onPrimaryContainer)
+                                        }
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                          Text(
+                                              text = "Description:",
+                                              style = typography.bodyMedium,
+                                              color = colorScheme.onPrimaryContainer)
+                                          Text(
+                                              text = request.description,
+                                              style = typography.bodyMedium,
+                                              color = colorScheme.onPrimaryContainer,
+                                              maxLines = 2,
+                                              overflow = TextOverflow.Ellipsis)
+                                        }
+                                  }
+                            }
+                      }
+                    }
+
+                // Action Buttons
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly) {
+                      TextButton(
+                          onClick = { showDialog.value = false },
+                          modifier = Modifier.padding(horizontal = 8.dp)) {
+                            Text(
+                                text = "Dismiss",
+                                style = typography.labelLarge,
+                                color = colorScheme.primary)
+                          }
+
+                      Button(
+                          enabled = selectedRequest.value != null,
+                          onClick = {
+                            selectedRequest.value?.let {
+                              var request = it.copy(providerId = providerId)
+                              val packageProposal = selectedPackage.value
+                              if (packageProposal != null) {
+                                request =
+                                    request.copy(
+                                        packageId = packageProposal.uid,
+                                        agreedPrice = packageProposal.price)
+                              }
+                              requestViewModel.saveServiceRequest(request)
+                              requestViewModel.selectRequest(request)
+                              navigationActions.navigateTo(Route.BOOKING_DETAILS)
+                            }
+                            showDialog.value = false
+                          },
+                          modifier = Modifier.padding(horizontal = 8.dp),
+                          shape = RoundedCornerShape(8.dp)) {
+                            Text(
+                                text = "Confirm",
+                                style = typography.labelLarge,
+                                color = colorScheme.onPrimary)
+                          }
+                    }
+              }
+        }
+  }
 }

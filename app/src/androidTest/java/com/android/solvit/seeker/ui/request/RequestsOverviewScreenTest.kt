@@ -163,7 +163,7 @@ class RequestsOverviewScreenTest {
   }
 
   @Test
-  fun clickOnRequestNavigatesToEditScreen() {
+  fun clickOnRequestNavigatesToBookingScreen() {
     composeTestRule.setContent {
       RequestsOverviewScreen(navigationActions, serviceRequestViewModel)
     }
@@ -174,7 +174,7 @@ class RequestsOverviewScreenTest {
     serviceRequestViewModel.getServiceRequests()
 
     composeTestRule.onNodeWithText("title").performClick()
-    verify(navigationActions).navigateTo(Route.EDIT_REQUEST)
+    verify(navigationActions).navigateTo(Route.BOOKING_DETAILS)
   }
 
   @Test
