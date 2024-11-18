@@ -109,7 +109,7 @@ fun RequestsOverviewScreen(
                         request = request,
                         onClick = {
                           requestViewModel.selectRequest(request)
-                          navigationActions.navigateTo(Route.EDIT_REQUEST)
+                          navigationActions.navigateTo(Route.BOOKING_DETAILS)
                         })
                   }
                 }
