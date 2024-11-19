@@ -28,11 +28,14 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ScrollableTabRow
+import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -74,7 +77,6 @@ fun RequestsOverviewScreen(
         viewModel(factory = ServiceRequestViewModel.Factory),
     authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory),
 ) {
-
   // Lock Orientation to Portrait
   val context = LocalContext.current
   DisposableEffect(Unit) {
@@ -82,6 +84,7 @@ fun RequestsOverviewScreen(
     activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
     onDispose { activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED }
   }
+
   Scaffold(
       modifier = Modifier.testTag("requestsOverviewScreen"),
       bottomBar = {
@@ -92,19 +95,50 @@ fun RequestsOverviewScreen(
       }) {
         val user = authViewModel.user.collectAsState()
         val userId = user.value?.uid ?: "-1"
-        val requests =
+        val allRequests =
             requestViewModel.requests.collectAsState().value.filter { it.userId == userId }
+
+        var selectedTab by remember { mutableIntStateOf(0) }
+        val statusTabs = ServiceRequestStatus.entries.toTypedArray()
 
         Column {
           TopOrdersSection(navigationActions)
           CategoriesFiltersSection()
-          if (requests.isEmpty()) {
+
+          // Tabs for filtering by status
+          ScrollableTabRow(
+              selectedTabIndex = selectedTab,
+              modifier = Modifier.fillMaxWidth().testTag("statusTabRow"),
+              containerColor = colorScheme.background,
+              contentColor = colorScheme.primary) {
+                statusTabs.forEachIndexed { index, status ->
+                  Tab(
+                      selected = selectedTab == index,
+                      onClick = { selectedTab = index },
+                      text = {
+                        Text(
+                            text = ServiceRequestStatus.format(status),
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = getStatusColor(status))
+                      })
+                }
+              }
+
+          val filteredRequests =
+              if (selectedTab < statusTabs.size) {
+                allRequests.filter { it.status == statusTabs[selectedTab] }
+              } else {
+                allRequests
+              }
+
+          if (filteredRequests.isEmpty()) {
             NoRequestsText()
           } else {
             LazyColumn(
                 modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("requestsList"),
                 verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                  items(requests) { request ->
+                  items(filteredRequests) { request ->
                     RequestItemRow(
                         request = request,
                         onClick = {

@@ -3,6 +3,7 @@ package com.android.solvit.shared.ui.booking
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
 import androidx.navigation.NavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
@@ -87,5 +88,29 @@ class BookingScreenTest {
     composeTestRule.onNodeWithTag("address_label").assertIsDisplayed()
     composeTestRule.onNodeWithTag("google_map_container").assertIsDisplayed()
     composeTestRule.onNodeWithTag("edit_button").assertIsDisplayed()
+  }
+
+  @Test
+  fun dateAndTimePickersFunctionsAsIntended() {
+    composeTestRule.setContent {
+      DateAndTimePickers(
+          request = serviceRequest,
+          requestViewModel = serviceRequestViewModel,
+      )
+    }
+
+    composeTestRule.onNodeWithTag("date_time_picker_button").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("date_time_picker_button").performClick()
+    composeTestRule.onNodeWithTag("date_picker").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("date_picker").performClick()
+    composeTestRule.onNodeWithTag("action_button").performClick()
+    composeTestRule.onNodeWithTag("time_picker").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("time_picker").performClick()
+    composeTestRule.onNodeWithTag("action_button").performClick()
+    composeTestRule.onNodeWithTag("date_time_picker_button").performClick()
+    composeTestRule.onNodeWithTag("cancel_button").performClick()
+    composeTestRule.onNodeWithTag("date_picker").assertDoesNotExist()
+    composeTestRule.onNodeWithTag("date_time_picker_button").performClick()
+    composeTestRule.onNodeWithTag("date_picker").assertIsDisplayed()
   }
 }

@@ -1,5 +1,7 @@
 package com.android.solvit.shared.ui.booking
 
+import android.content.pm.ActivityInfo
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -12,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -21,27 +24,43 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TimePicker
+import androidx.compose.material3.TimePickerState
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarColors
+import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -50,6 +69,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.android.solvit.R
@@ -58,14 +78,18 @@ import com.android.solvit.seeker.ui.provider.Note
 import com.android.solvit.shared.model.packages.PackageProposal
 import com.android.solvit.shared.model.packages.PackageProposalViewModel
 import com.android.solvit.shared.model.provider.Provider
+import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestStatus
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
 import com.google.android.gms.maps.model.LatLng
+import com.google.firebase.Timestamp
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.rememberCameraPositionState
 import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
 import java.util.Locale
 
 /**
@@ -82,6 +106,14 @@ fun ServiceBookingScreen(
     packageViewModel: PackageProposalViewModel =
         viewModel(factory = PackageProposalViewModel.Factory)
 ) {
+  // Lock Orientation to Portrait
+  val context = LocalContext.current
+  DisposableEffect(Unit) {
+    val activity = context as? ComponentActivity
+    activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+    onDispose { activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED }
+  }
+
   val request = requestViewModel.selectedRequest.collectAsState().value ?: return
   val providerId = request.providerId
   val provider =
@@ -97,6 +129,10 @@ fun ServiceBookingScreen(
           packageViewModel.proposal.collectAsState().value.firstOrNull {
             it.uid == request.packageId
           }
+
+  val acceptedOrScheduled =
+      request.status == ServiceRequestStatus.ACCEPTED ||
+          request.status == ServiceRequestStatus.SCHEDULED
   // Scaffold provides the basic structure for the screen with a top bar and content
   Scaffold(
       topBar = {
@@ -273,16 +309,26 @@ fun ServiceBookingScreen(
                                 Spacer(
                                     modifier =
                                         Modifier.height(8.dp)) // Space between the text and date
-                                Text(
-                                    text = date,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 20.sp,
-                                    color = colorScheme.onPrimary)
-                                Text(
-                                    text = time,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 15.sp,
-                                    color = colorScheme.onPrimary)
+                                Row {
+                                  Column(
+                                      modifier =
+                                          if (acceptedOrScheduled) Modifier.weight(1f)
+                                          else Modifier) {
+                                        Text(
+                                            text = date,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 20.sp,
+                                            color = colorScheme.onPrimary)
+                                        Text(
+                                            text = time,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 15.sp,
+                                            color = colorScheme.onPrimary)
+                                      }
+                                  if (acceptedOrScheduled) {
+                                    DateAndTimePickers(request, requestViewModel)
+                                  }
+                                }
                               }
                         }
                   }
@@ -456,4 +502,124 @@ fun PackageCard(packageProposal: PackageProposal) {
               }
             }
       }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DateAndTimePickers(request: ServiceRequest, requestViewModel: ServiceRequestViewModel) {
+  var meetingDate: Timestamp?
+  var showModal by remember { mutableStateOf(false) }
+  // Track current step (true = date, false = time)
+  var isSelectingDate by remember { mutableStateOf(true) }
+  val currentTime = Calendar.getInstance()
+
+  // States for DatePicker and TimePicker
+  val datePickerState =
+      rememberDatePickerState(
+          initialSelectedDateMillis = currentTime.timeInMillis,
+          initialDisplayedMonthMillis = currentTime.timeInMillis,
+          selectableDates = DatePickerDefaults.AllDates // To be modified with provider availability
+          )
+  val timePickerState =
+      rememberTimePickerState(
+          initialHour = currentTime.get(Calendar.HOUR_OF_DAY),
+          initialMinute = currentTime.get(Calendar.MINUTE),
+          is24Hour = true)
+  var selectedDate by remember { mutableStateOf<Long?>(null) }
+  var selectedTime: TimePickerState? by remember { mutableStateOf(null) }
+
+  IconButton(
+      colors = IconButtonDefaults.iconButtonColors(contentColor = colorScheme.onPrimary),
+      onClick = {
+        showModal = true
+        isSelectingDate = true // Start with date selection
+      },
+      modifier = Modifier.testTag("date_time_picker_button")) {
+        Icon(Icons.Default.DateRange, contentDescription = "Select date and time")
+      }
+
+  if (showModal) {
+    Dialog(onDismissRequest = { showModal = false }) {
+      Surface(
+          shape = RoundedCornerShape(16.dp),
+          color = colorScheme.surface,
+          modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
+            Box(
+                modifier =
+                    Modifier.fillMaxWidth()
+                        .heightIn(min = 400.dp, max = 600.dp)
+                        .verticalScroll(rememberScrollState()) // Enable scrolling if needed
+                        .padding(16.dp)) {
+                  Column(
+                      verticalArrangement = Arrangement.spacedBy(16.dp),
+                      modifier = Modifier.fillMaxWidth()) {
+                        if (!isSelectingDate) {
+                          Text(
+                              text = "Select Time",
+                              style = typography.titleMedium,
+                              color = colorScheme.onBackground,
+                              modifier = Modifier.testTag("select_time_text"))
+                        }
+                        if (isSelectingDate) {
+                          DatePicker(
+                              state = datePickerState,
+                              title = {
+                                Text(
+                                    "Select Date",
+                                    style = typography.titleMedium,
+                                    color = colorScheme.onBackground)
+                              },
+                              modifier = Modifier.testTag("date_picker"))
+                        } else {
+                          TimePicker(
+                              state = timePickerState, modifier = Modifier.testTag("time_picker"))
+                        }
+
+                        // Action buttons
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.End) {
+                              TextButton(
+                                  onClick = { showModal = false },
+                                  modifier = Modifier.testTag("cancel_button")) {
+                                    Text("Cancel")
+                                  }
+                              TextButton(
+                                  modifier = Modifier.testTag("action_button"),
+                                  onClick = {
+                                    if (isSelectingDate) {
+                                      // Save selected date and proceed to time selection
+                                      selectedDate = datePickerState.selectedDateMillis
+                                      isSelectingDate = false
+                                    } else {
+                                      // Save selected time and close dialog
+                                      selectedTime = timePickerState
+                                      meetingDate =
+                                          selectedDate
+                                              ?.let { dateMillis ->
+                                                Calendar.getInstance()
+                                                    .apply {
+                                                      timeInMillis = dateMillis
+                                                      set(Calendar.HOUR_OF_DAY, selectedTime!!.hour)
+                                                      set(Calendar.MINUTE, selectedTime!!.minute)
+                                                    }
+                                                    .time
+                                                    .let { Date(it.time) }
+                                              }
+                                              ?.let { Timestamp(it) }
+                                      requestViewModel.saveServiceRequest(
+                                          request.copy(
+                                              meetingDate = meetingDate,
+                                              status = ServiceRequestStatus.SCHEDULED))
+                                      showModal = false
+                                    }
+                                  }) {
+                                    Text(if (isSelectingDate) "Next" else "OK")
+                                  }
+                            }
+                      }
+                }
+          }
+    }
+  }
 }
