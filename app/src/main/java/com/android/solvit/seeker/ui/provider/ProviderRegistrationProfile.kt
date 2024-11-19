@@ -25,8 +25,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Checkbox
-import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Build
@@ -35,7 +33,9 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.Icon
@@ -118,10 +118,20 @@ fun ProviderRegistrationScreen(
   // represent the current authenticated user
   val user by authViewModel.user.collectAsState()
 
+  // Additional Informations about the provider
+  var selectedService by remember { mutableStateOf("") }
+  var description by remember { mutableStateOf("") }
+  var startingPrice by remember { mutableStateOf("") }
+  val selectedLanguages = remember { mutableStateListOf<String>() }
+  var providerImageUri by remember { mutableStateOf<Uri?>(null) }
+  var providerImageBitmap by remember { mutableStateOf<Bitmap?>(null) }
+
   // Step tracking: Role, Details, Preferences
   var currentStep by remember { mutableIntStateOf(1) }
 
   val backgroundColor = colorScheme.background
+
+  val localContext = LocalContext.current
 
   val isFullNameOk = fullName.isNotBlank() && fullName.length > 2
   val isPhoneOk = phone.isNotBlank() && phone.all { it.isDigit() || it == '+' } && phone.length > 6
@@ -252,7 +262,7 @@ fun ProviderRegistrationScreen(
                     verticalArrangement = Arrangement.Center // Center vertically
                     ) {
                       Text(
-                          text = "Set Your Preferences",
+                          text = "Finish Your Inscription",
                           style = MaterialTheme.typography.titleLarge,
                           modifier =
                               Modifier.align(Alignment.CenterHorizontally)
@@ -268,21 +278,36 @@ fun ProviderRegistrationScreen(
                                   .testTag("preferencesIllustration")
                                   .align(Alignment.CenterHorizontally))
                       Spacer(modifier = Modifier.height(20.dp))
-                      Text(
-                          text = "This feature is not implemented yet.",
-                          style = MaterialTheme.typography.bodyLarge,
-                          modifier = Modifier.align(Alignment.CenterHorizontally),
-                          textAlign = TextAlign.Center,
-                          color = colorScheme.primary)
+                      ProviderDetails(
+                          selectedService = selectedService,
+                          onSelectedServiceChange = { s: String -> selectedService = s },
+                          description = description,
+                          onDescriptionChange = { d: String -> description = d },
+                          startingPrice = startingPrice,
+                          onStartingPriceChange = { sP: String -> startingPrice = sP },
+                          selectedLanguages = selectedLanguages,
+                          addSelectedLanguage = { language: String ->
+                            selectedLanguages.add(language)
+                          },
+                          removeSelectedLanguage = { language: String ->
+                            selectedLanguages.remove(language)
+                          },
+                          providerImageUri = providerImageUri,
+                          onImageSelected = { uri: Uri? ->
+                            providerImageUri = uri
+                            uri?.let { providerImageBitmap = loadBitmapFromUri(localContext, it) }
+                          })
                       Spacer(modifier = Modifier.height(100.dp))
                       Button(
                           onClick = { currentStep = 3 },
                           modifier = Modifier.fillMaxWidth().testTag("savePreferencesButton"),
                           colors = ButtonDefaults.buttonColors(colorScheme.secondary)) {
-                            Text("Save Preferences", color = colorScheme.onSecondary)
+                            Text("Complete Registration", color = colorScheme.onSecondary)
                           }
+                      Spacer(modifier = Modifier.height(15.dp))
                       Text(
-                          text = "You can always update your preferences in your profile settings.",
+                          text =
+                              "You can always update your informations in your profile settings.",
                           style = MaterialTheme.typography.bodyLarge,
                           modifier =
                               Modifier.align(Alignment.CenterHorizontally).testTag("footerText"),
@@ -335,8 +360,12 @@ fun ProviderRegistrationScreen(
                               name = fullName,
                               phone = phone,
                               companyName = companyName,
+                              service = Services.valueOf(selectedService),
+                              description = description,
+                              price = startingPrice.toDouble(),
+                              languages = selectedLanguages.map { Language.valueOf(it) },
                               location = loc)
-                      viewModel.addProvider(newProviderProfile)
+                      viewModel.addProvider(newProviderProfile,providerImageUri)
                       authViewModel.registered()
                       // navigationActions.goBack() // Navigate after saving
                     },
@@ -352,15 +381,22 @@ fun ProviderRegistrationScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProviderDetails() {
+fun ProviderDetails(
+    selectedService: String,
+    onSelectedServiceChange: (String) -> Unit,
+    description: String,
+    onDescriptionChange: (String) -> Unit,
+    startingPrice: String,
+    onStartingPriceChange: (String) -> Unit,
+    selectedLanguages: List<String>,
+    addSelectedLanguage: (String) -> Unit,
+    removeSelectedLanguage: (String) -> Unit,
+    providerImageUri: Uri?,
+    onImageSelected: (Uri?) -> Unit
+) {
+
   var servicesExpanded by remember { mutableStateOf(false) }
   var languagesExpanded by remember { mutableStateOf(false) }
-  var selectedService by remember { mutableStateOf("") }
-  var description by remember { mutableStateOf("") }
-  var startingPrice by remember { mutableStateOf("") }
-  val selectedLanguages = remember { mutableStateListOf<String>() }
-  var providerImageUri by remember { mutableStateOf<Uri?>(null) }
-  var providerImageBitmap by remember { mutableStateOf<Bitmap?>(null) }
 
   val services = Services.entries.toTypedArray()
   val availableLanguages = Language.entries.toList().map { it.toString() }
@@ -379,7 +415,7 @@ fun ProviderDetails() {
             onExpandedChange = { servicesExpanded = !servicesExpanded }) {
               OutlinedTextField(
                   value = selectedService,
-                  onValueChange = { selectedService = it },
+                  onValueChange = { onSelectedServiceChange(it) },
                   label = { Text("What Services Do You Offer?") },
                   readOnly = true,
                   modifier = Modifier.fillMaxWidth().menuAnchor())
@@ -387,12 +423,11 @@ fun ProviderDetails() {
                   expanded = servicesExpanded, onDismissRequest = { servicesExpanded = false }) {
                     services.forEach { service ->
                       DropdownMenuItem(
+                          text = { Text(text = service.toString()) },
                           onClick = {
-                            selectedService = service.toString()
+                            onSelectedServiceChange(service.toString())
                             servicesExpanded = false
-                          }) {
-                            Text(text = service.toString())
-                          }
+                          })
                     }
                   }
             }
@@ -401,15 +436,12 @@ fun ProviderDetails() {
         UploadImage(
             selectedImageUri = providerImageUri,
             imageUrl = null,
-            onImageSelected = { uri ->
-              providerImageUri = uri
-              uri?.let { providerImageBitmap = loadBitmapFromUri(localContext, it) }
-            })
+            onImageSelected = { uri -> onImageSelected(uri) })
 
         // Enter Provider Brief description
         CustomOutlinedTextField(
             value = description,
-            onValueChange = { description = it },
+            onValueChange = { onDescriptionChange(it) },
             label = "About you",
             placeholder =
                 "Briefly describe your services, skills, and what sets you apart to attract clients.",
@@ -423,10 +455,10 @@ fun ProviderDetails() {
         // Enter Provider Starting Price
         CustomOutlinedTextField(
             value = startingPrice,
-            onValueChange = { startingPrice = it },
+            onValueChange = { onStartingPriceChange(startingPrice) },
             label = "Starting Price",
             placeholder = "Enter the minimum price at which your services are available. (CHF)",
-            isValueOk = isDescriptionOk,
+            isValueOk = isStartingPriceOk,
             errorMessage = "Enter a valid starting price",
             leadingIcon = Icons.Default.Check,
             leadingIconDescription = "Check Icon",
@@ -441,13 +473,7 @@ fun ProviderDetails() {
               availableLanguages.forEach { language ->
                 val isSelected = language in selectedLanguages
                 DropdownMenuItem(
-                    onClick = {
-                      if (isSelected) {
-                        selectedLanguages.remove(language)
-                      } else {
-                        selectedLanguages.add(language)
-                      }
-                    }) {
+                    text = {
                       Row(verticalAlignment = Alignment.CenterVertically) {
                         Checkbox(
                             checked = isSelected,
@@ -456,7 +482,14 @@ fun ProviderDetails() {
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(text = language)
                       }
-                    }
+                    },
+                    onClick = {
+                      if (isSelected) {
+                        addSelectedLanguage(language)
+                      } else {
+                        removeSelectedLanguage(language)
+                      }
+                    })
               }
             }
       }
