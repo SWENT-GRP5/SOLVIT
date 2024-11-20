@@ -436,7 +436,9 @@ fun ProviderRegistrationScreen(
                                   providerId = user!!.uid,
                                   title = packagesNames[i],
                                   description = packagesDetails[i],
-                                  price = packagesPrices[i].toDouble(),
+                                  price =
+                                      if (packagesPrices[i] != "") packagesPrices[i].toDouble()
+                                      else null,
                                   bulletPoints = packagesFeatures[i])
                           try {
                             packageViewModel.addPackageProposal(packageProposal)
@@ -489,25 +491,26 @@ fun ProviderDetails(
         ExposedDropdownMenuBox(
             expanded = servicesExpanded,
             onExpandedChange = { servicesExpanded = !servicesExpanded },
-        ) {
-          OutlinedTextField(
-              value = selectedService,
-              onValueChange = { onSelectedServiceChange(it) },
-              label = { Text("What Services Do You Offer?") },
-              readOnly = true,
-              modifier = Modifier.fillMaxWidth().menuAnchor())
-          ExposedDropdownMenu(
-              expanded = servicesExpanded, onDismissRequest = { servicesExpanded = false }) {
-                services.forEach { service ->
-                  DropdownMenuItem(
-                      text = { Text(text = service.toString()) },
-                      onClick = {
-                        onSelectedServiceChange(service.toString())
-                        servicesExpanded = false
-                      })
-                }
-              }
-        }
+            modifier = Modifier.testTag("servicesDropDown")) {
+              OutlinedTextField(
+                  value = selectedService,
+                  onValueChange = { onSelectedServiceChange(it) },
+                  label = { Text("What Services Do You Offer?") },
+                  readOnly = true,
+                  modifier = Modifier.fillMaxWidth().menuAnchor())
+              ExposedDropdownMenu(
+                  expanded = servicesExpanded, onDismissRequest = { servicesExpanded = false }) {
+                    services.forEach { service ->
+                      DropdownMenuItem(
+                          modifier = Modifier.testTag("$service"),
+                          text = { Text(text = service.toString()) },
+                          onClick = {
+                            onSelectedServiceChange(service.toString())
+                            servicesExpanded = false
+                          })
+                    }
+                  }
+            }
 
         // Upload photo provider section
         UploadImage(
@@ -546,9 +549,7 @@ fun ProviderDetails(
         ExposedDropdownMenuBox(
             expanded = languagesExpanded,
             onExpandedChange = { languagesExpanded = !languagesExpanded },
-            modifier =
-                Modifier.background(colorScheme.primaryContainer)
-                    .border(1.dp, colorScheme.primary)) {
+            modifier = Modifier.testTag("languageDropdown")) {
               OutlinedTextField(
                   value =
                       if (selectedLanguages.isEmpty()) "Select Languages"
@@ -565,6 +566,7 @@ fun ProviderDetails(
                     availableLanguages.forEach { language ->
                       val isSelected = language in selectedLanguages
                       DropdownMenuItem(
+                          modifier = Modifier.testTag(language),
                           text = {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                               Checkbox(
@@ -648,32 +650,37 @@ fun ProviderPackages(
   Column(
       modifier = Modifier.fillMaxWidth().padding(16.dp),
       verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = !expanded }) {
-          OutlinedTextField(
-              value = if (providePackages.value) "Yes" else "No",
-              onValueChange = {},
-              label = { Text("Do you want to offer service Packages") },
-              readOnly = true,
-              modifier = Modifier.fillMaxWidth().menuAnchor())
+        ExposedDropdownMenuBox(
+            expanded = expanded,
+            onExpandedChange = { expanded = !expanded },
+            modifier = Modifier.testTag("offerPackagesDropDown")) {
+              OutlinedTextField(
+                  value = if (providePackages.value) "Yes" else "No",
+                  onValueChange = {},
+                  label = { Text("Do you want to offer service Packages") },
+                  readOnly = true,
+                  modifier = Modifier.fillMaxWidth().menuAnchor())
 
-          DropdownMenu(
-              expanded = expanded,
-              onDismissRequest = { expanded = false },
-          ) {
-            DropdownMenuItem(
-                text = { Text("Yes") },
-                onClick = {
-                  providePackages.value = true
-                  expanded = false
-                })
-            DropdownMenuItem(
-                text = { Text("No") },
-                onClick = {
-                  providePackages.value = false
-                  expanded = false
-                })
-          }
-        }
+              DropdownMenu(
+                  expanded = expanded,
+                  onDismissRequest = { expanded = false },
+              ) {
+                DropdownMenuItem(
+                    modifier = Modifier.testTag("Yes"),
+                    text = { Text("Yes") },
+                    onClick = {
+                      providePackages.value = true
+                      expanded = false
+                    })
+                DropdownMenuItem(
+                    modifier = Modifier.testTag("No"),
+                    text = { Text("No") },
+                    onClick = {
+                      providePackages.value = false
+                      expanded = false
+                    })
+              }
+            }
 
         if (providePackages.value) {
           // Display the 3 packages to fill
@@ -716,9 +723,10 @@ fun PackageInputSection(
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier =
-            Modifier.fillMaxWidth().padding(vertical = 8.dp).clickable {
-              onToggleVisibility(!expanded)
-            }) {
+            Modifier.fillMaxWidth()
+                .padding(vertical = 8.dp)
+                .testTag("package$packageNumber")
+                .clickable { onToggleVisibility(!expanded) }) {
           Text(
               text = "Package $packageNumber",
               style = MaterialTheme.typography.bodyLarge,
@@ -739,7 +747,7 @@ fun PackageInputSection(
           placeholder = "Give your package a catchy and descriptive name",
           leadingIcon = Icons.Default.Create,
           isValueOk = true,
-          testTag = "packageName",
+          testTag = "packageName$packageNumber",
           errorTestTag = "packageNameError")
       Spacer(modifier = Modifier.height(8.dp))
 
@@ -751,7 +759,7 @@ fun PackageInputSection(
           placeholder = "Enter the cost for this package (CHF)",
           leadingIcon = Icons.Default.Create,
           isValueOk = true,
-          testTag = "packagePrice",
+          testTag = "packagePrice$packageNumber",
           errorTestTag = "packagePriceError")
       Spacer(modifier = Modifier.height(8.dp))
 
@@ -763,7 +771,7 @@ fun PackageInputSection(
           placeholder = "Briefly explain what this package offers",
           leadingIcon = Icons.Default.Create,
           isValueOk = true,
-          testTag = "packageDetails",
+          testTag = "packageDetails$packageNumber",
           errorTestTag = "packageDetailsError")
 
       Spacer(modifier = Modifier.height(8.dp))
@@ -777,7 +785,7 @@ fun PackageInputSection(
             placeholder = "Feature ${featureNumber + 1}",
             leadingIcon = Icons.Default.Create,
             isValueOk = true,
-            testTag = "packageFeatures",
+            testTag = "packageFeatures$packageNumber$featureNumber",
             errorTestTag = "packageFeaturesError")
         Spacer(modifier = Modifier.height(8.dp))
       }

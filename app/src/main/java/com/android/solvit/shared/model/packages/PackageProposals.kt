@@ -6,6 +6,6 @@ data class PackageProposal(
     val providerId: String? = null,
     val title: String,
     val description: String,
-    val price: Double,
+    val price: Double? = null,
     val bulletPoints: List<String>
 )
