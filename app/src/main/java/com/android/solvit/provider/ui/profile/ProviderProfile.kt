@@ -14,10 +14,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -49,6 +52,8 @@ import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.android.solvit.shared.ui.navigation.Screen
+import java.util.Locale
 
 @Composable
 fun ProviderProfileScreen(
@@ -61,13 +66,17 @@ fun ProviderProfileScreen(
   val userId = user.value?.uid ?: "-1"
   val provider =
       listProviderViewModel.providersList.collectAsState().value.find { it.uid == userId } ?: return
-  Column(modifier = Modifier.fillMaxSize().background(colorScheme.background)) {
-    ProfileHeader(navigationActions, provider, authViewModel)
-    Spacer(modifier = Modifier.height(10.dp))
-    JobsDoneSection()
-    Spacer(modifier = Modifier.height(10.dp))
-    StatsSection(provider = provider)
-  }
+  Column(
+      modifier =
+          Modifier.fillMaxSize()
+              .background(colorScheme.background)
+              .verticalScroll(rememberScrollState())) {
+        ProfileHeader(navigationActions, provider, authViewModel)
+        Spacer(modifier = Modifier.height(10.dp))
+        JobsDoneSection()
+        Spacer(modifier = Modifier.height(10.dp))
+        StatsSection(provider = provider)
+      }
 }
 
 @Composable
@@ -173,7 +182,19 @@ fun ProfileHeader(
 
           Column(modifier = Modifier.align(Alignment.End)) { TitleText("Profile") }
 
-          Spacer(modifier = Modifier.height(20.dp))
+          Spacer(modifier = Modifier.height(5.dp))
+
+          Column(modifier = Modifier.align(Alignment.End)) {
+            Icon(
+                Icons.Default.Menu,
+                contentDescription = "Menu",
+                modifier =
+                    Modifier.size(24.dp).clickable {
+                      navigationActions.navigateTo(Screen.PROVIDER_MODIFY_PROFILE)
+                    })
+          }
+
+          Spacer(modifier = Modifier.height(15.dp))
 
           Column {
             TitleText("Company name", testTag = "companyNameTitle")
@@ -182,7 +203,13 @@ fun ProfileHeader(
 
           Column {
             TitleText("Profession", testTag = "serviceTitle")
-            BodyText(provider.service.toString(), testTag = "service")
+            BodyText(
+                provider.service
+                    .toString()
+                    .lowercase(Locale.ROOT)
+                    .replaceFirstChar { it.uppercase() }
+                    .ifEmpty { "Not provided" },
+                testTag = "service")
           }
 
           Column {

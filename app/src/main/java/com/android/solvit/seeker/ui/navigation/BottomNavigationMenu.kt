@@ -32,7 +32,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_CUSTOMER
+import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_SEEKER
 import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.navigation.TopLevelDestination
 import com.android.solvit.shared.ui.navigation.TopLevelDestinations
@@ -117,7 +117,7 @@ fun BottomNavigationMenu(
         FloatingActionButton(
             onClick = {
               onTabSelect(
-                  if (tabList == LIST_TOP_LEVEL_DESTINATION_CUSTOMER)
+                  if (tabList == LIST_TOP_LEVEL_DESTINATION_SEEKER)
                       TopLevelDestinations.CREATE_REQUEST
                   else TopLevelDestinations.MYJOBS)
             },
@@ -130,10 +130,10 @@ fun BottomNavigationMenu(
             shape = CircleShape,
             containerColor = colorScheme.primary) {
               Icon(
-                  if (tabList == LIST_TOP_LEVEL_DESTINATION_CUSTOMER) Icons.Outlined.Add
+                  if (tabList == LIST_TOP_LEVEL_DESTINATION_SEEKER) Icons.Outlined.Add
                   else Icons.Outlined.CheckCircle,
                   contentDescription =
-                      if (tabList == LIST_TOP_LEVEL_DESTINATION_CUSTOMER) "Add" else "Myjobs",
+                      if (tabList == LIST_TOP_LEVEL_DESTINATION_SEEKER) "Add" else "Myjobs",
                   tint = colorScheme.onPrimary,
                   modifier = Modifier.size(30.dp))
             }
@@ -144,7 +144,7 @@ fun BottomNavigationMenu(
 @Composable
 fun PreviewSeekerBottomNavigationMenu() {
   // Use the actual list of top-level destinations
-  val tabList = LIST_TOP_LEVEL_DESTINATION_CUSTOMER
+  val tabList = LIST_TOP_LEVEL_DESTINATION_SEEKER
 
   // Preview with "Home" as the selected item
   BottomNavigationMenu(

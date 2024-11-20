@@ -182,6 +182,7 @@ dependencies {
     implementation(libs.firebase.storage.ktx)
     implementation(libs.play.services.location)
     implementation(libs.androidx.navigation.testing)
+    implementation(libs.androidx.compose.material)
     testImplementation(libs.testng)
 
 
