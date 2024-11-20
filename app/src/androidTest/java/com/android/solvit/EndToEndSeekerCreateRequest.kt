@@ -165,7 +165,9 @@ class EndToEndSeekerCreateRequest {
                   serviceRequestViewModel,
                   reviewViewModel,
                   locationViewModel)
-          "provider" -> ProviderUI(authViewModel, listProviderViewModel, seekerProfileViewModel, locationViewModel)
+          "provider" ->
+              ProviderUI(
+                  authViewModel, listProviderViewModel, seekerProfileViewModel, locationViewModel)
         }
       }
     }
