@@ -300,6 +300,7 @@ class EndToEndTestCreateProfile {
     composeTestRule.onNodeWithTag("continueDashboardButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("continueDashboardButton").performClick()
 
+    listProviderViewModel.getProviders()
     // Check that the provider has indeed be added to the providerList
     assertEquals(listProviderViewModel.providersList.value.size, sizeBefore + 1)
   }
