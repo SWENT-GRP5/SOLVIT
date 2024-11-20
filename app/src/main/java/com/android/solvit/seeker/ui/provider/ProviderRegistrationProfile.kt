@@ -197,6 +197,7 @@ fun ProviderRegistrationScreen(
                     showDropdownLocation = showDropdown,
                     onShowDropdownLocationChange = { showDropdown = it },
                     locationSuggestions = locationSuggestions.filterNotNull(),
+                    userLocations = user?.locations ?: emptyList(),
                     onLocationSelected = { selectedLocation = it },
                     requestLocation = null,
                     backgroundColor = colorScheme.background,

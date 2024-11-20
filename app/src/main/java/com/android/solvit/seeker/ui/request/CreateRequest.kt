@@ -15,6 +15,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.map.LocationViewModel
 import com.android.solvit.shared.model.request.ServiceRequest
@@ -32,7 +33,8 @@ fun CreateRequestScreen(
     navigationActions: NavigationActions,
     requestViewModel: ServiceRequestViewModel =
         viewModel(factory = ServiceRequestViewModel.Factory),
-    locationViewModel: LocationViewModel = viewModel(factory = LocationViewModel.Factory)
+    locationViewModel: LocationViewModel = viewModel(factory = LocationViewModel.Factory),
+    authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory)
 ) {
   // Lock Orientation to Portrait
   val context = LocalContext.current
@@ -52,6 +54,7 @@ fun CreateRequestScreen(
   var showDropdownLocation by remember { mutableStateOf(false) }
   val locationSuggestions by
       locationViewModel.locationSuggestions.collectAsState(initial = emptyList<Location?>())
+  val user by authViewModel.user.collectAsState()
   var showDropdownType by remember { mutableStateOf(false) }
   var typeQuery by remember { mutableStateOf("") }
   val filteredServiceTypes =
@@ -83,7 +86,11 @@ fun CreateRequestScreen(
       showDropdownLocation = showDropdownLocation,
       onShowDropdownLocationChange = { showDropdownLocation = it },
       locationSuggestions = locationSuggestions.filterNotNull(),
-      onLocationSelected = { selectedLocation = it },
+      userLocations = user?.locations ?: emptyList(),
+      onLocationSelected = {
+        selectedLocation = it
+        authViewModel.addUserLocation(it, {}, {})
+      },
       selectedLocation = selectedLocation,
       dueDate = dueDate,
       onDueDateChange = { dueDate = it },
