@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
 import android.graphics.Bitmap
 import android.net.Uri
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -29,6 +30,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Person
@@ -51,6 +53,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -59,6 +62,7 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -79,6 +83,8 @@ import com.android.solvit.seeker.ui.request.LocationDropdown
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.map.LocationViewModel
+import com.android.solvit.shared.model.packages.PackageProposal
+import com.android.solvit.shared.model.packages.PackageProposalViewModel
 import com.android.solvit.shared.model.provider.Language
 import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.service.Services
@@ -97,7 +103,9 @@ fun ProviderRegistrationScreen(
     viewModel: ListProviderViewModel = viewModel(factory = ListProviderViewModel.Factory),
     navigationActions: NavigationActions,
     locationViewModel: LocationViewModel = viewModel(factory = LocationViewModel.Factory),
-    authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory)
+    authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory),
+    packageViewModel: PackageProposalViewModel =
+        viewModel(factory = PackageProposalViewModel.Factory)
 ) {
   // Lock Orientation to Portrait
   val context = LocalContext.current
@@ -130,10 +138,17 @@ fun ProviderRegistrationScreen(
   var providerImageBitmap by remember { mutableStateOf<Bitmap?>(null) }
 
   // Additional Informations about provider packages
-  val packagesNames = remember { mutableStateListOf<String>() }
-  val packagesPrices = remember { mutableStateListOf<String>() }
-  val packagesDetails = remember { mutableStateListOf<String>() }
-  val packagesFeatures = remember { mutableStateListOf<MutableList<String>>() }
+  val offerPackages = remember { mutableStateOf(false) }
+  val packagesNames = remember { mutableStateListOf(*Array(3) { "" }) }
+  val packagesPrices = remember { mutableStateListOf(*Array(3) { "" }) }
+  val packagesDetails = remember { mutableStateListOf(*Array(3) { "" }) }
+  val packagesFeatures = remember {
+    mutableStateListOf(
+        mutableStateListOf("", "", ""), // Package 1 features
+        mutableStateListOf("", "", ""), // Package 2 features
+        mutableStateListOf("", "", "") // Package 3 features
+        )
+  }
 
   // Step tracking: Role, Details, Preferences
   var currentStep by remember { mutableIntStateOf(1) }
@@ -340,7 +355,8 @@ fun ProviderRegistrationScreen(
                           packagesNames = packagesNames,
                           packagePrices = packagesPrices,
                           packagesDetails = packagesDetails,
-                          packagesFeatures = packagesFeatures)
+                          packagesFeatures = packagesFeatures,
+                          providePackages = offerPackages)
                       Spacer(modifier = Modifier.height(30.dp))
                       Button(
                           onClick = { currentStep = 4 },
@@ -409,6 +425,26 @@ fun ProviderRegistrationScreen(
                               price = startingPrice.toDouble(),
                               languages = selectedLanguages.map { Language.valueOf(it) },
                               location = loc)
+                      // Check that the provider want to offer service packages
+                      Log.e("ServicePackages", "offerPackages : ${offerPackages.value}")
+                      if (offerPackages.value && packagesNames.isNotEmpty()) {
+                        for (i in 0..2) {
+                          val packageProposal =
+                              PackageProposal(
+                                  uid = packageViewModel.getNewUid(),
+                                  packageNumber = i + 1.0,
+                                  providerId = user!!.uid,
+                                  title = packagesNames[i],
+                                  description = packagesDetails[i],
+                                  price = packagesPrices[i].toDouble(),
+                                  bulletPoints = packagesFeatures[i])
+                          try {
+                            packageViewModel.addPackageProposal(packageProposal)
+                          } catch (e: Exception) {
+                            Log.e("Provider Registration", "Failed to add package $i : $e")
+                          }
+                        }
+                      }
                       viewModel.addProvider(newProviderProfile, providerImageUri)
                       authViewModel.registered()
                       // navigationActions.goBack() // Navigate after saving
@@ -442,9 +478,6 @@ fun ProviderDetails(
 
   val services = Services.entries.toTypedArray()
   val availableLanguages = Language.entries.toList().map { it.toString() }
-  val languages = remember { mutableStateListOf<String>() }
-
-  val localContext = LocalContext.current
 
   val isDescriptionOk = description.isNotBlank()
   val isStartingPriceOk = startingPrice.isNotBlank() && startingPrice.all { it.isDigit() }
@@ -456,27 +489,25 @@ fun ProviderDetails(
         ExposedDropdownMenuBox(
             expanded = servicesExpanded,
             onExpandedChange = { servicesExpanded = !servicesExpanded },
-            modifier =
-                Modifier.background(MaterialTheme.colorScheme.primaryContainer)
-                    .border(1.dp, colorScheme.primary)) {
-              OutlinedTextField(
-                  value = selectedService,
-                  onValueChange = { onSelectedServiceChange(it) },
-                  label = { Text("What Services Do You Offer?") },
-                  readOnly = true,
-                  modifier = Modifier.fillMaxWidth().menuAnchor())
-              ExposedDropdownMenu(
-                  expanded = servicesExpanded, onDismissRequest = { servicesExpanded = false }) {
-                    services.forEach { service ->
-                      DropdownMenuItem(
-                          text = { Text(text = service.toString()) },
-                          onClick = {
-                            onSelectedServiceChange(service.toString())
-                            servicesExpanded = false
-                          })
-                    }
-                  }
-            }
+        ) {
+          OutlinedTextField(
+              value = selectedService,
+              onValueChange = { onSelectedServiceChange(it) },
+              label = { Text("What Services Do You Offer?") },
+              readOnly = true,
+              modifier = Modifier.fillMaxWidth().menuAnchor())
+          ExposedDropdownMenu(
+              expanded = servicesExpanded, onDismissRequest = { servicesExpanded = false }) {
+                services.forEach { service ->
+                  DropdownMenuItem(
+                      text = { Text(text = service.toString()) },
+                      onClick = {
+                        onSelectedServiceChange(service.toString())
+                        servicesExpanded = false
+                      })
+                }
+              }
+        }
 
         // Upload photo provider section
         UploadImage(
@@ -569,10 +600,7 @@ fun UploadImage(selectedImageUri: Uri?, imageUrl: String?, onImageSelected: (Uri
       modifier =
           Modifier.fillMaxWidth()
               .height(150.dp)
-              .border(
-                  1.dp,
-                  MaterialTheme.colorScheme.onSurfaceVariant,
-                  shape = RoundedCornerShape(12.dp))
+              .border(1.dp, colorScheme.onSurfaceVariant, shape = RoundedCornerShape(12.dp))
               .clip(RoundedCornerShape(12.dp))
               .background(Color.Transparent)
               .testTag("providerImageButton"),
@@ -582,12 +610,12 @@ fun UploadImage(selectedImageUri: Uri?, imageUrl: String?, onImageSelected: (Uri
             Icon(
                 imageVector = Icons.Default.Person,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                tint = colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(48.dp))
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 "Click to upload a picture of you",
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = colorScheme.onSurfaceVariant,
                 modifier = Modifier.clickable { imagePickerLauncher.launch("image/*") },
                 style =
                     MaterialTheme.typography.bodyLarge.copy(
@@ -611,17 +639,18 @@ fun ProviderPackages(
     packagesNames: MutableList<String>,
     packagePrices: MutableList<String>,
     packagesDetails: MutableList<String>,
-    packagesFeatures: MutableList<MutableList<String>>
+    packagesFeatures: SnapshotStateList<SnapshotStateList<String>>,
+    providePackages: MutableState<Boolean>
 ) {
+
   var expanded by remember { mutableStateOf(false) }
-  var providePackages by remember { mutableStateOf(false) }
   val packagesVisibilityStates = remember { mutableStateMapOf<Int, Boolean>() }
   Column(
       modifier = Modifier.fillMaxWidth().padding(16.dp),
       verticalArrangement = Arrangement.spacedBy(16.dp)) {
         ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = !expanded }) {
           OutlinedTextField(
-              value = if (providePackages) "Yes" else "No",
+              value = if (providePackages.value) "Yes" else "No",
               onValueChange = {},
               label = { Text("Do you want to offer service Packages") },
               readOnly = true,
@@ -630,25 +659,23 @@ fun ProviderPackages(
           DropdownMenu(
               expanded = expanded,
               onDismissRequest = { expanded = false },
-              modifier = Modifier.fillMaxWidth()) {
-                DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                  DropdownMenuItem(
-                      text = { Text("Yes") },
-                      onClick = {
-                        providePackages = true
-                        expanded = false
-                      })
-                  DropdownMenuItem(
-                      text = { Text("No") },
-                      onClick = {
-                        providePackages = false
-                        expanded = false
-                      })
-                }
-              }
+          ) {
+            DropdownMenuItem(
+                text = { Text("Yes") },
+                onClick = {
+                  providePackages.value = true
+                  expanded = false
+                })
+            DropdownMenuItem(
+                text = { Text("No") },
+                onClick = {
+                  providePackages.value = false
+                  expanded = false
+                })
+          }
         }
 
-        if (providePackages) {
+        if (providePackages.value) {
           // Display the 3 packages to fill
           for (i in 1..3) {
             PackageInputSection(
@@ -663,7 +690,7 @@ fun ProviderPackages(
                 onPackagePriceChange = { packagePrices[i - 1] = it },
                 packageDetails = packagesDetails[i - 1],
                 onPackageDetailsChange = { packagesDetails[i - 1] = it },
-                packageFeatures = packagesFeatures[i - 1],
+                packageFeatures = packagesFeatures,
             )
           }
         }
@@ -681,8 +708,9 @@ fun PackageInputSection(
     onPackagePriceChange: (String) -> Unit,
     packageDetails: String,
     onPackageDetailsChange: (String) -> Unit,
-    packageFeatures: MutableList<String>
+    packageFeatures: SnapshotStateList<SnapshotStateList<String>>
 ) {
+  Log.e("Packages", "$packageFeatures")
   Column(modifier = Modifier.fillMaxWidth()) {
     // Package Header with Collapse/Expand Icon
     Row(
@@ -709,6 +737,7 @@ fun PackageInputSection(
           value = packageName,
           onValueChange = { onPackageNameChange(it) },
           placeholder = "Give your package a catchy and descriptive name",
+          leadingIcon = Icons.Default.Create,
           isValueOk = true,
           testTag = "packageName",
           errorTestTag = "packageNameError")
@@ -720,6 +749,7 @@ fun PackageInputSection(
           value = packagePrice,
           onValueChange = { onPackagePriceChange(it) },
           placeholder = "Enter the cost for this package (CHF)",
+          leadingIcon = Icons.Default.Create,
           isValueOk = true,
           testTag = "packagePrice",
           errorTestTag = "packagePriceError")
@@ -731,6 +761,7 @@ fun PackageInputSection(
           value = packageDetails,
           onValueChange = { onPackageDetailsChange(it) },
           placeholder = "Briefly explain what this package offers",
+          leadingIcon = Icons.Default.Create,
           isValueOk = true,
           testTag = "packageDetails",
           errorTestTag = "packageDetailsError")
@@ -741,9 +772,10 @@ fun PackageInputSection(
       Spacer(modifier = Modifier.height(8.dp))
       repeat(3) { featureNumber ->
         CustomOutlinedTextField(
-            value = packageFeatures[featureNumber],
-            onValueChange = { packageFeatures[featureNumber] = it },
-            placeholder = "Text(\"Feature ${featureNumber + 1}\")",
+            value = packageFeatures[packageNumber - 1][featureNumber],
+            onValueChange = { packageFeatures[packageNumber - 1][featureNumber] = it },
+            placeholder = "Feature ${featureNumber + 1}",
+            leadingIcon = Icons.Default.Create,
             isValueOk = true,
             testTag = "packageFeatures",
             errorTestTag = "packageFeaturesError")
