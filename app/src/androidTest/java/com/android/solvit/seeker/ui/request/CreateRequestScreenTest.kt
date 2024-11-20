@@ -90,9 +90,9 @@ class CreateRequestScreenTest {
 
     `when`(serviceRequestRepository.getNewUid()).thenAnswer { "1" }
 
-    `when`(authRepository.updateUserLocations(any(), any(), any())).thenAnswer{
-        val onSuccess = it.getArgument<() -> Unit>(1)
-        onSuccess()
+    `when`(authRepository.updateUserLocations(any(), any(), any())).thenAnswer {
+      val onSuccess = it.getArgument<() -> Unit>(1)
+      onSuccess()
     }
   }
 
@@ -147,7 +147,8 @@ class CreateRequestScreenTest {
   @Test
   fun locationSelectionFromDropdown() {
     composeTestRule.setContent {
-      CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel, authViewModel)
+      CreateRequestScreen(
+          navigationActions, serviceRequestViewModel, locationViewModel, authViewModel)
     }
 
     composeTestRule.onNodeWithTag("inputRequestAddress").performTextInput("USA")

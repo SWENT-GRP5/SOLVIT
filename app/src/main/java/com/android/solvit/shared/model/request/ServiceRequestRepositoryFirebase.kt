@@ -34,6 +34,22 @@ class ServiceRequestRepositoryFirebase(
     }
   }
 
+  override fun addListenerOnServiceRequests(
+      onSuccess: (List<ServiceRequest>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    db.collection(collectionPath).addSnapshotListener { value, error ->
+      if (error != null) {
+        onFailure(error)
+        return@addSnapshotListener
+      }
+      if (value != null) {
+        val serviceRequests = value.mapNotNull { documentToServiceRequest(it) }
+        onSuccess(serviceRequests)
+      }
+    }
+  }
+
   // Fetch service requests
   override fun getServiceRequests(
       onSuccess: (List<ServiceRequest>) -> Unit,
@@ -110,6 +126,7 @@ class ServiceRequestRepositoryFirebase(
       onFailure: (Exception) -> Unit
   ) {
     if (imageUri != null) {
+      saveServiceRequest(serviceRequest, onSuccess, onFailure)
       uploadImageToStorage(
           imageUri,
           { imageUrl ->

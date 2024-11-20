@@ -22,6 +22,7 @@ import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestStatus
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.service.Services
+import com.android.solvit.shared.model.utils.isInternetAvailable
 import com.android.solvit.shared.model.utils.loadBitmapFromUri
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.google.firebase.Firebase
@@ -118,6 +119,13 @@ fun CreateRequestScreen(
                     type = selectedServiceType,
                     imageUrl = null)
             if (selectedImageUri != null) {
+              if (!isInternetAvailable(localContext)) {
+                Toast.makeText(
+                        localContext,
+                        "Image will show when you are back online",
+                        Toast.LENGTH_SHORT)
+                    .show()
+              }
               requestViewModel.saveServiceRequestWithImage(serviceRequest, selectedImageUri!!)
               navigationActions.goBack()
             } else {
