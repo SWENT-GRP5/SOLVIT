@@ -139,6 +139,10 @@ class AuthViewModel(private val authRepository: AuthRep) : ViewModel() {
     authRepository.logout {
       _userRegistered.value = false
       _user.value = null
+      _role.value = ""
+      _email.value = ""
+      _password.value = ""
+      _googleAccount.value = null
       onSuccess()
     }
   }
