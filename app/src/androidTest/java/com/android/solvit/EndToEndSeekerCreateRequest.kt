@@ -8,8 +8,6 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import androidx.test.core.app.ApplicationProvider
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.seeker.model.profile.UserRepository
@@ -28,7 +26,6 @@ import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.review.ReviewRepository
 import com.android.solvit.shared.model.review.ReviewRepositoryFirestore
 import com.android.solvit.shared.model.review.ReviewViewModel
-import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.TopLevelDestinations
 import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
@@ -64,9 +61,6 @@ class EndToEndSeekerCreateRequest {
   private lateinit var locationRepository: LocationRepository
   private lateinit var serviceRequestRepository: ServiceRequestRepository
   private lateinit var reviewRepository: ReviewRepository
-
-  private lateinit var navHostController: NavHostController
-  private lateinit var navigationActions: NavigationActions
 
   private val email = "test@test.ch"
   private val password = "password"
@@ -141,20 +135,11 @@ class EndToEndSeekerCreateRequest {
   @Test
   fun createServiceRequest() {
     composeTestRule.setContent {
-      navHostController = rememberNavController()
-      navigationActions = NavigationActions(navHostController)
-
       val user = authViewModel.user.collectAsState()
       val userRegistered = authViewModel.userRegistered.collectAsState()
 
       if (!userRegistered.value) {
-        SharedUI(
-            authViewModel,
-            listProviderViewModel,
-            seekerProfileViewModel,
-            locationViewModel,
-            navHostController,
-            navigationActions)
+        SharedUI(authViewModel, listProviderViewModel, seekerProfileViewModel, locationViewModel)
       } else {
         when (user.value!!.role) {
           "seeker" ->
