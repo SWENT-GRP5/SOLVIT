@@ -29,6 +29,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.Button
@@ -53,6 +55,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -125,6 +128,12 @@ fun ProviderRegistrationScreen(
   val selectedLanguages = remember { mutableStateListOf<String>() }
   var providerImageUri by remember { mutableStateOf<Uri?>(null) }
   var providerImageBitmap by remember { mutableStateOf<Bitmap?>(null) }
+
+  // Additional Informations about provider packages
+  val packagesNames = remember { mutableStateListOf<String>() }
+  val packagesPrices = remember { mutableStateListOf<String>() }
+  val packagesDetails = remember { mutableStateListOf<String>() }
+  val packagesFeatures = remember { mutableStateListOf<MutableList<String>>() }
 
   // Step tracking: Role, Details, Preferences
   var currentStep by remember { mutableIntStateOf(1) }
@@ -286,12 +295,6 @@ fun ProviderRegistrationScreen(
                           startingPrice = startingPrice,
                           onStartingPriceChange = { sP: String -> startingPrice = sP },
                           selectedLanguages = selectedLanguages,
-                          addSelectedLanguage = { language: String ->
-                            selectedLanguages.add(language)
-                          },
-                          removeSelectedLanguage = { language: String ->
-                            selectedLanguages.remove(language)
-                          },
                           providerImageUri = providerImageUri,
                           onImageSelected = { uri: Uri? ->
                             providerImageUri = uri
@@ -315,8 +318,49 @@ fun ProviderRegistrationScreen(
                     }
               }
 
-              // Completion Step
               if (currentStep == 3) {
+
+                Column(
+                    modifier =
+                        Modifier.fillMaxWidth() // Ensure content takes up full width
+                            .padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally, // Center horizontally
+                    verticalArrangement = Arrangement.Center // Center vertically
+                    ) {
+                      Text(
+                          text = "Offer Service Packages",
+                          style = MaterialTheme.typography.titleLarge,
+                          modifier =
+                              Modifier.align(Alignment.CenterHorizontally)
+                                  .testTag("preferencesTitle"),
+                          textAlign = TextAlign.Center // Center the text
+                          )
+                      Spacer(modifier = Modifier.height(16.dp))
+                      ProviderPackages(
+                          packagesNames = packagesNames,
+                          packagePrices = packagesPrices,
+                          packagesDetails = packagesDetails,
+                          packagesFeatures = packagesFeatures)
+                      Spacer(modifier = Modifier.height(30.dp))
+                      Button(
+                          onClick = { currentStep = 4 },
+                          modifier = Modifier.fillMaxWidth().testTag("savePreferences2Button"),
+                          colors = ButtonDefaults.buttonColors(colorScheme.secondary)) {
+                            Text("Complete Registration", color = colorScheme.onSecondary)
+                          }
+                      Spacer(modifier = Modifier.height(15.dp))
+                      Text(
+                          text =
+                              "You can always update your informations in your profile settings.",
+                          style = MaterialTheme.typography.bodyLarge,
+                          modifier =
+                              Modifier.align(Alignment.CenterHorizontally).testTag("footer2Text"),
+                          textAlign = TextAlign.Center)
+                    }
+              }
+
+              // Completion Step
+              if (currentStep == 4) {
                 // Completion screen
                 Text(
                     text = "You're All Set!",
@@ -389,8 +433,6 @@ fun ProviderDetails(
     startingPrice: String,
     onStartingPriceChange: (String) -> Unit,
     selectedLanguages: MutableList<String>,
-    addSelectedLanguage: (String) -> Unit,
-    removeSelectedLanguage: (String) -> Unit,
     providerImageUri: Uri?,
     onImageSelected: (Uri?) -> Unit
 ) {
@@ -563,4 +605,150 @@ fun UploadImage(selectedImageUri: Uri?, imageUrl: String?, onImageSelected: (Uri
       }
 }
 
-@Composable fun providerPackages() {}
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ProviderPackages(
+    packagesNames: MutableList<String>,
+    packagePrices: MutableList<String>,
+    packagesDetails: MutableList<String>,
+    packagesFeatures: MutableList<MutableList<String>>
+) {
+  var expanded by remember { mutableStateOf(false) }
+  var providePackages by remember { mutableStateOf(false) }
+  val packagesVisibilityStates = remember { mutableStateMapOf<Int, Boolean>() }
+  Column(
+      modifier = Modifier.fillMaxWidth().padding(16.dp),
+      verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = !expanded }) {
+          OutlinedTextField(
+              value = if (providePackages) "Yes" else "No",
+              onValueChange = {},
+              label = { Text("Do you want to offer service Packages") },
+              readOnly = true,
+              modifier = Modifier.fillMaxWidth().menuAnchor())
+
+          DropdownMenu(
+              expanded = expanded,
+              onDismissRequest = { expanded = false },
+              modifier = Modifier.fillMaxWidth()) {
+                DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                  DropdownMenuItem(
+                      text = { Text("Yes") },
+                      onClick = {
+                        providePackages = true
+                        expanded = false
+                      })
+                  DropdownMenuItem(
+                      text = { Text("No") },
+                      onClick = {
+                        providePackages = false
+                        expanded = false
+                      })
+                }
+              }
+        }
+
+        if (providePackages) {
+          // Display the 3 packages to fill
+          for (i in 1..3) {
+            PackageInputSection(
+                i,
+                expanded = packagesVisibilityStates[i - 1] ?: true,
+                onToggleVisibility = { isExpanded: Boolean ->
+                  packagesVisibilityStates[i - 1] = isExpanded
+                },
+                packageName = packagesNames[i - 1],
+                onPackageNameChange = { packagesNames[i - 1] = it },
+                packagePrice = packagePrices[i - 1],
+                onPackagePriceChange = { packagePrices[i - 1] = it },
+                packageDetails = packagesDetails[i - 1],
+                onPackageDetailsChange = { packagesDetails[i - 1] = it },
+                packageFeatures = packagesFeatures[i - 1],
+            )
+          }
+        }
+      }
+}
+
+@Composable
+fun PackageInputSection(
+    packageNumber: Int,
+    expanded: Boolean,
+    onToggleVisibility: (Boolean) -> Unit,
+    packageName: String,
+    onPackageNameChange: (String) -> Unit,
+    packagePrice: String,
+    onPackagePriceChange: (String) -> Unit,
+    packageDetails: String,
+    onPackageDetailsChange: (String) -> Unit,
+    packageFeatures: MutableList<String>
+) {
+  Column(modifier = Modifier.fillMaxWidth()) {
+    // Package Header with Collapse/Expand Icon
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier =
+            Modifier.fillMaxWidth().padding(vertical = 8.dp).clickable {
+              onToggleVisibility(!expanded)
+            }) {
+          Text(
+              text = "Package $packageNumber",
+              style = MaterialTheme.typography.bodyLarge,
+              modifier = Modifier.weight(1f))
+          Icon(
+              imageVector =
+                  if (expanded) Icons.Default.KeyboardArrowDown else Icons.Default.KeyboardArrowUp,
+              contentDescription = "Toggle Package Visibility")
+        }
+    if (expanded) {
+      // Package Inputs
+
+      Text("Package Name", style = MaterialTheme.typography.bodyLarge)
+      Spacer(modifier = Modifier.height(8.dp))
+      CustomOutlinedTextField(
+          value = packageName,
+          onValueChange = { onPackageNameChange(it) },
+          placeholder = "Give your package a catchy and descriptive name",
+          isValueOk = true,
+          testTag = "packageName",
+          errorTestTag = "packageNameError")
+      Spacer(modifier = Modifier.height(8.dp))
+
+      Text("Set Your Price", style = MaterialTheme.typography.bodyLarge)
+      Spacer(modifier = Modifier.height(8.dp))
+      CustomOutlinedTextField(
+          value = packagePrice,
+          onValueChange = { onPackagePriceChange(it) },
+          placeholder = "Enter the cost for this package (CHF)",
+          isValueOk = true,
+          testTag = "packagePrice",
+          errorTestTag = "packagePriceError")
+      Spacer(modifier = Modifier.height(8.dp))
+
+      Text("Package Details", style = MaterialTheme.typography.bodyLarge)
+      Spacer(modifier = Modifier.height(8.dp))
+      CustomOutlinedTextField(
+          value = packageDetails,
+          onValueChange = { onPackageDetailsChange(it) },
+          placeholder = "Briefly explain what this package offers",
+          isValueOk = true,
+          testTag = "packageDetails",
+          errorTestTag = "packageDetailsError")
+
+      Spacer(modifier = Modifier.height(8.dp))
+
+      Text("Key Features", style = MaterialTheme.typography.bodyLarge)
+      Spacer(modifier = Modifier.height(8.dp))
+      repeat(3) { featureNumber ->
+        CustomOutlinedTextField(
+            value = packageFeatures[featureNumber],
+            onValueChange = { packageFeatures[featureNumber] = it },
+            placeholder = "Text(\"Feature ${featureNumber + 1}\")",
+            isValueOk = true,
+            testTag = "packageFeatures",
+            errorTestTag = "packageFeaturesError")
+        Spacer(modifier = Modifier.height(8.dp))
+      }
+    }
+  }
+}

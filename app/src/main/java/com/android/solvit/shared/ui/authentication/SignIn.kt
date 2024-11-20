@@ -590,12 +590,12 @@ fun googleSignInLauncher(
 fun CustomOutlinedTextField(
     value: String,
     onValueChange: (String) -> Unit,
-    label: String,
+    label: String? = null,
     placeholder: String,
     isValueOk: Boolean,
     modifier: Modifier = Modifier,
     errorMessage: String = "Invalid input",
-    leadingIcon: ImageVector,
+    leadingIcon: ImageVector? = null,
     leadingIconDescription: String = "",
     testTag: String,
     errorTestTag: String = "errorMessage"
@@ -615,14 +615,16 @@ fun CustomOutlinedTextField(
             hasLostFocusAfterTyping = false
           }
         },
-        label = { Text(label, color = colorScheme.onBackground) },
+        label = { if (label != null) Text(label, color = colorScheme.onBackground) },
         singleLine = true,
         placeholder = { Text(placeholder) },
         leadingIcon = {
-          Icon(
-              leadingIcon,
-              contentDescription = leadingIconDescription,
-              tint = if (isValueOk) colorScheme.secondary else colorScheme.onSurfaceVariant)
+          if (leadingIcon != null) {
+            Icon(
+                leadingIcon,
+                contentDescription = leadingIconDescription,
+                tint = if (isValueOk) colorScheme.secondary else colorScheme.onSurfaceVariant)
+          }
         },
         modifier =
             Modifier.fillMaxWidth().testTag(testTag).onFocusChanged { focusState ->
