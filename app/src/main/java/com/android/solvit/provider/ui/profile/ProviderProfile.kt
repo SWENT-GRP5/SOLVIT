@@ -51,6 +51,7 @@ import com.android.solvit.R
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.provider.Provider
+import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
 import java.util.Locale
@@ -204,11 +205,7 @@ fun ProfileHeader(
           Column {
             TitleText("Profession", testTag = "serviceTitle")
             BodyText(
-                provider.service
-                    .toString()
-                    .lowercase(Locale.ROOT)
-                    .replaceFirstChar { it.uppercase() }
-                    .ifEmpty { "Not provided" },
+                Services.format(provider.service),
                 testTag = "service")
           }
 

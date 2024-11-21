@@ -2,6 +2,7 @@ package com.android.solvit.provider.ui.profile
 
 import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -12,8 +13,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.ContentAlpha
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Phone
@@ -33,9 +34,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.seeker.ui.request.LocationDropdown
@@ -92,7 +99,7 @@ fun ModifyProviderInformationScreen(
                     it.uid == userId
                   } ?: return@Column
 
-              ModifyInput(provider = provider)
+              ModifyInput(provider = provider, navigationActions = navigationActions)
             }
       })
 }
@@ -102,11 +109,12 @@ fun ModifyInput(
     provider: Provider,
     locationViewModel: LocationViewModel = viewModel(factory = LocationViewModel.Factory),
     listProviderViewModel: ListProviderViewModel =
-        viewModel(factory = ListProviderViewModel.Factory)
+        viewModel(factory = ListProviderViewModel.Factory),
+    navigationActions: NavigationActions
 ) {
+  val context = LocalContext.current
   var newCompanyName by remember { mutableStateOf(provider.companyName) }
-  val okNewCompanyName = provider.companyName.length >= 2 && provider.companyName.isNotBlank()
-
+  val okNewCompanyName = newCompanyName.length >= 2 && newCompanyName.isNotBlank()
   var newProfession by remember { mutableStateOf(provider.service) }
 
   var newPhoneNumber by remember { mutableStateOf(provider.phone) }
@@ -123,6 +131,8 @@ fun ModifyInput(
       locationViewModel.locationSuggestions.collectAsState(initial = emptyList<Location?>())
   var selectedLocation by remember { mutableStateOf<Location?>(null) }
 
+  val allIsGood = okNewCompanyName && okNewPhoneNumber && okNewLocation
+
   CustomOutlinedTextField(
       value = newCompanyName,
       onValueChange = { newCompanyName = it },
@@ -132,7 +142,7 @@ fun ModifyInput(
       leadingIcon = Icons.Default.AccountCircle,
       leadingIconDescription = "Provider Name Icon",
       testTag = "newProviderCompanyNameInputField",
-      errorMessage = "Your provider name must not be empty",
+      errorMessage = "Your company name must have at least 2 characters",
       errorTestTag = "providerNameErrorMessage")
 
   Spacer(modifier = Modifier.height(10.dp))
@@ -167,12 +177,56 @@ fun ModifyInput(
       isValueOk = okNewLocation,
       testTag = "newLocationInputField")
 
-  provider.companyName = newCompanyName
-  provider.service = newProfession
-  provider.phone = newPhoneNumber
-  provider.location = selectedLocation ?: provider.location
+  Text(
+      text = "Don't forget to save your changes by clicking the button before leaving the page!",
+      color = colorScheme.onSurfaceVariant,
+      fontSize = 12.sp,
+      textAlign = TextAlign.Start,
+      style = TextStyle(fontSize = 12.sp, lineHeight = 16.sp),
+      modifier = Modifier.padding(top = 4.dp).fillMaxWidth())
 
-  listProviderViewModel.updateProvider(provider = provider)
+  Spacer(modifier = Modifier.height(10.dp))
+
+  Button(
+      onClick = {
+        if (allIsGood) {
+          provider.companyName = newCompanyName
+          provider.service = newProfession
+          provider.phone = newPhoneNumber
+          provider.location = selectedLocation ?: provider.location
+
+          listProviderViewModel.updateProvider(provider = provider)
+
+          navigationActions.goBack()
+        } else {
+          Toast.makeText(
+                  context,
+                  "Please fill in all the correct information before modify it",
+                  Toast.LENGTH_SHORT)
+              .show()
+        }
+      },
+      modifier =
+          Modifier.fillMaxWidth()
+              .height(50.dp)
+              .background(
+                  brush =
+                      if (allIsGood) {
+                        Brush.horizontalGradient(
+                            colors = listOf(colorScheme.primary, colorScheme.secondary))
+                      } else {
+                        Brush.horizontalGradient(
+                            colors =
+                                listOf(colorScheme.onSurfaceVariant, colorScheme.onSurfaceVariant))
+                      },
+                  shape =
+                      RoundedCornerShape(
+                          25.dp,
+                      )),
+      colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)) {
+        Text(
+            "Save !", color = colorScheme.onPrimary, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+      }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -200,14 +254,12 @@ fun ServiceDropdownMenu(
                 TextFieldDefaults.textFieldColors(
                     // Set the background color of the TextField to match the screen or be white
                     containerColor = colorScheme.background,
-                    disabledIndicatorColor = colorScheme.onSurfaceVariant,
-                    unfocusedIndicatorColor = colorScheme.onSurfaceVariant,
-                    focusedIndicatorColor = colorScheme.primary,
+                    disabledIndicatorColor = colorScheme.secondary,
+                    unfocusedIndicatorColor = colorScheme.secondary,
+                    focusedIndicatorColor = colorScheme.secondary,
                     disabledTextColor = colorScheme.onBackground,
-                    disabledTrailingIconColor =
-                        colorScheme.onBackground.copy(alpha = ContentAlpha.disabled),
-                    disabledLabelColor =
-                        colorScheme.onBackground.copy(alpha = ContentAlpha.disabled),
+                    disabledTrailingIconColor = colorScheme.onBackground,
+                    disabledLabelColor = colorScheme.onBackground,
                 ),
             modifier = Modifier.fillMaxWidth().menuAnchor())
 
