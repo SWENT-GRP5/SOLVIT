@@ -184,11 +184,12 @@ fun ModifyInput(
   LanguageDropdownMenu(
       selectedLanguages = newLanguage,
       onLanguageSelected = { language, isChecked ->
-          newLanguage = if (isChecked) {
+        newLanguage =
+            if (isChecked) {
               newLanguage + language
-          } else {
+            } else {
               newLanguage - language
-          }
+            }
       })
 
   Spacer(modifier = Modifier.height(10.dp))
@@ -306,7 +307,6 @@ fun LanguageDropdownMenu(
       expanded = expanded,
       onExpandedChange = { expanded = !expanded },
       modifier = modifier.fillMaxWidth().testTag("languageInputField")) {
-
         TextField(
             readOnly = true,
             value = selectedLanguages.joinToString(", ") { it.name },
@@ -325,14 +325,12 @@ fun LanguageDropdownMenu(
                 ),
             modifier = Modifier.menuAnchor().fillMaxWidth())
 
-
         DropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
             modifier = Modifier.fillMaxWidth()) {
               languagesList.forEach { language ->
                 val isSelected = language in selectedLanguages
-
 
                 DropdownMenuItem(
                     text = { Text(language.name) },
