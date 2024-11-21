@@ -51,6 +51,7 @@ import com.android.solvit.ui.message.MessageScreen
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 
+
 class MainActivity : ComponentActivity() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -60,7 +61,7 @@ class MainActivity : ComponentActivity() {
 
     setContent {
       SampleAppTheme {
-        Surface(modifier = Modifier.fillMaxSize(), color = colorScheme.background) { SolvitApp() }
+        Surface(modifier = Modifier.fillMaxSize(), color = colorScheme.background) { ZyadApp() }
       }
     }
   }
@@ -202,3 +203,26 @@ fun ProviderUI(
     }
   }
 }
+
+
+@Composable
+fun ZyadApp() {
+    // Create necessary view models
+    val serviceRequestViewModel =
+        viewModel<ServiceRequestViewModel>(factory = ServiceRequestViewModel.Factory)
+
+    // Navigation setup
+    val navController = rememberNavController()
+    val navigationActions = NavigationActions(navController)
+    val listProviderViewModel =
+        viewModel<ListProviderViewModel>(factory = ListProviderViewModel.Factory)
+
+    // Only display the CreateRequestScreen
+    // CreateRequestScreen(navigationActions = navigationActions)
+    // ListRequestsFeedScreen(navigationActions = navigationActions)
+    // ServicesScreen(navigationActions, listProviderViewModel)
+    //JobDashboardScreen(navigationActions)
+    CreateRequestScreen(navigationActions, serviceRequestViewModel)
+}
+
+

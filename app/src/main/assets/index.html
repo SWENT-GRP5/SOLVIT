@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Image Analysis</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet"></script>
+    <script src="app.js"></script>
+</head>
+<body>
+<h1>AI Image Analysis</h1>
+<input type="file" id="imageInput" accept="image/*" multiple>
+<div id="results">
+    <h3>Results:</h3>
+    <ul id="predictionList"></ul>
+</div>
+<button id="analyzeButton">Analyze</button>
+
+<script>
+    const analyzeButton = document.getElementById('analyzeButton');
+    analyzeButton.addEventListener('click', () => {
+        analyzeImages(); // Call the TensorFlow.js function
+    });
+</script>
+</body>
+</html>

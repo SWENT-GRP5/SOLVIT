@@ -6,6 +6,10 @@ import android.icu.util.GregorianCalendar
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
@@ -26,6 +30,11 @@ import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.google.firebase.Firebase
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.auth
+import androidx.compose.material3.Text
+import androidx.compose.material3.Button
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+
 
 @Composable
 fun CreateRequestScreen(
@@ -60,68 +69,117 @@ fun CreateRequestScreen(
   val localContext = LocalContext.current
   val userId = Firebase.auth.currentUser?.uid ?: "-1"
 
-  RequestScreen(
-      navigationActions = navigationActions,
-      screenTitle = "Create a new request",
-      title = title,
-      onTitleChange = { title = it },
-      description = description,
-      onDescriptionChange = { description = it },
-      typeQuery = typeQuery,
-      onTypeQueryChange = { typeQuery = it },
-      showDropdownType = showDropdownType,
-      onShowDropdownTypeChange = { showDropdownType = it },
-      filteredServiceTypes = filteredServiceTypes,
-      onServiceTypeSelected = {
-        typeQuery = it.name
-        selectedServiceType = it
-      },
-      locationQuery = locationQuery,
-      onLocationQueryChange = { locationViewModel.setQuery(it) },
-      selectedRequest = null,
-      requestViewModel = requestViewModel,
-      showDropdownLocation = showDropdownLocation,
-      onShowDropdownLocationChange = { showDropdownLocation = it },
-      locationSuggestions = locationSuggestions.filterNotNull(),
-      onLocationSelected = { selectedLocation = it },
-      selectedLocation = selectedLocation,
-      dueDate = dueDate,
-      onDueDateChange = { dueDate = it },
-      selectedImageUri = selectedImageUri,
-      imageUrl = null,
-      onImageSelected = { uri ->
-        selectedImageUri = uri
-        uri?.let { selectedImageBitmap = loadBitmapFromUri(localContext, it) }
-      },
-      onSubmit = {
-        val calendar = GregorianCalendar()
-        val parts = dueDate.split("/")
-        if (parts.size == 3) {
-          try {
-            calendar.set(parts[2].toInt(), parts[1].toInt() - 1, parts[0].toInt(), 0, 0, 0)
-            val serviceRequest =
-                ServiceRequest(
-                    title = title,
-                    description = description,
-                    userId = userId,
-                    dueDate = Timestamp(calendar.time),
-                    location = selectedLocation,
-                    status = ServiceRequestStatus.PENDING,
-                    uid = requestViewModel.getNewUid(),
-                    type = selectedServiceType,
-                    imageUrl = null)
-            if (selectedImageUri != null) {
-              requestViewModel.saveServiceRequestWithImage(serviceRequest, selectedImageUri!!)
-              navigationActions.goBack()
-            } else {
-              requestViewModel.saveServiceRequest(serviceRequest)
-              navigationActions.goBack()
+    // AI Popup state
+    var showAIPopup by remember { mutableStateOf(false) }
+
+    if (showAIPopup) {
+        AIPopup(
+            onDismiss = { showAIPopup = false },
+            onAIResult = { aiTitle, aiType, aiDescription, images ->
+                // Update fields with AI-generated results
+                title = aiTitle
+                typeQuery = aiType
+                selectedServiceType = Services.valueOf(aiType.uppercase())
+                description = aiDescription
+                selectedImageUri = images.firstOrNull() // Use the first image, adjust if needed
+                selectedImageBitmap = images.firstOrNull()?.let { loadBitmapFromUri(localContext, it) }
             }
-            return@RequestScreen
-          } catch (_: NumberFormatException) {}
+        )
+    }
+
+    Column(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        // Add the AI button above or below RequestScreen
+        Button(
+            onClick = { showAIPopup = true },
+            modifier = Modifier.fillMaxWidth().padding(16.dp)
+        ) {
+            Text("Use AI to Fill Fields")
         }
-        Toast.makeText(localContext, "Invalid format, date must be DD/MM/YYYY.", Toast.LENGTH_SHORT)
-            .show()
-      },
-      submitButtonText = "Submit Request")
+
+
+        RequestScreen(
+            navigationActions = navigationActions,
+            screenTitle = "Create a new request",
+            title = title,
+            onTitleChange = { title = it },
+            description = description,
+            onDescriptionChange = { description = it },
+            typeQuery = typeQuery,
+            onTypeQueryChange = { typeQuery = it },
+            showDropdownType = showDropdownType,
+            onShowDropdownTypeChange = { showDropdownType = it },
+            filteredServiceTypes = filteredServiceTypes,
+            onServiceTypeSelected = {
+                typeQuery = it.name
+                selectedServiceType = it
+            },
+            locationQuery = locationQuery,
+            onLocationQueryChange = { locationViewModel.setQuery(it) },
+            selectedRequest = null,
+            requestViewModel = requestViewModel,
+            showDropdownLocation = showDropdownLocation,
+            onShowDropdownLocationChange = { showDropdownLocation = it },
+            locationSuggestions = locationSuggestions.filterNotNull(),
+            onLocationSelected = { selectedLocation = it },
+            selectedLocation = selectedLocation,
+            dueDate = dueDate,
+            onDueDateChange = { dueDate = it },
+            selectedImageUri = selectedImageUri,
+            imageUrl = null,
+            onImageSelected = { uri ->
+                selectedImageUri = uri
+                uri?.let { selectedImageBitmap = loadBitmapFromUri(localContext, it) }
+            },
+            onSubmit = {
+                val calendar = GregorianCalendar()
+                val parts = dueDate.split("/")
+                if (parts.size == 3) {
+                    try {
+                        calendar.set(
+                            parts[2].toInt(),
+                            parts[1].toInt() - 1,
+                            parts[0].toInt(),
+                            0,
+                            0,
+                            0
+                        )
+                        val serviceRequest =
+                            ServiceRequest(
+                                title = title,
+                                description = description,
+                                userId = userId,
+                                dueDate = Timestamp(calendar.time),
+                                location = selectedLocation,
+                                status = ServiceRequestStatus.PENDING,
+                                uid = requestViewModel.getNewUid(),
+                                type = selectedServiceType,
+                                imageUrl = null
+                            )
+                        if (selectedImageUri != null) {
+                            requestViewModel.saveServiceRequestWithImage(
+                                serviceRequest,
+                                selectedImageUri!!
+                            )
+                            navigationActions.goBack()
+                        } else {
+                            requestViewModel.saveServiceRequest(serviceRequest)
+                            navigationActions.goBack()
+                        }
+                        return@RequestScreen
+                    } catch (_: NumberFormatException) {
+                    }
+                }
+                Toast.makeText(
+                    localContext,
+                    "Invalid format, date must be DD/MM/YYYY.",
+                    Toast.LENGTH_SHORT
+                )
+                    .show()
+            },
+            submitButtonText = "Submit Request"
+        )
+
+    }
 }

@@ -1,7 +1,10 @@
 package com.android.solvit.seeker.ui.request
 
+import android.annotation.SuppressLint
 import android.net.Uri
 import android.util.Log
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -12,6 +15,7 @@ import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,6 +25,8 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
@@ -29,6 +35,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenu
@@ -45,6 +52,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -57,9 +65,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.PopupProperties
 import coil.compose.AsyncImage
 import com.android.solvit.shared.model.map.Location
@@ -67,12 +78,14 @@ import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
+import kotlinx.coroutines.GlobalScope
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.json.JSONArray
 
 @Composable
 fun TitleInput(title: String, onTitleChange: (String) -> Unit) {
@@ -458,3 +471,76 @@ fun DeleteButton(
             }
       }
 }
+
+
+@Composable
+fun AIPopup(
+    onDismiss: () -> Unit,
+    onAIResult: (title: String, serviceType: String, description: String, images: List<Uri>) -> Unit
+) {
+    val context = LocalContext.current
+    val selectedImages = remember { mutableStateListOf<Uri>() }
+
+    Dialog(onDismissRequest = { onDismiss() }) {
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+                .background(Color.White, shape = RoundedCornerShape(12.dp))
+        ) {
+            AndroidView(factory = { ctx ->
+                WebView(ctx).apply {
+                    settings.javaScriptEnabled = true
+
+                    // Add the JavascriptInterface
+                    addJavascriptInterface(
+                        AIWebInterface { jsonResult ->
+                            // Parse JSON result
+                            val results = JSONArray(jsonResult)
+                            val firstResult = results.getJSONObject(0)
+
+                            val title = firstResult.getString("title")
+                            val serviceType = firstResult.getString("serviceType")
+                            val description = firstResult.getString("description")
+
+                            onAIResult(title, serviceType, description, selectedImages)
+                            onDismiss()
+                        },
+                        "Android"
+                    )
+
+                    webViewClient = object : WebViewClient() {
+                        override fun onPageFinished(view: WebView?, url: String?) {
+                            super.onPageFinished(view, url)
+
+                            // Inject JavaScript to pass image URIs to WebView
+                            val imageUrisJs = selectedImages.joinToString(",") { "\"${it.toString()}\"" }
+                            val jsCode = """
+                                const images = [$imageUrisJs];
+                                analyzeImages(images);
+                            """
+                            evaluateJavascript(jsCode, null)
+                        }
+                    }
+
+                    // Load the local HTML file containing TensorFlow.js logic
+                    loadUrl("file:///android_asset/index.html")
+                }
+            }, modifier = Modifier.fillMaxSize())
+        }
+    }
+}
+
+
+
+fun processImagesWithAI(
+    images: List<Uri>,
+    onResult: (title: String, serviceType: String, description: String) -> Unit
+) {
+    // Simulate AI processing
+    GlobalScope.launch {
+        delay(3000) // Simulating AI processing delay
+        onResult("Sample Title", "PLUMBER", "Detected plumbing issue")
+    }
+}
+

@@ -260,6 +260,10 @@ dependencies {
 
     // ----------       Load Images from URL     ------------
     implementation("io.coil-kt:coil-compose:2.4.0")
+
+    // ----------       WebKit     ------------
+    implementation ("androidx.webkit:webkit:1.4.0")
+
 }
 
 tasks.withType<Test> {
