@@ -74,6 +74,7 @@ import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.review.Review
 import com.android.solvit.shared.model.review.ReviewViewModel
+import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
 
@@ -90,14 +91,12 @@ fun ProviderInfoScreen(
   val reviews =
       reviewsViewModel.reviews.collectAsState().value.filter { it.providerId == provider.uid }
 
-  var selectedTabIndex by remember { mutableIntStateOf(0) }
+  var selectedTab by remember { mutableStateOf(ProviderTab.DETAILS) }
   val selectedPackage = remember { mutableStateOf<PackageProposal?>(null) }
   val showDialog = remember { mutableStateOf(false) }
 
   val user = authViewModel.user.collectAsState()
   val userId = user.value?.uid ?: "-1"
-
-  var selectedTab by remember { mutableStateOf(ProviderTab.DETAILS) }
 
   // Since We still don't give the possibility to provider to add packages (for the moment we're use
   // a default list of packages for all providers)
@@ -304,6 +303,7 @@ fun ProviderPackages(
         if (showDialog.value) {
           SelectRequestDialog(
               provider.uid,
+              provider.service,
               selectedPackage,
               showDialog,
               requestViewModel,
@@ -531,6 +531,7 @@ fun ProviderDetails(
         if (showDialog.value) {
           SelectRequestDialog(
               provider.uid,
+              provider.service,
               selectedPackage,
               showDialog,
               requestViewModel,
@@ -630,6 +631,7 @@ fun ProviderReviews(
         if (showDialog.value) {
           SelectRequestDialog(
               provider.uid,
+              provider.service,
               selectedPackage,
               showDialog,
               requestViewModel,
@@ -711,6 +713,7 @@ fun BottomBar(showDialog: MutableState<Boolean>) {
 @Composable
 fun SelectRequestDialog(
     providerId: String,
+    providerType: Services,
     selectedPackage: MutableState<PackageProposal?>,
     showDialog: MutableState<Boolean>,
     requestViewModel: ServiceRequestViewModel,
@@ -718,7 +721,9 @@ fun SelectRequestDialog(
     navigationActions: NavigationActions
 ) {
   val requests =
-      requestViewModel.pendingRequests.collectAsState().value.filter { it.userId == userId }
+      requestViewModel.pendingRequests.collectAsState().value.filter {
+        it.userId == userId && it.type == providerType
+      }
 
   val selectedRequest = remember { mutableStateOf<ServiceRequest?>(null) }
 

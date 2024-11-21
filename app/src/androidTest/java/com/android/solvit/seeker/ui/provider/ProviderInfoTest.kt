@@ -277,6 +277,7 @@ class ProviderInfoTest {
           requestViewModel = requestViewModel,
           userId = "1",
           providerId = "1",
+          providerType = Services.PLUMBER,
           navigationActions = navigationActions)
     }
 
