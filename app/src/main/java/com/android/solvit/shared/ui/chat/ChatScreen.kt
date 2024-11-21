@@ -127,7 +127,8 @@ fun SentMessage(
                             topEnd = if (isSentByUser) 0.dp else 16.dp,
                             bottomStart = 16.dp,
                             bottomEnd = 16.dp))
-                    .background(if (isSentByUser) Color.Blue else Color.LightGray)
+                    .background(
+                        if (isSentByUser) MaterialTheme.colorScheme.primary else Color.LightGray)
                     .padding(horizontal = 16.dp, vertical = 12.dp)) {
               constraints
 
