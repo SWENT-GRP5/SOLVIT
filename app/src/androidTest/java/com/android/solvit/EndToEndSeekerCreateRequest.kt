@@ -213,11 +213,15 @@ class EndToEndSeekerCreateRequest {
     // Delete the request
     composeTestRule.onNodeWithTag("requestListItem").performClick()
     composeTestRule.waitUntil(timeoutMillis = 10000) {
+      composeTestRule.onNodeWithTag("edit_button").isDisplayed()
+    }
+    composeTestRule.onNodeWithTag("edit_button").performClick()
+    composeTestRule.waitUntil(timeoutMillis = 10000) {
       composeTestRule.onNodeWithTag("requestScreen").isDisplayed()
     }
     composeTestRule.onNodeWithTag("deleteRequestButton").performClick()
     composeTestRule.waitUntil(timeoutMillis = 10000) {
-      composeTestRule.onNodeWithTag("noServiceRequestsScreen").isDisplayed()
+      composeTestRule.onNodeWithTag("edit_button").isDisplayed()
     }
   }
 }
