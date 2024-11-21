@@ -1,7 +1,6 @@
 package com.android.solvit.seeker.ui.review
 
 import android.content.pm.ActivityInfo
-import android.util.Log
 import android.view.MotionEvent
 import android.widget.Toast
 import androidx.activity.ComponentActivity
