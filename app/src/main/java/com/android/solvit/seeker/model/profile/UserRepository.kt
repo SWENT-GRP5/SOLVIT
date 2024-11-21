@@ -1,6 +1,7 @@
 package com.android.solvit.seeker.model.profile
 
 import com.android.solvit.shared.model.map.Location
+import com.android.solvit.shared.model.service.Services
 
 interface UserRepository {
   fun getNewUid(): String
@@ -37,4 +38,23 @@ interface UserRepository {
       onSuccess: (List<Location>) -> Unit,
       onFailure: (Exception) -> Unit
   )
+
+    fun addUserPreference(
+        userId: String,
+        preference: String,
+        onSuccess: () -> Unit,
+        onFailure: (Exception) -> Unit
+    )
+
+    fun deleteUserPreference(
+        userId: String,
+        preference: String,
+        onSuccess: () -> Unit,
+        onFailure: (Exception) -> Unit
+    )
+    fun getUserPreferences(
+        userId: String,
+        onSuccess: (List<String>) -> Unit,
+        onFailure: (Exception) -> Unit
+    )
 }

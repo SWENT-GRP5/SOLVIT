@@ -262,6 +262,116 @@ class UserRepositoryFirestoreTest {
   }
 
   @Test
+  fun testAddUserPreferenceSuccess() {
+    // Mock existing preferences in Firestore document
+    val existingPreferences = mutableListOf("⚡ Electrical Work", "📚 Tutoring")
+    Mockito.`when`(mockDocumentSnapshot.get("preferences")).thenReturn(existingPreferences)
+
+    // Mock successful document retrieval and update
+    Mockito.`when`(mockDocumentReference.get()).thenReturn(Tasks.forResult(mockDocumentSnapshot))
+    Mockito.`when`(mockDocumentReference.update(eq("preferences"), any())).thenReturn(Tasks.forResult(null))
+
+    // Test adding new preference
+    firebaseRepository.addUserPreference(
+      userId = testUserId,
+      preference = "🔧 Plumbing",
+      onSuccess = {
+        assert(existingPreferences.contains("🔧 Plumbing")) // Verify the new preference is added
+      },
+      onFailure = { TestCase.fail("Failure callback should not be called") }
+    )
+
+    Shadows.shadowOf(Looper.getMainLooper()).idle()
+    verify(mockDocumentReference).update(eq("preferences"), any()) // Verify update was called
+  }
+
+  @Test
+  fun testAddUserPreferenceFailure() {
+    // Mock a failure scenario
+    val mockException = Exception("Firestore error")
+    Mockito.`when`(mockDocumentReference.get()).thenReturn(Tasks.forException(mockException))
+
+    firebaseRepository.addUserPreference(
+      userId = testUserId,
+      preference = "🔧 Plumbing",
+      onSuccess = { TestCase.fail("Success callback should not be called") },
+      onFailure = { e -> assertEquals(mockException, e) } // Verify failure callback is triggered
+    )
+  }
+
+  @Test
+  fun testDeleteUserPreferenceSuccess() {
+    // Mock existing preferences
+    val existingPreferences = mutableListOf("⚡ Electrical Work", "📚 Tutoring", "🔧 Plumbing")
+    Mockito.`when`(mockDocumentSnapshot.get("preferences")).thenReturn(existingPreferences)
+
+    // Mock successful document retrieval and update
+    Mockito.`when`(mockDocumentReference.get()).thenReturn(Tasks.forResult(mockDocumentSnapshot))
+    Mockito.`when`(mockDocumentReference.update(eq("preferences"), any())).thenReturn(Tasks.forResult(null))
+    // Test removing a preference
+    firebaseRepository.deleteUserPreference(
+      userId = testUserId,
+      preference = "🔧 Plumbing",
+      onSuccess = {
+        assert(!existingPreferences.contains("🔧 Plumbing")) // Verify the preference is removed
+      },
+      onFailure = { TestCase.fail("Failure callback should not be called") }
+    )
+
+    Shadows.shadowOf(Looper.getMainLooper()).idle()
+    verify(mockDocumentReference).update(eq("preferences"), any()) // Verify update was called
+  }
+
+  @Test
+  fun testDeleteUserPreferenceFailure() {
+    // Mock a failure scenario
+    val mockException = Exception("Firestore error")
+    Mockito.`when`(mockDocumentReference.get()).thenReturn(Tasks.forException(mockException))
+
+    firebaseRepository.deleteUserPreference(
+      userId = testUserId,
+      preference = "🔧 Plumbing",
+      onSuccess = { TestCase.fail("Success callback should not be called") },
+      onFailure = { e -> assertEquals(mockException, e) } // Verify failure callback is triggered
+    )
+  }
+
+  @Test
+  fun testGetUserPreferencesSuccess() {
+    // Mock existing preferences
+    val existingPreferences = listOf("⚡ Electrical Work", "📚 Tutoring")
+    Mockito.`when`(mockDocumentSnapshot.get("preferences")).thenReturn(existingPreferences)
+
+    // Mock successful document retrieval
+    Mockito.`when`(mockDocumentReference.get()).thenReturn(Tasks.forResult(mockDocumentSnapshot))
+
+    // Test retrieving preferences
+    firebaseRepository.getUserPreferences(
+      userId = testUserId,
+      onSuccess = { preferences ->
+        assertEquals(existingPreferences, preferences) // Verify the correct list is returned
+      },
+      onFailure = { TestCase.fail("Failure callback should not be called") }
+    )
+
+    Shadows.shadowOf(Looper.getMainLooper()).idle()
+    verify(mockDocumentReference).get() // Verify document retrieval was called
+  }
+
+  @Test
+  fun testGetUserPreferencesFailure() {
+    // Mock a failure scenario
+    val mockException = Exception("Firestore error")
+    Mockito.`when`(mockDocumentReference.get()).thenReturn(Tasks.forException(mockException))
+
+    firebaseRepository.getUserPreferences(
+      userId = testUserId,
+      onSuccess = { TestCase.fail("Success callback should not be called") },
+      onFailure = { e -> assertEquals(mockException, e) } // Verify failure callback is triggered
+    )
+  }
+
+  @Test
   fun documentToUser_success() {
     // Mock a DocumentSnapshot
 
