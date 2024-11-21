@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,7 +20,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -31,8 +29,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,7 +42,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
@@ -57,7 +52,6 @@ import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
-import java.util.Locale
 
 @Composable
 fun ProviderProfileScreen(
@@ -76,9 +70,6 @@ fun ProviderProfileScreen(
               .background(colorScheme.background)
               .verticalScroll(rememberScrollState())) {
         ProfileHeader(navigationActions, provider, authViewModel)
-        Spacer(modifier = Modifier.height(10.dp))
-        JobsDoneSection()
-        Spacer(modifier = Modifier.height(10.dp))
         StatsSection(provider = provider)
       }
 }
@@ -176,15 +167,19 @@ fun ProfileHeader(
           }
 
           @Composable
-          fun BodyText(text: String, fontSize: TextUnit = 15.sp, testTag: String = "", maxLines : Int = Int.MAX_VALUE) {
+          fun BodyText(
+              text: String,
+              fontSize: TextUnit = 15.sp,
+              testTag: String = "",
+              maxLines: Int = Int.MAX_VALUE
+          ) {
             Text(
                 text = text,
                 color = bodyColor,
                 fontSize = fontSize,
                 modifier = Modifier.testTag(testTag),
                 maxLines = maxLines,
-                overflow = TextOverflow.Ellipsis
-            )
+                overflow = TextOverflow.Ellipsis)
           }
 
           Column(modifier = Modifier.align(Alignment.End)) {
@@ -206,9 +201,7 @@ fun ProfileHeader(
 
           Column {
             TitleText("Profession", testTag = "serviceTitle")
-            BodyText(
-                Services.format(provider.service),
-                testTag = "service")
+            BodyText(Services.format(provider.service), testTag = "service")
           }
 
           Column {
@@ -221,25 +214,6 @@ fun ProfileHeader(
             BodyText(provider.location.name, testTag = "location", maxLines = 3)
           }
         }
-  }
-}
-
-@Composable
-fun JobsDoneSection() {
-  // TODO : Change the hardcoded value to jobs done by the provider
-  Column(modifier = Modifier.fillMaxWidth().background(colorScheme.background).padding(16.dp)) {
-    Text(
-        "Jobs done",
-        fontWeight = FontWeight.Bold,
-        fontSize = 18.sp,
-        modifier = Modifier.align(Alignment.CenterHorizontally).testTag("jobsDoneTitle"))
-    Spacer(modifier = Modifier.height(20.dp))
-    Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-      JobItem("Back end")
-      JobItem("Front end")
-      JobItem("Visual Designer")
-      JobItem("Voyager")
-    }
   }
 }
 
@@ -267,7 +241,7 @@ fun StatsSection(provider: Provider) {
   Column(
       modifier =
           Modifier.fillMaxWidth()
-              .height(400.dp)
+              .height(150.dp)
               .background(colorScheme.primary)
               .padding(16.dp)
               .testTag("statsSection"),
@@ -281,60 +255,21 @@ fun StatsSection(provider: Provider) {
                 fontWeight = FontWeight.Bold)
             Text("Average Rating", fontSize = 10.sp, color = colorScheme.onPrimary)
           }
-          Column(horizontalAlignment = Alignment.End) {
-            // TODO : Change the hardcoded value to the actual number of jobs completed by the
-            // provider
-            Text(
-                "37", fontSize = 40.sp, color = colorScheme.onPrimary, fontWeight = FontWeight.Bold)
-            Text("Jobs Completed", fontSize = 10.sp, color = colorScheme.onPrimary)
-          }
-        }
-
-        Spacer(modifier = Modifier.height(30.dp))
-        Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
-          Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(
-                "1500-2300$", // TODO : modify later with real value
-                fontSize = 20.sp,
-                color = colorScheme.onPrimary,
-                fontWeight = FontWeight.Bold)
-            Text("pay range", fontSize = 10.sp, color = colorScheme.onPrimary)
-          }
-          Column(horizontalAlignment = Alignment.End) {
-            Text(
-                "5 days", // TODO : modify later with real value
-                fontSize = 20.sp,
-                color = colorScheme.onPrimary,
-                fontWeight = FontWeight.Bold)
-            Text("delivery Time", fontSize = 10.sp, color = colorScheme.onPrimary)
-          }
-        }
-
-        Spacer(modifier = Modifier.height(30.dp))
-        Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
-          Column(horizontalAlignment = Alignment.Start) {
-            // TODO : Change the hardcoded value to the actual availability of the provider
-            Text(
-                "Excellent",
-                fontSize = 15.sp,
-                color = colorScheme.onPrimary,
-                fontWeight = FontWeight.Bold)
-            Text("Availability", fontSize = 10.sp, color = colorScheme.onPrimary)
-          }
           Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
                 provider.popular.toString().replaceFirstChar {
                   if (it.isLowerCase()) it.uppercase() else it.toString()
                 },
-                fontSize = 15.sp,
+                fontSize = 40.sp,
                 color = colorScheme.onPrimary,
                 fontWeight = FontWeight.Bold)
             Text("Popular", fontSize = 10.sp, color = colorScheme.onPrimary)
           }
+
           Column(horizontalAlignment = Alignment.End) {
             Text(
                 if (provider.languages.isEmpty()) "Not provided" else provider.languages.toString(),
-                fontSize = 15.sp,
+                fontSize = if (provider.languages.isEmpty()) 20.sp else 30.sp,
                 color = colorScheme.onPrimary,
                 fontWeight = FontWeight.Bold)
             Text("Languages", fontSize = 10.sp, color = colorScheme.onPrimary)

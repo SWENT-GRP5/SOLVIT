@@ -1,11 +1,8 @@
-import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.android.solvit.provider.ui.profile.JobsDoneSection
 import com.android.solvit.provider.ui.profile.ProfileHeader
 import com.android.solvit.provider.ui.profile.StatsSection
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
@@ -83,14 +80,6 @@ class ProfessionalProfileScreenTest {
     composeTestRule.setContent { ProfileHeader(mockNavigationActions, provider) }
 
     composeTestRule.onNodeWithTag("logoutButton").performClick()
-  }
-
-  @Test
-  fun providerProfileScreen_JobsDoneSection_displaysCorrectly() {
-
-    composeTestRule.setContent { JobsDoneSection() }
-    composeTestRule.onNodeWithTag("jobsDoneTitle").assertIsDisplayed()
-    composeTestRule.onAllNodesWithTag("jobItem").assertCountEquals(4)
   }
 
   @Test

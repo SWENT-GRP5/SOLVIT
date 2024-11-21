@@ -2,7 +2,6 @@ package com.android.solvit.provider.ui.profile
 
 import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
-import android.widget.Space
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.background
@@ -131,7 +130,7 @@ fun ModifyInput(
   val locationSuggestions by
       locationViewModel.locationSuggestions.collectAsState(initial = emptyList<Location?>())
   var selectedLocation by remember { mutableStateOf<Location?>(provider.location) }
-    val okNewLocation = selectedLocation != null
+  val okNewLocation = selectedLocation != null
 
   val allIsGood = okNewCompanyName && okNewPhoneNumber && okNewLocation
 
@@ -222,15 +221,15 @@ fun ModifyInput(
             "Save !", color = colorScheme.onPrimary, fontWeight = FontWeight.Bold, fontSize = 16.sp)
       }
 
-    Spacer(modifier = Modifier.height(3.dp))
+  Spacer(modifier = Modifier.height(3.dp))
 
-    Text(
-        text = "Don't forget to save your changes by clicking the button before leaving the page!",
-        color = colorScheme.onSurfaceVariant,
-        fontSize = 12.sp,
-        textAlign = TextAlign.Center,
-        style = TextStyle(fontSize = 12.sp, lineHeight = 16.sp),
-        modifier = Modifier.padding(top = 4.dp).fillMaxWidth())
+  Text(
+      text = "Don't forget to save your changes by clicking the button before leaving the page!",
+      color = colorScheme.onSurfaceVariant,
+      fontSize = 12.sp,
+      textAlign = TextAlign.Center,
+      style = TextStyle(fontSize = 12.sp, lineHeight = 16.sp),
+      modifier = Modifier.padding(top = 4.dp).fillMaxWidth())
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
