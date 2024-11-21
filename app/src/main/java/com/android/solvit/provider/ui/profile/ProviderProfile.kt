@@ -197,7 +197,7 @@ fun ProfileHeader(
                     })
           }
 
-          Spacer(modifier = Modifier.height(10.dp))
+          Spacer(modifier = Modifier.height(5.dp))
 
           Column {
             TitleText("Company name", testTag = "companyNameTitle")
@@ -219,42 +219,6 @@ fun ProfileHeader(
           Column {
             TitleText("Location", testTag = "locationTitle")
             BodyText(provider.location.name, testTag = "location", maxLines = 3)
-          }
-
-          var isOpen by remember { mutableStateOf(true) }
-
-          Column {
-            TitleText("Position", testTag = "positionTitle")
-            Spacer(modifier = Modifier.width(8.dp))
-
-            Row(
-                // TODO : Stores the value position in memory
-                modifier = Modifier.testTag("position"),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically) {
-                  Box(
-                      modifier =
-                          Modifier.size(32.dp, 16.dp)
-                              .background(colorScheme.onSurface, shape = CircleShape)
-                              .clickable { isOpen = !isOpen },
-                      contentAlignment =
-                          if (isOpen) Alignment.CenterEnd else Alignment.CenterStart) {
-                        Box(
-                            modifier =
-                                Modifier.size(12.dp)
-                                    .background(
-                                        if (isOpen) colorScheme.secondary else colorScheme.error,
-                                        shape = CircleShape))
-                      }
-
-                  Spacer(modifier = Modifier.width(8.dp))
-
-                  Text(
-                      text = if (isOpen) "open" else "close",
-                      color = if (isOpen) colorScheme.secondary else colorScheme.error,
-                      fontSize = 14.sp,
-                      fontWeight = FontWeight.Bold)
-                }
           }
         }
   }

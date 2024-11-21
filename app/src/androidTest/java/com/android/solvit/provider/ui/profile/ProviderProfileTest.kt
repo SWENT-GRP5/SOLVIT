@@ -65,8 +65,6 @@ class ProfessionalProfileScreenTest {
     composeTestRule.onNodeWithTag("contact").assertIsDisplayed()
     composeTestRule.onNodeWithTag("locationTitle").assertIsDisplayed()
     composeTestRule.onNodeWithTag("location").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("positionTitle").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("position").assertIsDisplayed()
     composeTestRule.onNodeWithTag("logoutButton").assertIsDisplayed()
   }
 
