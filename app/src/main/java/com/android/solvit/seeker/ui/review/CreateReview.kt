@@ -1,6 +1,7 @@
 package com.android.solvit.seeker.ui.review
 
 import android.content.pm.ActivityInfo
+import android.util.Log
 import android.view.MotionEvent
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -95,7 +96,6 @@ fun CreateReviewScreen(
     activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
     onDispose { activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED }
   }
-
   Scaffold(topBar = { TopSection(navigationActions) }) { paddingValues ->
     Column(
         modifier =
@@ -207,9 +207,9 @@ fun RequestBox(
                       modifier = Modifier.testTag("requestPrice"),
                       fontWeight = FontWeight.SemiBold)
                 }
-                request.location?.let {
+                request.meetingDate?.let {
                   Text(
-                      text = dateFormat.format(request.meetingDate?.toDate() ?: ""),
+                      text = dateFormat.format(request.meetingDate.toDate()),
                       modifier = Modifier.testTag("requestDate"),
                       fontWeight = FontWeight.SemiBold)
                 }
