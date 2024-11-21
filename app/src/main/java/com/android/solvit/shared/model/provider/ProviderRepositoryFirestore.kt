@@ -1,15 +1,23 @@
 package com.android.solvit.shared.model.provider
 
+import android.net.Uri
 import android.util.Log
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.service.Services
+import com.android.solvit.shared.model.utils.uploadImageToStorage
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 
-class ProviderRepositoryFirestore(private val db: FirebaseFirestore) : ProviderRepository {
+class ProviderRepositoryFirestore(
+    private val db: FirebaseFirestore,
+    private val storage: FirebaseStorage
+) : ProviderRepository {
+
   private val collectionPath = "providers"
+  private val providersImagesPath = "providersImages/"
 
   private fun convertDoc(doc: DocumentSnapshot): Provider? {
     try {
@@ -60,11 +68,23 @@ class ProviderRepositoryFirestore(private val db: FirebaseFirestore) : ProviderR
 
   override fun addProvider(
       provider: Provider,
+      imageUri: Uri?,
       onSuccess: () -> Unit,
       onFailure: (Exception) -> Unit
   ) {
+    var providerWithImage = provider
+    if (imageUri != null) {
+      uploadImageToStorage(
+          storage,
+          providersImagesPath,
+          imageUri,
+          onSuccess = { imageUrl -> providerWithImage = provider.copy(imageUrl = imageUrl) },
+          onFailure = { Log.e("add Provider", "Failed to add provider $it") })
+    }
     performFirestoreOperation(
-        db.collection(collectionPath).document(provider.uid).set(provider), onSuccess, onFailure)
+        db.collection(collectionPath).document(provider.uid).set(providerWithImage),
+        onSuccess,
+        onFailure)
   }
 
   override fun deleteProvider(uid: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
