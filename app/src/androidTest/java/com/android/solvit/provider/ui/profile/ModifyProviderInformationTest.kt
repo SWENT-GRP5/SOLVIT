@@ -20,7 +20,10 @@ import com.android.solvit.shared.ui.navigation.NavigationActions
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.`when`
+import org.mockito.kotlin.anyOrNull
 
 class ProfessionalProfileScreenTest {
 
@@ -63,6 +66,12 @@ class ProfessionalProfileScreenTest {
 
     locationRepository = mock(LocationRepository::class.java)
     locationViewModel = LocationViewModel(locationRepository)
+
+    `when`(locationRepository.search(ArgumentMatchers.anyString(), anyOrNull(), anyOrNull()))
+        .thenAnswer { invocation ->
+          val onSuccess = invocation.getArgument<(List<Location>) -> Unit>(1)
+          onSuccess(locations)
+        }
   }
 
   @Test
@@ -121,7 +130,9 @@ class ProfessionalProfileScreenTest {
 
   @Test
   fun modifyProviderInformationScreen_errorIsDisplayInTheLocationContent() {
-
+    composeTestRule.setContent {
+      ModifyInput(provider, locationViewModel, navigationActions = navigationActions)
+    }
     composeTestRule.onNodeWithTag("newLocationInputField").performTextClearance()
     composeTestRule.onNodeWithTag("newLocationInputField").performTextInput("USA")
     composeTestRule.waitUntil { locationViewModel.locationSuggestions.value.isNotEmpty() }
