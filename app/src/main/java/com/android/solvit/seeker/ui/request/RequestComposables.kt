@@ -113,7 +113,8 @@ fun ServiceTypeDropdown(
     showDropdownType: Boolean,
     onShowDropdownTypeChange: (Boolean) -> Unit,
     filteredServiceTypes: List<Services>,
-    onServiceTypeSelected: (Services) -> Unit
+    onServiceTypeSelected: (Services) -> Unit,
+    readOnly: Boolean = false
 ) {
   Box(modifier = Modifier.fillMaxWidth()) {
     OutlinedTextField(
@@ -125,6 +126,7 @@ fun ServiceTypeDropdown(
           onTypeQueryChange(it)
           onShowDropdownTypeChange(true)
         },
+        readOnly = readOnly,
         label = { Text("Service Type") },
         placeholder = { Text("Select a Service Type") },
         shape = RoundedCornerShape(12.dp),

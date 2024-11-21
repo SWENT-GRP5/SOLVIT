@@ -208,18 +208,21 @@ fun ProfileHeader(
             TitleText("Company name", testTag = "companyNameTitle")
             BodyText(
                 provider.companyName.ifEmpty { "Not provided" }.replaceFirstChar { it.uppercase() },
-                testTag = "companyName")
+                testTag = "companyName",
+                maxLines = 2)
           }
 
           Column {
             TitleText("Profession", testTag = "serviceTitle")
             BodyText(
-                Services.format(provider.service).ifEmpty { "Not provided" }, testTag = "service")
+                Services.format(provider.service).ifEmpty { "Not provided" },
+                testTag = "service",
+                maxLines = 1)
           }
 
           Column {
             TitleText("Contact", testTag = "contactTitle")
-            BodyText(provider.phone.ifEmpty { "Not provided" }, testTag = "contact")
+            BodyText(provider.phone.ifEmpty { "Not provided" }, testTag = "contact", maxLines = 1)
           }
 
           Column {

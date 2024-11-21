@@ -90,7 +90,7 @@ class ProfessionalProfileScreenTest {
   fun modifyProviderInformationScreen_contentIsDisplay() {
 
     composeTestRule.setContent { ModifyInput(provider, navigationActions = navigationActions) }
-    composeTestRule.onNodeWithTag("newProviderCompanyNameInputField").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("newProviderNameInputField").assertIsDisplayed()
     composeTestRule.onNodeWithTag("newPhoneNumberInputField").assertIsDisplayed()
     composeTestRule.onNodeWithTag("newServiceInputField").assertIsDisplayed()
     composeTestRule.onNodeWithTag("newLocationInputField").assertIsDisplayed()
@@ -100,14 +100,14 @@ class ProfessionalProfileScreenTest {
   fun modifyProviderInformationScreen_errorIsDisplayInTheCompanyNameContent() {
 
     composeTestRule.setContent { ModifyInput(provider, navigationActions = navigationActions) }
-    composeTestRule.onNodeWithTag("newProviderCompanyNameInputField").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("newProviderNameInputField").assertIsDisplayed()
     composeTestRule.onNodeWithTag("providerNameErrorMessage").assertIsNotDisplayed()
-    composeTestRule.onNodeWithTag("newProviderCompanyNameInputField").performTextClearance()
-    composeTestRule.onNodeWithTag("newProviderCompanyNameInputField").performTextInput("a")
+    composeTestRule.onNodeWithTag("newProviderNameInputField").performTextClearance()
+    composeTestRule.onNodeWithTag("newProviderNameInputField").performTextInput("a")
     composeTestRule.onNodeWithTag("newPhoneNumberInputField").performTextInput("+1234567")
     composeTestRule.onNodeWithTag("providerNameErrorMessage").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("newProviderCompanyNameInputField").performTextClearance()
-    composeTestRule.onNodeWithTag("newProviderCompanyNameInputField").performTextInput("Kevin")
+    composeTestRule.onNodeWithTag("newProviderNameInputField").performTextClearance()
+    composeTestRule.onNodeWithTag("newProviderNameInputField").performTextInput("Kevin")
     composeTestRule.onNodeWithTag("providerNameErrorMessage").assertIsNotDisplayed()
   }
 
@@ -121,7 +121,7 @@ class ProfessionalProfileScreenTest {
     composeTestRule.onNodeWithTag("newPhoneNumberErrorMessage").assertIsNotDisplayed()
     composeTestRule.onNodeWithTag("newPhoneNumberInputField").performTextClearance()
     composeTestRule.onNodeWithTag("newPhoneNumberInputField").performTextInput("a")
-    composeTestRule.onNodeWithTag("newProviderCompanyNameInputField").performTextInput("Kevin")
+    composeTestRule.onNodeWithTag("newProviderNameInputField").performTextInput("Kevin")
     composeTestRule.onNodeWithTag("newPhoneNumberErrorMessage").assertIsDisplayed()
     composeTestRule.onNodeWithTag("newPhoneNumberInputField").performTextClearance()
     composeTestRule.onNodeWithTag("newPhoneNumberInputField").performTextInput("+1234567")

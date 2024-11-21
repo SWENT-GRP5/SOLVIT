@@ -5,6 +5,7 @@ import android.content.pm.ActivityInfo
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -114,9 +115,11 @@ fun ModifyInput(
     navigationActions: NavigationActions
 ) {
   val context = LocalContext.current
-  var newCompanyName by remember { mutableStateOf(provider.companyName) }
-  val okNewCompanyName = newCompanyName.length >= 2 && newCompanyName.isNotBlank()
+  var newProviderName by remember { mutableStateOf(provider.companyName) }
+  val okNewProviderName = newProviderName.length >= 2 && newProviderName.isNotBlank()
   var newProfession by remember { mutableStateOf(provider.service) }
+  var showDropdownType by remember { mutableStateOf(false) }
+  var query = remember { mutableStateOf(provider.service.name) }
 
   var newPhoneNumber by remember { mutableStateOf(provider.phone) }
   val okNewPhoneNumber =
@@ -125,6 +128,7 @@ fun ModifyInput(
           newPhoneNumber.length > 6
 
   val newLocation by remember { mutableStateOf(provider.location.name) }
+  var selectedServiceType by remember { mutableStateOf(Services.OTHER) }
 
   var showDropdown by remember { mutableStateOf(false) }
 
@@ -135,19 +139,20 @@ fun ModifyInput(
 
   var newLanguage by remember { mutableStateOf(provider.languages) }
 
-  val allIsGood = okNewCompanyName && okNewPhoneNumber && okNewLocation
+  val allIsGood = okNewProviderName && okNewPhoneNumber && okNewLocation
 
   CustomOutlinedTextField(
-      value = newCompanyName,
-      onValueChange = { newCompanyName = it },
+      value = newProviderName,
+      onValueChange = { newProviderName = it },
       label = "Provider Name",
-      placeholder = "Enter your new company name",
-      isValueOk = okNewCompanyName,
+      placeholder = "Enter your new Provider name",
+      isValueOk = okNewProviderName,
       leadingIcon = Icons.Default.AccountCircle,
       leadingIconDescription = "Company Name Icon",
-      testTag = "newProviderCompanyNameInputField",
-      errorMessage = "Your company name must have at least 2 characters",
-      errorTestTag = "providerNameErrorMessage")
+      testTag = "newProviderNameInputField",
+      errorMessage = "Your provider name must have at least 2 characters",
+      errorTestTag = "providerNameErrorMessage",
+      maxLines = 2)
 
   Spacer(modifier = Modifier.height(10.dp))
 
@@ -181,6 +186,8 @@ fun ModifyInput(
       isValueOk = okNewLocation,
       testTag = "newLocationInputField")
 
+  Spacer(modifier = Modifier.height(10.dp))
+
   LanguageDropdownMenu(
       selectedLanguages = newLanguage,
       onLanguageSelected = { language, isChecked ->
@@ -197,7 +204,7 @@ fun ModifyInput(
   Button(
       onClick = {
         if (allIsGood) {
-          provider.companyName = newCompanyName
+          provider.companyName = newProviderName
           provider.service = newProfession
           provider.phone = newPhoneNumber
           provider.location = selectedLocation ?: provider.location
@@ -268,28 +275,32 @@ fun ServiceDropdownMenu(selectedService: Services, onServiceSelected: (Services)
                 TextFieldDefaults.textFieldColors(
                     // Set the background color of the TextField to match the screen or be white
                     containerColor = colorScheme.background,
-                    disabledIndicatorColor = colorScheme.secondary,
                     unfocusedIndicatorColor = colorScheme.secondary,
                     focusedIndicatorColor = colorScheme.secondary,
-                    disabledTextColor = colorScheme.onBackground,
-                    disabledTrailingIconColor = colorScheme.onBackground,
-                    disabledLabelColor = colorScheme.onBackground,
                 ),
-            modifier = Modifier.fillMaxWidth().menuAnchor())
+            modifier =
+                Modifier.fillMaxWidth()
+                    .menuAnchor()
+                    .border(1.dp, colorScheme.secondary, RoundedCornerShape(8.dp)))
 
         // The dropdown menu showing all services
-        ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-          servicesList.forEach { service ->
-            DropdownMenuItem(
-                text = { Text(Services.format(service)) },
-                onClick = {
-                  onServiceSelected(service)
-                  expanded = false
-                },
-                modifier = Modifier.fillMaxWidth(),
-                contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding)
-          }
-        }
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            modifier =
+                Modifier.background(colorScheme.background)
+                    .border(1.dp, colorScheme.onBackground)) {
+              servicesList.forEach { service ->
+                DropdownMenuItem(
+                    text = { Text(Services.format(service)) },
+                    onClick = {
+                      onServiceSelected(service)
+                      expanded = false
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding)
+              }
+            }
       }
 }
 
@@ -316,19 +327,20 @@ fun LanguageDropdownMenu(
             colors =
                 TextFieldDefaults.textFieldColors(
                     containerColor = colorScheme.background,
-                    disabledIndicatorColor = colorScheme.secondary,
                     unfocusedIndicatorColor = colorScheme.secondary,
                     focusedIndicatorColor = colorScheme.secondary,
-                    disabledTextColor = colorScheme.onBackground,
-                    disabledTrailingIconColor = colorScheme.onBackground,
-                    disabledLabelColor = colorScheme.onBackground,
                 ),
-            modifier = Modifier.menuAnchor().fillMaxWidth())
+            modifier =
+                Modifier.menuAnchor()
+                    .fillMaxWidth()
+                    .border(1.dp, colorScheme.secondary, RoundedCornerShape(8.dp)))
 
         DropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
-            modifier = Modifier.fillMaxWidth()) {
+            modifier =
+                Modifier.background(colorScheme.background)
+                    .border(1.dp, colorScheme.onBackground)) {
               languagesList.forEach { language ->
                 val isSelected = language in selectedLanguages
 
