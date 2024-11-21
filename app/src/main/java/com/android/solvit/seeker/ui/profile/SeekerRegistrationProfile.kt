@@ -138,7 +138,7 @@ fun SeekerRegistrationScreen(
                     contentDescription = "App Logo",
                     modifier =
                         Modifier.testTag("signUpIcon")
-                            .size(150.dp)
+                            .size(100.dp)
                             .align(Alignment.CenterHorizontally))
                 Text(
                     text = "Sign Up as a Seeker",
@@ -219,9 +219,7 @@ fun SeekerRegistrationScreen(
                 Column(
                     modifier =
                         Modifier.fillMaxWidth() // Ensure content takes up full width
-                            .padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally, // Center horizontally
-                    verticalArrangement = Arrangement.Center // Center vertically
+                            .padding(16.dp)
                     ) {
                       Text(
                           text = "Set Your Preferences",
@@ -236,17 +234,23 @@ fun SeekerRegistrationScreen(
                           painter = painterResource(id = R.drawable.userpref),
                           contentDescription = "Completion Image",
                           modifier =
-                              Modifier.size(300.dp)
+                              Modifier.size(100.dp)
                                   .align(Alignment.CenterHorizontally)
                                   .testTag("preferencesIllustration"))
                       Spacer(modifier = Modifier.height(20.dp))
-                      Text(
-                          text = "This feature is not implemented yet.",
-                          style = MaterialTheme.typography.bodyLarge,
-                          modifier = Modifier.align(Alignment.CenterHorizontally),
-                          textAlign = TextAlign.Center,
-                          color = colorScheme.primary)
-                      Spacer(modifier = Modifier.height(100.dp))
+                    val userId = user?.uid
+                    if (userId != null) {
+                        Preferences(userId, viewModel)
+                    } else {
+                        Text(
+                            text = "User not authenticated. Please sign in again.",
+                            color = colorScheme.error,
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.align(Alignment.CenterHorizontally)
+                                .testTag("userNotAuthenticatedError")
+                        )
+                    }
+                      Spacer(modifier = Modifier.height(20.dp))
                       Button(
                           onClick = { currentStep = 3 },
                           modifier = Modifier.fillMaxWidth().testTag("savePreferencesButton"),
@@ -368,7 +372,7 @@ fun StepCircle(stepNumber: Int, isCompleted: Boolean, label: String) {
         // Display the label below the circle
         Text(
             text = label,
-            color = colorScheme.onBackground, // You can customize this color
+            color = colorScheme.onBackground,
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.padding(top = 4.dp) // Add space between circle and label
             )
