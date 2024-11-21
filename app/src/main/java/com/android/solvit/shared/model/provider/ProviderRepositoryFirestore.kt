@@ -4,13 +4,12 @@ import android.net.Uri
 import android.util.Log
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.service.Services
+import com.android.solvit.shared.model.utils.uploadImageToStorage
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
-import com.google.firebase.storage.StorageReference
-import java.util.UUID
 
 class ProviderRepositoryFirestore(
     private val db: FirebaseFirestore,
@@ -76,6 +75,8 @@ class ProviderRepositoryFirestore(
     var providerWithImage = provider
     if (imageUri != null) {
       uploadImageToStorage(
+          storage,
+          providersImagesPath,
           imageUri,
           onSuccess = { imageUrl -> providerWithImage = provider.copy(imageUrl = imageUrl) },
           onFailure = { Log.e("add Provider", "Failed to add provider $it") })
@@ -170,23 +171,5 @@ class ProviderRepositoryFirestore(
         }
       }
     }
-  }
-
-  private fun uploadImageToStorage(
-      imageUri: Uri,
-      onSuccess: (String) -> Unit,
-      onFailure: (Exception) -> Unit
-  ) {
-    val uniqueFileName = UUID.randomUUID().toString() + ".jpg"
-    val imageRef: StorageReference = storage.reference.child(providersImagesPath + uniqueFileName)
-
-    imageRef
-        .putFile(imageUri)
-        .addOnSuccessListener {
-          imageRef.downloadUrl
-              .addOnSuccessListener { downloadUrl -> onSuccess(downloadUrl.toString()) }
-              .addOnFailureListener { exception -> onFailure(exception) }
-        }
-        .addOnFailureListener { exception -> onFailure(exception) }
   }
 }

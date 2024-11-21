@@ -481,7 +481,9 @@ fun ProviderDetails(
   val services = Services.entries.toTypedArray()
   val availableLanguages = Language.entries.toList().map { it.toString() }
 
-  val isDescriptionOk = description.isNotBlank()
+  val isDescriptionOk =
+      description.isNotBlank() &&
+          description.length < 250 // (we assume here that a word on average is 5 character)
   val isStartingPriceOk = startingPrice.isNotBlank() && startingPrice.all { it.isDigit() }
 
   Column(
@@ -526,7 +528,7 @@ fun ProviderDetails(
             placeholder =
                 "Briefly describe your services, skills, and what sets you apart to attract clients.",
             isValueOk = isDescriptionOk,
-            errorMessage = "Enter a valid Description",
+            errorMessage = "Enter a valid Description (less than 50 words)",
             leadingIcon = Icons.Default.Check,
             leadingIconDescription = "Check Icon",
             testTag = "descriptionInputProviderRegistration",
