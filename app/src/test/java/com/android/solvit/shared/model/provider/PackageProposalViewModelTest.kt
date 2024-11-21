@@ -21,7 +21,9 @@ class PackageProposalViewModelTest {
   fun setup() {
     proposalRepository = Mockito.mock(PackageProposalRepository::class.java)
     proposalViewModel = PackageProposalViewModel(proposalRepository)
-    proposal = PackageProposal("test", "test", "test", 0.0, emptyList())
+    proposal =
+        PackageProposal(
+            "test", packageNumber = 0.0, providerId = "1", "test", "test", 0.0, emptyList())
   }
 
   @Test
