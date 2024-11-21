@@ -50,11 +50,17 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
   fun initChat() {
     receiverUid?.let {
       Log.e("receiverUid", "notnNull")
-      repository.initChat(onSuccess = { uid -> chatId = uid }, it)
+      repository.initChat(
+          onSuccess = { uid ->
+            Log.e("initChat", "onSuccess $uid")
+            chatId = uid
+          },
+          it)
     }
   }
 
   fun sendMessage(message: ChatMessage.TextMessage) {
+    Log.e("sendMessage", "$chatId")
     chatId?.let {
       Log.e("chatId", "notNull")
       repository.sendMessage(
@@ -76,6 +82,7 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
 
   fun getAllLastMessages() {
 
+    Log.e("getAllLastMessages", "Soy Aqui")
     repository.listenForLastMessages(
         onSuccess = { list -> _allMessages.value = list },
         onFailure = { Log.e("ChatViewModel", "Failed to get All messages") })

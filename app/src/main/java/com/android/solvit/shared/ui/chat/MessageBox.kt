@@ -42,42 +42,55 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.android.solvit.R
+import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.chat.ChatMessage
 import com.android.solvit.shared.model.chat.ChatViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
-import com.google.firebase.auth.FirebaseAuth
 
 @Composable
-fun MessageBox(chatViewModel: ChatViewModel, navigationActions: NavigationActions) {
+fun MessageBox(
+    chatViewModel: ChatViewModel,
+    navigationActions: NavigationActions,
+    authViewModel: AuthViewModel
+) {
 
   val allMessages by chatViewModel.allMessages.collectAsState()
+
+  chatViewModel.getAllLastMessages()
 
   // picture is hardCoded since we didn't implement yet a logic to all informations of a user
   // starting from its id
   val picture =
       "https://firebasestorage.googleapis.com/v0/b/solvit-14cc1.appspot.com/o/serviceRequestImages%2F98a09ae2-fddf-4ab8-96a5-3b10210230c7.jpg?alt=media&token=ce9376d6-de0f-42eb-ad97-5e4af0a74b16"
 
-  Scaffold(topBar = { ChatListTopBar(navigationActions, chatViewModel) }, bottomBar = {}) {
-      paddingValues ->
-    if (allMessages.isNotEmpty()) {
-      LazyColumn(
-          modifier = Modifier.padding(paddingValues).fillMaxSize(),
-          contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)) {
-            items(allMessages) { chat ->
-              ChatListItem(chat, picture, navigationActions, chatViewModel)
-            }
-          }
-    } else {
-      NoMessagesSent(modifier = Modifier.padding(paddingValues))
-    }
-  }
+  Scaffold(
+      topBar = { ChatListTopBar(navigationActions, chatViewModel, authViewModel) },
+      bottomBar = {}) { paddingValues ->
+        if (allMessages.isNotEmpty()) {
+          LazyColumn(
+              modifier = Modifier.padding(paddingValues).fillMaxSize(),
+              contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)) {
+                items(allMessages) { chat ->
+                  ChatListItem(chat, picture, navigationActions, chatViewModel)
+                }
+              }
+        } else {
+          NoMessagesSent(modifier = Modifier.padding(paddingValues))
+        }
+      }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChatListTopBar(navigationActions: NavigationActions, chatViewModel: ChatViewModel) {
+fun ChatListTopBar(
+    navigationActions: NavigationActions,
+    chatViewModel: ChatViewModel,
+    authViewModel: AuthViewModel
+) {
   val context = LocalContext.current
+  chatViewModel.setReceiverUid("12345")
+  chatViewModel.initChat()
   TopAppBar(
       title = {
         Box(
@@ -96,14 +109,11 @@ fun ChatListTopBar(navigationActions: NavigationActions, chatViewModel: ChatView
         IconButton(
             onClick = {
               // Toast.makeText(context, "Not Yet Implemented", Toast.LENGTH_LONG).show()
-              chatViewModel.setReceiverUid("12345")
-              chatViewModel.initChat()
 
-              FirebaseAuth.getInstance()
-                  .currentUser
-                  ?.uid
-                  ?.let {
-                    Log.e("MessageBox", "notNul")
+              val senderUid = authViewModel.user.value?.uid
+              Log.e("SendMessage", "$senderUid")
+              val message =
+                  senderUid?.let {
                     ChatMessage.TextMessage(
                         "Hey",
                         "Hassan",
@@ -111,7 +121,10 @@ fun ChatListTopBar(navigationActions: NavigationActions, chatViewModel: ChatView
                         System.currentTimeMillis(),
                     )
                   }
-                  ?.let { chatViewModel.sendMessage(it) }
+              if (message != null) {
+                Log.e("SendMessage", "Soy Aqui")
+                chatViewModel.sendMessage(message)
+              }
             }) {
               Image(
                   painter = painterResource(id = R.drawable.new_message),

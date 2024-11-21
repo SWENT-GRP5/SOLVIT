@@ -21,6 +21,7 @@ class ChatRepositoryFirestore(private val auth: FirebaseAuth, private val db: Fi
     auth.addAuthStateListener {
       if (it.currentUser != null) {
         val databaseRef = db.getReference(collectionPath)
+        Log.e("InitChat", "$databaseRef")
         try {
           databaseRef.addListenerForSingleValueEvent(
               object : ValueEventListener {
@@ -36,6 +37,7 @@ class ChatRepositoryFirestore(private val auth: FirebaseAuth, private val db: Fi
                       // Check if there is an already existing chat room between 2 users
                       if (chatUsers?.containsKey(receiverUid) == true &&
                           chatUsers.containsKey(auth.currentUser?.uid)) {
+                        Log.e("initChat", "soy Aqui")
                         chatId = chatSnapshot.key
                         if (chatId != null) {
                           onSuccess(chatId)
@@ -78,10 +80,12 @@ class ChatRepositoryFirestore(private val auth: FirebaseAuth, private val db: Fi
       onFailure: () -> Unit
   ) {
 
+    Log.e("sendMessage", "Entered there")
     val chatNode = db.getReference(collectionPath)
     val chatMessageId = chatNode.child(chatRoomId).child("chats").push().key
     try {
       if (chatMessageId != null) {
+        Log.e("sendMessage", "$chatMessageId : $chatRoomId")
         chatNode.child(chatRoomId).child("chats").child(chatMessageId).setValue(message)
         onSuccess()
       } else {
@@ -132,22 +136,30 @@ class ChatRepositoryFirestore(private val auth: FirebaseAuth, private val db: Fi
         .addListenerForSingleValueEvent(
             object : ValueEventListener {
               override fun onDataChange(p0: DataSnapshot) {
+
                 // Check that there is indeed chatRooms
                 if (p0.hasChildren()) {
+                  var processedCount = 0
                   for (chatRoomsSnapshot in p0.children) {
                     val chatRoomId = chatRoomsSnapshot.key ?: continue
                     getLastMessageForChatRoom(
                         chatRoomId,
                         onComplete = { chatMessage ->
                           if (chatMessage != null) {
+                            Log.e("add chatMessage to Last Message", "$chatMessage")
                             lastMessages.add(chatMessage)
+                            processedCount++
+                            // If we get All last messages
+                            if (processedCount == p0.children.count()) {
+                              val sortedMessages = lastMessages.sortedByDescending { it.timestamp }
+                              onSuccess(sortedMessages)
+                            }
+                            Log.e("lastMessages.add", "${lastMessages.toList()}")
                           } else {
                             Log.e("listenForLastMessages", "Chat Message is null")
                           }
                         })
                   }
-                  if (lastMessages.isNotEmpty())
-                      onSuccess(lastMessages.sortedByDescending { it.timestamp })
                 } else {
                   Log.e("listenForLastMessages", "chatNode sorted with userId don't have children")
                 }
@@ -175,6 +187,7 @@ class ChatRepositoryFirestore(private val auth: FirebaseAuth, private val db: Fi
                 if (snapshot.exists()) {
                   val lastMessage =
                       snapshot.children.first().getValue(ChatMessage.TextMessage::class.java)
+                  Log.e("getLastMessage", "$lastMessage")
                   onComplete(lastMessage)
                 } else {
                   Log.e("getLastMessageForChatRoom", "snapshot doesn't exist")

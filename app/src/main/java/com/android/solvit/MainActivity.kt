@@ -167,10 +167,16 @@ fun SeekerUI(
     }
     navigation(startDestination = Screen.INBOX, route = Route.INBOX) {
       composable(Screen.INBOX) {
-        MessageBox(chatViewModel = chatViewModel, navigationActions = navigationActions)
+        MessageBox(
+            chatViewModel = chatViewModel,
+            navigationActions = navigationActions,
+            authViewModel = authViewModel)
       }
       composable(Screen.CHAT) {
-        ChatScreen(navigationActions = navigationActions, chatViewModel = chatViewModel)
+        ChatScreen(
+            navigationActions = navigationActions,
+            chatViewModel = chatViewModel,
+            authViewModel = authViewModel)
       }
     }
 
@@ -213,10 +219,16 @@ fun ProviderUI(
     composable(Screen.CALENDAR) { ProviderCalendarScreen(navigationActions = navigationActions) }
     navigation(startDestination = Screen.INBOX, route = Route.INBOX) {
       composable(Screen.INBOX) {
-        MessageBox(chatViewModel = chatViewModel, navigationActions = navigationActions)
+        MessageBox(
+            chatViewModel = chatViewModel,
+            navigationActions = navigationActions,
+            authViewModel = authViewModel)
       }
       composable(Screen.CHAT) {
-        ChatScreen(navigationActions = navigationActions, chatViewModel = chatViewModel)
+        ChatScreen(
+            navigationActions = navigationActions,
+            chatViewModel = chatViewModel,
+            authViewModel = authViewModel)
       }
     }
     composable(Screen.MYJOBS) { RequestsDashboardScreen(navigationActions = navigationActions) }
