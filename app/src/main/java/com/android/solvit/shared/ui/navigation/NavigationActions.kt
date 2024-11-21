@@ -27,6 +27,7 @@ object Route {
   const val CALENDAR = "Calendar"
   const val PROVIDER_PROFILE = "Provider Profile"
   const val MYJOBS = "My Jobs"
+  const val BOOKING_DETAILS = "Booking Details"
 }
 
 object Screen {

@@ -44,6 +44,7 @@ import com.android.solvit.shared.ui.authentication.OpeningScreen
 import com.android.solvit.shared.ui.authentication.SignInScreen
 import com.android.solvit.shared.ui.authentication.SignUpChooseProfile
 import com.android.solvit.shared.ui.authentication.SignUpScreen
+import com.android.solvit.shared.ui.booking.ServiceBookingScreen
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.navigation.Screen
@@ -158,7 +159,12 @@ fun SeekerUI(
       }
     }
     composable(Route.PROVIDER_PROFILE) {
-      ProviderInfoScreen(navigationActions, listProviderViewModel, reviewViewModel)
+      ProviderInfoScreen(
+          navigationActions,
+          listProviderViewModel,
+          reviewViewModel,
+          serviceRequestViewModel,
+          authViewModel)
     }
     composable(Route.MESSAGE) { MessageScreen() }
     composable(Route.CREATE_REQUEST) {
@@ -166,6 +172,9 @@ fun SeekerUI(
     }
     composable(Route.REQUESTS_OVERVIEW) {
       RequestsOverviewScreen(navigationActions, serviceRequestViewModel, authViewModel)
+    }
+    composable(Route.BOOKING_DETAILS) {
+      ServiceBookingScreen(navigationActions, listProviderViewModel, serviceRequestViewModel)
     }
     composable(Route.EDIT_REQUEST) {
       EditRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
