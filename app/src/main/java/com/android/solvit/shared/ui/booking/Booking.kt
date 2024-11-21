@@ -114,25 +114,29 @@ fun ServiceBookingScreen(
     onDispose { activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED }
   }
 
-  val request = requestViewModel.selectedRequest.collectAsState().value ?: return
-  val providerId = request.providerId
+  val request by requestViewModel.selectedRequest.collectAsState()
+  if (request == null) {
+    navigationActions.goBack()
+    return
+  }
+  val providerId = request!!.providerId
   val provider =
       if (providerId.isNullOrEmpty()) null
       else
           providerViewModel.providersList.collectAsState().value.firstOrNull {
-            it.uid == request.providerId
+            it.uid == request!!.providerId
           }
-  val packageId = request.packageId
+  val packageId = request!!.packageId
   val packageProposal =
       if (packageId.isNullOrEmpty()) null
       else
           packageViewModel.proposal.collectAsState().value.firstOrNull {
-            it.uid == request.packageId
+            it.uid == request!!.packageId
           }
 
   val acceptedOrScheduled =
-      request.status == ServiceRequestStatus.ACCEPTED ||
-          request.status == ServiceRequestStatus.SCHEDULED
+      request!!.status == ServiceRequestStatus.ACCEPTED ||
+          request!!.status == ServiceRequestStatus.SCHEDULED
   // Scaffold provides the basic structure for the screen with a top bar and content
   Scaffold(
       topBar = {
@@ -195,7 +199,7 @@ fun ServiceBookingScreen(
                   ) {
                     Column(modifier = Modifier.padding(8.dp)) {
                       Text(
-                          text = request.description,
+                          text = request!!.description,
                           fontSize = 16.sp,
                           fontWeight = FontWeight.Bold,
                           color = colorScheme.onSurface,
@@ -234,7 +238,10 @@ fun ServiceBookingScreen(
                                   .padding(16.dp)
                                   .testTag("profile_box")
                                   .clickable(
-                                      onClick = { navigationActions.navigateTo(Route.SERVICES) })) {
+                                      onClick = {
+                                        providerViewModel.selectService(request!!.type)
+                                        navigationActions.navigateTo(Route.PROVIDERS)
+                                      })) {
                             Column(
                                 horizontalAlignment =
                                     Alignment
@@ -277,7 +284,7 @@ fun ServiceBookingScreen(
                                     fontWeight = FontWeight.Medium,
                                     color = colorScheme.secondaryContainer)
                                 Spacer(modifier = Modifier.height(8.dp))
-                                val price = request.agreedPrice
+                                val price = request!!.agreedPrice
                                 Text(
                                     text = if (price != null) "$price €" else "Not set",
                                     fontWeight = FontWeight.Bold,
@@ -294,7 +301,7 @@ fun ServiceBookingScreen(
                                 val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
                                 var date = "Not set"
                                 var time = "Not set"
-                                request.meetingDate.let {
+                                request!!.meetingDate.let {
                                   if (it != null) {
                                     date = dateFormat.format(it.toDate())
                                     time = timeFormat.format(it.toDate())
@@ -326,7 +333,7 @@ fun ServiceBookingScreen(
                                             color = colorScheme.onPrimary)
                                       }
                                   if (acceptedOrScheduled) {
-                                    DateAndTimePickers(request, requestViewModel)
+                                    DateAndTimePickers(request!!, requestViewModel)
                                   }
                                 }
                               }
@@ -340,7 +347,7 @@ fun ServiceBookingScreen(
                   fontWeight = FontWeight.Bold,
                   modifier = Modifier.padding(top = 16.dp, bottom = 8.dp).testTag("address_label"))
 
-              val address = request.location
+              val address = request!!.location
               // Google Map showing the service location
               val mapPosition = rememberCameraPositionState {
                 position =
@@ -363,7 +370,7 @@ fun ServiceBookingScreen(
                                 .clip(RoundedCornerShape(16.dp))) // Display the map
               }
 
-              if (request.status == ServiceRequestStatus.PENDING) {
+              if (request!!.status == ServiceRequestStatus.PENDING) {
                 EditButton(navigationActions)
               }
             }
@@ -378,7 +385,7 @@ fun ProviderCard(
 ) {
   Card(
       modifier =
-          Modifier.width(141.dp).height(172.dp).clickable {
+          Modifier.width(141.dp).height(172.dp).testTag("provider_card").clickable {
             providerViewModel.selectProvider(provider)
             navigationActions.navigateTo(Route.PROVIDER_PROFILE)
           },
@@ -451,7 +458,7 @@ fun PackageCard(packageProposal: PackageProposal) {
       elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
       colors = CardDefaults.cardColors(containerColor = colorScheme.primary)) {
         Column(
-            modifier = Modifier.padding(20.dp).fillMaxHeight().testTag("PackageContent"),
+            modifier = Modifier.padding(20.dp).fillMaxHeight().testTag("package_content"),
             horizontalAlignment = Alignment.Start) {
               // Price of the Package
               Row(verticalAlignment = Alignment.CenterVertically) {
@@ -468,6 +475,7 @@ fun PackageCard(packageProposal: PackageProposal) {
               }
               // Title of the Package
               Text(
+                  modifier = Modifier.testTag("title"),
                   text = packageProposal.title,
                   style = typography.titleMedium,
                   color = colorScheme.onPrimaryContainer)
@@ -476,6 +484,7 @@ fun PackageCard(packageProposal: PackageProposal) {
                       Modifier.height(12.dp)) // Increased space between title and description
               // Description of the Package
               Text(
+                  modifier = Modifier.testTag("description"),
                   text = packageProposal.description,
                   style = typography.bodyMedium,
                   color = colorScheme.onSurface)
@@ -483,7 +492,9 @@ fun PackageCard(packageProposal: PackageProposal) {
                   modifier =
                       Modifier.height(12.dp)) // Increased space between description and features
               // Important infos about the package
-              Column {
+              Column(
+                  modifier = Modifier.testTag("bullet_points"),
+              ) {
                 packageProposal.bulletPoints.forEach { feature ->
                   Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(

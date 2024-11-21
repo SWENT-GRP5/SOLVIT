@@ -39,8 +39,6 @@ import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
-import androidx.compose.material3.TabRowDefaults.SecondaryIndicator
-import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -99,6 +97,8 @@ fun ProviderInfoScreen(
   val user = authViewModel.user.collectAsState()
   val userId = user.value?.uid ?: "-1"
 
+  var selectedTab by remember { mutableStateOf(ProviderTab.DETAILS) }
+
   // Since We still don't give the possibility to provider to add packages (for the moment we're use
   // a default list of packages for all providers)
   val packages =
@@ -138,11 +138,10 @@ fun ProviderInfoScreen(
       content = { padding ->
         Column(modifier = Modifier.background(colorScheme.surface).padding(padding)) {
           ProviderHeader(provider)
-          ProviderTabs(selectedTabIndex) { newIndex -> selectedTabIndex = newIndex }
-
+          ProviderTabs(selectedTab = selectedTab) { newTab -> selectedTab = newTab }
           // Display content based on the selected tab
-          when (selectedTabIndex) {
-            0 ->
+          when (selectedTab) {
+            ProviderTab.DETAILS ->
                 ProviderDetails(
                     provider,
                     selectedPackage,
@@ -151,7 +150,7 @@ fun ProviderInfoScreen(
                     requestViewModel,
                     userId,
                     navigationActions)
-            1 ->
+            ProviderTab.PACKAGES ->
                 ProviderPackages(
                     provider,
                     packages,
@@ -160,7 +159,7 @@ fun ProviderInfoScreen(
                     requestViewModel,
                     userId,
                     navigationActions)
-            2 ->
+            ProviderTab.REVIEWS ->
                 ProviderReviews(
                     provider,
                     selectedPackage,
@@ -246,11 +245,18 @@ fun PackageCard(
               Spacer(modifier = Modifier.weight(1f)) // Pushes the button to the bottom
               Button(
                   enabled = isSelected,
-                  onClick = { selectedPackage.value = packageProposal },
+                  onClick = {
+                    // Toggle the selected package: if already selected, unselect it
+                    selectedPackage.value =
+                        if (selectedPackage.value == packageProposal) null else packageProposal
+                  },
                   colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
                   modifier = Modifier.align(Alignment.CenterHorizontally)) {
-                    if (selectedPackage.value == packageProposal) Text("You selected this package")
-                    else Text("Choose package")
+                    // Update the button text based on the selection state
+                    Text(
+                        text =
+                            if (selectedPackage.value == packageProposal) "Unselect package"
+                            else "Choose package")
                   }
             }
       }
@@ -398,59 +404,35 @@ fun ProviderHeader(provider: Provider) {
 }
 
 @Composable
-fun ProviderTabs(selectedTabIndex: Int, onTabSelected: (Int) -> Unit) {
+fun ProviderTabs(selectedTab: ProviderTab, onTabSelected: (ProviderTab) -> Unit) {
   TabRow(
-      selectedTabIndex = selectedTabIndex,
+      selectedTabIndex = selectedTab.ordinal,
       modifier = Modifier.fillMaxWidth().testTag("providerTabs"),
       containerColor = colorScheme.primary,
       contentColor = colorScheme.onPrimary,
-      indicator = { tabPositions ->
-        SecondaryIndicator(
-            modifier = Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
-            height = 3.dp,
-            color = colorScheme.onPrimary)
-      }) {
-        Tab(
-            selected = selectedTabIndex == 0,
-            onClick = { onTabSelected(0) },
-            modifier = Modifier.testTag("profileTab"),
-        ) {
-          Text(
-              "Profile",
-              modifier =
-                  Modifier.padding(horizontal = 20.dp, vertical = 12.dp), // Increased padding
-              color =
-                  if (selectedTabIndex == 0) colorScheme.onPrimary
-                  else colorScheme.onPrimary.copy(alpha = 0.6f),
-              fontWeight = if (selectedTabIndex == 0) FontWeight.Bold else FontWeight.Normal)
-        }
-        Tab(
-            selected = selectedTabIndex == 1,
-            onClick = { onTabSelected(1) },
-            modifier = Modifier.testTag("packagesTab")) {
-              Text(
-                  "Packages",
-                  modifier =
-                      Modifier.padding(horizontal = 20.dp, vertical = 12.dp), // Increased padding
-                  color =
-                      if (selectedTabIndex == 1) colorScheme.onPrimary
-                      else colorScheme.onPrimary.copy(alpha = 0.6f),
-                  fontWeight = if (selectedTabIndex == 1) FontWeight.Bold else FontWeight.Normal)
-            }
-        Tab(
-            selected = selectedTabIndex == 2,
-            onClick = { onTabSelected(2) },
-            modifier = Modifier.testTag("reviewsTab")) {
-              Text(
-                  "Reviews",
-                  modifier =
-                      Modifier.padding(horizontal = 20.dp, vertical = 12.dp), // Increased padding
-                  color =
-                      if (selectedTabIndex == 2) colorScheme.onPrimary
-                      else colorScheme.onPrimary.copy(alpha = 0.6f),
-                  fontWeight = if (selectedTabIndex == 2) FontWeight.Bold else FontWeight.Normal)
-            }
-      }
+  ) {
+    ProviderTab.entries.forEach { tab ->
+      Tab(
+          modifier = Modifier.testTag(tab.name.lowercase() + "Tab"),
+          text = {
+            Text(
+                text = tab.title,
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
+                color =
+                    if (selectedTab == tab) colorScheme.onPrimary
+                    else colorScheme.onPrimary.copy(alpha = 0.6f),
+                fontWeight = if (selectedTab == tab) FontWeight.Bold else FontWeight.Normal)
+          },
+          selected = selectedTab == tab,
+          onClick = { onTabSelected(tab) })
+    }
+  }
+}
+
+enum class ProviderTab(val title: String) {
+  DETAILS("Details"),
+  PACKAGES("Packages"),
+  REVIEWS("Reviews")
 }
 
 @Composable
@@ -745,7 +727,7 @@ fun SelectRequestDialog(
         modifier =
             Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                 .height(400.dp)
-                .testTag("dialogCard"),
+                .testTag("dialog_card"),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = colorScheme.surface)) {
           Column(
@@ -756,13 +738,14 @@ fun SelectRequestDialog(
                 Text(
                     text = "Choose the concerned service request:",
                     style = typography.titleMedium,
-                    modifier = Modifier.padding(bottom = 16.dp),
+                    modifier = Modifier.padding(bottom = 16.dp).testTag("dialog_title"),
                     color = colorScheme.onSurface)
 
                 // LazyColumn to display requests
                 LazyColumn(
                     modifier =
-                        Modifier.fillMaxWidth()
+                        Modifier.testTag("requests_column")
+                            .fillMaxWidth()
                             .weight(
                                 1f), // Allows the list to scroll properly when content overflows
                     verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -770,6 +753,7 @@ fun SelectRequestDialog(
                         Card(
                             modifier =
                                 Modifier.fillMaxWidth()
+                                    .testTag("request_card")
                                     .border(
                                         2.dp,
                                         if (selectedRequest.value == request) colorScheme.primary
@@ -791,6 +775,7 @@ fun SelectRequestDialog(
                                               style = typography.bodyMedium,
                                               color = colorScheme.onPrimaryContainer)
                                           Text(
+                                              modifier = Modifier.testTag("request_title"),
                                               text = request.title,
                                               style = typography.bodyMedium,
                                               color = colorScheme.onPrimaryContainer)
@@ -803,6 +788,7 @@ fun SelectRequestDialog(
                                               style = typography.bodyMedium,
                                               color = colorScheme.onPrimaryContainer)
                                           Text(
+                                              modifier = Modifier.testTag("request_description"),
                                               text = request.description,
                                               style = typography.bodyMedium,
                                               color = colorScheme.onPrimaryContainer,
@@ -820,7 +806,8 @@ fun SelectRequestDialog(
                     horizontalArrangement = Arrangement.SpaceEvenly) {
                       TextButton(
                           onClick = { showDialog.value = false },
-                          modifier = Modifier.padding(horizontal = 8.dp)) {
+                          modifier =
+                              Modifier.padding(horizontal = 8.dp).testTag("dismiss_button")) {
                             Text(
                                 text = "Dismiss",
                                 style = typography.labelLarge,
@@ -828,6 +815,7 @@ fun SelectRequestDialog(
                           }
 
                       Button(
+                          modifier = Modifier.padding(horizontal = 8.dp).testTag("confirm_button"),
                           enabled = selectedRequest.value != null,
                           onClick = {
                             selectedRequest.value?.let {
@@ -845,7 +833,6 @@ fun SelectRequestDialog(
                             }
                             showDialog.value = false
                           },
-                          modifier = Modifier.padding(horizontal = 8.dp),
                           shape = RoundedCornerShape(8.dp)) {
                             Text(
                                 text = "Confirm",

@@ -8,8 +8,10 @@ import androidx.navigation.NavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.shared.model.map.Location
+import com.android.solvit.shared.model.packages.PackageProposal
 import com.android.solvit.shared.model.packages.PackageProposalRepository
 import com.android.solvit.shared.model.packages.PackageProposalViewModel
+import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.provider.ProviderRepository
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestRepository
@@ -53,6 +55,17 @@ class BookingScreenTest {
           agreedPrice = 200.15,
           type = Services.PLUMBER,
           status = ServiceRequestStatus.PENDING)
+
+  private val provider = Provider(uid = "1", name = "Test Provider", imageUrl = "", rating = 4.5)
+
+  private val packageProposal =
+      PackageProposal(
+          uid = "1",
+          title = "Basic Maintenance",
+          description = "Ideal for minor repairs and maintenance tasks.",
+          price = 49.99,
+          bulletPoints =
+              listOf("Fix leaky faucets", "Unclog drains", "Inspect plumbing for minor issues"))
 
   @Before
   fun setUp() {
@@ -112,5 +125,32 @@ class BookingScreenTest {
     composeTestRule.onNodeWithTag("date_picker").assertDoesNotExist()
     composeTestRule.onNodeWithTag("date_time_picker_button").performClick()
     composeTestRule.onNodeWithTag("date_picker").assertIsDisplayed()
+  }
+
+  @Test
+  fun providerCardDisplaysAndFunctionsCorrectly() {
+    composeTestRule.setContent {
+      ProviderCard(
+          provider = provider,
+          providerViewModel = providerViewModel,
+          navigationActions = navigationActions)
+    }
+
+    composeTestRule.onNodeWithTag("provider_card").assertIsDisplayed()
+  }
+
+  @Test
+  fun packageCardDisplaysAndFunctionsCorrectly() {
+    composeTestRule.setContent {
+      PackageCard(
+          packageProposal = packageProposal,
+      )
+    }
+
+    composeTestRule.onNodeWithTag("package_content").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("price").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("title").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("description").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("bullet_points").assertIsDisplayed()
   }
 }

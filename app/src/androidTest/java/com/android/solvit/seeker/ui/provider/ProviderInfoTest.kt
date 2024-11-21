@@ -1,7 +1,6 @@
 package com.android.solvit.seeker.ui.provider
 
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assertIsDisplayed
@@ -98,7 +97,6 @@ class ProviderInfoTest {
     navigationActions = mock(NavigationActions::class.java)
     requestRepository = mock(ServiceRequestRepository::class.java)
     requestViewModel = ServiceRequestViewModel(requestRepository)
-
     providerViewModel.selectProvider(provider)
   }
 
@@ -116,25 +114,26 @@ class ProviderInfoTest {
   @Test
   fun providerTabsSwitchCorrectly() {
     // Arrange
-    var selectedTabIndex by mutableIntStateOf(0)
+    var selectedTab by mutableStateOf(ProviderTab.DETAILS)
 
     // Act
     composeTestRule.setContent {
-      ProviderTabs(selectedTabIndex) { newIndex -> selectedTabIndex = newIndex }
+      ProviderTabs(
+          selectedTab = ProviderTab.DETAILS, onTabSelected = { newTab -> selectedTab = newTab })
     }
 
     // Assert
     composeTestRule.onNodeWithTag("providerTabs").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("profileTab").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("detailsTab").assertIsDisplayed()
     composeTestRule.onNodeWithTag("reviewsTab").assertIsDisplayed()
     composeTestRule.onNodeWithTag("packagesTab").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("profileTab").performClick()
+    composeTestRule.onNodeWithTag("detailsTab").performClick()
     composeTestRule.onNodeWithTag("packagesTab").assertIsDisplayed()
-    assertEquals(0, selectedTabIndex)
+    assertEquals(ProviderTab.DETAILS, selectedTab)
     composeTestRule.onNodeWithTag("packagesTab").performClick()
-    assertEquals(1, selectedTabIndex)
+    assertEquals(ProviderTab.PACKAGES, selectedTab)
     composeTestRule.onNodeWithTag("reviewsTab").performClick()
-    assertEquals(2, selectedTabIndex)
+    assertEquals(ProviderTab.REVIEWS, selectedTab)
   }
 
   @Test
@@ -240,6 +239,7 @@ class ProviderInfoTest {
     composeTestRule.onNodeWithTag("bottomBar").assertIsDisplayed()
     composeTestRule.onNodeWithTag("bookNowButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("bookNowButton").assertTextEquals("Book Now")
+    composeTestRule.onNodeWithTag("bookNowButton").performClick()
   }
 
   @Test
@@ -251,6 +251,7 @@ class ProviderInfoTest {
     composeTestRule.onNodeWithTag("providerHeader").assertIsDisplayed()
     composeTestRule.onNodeWithTag("providerTabs").assertIsDisplayed()
     composeTestRule.onNodeWithTag("bottomBar").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("bookNowButton").performClick()
   }
 
   @Test
@@ -259,11 +260,34 @@ class ProviderInfoTest {
       ProviderInfoScreen(navigationActions, providerViewModel, reviewViewModel)
     }
 
-    composeTestRule.onNodeWithTag("profileTab").performClick()
+    composeTestRule.onNodeWithTag("detailsTab").performClick()
     composeTestRule.onNodeWithTag("providerDetails").assertIsDisplayed()
     composeTestRule.onNodeWithTag("reviewsTab").performClick()
     composeTestRule.onNodeWithTag("providerReviews").assertIsDisplayed()
     composeTestRule.onNodeWithTag("packagesTab").performClick()
     composeTestRule.onNodeWithTag("packagesScrollableList").assertIsDisplayed()
+  }
+
+  @Test
+  fun selectRequestDialogDisplaysCorrectly() {
+    composeTestRule.setContent {
+      SelectRequestDialog(
+          showDialog = mutableStateOf(true),
+          selectedPackage = mutableStateOf(null),
+          requestViewModel = requestViewModel,
+          userId = "1",
+          providerId = "1",
+          navigationActions = navigationActions)
+    }
+
+    composeTestRule.onNodeWithTag("dialog_card").assertIsDisplayed()
+    composeTestRule
+        .onNodeWithTag("dialog_title")
+        .assertTextEquals("Choose the concerned service request:")
+    composeTestRule.onNodeWithTag("requests_column").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("dismiss_button").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("dismiss_button").performClick()
+    composeTestRule.onNodeWithTag("confirm_button").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("confirm_button").performClick()
   }
 }
