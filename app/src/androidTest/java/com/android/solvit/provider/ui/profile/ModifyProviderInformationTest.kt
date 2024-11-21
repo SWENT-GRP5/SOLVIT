@@ -1,8 +1,13 @@
 package com.android.solvit.provider.ui.profile
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextClearance
+import androidx.compose.ui.test.performTextInput
 import androidx.navigation.NavController
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.shared.model.map.Location
@@ -77,8 +82,49 @@ class ProfessionalProfileScreenTest {
 
     composeTestRule.setContent { ModifyInput(provider, navigationActions = navigationActions) }
     composeTestRule.onNodeWithTag("newProviderCompanyNameInputField").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("NewPhoneNumberInputField").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("newPhoneNumberInputField").assertIsDisplayed()
     composeTestRule.onNodeWithTag("newServiceInputField").assertIsDisplayed()
     composeTestRule.onNodeWithTag("newLocationInputField").assertIsDisplayed()
   }
+
+
+    @Test
+    fun modifyProviderInformationScreen_errorIsDisplayInTheCompanyNameContent() {
+
+        composeTestRule.setContent { ModifyInput(provider, navigationActions = navigationActions) }
+        composeTestRule.onNodeWithTag("newProviderCompanyNameInputField").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("providerNameErrorMessage").assertIsNotDisplayed()
+        composeTestRule.onNodeWithTag("newProviderCompanyNameInputField").performTextClearance()
+        composeTestRule.onNodeWithTag("newProviderCompanyNameInputField").performTextInput("a")
+        composeTestRule.onNodeWithTag("newPhoneNumberInputField").performTextInput("+1234567")
+        composeTestRule.onNodeWithTag("providerNameErrorMessage").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("newProviderCompanyNameInputField").performTextClearance()
+        composeTestRule.onNodeWithTag("newProviderCompanyNameInputField").performTextInput("Kevin")
+        composeTestRule.onNodeWithTag("providerNameErrorMessage").assertIsNotDisplayed()
+    }
+
+    @Test
+    fun modifyProviderInformationScreen_errorIsDisplayInThePhoneNumberContent() {
+
+        composeTestRule.setContent { ModifyInput(provider, locationViewModel,navigationActions = navigationActions) }
+        composeTestRule.onNodeWithTag("newPhoneNumberInputField").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("newPhoneNumberErrorMessage").assertIsNotDisplayed()
+        composeTestRule.onNodeWithTag("newPhoneNumberInputField").performTextClearance()
+        composeTestRule.onNodeWithTag("newPhoneNumberInputField").performTextInput("a")
+        composeTestRule.onNodeWithTag("newProviderCompanyNameInputField").performTextInput("Kevin")
+        composeTestRule.onNodeWithTag("newPhoneNumberErrorMessage").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("newPhoneNumberInputField").performTextClearance()
+        composeTestRule.onNodeWithTag("newPhoneNumberInputField").performTextInput("+1234567")
+        composeTestRule.onNodeWithTag("newPhoneNumberErrorMessage").assertIsNotDisplayed()
+    }
+
+
+    @Test
+    fun modifyProviderInformationScreen_errorIsDisplayInTheLocationContent() {
+
+        composeTestRule.onNodeWithTag("newLocationInputField").performTextClearance()
+        composeTestRule.onNodeWithTag("newLocationInputField").performTextInput("USA")
+        composeTestRule.waitUntil { locationViewModel.locationSuggestions.value.isNotEmpty() }
+        composeTestRule.onAllNodesWithTag("locationResult")[0].performClick()
+    }
 }

@@ -13,9 +13,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -28,12 +29,9 @@ import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
@@ -52,7 +50,6 @@ import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
-import java.util.Locale
 
 @Composable
 fun ProviderProfileScreen(
@@ -197,12 +194,15 @@ fun ProfileHeader(
 
           Column {
             TitleText("Company name", testTag = "companyNameTitle")
-            BodyText(provider.companyName.ifEmpty { "Not provided" }.replaceFirstChar { it.uppercase() }, testTag = "companyName")
+            BodyText(
+                provider.companyName.ifEmpty { "Not provided" }.replaceFirstChar { it.uppercase() },
+                testTag = "companyName")
           }
 
           Column {
             TitleText("Profession", testTag = "serviceTitle")
-            BodyText(Services.format(provider.service).ifEmpty { "Not provided" }, testTag = "service")
+            BodyText(
+                Services.format(provider.service).ifEmpty { "Not provided" }, testTag = "service")
           }
 
           Column {
@@ -212,7 +212,10 @@ fun ProfileHeader(
 
           Column {
             TitleText("Location", testTag = "locationTitle")
-            BodyText(provider.location.name.ifEmpty { "Not provided" }, testTag = "location", maxLines = 3)
+            BodyText(
+                provider.location.name.ifEmpty { "Not provided" },
+                testTag = "location",
+                maxLines = 3)
           }
         }
   }
@@ -223,7 +226,7 @@ fun StatsSection(provider: Provider) {
   Column(
       modifier =
           Modifier.fillMaxWidth()
-              .height(150.dp)
+              .height(500.dp)
               .background(colorScheme.primary)
               .padding(16.dp)
               .testTag("statsSection"),
@@ -235,7 +238,7 @@ fun StatsSection(provider: Provider) {
                 fontSize = 40.sp,
                 color = colorScheme.onPrimary,
                 fontWeight = FontWeight.Bold)
-            Text("Average Rating", fontSize = 10.sp, color = colorScheme.onPrimary)
+            Text("Average Rating", fontSize = 15.sp, color = colorScheme.onPrimary)
           }
           Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
@@ -245,24 +248,29 @@ fun StatsSection(provider: Provider) {
                 fontSize = 40.sp,
                 color = colorScheme.onPrimary,
                 fontWeight = FontWeight.Bold)
-            Text("Popular", fontSize = 10.sp, color = colorScheme.onPrimary)
+            Text("Popular", fontSize = 15.sp, color = colorScheme.onPrimary)
           }
+        }
 
-          Column(horizontalAlignment = Alignment.End) {
-            Text(
-                if (provider.languages.isEmpty()) "Not provided"
-                else
-                    provider.languages
-                        .toString()
-                        .replace("[", "")
-                        .replace("]", "")
-                        .toLowerCase(Locale.ROOT)
-                        .replaceFirstChar { it.uppercase() },
-                fontSize = if (provider.languages.isEmpty()) 20.sp else (30/provider.languages.size).sp,
-                color = colorScheme.onPrimary,
-                fontWeight = FontWeight.Bold)
-            Text("Languages", fontSize = 10.sp, color = colorScheme.onPrimary)
+        Spacer(modifier = Modifier.height(5.dp))
+
+        Column(horizontalAlignment = Alignment.Start) {
+          if (provider.languages.isEmpty()) {
+            Text("Not provided")
+          } else {
+            LazyRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                  items(provider.languages) { language ->
+                    Text(
+                        language.toString().replaceFirstChar { it.uppercase() },
+                        fontSize = 40.sp,
+                        color = colorScheme.onPrimary,
+                        fontWeight = FontWeight.Bold)
+                  }
+                }
           }
+          Text("Languages", fontSize = 15.sp, color = colorScheme.onPrimary)
         }
       }
 }

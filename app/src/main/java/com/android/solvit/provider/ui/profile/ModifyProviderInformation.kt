@@ -141,10 +141,10 @@ fun ModifyInput(
       value = newCompanyName,
       onValueChange = { newCompanyName = it },
       label = "Provider Name",
-      placeholder = "Enter your new provider name",
+      placeholder = "Enter your new company name",
       isValueOk = okNewCompanyName,
       leadingIcon = Icons.Default.AccountCircle,
-      leadingIconDescription = "Provider Name Icon",
+      leadingIconDescription = "Company Name Icon",
       testTag = "newProviderCompanyNameInputField",
       errorMessage = "Your company name must have at least 2 characters",
       errorTestTag = "providerNameErrorMessage")
@@ -163,7 +163,7 @@ fun ModifyInput(
       isValueOk = okNewPhoneNumber,
       leadingIcon = Icons.Default.Phone,
       leadingIconDescription = "Phone Number Icon",
-      testTag = "NewPhoneNumberInputField",
+      testTag = "newPhoneNumberInputField",
       errorMessage = "Your phone number name must have at least 7 characters",
       errorTestTag = "newPhoneNumberErrorMessage")
 
@@ -182,12 +182,13 @@ fun ModifyInput(
       testTag = "newLocationInputField")
 
   LanguageDropdownMenu(
-      selectedLanguages = newLanguage, onLanguageSelected = { language, isChecked ->
-        if (isChecked) {
-          newLanguage = newLanguage + language
-        } else {
-          newLanguage = newLanguage - language
-        }
+      selectedLanguages = newLanguage,
+      onLanguageSelected = { language, isChecked ->
+          newLanguage = if (isChecked) {
+              newLanguage + language
+          } else {
+              newLanguage - language
+          }
       })
 
   Spacer(modifier = Modifier.height(10.dp))
@@ -298,63 +299,54 @@ fun LanguageDropdownMenu(
     onLanguageSelected: (Language, Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var expanded by remember { mutableStateOf(false) }
-    val languagesList = Language.entries
+  var expanded by remember { mutableStateOf(false) }
+  val languagesList = Language.entries
 
-    ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = { expanded = !expanded },
-        modifier = modifier
-            .fillMaxWidth()
-            .testTag("languageInputField")
-    ) {
-        // Champ de texte affichant les langues sélectionnées
+  ExposedDropdownMenuBox(
+      expanded = expanded,
+      onExpandedChange = { expanded = !expanded },
+      modifier = modifier.fillMaxWidth().testTag("languageInputField")) {
+
         TextField(
             readOnly = true,
             value = selectedLanguages.joinToString(", ") { it.name },
             onValueChange = {},
-            label = { Text("Sélectionnez les langues") },
+            label = { Text("Select languages") },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            colors = TextFieldDefaults.textFieldColors(
-                containerColor = MaterialTheme.colorScheme.background,
-                disabledIndicatorColor = MaterialTheme.colorScheme.secondary,
-                unfocusedIndicatorColor = MaterialTheme.colorScheme.secondary,
-                focusedIndicatorColor = MaterialTheme.colorScheme.secondary,
-                disabledTextColor = MaterialTheme.colorScheme.onBackground,
-                disabledTrailingIconColor = MaterialTheme.colorScheme.onBackground,
-                disabledLabelColor = MaterialTheme.colorScheme.onBackground,
-            ),
-            modifier = Modifier
-                .menuAnchor()
-                .fillMaxWidth()
-        )
+            colors =
+                TextFieldDefaults.textFieldColors(
+                    containerColor = colorScheme.background,
+                    disabledIndicatorColor = colorScheme.secondary,
+                    unfocusedIndicatorColor = colorScheme.secondary,
+                    focusedIndicatorColor = colorScheme.secondary,
+                    disabledTextColor = colorScheme.onBackground,
+                    disabledTrailingIconColor = colorScheme.onBackground,
+                    disabledLabelColor = colorScheme.onBackground,
+                ),
+            modifier = Modifier.menuAnchor().fillMaxWidth())
 
-        // Menu déroulant personnalisé permettant la sélection multiple
+
         DropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
-            modifier = Modifier
-                .fillMaxWidth()
-        ) {
-            languagesList.forEach { language ->
+            modifier = Modifier.fillMaxWidth()) {
+              languagesList.forEach { language ->
                 val isSelected = language in selectedLanguages
 
-                // Utilisation de DropdownMenuItem avec une case à cocher
+
                 DropdownMenuItem(
                     text = { Text(language.name) },
-                    onClick = {}, // Empêche la fermeture du menu
+                    onClick = {},
                     leadingIcon = {
-                        Checkbox(
-                            checked = isSelected,
-                            onCheckedChange = { isChecked ->
-                                onLanguageSelected(language, isChecked)
-                            }
-                        )
+                      Checkbox(
+                          checked = isSelected,
+                          onCheckedChange = { isChecked ->
+                            onLanguageSelected(language, isChecked)
+                          })
                     },
                     modifier = Modifier.fillMaxWidth(),
-                    contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
-                )
+                    contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding)
+              }
             }
-        }
-    }
+      }
 }
