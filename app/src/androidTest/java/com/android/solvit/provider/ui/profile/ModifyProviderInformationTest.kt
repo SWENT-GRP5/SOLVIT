@@ -75,7 +75,7 @@ class ProfessionalProfileScreenTest {
   @Test
   fun modifyProviderInformationScreen_contentIsDisplay() {
 
-    composeTestRule.setContent { ModifyInput(provider) }
+    composeTestRule.setContent { ModifyInput(provider, navigationActions = navigationActions) }
     composeTestRule.onNodeWithTag("newProviderCompanyNameInputField").assertIsDisplayed()
     composeTestRule.onNodeWithTag("NewPhoneNumberInputField").assertIsDisplayed()
     composeTestRule.onNodeWithTag("newServiceInputField").assertIsDisplayed()
