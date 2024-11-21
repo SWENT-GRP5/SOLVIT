@@ -20,6 +20,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -186,21 +187,17 @@ fun ProfileHeader(
             )
           }
 
-          Column(modifier = Modifier.align(Alignment.End)) { TitleText("Profile") }
-
-          Spacer(modifier = Modifier.height(5.dp))
-
           Column(modifier = Modifier.align(Alignment.End)) {
             Icon(
-                Icons.Default.Menu,
-                contentDescription = "Menu",
+                Icons.Default.Edit,
+                contentDescription = "Edit Profile",
                 modifier =
                     Modifier.size(24.dp).clickable {
                       navigationActions.navigateTo(Screen.PROVIDER_MODIFY_PROFILE)
                     })
           }
 
-          Spacer(modifier = Modifier.height(15.dp))
+          Spacer(modifier = Modifier.height(10.dp))
 
           Column {
             TitleText("Company name", testTag = "companyNameTitle")
