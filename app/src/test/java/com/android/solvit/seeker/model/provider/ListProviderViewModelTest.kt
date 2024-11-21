@@ -1,5 +1,6 @@
 package com.android.solvit.seeker.model.provider
 
+import android.net.Uri
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.provider.ProviderRepository
@@ -10,6 +11,7 @@ import org.hamcrest.MatcherAssert
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito
+import org.mockito.Mockito.mock
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
@@ -48,8 +50,9 @@ class ListProviderViewModelTest {
 
   @Test
   fun addProvider() {
-    listProviderViewModel.addProvider(provider)
-    verify(providerRepository).addProvider(eq(provider), any(), any())
+    val imageUri = mock(Uri::class.java)
+    listProviderViewModel.addProvider(provider, imageUri)
+    verify(providerRepository).addProvider(eq(provider), eq(imageUri), any(), any())
   }
 
   @Test

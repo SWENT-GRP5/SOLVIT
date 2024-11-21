@@ -20,6 +20,9 @@ import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.map.LocationRepository
 import com.android.solvit.shared.model.map.LocationViewModel
+import com.android.solvit.shared.model.packages.PackageProposalRepository
+import com.android.solvit.shared.model.packages.PackageProposalRepositoryFirestore
+import com.android.solvit.shared.model.packages.PackageProposalViewModel
 import com.android.solvit.shared.model.provider.ProviderRepository
 import com.android.solvit.shared.model.provider.ProviderRepositoryFirestore
 import com.android.solvit.shared.model.request.ServiceRequestRepository
@@ -57,6 +60,7 @@ class EndToEndSeekerCreateRequest {
   private lateinit var serviceRequestViewModel: ServiceRequestViewModel
   private lateinit var locationViewModel: LocationViewModel
   private lateinit var reviewViewModel: ReviewViewModel
+  private lateinit var packageProposalViewModel: PackageProposalViewModel
 
   private lateinit var authRepository: AuthRepository
   private lateinit var seekerRepository: UserRepository
@@ -64,6 +68,7 @@ class EndToEndSeekerCreateRequest {
   private lateinit var locationRepository: LocationRepository
   private lateinit var serviceRequestRepository: ServiceRequestRepository
   private lateinit var reviewRepository: ReviewRepository
+  private lateinit var packageProposalRepository: PackageProposalRepository
 
   private lateinit var navHostController: NavHostController
   private lateinit var navigationActions: NavigationActions
@@ -93,10 +98,11 @@ class EndToEndSeekerCreateRequest {
 
     authRepository = AuthRepository(Firebase.auth, firestore)
     seekerRepository = UserRepositoryFirestore(firestore)
-    providerRepository = ProviderRepositoryFirestore(firestore)
+    providerRepository = ProviderRepositoryFirestore(firestore, storage)
     locationRepository = mock(LocationRepository::class.java)
     serviceRequestRepository = ServiceRequestRepositoryFirebase(firestore, storage)
     reviewRepository = ReviewRepositoryFirestore(firestore)
+    packageProposalRepository = PackageProposalRepositoryFirestore(firestore)
 
     authViewModel = AuthViewModel(authRepository)
     seekerProfileViewModel = SeekerProfileViewModel(seekerRepository)
@@ -104,6 +110,7 @@ class EndToEndSeekerCreateRequest {
     locationViewModel = LocationViewModel(locationRepository)
     serviceRequestViewModel = ServiceRequestViewModel(serviceRequestRepository)
     reviewViewModel = ReviewViewModel(reviewRepository)
+    packageProposalViewModel = PackageProposalViewModel(packageProposalRepository)
 
     `when`(locationRepository.search(ArgumentMatchers.anyString(), anyOrNull(), anyOrNull()))
         .thenAnswer { invocation ->
@@ -154,7 +161,8 @@ class EndToEndSeekerCreateRequest {
             seekerProfileViewModel,
             locationViewModel,
             navHostController,
-            navigationActions)
+            navigationActions,
+            packageProposalViewModel)
       } else {
         when (user.value!!.role) {
           "seeker" ->

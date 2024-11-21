@@ -43,6 +43,7 @@ object Screen {
   const val MY_JOBS = "My Jobs"
   const val PROVIDER_PROFILE = "Provider Profile"
   const val PROVIDER_MODIFY_PROFILE = "Modify Provider Profile"
+  const val PREFERENCES = "Preferences"
 }
 
 data class TopLevelDestination(val route: String, val icon: ImageVector, val textId: String)

@@ -14,6 +14,7 @@ import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
+import com.google.firebase.storage.FirebaseStorage
 import junit.framework.TestCase
 import junit.framework.TestCase.assertEquals
 import org.hamcrest.CoreMatchers
@@ -41,6 +42,7 @@ class ProviderRepositoryFirestoneTest {
   @Mock private lateinit var mockDocumentSnapshot: DocumentSnapshot
   @Mock private lateinit var mockTaskUser: Task<UserRepository>
   @Mock private lateinit var mockTaskDoc: Task<DocumentSnapshot>
+  @Mock private lateinit var mockStorage: FirebaseStorage
 
   private lateinit var providerRepositoryFirestore: ProviderRepositoryFirestore
 
@@ -69,7 +71,7 @@ class ProviderRepositoryFirestoneTest {
       FirebaseApp.initializeApp(ApplicationProvider.getApplicationContext())
     }
 
-    providerRepositoryFirestore = ProviderRepositoryFirestore(mockFirestore)
+    providerRepositoryFirestore = ProviderRepositoryFirestore(mockFirestore, mockStorage)
 
     Mockito.`when`(mockFirestore.collection(any())).thenReturn(mockCollectionReference)
     Mockito.`when`(mockCollectionReference.document(any())).thenReturn(mockDocumentReference)
@@ -85,7 +87,7 @@ class ProviderRepositoryFirestoneTest {
   @Test
   fun addProvider() {
     Mockito.`when`(mockDocumentReference.set(any())).thenReturn(Tasks.forResult(null))
-    providerRepositoryFirestore.addProvider(provider, {}, {})
+    providerRepositoryFirestore.addProvider(provider, any(), {}, {})
     verify(mockDocumentReference).set(eq(provider))
   }
 
