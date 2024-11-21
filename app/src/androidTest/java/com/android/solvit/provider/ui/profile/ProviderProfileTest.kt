@@ -50,7 +50,7 @@ class ProfessionalProfileScreenTest {
   }
 
   @Test
-  fun professionalProfileScreen_profileHeader_displaysCorrectly() {
+  fun providerProfileScreen_profileHeader_displaysCorrectly() {
 
     composeTestRule.setContent { ProfileHeader(mockNavigationActions, provider) }
 
@@ -71,7 +71,7 @@ class ProfessionalProfileScreenTest {
   }
 
   @Test
-  fun professionalProfileScreen_profileHeader_performClick() {
+  fun providerProfileScreen_profileHeader_performClick() {
 
     composeTestRule.setContent { ProfileHeader(mockNavigationActions, provider) }
 
@@ -80,7 +80,7 @@ class ProfessionalProfileScreenTest {
   }
 
   @Test
-  fun professionalProfileScreen_logoutButton_performClick() {
+  fun providerProfileScreen_logoutButton_performClick() {
 
     composeTestRule.setContent { ProfileHeader(mockNavigationActions, provider) }
 
@@ -88,7 +88,7 @@ class ProfessionalProfileScreenTest {
   }
 
   @Test
-  fun professionalProfileScreen_JobsDoneSection_displaysCorrectly() {
+  fun providerProfileScreen_JobsDoneSection_displaysCorrectly() {
 
     composeTestRule.setContent { JobsDoneSection() }
     composeTestRule.onNodeWithTag("jobsDoneTitle").assertIsDisplayed()
@@ -96,7 +96,7 @@ class ProfessionalProfileScreenTest {
   }
 
   @Test
-  fun professionalProfileScreen_StatsSection_displaysCorrectly() {
+  fun providerProfileScreen_StatsSection_displaysCorrectly() {
 
     composeTestRule.setContent { StatsSection(provider) }
     composeTestRule.onNodeWithTag("statsSection").assertIsDisplayed()
