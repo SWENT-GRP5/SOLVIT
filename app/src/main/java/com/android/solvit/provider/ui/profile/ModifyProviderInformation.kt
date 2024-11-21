@@ -124,12 +124,13 @@ fun ModifyInput(
           newPhoneNumber.length > 6
 
   val newLocation by remember { mutableStateOf(provider.location.name) }
-  val okNewLocation = true
+
   var showDropdown by remember { mutableStateOf(false) }
 
   val locationSuggestions by
       locationViewModel.locationSuggestions.collectAsState(initial = emptyList<Location?>())
-  var selectedLocation by remember { mutableStateOf<Location?>(null) }
+  var selectedLocation by remember { mutableStateOf<Location?>(provider.location) }
+    val okNewLocation = selectedLocation != null
 
   val allIsGood = okNewCompanyName && okNewPhoneNumber && okNewLocation
 

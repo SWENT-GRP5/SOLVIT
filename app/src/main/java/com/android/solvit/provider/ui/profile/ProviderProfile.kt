@@ -42,8 +42,10 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
@@ -173,12 +175,15 @@ fun ProfileHeader(
           }
 
           @Composable
-          fun BodyText(text: String, fontSize: TextUnit = 15.sp, testTag: String = "") {
+          fun BodyText(text: String, fontSize: TextUnit = 15.sp, testTag: String = "", maxLines : Int = Int.MAX_VALUE) {
             Text(
                 text = text,
                 color = bodyColor,
                 fontSize = fontSize,
-                modifier = Modifier.testTag(testTag))
+                modifier = Modifier.testTag(testTag),
+                maxLines = maxLines,
+                overflow = TextOverflow.Ellipsis
+            )
           }
 
           Column(modifier = Modifier.align(Alignment.End)) { TitleText("Profile") }
@@ -216,7 +221,7 @@ fun ProfileHeader(
 
           Column {
             TitleText("Location", testTag = "locationTitle")
-            BodyText(provider.location.name, testTag = "location")
+            BodyText(provider.location.name, testTag = "location", maxLines = 3)
           }
 
           var isOpen by remember { mutableStateOf(true) }
