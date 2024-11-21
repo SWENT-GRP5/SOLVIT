@@ -76,11 +76,16 @@ fun SolvitApp() {
       viewModel<ServiceRequestViewModel>(factory = ServiceRequestViewModel.Factory)
   val locationViewModel = viewModel<LocationViewModel>(factory = LocationViewModel.Factory)
   val reviewViewModel = viewModel<ReviewViewModel>(factory = ReviewViewModel.Factory)
-    val packageProposalViewModel =
-        viewModel<PackageProposalViewModel>(factory = PackageProposalViewModel.Factory)
+  val packageProposalViewModel =
+      viewModel<PackageProposalViewModel>(factory = PackageProposalViewModel.Factory)
 
   if (!userRegistered.value) {
-    SharedUI(authViewModel, listProviderViewModel, seekerProfileViewModel, locationViewModel, packageProposalViewModel)
+    SharedUI(
+        authViewModel,
+        listProviderViewModel,
+        seekerProfileViewModel,
+        locationViewModel,
+        packageProposalViewModel)
   } else {
     when (user.value!!.role) {
       "seeker" ->
@@ -101,7 +106,7 @@ fun SharedUI(
     authViewModel: AuthViewModel,
     listProviderViewModel: ListProviderViewModel,
     seekerProfileViewModel: SeekerProfileViewModel,
-    locationViewModel: LocationViewModel
+    locationViewModel: LocationViewModel,
     packageProposalViewModel: PackageProposalViewModel
 ) {
   val navController = rememberNavController()

@@ -146,7 +146,12 @@ class EndToEndSeekerCreateRequest {
       val userRegistered = authViewModel.userRegistered.collectAsState()
 
       if (!userRegistered.value) {
-        SharedUI(authViewModel, listProviderViewModel, seekerProfileViewModel, locationViewModel, packageProposalViewModel)
+        SharedUI(
+            authViewModel,
+            listProviderViewModel,
+            seekerProfileViewModel,
+            locationViewModel,
+            packageProposalViewModel)
       } else {
         when (user.value!!.role) {
           "seeker" ->

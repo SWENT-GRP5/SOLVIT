@@ -9,6 +9,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
+import androidx.navigation.compose.rememberNavController
 import androidx.test.core.app.ApplicationProvider
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.seeker.model.profile.UserRepository
@@ -33,6 +34,7 @@ import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.review.ReviewRepository
 import com.android.solvit.shared.model.review.ReviewRepositoryFirestore
 import com.android.solvit.shared.model.review.ReviewViewModel
+import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
@@ -228,8 +230,8 @@ class EndToEndTestCreateProfile {
     authViewModel2 = AuthViewModel(authRepository2)
 
     composeTestRule.setContent {
-      navHostController = rememberNavController()
-      navigationActions = NavigationActions(navHostController)
+      val navHostController = rememberNavController()
+      val navigationActions = NavigationActions(navHostController)
       ProviderRegistrationScreen(
           navigationActions = navigationActions,
           viewModel = listProviderViewModel,
