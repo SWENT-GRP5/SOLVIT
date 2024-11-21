@@ -18,13 +18,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.Button
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
@@ -64,6 +62,7 @@ import com.android.solvit.shared.model.request.ServiceRequestStatus
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.review.Review
 import com.android.solvit.shared.model.review.ReviewViewModel
+import com.android.solvit.shared.ui.authentication.GoBackButton
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
 import com.google.android.gms.maps.model.LatLng
@@ -155,11 +154,7 @@ fun TopSection(navigationActions: NavigationActions) {
   TopAppBar(
       title = { Text(text = "Leave a Review") },
       modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("reviewTopBar"),
-      navigationIcon = {
-        IconButton(onClick = { navigationActions.goBack() }) {
-          Icon(imageVector = Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Go back")
-        }
-      },
+      navigationIcon = { GoBackButton(navigationActions) },
       colors =
           TopAppBarColors(
               colorScheme.background,
