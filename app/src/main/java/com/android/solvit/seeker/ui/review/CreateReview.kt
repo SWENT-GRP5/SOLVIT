@@ -50,6 +50,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -109,7 +110,7 @@ fun CreateReviewScreen(
           OutlinedTextField(
               value = comment,
               onValueChange = { comment = it },
-              modifier = Modifier.fillMaxWidth().height(160.dp),
+              modifier = Modifier.fillMaxWidth().height(160.dp).testTag("reviewComment"),
               label = { Text("Comment") },
               placeholder = { Text("Leave a comment") },
               shape = RoundedCornerShape(16.dp),
@@ -136,7 +137,8 @@ fun CreateReviewScreen(
                   Toast.makeText(context, "Error Submitting Review", Toast.LENGTH_SHORT).show()
                 }
                 navigationActions.goBack()
-              }) {
+              },
+              modifier = Modifier.testTag("submitReviewButton")) {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                     verticalAlignment = Alignment.CenterVertically) {
@@ -153,7 +155,7 @@ fun CreateReviewScreen(
 fun TopSection(navigationActions: NavigationActions) {
   TopAppBar(
       title = { Text(text = "Leave a Review") },
-      modifier = Modifier.fillMaxWidth().padding(16.dp),
+      modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("reviewTopBar"),
       navigationIcon = {
         IconButton(onClick = { navigationActions.goBack() }) {
           Icon(imageVector = Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Go back")
@@ -187,23 +189,33 @@ fun RequestBox(
               colorScheme.onBackground),
   ) {
     Column(
-        modifier = Modifier.fillMaxWidth().padding(16.dp),
+        modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("requestBox"),
         verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalAlignment = Alignment.Start) {
-          Text(text = request.title, fontWeight = FontWeight.ExtraBold, fontSize = 20.sp)
-          Text(text = request.description)
-          Row(horizontalArrangement = Arrangement.SpaceBetween) {
-            request.agreedPrice?.let {
-              Text(text = "${request.agreedPrice} $", fontWeight = FontWeight.SemiBold)
-            }
-            request.location?.let {
-              Text(
-                  text = dateFormat.format(request.meetingDate?.toDate() ?: ""),
-                  fontWeight = FontWeight.SemiBold)
-            }
-          }
+          Text(
+              text = request.title,
+              modifier = Modifier.testTag("requestTitle"),
+              fontWeight = FontWeight.ExtraBold,
+              fontSize = 20.sp)
+          Text(text = request.description, modifier = Modifier.testTag("requestDescription"))
           Row(
-              modifier = Modifier.height(160.dp),
+              modifier = Modifier.fillMaxWidth(),
+              horizontalArrangement = Arrangement.SpaceBetween) {
+                request.agreedPrice?.let {
+                  Text(
+                      text = "${request.agreedPrice} $",
+                      modifier = Modifier.testTag("requestPrice"),
+                      fontWeight = FontWeight.SemiBold)
+                }
+                request.location?.let {
+                  Text(
+                      text = dateFormat.format(request.meetingDate?.toDate() ?: ""),
+                      modifier = Modifier.testTag("requestDate"),
+                      fontWeight = FontWeight.SemiBold)
+                }
+              }
+          Row(
+              modifier = Modifier.height(160.dp).testTag("requestProviderAndLocation"),
               horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 provider?.let {
                   ProviderItem(provider = it) {
@@ -226,7 +238,8 @@ fun MapCard(location: Location) {
   }
   Box {
     GoogleMap(
-        cameraPositionState = mapPosition, modifier = Modifier.clip(RoundedCornerShape(16.dp))) {
+        cameraPositionState = mapPosition,
+        modifier = Modifier.clip(RoundedCornerShape(16.dp)).testTag("mapCard")) {
           Marker(
               state = rememberMarkerState(position = LatLng(location.latitude, location.longitude)))
         }
@@ -240,7 +253,10 @@ fun RatingBar(
   val selectedColor = colorScheme.primary
   val unselectedColor = colorScheme.primaryContainer
   Row(
-      modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp, vertical = 16.dp),
+      modifier =
+          Modifier.fillMaxWidth()
+              .padding(horizontal = 32.dp, vertical = 16.dp)
+              .testTag("ratingBar"),
       horizontalArrangement = Arrangement.SpaceBetween,
       verticalAlignment = Alignment.CenterVertically) {
         for (value in 1..5) {
@@ -270,7 +286,7 @@ fun StarIcon(
       painter = painterResource(id = R.drawable.star),
       contentDescription = null,
       modifier =
-          Modifier.size(40.dp).pointerInteropFilter {
+          Modifier.size(40.dp).testTag("reviewStar$ratingValue").pointerInteropFilter {
             when (it.action) {
               MotionEvent.ACTION_DOWN -> {
                 ratingState.intValue = ratingValue
