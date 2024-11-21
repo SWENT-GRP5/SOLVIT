@@ -42,6 +42,7 @@ object Screen {
   const val CALENDAR = "Calendar"
   const val MYJOBS = "My Jobs"
   const val PROFESSIONAL_PROFILE = "Professional Profile"
+  const val PREFERENCES = "Preferences"
 }
 
 data class TopLevelDestination(val route: String, val icon: ImageVector, val textId: String)
