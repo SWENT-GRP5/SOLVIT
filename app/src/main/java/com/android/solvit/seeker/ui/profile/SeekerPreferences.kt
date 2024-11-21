@@ -86,7 +86,7 @@ fun SuggestionsGrid(
     onSuggestionClick: (String) -> Unit
 ) {
     Column(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth().testTag("preference_button")
     ) {
         val chunkedSuggestions = suggestions.chunked(2) // Divide into rows of 2 items
         chunkedSuggestions.forEach { rowItems ->
@@ -118,8 +118,7 @@ fun SuggestionButton(
     Surface(
         modifier = Modifier
             .padding(8.dp)
-            .clickable { onClick() }
-            .testTag("preference_button"),
+            .clickable { onClick() },
         shape = RoundedCornerShape(16.dp),
         color = backgroundColor
     ) {
