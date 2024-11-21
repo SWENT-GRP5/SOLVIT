@@ -33,6 +33,7 @@ import com.android.solvit.seeker.ui.provider.SelectProviderScreen
 import com.android.solvit.seeker.ui.request.CreateRequestScreen
 import com.android.solvit.seeker.ui.request.EditRequestScreen
 import com.android.solvit.seeker.ui.request.RequestsOverviewScreen
+import com.android.solvit.seeker.ui.review.CreateReviewScreen
 import com.android.solvit.seeker.ui.service.ServicesScreen
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.map.LocationViewModel
@@ -177,6 +178,10 @@ fun SeekerUI(
       composable(Screen.EDIT_PROFILE) {
         EditSeekerProfileScreen(seekerProfileViewModel, navigationActions, authViewModel)
       }
+    }
+    composable(Screen.REVIEW_SCREEN) {
+      CreateReviewScreen(
+          reviewViewModel, serviceRequestViewModel, listProviderViewModel, navigationActions)
     }
   }
 }
