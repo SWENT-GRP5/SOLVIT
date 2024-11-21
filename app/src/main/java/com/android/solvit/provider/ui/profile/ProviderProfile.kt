@@ -52,6 +52,7 @@ import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
+import java.util.Locale
 
 @Composable
 fun ProviderProfileScreen(
@@ -196,44 +197,25 @@ fun ProfileHeader(
 
           Column {
             TitleText("Company name", testTag = "companyNameTitle")
-            BodyText(provider.companyName.ifEmpty { "Not provided" }, testTag = "companyName")
+            BodyText(provider.companyName.ifEmpty { "Not provided" }.replaceFirstChar { it.uppercase() }, testTag = "companyName")
           }
 
           Column {
             TitleText("Profession", testTag = "serviceTitle")
-            BodyText(Services.format(provider.service), testTag = "service")
+            BodyText(Services.format(provider.service).ifEmpty { "Not provided" }, testTag = "service")
           }
 
           Column {
             TitleText("Contact", testTag = "contactTitle")
-            BodyText(provider.phone, testTag = "contact")
+            BodyText(provider.phone.ifEmpty { "Not provided" }, testTag = "contact")
           }
 
           Column {
             TitleText("Location", testTag = "locationTitle")
-            BodyText(provider.location.name, testTag = "location", maxLines = 3)
+            BodyText(provider.location.name.ifEmpty { "Not provided" }, testTag = "location", maxLines = 3)
           }
         }
   }
-}
-
-@Composable
-fun JobItem(title: String) {
-  Box(
-      modifier =
-          Modifier.size(80.dp)
-              .shadow(4.dp, shape = RoundedCornerShape(12.dp))
-              .background(colorScheme.background, shape = RoundedCornerShape(12.dp))
-              .padding(8.dp)
-              .testTag("jobItem"),
-      contentAlignment = Alignment.Center) {
-        Text(
-            text = title,
-            fontSize = 14.sp,
-            textAlign = TextAlign.Center,
-            maxLines = 2,
-            color = colorScheme.error)
-      }
 }
 
 @Composable
@@ -268,8 +250,15 @@ fun StatsSection(provider: Provider) {
 
           Column(horizontalAlignment = Alignment.End) {
             Text(
-                if (provider.languages.isEmpty()) "Not provided" else provider.languages.toString(),
-                fontSize = if (provider.languages.isEmpty()) 20.sp else 30.sp,
+                if (provider.languages.isEmpty()) "Not provided"
+                else
+                    provider.languages
+                        .toString()
+                        .replace("[", "")
+                        .replace("]", "")
+                        .toLowerCase(Locale.ROOT)
+                        .replaceFirstChar { it.uppercase() },
+                fontSize = if (provider.languages.isEmpty()) 20.sp else (30/provider.languages.size).sp,
                 color = colorScheme.onPrimary,
                 fontWeight = FontWeight.Bold)
             Text("Languages", fontSize = 10.sp, color = colorScheme.onPrimary)

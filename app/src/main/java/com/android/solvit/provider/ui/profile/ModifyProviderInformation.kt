@@ -49,6 +49,7 @@ import com.android.solvit.seeker.ui.request.LocationDropdown
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.map.LocationViewModel
+import com.android.solvit.shared.model.provider.Language
 import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.authentication.CustomOutlinedTextField
@@ -132,6 +133,8 @@ fun ModifyInput(
   var selectedLocation by remember { mutableStateOf<Location?>(provider.location) }
   val okNewLocation = selectedLocation != null
 
+  var newLanguage by remember { mutableStateOf(provider.languages) }
+
   val allIsGood = okNewCompanyName && okNewPhoneNumber && okNewLocation
 
   CustomOutlinedTextField(
@@ -178,6 +181,15 @@ fun ModifyInput(
       isValueOk = okNewLocation,
       testTag = "newLocationInputField")
 
+  LanguageDropdownMenu(
+      selectedLanguages = newLanguage, onLanguageSelected = { language, isChecked ->
+        if (isChecked) {
+          newLanguage = newLanguage + language
+        } else {
+          newLanguage = newLanguage - language
+        }
+      })
+
   Spacer(modifier = Modifier.height(10.dp))
 
   Button(
@@ -187,6 +199,7 @@ fun ModifyInput(
           provider.service = newProfession
           provider.phone = newPhoneNumber
           provider.location = selectedLocation ?: provider.location
+          provider.languages = newLanguage
 
           listProviderViewModel.updateProvider(provider = provider)
 
@@ -234,18 +247,14 @@ fun ModifyInput(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ServiceDropdownMenu(
-    selectedService: Services,
-    onServiceSelected: (Services) -> Unit,
-    modifier: Modifier = Modifier
-) {
+fun ServiceDropdownMenu(selectedService: Services, onServiceSelected: (Services) -> Unit) {
   var expanded by remember { mutableStateOf(false) }
   val servicesList = Services.entries
 
   ExposedDropdownMenuBox(
       expanded = expanded,
       onExpandedChange = { expanded = !expanded },
-      modifier = modifier.fillMaxWidth().testTag("newServiceInputField")) {
+      modifier = Modifier.fillMaxWidth().testTag("newServiceInputField")) {
         // The read-only text field displaying the selected service
         TextField(
             readOnly = true,
@@ -280,4 +289,72 @@ fun ServiceDropdownMenu(
           }
         }
       }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun LanguageDropdownMenu(
+    selectedLanguages: List<Language>,
+    onLanguageSelected: (Language, Boolean) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val languagesList = Language.entries
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded },
+        modifier = modifier
+            .fillMaxWidth()
+            .testTag("languageInputField")
+    ) {
+        // Champ de texte affichant les langues sélectionnées
+        TextField(
+            readOnly = true,
+            value = selectedLanguages.joinToString(", ") { it.name },
+            onValueChange = {},
+            label = { Text("Sélectionnez les langues") },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            colors = TextFieldDefaults.textFieldColors(
+                containerColor = MaterialTheme.colorScheme.background,
+                disabledIndicatorColor = MaterialTheme.colorScheme.secondary,
+                unfocusedIndicatorColor = MaterialTheme.colorScheme.secondary,
+                focusedIndicatorColor = MaterialTheme.colorScheme.secondary,
+                disabledTextColor = MaterialTheme.colorScheme.onBackground,
+                disabledTrailingIconColor = MaterialTheme.colorScheme.onBackground,
+                disabledLabelColor = MaterialTheme.colorScheme.onBackground,
+            ),
+            modifier = Modifier
+                .menuAnchor()
+                .fillMaxWidth()
+        )
+
+        // Menu déroulant personnalisé permettant la sélection multiple
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            languagesList.forEach { language ->
+                val isSelected = language in selectedLanguages
+
+                // Utilisation de DropdownMenuItem avec une case à cocher
+                DropdownMenuItem(
+                    text = { Text(language.name) },
+                    onClick = {}, // Empêche la fermeture du menu
+                    leadingIcon = {
+                        Checkbox(
+                            checked = isSelected,
+                            onCheckedChange = { isChecked ->
+                                onLanguageSelected(language, isChecked)
+                            }
+                        )
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                )
+            }
+        }
+    }
 }

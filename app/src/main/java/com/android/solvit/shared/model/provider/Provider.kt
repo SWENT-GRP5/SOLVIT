@@ -17,5 +17,5 @@ data class Provider(
     val rating: Double = 0.0,
     val price: Double = 0.0,
     val deliveryTime: Timestamp = Timestamp.now(),
-    val languages: List<Language> = emptyList()
+    var languages: List<Language> = emptyList()
 ) {}
