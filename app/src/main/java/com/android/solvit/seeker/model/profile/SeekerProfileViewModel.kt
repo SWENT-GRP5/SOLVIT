@@ -38,8 +38,8 @@ class SeekerProfileViewModel(
   private val _locationSearched = MutableStateFlow<Location>(Location(0.0, 0.0, "Unknown"))
   val locationSearched: StateFlow<Location> = _locationSearched
 
-    private val _userPreferences = MutableStateFlow<List<String>>(emptyList())
-    val userPreferences: StateFlow<List<String>> = _userPreferences
+  private val _userPreferences = MutableStateFlow<List<String>>(emptyList())
+  val userPreferences: StateFlow<List<String>> = _userPreferences
 
   // create factory
   companion object {
@@ -93,36 +93,30 @@ class SeekerProfileViewModel(
     repository.deleteUserProfile(id = id, onSuccess = { getUsersProfile() }, onFailure = {})
   }
 
-    fun addUserPreference(userId: String, preference: String) {
-        repository.addUserPreference(
-            userId = userId,
-            preference = preference,
-            onSuccess = { getUserPreferences(userId) }, // Refresh preferences after adding
-            onFailure = { Log.e("SeekerProfileViewModel", "Failed to add preference") }
-        )
-    }
+  fun addUserPreference(userId: String, preference: String) {
+    repository.addUserPreference(
+        userId = userId,
+        preference = preference,
+        onSuccess = { getUserPreferences(userId) }, // Refresh preferences after adding
+        onFailure = { Log.e("SeekerProfileViewModel", "Failed to add preference") })
+  }
 
-    fun deleteUserPreference(userId: String, preference: String) {
-        repository.deleteUserPreference(
-            userId = userId,
-            preference = preference,
-            onSuccess = { getUserPreferences(userId) }, // Refresh preferences after deletion
-            onFailure = { Log.e("SeekerProfileViewModel", "Failed to delete preference") }
-        )
-    }
+  fun deleteUserPreference(userId: String, preference: String) {
+    repository.deleteUserPreference(
+        userId = userId,
+        preference = preference,
+        onSuccess = { getUserPreferences(userId) }, // Refresh preferences after deletion
+        onFailure = { Log.e("SeekerProfileViewModel", "Failed to delete preference") })
+  }
 
-    fun getUserPreferences(userId: String) {
-        repository.getUserPreferences(
-            userId = userId,
-            onSuccess = { _userPreferences.value = it },
-            onFailure = { Log.e("SeekerProfileViewModel", "Failed to get preferences") }
-        )
-    }
+  fun getUserPreferences(userId: String) {
+    repository.getUserPreferences(
+        userId = userId,
+        onSuccess = { _userPreferences.value = it },
+        onFailure = { Log.e("SeekerProfileViewModel", "Failed to get preferences") })
+  }
 
-
-
-
-    fun updateCachedLocations(userId: String, newLocation: Location) {
+  fun updateCachedLocations(userId: String, newLocation: Location) {
     repository.updateUserLocations(
         userId, newLocation, onSuccess = { _cachedLocations.value = it }, onFailure = {})
   }

@@ -1,6 +1,5 @@
 package com.android.solvit.seeker.model.profile
 
-import android.content.SharedPreferences
 import com.android.solvit.shared.model.map.Location
 
 data class SeekerProfile(

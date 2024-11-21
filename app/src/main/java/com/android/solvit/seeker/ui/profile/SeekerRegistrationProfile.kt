@@ -219,8 +219,7 @@ fun SeekerRegistrationScreen(
                 Column(
                     modifier =
                         Modifier.fillMaxWidth() // Ensure content takes up full width
-                            .padding(16.dp)
-                    ) {
+                            .padding(16.dp)) {
                       Text(
                           text = "Set Your Preferences",
                           style = MaterialTheme.typography.titleLarge,
@@ -238,18 +237,18 @@ fun SeekerRegistrationScreen(
                                   .align(Alignment.CenterHorizontally)
                                   .testTag("preferencesIllustration"))
                       Spacer(modifier = Modifier.height(20.dp))
-                    val userId = user?.uid
-                    if (userId != null) {
+                      val userId = user?.uid
+                      if (userId != null) {
                         Preferences(userId, viewModel)
-                    } else {
+                      } else {
                         Text(
                             text = "User not authenticated. Please sign in again.",
                             color = colorScheme.error,
                             style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.align(Alignment.CenterHorizontally)
-                                .testTag("userNotAuthenticatedError")
-                        )
-                    }
+                            modifier =
+                                Modifier.align(Alignment.CenterHorizontally)
+                                    .testTag("userNotAuthenticatedError"))
+                      }
                       Spacer(modifier = Modifier.height(20.dp))
                       Button(
                           onClick = { currentStep = 3 },
