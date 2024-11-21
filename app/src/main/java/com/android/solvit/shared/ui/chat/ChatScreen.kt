@@ -27,6 +27,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults.shape
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,24 +42,33 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.android.solvit.R
+import com.android.solvit.shared.model.chat.ChatViewModel
+import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
-fun ChatScreen(receiverName: String?, receiverImage: String, receiverId: String?) {
+fun ChatScreen(navigationActions: NavigationActions, chatViewModel: ChatViewModel) {
 
-  val messages = listOf("1", "2", "1", "2")
+  val messages by chatViewModel.coMessage.collectAsState()
+  val receiverName by chatViewModel.receiverName.collectAsState()
   var message by remember { mutableStateOf("") }
+
+  // picture is hardCoded since we didn't implement yet a logic to all informations of a user
+  // starting from its id
+  val picture =
+      "https://firebasestorage.googleapis.com/v0/b/solvit-14cc1.appspot.com/o/serviceRequestImages%2F98a09ae2-fddf-4ab8-96a5-3b10210230c7.jpg?alt=media&token=ce9376d6-de0f-42eb-ad97-5e4af0a74b16"
   Scaffold(
-      topBar = { ChatHeader(name = receiverName, picture = receiverImage) },
+      topBar = { ChatHeader(name = receiverName, picture = picture) },
       bottomBar = { MessageInputBar(message = message, onMessageChange = { message = it }) }) {
           paddingValues ->
         LazyColumn(modifier = Modifier.padding(paddingValues)) {
           items(messages) { message ->
-            if (message == "1") {
+            if (message.senderId == FirebaseAuth.getInstance().currentUser?.uid) {
               // Item for messages authentified user send
-              SentMessage(message, true)
+              SentMessage(message.message, true)
             } else {
               // Item for messages authentified user receive
-              SentMessage(message, false, true, receiverImage)
+              SentMessage(message.message, false, true, picture)
             }
           }
         }

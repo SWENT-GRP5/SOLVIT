@@ -35,6 +35,7 @@ import com.android.solvit.seeker.ui.request.EditRequestScreen
 import com.android.solvit.seeker.ui.request.RequestsOverviewScreen
 import com.android.solvit.seeker.ui.service.ServicesScreen
 import com.android.solvit.shared.model.authentication.AuthViewModel
+import com.android.solvit.shared.model.chat.ChatViewModel
 import com.android.solvit.shared.model.map.LocationViewModel
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.review.ReviewViewModel
@@ -44,11 +45,11 @@ import com.android.solvit.shared.ui.authentication.SignInScreen
 import com.android.solvit.shared.ui.authentication.SignUpChooseProfile
 import com.android.solvit.shared.ui.authentication.SignUpScreen
 import com.android.solvit.shared.ui.chat.ChatScreen
+import com.android.solvit.shared.ui.chat.MessageBox
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.navigation.Screen
 import com.android.solvit.shared.ui.theme.SampleAppTheme
-import com.android.solvit.ui.message.MessageScreen
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 
@@ -61,13 +62,7 @@ class MainActivity : ComponentActivity() {
 
     setContent {
       SampleAppTheme {
-        Surface(modifier = Modifier.fillMaxSize(), color = colorScheme.background) {
-          val imageUrl =
-              "https://firebasestorage.googleapis.com/v0/b/solvit-14cc1.appspot.com/o/serviceRequestImages%2F98a09ae2-fddf-4ab8-96a5-3b10210230c7.jpg?alt=media&token=ce9376d6-de0f-42eb-ad97-5e4af0a74b16"
-
-          ChatScreen("Hassan", imageUrl, "1234")
-          // SolvitApp()
-        }
+        Surface(modifier = Modifier.fillMaxSize(), color = colorScheme.background) { SolvitApp() }
       }
     }
   }
@@ -86,6 +81,7 @@ fun SolvitApp() {
       viewModel<ServiceRequestViewModel>(factory = ServiceRequestViewModel.Factory)
   val locationViewModel = viewModel<LocationViewModel>(factory = LocationViewModel.Factory)
   val reviewViewModel = viewModel<ReviewViewModel>(factory = ReviewViewModel.Factory)
+  val chatViewModel = viewModel<ChatViewModel>(factory = ChatViewModel.Factory)
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
 
@@ -106,8 +102,10 @@ fun SolvitApp() {
               seekerProfileViewModel,
               serviceRequestViewModel,
               reviewViewModel,
-              locationViewModel)
-      "provider" -> ProviderUI(authViewModel, listProviderViewModel, seekerProfileViewModel)
+              locationViewModel,
+              chatViewModel)
+      "provider" ->
+          ProviderUI(authViewModel, listProviderViewModel, seekerProfileViewModel, chatViewModel)
     }
   }
 }
@@ -146,7 +144,8 @@ fun SeekerUI(
     seekerProfileViewModel: SeekerProfileViewModel,
     serviceRequestViewModel: ServiceRequestViewModel,
     reviewViewModel: ReviewViewModel,
-    locationViewModel: LocationViewModel
+    locationViewModel: LocationViewModel,
+    chatViewModel: ChatViewModel
 ) {
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
@@ -166,7 +165,15 @@ fun SeekerUI(
     composable(Route.PROVIDER_PROFILE) {
       ProviderInfoScreen(navigationActions, listProviderViewModel, reviewViewModel)
     }
-    composable(Route.MESSAGE) { MessageScreen() }
+    navigation(startDestination = Screen.INBOX, route = Route.INBOX) {
+      composable(Screen.INBOX) {
+        MessageBox(chatViewModel = chatViewModel, navigationActions = navigationActions)
+      }
+      composable(Screen.CHAT) {
+        ChatScreen(navigationActions = navigationActions, chatViewModel = chatViewModel)
+      }
+    }
+
     composable(Route.CREATE_REQUEST) {
       CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
     }
@@ -192,7 +199,8 @@ fun SeekerUI(
 fun ProviderUI(
     authViewModel: AuthViewModel,
     listProviderViewModel: ListProviderViewModel,
-    seekerProfileViewModel: SeekerProfileViewModel
+    seekerProfileViewModel: SeekerProfileViewModel,
+    chatViewModel: ChatViewModel
 ) {
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
@@ -203,6 +211,14 @@ fun ProviderUI(
     }
     composable(Route.MAP_OF_SEEKERS) { ProviderMapScreen(navigationActions = navigationActions) }
     composable(Screen.CALENDAR) { ProviderCalendarScreen(navigationActions = navigationActions) }
+    navigation(startDestination = Screen.INBOX, route = Route.INBOX) {
+      composable(Screen.INBOX) {
+        MessageBox(chatViewModel = chatViewModel, navigationActions = navigationActions)
+      }
+      composable(Screen.CHAT) {
+        ChatScreen(navigationActions = navigationActions, chatViewModel = chatViewModel)
+      }
+    }
     composable(Screen.MYJOBS) { RequestsDashboardScreen(navigationActions = navigationActions) }
     composable(Screen.PROFESSIONAL_PROFILE) {
       ProviderProfileScreen(listProviderViewModel, authViewModel, navigationActions)

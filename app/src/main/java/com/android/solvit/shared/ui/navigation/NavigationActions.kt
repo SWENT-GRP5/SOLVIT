@@ -19,7 +19,7 @@ object Route {
   const val CREATE_REQUEST = "Create request"
   const val EDIT_REQUEST = "Edit request"
   const val REQUESTS_OVERVIEW = "Requests"
-  const val MESSAGE = "Message"
+  const val INBOX = "Messages"
   const val PROFILE = "Profile"
   const val PROVIDERS = "Providers"
   const val MAP = "Map"
@@ -41,11 +41,17 @@ object Screen {
   const val CALENDAR = "Calendar"
   const val MYJOBS = "My Jobs"
   const val PROFESSIONAL_PROFILE = "Professional Profile"
+  const val INBOX = "Inbox Screen"
+  const val CHAT = "Chat Room Screen"
 }
 
 data class TopLevelDestination(val route: String, val icon: ImageVector, val textId: String)
 
 object TopLevelDestinations {
+
+  ////////////////////////////////// Shared //////////////////////////////////
+  val MESSAGES =
+      TopLevelDestination(Route.INBOX, icon = Icons.Outlined.MailOutline, textId = "Inbox messages")
 
   ////////////////////////////////// PROVIDER //////////////////////////////////
   val REQUEST_FEED =
@@ -54,6 +60,7 @@ object TopLevelDestinations {
   val MAP_OF_SEEKERS =
       TopLevelDestination(
           route = Route.MAP_OF_SEEKERS, icon = Icons.Outlined.LocationOn, textId = "Map of Seekers")
+
   val CALENDAR =
       TopLevelDestination(
           route = Route.CALENDAR, icon = Icons.Outlined.DateRange, textId = "Professional Calendar")
@@ -65,9 +72,6 @@ object TopLevelDestinations {
   val SERVICES =
       TopLevelDestination(
           route = Route.SERVICES, icon = Icons.Outlined.Home, textId = "Customer Home")
-  val MESSAGE =
-      TopLevelDestination(
-          route = Route.MESSAGE, icon = Icons.Outlined.MailOutline, textId = "Message")
   val MAP_OF_PROVIDERS =
       TopLevelDestination(
           route = Route.MAP, icon = Icons.Outlined.LocationOn, textId = "Providers Map")
@@ -91,6 +95,7 @@ val LIST_TOP_LEVEL_DESTINATION_CUSTOMER =
     listOf(
         TopLevelDestinations.SERVICES,
         TopLevelDestinations.MAP_OF_PROVIDERS,
+        TopLevelDestinations.MESSAGES,
         TopLevelDestinations.REQUESTS_OVERVIEW,
         TopLevelDestinations.PROFILE)
 
@@ -98,6 +103,7 @@ val LIST_TOP_LEVEL_DESTINATION_PROVIDER =
     listOf(
         TopLevelDestinations.REQUEST_FEED,
         TopLevelDestinations.MAP_OF_SEEKERS,
+        TopLevelDestinations.MESSAGES,
         TopLevelDestinations.CALENDAR,
         TopLevelDestinations.PROFESSIONAL_PROFILE)
 

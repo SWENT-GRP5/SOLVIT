@@ -13,11 +13,14 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
   private var receiverUid: String? = null
   private var chatId: String? = null
 
-  private val _coMessage = MutableStateFlow<List<ChatMessage>>(emptyList())
-  val coMessage: StateFlow<List<ChatMessage>> = _coMessage
+  private val _coMessage = MutableStateFlow<List<ChatMessage.TextMessage>>(emptyList())
+  val coMessage: StateFlow<List<ChatMessage.TextMessage>> = _coMessage
 
-  private val _allMessages = MutableStateFlow<List<ChatMessage>>(emptyList())
-  val allMessages: StateFlow<List<ChatMessage>> = _allMessages
+  private val _allMessages = MutableStateFlow<List<ChatMessage.TextMessage>>(emptyList())
+  val allMessages: StateFlow<List<ChatMessage.TextMessage>> = _allMessages
+
+  private val _receiverName = MutableStateFlow<String>("")
+  val receiverName: StateFlow<String> = _receiverName
 
   // Create factory
   companion object {
@@ -32,23 +35,35 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
         }
   }
 
+  init {
+    getAllLastMessages()
+  }
+
   fun setReceiverUid(uid: String) {
     receiverUid = uid
   }
 
+  fun setReceiverName(name: String) {
+    _receiverName.value = name
+  }
+
   fun initChat() {
-    receiverUid?.let { repository.initChat(onSuccess = { uid -> chatId = uid }, it) }
+    receiverUid?.let {
+      Log.e("receiverUid", "notnNull")
+      repository.initChat(onSuccess = { uid -> chatId = uid }, it)
+    }
   }
 
   fun sendMessage(message: ChatMessage.TextMessage) {
     chatId?.let {
+      Log.e("chatId", "notNull")
       repository.sendMessage(
           chatRoomId = it,
           message,
           onSuccess = {
             Log.e("send Message", "Message \"${message.message}\" is succesfully sent")
           },
-          onFailure = {})
+          onFailure = { Log.e("send Message", "Failed") })
     }
   }
 
@@ -57,5 +72,12 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
       repository.listenForMessages(
           it, onSuccess = { list -> _coMessage.value = list }, onFailure = {})
     }
+  }
+
+  fun getAllLastMessages() {
+
+    repository.listenForLastMessages(
+        onSuccess = { list -> _allMessages.value = list },
+        onFailure = { Log.e("ChatViewModel", "Failed to get All messages") })
   }
 }

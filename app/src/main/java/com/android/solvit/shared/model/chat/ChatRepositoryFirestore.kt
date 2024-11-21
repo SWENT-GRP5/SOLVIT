@@ -6,6 +6,7 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.ktx.getValue
 
 class ChatRepositoryFirestore(private val auth: FirebaseAuth, private val db: FirebaseDatabase) :
     ChatRepository {
@@ -24,6 +25,7 @@ class ChatRepositoryFirestore(private val auth: FirebaseAuth, private val db: Fi
           databaseRef.addListenerForSingleValueEvent(
               object : ValueEventListener {
                 override fun onDataChange(p0: DataSnapshot) {
+                  Log.e("initChat", "entered there")
                   var chatId: String? = null
                   // p0 represent all chat Rooms
                   if (p0.hasChildren()) {
@@ -71,7 +73,7 @@ class ChatRepositoryFirestore(private val auth: FirebaseAuth, private val db: Fi
   // Send Message in a chatRoom than links 2 users
   override fun sendMessage(
       chatRoomId: String,
-      message: ChatMessage,
+      message: ChatMessage.TextMessage,
       onSuccess: () -> Unit,
       onFailure: () -> Unit
   ) {
@@ -93,7 +95,7 @@ class ChatRepositoryFirestore(private val auth: FirebaseAuth, private val db: Fi
   // Get All Messages of a chatRoom between 2 users
   override fun listenForMessages(
       chatRoomId: String,
-      onSuccess: (List<ChatMessage>) -> Unit,
+      onSuccess: (List<ChatMessage.TextMessage>) -> Unit,
       onFailure: () -> Unit
   ) {
 
@@ -108,12 +110,81 @@ class ChatRepositoryFirestore(private val auth: FirebaseAuth, private val db: Fi
               override fun onDataChange(snapshot: DataSnapshot) {
                 val messages =
                     snapshot.children.mapNotNull { messageSnap ->
-                      messageSnap.getValue(ChatMessage::class.java)
+                      messageSnap.getValue(ChatMessage.TextMessage::class.java)
                     }
                 onSuccess(messages)
               }
 
               override fun onCancelled(error: DatabaseError) {}
+            })
+  }
+
+  override fun listenForLastMessages(
+      onSuccess: (List<ChatMessage.TextMessage>) -> Unit,
+      onFailure: () -> Unit
+  ) {
+    val chatNode = db.getReference(collectionPath)
+    val lastMessages = mutableListOf<ChatMessage.TextMessage>()
+
+    chatNode
+        .orderByChild("users/${auth.currentUser?.uid}")
+        .equalTo(true)
+        .addListenerForSingleValueEvent(
+            object : ValueEventListener {
+              override fun onDataChange(p0: DataSnapshot) {
+                // Check that there is indeed chatRooms
+                if (p0.hasChildren()) {
+                  for (chatRoomsSnapshot in p0.children) {
+                    val chatRoomId = chatRoomsSnapshot.key ?: continue
+                    getLastMessageForChatRoom(
+                        chatRoomId,
+                        onComplete = { chatMessage ->
+                          if (chatMessage != null) {
+                            lastMessages.add(chatMessage)
+                          } else {
+                            Log.e("listenForLastMessages", "Chat Message is null")
+                          }
+                        })
+                  }
+                  if (lastMessages.isNotEmpty())
+                      onSuccess(lastMessages.sortedByDescending { it.timestamp })
+                } else {
+                  Log.e("listenForLastMessages", "chatNode sorted with userId don't have children")
+                }
+              }
+
+              override fun onCancelled(error: DatabaseError) {
+                TODO("Not yet implemented")
+              }
+            })
+  }
+
+  fun getLastMessageForChatRoom(
+      chatRoomId: String,
+      onComplete: (ChatMessage.TextMessage?) -> Unit
+  ) {
+    val chatRef = db.getReference(collectionPath).child(chatRoomId).child("chats")
+
+    // Query Messages ordered by timestamp and get last message
+    chatRef
+        .orderByChild("timestamp")
+        .limitToLast(1)
+        .addListenerForSingleValueEvent(
+            object : ValueEventListener {
+              override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()) {
+                  val lastMessage =
+                      snapshot.children.first().getValue(ChatMessage.TextMessage::class.java)
+                  onComplete(lastMessage)
+                } else {
+                  Log.e("getLastMessageForChatRoom", "snapshot doesn't exist")
+                  onComplete(null)
+                }
+              }
+
+              override fun onCancelled(error: DatabaseError) {
+                TODO("Not yet implemented")
+              }
             })
   }
 }
