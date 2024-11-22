@@ -24,6 +24,7 @@ import com.android.solvit.provider.ui.request.ListRequestsFeedScreen
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.seeker.ui.map.SeekerMapScreen
+import com.android.solvit.seeker.ui.profile.EditPreferences
 import com.android.solvit.seeker.ui.profile.EditSeekerProfileScreen
 import com.android.solvit.seeker.ui.profile.SeekerProfileScreen
 import com.android.solvit.seeker.ui.profile.SeekerRegistrationScreen
@@ -177,6 +178,9 @@ fun SeekerUI(
       composable(Screen.EDIT_PROFILE) {
         EditSeekerProfileScreen(seekerProfileViewModel, navigationActions, authViewModel)
       }
+        composable(Screen.EDIT_PREFERENCES){
+            EditPreferences(user!!.uid,seekerProfileViewModel,navigationActions)
+        }
     }
   }
 }
