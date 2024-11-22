@@ -41,6 +41,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
@@ -60,7 +61,6 @@ fun ChatScreen(
 
   val messages by chatViewModel.coMessage.collectAsState()
   val receiverName by chatViewModel.receiverName.collectAsState()
-  var message by remember { mutableStateOf("") }
 
   chatViewModel.getConversation()
   // picture is hardCoded since we didn't implement yet a logic to all informations of a user
@@ -74,17 +74,18 @@ fun ChatScreen(
       bottomBar = {
         MessageInputBar(chatViewModel = chatViewModel, authViewModel = authViewModel)
       }) { paddingValues ->
-        LazyColumn(modifier = Modifier.padding(paddingValues).imePadding()) {
-          items(messages) { message ->
-            if (message.senderId == FirebaseAuth.getInstance().currentUser?.uid) {
-              // Item for messages authentified user send
-              SentMessage(message.message, true)
-            } else {
-              // Item for messages authentified user receive
-              SentMessage(message.message, false, true, picture)
+        LazyColumn(
+            modifier = Modifier.padding(paddingValues).imePadding().testTag("conversation")) {
+              items(messages) { message ->
+                if (message.senderId == FirebaseAuth.getInstance().currentUser?.uid) {
+                  // Item for messages authentified user send
+                  SentMessage(message.message, true)
+                } else {
+                  // Item for messages authentified user receive
+                  SentMessage(message.message, false, true, picture)
+                }
+              }
             }
-          }
-        }
       }
 }
 
@@ -92,6 +93,7 @@ fun ChatScreen(
 @Composable
 fun ChatHeader(name: String?, picture: String, navigationActions: NavigationActions) {
   TopAppBar(
+      modifier = Modifier.testTag("ChatHeader"),
       title = {
         Row(
             modifier = Modifier,
@@ -127,7 +129,10 @@ fun SentMessage(
 ) {
 
   Row(
-      modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+      modifier =
+          Modifier.fillMaxWidth()
+              .padding(horizontal = 16.dp, vertical = 8.dp)
+              .testTag("MessageItem"),
       horizontalArrangement = if (isSentByUser) Arrangement.End else Arrangement.Start) {
         if (!isSentByUser && showProfilePicture) {
           AsyncImage(
@@ -175,7 +180,10 @@ fun MessageInputBar(chatViewModel: ChatViewModel, authViewModel: AuthViewModel) 
                   color = MaterialTheme.colorScheme.surface,
                   shape = RoundedCornerShape(size = 28.dp),
               )
-              .imePadding(), // To ensure that content of scaffold appears even if keyboard is
+              .imePadding()
+              .testTag(
+                  "SendMessageBar"), // To ensure that content of scaffold appears even if keyboard
+      // is
       // displayed
   ) {
 
