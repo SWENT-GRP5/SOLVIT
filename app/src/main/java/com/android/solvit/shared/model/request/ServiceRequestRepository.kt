@@ -12,6 +12,36 @@ interface ServiceRequestRepository {
   // Retrieve all service requests
   fun getServiceRequests(onSuccess: (List<ServiceRequest>) -> Unit, onFailure: (Exception) -> Unit)
 
+  fun getPendingServiceRequests(
+      onSuccess: (List<ServiceRequest>) -> Unit,
+      onFailure: (Exception) -> Unit
+  )
+
+  fun getAcceptedServiceRequests(
+      onSuccess: (List<ServiceRequest>) -> Unit,
+      onFailure: (Exception) -> Unit
+  )
+
+  fun getScheduledServiceRequests(
+      onSuccess: (List<ServiceRequest>) -> Unit,
+      onFailure: (Exception) -> Unit
+  )
+
+  fun getCompletedServiceRequests(
+      onSuccess: (List<ServiceRequest>) -> Unit,
+      onFailure: (Exception) -> Unit
+  )
+
+  fun getCancelledServiceRequests(
+      onSuccess: (List<ServiceRequest>) -> Unit,
+      onFailure: (Exception) -> Unit
+  )
+
+  fun getArchivedServiceRequests(
+      onSuccess: (List<ServiceRequest>) -> Unit,
+      onFailure: (Exception) -> Unit
+  )
+
   // Add a new service request
   fun saveServiceRequest(
       serviceRequest: ServiceRequest,

@@ -182,7 +182,7 @@ fun SeekerRegistrationScreen(
                     label = "Phone Number",
                     placeholder = "Enter your phone number",
                     isValueOk = isPhoneOk,
-                    errorMessage = "Your phone number must be at least 6 digits",
+                    errorMessage = "Your phone number must be at least 7 digits",
                     leadingIcon = Icons.Default.Phone,
                     leadingIconDescription = "Phone Icon",
                     testTag = "phoneNumberInput",
@@ -327,9 +327,9 @@ fun SeekerRegistrationScreen(
 fun Stepper(currentStep: Int, isFormComplete: Boolean) {
   val stepLabels = listOf("Information", "Details", "All Done")
   Row(
-      modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
-      horizontalArrangement = Arrangement.SpaceBetween,
-      verticalAlignment = Alignment.CenterVertically) {
+      modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+      horizontalArrangement = Arrangement.Start,
+      verticalAlignment = Alignment.Top) {
         stepLabels.forEachIndexed { index, label ->
           StepCircle(
               stepNumber = index + 1,
@@ -338,7 +338,7 @@ fun Stepper(currentStep: Int, isFormComplete: Boolean) {
           )
 
           if (index < stepLabels.size - 1) {
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.weight(1f))
           }
         }
       }
@@ -346,15 +346,11 @@ fun Stepper(currentStep: Int, isFormComplete: Boolean) {
 
 @Composable
 fun StepCircle(stepNumber: Int, isCompleted: Boolean, label: String) {
-
-  // Use a Column to stack the circle and the label vertically
   val testTag = "stepCircle-$stepNumber-${if (isCompleted) "completed" else "incomplete"}"
 
   Column(
       horizontalAlignment = Alignment.CenterHorizontally,
-      verticalArrangement = Arrangement.Center,
-      modifier = Modifier.width(80.dp).testTag(testTag) // Set a width for alignment
-      ) {
+      modifier = Modifier.width(100.dp).testTag(testTag)) {
         Box(
             modifier =
                 Modifier.size(40.dp)

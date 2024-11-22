@@ -10,10 +10,10 @@ import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -52,11 +52,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -125,16 +127,21 @@ fun SignUpScreen(
 
               ScreenTitle("Sign up", "signUpTitle")
               Spacer(modifier = Modifier.height(30.dp))
-              SocialSignUpButton {
-                authViewModel.setRole("seeker")
-                val gso =
-                    GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                        .requestIdToken(token)
-                        .requestEmail()
-                        .build()
-                val googleSignInClient = GoogleSignIn.getClient(context, gso)
-                launcher.launch(googleSignInClient.signInIntent)
-              }
+
+              GoogleButton(
+                  onClick = {
+                    authViewModel.setRole("seeker")
+                    val gso =
+                        GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                            .requestIdToken(token)
+                            .requestEmail()
+                            .build()
+                    val googleSignInClient = GoogleSignIn.getClient(context, gso)
+                    launcher.launch(googleSignInClient.signInIntent)
+                  },
+                  text = "Sign up with Google",
+                  testTag = "googleSignUpButton",
+                  roundedCornerShape = RoundedCornerShape(12.dp))
 
               Spacer(modifier = Modifier.height(20.dp))
               Text("OR", color = colorScheme.onSurfaceVariant)
@@ -149,7 +156,9 @@ fun SignUpScreen(
                   isValueOk = goodFormEmail,
                   leadingIcon = Icons.Default.Email,
                   leadingIconDescription = "Email Icon",
-                  testTag = "emailInputField")
+                  testTag = "emailInputField",
+                  errorMessage = "Your email must have \"@\" and \".\"",
+                  errorTestTag = "emailErrorMessage")
 
               Spacer(modifier = Modifier.height(10.dp))
 
@@ -186,10 +195,11 @@ fun SignUpScreen(
               }
 
               Text(
-                  text = "Your passport must have at least 6 characters",
+                  text = "Your password must have at least 6 characters",
                   color = colorScheme.onSurfaceVariant,
                   fontSize = 12.sp,
                   textAlign = TextAlign.Start,
+                  style = TextStyle(fontSize = 12.sp, lineHeight = 16.sp),
                   modifier = Modifier.padding(top = 4.dp).fillMaxWidth())
 
               Spacer(modifier = Modifier.height(20.dp))
@@ -276,28 +286,6 @@ fun SignUpButton(
 }
 
 @Composable
-fun SocialSignUpButton(onClick: () -> Unit) {
-  Button(
-      onClick = onClick,
-      colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-      shape = RoundedCornerShape(8.dp),
-      border = BorderStroke(1.dp, colorScheme.onSurface),
-      modifier = Modifier.fillMaxWidth().height(48.dp).testTag("googleSignUpButton")) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier.fillMaxWidth()) {
-              Image(
-                  painter = painterResource(id = R.drawable.google_logo),
-                  contentDescription = "Google Logo",
-                  modifier = Modifier.size(30.dp).padding(end = 8.dp))
-              Text(text = "Sign Up with Google", color = colorScheme.onSurface, fontSize = 16.sp)
-              Spacer(Modifier.size(25.dp))
-            }
-      }
-}
-
-@Composable
 fun googleRegisterLauncher(
     authViewModel: AuthViewModel,
     onSuccess: () -> Unit,
@@ -322,11 +310,34 @@ fun googleRegisterLauncher(
 @Composable
 fun AlreadyHaveAccountText(navigationActions: NavigationActions) {
   Row(verticalAlignment = Alignment.CenterVertically) {
-    Text("Already have an account? ", color = colorScheme.onSurface)
-    ClickableText(
-        text = AnnotatedString("Log up in here!"),
-        onClick = { navigationActions.navigateTo(Screen.SIGN_IN) },
-        style = TextStyle(color = colorScheme.primary, textDecoration = TextDecoration.Underline),
-        modifier = Modifier.testTag("logInLink"))
+    val annotatedText = buildAnnotatedString {
+      append("Already have an account? ")
+
+      pushStringAnnotation(tag = "Log in", annotation = "log_in")
+      withStyle(
+          style =
+              SpanStyle(color = colorScheme.primary, textDecoration = TextDecoration.Underline)) {
+            append("Log-In here !")
+          }
+      pop()
+    }
+
+    Box(
+        modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+      ClickableText(
+          text = annotatedText,
+          style =
+              TextStyle(
+                  color = colorScheme.onSurface, fontSize = 16.sp, textAlign = TextAlign.Center),
+          onClick = { offset ->
+            annotatedText
+                .getStringAnnotations(tag = "Log in", start = offset, end = offset)
+                .firstOrNull()
+                ?.let { navigationActions.navigateTo(Screen.SIGN_IN) }
+          },
+          modifier = Modifier.fillMaxWidth().testTag("logInLink"))
+    }
   }
 }

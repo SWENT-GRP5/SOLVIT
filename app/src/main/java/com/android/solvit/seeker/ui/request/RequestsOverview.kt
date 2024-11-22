@@ -28,18 +28,21 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ScrollableTabRow
+import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -55,18 +58,14 @@ import com.android.solvit.seeker.ui.service.SERVICES_LIST
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestStatus
+import com.android.solvit.shared.model.request.ServiceRequestStatus.Companion.getStatusColor
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.service.Services
-import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_CUSTOMER
+import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_SEEKER
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
-import com.android.solvit.shared.ui.theme.ACCEPTED_color
-import com.android.solvit.shared.ui.theme.ARCHIVED_color
-import com.android.solvit.shared.ui.theme.ENDED_color
 import com.android.solvit.shared.ui.theme.LightBlue
 import com.android.solvit.shared.ui.theme.LightOrange
-import com.android.solvit.shared.ui.theme.PENDING_color
-import com.android.solvit.shared.ui.theme.STARTED_color
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -78,7 +77,6 @@ fun RequestsOverviewScreen(
         viewModel(factory = ServiceRequestViewModel.Factory),
     authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory),
 ) {
-
   // Lock Orientation to Portrait
   val context = LocalContext.current
   DisposableEffect(Unit) {
@@ -86,34 +84,66 @@ fun RequestsOverviewScreen(
     activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
     onDispose { activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED }
   }
+
   Scaffold(
       modifier = Modifier.testTag("requestsOverviewScreen"),
       bottomBar = {
         BottomNavigationMenu(
             onTabSelect = { navigationActions.navigateTo(it.route) },
-            tabList = LIST_TOP_LEVEL_DESTINATION_CUSTOMER,
+            tabList = LIST_TOP_LEVEL_DESTINATION_SEEKER,
             selectedItem = Route.REQUESTS_OVERVIEW)
       }) {
         val user = authViewModel.user.collectAsState()
         val userId = user.value?.uid ?: "-1"
-        val requests =
+        val allRequests =
             requestViewModel.requests.collectAsState().value.filter { it.userId == userId }
+
+        var selectedTab by remember { mutableIntStateOf(0) }
+        val statusTabs = ServiceRequestStatus.entries.toTypedArray()
 
         Column {
           TopOrdersSection(navigationActions)
           CategoriesFiltersSection()
-          if (requests.isEmpty()) {
+
+          // Tabs for filtering by status
+          ScrollableTabRow(
+              selectedTabIndex = selectedTab,
+              modifier = Modifier.fillMaxWidth().testTag("statusTabRow"),
+              containerColor = colorScheme.background,
+              contentColor = colorScheme.primary) {
+                statusTabs.forEachIndexed { index, status ->
+                  Tab(
+                      selected = selectedTab == index,
+                      onClick = { selectedTab = index },
+                      text = {
+                        Text(
+                            text = ServiceRequestStatus.format(status),
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = getStatusColor(status))
+                      })
+                }
+              }
+
+          val filteredRequests =
+              if (selectedTab < statusTabs.size) {
+                allRequests.filter { it.status == statusTabs[selectedTab] }
+              } else {
+                allRequests
+              }
+
+          if (filteredRequests.isEmpty()) {
             NoRequestsText()
           } else {
             LazyColumn(
                 modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("requestsList"),
                 verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                  items(requests) { request ->
+                  items(filteredRequests) { request ->
                     RequestItemRow(
                         request = request,
                         onClick = {
                           requestViewModel.selectRequest(request)
-                          navigationActions.navigateTo(Route.EDIT_REQUEST)
+                          navigationActions.navigateTo(Route.BOOKING_DETAILS)
                         })
                   }
                 }
@@ -174,52 +204,68 @@ fun NoRequestsText() {
 fun CategoriesFiltersSection() {
   var showFilters by remember { mutableStateOf(false) }
   var showSort by remember { mutableStateOf(false) }
-  Row(
-      modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).testTag("filterRequestsBar"),
-      horizontalArrangement = Arrangement.SpaceBetween,
-      verticalAlignment = Alignment.CenterVertically) {
-        Box(
-            modifier =
-                Modifier.background(LightBlue, shape = RoundedCornerShape(16.dp))
-                    .clickable { showFilters = !showFilters }
-                    .testTag("categoriesSettings")) {
-              Row(
-                  modifier = Modifier.padding(horizontal = 32.dp, vertical = 16.dp),
-                  verticalAlignment = Alignment.CenterVertically,
-                  horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Image(
-                        painter = painterResource(id = R.drawable.filter_square),
-                        contentDescription = "categories filter",
-                        modifier = Modifier.size(24.dp))
-                    Text(
-                        text = "Category Settings",
-                        fontWeight = FontWeight.Bold,
-                        color = colorScheme.onPrimary)
-                  }
-            }
-        Box(
-            modifier =
-                Modifier.background(LightOrange, shape = RoundedCornerShape(16.dp))
-                    .clickable { showSort = !showSort }
-                    .testTag("categoriesSort"),
-        ) {
-          Row(
-              modifier = Modifier.padding(horizontal = 32.dp, vertical = 16.dp),
-              verticalAlignment = Alignment.CenterVertically,
-              horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Image(
-                    painter = painterResource(id = R.drawable.filter_circle),
-                    contentDescription = "categories sort",
-                    modifier = Modifier.size(24.dp))
-                Text(text = "Sort", fontWeight = FontWeight.Bold, color = colorScheme.onPrimary)
+  Column {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).testTag("filterRequestsBar"),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically) {
+          Box(
+              modifier =
+                  Modifier.weight(1f)
+                      .background(LightBlue, shape = RoundedCornerShape(16.dp))
+                      .clickable { showFilters = !showFilters }
+                      .testTag("categoriesSettings")) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center) {
+                      Image(
+                          painter = painterResource(id = R.drawable.filter_square),
+                          contentDescription = "categories filter",
+                          modifier = Modifier.size(24.dp).weight(0.3f).padding(horizontal = 4.dp),
+                          colorFilter = ColorFilter.tint(colorScheme.onPrimary))
+                      Text(
+                          text = "Services",
+                          fontWeight = FontWeight.Bold,
+                          color = colorScheme.onPrimary,
+                          modifier = Modifier.weight(0.8f),
+                          maxLines = 1,
+                          softWrap = false)
+                    }
+              }
+
+          Box(
+              modifier =
+                  Modifier.weight(1f)
+                      .background(LightOrange, shape = RoundedCornerShape(16.dp))
+                      .clickable { showSort = !showSort }
+                      .testTag("categoriesSort")) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center) {
+                      Image(
+                          painter = painterResource(id = R.drawable.filter_circle),
+                          contentDescription = "categories sort",
+                          modifier = Modifier.size(24.dp).weight(0.3f).padding(horizontal = 4.dp),
+                          colorFilter = ColorFilter.tint(colorScheme.onPrimary))
+                      Text(
+                          text = "Sort",
+                          fontWeight = FontWeight.Bold,
+                          color = colorScheme.onPrimary,
+                          modifier = Modifier.weight(0.8f),
+                          maxLines = 1,
+                          softWrap = false)
+                    }
               }
         }
-      }
-  if (showFilters) {
-    CategoriesFilter()
-  }
-  if (showSort) {
-    CategoriesSort()
+
+    if (showFilters) {
+      CategoriesFilter()
+    }
+    if (showSort) {
+      CategoriesSort()
+    }
   }
 }
 
@@ -323,14 +369,4 @@ fun RequestItemRow(request: ServiceRequest, onClick: () -> Unit) {
               }
         }
       }
-}
-
-fun getStatusColor(status: ServiceRequestStatus): Color {
-  return when (status) {
-    ServiceRequestStatus.PENDING -> PENDING_color
-    ServiceRequestStatus.ACCEPTED -> ACCEPTED_color
-    ServiceRequestStatus.STARTED -> STARTED_color
-    ServiceRequestStatus.ENDED -> ENDED_color
-    ServiceRequestStatus.ARCHIVED -> ARCHIVED_color
-  }
 }

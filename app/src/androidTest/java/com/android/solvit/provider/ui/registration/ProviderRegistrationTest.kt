@@ -106,7 +106,7 @@ class ProviderRegistrationTest {
     composeTestRule.onNodeWithTag("completeRegistrationButton").performClick()
 
     // Verify that the step does not progress and userRepository was not called
-    verify(providerRepository, never()).addProvider(any(), any(), any())
+    verify(providerRepository, never()).addProvider(any(), any(), any(), any())
   }
 
   @Test
@@ -177,7 +177,8 @@ class ProviderRegistrationTest {
       ProviderRegistrationScreen(
           viewModel = listProviderViewModel,
           navigationActions = navigationActions,
-          locationViewModel = locationViewModel)
+          locationViewModel = locationViewModel,
+      )
     }
 
     composeTestRule.onNodeWithTag("inputRequestAddress").performTextInput("USA")
@@ -186,6 +187,17 @@ class ProviderRegistrationTest {
     composeTestRule.onAllNodesWithTag("locationResult")[0].assertIsDisplayed()
     composeTestRule.onAllNodesWithTag("locationResult")[1].assertIsDisplayed()
     composeTestRule.onAllNodesWithTag("locationResult")[2].assertIsDisplayed()
+  }
+
+  @Test
+  fun testEnterDetailedProviderInfo() {
+    composeTestRule.setContent {
+      ProviderRegistrationScreen(
+          viewModel = listProviderViewModel,
+          navigationActions = navigationActions,
+          locationViewModel = locationViewModel,
+      )
+    }
   }
 
   @Test
