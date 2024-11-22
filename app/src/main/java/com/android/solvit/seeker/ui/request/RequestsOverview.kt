@@ -28,11 +28,14 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ScrollableTabRow
+import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -58,7 +61,7 @@ import com.android.solvit.shared.model.request.ServiceRequestStatus
 import com.android.solvit.shared.model.request.ServiceRequestStatus.Companion.getStatusColor
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.service.Services
-import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_CUSTOMER
+import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_SEEKER
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.theme.LightBlue
@@ -74,7 +77,6 @@ fun RequestsOverviewScreen(
         viewModel(factory = ServiceRequestViewModel.Factory),
     authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory),
 ) {
-
   // Lock Orientation to Portrait
   val context = LocalContext.current
   DisposableEffect(Unit) {
@@ -82,34 +84,66 @@ fun RequestsOverviewScreen(
     activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
     onDispose { activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED }
   }
+
   Scaffold(
       modifier = Modifier.testTag("requestsOverviewScreen"),
       bottomBar = {
         BottomNavigationMenu(
             onTabSelect = { navigationActions.navigateTo(it.route) },
-            tabList = LIST_TOP_LEVEL_DESTINATION_CUSTOMER,
+            tabList = LIST_TOP_LEVEL_DESTINATION_SEEKER,
             selectedItem = Route.REQUESTS_OVERVIEW)
       }) {
         val user = authViewModel.user.collectAsState()
         val userId = user.value?.uid ?: "-1"
-        val requests =
+        val allRequests =
             requestViewModel.requests.collectAsState().value.filter { it.userId == userId }
+
+        var selectedTab by remember { mutableIntStateOf(0) }
+        val statusTabs = ServiceRequestStatus.entries.toTypedArray()
 
         Column {
           TopOrdersSection(navigationActions)
           CategoriesFiltersSection()
-          if (requests.isEmpty()) {
+
+          // Tabs for filtering by status
+          ScrollableTabRow(
+              selectedTabIndex = selectedTab,
+              modifier = Modifier.fillMaxWidth().testTag("statusTabRow"),
+              containerColor = colorScheme.background,
+              contentColor = colorScheme.primary) {
+                statusTabs.forEachIndexed { index, status ->
+                  Tab(
+                      selected = selectedTab == index,
+                      onClick = { selectedTab = index },
+                      text = {
+                        Text(
+                            text = ServiceRequestStatus.format(status),
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = getStatusColor(status))
+                      })
+                }
+              }
+
+          val filteredRequests =
+              if (selectedTab < statusTabs.size) {
+                allRequests.filter { it.status == statusTabs[selectedTab] }
+              } else {
+                allRequests
+              }
+
+          if (filteredRequests.isEmpty()) {
             NoRequestsText()
           } else {
             LazyColumn(
                 modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("requestsList"),
                 verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                  items(requests) { request ->
+                  items(filteredRequests) { request ->
                     RequestItemRow(
                         request = request,
                         onClick = {
                           requestViewModel.selectRequest(request)
-                          navigationActions.navigateTo(Route.EDIT_REQUEST)
+                          navigationActions.navigateTo(Route.BOOKING_DETAILS)
                         })
                   }
                 }

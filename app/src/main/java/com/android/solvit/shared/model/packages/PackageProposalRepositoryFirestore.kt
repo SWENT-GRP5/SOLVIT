@@ -92,6 +92,8 @@ class PackageProposalRepositoryFirestore(private val db: FirebaseFirestore) :
     return try {
       val uid = document.id
       val title = document.getString("title") ?: return null
+      val packageNumber = document.getDouble("packageNumber") ?: return null
+      val providerId = document.getString("providerId") ?: return null
       val description = document.getString("description") ?: return null
       val price = document.getDouble("price") ?: return null
       val bulletPoints = document.get("bulletPoints") as? List<String> ?: emptyList()
@@ -99,6 +101,8 @@ class PackageProposalRepositoryFirestore(private val db: FirebaseFirestore) :
       PackageProposal(
           uid = uid,
           title = title,
+          packageNumber = packageNumber,
+          providerId = providerId,
           description = description,
           price = price,
           bulletPoints = bulletPoints)

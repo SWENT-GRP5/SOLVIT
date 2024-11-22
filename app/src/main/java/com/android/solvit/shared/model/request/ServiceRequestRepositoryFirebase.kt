@@ -4,6 +4,7 @@ import android.net.Uri
 import android.util.Log
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.service.Services
+import com.android.solvit.shared.model.utils.uploadImageToStorage
 import com.google.android.gms.tasks.Task
 import com.google.firebase.Firebase
 import com.google.firebase.Timestamp
@@ -11,8 +12,6 @@ import com.google.firebase.auth.auth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
-import com.google.firebase.storage.StorageReference
-import java.util.UUID
 
 class ServiceRequestRepositoryFirebase(
     private val db: FirebaseFirestore,
@@ -111,6 +110,8 @@ class ServiceRequestRepositoryFirebase(
   ) {
     if (imageUri != null) {
       uploadImageToStorage(
+          storage,
+          imageFolderPath,
           imageUri,
           { imageUrl ->
             // Set image URL in the service request
@@ -177,25 +178,6 @@ class ServiceRequestRepositoryFirebase(
       Log.e("ServiceRequestRepositoryFirestore", "Error converting document to ServiceRequest", e)
       null
     }
-  }
-
-  // Handle image uploads to Firebase Storage
-  private fun uploadImageToStorage(
-      imageUri: Uri,
-      onSuccess: (String) -> Unit,
-      onFailure: (Exception) -> Unit
-  ) {
-    val uniqueFileName = UUID.randomUUID().toString() + ".jpg"
-    val imageRef: StorageReference = storage.reference.child(imageFolderPath + uniqueFileName)
-
-    imageRef
-        .putFile(imageUri)
-        .addOnSuccessListener {
-          imageRef.downloadUrl
-              .addOnSuccessListener { downloadUrl -> onSuccess(downloadUrl.toString()) }
-              .addOnFailureListener { exception -> onFailure(exception) }
-        }
-        .addOnFailureListener { exception -> onFailure(exception) }
   }
 
   private fun getServiceRequestsByStatus(

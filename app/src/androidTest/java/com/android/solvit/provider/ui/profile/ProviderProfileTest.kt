@@ -1,11 +1,8 @@
-import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.android.solvit.provider.ui.profile.JobsDoneSection
 import com.android.solvit.provider.ui.profile.ProfileHeader
 import com.android.solvit.provider.ui.profile.StatsSection
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
@@ -50,7 +47,7 @@ class ProfessionalProfileScreenTest {
   }
 
   @Test
-  fun professionalProfileScreen_profileHeader_displaysCorrectly() {
+  fun providerProfileScreen_profileHeader_displaysCorrectly() {
 
     composeTestRule.setContent { ProfileHeader(mockNavigationActions, provider) }
 
@@ -65,13 +62,11 @@ class ProfessionalProfileScreenTest {
     composeTestRule.onNodeWithTag("contact").assertIsDisplayed()
     composeTestRule.onNodeWithTag("locationTitle").assertIsDisplayed()
     composeTestRule.onNodeWithTag("location").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("positionTitle").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("position").assertIsDisplayed()
     composeTestRule.onNodeWithTag("logoutButton").assertIsDisplayed()
   }
 
   @Test
-  fun professionalProfileScreen_profileHeader_performClick() {
+  fun providerProfileScreen_profileHeader_performClick() {
 
     composeTestRule.setContent { ProfileHeader(mockNavigationActions, provider) }
 
@@ -80,7 +75,7 @@ class ProfessionalProfileScreenTest {
   }
 
   @Test
-  fun professionalProfileScreen_logoutButton_performClick() {
+  fun providerProfileScreen_logoutButton_performClick() {
 
     composeTestRule.setContent { ProfileHeader(mockNavigationActions, provider) }
 
@@ -88,15 +83,7 @@ class ProfessionalProfileScreenTest {
   }
 
   @Test
-  fun professionalProfileScreen_JobsDoneSection_displaysCorrectly() {
-
-    composeTestRule.setContent { JobsDoneSection() }
-    composeTestRule.onNodeWithTag("jobsDoneTitle").assertIsDisplayed()
-    composeTestRule.onAllNodesWithTag("jobItem").assertCountEquals(4)
-  }
-
-  @Test
-  fun professionalProfileScreen_StatsSection_displaysCorrectly() {
+  fun providerProfileScreen_StatsSection_displaysCorrectly() {
 
     composeTestRule.setContent { StatsSection(provider) }
     composeTestRule.onNodeWithTag("statsSection").assertIsDisplayed()

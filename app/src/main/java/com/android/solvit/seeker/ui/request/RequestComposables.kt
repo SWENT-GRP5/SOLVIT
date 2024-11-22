@@ -113,7 +113,8 @@ fun ServiceTypeDropdown(
     showDropdownType: Boolean,
     onShowDropdownTypeChange: (Boolean) -> Unit,
     filteredServiceTypes: List<Services>,
-    onServiceTypeSelected: (Services) -> Unit
+    onServiceTypeSelected: (Services) -> Unit,
+    readOnly: Boolean = false
 ) {
   Box(modifier = Modifier.fillMaxWidth()) {
     OutlinedTextField(
@@ -125,6 +126,7 @@ fun ServiceTypeDropdown(
           onTypeQueryChange(it)
           onShowDropdownTypeChange(true)
         },
+        readOnly = readOnly,
         label = { Text("Service Type") },
         placeholder = { Text("Select a Service Type") },
         shape = RoundedCornerShape(12.dp),
@@ -199,7 +201,8 @@ fun LocationDropdown(
     backgroundColor: Color = colorScheme.background,
     debounceDelay: Long = 1001L, // debounce delay longer than 1 second,
     isValueOk: Boolean = false,
-    errorMessage: String = "Invalid location" // Default error message
+    errorMessage: String = "Invalid location", // Default error message
+    testTag: String = "inputRequestAddress"
 ) {
   val coroutineScope = rememberCoroutineScope()
   var debounceJob by remember { mutableStateOf<Job?>(null) }
@@ -238,7 +241,7 @@ fun LocationDropdown(
         placeholder = { requestLocation?.name?.let { Text(it) } ?: Text("Enter your address") },
         shape = RoundedCornerShape(12.dp),
         modifier =
-            Modifier.fillMaxWidth().testTag("inputRequestAddress").onFocusChanged { focusState ->
+            Modifier.fillMaxWidth().testTag(testTag).onFocusChanged { focusState ->
               // Mark field as "visited" once it loses focus after user types
               if (!focusState.isFocused && localQuery.isNotBlank()) {
                 hasBeenFocused = true

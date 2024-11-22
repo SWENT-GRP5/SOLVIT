@@ -37,4 +37,24 @@ interface UserRepository {
       onSuccess: (List<Location>) -> Unit,
       onFailure: (Exception) -> Unit
   )
+
+  fun addUserPreference(
+      userId: String,
+      preference: String,
+      onSuccess: () -> Unit,
+      onFailure: (Exception) -> Unit
+  )
+
+  fun deleteUserPreference(
+      userId: String,
+      preference: String,
+      onSuccess: () -> Unit,
+      onFailure: (Exception) -> Unit
+  )
+
+  fun getUserPreferences(
+      userId: String,
+      onSuccess: (List<String>) -> Unit,
+      onFailure: (Exception) -> Unit
+  )
 }
