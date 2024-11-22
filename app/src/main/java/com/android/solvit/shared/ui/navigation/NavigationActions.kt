@@ -44,6 +44,7 @@ object Screen {
   const val PROVIDER_PROFILE = "Provider Profile"
   const val PROVIDER_MODIFY_PROFILE = "Modify Provider Profile"
   const val PREFERENCES = "Preferences"
+  const val REVIEW_SCREEN = "Review Screen"
 }
 
 data class TopLevelDestination(val route: String, val icon: ImageVector, val textId: String)

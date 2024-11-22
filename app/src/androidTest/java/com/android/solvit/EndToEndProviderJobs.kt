@@ -177,7 +177,13 @@ class EndToEndProviderJobs {
                   serviceRequestViewModel,
                   reviewViewModel,
                   locationViewModel)
-          "provider" -> ProviderUI(authViewModel, listProviderViewModel, seekerProfileViewModel)
+          "provider" ->
+              ProviderUI(
+                  authViewModel,
+                  listProviderViewModel,
+                  serviceRequestViewModel,
+                  seekerProfileViewModel,
+                  locationViewModel)
         }
       }
     }

@@ -33,6 +33,7 @@ import com.android.solvit.seeker.ui.provider.SelectProviderScreen
 import com.android.solvit.seeker.ui.request.CreateRequestScreen
 import com.android.solvit.seeker.ui.request.EditRequestScreen
 import com.android.solvit.seeker.ui.request.RequestsOverviewScreen
+import com.android.solvit.seeker.ui.review.CreateReviewScreen
 import com.android.solvit.seeker.ui.service.ServicesScreen
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.map.LocationViewModel
@@ -99,7 +100,11 @@ fun SolvitApp() {
               locationViewModel)
       "provider" ->
           ProviderUI(
-              authViewModel, listProviderViewModel, seekerProfileViewModel, locationViewModel)
+              authViewModel,
+              listProviderViewModel,
+              serviceRequestViewModel,
+              seekerProfileViewModel,
+              locationViewModel)
     }
   }
 }
@@ -190,6 +195,10 @@ fun SeekerUI(
         EditSeekerProfileScreen(seekerProfileViewModel, navigationActions, authViewModel)
       }
     }
+    composable(Screen.REVIEW_SCREEN) {
+      CreateReviewScreen(
+          reviewViewModel, serviceRequestViewModel, listProviderViewModel, navigationActions)
+    }
   }
 }
 
@@ -197,6 +206,7 @@ fun SeekerUI(
 fun ProviderUI(
     authViewModel: AuthViewModel,
     listProviderViewModel: ListProviderViewModel,
+    serviceRequestViewModel: ServiceRequestViewModel,
     seekerProfileViewModel: SeekerProfileViewModel,
     locationViewModel: LocationViewModel,
 ) {
@@ -205,11 +215,18 @@ fun ProviderUI(
 
   NavHost(navController = navController, startDestination = Route.REQUESTS_FEED) {
     composable(Route.REQUESTS_FEED) {
-      ListRequestsFeedScreen(navigationActions = navigationActions)
+      ListRequestsFeedScreen(
+          serviceRequestViewModel = serviceRequestViewModel, navigationActions = navigationActions)
     }
-    composable(Route.MAP_OF_SEEKERS) { ProviderMapScreen(navigationActions = navigationActions) }
+    composable(Route.MAP_OF_SEEKERS) {
+      ProviderMapScreen(
+          serviceRequestViewModel = serviceRequestViewModel, navigationActions = navigationActions)
+    }
     composable(Screen.CALENDAR) { ProviderCalendarScreen(navigationActions = navigationActions) }
-    composable(Screen.MY_JOBS) { RequestsDashboardScreen(navigationActions = navigationActions) }
+    composable(Screen.MY_JOBS) {
+      RequestsDashboardScreen(
+          navigationActions = navigationActions, serviceRequestViewModel = serviceRequestViewModel)
+    }
     composable(Screen.PROVIDER_PROFILE) {
       ProviderProfileScreen(listProviderViewModel, authViewModel, navigationActions)
     }
