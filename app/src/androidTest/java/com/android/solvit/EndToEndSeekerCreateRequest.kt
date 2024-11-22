@@ -239,7 +239,8 @@ class EndToEndSeekerCreateRequest {
     }
     composeTestRule.onNodeWithTag("deleteRequestButton").performClick()
     composeTestRule.waitUntil(timeoutMillis = 10000) {
-      composeTestRule.onNodeWithTag("edit_button").isDisplayed()
+      composeTestRule.onNodeWithTag("requestsOverviewScreen").isDisplayed()
     }
+    composeTestRule.onNodeWithTag("noServiceRequestsScreen").assertIsDisplayed()
   }
 }
