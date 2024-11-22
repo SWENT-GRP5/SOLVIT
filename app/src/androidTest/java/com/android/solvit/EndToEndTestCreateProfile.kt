@@ -9,7 +9,6 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import androidx.test.core.app.ApplicationProvider
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
@@ -36,7 +35,6 @@ import com.android.solvit.shared.model.review.ReviewRepository
 import com.android.solvit.shared.model.review.ReviewRepositoryFirestore
 import com.android.solvit.shared.model.review.ReviewViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
-import com.android.solvit.shared.ui.navigation.Screen
 import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
@@ -78,8 +76,6 @@ class EndToEndTestCreateProfile {
   private lateinit var reviewRepository: ReviewRepository
   private lateinit var packageProposalRepositoryFirestore: PackageProposalRepository
 
-  private lateinit var navHostController: NavHostController
-  private lateinit var navigationActions: NavigationActions
   private val locations =
       listOf(
           Location(37.7749, -122.4194, "San Francisco"),
@@ -144,9 +140,6 @@ class EndToEndTestCreateProfile {
   @Test
   fun CreateSeekerProfile() {
     composeTestRule.setContent {
-      navHostController = rememberNavController()
-      navigationActions = NavigationActions(navHostController)
-
       val userRegistered = authViewModel.userRegistered.collectAsState()
       val user = authViewModel.user.collectAsState()
 
@@ -156,8 +149,6 @@ class EndToEndTestCreateProfile {
             listProviderViewModel,
             seekerProfileViewModel,
             locationViewModel,
-            navHostController,
-            navigationActions,
             packageProposalViewModel)
       } else {
         when (user.value!!.role) {
@@ -178,10 +169,10 @@ class EndToEndTestCreateProfile {
 
     composeTestRule.onNodeWithTag("ctaButtonPortrait").performClick()
 
-    assertEquals(Screen.SIGN_IN, navHostController.currentDestination?.route)
+    composeTestRule.onNodeWithTag("loginImage").assertIsDisplayed()
     composeTestRule.onNodeWithTag("signUpLink").performClick()
 
-    assertEquals(Screen.SIGN_UP, navHostController.currentDestination?.route)
+    composeTestRule.onNodeWithTag("signUpIllustration").assertIsDisplayed()
     val email = "e2eTest20@test.com"
     val password = "password"
 
@@ -192,7 +183,7 @@ class EndToEndTestCreateProfile {
     assertEquals(email, authViewModel.email.value)
     assertEquals(password, authViewModel.password.value)
 
-    assertEquals(Screen.SIGN_UP_CHOOSE_ROLE, navHostController.currentDestination?.route)
+    composeTestRule.onNodeWithTag("roleIllustration").assertIsDisplayed()
     composeTestRule.onNodeWithTag("seekerButton").performClick()
     assertEquals("seeker", authViewModel.role.value)
 
@@ -241,8 +232,8 @@ class EndToEndTestCreateProfile {
     authViewModel2 = AuthViewModel(authRepository2)
 
     composeTestRule.setContent {
-      navHostController = rememberNavController()
-      navigationActions = NavigationActions(navHostController)
+      val navHostController = rememberNavController()
+      val navigationActions = NavigationActions(navHostController)
       ProviderRegistrationScreen(
           navigationActions = navigationActions,
           viewModel = listProviderViewModel,

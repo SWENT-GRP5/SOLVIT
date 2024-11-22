@@ -56,6 +56,7 @@ import com.android.solvit.shared.model.request.ServiceRequestStatus
 import com.android.solvit.shared.model.request.ServiceRequestStatus.Companion.format
 import com.android.solvit.shared.model.request.ServiceRequestStatus.Companion.getStatusColor
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
+import com.android.solvit.shared.model.utils.isInternetAvailable
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.google.android.gms.maps.model.LatLng
 import java.text.SimpleDateFormat
@@ -325,6 +326,7 @@ fun JobItem(
     onCancelRequest: (() -> Unit)? = null,
     onChat: (() -> Unit)? = null
 ) {
+  val context = LocalContext.current
   Card(
       modifier =
           Modifier.fillMaxWidth()
@@ -426,7 +428,17 @@ fun JobItem(
                     // Confirm Request Button
                     onConfirmRequest?.let {
                       Button(
-                          onClick = it,
+                          onClick = {
+                            if (isInternetAvailable(context)) {
+                              it()
+                            } else {
+                              Toast.makeText(
+                                      context,
+                                      "Confirming requests requires internet connectivity",
+                                      Toast.LENGTH_SHORT)
+                                  .show()
+                            }
+                          },
                           colors =
                               ButtonDefaults.buttonColors(containerColor = colorScheme.secondary),
                           modifier = Modifier.testTag("ConfirmButton_${request.uid}")) {
@@ -438,7 +450,17 @@ fun JobItem(
                     // Cancel and Complete Buttons for Current Jobs
                     onCancelRequest?.let {
                       Button(
-                          onClick = it,
+                          onClick = {
+                            if (isInternetAvailable(context)) {
+                              it()
+                            } else {
+                              Toast.makeText(
+                                      context,
+                                      "Cancelling requests requires internet connectivity",
+                                      Toast.LENGTH_SHORT)
+                                  .show()
+                            }
+                          },
                           colors =
                               ButtonDefaults.buttonColors(
                                   containerColor = colorScheme.errorContainer),
@@ -450,7 +472,17 @@ fun JobItem(
                     // Mark as Complete Button
                     onMarkAsCompleted?.let {
                       Button(
-                          onClick = it,
+                          onClick = {
+                            if (isInternetAvailable(context)) {
+                              it()
+                            } else {
+                              Toast.makeText(
+                                      context,
+                                      "Completing requests requires internet connectivity",
+                                      Toast.LENGTH_SHORT)
+                                  .show()
+                            }
+                          },
                           colors =
                               ButtonDefaults.buttonColors(containerColor = colorScheme.secondary),
                           modifier = Modifier.testTag("CompleteButton_${request.uid}")) {
