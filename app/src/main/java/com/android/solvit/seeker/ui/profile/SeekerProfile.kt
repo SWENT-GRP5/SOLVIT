@@ -204,8 +204,7 @@ fun SeekerProfileScreen(
                             optionName = "Preferences",
                             subtitle = "Set your preferences",
                             onClick = {
-                              Toast.makeText(context, "Not yet implemented", Toast.LENGTH_SHORT)
-                                  .show()
+                                navigationActions.navigateTo(Screen.EDIT_PREFERENCES)
                             },
                             modifier = Modifier.testTag("PreferencesOption"))
                         Spacer(modifier = Modifier.height(8.dp))
