@@ -82,7 +82,6 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
 
   fun getAllLastMessages() {
 
-    Log.e("getAllLastMessages", "Soy Aqui")
     repository.listenForLastMessages(
         onSuccess = { list -> _allMessages.value = list },
         onFailure = { Log.e("ChatViewModel", "Failed to get All messages") })

@@ -176,7 +176,7 @@ fun MessageInputBar(chatViewModel: ChatViewModel, authViewModel: AuthViewModel) 
                   shape = RoundedCornerShape(size = 28.dp),
               )
               .imePadding(), // To ensure that content of scaffold appears even if keyboard is
-                             // displayed
+      // displayed
   ) {
 
     // Input to enter message you want to send
@@ -203,8 +203,8 @@ fun MessageInputBar(chatViewModel: ChatViewModel, authViewModel: AuthViewModel) 
                 ChatMessage.TextMessage(
                     message,
                     "Hassan", // Has to be updated once we implement a logic to link the
-                              // authenticated user to its profile (generic class for both provider
-                              // and seeker that contains common informations,
+                    // authenticated user to its profile (generic class for both provider
+                    // and seeker that contains common informations,
                     it,
                     timestamp = System.currentTimeMillis(),
                 )

@@ -61,9 +61,8 @@ class NavigationActionsTest {
     Mockito.verify(navHostController)
         .navigate(eq(Route.CREATE_REQUEST), any<NavOptionsBuilder.() -> Unit>())
 
-    navigationActions.navigateTo(TopLevelDestinations.MESSAGE)
-    Mockito.verify(navHostController)
-        .navigate(eq(Route.MESSAGE), any<NavOptionsBuilder.() -> Unit>())
+    navigationActions.navigateTo(TopLevelDestinations.MESSAGES)
+    Mockito.verify(navHostController).navigate(eq(Route.INBOX), any<NavOptionsBuilder.() -> Unit>())
 
     navigationActions.navigateTo(TopLevelDestinations.PROFILE)
     Mockito.verify(navHostController)

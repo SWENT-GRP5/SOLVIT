@@ -17,6 +17,9 @@ import com.android.solvit.seeker.model.profile.UserRepositoryFirestore
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.shared.model.authentication.AuthRepository
 import com.android.solvit.shared.model.authentication.AuthViewModel
+import com.android.solvit.shared.model.chat.ChatRepository
+import com.android.solvit.shared.model.chat.ChatRepositoryFirestore
+import com.android.solvit.shared.model.chat.ChatViewModel
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.map.LocationRepository
 import com.android.solvit.shared.model.map.LocationViewModel
@@ -57,6 +60,7 @@ class EndToEndSeekerCreateRequest {
   private lateinit var serviceRequestViewModel: ServiceRequestViewModel
   private lateinit var locationViewModel: LocationViewModel
   private lateinit var reviewViewModel: ReviewViewModel
+  private lateinit var chatViewModel: ChatViewModel
 
   private lateinit var authRepository: AuthRepository
   private lateinit var seekerRepository: UserRepository
@@ -64,6 +68,7 @@ class EndToEndSeekerCreateRequest {
   private lateinit var locationRepository: LocationRepository
   private lateinit var serviceRequestRepository: ServiceRequestRepository
   private lateinit var reviewRepository: ReviewRepository
+  private lateinit var chatRepository: ChatRepository
 
   private lateinit var navHostController: NavHostController
   private lateinit var navigationActions: NavigationActions
@@ -97,6 +102,7 @@ class EndToEndSeekerCreateRequest {
     locationRepository = mock(LocationRepository::class.java)
     serviceRequestRepository = ServiceRequestRepositoryFirebase(firestore, storage)
     reviewRepository = ReviewRepositoryFirestore(firestore)
+    chatRepository = ChatRepositoryFirestore(Firebase.auth, database)
 
     authViewModel = AuthViewModel(authRepository)
     seekerProfileViewModel = SeekerProfileViewModel(seekerRepository)
@@ -104,6 +110,7 @@ class EndToEndSeekerCreateRequest {
     locationViewModel = LocationViewModel(locationRepository)
     serviceRequestViewModel = ServiceRequestViewModel(serviceRequestRepository)
     reviewViewModel = ReviewViewModel(reviewRepository)
+    chatViewModel = ChatViewModel(chatRepository)
 
     `when`(locationRepository.search(ArgumentMatchers.anyString(), anyOrNull(), anyOrNull()))
         .thenAnswer { invocation ->
@@ -164,8 +171,11 @@ class EndToEndSeekerCreateRequest {
                   seekerProfileViewModel,
                   serviceRequestViewModel,
                   reviewViewModel,
-                  locationViewModel)
-          "provider" -> ProviderUI(authViewModel, listProviderViewModel, seekerProfileViewModel)
+                  locationViewModel,
+                  chatViewModel)
+          "provider" ->
+              ProviderUI(
+                  authViewModel, listProviderViewModel, seekerProfileViewModel, chatViewModel)
         }
       }
     }
