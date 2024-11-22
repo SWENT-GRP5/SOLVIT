@@ -26,7 +26,7 @@ object Route {
   const val MAP_OF_SEEKERS = "Seekers Map"
   const val CALENDAR = "Calendar"
   const val PROVIDER_PROFILE = "Provider Profile"
-  const val MYJOBS = "My Jobs"
+  const val MY_JOBS = "My Jobs"
   const val BOOKING_DETAILS = "Booking Details"
 }
 
@@ -40,8 +40,9 @@ object Screen {
   const val SEEKER_REGISTRATION_PROFILE = "Seeker registration"
   const val PROVIDER_REGISTRATION_PROFILE = "Provider registration"
   const val CALENDAR = "Calendar"
-  const val MYJOBS = "My Jobs"
-  const val PROFESSIONAL_PROFILE = "Professional Profile"
+  const val MY_JOBS = "My Jobs"
+  const val PROVIDER_PROFILE = "Provider Profile"
+  const val PROVIDER_MODIFY_PROFILE = "Modify Provider Profile"
   const val PREFERENCES = "Preferences"
 }
 
@@ -61,9 +62,9 @@ object TopLevelDestinations {
           route = Route.CALENDAR, icon = Icons.Outlined.DateRange, textId = "Professional Calendar")
   val MYJOBS =
       TopLevelDestination(
-          route = Route.MYJOBS, icon = Icons.Outlined.CheckCircle, textId = "My Jobs")
+          route = Route.MY_JOBS, icon = Icons.Outlined.CheckCircle, textId = "My Jobs")
 
-  ////////////////////////////////// CUSTOMER //////////////////////////////////
+  ////////////////////////////////// SEEKER //////////////////////////////////
   val SERVICES =
       TopLevelDestination(
           route = Route.SERVICES, icon = Icons.Outlined.Home, textId = "Customer Home")
@@ -84,12 +85,10 @@ object TopLevelDestinations {
           route = Route.PROFILE, icon = Icons.Outlined.AccountCircle, textId = "Profile")
   val PROFESSIONAL_PROFILE =
       TopLevelDestination(
-          route = Screen.PROFESSIONAL_PROFILE,
-          icon = Icons.Outlined.AccountCircle,
-          textId = "Profile")
+          route = Screen.PROVIDER_PROFILE, icon = Icons.Outlined.AccountCircle, textId = "Profile")
 }
 
-val LIST_TOP_LEVEL_DESTINATION_CUSTOMER =
+val LIST_TOP_LEVEL_DESTINATION_SEEKER =
     listOf(
         TopLevelDestinations.SERVICES,
         TopLevelDestinations.MAP_OF_PROVIDERS,

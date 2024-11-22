@@ -598,7 +598,8 @@ fun CustomOutlinedTextField(
     leadingIcon: ImageVector? = null,
     leadingIconDescription: String = "",
     testTag: String,
-    errorTestTag: String = "errorMessage"
+    errorTestTag: String = "errorMessage",
+    maxLines: Int = Int.MAX_VALUE
 ) {
   // State to track if the field has been "visited" (focused and then unfocused)
   var hasBeenFocused by remember { mutableStateOf(false) }
@@ -647,7 +648,8 @@ fun CustomOutlinedTextField(
                       value.isEmpty() -> colorScheme.onSurfaceVariant
                       isValueOk -> colorScheme.secondary
                       else -> colorScheme.error
-                    }))
+                    }),
+        maxLines = maxLines)
 
     // Display the error message if the field has been visited, input is incorrect, and focus was
     // lost after typing
