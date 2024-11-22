@@ -244,28 +244,27 @@ fun ProviderUI(
     composable(Screen.CALENDAR) { ProviderCalendarScreen(navigationActions = navigationActions) }
     composable(Screen.MY_JOBS) { RequestsDashboardScreen(navigationActions = navigationActions) }
     composable(Screen.PROVIDER_PROFILE) {
-      navigation(startDestination = Screen.INBOX, route = Route.INBOX) {
-        composable(Screen.INBOX) {
-          MessageBox(
-              chatViewModel = chatViewModel,
-              navigationActions = navigationActions,
-              authViewModel = authViewModel)
-        }
-        composable(Screen.CHAT) {
-          ChatScreen(
-              navigationActions = navigationActions,
-              chatViewModel = chatViewModel,
-              authViewModel = authViewModel)
-        }
+      ProviderProfileScreen(listProviderViewModel, authViewModel, navigationActions)
+    }
+    navigation(startDestination = Screen.INBOX, route = Route.INBOX) {
+      composable(Screen.INBOX) {
+        MessageBox(
+            chatViewModel = chatViewModel,
+            navigationActions = navigationActions,
+            authViewModel = authViewModel)
       }
-      composable(Screen.MY_JOBS) { RequestsDashboardScreen(navigationActions = navigationActions) }
-      composable(Screen.PROVIDER_PROFILE) {
-        ProviderProfileScreen(listProviderViewModel, authViewModel, navigationActions)
+      composable(Screen.CHAT) {
+        ChatScreen(
+            navigationActions = navigationActions,
+            chatViewModel = chatViewModel,
+            authViewModel = authViewModel)
       }
-      composable(Screen.PROVIDER_MODIFY_PROFILE) {
-        ModifyProviderInformationScreen(
-            listProviderViewModel, authViewModel, locationViewModel, navigationActions)
-      }
+    }
+
+    composable(Screen.MY_JOBS) { RequestsDashboardScreen(navigationActions = navigationActions) }
+    composable(Screen.PROVIDER_MODIFY_PROFILE) {
+      ModifyProviderInformationScreen(
+          listProviderViewModel, authViewModel, locationViewModel, navigationActions)
     }
   }
 }
