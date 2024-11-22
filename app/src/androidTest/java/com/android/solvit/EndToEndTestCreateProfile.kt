@@ -162,7 +162,11 @@ class EndToEndTestCreateProfile {
                   locationViewModel)
           "provider" ->
               ProviderUI(
-                  authViewModel, listProviderViewModel, seekerProfileViewModel, locationViewModel)
+                  authViewModel,
+                  listProviderViewModel,
+                  serviceRequestViewModel,
+                  seekerProfileViewModel,
+                  locationViewModel)
         }
       }
     }

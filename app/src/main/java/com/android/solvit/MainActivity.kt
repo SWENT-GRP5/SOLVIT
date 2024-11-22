@@ -100,7 +100,11 @@ fun SolvitApp() {
               locationViewModel)
       "provider" ->
           ProviderUI(
-              authViewModel, listProviderViewModel, seekerProfileViewModel, locationViewModel)
+              authViewModel,
+              listProviderViewModel,
+              serviceRequestViewModel,
+              seekerProfileViewModel,
+              locationViewModel)
     }
   }
 }
@@ -202,6 +206,7 @@ fun SeekerUI(
 fun ProviderUI(
     authViewModel: AuthViewModel,
     listProviderViewModel: ListProviderViewModel,
+    serviceRequestViewModel: ServiceRequestViewModel,
     seekerProfileViewModel: SeekerProfileViewModel,
     locationViewModel: LocationViewModel,
 ) {
@@ -210,11 +215,18 @@ fun ProviderUI(
 
   NavHost(navController = navController, startDestination = Route.REQUESTS_FEED) {
     composable(Route.REQUESTS_FEED) {
-      ListRequestsFeedScreen(navigationActions = navigationActions)
+      ListRequestsFeedScreen(
+          serviceRequestViewModel = serviceRequestViewModel, navigationActions = navigationActions)
     }
-    composable(Route.MAP_OF_SEEKERS) { ProviderMapScreen(navigationActions = navigationActions) }
+    composable(Route.MAP_OF_SEEKERS) {
+      ProviderMapScreen(
+          serviceRequestViewModel = serviceRequestViewModel, navigationActions = navigationActions)
+    }
     composable(Screen.CALENDAR) { ProviderCalendarScreen(navigationActions = navigationActions) }
-    composable(Screen.MY_JOBS) { RequestsDashboardScreen(navigationActions = navigationActions) }
+    composable(Screen.MY_JOBS) {
+      RequestsDashboardScreen(
+          navigationActions = navigationActions, serviceRequestViewModel = serviceRequestViewModel)
+    }
     composable(Screen.PROVIDER_PROFILE) {
       ProviderProfileScreen(listProviderViewModel, authViewModel, navigationActions)
     }
