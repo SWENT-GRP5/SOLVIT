@@ -85,4 +85,10 @@ class NavigationActionsTest {
     MatcherAssert.assertThat(
         navigationActions.currentRoute(), CoreMatchers.`is`(Route.CREATE_REQUEST))
   }
+
+  @Test
+  fun goBackToCallsController() {
+    navigationActions.goBackTo(Route.CREATE_REQUEST)
+    Mockito.verify(navHostController).popBackStack(Route.CREATE_REQUEST, false)
+  }
 }
