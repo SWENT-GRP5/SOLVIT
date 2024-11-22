@@ -203,9 +203,7 @@ fun SeekerProfileScreen(
                             icon = Icons.Default.Favorite,
                             optionName = "Preferences",
                             subtitle = "Set your preferences",
-                            onClick = {
-                                navigationActions.navigateTo(Screen.EDIT_PREFERENCES)
-                            },
+                            onClick = { navigationActions.navigateTo(Screen.EDIT_PREFERENCES) },
                             modifier = Modifier.testTag("PreferencesOption"))
                         Spacer(modifier = Modifier.height(8.dp))
 

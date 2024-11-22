@@ -97,31 +97,29 @@ class SeekerProfileViewModel(
 
     val updatedPreferences = _userPreferences.value.toMutableList()
     if (!updatedPreferences.contains(preference)) {
-          updatedPreferences.add(preference)
-          _userPreferences.value = updatedPreferences // Update the state optimistically
+      updatedPreferences.add(preference)
+      _userPreferences.value = updatedPreferences // Update the state optimistically
     }
     // Perform the addition from Firestore
     repository.addUserPreference(
         userId = userId,
         preference = preference,
         onSuccess = { Log.d("SeekerProfileViewModel", "Preference added successfully") },
-        onFailure = { Log.e("SeekerProfileViewModel", "Failed to add preference")
-            })
+        onFailure = { Log.e("SeekerProfileViewModel", "Failed to add preference") })
   }
 
   fun deleteUserPreference(userId: String, preference: String) {
 
-      // Optimistically remove the preference from the local state
-      val updatedPreferences = _userPreferences.value.toMutableList()
-      updatedPreferences.remove(preference)
-      _userPreferences.value = updatedPreferences
-      // Perform the deletion from Firestore
-      repository.deleteUserPreference(
+    // Optimistically remove the preference from the local state
+    val updatedPreferences = _userPreferences.value.toMutableList()
+    updatedPreferences.remove(preference)
+    _userPreferences.value = updatedPreferences
+    // Perform the deletion from Firestore
+    repository.deleteUserPreference(
         userId = userId,
         preference = preference,
-        onSuccess = {  Log.d("SeekerProfileViewModel", "Preference deleted successfully") },
-        onFailure = { Log.e("SeekerProfileViewModel", "Failed to delete preference")
-           })
+        onSuccess = { Log.d("SeekerProfileViewModel", "Preference deleted successfully") },
+        onFailure = { Log.e("SeekerProfileViewModel", "Failed to delete preference") })
   }
 
   fun getUserPreferences(userId: String) {

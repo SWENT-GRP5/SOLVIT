@@ -42,7 +42,7 @@ object Screen {
   const val MYJOBS = "My Jobs"
   const val PROFESSIONAL_PROFILE = "Professional Profile"
   const val PREFERENCES = "Preferences"
-  const val EDIT_PREFERENCES="Edit Preferences"
+  const val EDIT_PREFERENCES = "Edit Preferences"
 }
 
 data class TopLevelDestination(val route: String, val icon: ImageVector, val textId: String)

@@ -88,37 +88,34 @@ class SeekerProfileViewModelTest {
     verify(firebaseRepository).deleteUserProfile(eq(testProfile.uid), any(), any())
   }
 
-    @Test
-    fun `addUserPreference calls repository and refreshes preferences`() {
-        // Mocking addUserPreference to immediately call onSuccess
-        doAnswer { invocation ->
-            val onSuccess = invocation.getArgument<() -> Unit>(2)
-            onSuccess.invoke() // Simulate success callback for adding the preference
-            null
+  @Test
+  fun `addUserPreference calls repository and refreshes preferences`() {
+    // Mocking addUserPreference to immediately call onSuccess
+    doAnswer { invocation ->
+          val onSuccess = invocation.getArgument<() -> Unit>(2)
+          onSuccess.invoke() // Simulate success callback for adding the preference
+          null
         }
-            .`when`(firebaseRepository)
-            .addUserPreference(eq(testUserId), eq(testPreference), any(), any())
+        .`when`(firebaseRepository)
+        .addUserPreference(eq(testUserId), eq(testPreference), any(), any())
 
-        // Mocking getUserPreferences to return a list of preferences via onSuccess callback
-        doAnswer { invocation ->
-            val onSuccess = invocation.getArgument<(List<String>) -> Unit>(1)
-            onSuccess.invoke(userPreferences) // Simulate success callback with preferences
-            null
+    // Mocking getUserPreferences to return a list of preferences via onSuccess callback
+    doAnswer { invocation ->
+          val onSuccess = invocation.getArgument<(List<String>) -> Unit>(1)
+          onSuccess.invoke(userPreferences) // Simulate success callback with preferences
+          null
         }
-            .`when`(firebaseRepository)
-            .getUserPreferences(eq(testUserId), any(), any())
+        .`when`(firebaseRepository)
+        .getUserPreferences(eq(testUserId), any(), any())
 
-        // Call the function in the ViewModel
-        seekerProfileViewModel.addUserPreference(testUserId, testPreference)
+    // Call the function in the ViewModel
+    seekerProfileViewModel.addUserPreference(testUserId, testPreference)
 
-        // Verify addUserPreference was called
-        verify(firebaseRepository).addUserPreference(eq(testUserId), eq(testPreference), any(), any())
+    // Verify addUserPreference was called
+    verify(firebaseRepository).addUserPreference(eq(testUserId), eq(testPreference), any(), any())
+  }
 
-
-    }
-
-
-    @Test
+  @Test
   fun `deleteUserPreference calls repository and refreshes preferences`() {
     // Mocking deleteUserPreference to immediately call onSuccess
     doAnswer { invocation ->
@@ -144,8 +141,6 @@ class SeekerProfileViewModelTest {
     // Verify deleteUserPreference was called
     verify(firebaseRepository)
         .deleteUserPreference(eq(testUserId), eq(testPreference), any(), any())
-
-
   }
 
   @Test
