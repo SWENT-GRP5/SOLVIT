@@ -11,13 +11,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navigation
 import com.android.solvit.provider.ui.calendar.ProviderCalendarScreen
 import com.android.solvit.provider.ui.map.ProviderMapScreen
+import com.android.solvit.provider.ui.profile.ModifyProviderInformationScreen
 import com.android.solvit.provider.ui.profile.ProviderProfileScreen
 import com.android.solvit.provider.ui.request.ListRequestsFeedScreen
 import com.android.solvit.provider.ui.request.RequestsDashboardScreen
@@ -51,15 +51,11 @@ import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.navigation.Screen
 import com.android.solvit.shared.ui.theme.SampleAppTheme
 import com.android.solvit.ui.message.MessageScreen
-import com.google.firebase.Firebase
-import com.google.firebase.auth.auth
 
 class MainActivity : ComponentActivity() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-
-    Firebase.auth.signOut()
 
     setContent {
       SampleAppTheme {
@@ -84,8 +80,6 @@ fun SolvitApp() {
   val reviewViewModel = viewModel<ReviewViewModel>(factory = ReviewViewModel.Factory)
   val packageProposalViewModel =
       viewModel<PackageProposalViewModel>(factory = PackageProposalViewModel.Factory)
-  val navController = rememberNavController()
-  val navigationActions = NavigationActions(navController)
 
   if (!userRegistered.value) {
     SharedUI(
@@ -93,8 +87,6 @@ fun SolvitApp() {
         listProviderViewModel,
         seekerProfileViewModel,
         locationViewModel,
-        navController,
-        navigationActions,
         packageProposalViewModel)
   } else {
     when (user.value!!.role) {
@@ -106,7 +98,9 @@ fun SolvitApp() {
               serviceRequestViewModel,
               reviewViewModel,
               locationViewModel)
-      "provider" -> ProviderUI(authViewModel, listProviderViewModel, seekerProfileViewModel)
+      "provider" ->
+          ProviderUI(
+              authViewModel, listProviderViewModel, seekerProfileViewModel, locationViewModel)
     }
   }
 }
@@ -117,10 +111,10 @@ fun SharedUI(
     listProviderViewModel: ListProviderViewModel,
     seekerProfileViewModel: SeekerProfileViewModel,
     locationViewModel: LocationViewModel,
-    navController: NavHostController,
-    navigationActions: NavigationActions,
     packageProposalViewModel: PackageProposalViewModel
 ) {
+  val navController = rememberNavController()
+  val navigationActions = NavigationActions(navController)
 
   NavHost(navController = navController, startDestination = Route.AUTH) {
     composable(Route.AUTH) { OpeningScreen(navigationActions) }
@@ -208,7 +202,8 @@ fun SeekerUI(
 fun ProviderUI(
     authViewModel: AuthViewModel,
     listProviderViewModel: ListProviderViewModel,
-    seekerProfileViewModel: SeekerProfileViewModel
+    seekerProfileViewModel: SeekerProfileViewModel,
+    locationViewModel: LocationViewModel,
 ) {
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
@@ -219,9 +214,13 @@ fun ProviderUI(
     }
     composable(Route.MAP_OF_SEEKERS) { ProviderMapScreen(navigationActions = navigationActions) }
     composable(Screen.CALENDAR) { ProviderCalendarScreen(navigationActions = navigationActions) }
-    composable(Screen.MYJOBS) { RequestsDashboardScreen(navigationActions = navigationActions) }
-    composable(Screen.PROFESSIONAL_PROFILE) {
+    composable(Screen.MY_JOBS) { RequestsDashboardScreen(navigationActions = navigationActions) }
+    composable(Screen.PROVIDER_PROFILE) {
       ProviderProfileScreen(listProviderViewModel, authViewModel, navigationActions)
+    }
+    composable(Screen.PROVIDER_MODIFY_PROFILE) {
+      ModifyProviderInformationScreen(
+          listProviderViewModel, authViewModel, locationViewModel, navigationActions)
     }
   }
 }

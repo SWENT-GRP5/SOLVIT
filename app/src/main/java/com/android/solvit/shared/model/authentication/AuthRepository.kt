@@ -1,6 +1,7 @@
 package com.android.solvit.shared.model.authentication
 
 import android.util.Log
+import com.android.solvit.shared.model.map.Location
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
@@ -115,6 +116,25 @@ class AuthRepository(private val auth: FirebaseAuth, private val db: FirebaseFir
     onSuccess()
   }
 
+  override fun updateUserLocations(
+      locations: List<Location>,
+      onSuccess: () -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    db.collection(collectionPath)
+        .document(getUserId())
+        .update(
+            "locations",
+            locations.map {
+              mapOf("latitude" to it.latitude, "longitude" to it.longitude, "name" to it.name)
+            })
+        .addOnSuccessListener { onSuccess() }
+        .addOnFailureListener { e ->
+          Log.w("AuthRepository", "Failed to update user locations", e)
+          onFailure(e)
+        }
+  }
+
   private fun fetchUserDocument(
       userId: String,
       onSuccess: (User) -> Unit,
@@ -162,7 +182,13 @@ class AuthRepository(private val auth: FirebaseAuth, private val db: FirebaseFir
     val uid = doc.getString("uid") ?: return null
     val role = doc.getString("role") ?: return null
     val email = doc.getString("email") ?: return null
-    val profileData = doc.get("profileData") as? Map<String, Any> ?: emptyMap()
-    return User(uid, role, email, profileData)
+    val locations =
+        (doc.get("locations") as? List<Map<String, Any>> ?: emptyList()).map {
+          Location(
+              latitude = it["latitude"] as? Double ?: 0.0,
+              longitude = it["longitude"] as? Double ?: 0.0,
+              name = it["name"] as? String ?: "Unknown")
+        }
+    return User(uid, role, email, locations)
   }
 }

@@ -1,7 +1,9 @@
 package com.android.solvit.shared.model.authentication
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.android.solvit.shared.model.map.Location
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
@@ -28,6 +30,8 @@ class AuthViewModel(private val authRepository: AuthRep) : ViewModel() {
   private val _userRegistered = MutableStateFlow<Boolean>(false)
   val userRegistered: StateFlow<Boolean> = _userRegistered
 
+  private val maxLocationsSize = 5
+
   companion object {
     val Factory: ViewModelProvider.Factory =
         object : ViewModelProvider.Factory {
@@ -39,7 +43,12 @@ class AuthViewModel(private val authRepository: AuthRep) : ViewModel() {
   }
 
   init {
-    authRepository.init { _user.value = it }
+    authRepository.init {
+      _user.value = it
+      if (it != null) {
+        _userRegistered.value = true
+      }
+    }
   }
 
   fun setRole(role: String) {
@@ -130,7 +139,57 @@ class AuthViewModel(private val authRepository: AuthRep) : ViewModel() {
     authRepository.logout {
       _userRegistered.value = false
       _user.value = null
+      _role.value = ""
+      _email.value = ""
+      _password.value = ""
+      _googleAccount.value = null
       onSuccess()
     }
+  }
+
+  fun addUserLocation(location: Location, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+    val userLocations = user.value?.locations ?: emptyList()
+    if (userLocations.contains(location)) {
+      Log.d("AuthViewModel", "User already has this location")
+      onSuccess()
+      return
+    }
+    val updatedLocations = (listOf(location) + userLocations).take(maxLocationsSize)
+    authRepository.updateUserLocations(
+        updatedLocations,
+        {
+          _user.value = user.value?.copy(locations = updatedLocations)
+          Log.d("AuthViewModel", "User locations updated")
+          onSuccess()
+        },
+        {
+          Log.e("AuthViewModel", "Error updating user locations", it)
+          onFailure(it)
+        })
+  }
+
+  fun removeUserLocation(
+      location: Location,
+      onSuccess: () -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    val userLocations = user.value?.locations ?: emptyList()
+    if (!userLocations.contains(location)) {
+      Log.d("AuthViewModel", "User does not have this location")
+      onSuccess()
+      return
+    }
+    val updatedLocations = userLocations.filter { it != location }
+    authRepository.updateUserLocations(
+        updatedLocations,
+        {
+          _user.value = user.value?.copy(locations = updatedLocations)
+          Log.d("AuthViewModel", "User locations updated")
+          onSuccess()
+        },
+        {
+          Log.e("AuthViewModel", "Error updating user locations", it)
+          onFailure(it)
+        })
   }
 }

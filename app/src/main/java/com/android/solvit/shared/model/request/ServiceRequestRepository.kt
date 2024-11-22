@@ -9,6 +9,11 @@ interface ServiceRequestRepository {
   // Initialize the repository
   fun init(onSuccess: () -> Unit)
 
+  fun addListenerOnServiceRequests(
+      onSuccess: (List<ServiceRequest>) -> Unit,
+      onFailure: (Exception) -> Unit
+  )
+
   // Retrieve all service requests
   fun getServiceRequests(onSuccess: (List<ServiceRequest>) -> Unit, onFailure: (Exception) -> Unit)
 

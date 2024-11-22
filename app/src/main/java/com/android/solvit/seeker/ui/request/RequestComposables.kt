@@ -113,7 +113,8 @@ fun ServiceTypeDropdown(
     showDropdownType: Boolean,
     onShowDropdownTypeChange: (Boolean) -> Unit,
     filteredServiceTypes: List<Services>,
-    onServiceTypeSelected: (Services) -> Unit
+    onServiceTypeSelected: (Services) -> Unit,
+    readOnly: Boolean = false
 ) {
   Box(modifier = Modifier.fillMaxWidth()) {
     OutlinedTextField(
@@ -125,6 +126,7 @@ fun ServiceTypeDropdown(
           onTypeQueryChange(it)
           onShowDropdownTypeChange(true)
         },
+        readOnly = readOnly,
         label = { Text("Service Type") },
         placeholder = { Text("Select a Service Type") },
         shape = RoundedCornerShape(12.dp),
@@ -194,12 +196,14 @@ fun LocationDropdown(
     showDropdownLocation: Boolean,
     onShowDropdownLocationChange: (Boolean) -> Unit,
     locationSuggestions: List<Location>,
+    userLocations: List<Location>,
     onLocationSelected: (Location) -> Unit,
     requestLocation: Location?,
     backgroundColor: Color = colorScheme.background,
     debounceDelay: Long = 1001L, // debounce delay longer than 1 second,
     isValueOk: Boolean = false,
-    errorMessage: String = "Invalid location" // Default error message
+    errorMessage: String = "Invalid location", // Default error message
+    testTag: String = "inputRequestAddress"
 ) {
   val coroutineScope = rememberCoroutineScope()
   var debounceJob by remember { mutableStateOf<Job?>(null) }
@@ -238,7 +242,7 @@ fun LocationDropdown(
         placeholder = { requestLocation?.name?.let { Text(it) } ?: Text("Enter your address") },
         shape = RoundedCornerShape(12.dp),
         modifier =
-            Modifier.fillMaxWidth().testTag("inputRequestAddress").onFocusChanged { focusState ->
+            Modifier.fillMaxWidth().testTag(testTag).onFocusChanged { focusState ->
               // Mark field as "visited" once it loses focus after user types
               if (!focusState.isFocused && localQuery.isNotBlank()) {
                 hasBeenFocused = true
@@ -269,7 +273,7 @@ fun LocationDropdown(
 
     // Dropdown menu for location suggestions
     DropdownMenu(
-        expanded = showDropdownLocation && locationSuggestions.isNotEmpty(),
+        expanded = showDropdownLocation,
         onDismissRequest = { onShowDropdownLocationChange(false) },
         properties = PopupProperties(focusable = false),
         modifier =
@@ -278,21 +282,51 @@ fun LocationDropdown(
                 .background(backgroundColor)
                 .border(1.dp, colorScheme.onSurfaceVariant, shape = RoundedCornerShape(8.dp))
                 .padding(start = 8.dp, end = 8.dp)) {
-          locationSuggestions.forEach { location ->
-            DropdownMenuItem(
-                modifier = Modifier.padding(start = 8.dp, end = 8.dp).testTag("locationResult"),
-                text = {
-                  Text(
-                      text = location.name.take(50) + if (location.name.length > 50) "..." else "",
-                      maxLines = 1)
-                },
-                onClick = {
-                  onLocationQueryChange(location.name)
-                  localQuery = location.name
-                  onLocationSelected(location)
-                  onShowDropdownLocationChange(false)
-                })
-            HorizontalDivider()
+          if (userLocations.isNotEmpty()) {
+            Text(
+                text = "Previously used locations",
+                modifier = Modifier.padding(8.dp),
+                color = colorScheme.primary)
+            userLocations.forEach { location ->
+              DropdownMenuItem(
+                  modifier = Modifier.padding(start = 8.dp, end = 8.dp).testTag("locationResult"),
+                  text = {
+                    Text(
+                        text =
+                            location.name.take(50) + if (location.name.length > 50) "..." else "",
+                        maxLines = 1)
+                  },
+                  onClick = {
+                    onLocationQueryChange(location.name)
+                    localQuery = location.name
+                    onLocationSelected(location)
+                    onShowDropdownLocationChange(false)
+                  })
+              HorizontalDivider()
+            }
+          }
+          if (locationSuggestions.isNotEmpty()) {
+            Text(
+                text = "Suggested locations",
+                modifier = Modifier.padding(8.dp),
+                color = colorScheme.primary)
+            locationSuggestions.forEach { location ->
+              DropdownMenuItem(
+                  modifier = Modifier.padding(start = 8.dp, end = 8.dp).testTag("locationResult"),
+                  text = {
+                    Text(
+                        text =
+                            location.name.take(50) + if (location.name.length > 50) "..." else "",
+                        maxLines = 1)
+                  },
+                  onClick = {
+                    onLocationQueryChange(location.name)
+                    localQuery = location.name
+                    onLocationSelected(location)
+                    onShowDropdownLocationChange(false)
+                  })
+              HorizontalDivider()
+            }
           }
         }
 

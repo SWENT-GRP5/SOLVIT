@@ -61,7 +61,7 @@ import com.android.solvit.shared.model.request.ServiceRequestStatus
 import com.android.solvit.shared.model.request.ServiceRequestStatus.Companion.getStatusColor
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.service.Services
-import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_CUSTOMER
+import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_SEEKER
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.theme.LightBlue
@@ -90,7 +90,7 @@ fun RequestsOverviewScreen(
       bottomBar = {
         BottomNavigationMenu(
             onTabSelect = { navigationActions.navigateTo(it.route) },
-            tabList = LIST_TOP_LEVEL_DESTINATION_CUSTOMER,
+            tabList = LIST_TOP_LEVEL_DESTINATION_SEEKER,
             selectedItem = Route.REQUESTS_OVERVIEW)
       }) {
         val user = authViewModel.user.collectAsState()
