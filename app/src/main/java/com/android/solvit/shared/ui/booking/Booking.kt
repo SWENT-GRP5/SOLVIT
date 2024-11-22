@@ -49,6 +49,7 @@ import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -350,8 +351,10 @@ fun ServiceBookingScreen(
 
               val address = request!!.location
               // Google Map showing the service location
-              val mapPosition = rememberCameraPositionState {
-                position =
+              val mapPosition = rememberCameraPositionState()
+
+              LaunchedEffect(address) {
+                mapPosition.position =
                     com.google.android.gms.maps.model.CameraPosition.fromLatLngZoom(
                         LatLng(address?.latitude ?: 0.0, address?.longitude ?: 0.0), 15f)
               }
