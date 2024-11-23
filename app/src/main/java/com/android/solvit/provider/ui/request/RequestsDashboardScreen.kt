@@ -56,7 +56,6 @@ import com.android.solvit.shared.model.request.ServiceRequestStatus.Companion.ge
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.utils.isInternetAvailable
 import com.android.solvit.shared.ui.navigation.NavigationActions
-import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import java.text.SimpleDateFormat
@@ -284,14 +283,13 @@ fun AcceptedJobSection(viewModel: ServiceRequestViewModel) {
 @Composable
 fun ScheduledJobsSection(viewModel: ServiceRequestViewModel) {
   val context = LocalContext.current
-  val currentLocation = LatLng(40.748817, -73.985428)
   val scheduledRequests by viewModel.scheduledRequests.collectAsState()
 
   Column(Modifier.fillMaxSize().padding(16.dp)) {
     // "Navigate to All Jobs of the Day" button
     Button(
         onClick = {
-          navigateToAllSortedJobs(context, currentLocation, viewModel.getTodayScheduledRequests())
+          navigateToAllSortedJobs(context, viewModel.getTodayScheduledRequests())
         },
         modifier =
             Modifier.fillMaxWidth().padding(vertical = 8.dp).testTag("NavigateAllJobsButton"),
