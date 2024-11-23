@@ -75,7 +75,7 @@ class EndToEndProviderJobs {
 
   private val locations = listOf(Location(37.7749, -122.4194, "San Francisco"))
 
-  private val request =
+  private var request =
       ServiceRequest(
           uid = "1",
           title = "Test Job",
@@ -136,7 +136,6 @@ class EndToEndProviderJobs {
     authViewModel.setRole("provider")
     authViewModel.registerWithEmailAndPassword(
         onSuccess = { authViewModel.logout {} }, onFailure = {})
-    serviceRequestViewModel.saveServiceRequest(request)
   }
 
   @After
@@ -212,22 +211,23 @@ class EndToEndProviderJobs {
     // Navigate to the job dashboard
     composeTestRule.onNodeWithTag(TopLevelDestinations.CREATE_REQUEST.toString()).performClick()
 
+    request = request.copy(providerId = authViewModel.user.value!!.uid)
+    serviceRequestViewModel.saveServiceRequest(request)
+
     composeTestRule.waitUntil(timeoutMillis = 10000) {
       composeTestRule.onNodeWithTag("JobDashboardTitle").isDisplayed()
     }
 
     // Accept the job
-    composeTestRule.onNodeWithTag("Tab_Pending").performClick()
+    composeTestRule.onNodeWithTag("statusTab_0").performClick()
     composeTestRule.waitUntil {
       composeTestRule.onNodeWithTag("JobItem_${request.status.name}_${request.uid}").isDisplayed()
     }
     composeTestRule.onNodeWithTag("ConfirmButton_${request.uid}").performClick()
-    composeTestRule.waitUntil {
-      composeTestRule.onNodeWithTag("PendingJobsEmptyText").isDisplayed()
-    }
+    composeTestRule.waitUntil { composeTestRule.onNodeWithTag("PendingEmptyText").isDisplayed() }
 
     // Go to current jobs
-    composeTestRule.onNodeWithTag("Tab_Current").performClick()
+    composeTestRule.onNodeWithTag("statusTab_2").performClick()
 
     serviceRequestViewModel.deleteServiceRequestById(request.uid)
   }

@@ -121,6 +121,7 @@ fun StatusTabs(selectedTab: Int, tabs: Array<ServiceRequestStatus>, onTabSelecte
       contentColor = colorScheme.primary) {
         tabs.forEachIndexed { index, status ->
           Tab(
+              modifier = Modifier.testTag("statusTab_$index"),
               selected = selectedTab == index,
               onClick = { onTabSelected(index) },
               text = {
@@ -159,7 +160,8 @@ fun JobListSection(
     onArchiveRequest: ((ServiceRequest) -> Unit)? = null,
     onChat: ((ServiceRequest) -> Unit)? = null
 ) {
-  val filteredRequests = requests.filter { it.providerId == Firebase.auth.currentUser?.uid }
+  val providerId = Firebase.auth.currentUser?.uid ?: "-1"
+  val filteredRequests = requests.filter { it.providerId == providerId }
   LazyColumn(
       modifier = Modifier.fillMaxSize().padding(16.dp).testTag("${title}Section"),
       horizontalAlignment = Alignment.CenterHorizontally,
@@ -226,7 +228,7 @@ fun ScheduledJobsSection(viewModel: ServiceRequestViewModel) {
   val currentLocation = LatLng(40.748817, -73.985428)
   val scheduledRequests by viewModel.scheduledRequests.collectAsState()
 
-  Column(Modifier.fillMaxSize().padding(16.dp).testTag("ScheduledJobsSection")) {
+  Column(Modifier.fillMaxSize().padding(16.dp)) {
     // "Navigate to All Jobs of the Day" button
     Button(
         onClick = {
