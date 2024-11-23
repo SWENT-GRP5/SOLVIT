@@ -80,7 +80,11 @@ fun ModifyProviderInformationScreen(
   Scaffold(
       topBar = {
         TopAppBar(
-            title = { Text("Modify your profile information") },
+            title = {
+              Text(
+                  "Modify your profile information",
+                  modifier = Modifier.testTag("titleModifyProvider"))
+            },
             navigationIcon = { GoBackButton(navigationActions) },
             colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background))
       },
@@ -149,7 +153,7 @@ fun ModifyInput(
 
   var newLanguage by remember { mutableStateOf(provider.languages) }
 
-  val allIsGood = okNewCompanyName && okNewPhoneNumber && okNewLocation
+  val allIsGood = okNewName && okNewCompanyName && okNewPhoneNumber && okNewLocation
 
   CustomOutlinedTextField(
       value = newName,
@@ -160,7 +164,7 @@ fun ModifyInput(
       leadingIcon = Icons.Default.AccountCircle,
       leadingIconDescription = "Name Icon",
       testTag = "newNameInputField",
-      errorMessage = "Your provider name must have at least 2 characters",
+      errorMessage = "Your name must have at least 2 characters",
       errorTestTag = "nameErrorMessage",
       maxLines = 2)
 
@@ -267,7 +271,11 @@ fun ModifyInput(
                       )),
       colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)) {
         Text(
-            "Save !", color = colorScheme.onPrimary, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            "Save !",
+            color = colorScheme.onPrimary,
+            fontWeight = FontWeight.Bold,
+            fontSize = 16.sp,
+            modifier = Modifier.testTag("saveButton"))
       }
 
   Spacer(modifier = Modifier.height(3.dp))

@@ -84,16 +84,33 @@ class ProfessionalProfileScreenTest {
           navigationActions = navigationActions)
     }
     composeTestRule.onNodeWithTag("goBackButton").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("titleModifyProvider").assertIsDisplayed()
   }
 
   @Test
   fun modifyProviderInformationScreen_contentIsDisplay() {
 
     composeTestRule.setContent { ModifyInput(provider, navigationActions = navigationActions) }
+    composeTestRule.onNodeWithTag("newNameInputField").assertIsDisplayed()
     composeTestRule.onNodeWithTag("newCompanyNameInputField").assertIsDisplayed()
     composeTestRule.onNodeWithTag("newPhoneNumberInputField").assertIsDisplayed()
     composeTestRule.onNodeWithTag("newServiceInputField").assertIsDisplayed()
     composeTestRule.onNodeWithTag("newLocationInputField").assertIsDisplayed()
+  }
+
+  @Test
+  fun modifyProviderInformationScreen_errorIsDisplayInTheNameContent() {
+
+    composeTestRule.setContent { ModifyInput(provider, navigationActions = navigationActions) }
+    composeTestRule.onNodeWithTag("newNameInputField").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("nameErrorMessage").assertIsNotDisplayed()
+    composeTestRule.onNodeWithTag("newNameInputField").performTextClearance()
+    composeTestRule.onNodeWithTag("newNameInputField").performTextInput("a")
+    composeTestRule.onNodeWithTag("newPhoneNumberInputField").performTextInput("+1234567")
+    composeTestRule.onNodeWithTag("nameErrorMessage").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("newNameInputField").performTextClearance()
+    composeTestRule.onNodeWithTag("newNameInputField").performTextInput("Kevin")
+    composeTestRule.onNodeWithTag("nameErrorMessage").assertIsNotDisplayed()
   }
 
   @Test

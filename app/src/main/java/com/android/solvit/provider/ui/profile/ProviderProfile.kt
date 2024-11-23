@@ -225,8 +225,9 @@ fun ProfileHeader(
           }
 
           Column {
-            TitleText("Contact", testTag = "contactTitle")
-            BodyText(provider.phone.ifEmpty { "Not provided" }, testTag = "contact", maxLines = 1)
+            TitleText("Phone number", testTag = "phoneNumberTitle")
+            BodyText(
+                provider.phone.ifEmpty { "Not provided" }, testTag = "phoneNumber", maxLines = 1)
           }
 
           Column {
