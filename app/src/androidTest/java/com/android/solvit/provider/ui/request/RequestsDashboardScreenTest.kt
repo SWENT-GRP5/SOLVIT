@@ -40,7 +40,7 @@ class RequestsDashboardScreenTest {
           type = Services.CLEANER,
           description = "Test Description",
           userId = "1",
-          providerId = "1",
+          providerId = "-1",
           dueDate = Timestamp(GregorianCalendar(2024, 0, 1, 12, 1).time),
           meetingDate = Timestamp(GregorianCalendar(2024, 0, 1, 12, 1).time),
           location = Location(37.7749, -122.4194, "Test Location"),
@@ -90,8 +90,31 @@ class RequestsDashboardScreenTest {
     viewModel.pendingRequests.value.forEach { request ->
       composeTestRule.onNodeWithTag("JobItem_PENDING_${request.uid}").assertExists()
       composeTestRule.onNodeWithTag("ChatButton_${request.uid}").assertExists()
+      composeTestRule.onNodeWithTag("ChatButton_${request.uid}").performClick()
       composeTestRule.onNodeWithTag("ConfirmButton_${request.uid}").assertExists()
       composeTestRule.onNodeWithTag("CallButton_${request.uid}").assertExists()
+      composeTestRule.onNodeWithTag("CallButton_${request.uid}").performClick()
+    }
+  }
+
+  @Test
+  fun testAcceptedSectionDisplaysOnlyAcceptedJobs() {
+    composeTestRule.setContent {
+      RequestsDashboardScreen(navigationActions, serviceRequestViewModel = viewModel)
+    }
+
+    // Switch to Accepted tab
+    composeTestRule.onNodeWithTag("statusTab_1").performClick()
+
+    // Check if jobs in the Accepted section have the correct status tag
+    composeTestRule.onNodeWithTag("AcceptedSection").assertIsDisplayed()
+    viewModel.acceptedRequests.value.forEach { request ->
+      composeTestRule.onNodeWithTag("JobItem_ACCEPTED_${request.uid}").assertExists()
+      composeTestRule.onNodeWithTag("ChatButton_${request.uid}").assertExists()
+      composeTestRule.onNodeWithTag("ChatButton_${request.uid}").performClick()
+      composeTestRule.onNodeWithTag("CallButton_${request.uid}").assertExists()
+      composeTestRule.onNodeWithTag("CallButton_${request.uid}").performClick()
+      composeTestRule.onNodeWithTag("StatusText_${request.uid}").assertExists()
     }
   }
 
@@ -107,9 +130,53 @@ class RequestsDashboardScreenTest {
       composeTestRule.onNodeWithTag("JobItem_SCHEDULED_${request.uid}").assertExists()
       composeTestRule.onNodeWithTag("NavigateButton_${request.uid}").assertExists()
       composeTestRule.onNodeWithTag("ChatButton_${request.uid}").assertExists()
+      composeTestRule.onNodeWithTag("ChatButton_${request.uid}").performClick()
       composeTestRule.onNodeWithTag("CancelButton_${request.uid}").assertExists()
       composeTestRule.onNodeWithTag("CompleteButton_${request.uid}").assertExists()
+      composeTestRule.onNodeWithTag("CallButton_${request.uid}").performClick()
       composeTestRule.onNodeWithTag("CallButton_${request.uid}").assertExists()
+    }
+  }
+
+  @Test
+  fun testCompletedSectionDisplaysOnlyCompletedJobs() {
+    composeTestRule.setContent {
+      RequestsDashboardScreen(navigationActions, serviceRequestViewModel = viewModel)
+    }
+
+    // Switch to Completed tab
+    composeTestRule.onNodeWithTag("statusTab_3").performClick()
+
+    // Check if jobs in the Completed section have the correct status tag
+    composeTestRule.onNodeWithTag("CompletedSection").assertIsDisplayed()
+    viewModel.completedRequests.value.forEach { request ->
+      composeTestRule.onNodeWithTag("JobItem_COMPLETED_${request.uid}").assertExists()
+      composeTestRule.onNodeWithTag("ChatButton_${request.uid}").assertExists()
+      composeTestRule.onNodeWithTag("ChatButton_${request.uid}").performClick()
+      composeTestRule.onNodeWithTag("CallButton_${request.uid}").assertExists()
+      composeTestRule.onNodeWithTag("CallButton_${request.uid}").performClick()
+      composeTestRule.onNodeWithTag("StatusText_${request.uid}").assertExists()
+    }
+  }
+
+  @Test
+  fun testCancelledSectionDisplaysOnlyCancelledJobs() {
+    composeTestRule.setContent {
+      RequestsDashboardScreen(navigationActions, serviceRequestViewModel = viewModel)
+    }
+
+    // Switch to Cancelled tab
+    composeTestRule.onNodeWithTag("statusTab_4").performClick()
+
+    // Check if jobs in the Cancelled section have the correct status tag
+    composeTestRule.onNodeWithTag("CanceledSection").assertIsDisplayed()
+    viewModel.cancelledRequests.value.forEach { request ->
+      composeTestRule.onNodeWithTag("JobItem_CANCELLED_${request.uid}").assertExists()
+      composeTestRule.onNodeWithTag("ChatButton_${request.uid}").assertExists()
+      composeTestRule.onNodeWithTag("ChatButton_${request.uid}").performClick()
+      composeTestRule.onNodeWithTag("CallButton_${request.uid}").assertExists()
+      composeTestRule.onNodeWithTag("CallButton_${request.uid}").performClick()
+      composeTestRule.onNodeWithTag("StatusText_${request.uid}").assertExists()
     }
   }
 
@@ -128,8 +195,11 @@ class RequestsDashboardScreenTest {
     viewModel.archivedRequests.value.forEach { request ->
       composeTestRule.onNodeWithTag("JobItem_ARCHIVED_${request.uid}").assertExists()
       composeTestRule.onNodeWithTag("ChatButton_${request.uid}").assertExists()
+      composeTestRule.onNodeWithTag("ChatButton_${request.uid}").performClick()
       composeTestRule.onNodeWithTag("StatusText_${request.uid}").assertExists()
       composeTestRule.onNodeWithTag("CallButton_${request.uid}").assertExists()
+      composeTestRule.onNodeWithTag("CallButton_${request.uid}").performClick()
+      composeTestRule.onNodeWithTag("StatusText_${request.uid}").assertExists()
     }
   }
 
@@ -168,7 +238,24 @@ class RequestsDashboardScreenTest {
   }
 
   @Test
-  fun testCancelCurrentJobMovesToHistoryAsCancelled() {
+  fun testArchiveCompletedJobMovesToArchive() {
+    composeTestRule.setContent {
+      RequestsDashboardScreen(navigationActions, serviceRequestViewModel = viewModel)
+    }
+
+    // Get the first completed job and archive it
+    val completedJob = viewModel.completedRequests.value.firstOrNull()
+    completedJob?.let { request ->
+      composeTestRule.onNodeWithTag("ArchiveButton_${request.uid}").performClick()
+      assert(
+          viewModel.archivedRequests.value.any {
+            it.uid == request.uid && it.status == ServiceRequestStatus.ARCHIVED
+          })
+    }
+  }
+
+  @Test
+  fun testCancelCurrentJobMovesToCancel() {
     composeTestRule.setContent {
       RequestsDashboardScreen(navigationActions, serviceRequestViewModel = viewModel)
     }
