@@ -70,6 +70,9 @@ import com.android.solvit.shared.ui.theme.Orange
 import java.text.SimpleDateFormat
 import java.util.Locale
 
+/**
+ * Composable function that displays the top bar of the requests feed screen.
+ */
 @Preview
 @Composable
 fun RequestsTopBar() {
@@ -116,6 +119,11 @@ fun RequestsTopBar() {
       }
 }
 
+/**
+ * Composable function that displays the search bar of the requests feed screen.
+ *
+ * @param searchQuery The search query state
+ */
 @Composable
 fun SearchBar(searchQuery: MutableState<String>) {
   OutlinedTextField(
@@ -145,6 +153,11 @@ fun SearchBar(searchQuery: MutableState<String>) {
       shape = RoundedCornerShape(12.dp))
 }
 
+/**
+ * Composable function that displays the list of service requests.
+ *
+ * @param requests The list of service requests
+ */
 @Composable
 fun ListRequests(requests: List<ServiceRequest>) {
   LazyColumn(
@@ -157,11 +170,19 @@ fun ListRequests(requests: List<ServiceRequest>) {
       }
 }
 
+/**
+ * Composable function that displays a service request item.
+ *
+ * @param request The service request
+ */
 @Composable
 fun ServiceRequestItem(request: ServiceRequest) {
+  // State to hold the selected location
   var selectedLocation by remember { mutableStateOf<Location?>(null) }
   val context = LocalContext.current
+  // Placeholder onClick action
   val onClick = { Toast.makeText(context, "Not Yet Implemented", Toast.LENGTH_SHORT).show() }
+
   Column(
       modifier =
           Modifier.fillMaxWidth()
@@ -170,6 +191,8 @@ fun ServiceRequestItem(request: ServiceRequest) {
               .background(colorScheme.primary, RoundedCornerShape(12.dp))
               .padding(16.dp)
               .testTag("ServiceRequest")) {
+
+        // Row for profile picture and request details
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
           Image(
               painter = painterResource(id = R.drawable.default_pdp),
@@ -194,6 +217,8 @@ fun ServiceRequestItem(request: ServiceRequest) {
                 tint = colorScheme.onPrimary)
           }
         }
+
+        // Row for deadline information
         Row {
           Text(
               text = "Deadline: ",
@@ -208,6 +233,8 @@ fun ServiceRequestItem(request: ServiceRequest) {
               fontWeight = FontWeight.Bold,
               color = colorScheme.error)
         }
+
+        // Display location if available
         request.location?.let {
           Text(
               text = if (it.name.length > 50) "${it.name.take(50)}..." else it.name,
@@ -215,7 +242,10 @@ fun ServiceRequestItem(request: ServiceRequest) {
               color = colorScheme.onPrimary,
               modifier = Modifier.clickable { selectedLocation = it })
         }
+
         Spacer(modifier = Modifier.height(8.dp))
+
+        // Display request description
         Text(
             text = request.description,
             fontSize = 14.sp,
@@ -223,6 +253,8 @@ fun ServiceRequestItem(request: ServiceRequest) {
             lineHeight = 18.sp,
             color = colorScheme.onPrimary)
         Spacer(modifier = Modifier.height(8.dp))
+
+        // Display image if available, otherwise show placeholder text
         val imageUrl = request.imageUrl
         if (!imageUrl.isNullOrEmpty()) {
           AsyncImage(
@@ -247,16 +279,28 @@ fun ServiceRequestItem(request: ServiceRequest) {
                 Text(text = "No Image Provided", fontSize = 16.sp, color = colorScheme.onPrimary)
               }
         }
+
         Spacer(modifier = Modifier.height(8.dp))
+
+        // Row for interaction buttons
         Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
           InteractionBar("Comment", R.drawable.comment_icon, onClick)
           InteractionBar("Share", R.drawable.share_icon, onClick)
           InteractionBar("Reply", R.drawable.reply_icon, onClick)
         }
+
+        // Display directions bubble if location is selected
         selectedLocation?.let { GetDirectionsBubble(location = it) { selectedLocation = null } }
       }
 }
 
+/**
+ * Composable function that displays an interaction bar.
+ *
+ * @param text The text to display
+ * @param icon The icon to display
+ * @param onClick The onClick action
+ */
 @Composable
 fun InteractionBar(text: String, icon: Int, onClick: () -> Unit = {}) {
   Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -271,6 +315,14 @@ fun InteractionBar(text: String, icon: Int, onClick: () -> Unit = {}) {
   }
 }
 
+/**
+ * Composable function that displays the filter bar of the requests feed screen.
+ *
+ * @param selectedService The selected service
+ * @param selectedFilters The selected filters
+ * @param onSelectedService The onSelectedService action
+ * @param onFilterChange The onFilterChange action
+ */
 @Composable
 fun FilterBar(
     selectedService: String,
@@ -284,6 +336,7 @@ fun FilterBar(
       modifier = Modifier.background(colorScheme.background).testTag("FilterBar"),
       horizontalArrangement = Arrangement.spacedBy(5.dp),
       verticalAlignment = Alignment.Top) {
+      // Display the filter chips
         items(filters.size) { idx ->
           val filter = filters[idx]
           if (filter == "Service") {
@@ -303,11 +356,18 @@ fun FilterBar(
       }
 }
 
+/**
+ * Composable function that displays a service chip.
+ *
+ * @param selectedService The selected service
+ * @param onServiceSelected The onServiceSelected action
+ */
 @Composable
 fun ServiceChip(selectedService: String, onServiceSelected: (String) -> Unit) {
   var selectedText by remember { mutableStateOf(selectedService) }
   var showDropdown by remember { mutableStateOf(false) }
 
+    // Set the border text color based on the selected service
   val borderTextColor =
       if (selectedText != "Service") colorScheme.secondary else colorScheme.secondary
 
@@ -342,6 +402,7 @@ fun ServiceChip(selectedService: String, onServiceSelected: (String) -> Unit) {
           Modifier.border(1.dp, colorScheme.onSurface, RoundedCornerShape(12.dp))
               .background(colorScheme.background, RoundedCornerShape(12.dp))
               .testTag("ServiceDropdown")) {
+      // Display the service options
         Services.entries.forEach { service ->
           val serviceName = Services.format(service)
           DropdownMenuItem(
@@ -356,6 +417,13 @@ fun ServiceChip(selectedService: String, onServiceSelected: (String) -> Unit) {
       }
 }
 
+/**
+ * Composable function that displays a filter chip.
+ *
+ * @param label The label to display
+ * @param isSelected The isSelected state
+ * @param onSelected The onSelected action
+ */
 @Composable
 fun FilterChip(label: String, isSelected: Boolean, onSelected: (Boolean) -> Unit) {
   val borderTextColor = if (isSelected) colorScheme.secondary else colorScheme.secondary
@@ -377,13 +445,24 @@ fun FilterChip(label: String, isSelected: Boolean, onSelected: (Boolean) -> Unit
       }
 }
 
-// Extension function for common modifier styling
+/**
+ * Modifier function that applies the chip style to a composable.
+ *
+ * @param backgroundColor The background color
+ * @param borderTextColor The border text color
+ */
 private fun Modifier.chipModifier(backgroundColor: Color, borderTextColor: Color) =
     this.padding(8.dp)
         .border(3.dp, borderTextColor, shape = RoundedCornerShape(12.dp))
         .background(backgroundColor, shape = RoundedCornerShape(12.dp))
         .padding(12.dp, 6.dp)
 
+/**
+ * Composable function that displays the list requests feed screen.
+ *
+ * @param serviceRequestViewModel The service request view model
+ * @param navigationActions The navigation actions
+ */
 @Composable
 fun ListRequestsFeedScreen(
     serviceRequestViewModel: ServiceRequestViewModel =

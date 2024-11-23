@@ -62,12 +62,19 @@ import com.google.firebase.auth.auth
 import java.text.SimpleDateFormat
 import java.util.Locale
 
+/**
+ * Composable function that displays the Requests Dashboard screen.
+ *
+ * @param navigationActions Actions for navigation.
+ * @param serviceRequestViewModel ViewModel for managing service requests.
+ */
 @Composable
 fun RequestsDashboardScreen(
     navigationActions: NavigationActions,
     serviceRequestViewModel: ServiceRequestViewModel =
         viewModel(factory = ServiceRequestViewModel.Factory)
 ) {
+    // Selected tab index
   var selectedTab by remember { mutableIntStateOf(2) }
   val statusTabs = ServiceRequestStatus.entries.toTypedArray()
 
@@ -89,6 +96,12 @@ fun RequestsDashboardScreen(
       })
 }
 
+/**
+ * Composable function that displays the top app bar for the Requests Dashboard screen.
+ *
+ * @param title Title of the screen.
+ * @param onBackClicked Callback to handle back button click.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RequestsTopBar(title: String, onBackClicked: () -> Unit) {
@@ -112,6 +125,13 @@ fun RequestsTopBar(title: String, onBackClicked: () -> Unit) {
               titleContentColor = colorScheme.onBackground))
 }
 
+/**
+ * Composable function that displays the status tabs for the Requests Dashboard screen.
+ *
+ * @param selectedTab Index of the selected tab.
+ * @param tabs Array of ServiceRequestStatus values.
+ * @param onTabSelected Callback to handle tab selection.
+ */
 @Composable
 fun StatusTabs(selectedTab: Int, tabs: Array<ServiceRequestStatus>, onTabSelected: (Int) -> Unit) {
   ScrollableTabRow(
@@ -119,6 +139,7 @@ fun StatusTabs(selectedTab: Int, tabs: Array<ServiceRequestStatus>, onTabSelecte
       modifier = Modifier.fillMaxWidth().testTag("statusTabRow"),
       containerColor = colorScheme.background,
       contentColor = colorScheme.primary) {
+      // Create a tab for each status
         tabs.forEachIndexed { index, status ->
           Tab(
               modifier = Modifier.testTag("statusTab_$index"),
@@ -135,6 +156,12 @@ fun StatusTabs(selectedTab: Int, tabs: Array<ServiceRequestStatus>, onTabSelecte
       }
 }
 
+/**
+ * Composable function that displays the content of the selected tab in the Requests Dashboard screen.
+ *
+ * @param selectedTab Index of the selected tab.
+ * @param serviceRequestViewModel ViewModel for managing service requests.
+ */
 @Composable
 fun JobSectionContent(selectedTab: Int, serviceRequestViewModel: ServiceRequestViewModel) {
   when (selectedTab) {
@@ -147,6 +174,20 @@ fun JobSectionContent(selectedTab: Int, serviceRequestViewModel: ServiceRequestV
   }
 }
 
+/**
+ * Composable function that displays a list of jobs based on the status.
+ *
+ * @param title Title of the section.
+ * @param requests List of ServiceRequest objects.
+ * @param emptyMessage Message to display when the list is empty.
+ * @param onNavigateToJob Optional callback to navigate to the job's location.
+ * @param onContactCustomer Optional callback to contact the customer.
+ * @param onMarkAsCompleted Optional callback to mark the job as completed.
+ * @param onConfirmRequest Optional callback to confirm a job request (for pending jobs).
+ * @param onCancelRequest Optional callback to cancel the job.
+ * @param onArchiveRequest Optional callback to archive the job.
+ * @param onChat Optional callback to initiate a chat with the customer.
+ */
 @Composable
 fun JobListSection(
     title: String,
@@ -160,12 +201,14 @@ fun JobListSection(
     onArchiveRequest: ((ServiceRequest) -> Unit)? = null,
     onChat: ((ServiceRequest) -> Unit)? = null
 ) {
+    // Filter requests based on the current user's ID
   val providerId = Firebase.auth.currentUser?.uid ?: "-1"
   val filteredRequests = requests.filter { it.providerId == providerId }
   LazyColumn(
       modifier = Modifier.fillMaxSize().padding(16.dp).testTag("${title}Section"),
       horizontalAlignment = Alignment.CenterHorizontally,
       verticalArrangement =
+      // Center the empty message if there are no requests, otherwise align to the top
           if (filteredRequests.isEmpty()) Arrangement.Center else Arrangement.Top) {
         item {
           if (filteredRequests.isEmpty()) {
@@ -175,6 +218,7 @@ fun JobListSection(
                 color = colorScheme.onSurfaceVariant,
                 modifier = Modifier.testTag("${title}EmptyText"))
           } else {
+              // Display a list of job items
             filteredRequests.forEach { request ->
               JobItem(
                   request = request,
@@ -191,6 +235,11 @@ fun JobListSection(
       }
 }
 
+/**
+ * Composable functions for displaying the pending requests on the Requests Dashboard screen.
+ *
+ * @param viewModel ViewModel for managing service requests.
+ */
 @Composable
 fun PendingJobsSection(viewModel: ServiceRequestViewModel) {
   val context = LocalContext.current
@@ -207,6 +256,11 @@ fun PendingJobsSection(viewModel: ServiceRequestViewModel) {
       onChat = { Toast.makeText(context, "Chat Not yet Implemented", Toast.LENGTH_SHORT).show() })
 }
 
+/**
+ * Composable functions for displaying the accepted requests on the Requests Dashboard screen.
+ *
+ * @param viewModel ViewModel for managing service requests.
+ */
 @Composable
 fun AcceptedJobSection(viewModel: ServiceRequestViewModel) {
   val context = LocalContext.current
@@ -222,6 +276,11 @@ fun AcceptedJobSection(viewModel: ServiceRequestViewModel) {
       onChat = { Toast.makeText(context, "Chat Not yet Implemented", Toast.LENGTH_SHORT).show() })
 }
 
+/**
+ * Composable functions for displaying the scheduled requests on the Requests Dashboard screen.
+ *
+ * @param viewModel ViewModel for managing service requests.
+ */
 @Composable
 fun ScheduledJobsSection(viewModel: ServiceRequestViewModel) {
   val context = LocalContext.current
@@ -265,6 +324,11 @@ fun ScheduledJobsSection(viewModel: ServiceRequestViewModel) {
   }
 }
 
+/**
+ * Composable functions for displaying the completed requests on the Requests Dashboard screen.
+ *
+ * @param viewModel ViewModel for managing service requests.
+ */
 @Composable
 fun CompletedJobsSection(viewModel: ServiceRequestViewModel) {
   val context = LocalContext.current
@@ -281,6 +345,11 @@ fun CompletedJobsSection(viewModel: ServiceRequestViewModel) {
       onArchiveRequest = { request -> viewModel.archiveRequest(request) })
 }
 
+/**
+ * Composable functions for displaying the canceled requests on the Requests Dashboard screen.
+ *
+ * @param viewModel ViewModel for managing service requests.
+ */
 @Composable
 fun CanceledJobsSection(viewModel: ServiceRequestViewModel) {
   val context = LocalContext.current
@@ -297,6 +366,11 @@ fun CanceledJobsSection(viewModel: ServiceRequestViewModel) {
   )
 }
 
+/**
+ * Composable functions for displaying the archived requests on the Requests Dashboard screen.
+ *
+ * @param viewModel ViewModel for managing service requests.
+ */
 @Composable
 fun ArchivedJobsSection(viewModel: ServiceRequestViewModel) {
   val context = LocalContext.current
@@ -315,7 +389,7 @@ fun ArchivedJobsSection(viewModel: ServiceRequestViewModel) {
 
 /**
  * JobItem represents a job item in a list. The display changes based on job status: Pending,
- * Current, or History.
+ * Accepted, Scheduled, Completed, Canceled, or Archived.
  *
  * @param request ServiceRequest object containing job details.
  * @param onNavigateToJob Optional callback to navigate to the job's location.
