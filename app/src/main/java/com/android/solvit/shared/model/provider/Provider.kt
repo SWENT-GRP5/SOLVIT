@@ -6,7 +6,7 @@ import com.google.firebase.Timestamp
 
 data class Provider(
     val uid: String = "",
-    val name: String = "",
+    var name: String = "",
     var service: Services = Services.TUTOR,
     val imageUrl: String = "",
     var companyName: String = "",

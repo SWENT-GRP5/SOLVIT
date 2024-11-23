@@ -144,7 +144,9 @@ fun ProfileHeader(
               color = colorScheme.onBackground,
               fontSize = 24.sp,
               fontWeight = FontWeight.Bold,
-              textAlign = TextAlign.Center)
+              textAlign = TextAlign.Center,
+              maxLines = 2,
+              overflow = TextOverflow.Ellipsis)
 
           Spacer(modifier = Modifier.height(40.dp))
 
@@ -173,7 +175,9 @@ fun ProfileHeader(
                 text = text,
                 color = titleColor,
                 fontSize = fontSize,
-                modifier = Modifier.testTag(testTag))
+                modifier = Modifier.testTag(testTag),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis)
           }
 
           @Composable

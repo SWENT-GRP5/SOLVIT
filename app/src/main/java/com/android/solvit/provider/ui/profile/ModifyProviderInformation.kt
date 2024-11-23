@@ -121,11 +121,14 @@ fun ModifyInput(
     navigationActions: NavigationActions
 ) {
   val context = LocalContext.current
-  var newProviderName by remember { mutableStateOf(provider.companyName) }
-  val okNewProviderName = newProviderName.length >= 2 && newProviderName.isNotBlank()
-  var newProfession by remember { mutableStateOf(provider.service) }
-  var showDropdownType by remember { mutableStateOf(false) }
-  var query = remember { mutableStateOf(provider.service.name) }
+
+  var newName by remember { mutableStateOf(provider.name) }
+  val okNewName = newName.length >= 2 && newName.isNotBlank()
+
+  var newCompanyName by remember { mutableStateOf(provider.companyName) }
+  val okNewCompanyName = newCompanyName.length >= 2 && newCompanyName.isNotBlank()
+
+  var newService by remember { mutableStateOf(provider.service) }
 
   var newPhoneNumber by remember { mutableStateOf(provider.phone) }
   val okNewPhoneNumber =
@@ -134,7 +137,6 @@ fun ModifyInput(
           newPhoneNumber.length > 6
 
   val newLocation by remember { mutableStateOf(provider.location.name) }
-  var selectedServiceType by remember { mutableStateOf(Services.OTHER) }
 
   var showDropdown by remember { mutableStateOf(false) }
 
@@ -147,24 +149,39 @@ fun ModifyInput(
 
   var newLanguage by remember { mutableStateOf(provider.languages) }
 
-  val allIsGood = okNewProviderName && okNewPhoneNumber && okNewLocation
+  val allIsGood = okNewCompanyName && okNewPhoneNumber && okNewLocation
 
   CustomOutlinedTextField(
-      value = newProviderName,
-      onValueChange = { newProviderName = it },
-      label = "Provider Name",
-      placeholder = "Enter your new Provider name",
-      isValueOk = okNewProviderName,
+      value = newName,
+      onValueChange = { newName = it },
+      label = "Name",
+      placeholder = "Enter your new name",
+      isValueOk = okNewName,
       leadingIcon = Icons.Default.AccountCircle,
-      leadingIconDescription = "Company Name Icon",
-      testTag = "newProviderNameInputField",
+      leadingIconDescription = "Name Icon",
+      testTag = "newNameInputField",
       errorMessage = "Your provider name must have at least 2 characters",
-      errorTestTag = "providerNameErrorMessage",
+      errorTestTag = "nameErrorMessage",
       maxLines = 2)
 
   Spacer(modifier = Modifier.height(10.dp))
 
-  ServiceDropdownMenu(selectedService = newProfession, onServiceSelected = { newProfession = it })
+  CustomOutlinedTextField(
+      value = newCompanyName,
+      onValueChange = { newCompanyName = it },
+      label = "Company Name",
+      placeholder = "Enter your new Company name",
+      isValueOk = okNewCompanyName,
+      leadingIcon = Icons.Default.AccountCircle,
+      leadingIconDescription = "Company Name Icon",
+      testTag = "newCompanyNameInputField",
+      errorMessage = "Your company name must have at least 2 characters",
+      errorTestTag = "companyNameErrorMessage",
+      maxLines = 2)
+
+  Spacer(modifier = Modifier.height(10.dp))
+
+  ServiceDropdownMenu(selectedService = newService, onServiceSelected = { newService = it })
 
   Spacer(modifier = Modifier.height(10.dp))
 
@@ -213,8 +230,9 @@ fun ModifyInput(
   Button(
       onClick = {
         if (allIsGood) {
-          provider.companyName = newProviderName
-          provider.service = newProfession
+          provider.name = newName
+          provider.companyName = newCompanyName
+          provider.service = newService
           provider.phone = newPhoneNumber
           provider.location = selectedLocation ?: provider.location
           provider.languages = newLanguage
