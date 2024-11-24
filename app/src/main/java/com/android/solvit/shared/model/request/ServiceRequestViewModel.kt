@@ -41,6 +41,11 @@ open class ServiceRequestViewModel(private val repository: ServiceRequestReposit
 
   init {
     repository.init { updateAllRequests() }
+    repository.addListenerOnServiceRequests(
+        onSuccess = { _requests.value = it },
+        onFailure = { exception ->
+          Log.e("ServiceRequestViewModel", "Error listening ServiceRequests", exception)
+        })
   }
 
   // Create factory

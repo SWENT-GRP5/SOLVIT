@@ -46,6 +46,7 @@ object Screen {
   const val PREFERENCES = "Preferences"
   const val INBOX = "Inbox Screen"
   const val CHAT = "Chat Room Screen"
+  const val REVIEW_SCREEN = "Review Screen"
 }
 
 data class TopLevelDestination(val route: String, val icon: ImageVector, val textId: String)

@@ -14,6 +14,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.map.LocationViewModel
 import com.android.solvit.shared.model.request.ServiceRequest
@@ -28,7 +29,8 @@ fun EditRequestScreen(
     navigationActions: NavigationActions,
     requestViewModel: ServiceRequestViewModel =
         viewModel(factory = ServiceRequestViewModel.Factory),
-    locationViewModel: LocationViewModel = viewModel(factory = LocationViewModel.Factory)
+    locationViewModel: LocationViewModel = viewModel(factory = LocationViewModel.Factory),
+    authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory)
 ) {
   // Lock Orientation to Portrait
   val localContext = LocalContext.current
@@ -57,6 +59,7 @@ fun EditRequestScreen(
   var showDropdownLocation by remember { mutableStateOf(false) }
   val locationSuggestions by
       locationViewModel.locationSuggestions.collectAsState(initial = emptyList<Location?>())
+  val user by authViewModel.user.collectAsState()
   var showDropdownType by remember { mutableStateOf(false) }
   var typeQuery by remember { mutableStateOf(request.type.name) }
   val filteredServiceTypes =
@@ -88,6 +91,7 @@ fun EditRequestScreen(
       showDropdownLocation = showDropdownLocation,
       onShowDropdownLocationChange = { showDropdownLocation = it },
       locationSuggestions = locationSuggestions.filterNotNull(),
+      userLocations = user?.locations ?: emptyList(),
       onLocationSelected = { selectedLocation = it },
       selectedLocation = selectedLocation,
       dueDate = dueDate,

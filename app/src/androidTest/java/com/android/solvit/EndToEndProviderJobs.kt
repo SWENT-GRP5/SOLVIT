@@ -1,11 +1,9 @@
 package com.android.solvit
 
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.test.core.app.ApplicationProvider
@@ -26,15 +24,19 @@ import com.android.solvit.shared.model.packages.PackageProposalRepositoryFiresto
 import com.android.solvit.shared.model.packages.PackageProposalViewModel
 import com.android.solvit.shared.model.provider.ProviderRepository
 import com.android.solvit.shared.model.provider.ProviderRepositoryFirestore
+import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestRepository
 import com.android.solvit.shared.model.request.ServiceRequestRepositoryFirebase
+import com.android.solvit.shared.model.request.ServiceRequestStatus
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.review.ReviewRepository
 import com.android.solvit.shared.model.review.ReviewRepositoryFirestore
 import com.android.solvit.shared.model.review.ReviewViewModel
+import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.TopLevelDestinations
 import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 import com.google.firebase.database.database
@@ -43,6 +45,7 @@ import com.google.firebase.firestore.FirebaseFirestoreSettings
 import com.google.firebase.firestore.firestore
 import com.google.firebase.firestore.firestoreSettings
 import com.google.firebase.storage.storage
+import java.util.GregorianCalendar
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -52,7 +55,7 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
 import org.mockito.kotlin.anyOrNull
 
-class EndToEndSeekerCreateRequest {
+class EndToEndProviderJobs {
 
   private lateinit var authViewModel: AuthViewModel
   private lateinit var listProviderViewModel: ListProviderViewModel
@@ -60,8 +63,9 @@ class EndToEndSeekerCreateRequest {
   private lateinit var serviceRequestViewModel: ServiceRequestViewModel
   private lateinit var locationViewModel: LocationViewModel
   private lateinit var reviewViewModel: ReviewViewModel
-  private lateinit var chatViewModel: ChatViewModel
   private lateinit var packageProposalViewModel: PackageProposalViewModel
+  private lateinit var chatViewModel: ChatViewModel
+  private lateinit var chatRepository: ChatRepository
 
   private lateinit var authRepository: AuthRepository
   private lateinit var seekerRepository: UserRepository
@@ -70,12 +74,27 @@ class EndToEndSeekerCreateRequest {
   private lateinit var serviceRequestRepository: ServiceRequestRepository
   private lateinit var reviewRepository: ReviewRepository
   private lateinit var packageProposalRepository: PackageProposalRepository
-  private lateinit var chatRepository: ChatRepository
 
-  private val email = "test@test.ch"
+  private val email = "test@provider.ch"
   private val password = "password"
 
   private val locations = listOf(Location(37.7749, -122.4194, "San Francisco"))
+
+  private val request =
+      ServiceRequest(
+          uid = "1",
+          title = "Test Job",
+          type = Services.CLEANER,
+          description = "Test Description",
+          userId = "1",
+          providerId = "1",
+          dueDate = Timestamp(GregorianCalendar(2024, 0, 1, 12, 1).time),
+          meetingDate = Timestamp(GregorianCalendar(2024, 0, 1, 12, 1).time),
+          location = Location(37.7749, -122.4194, "Test Location"),
+          packageId = "1",
+          agreedPrice = 100.0,
+          imageUrl = "imageUrl",
+          status = ServiceRequestStatus.PENDING)
 
   @get:Rule val composeTestRule = createComposeRule()
 
@@ -121,14 +140,10 @@ class EndToEndSeekerCreateRequest {
 
     authViewModel.setEmail(email)
     authViewModel.setPassword(password)
-    authViewModel.setRole("seeker")
+    authViewModel.setRole("provider")
     authViewModel.registerWithEmailAndPassword(
         onSuccess = { authViewModel.logout {} }, onFailure = {})
-    serviceRequestRepository.getServiceRequests(
-        onSuccess = { requests ->
-          requests.forEach { serviceRequestViewModel.deleteServiceRequestById(it.uid) }
-        },
-        onFailure = {})
+    serviceRequestViewModel.saveServiceRequest(request)
   }
 
   @After
@@ -147,7 +162,7 @@ class EndToEndSeekerCreateRequest {
   }
 
   @Test
-  fun createServiceRequest() {
+  fun navigateJobDashboard() {
     composeTestRule.setContent {
       val user = authViewModel.user.collectAsState()
       val userRegistered = authViewModel.userRegistered.collectAsState()
@@ -193,62 +208,36 @@ class EndToEndSeekerCreateRequest {
     composeTestRule.onNodeWithTag("passwordInput").performTextInput(password)
     composeTestRule.onNodeWithTag("signInButton").performClick()
 
-    // Wait for the services screen to be displayed
+    // Wait for the request feed to be displayed
     composeTestRule.waitUntil(timeoutMillis = 10000) {
-      composeTestRule.onNodeWithTag("servicesScreen").isDisplayed()
+      composeTestRule.onNodeWithTag("ScreenContent").isDisplayed()
     }
 
-    authViewModel.user.value?.locations?.forEach { authViewModel.removeUserLocation(it, {}, {}) }
+    // Navigate to the calendar screen
+    composeTestRule.onNodeWithTag(TopLevelDestinations.CALENDAR.textId).performClick()
+    composeTestRule.waitUntil { composeTestRule.onNodeWithTag("calendarTitle").isDisplayed() }
+    composeTestRule.onNodeWithTag("backButton").performClick()
 
-    // Navigate to the requests overview screen
-    composeTestRule.onNodeWithTag(TopLevelDestinations.REQUESTS_OVERVIEW.textId).performClick()
-    composeTestRule.waitUntil {
-      composeTestRule.onNodeWithTag("requestsOverviewScreen").isDisplayed()
-    }
-    composeTestRule.onNodeWithTag("noServiceRequestsScreen").assertIsDisplayed()
-
-    // Create a new request
+    // Navigate to the job dashboard
     composeTestRule.onNodeWithTag(TopLevelDestinations.CREATE_REQUEST.toString()).performClick()
 
     composeTestRule.waitUntil(timeoutMillis = 10000) {
-      composeTestRule.onNodeWithTag("requestScreen").isDisplayed()
+      composeTestRule.onNodeWithTag("JobDashboardTitle").isDisplayed()
     }
 
-    composeTestRule.onNodeWithTag("inputRequestTitle").performTextInput("Test Request")
-    composeTestRule.onNodeWithTag("inputServiceType").performTextInput("PLUMBER")
-    composeTestRule.waitUntil(timeoutMillis = 10000) {
-      composeTestRule.onNodeWithTag("serviceTypeMenu").isDisplayed()
+    // Accept the job
+    composeTestRule.onNodeWithTag("Tab_Pending").performClick()
+    composeTestRule.waitUntil {
+      composeTestRule.onNodeWithTag("JobItem_${request.status.name}_${request.uid}").isDisplayed()
     }
-    composeTestRule.onNodeWithTag("serviceTypeResult").performClick()
-    composeTestRule.onNodeWithTag("inputRequestDescription").performTextInput("Test Description")
-    composeTestRule.onNodeWithTag("inputRequestAddress").performTextInput("test")
-    composeTestRule.waitUntil(timeoutMillis = 10000) {
-      locationViewModel.locationSuggestions.value.isNotEmpty()
-    }
-    composeTestRule.onNodeWithTag("locationResult").performClick()
-    composeTestRule.onNodeWithTag("inputRequestDate").performClick()
-    composeTestRule.onNodeWithTag("datePickerDialog").performClick()
-    composeTestRule.onNodeWithText("OK").performClick()
-
-    composeTestRule.onNodeWithTag("requestSubmit").performClick()
-
-    // Assert the requests to be displayed
-    composeTestRule.waitUntil(timeoutMillis = 10000) {
-      composeTestRule.onNodeWithTag("requestsList").isDisplayed()
+    composeTestRule.onNodeWithTag("ConfirmButton_${request.uid}").performClick()
+    composeTestRule.waitUntil {
+      composeTestRule.onNodeWithTag("PendingJobsEmptyText").isDisplayed()
     }
 
-    // Delete the request
-    composeTestRule.onNodeWithTag("requestListItem").performClick()
-    composeTestRule.waitUntil(timeoutMillis = 10000) {
-      composeTestRule.onNodeWithTag("edit_button").isDisplayed()
-    }
-    composeTestRule.onNodeWithTag("edit_button").performClick()
-    composeTestRule.waitUntil(timeoutMillis = 10000) {
-      composeTestRule.onNodeWithTag("requestScreen").isDisplayed()
-    }
-    composeTestRule.onNodeWithTag("deleteRequestButton").performClick()
-    composeTestRule.waitUntil(timeoutMillis = 10000) {
-      composeTestRule.onNodeWithTag("edit_button").isDisplayed()
-    }
+    // Go to current jobs
+    composeTestRule.onNodeWithTag("Tab_Current").performClick()
+
+    serviceRequestViewModel.deleteServiceRequestById(request.uid)
   }
 }

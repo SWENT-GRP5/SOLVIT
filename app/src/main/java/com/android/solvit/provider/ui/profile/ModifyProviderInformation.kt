@@ -101,7 +101,12 @@ fun ModifyProviderInformationScreen(
                     it.uid == userId
                   } ?: return@Column
 
-              ModifyInput(provider = provider, navigationActions = navigationActions)
+              ModifyInput(
+                  provider = provider,
+                  locationViewModel,
+                  listProviderViewModel,
+                  authViewModel,
+                  navigationActions = navigationActions)
             }
       })
 }
@@ -112,6 +117,7 @@ fun ModifyInput(
     locationViewModel: LocationViewModel = viewModel(factory = LocationViewModel.Factory),
     listProviderViewModel: ListProviderViewModel =
         viewModel(factory = ListProviderViewModel.Factory),
+    authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory),
     navigationActions: NavigationActions
 ) {
   val context = LocalContext.current
@@ -136,6 +142,8 @@ fun ModifyInput(
       locationViewModel.locationSuggestions.collectAsState(initial = emptyList<Location?>())
   var selectedLocation by remember { mutableStateOf<Location?>(provider.location) }
   val okNewLocation = selectedLocation != null
+
+  val user by authViewModel.user.collectAsState()
 
   var newLanguage by remember { mutableStateOf(provider.languages) }
 
@@ -180,6 +188,7 @@ fun ModifyInput(
       showDropdownLocation = showDropdown,
       onShowDropdownLocationChange = { showDropdown = it },
       locationSuggestions = locationSuggestions.filterNotNull(),
+      userLocations = user?.locations ?: emptyList(),
       onLocationSelected = { selectedLocation = it },
       requestLocation = null,
       backgroundColor = colorScheme.background,
