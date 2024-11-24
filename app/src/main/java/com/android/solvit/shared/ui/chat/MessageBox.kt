@@ -36,6 +36,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -92,6 +93,7 @@ fun ChatListTopBar(
   chatViewModel.setReceiverUid("12345")
   chatViewModel.initChat()
   TopAppBar(
+      modifier = Modifier.testTag("InboxTopAppBar"),
       title = {
         Box(
             modifier = Modifier.fillMaxWidth(),
@@ -151,7 +153,7 @@ fun ChatListItem(
 
   Row(
       modifier =
-          Modifier.fillMaxWidth().padding(vertical = 8.dp).clickable {
+          Modifier.fillMaxWidth().padding(vertical = 8.dp).testTag("ChatListItem").clickable {
             // Actions to retrieve the conversation with correct user
             listChatViewModel.setReceiverUid(message.senderId)
             listChatViewModel.setReceiverName(message.senderName)

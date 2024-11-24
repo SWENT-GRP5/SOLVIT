@@ -1,10 +1,10 @@
 package com.android.solvit.shared.ui.chat
 
-import android.util.Log
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.navigation.NavController
 import com.android.solvit.shared.model.authentication.AuthRep
 import com.android.solvit.shared.model.authentication.AuthViewModel
@@ -24,7 +24,7 @@ import org.mockito.Mockito.`when`
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 
-class ChatScreenTest {
+class MessageBoxTest {
   private lateinit var chatRepository: ChatRepository
   private lateinit var authRep: AuthRep
   private lateinit var navController: NavController
@@ -91,42 +91,44 @@ class ChatScreenTest {
         .whenever(authRep)
         .init(any())
 
-    `when`(chatRepository.listenForLastMessages(any(), any())).thenAnswer {
-      println("je suis rentré")
-      val onSuccess = it.getArgument<(List<ChatMessage.TextMessage>) -> Unit>(0)
-      onSuccess(listOf(testMessages[0])) // Simulate success
-    }
-
-    `when`(chatRepository.listenForMessages(any(), any(), any())).thenAnswer {
-      Log.e("Test", "Je suis rentré")
-      val onSuccess = it.getArgument<(List<ChatMessage.TextMessage>) -> Unit>(1)
-      onSuccess(testMessages) // Simulate success
-    }
     `when`(chatRepository.initChat(any(), any())).thenAnswer {
       val onSuccess = it.getArgument<(String) -> Unit>(0)
       onSuccess("chatId") // Simulate success
     }
   }
 
-  // Check that All Components are display and messages are retrieved correctly
   @Test
-  fun AllComponentsAreDisplayed() {
+  fun emptyMessageListDisplaysNoMessagesScreen() {
 
-    composeTestRule.setContent { ChatScreen(navigationActions, chatViewModel, authViewModel) }
-
-    chatViewModel.setReceiverUid("1234")
-    chatViewModel.initChat()
-    chatViewModel.getConversation()
-
-    composeTestRule.onNodeWithTag("ChatHeader").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("SendMessageBar").assertIsDisplayed()
-
-    composeTestRule.waitUntil(timeoutMillis = 5000) {
-      composeTestRule.onAllNodesWithTag("MessageItem").fetchSemanticsNodes().isNotEmpty()
+    `when`(chatRepository.listenForLastMessages(any(), any())).thenAnswer {
+      val onSuccess = it.getArgument<(List<ChatMessage.TextMessage>) -> Unit>(0)
+      onSuccess(emptyList()) // Simulate success
+    }
+    composeTestRule.setContent {
+      // Set an empty list of messages
+      MessageBox(chatViewModel, navigationActions, authViewModel)
     }
 
+    composeTestRule.onNodeWithTag("InboxTopAppBar").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("ChatListItem").assertDoesNotExist()
+    composeTestRule.onNodeWithText("No messages yet").assertIsDisplayed()
+    composeTestRule.onNodeWithText("Send your first message").assertIsDisplayed()
+  }
+  // Check that overview of all user messages is well displayed
+  @Test
+  fun messagesAreDisplayedCorrectly() {
+
+    `when`(chatRepository.listenForLastMessages(any(), any())).thenAnswer {
+      println("je suis rentré")
+      val onSuccess = it.getArgument<(List<ChatMessage.TextMessage>) -> Unit>(0)
+      onSuccess(testMessages) // Simulate success
+    }
+
+    composeTestRule.setContent { MessageBox(chatViewModel, navigationActions, authViewModel) }
+
+    composeTestRule.onNodeWithTag("InboxTopAppBar").assertIsDisplayed()
     assertEquals(
-        testMessages.size,
-        composeTestRule.onAllNodesWithTag("MessageItem").fetchSemanticsNodes().size)
+        composeTestRule.onAllNodesWithTag("ChatListItem").fetchSemanticsNodes().size,
+        testMessages.size)
   }
 }

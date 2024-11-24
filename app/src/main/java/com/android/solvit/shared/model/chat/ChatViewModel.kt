@@ -36,6 +36,7 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
   }
 
   init {
+    Log.e("Debug Test", "Init")
     getAllLastMessages()
   }
 
