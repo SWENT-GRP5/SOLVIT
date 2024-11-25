@@ -40,7 +40,7 @@ class ChatViewModelTest {
     chatViewModel.initChat()
 
     chatViewModel.sendMessage(
-        ChatMessage.TextMessage("Message 1", "Hello", System.currentTimeMillis()))
+        ChatMessage.TextMessage("Message 1", "senderName", "Hello", System.currentTimeMillis()))
     verify(chatRepository).sendMessage(any(), any(), any(), any())
   }
 
@@ -60,5 +60,11 @@ class ChatViewModelTest {
     chatViewModel.initChat()
     chatViewModel.getConversation()
     verify(chatRepository).listenForMessages(any(), any(), any())
+  }
+
+  @Test
+  fun getAllMessages() {
+    // Check that in the init it indeed retrive last messages
+    verify(chatRepository).listenForLastMessages(any(), any())
   }
 }
