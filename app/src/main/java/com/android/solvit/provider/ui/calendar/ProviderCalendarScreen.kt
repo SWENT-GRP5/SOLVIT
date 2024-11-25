@@ -611,7 +611,8 @@ fun TimeSlots(
 ) {
   Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
     timeSlots
-        .sortedBy { it.meetingDate?.toInstant() }
+        .filter { it.meetingDate != null }
+        .sortedBy { it.meetingDate!!.toInstant() }
         .forEach { request -> TimeSlotItem(request, textColor, showDescription, currentView) }
   }
 }

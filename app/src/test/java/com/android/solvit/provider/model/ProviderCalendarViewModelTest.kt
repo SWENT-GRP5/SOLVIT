@@ -41,14 +41,14 @@ class ProviderCalendarViewModelTest {
           languages = listOf(Language.ENGLISH),
           schedule = Schedule())
 
-  private lateinit var authViewModel: AuthViewModel
-  private lateinit var serviceRequestViewModel: ServiceRequestViewModel
-  private lateinit var calendarViewModel: ProviderCalendarViewModel
   private lateinit var authRepository: AuthRepository
   private lateinit var providerRepository: ProviderRepository
   private lateinit var mockUser: User
   private lateinit var userFlow: MutableStateFlow<User?>
   private lateinit var requestsFlow: MutableStateFlow<List<ServiceRequest>>
+  private lateinit var authViewModel: AuthViewModel
+  private lateinit var serviceRequestViewModel: ServiceRequestViewModel
+  private lateinit var calendarViewModel: ProviderCalendarViewModel
 
   @Before
   fun setUp() {
@@ -91,7 +91,7 @@ class ProviderCalendarViewModelTest {
       Unit
     }
 
-    // Initialize view model
+    // Initialize view model with mocked dependencies
     calendarViewModel =
         ProviderCalendarViewModel(providerRepository, authViewModel, serviceRequestViewModel)
 

@@ -11,9 +11,12 @@ import com.android.solvit.shared.model.provider.Schedule
 import com.android.solvit.shared.model.provider.ScheduleException
 import com.android.solvit.shared.model.provider.TimeSlot
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
-import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.Firebase
+import com.google.firebase.firestore.firestore
+import com.google.firebase.storage.storage
 import java.time.DayOfWeek
 import java.time.LocalDateTime
+import kotlinx.coroutines.flow.map
 
 class ProviderCalendarViewModel(
     private val providerRepository: ProviderRepository,
@@ -52,7 +55,17 @@ class ProviderCalendarViewModel(
     serviceRequestViewModel.getServiceRequests()
   }
 
-  fun getServiceRequests() = serviceRequestViewModel.requests
+  fun getServiceRequests() =
+      serviceRequestViewModel.requests.map { requests ->
+        requests.filter { request ->
+          try {
+            request.meetingDate != null
+          } catch (e: Exception) {
+            Log.e("ProviderCalendarViewModel", "Error processing service request", e)
+            false
+          }
+        }
+      }
 
   fun setRegularHours(
       day: DayOfWeek,
@@ -113,7 +126,7 @@ class ProviderCalendarViewModel(
           @Suppress("UNCHECKED_CAST")
           override fun <T : ViewModel> create(modelClass: Class<T>): T {
             return ProviderCalendarViewModel(
-                ProviderRepositoryFirestore(FirebaseFirestore.getInstance()),
+                ProviderRepositoryFirestore(Firebase.firestore, Firebase.storage),
                 AuthViewModel.Factory.create(AuthViewModel::class.java),
                 ServiceRequestViewModel.Factory.create(ServiceRequestViewModel::class.java))
                 as T

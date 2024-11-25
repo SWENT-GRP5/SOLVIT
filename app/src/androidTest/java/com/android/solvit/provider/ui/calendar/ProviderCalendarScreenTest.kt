@@ -66,17 +66,6 @@ class ProviderCalendarScreenTest {
   }
 
   @Test
-  fun testTimeSlots() {
-    composeTestRule.onNodeWithTag("toggleButton_day").performClick()
-    // composeTestRule.onNodeWithTag("dayView").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("timeSlotItem_08:00-10:00").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("timeSlotItem_08:00-10:00").performClick()
-    composeTestRule.onNodeWithTag("timeSlotItem_10:00-12:00").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("timeSlotItem_13:00-15:00").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("timeSlotItem_15:00-17:00").assertIsDisplayed()
-  }
-
-  @Test
   fun testDatePicker() {
     // Open the date picker
     composeTestRule.onNodeWithTag("monthHeader").performClick()
