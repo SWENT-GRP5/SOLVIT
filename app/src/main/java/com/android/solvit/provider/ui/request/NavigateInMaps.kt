@@ -21,10 +21,7 @@ fun navigateToSingleJob(context: Context, jobLatitude: Double, jobLongitude: Dou
   }
 }
 
-fun navigateToAllSortedJobs(
-    context: Context,
-    requests: List<ServiceRequest>
-) {
+fun navigateToAllSortedJobs(context: Context, requests: List<ServiceRequest>) {
   if (requests.isEmpty()) {
     Toast.makeText(context, "No jobs available for navigation", Toast.LENGTH_SHORT).show()
     return

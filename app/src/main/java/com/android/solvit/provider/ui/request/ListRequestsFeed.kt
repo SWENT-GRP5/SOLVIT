@@ -70,9 +70,7 @@ import com.android.solvit.shared.ui.theme.Orange
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-/**
- * Composable function that displays the top bar of the requests feed screen.
- */
+/** Composable function that displays the top bar of the requests feed screen. */
 @Preview
 @Composable
 fun RequestsTopBar() {
@@ -336,7 +334,7 @@ fun FilterBar(
       modifier = Modifier.background(colorScheme.background).testTag("FilterBar"),
       horizontalArrangement = Arrangement.spacedBy(5.dp),
       verticalAlignment = Alignment.Top) {
-      // Display the filter chips
+        // Display the filter chips
         items(filters.size) { idx ->
           val filter = filters[idx]
           if (filter == "Service") {
@@ -367,7 +365,7 @@ fun ServiceChip(selectedService: String, onServiceSelected: (String) -> Unit) {
   var selectedText by remember { mutableStateOf(selectedService) }
   var showDropdown by remember { mutableStateOf(false) }
 
-    // Set the border text color based on the selected service
+  // Set the border text color based on the selected service
   val borderTextColor =
       if (selectedText != "Service") colorScheme.secondary else colorScheme.secondary
 
@@ -402,7 +400,7 @@ fun ServiceChip(selectedService: String, onServiceSelected: (String) -> Unit) {
           Modifier.border(1.dp, colorScheme.onSurface, RoundedCornerShape(12.dp))
               .background(colorScheme.background, RoundedCornerShape(12.dp))
               .testTag("ServiceDropdown")) {
-      // Display the service options
+        // Display the service options
         Services.entries.forEach { service ->
           val serviceName = Services.format(service)
           DropdownMenuItem(

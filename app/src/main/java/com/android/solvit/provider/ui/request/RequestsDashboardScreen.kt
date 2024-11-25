@@ -73,7 +73,7 @@ fun RequestsDashboardScreen(
     serviceRequestViewModel: ServiceRequestViewModel =
         viewModel(factory = ServiceRequestViewModel.Factory)
 ) {
-    // Selected tab index
+  // Selected tab index
   var selectedTab by remember { mutableIntStateOf(2) }
   val statusTabs = ServiceRequestStatus.entries.toTypedArray()
 
@@ -138,7 +138,7 @@ fun StatusTabs(selectedTab: Int, tabs: Array<ServiceRequestStatus>, onTabSelecte
       modifier = Modifier.fillMaxWidth().testTag("statusTabRow"),
       containerColor = colorScheme.background,
       contentColor = colorScheme.primary) {
-      // Create a tab for each status
+        // Create a tab for each status
         tabs.forEachIndexed { index, status ->
           Tab(
               modifier = Modifier.testTag("statusTab_$index"),
@@ -156,7 +156,8 @@ fun StatusTabs(selectedTab: Int, tabs: Array<ServiceRequestStatus>, onTabSelecte
 }
 
 /**
- * Composable function that displays the content of the selected tab in the Requests Dashboard screen.
+ * Composable function that displays the content of the selected tab in the Requests Dashboard
+ * screen.
  *
  * @param selectedTab Index of the selected tab.
  * @param serviceRequestViewModel ViewModel for managing service requests.
@@ -200,14 +201,14 @@ fun JobListSection(
     onArchiveRequest: ((ServiceRequest) -> Unit)? = null,
     onChat: ((ServiceRequest) -> Unit)? = null
 ) {
-    // Filter requests based on the current user's ID
+  // Filter requests based on the current user's ID
   val providerId = Firebase.auth.currentUser?.uid ?: "-1"
   val filteredRequests = requests.filter { it.providerId == providerId }
   LazyColumn(
       modifier = Modifier.fillMaxSize().padding(16.dp).testTag("${title}Section"),
       horizontalAlignment = Alignment.CenterHorizontally,
       verticalArrangement =
-      // Center the empty message if there are no requests, otherwise align to the top
+          // Center the empty message if there are no requests, otherwise align to the top
           if (filteredRequests.isEmpty()) Arrangement.Center else Arrangement.Top) {
         item {
           if (filteredRequests.isEmpty()) {
@@ -217,7 +218,7 @@ fun JobListSection(
                 color = colorScheme.onSurfaceVariant,
                 modifier = Modifier.testTag("${title}EmptyText"))
           } else {
-              // Display a list of job items
+            // Display a list of job items
             filteredRequests.forEach { request ->
               JobItem(
                   request = request,
@@ -288,9 +289,7 @@ fun ScheduledJobsSection(viewModel: ServiceRequestViewModel) {
   Column(Modifier.fillMaxSize().padding(16.dp)) {
     // "Navigate to All Jobs of the Day" button
     Button(
-        onClick = {
-          navigateToAllSortedJobs(context, viewModel.getTodayScheduledRequests())
-        },
+        onClick = { navigateToAllSortedJobs(context, viewModel.getTodayScheduledRequests()) },
         modifier =
             Modifier.fillMaxWidth().padding(vertical = 8.dp).testTag("NavigateAllJobsButton"),
         colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)) {
