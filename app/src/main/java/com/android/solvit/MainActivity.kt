@@ -36,6 +36,7 @@ import com.android.solvit.seeker.ui.request.RequestsOverviewScreen
 import com.android.solvit.seeker.ui.review.CreateReviewScreen
 import com.android.solvit.seeker.ui.service.ServicesScreen
 import com.android.solvit.shared.model.authentication.AuthViewModel
+import com.android.solvit.shared.model.chat.ChatViewModel
 import com.android.solvit.shared.model.map.LocationViewModel
 import com.android.solvit.shared.model.packages.PackageProposalViewModel
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
@@ -46,11 +47,12 @@ import com.android.solvit.shared.ui.authentication.SignInScreen
 import com.android.solvit.shared.ui.authentication.SignUpChooseProfile
 import com.android.solvit.shared.ui.authentication.SignUpScreen
 import com.android.solvit.shared.ui.booking.ServiceBookingScreen
+import com.android.solvit.shared.ui.chat.ChatScreen
+import com.android.solvit.shared.ui.chat.MessageBox
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.navigation.Screen
 import com.android.solvit.shared.ui.theme.SampleAppTheme
-import com.android.solvit.ui.message.MessageScreen
 
 class MainActivity : ComponentActivity() {
 
@@ -80,6 +82,9 @@ fun SolvitApp() {
   val reviewViewModel = viewModel<ReviewViewModel>(factory = ReviewViewModel.Factory)
   val packageProposalViewModel =
       viewModel<PackageProposalViewModel>(factory = PackageProposalViewModel.Factory)
+  val chatViewModel = viewModel<ChatViewModel>(factory = ChatViewModel.Factory)
+  val navController = rememberNavController()
+  val navigationActions = NavigationActions(navController)
 
   if (!userRegistered.value) {
     SharedUI(
@@ -97,13 +102,15 @@ fun SolvitApp() {
               seekerProfileViewModel,
               serviceRequestViewModel,
               reviewViewModel,
-              locationViewModel)
+              locationViewModel,
+              chatViewModel)
       "provider" ->
           ProviderUI(
               authViewModel,
               listProviderViewModel,
               serviceRequestViewModel,
               seekerProfileViewModel,
+              chatViewModel,
               locationViewModel)
     }
   }
@@ -148,7 +155,8 @@ fun SeekerUI(
     seekerProfileViewModel: SeekerProfileViewModel,
     serviceRequestViewModel: ServiceRequestViewModel,
     reviewViewModel: ReviewViewModel,
-    locationViewModel: LocationViewModel
+    locationViewModel: LocationViewModel,
+    chatViewModel: ChatViewModel
 ) {
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
@@ -173,7 +181,21 @@ fun SeekerUI(
           serviceRequestViewModel,
           authViewModel)
     }
-    composable(Route.MESSAGE) { MessageScreen() }
+    navigation(startDestination = Screen.INBOX, route = Route.INBOX) {
+      composable(Screen.INBOX) {
+        MessageBox(
+            chatViewModel = chatViewModel,
+            navigationActions = navigationActions,
+            authViewModel = authViewModel)
+      }
+      composable(Screen.CHAT) {
+        ChatScreen(
+            navigationActions = navigationActions,
+            chatViewModel = chatViewModel,
+            authViewModel = authViewModel)
+      }
+    }
+
     composable(Route.CREATE_REQUEST) {
       CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
     }
@@ -208,6 +230,7 @@ fun ProviderUI(
     listProviderViewModel: ListProviderViewModel,
     serviceRequestViewModel: ServiceRequestViewModel,
     seekerProfileViewModel: SeekerProfileViewModel,
+    chatViewModel: ChatViewModel,
     locationViewModel: LocationViewModel,
 ) {
   val navController = rememberNavController()
@@ -230,6 +253,22 @@ fun ProviderUI(
     composable(Screen.PROVIDER_PROFILE) {
       ProviderProfileScreen(listProviderViewModel, authViewModel, navigationActions)
     }
+    navigation(startDestination = Screen.INBOX, route = Route.INBOX) {
+      composable(Screen.INBOX) {
+        MessageBox(
+            chatViewModel = chatViewModel,
+            navigationActions = navigationActions,
+            authViewModel = authViewModel)
+      }
+      composable(Screen.CHAT) {
+        ChatScreen(
+            navigationActions = navigationActions,
+            chatViewModel = chatViewModel,
+            authViewModel = authViewModel)
+      }
+    }
+
+    composable(Screen.MY_JOBS) { RequestsDashboardScreen(navigationActions = navigationActions) }
     composable(Screen.PROVIDER_MODIFY_PROFILE) {
       ModifyProviderInformationScreen(
           listProviderViewModel, authViewModel, locationViewModel, navigationActions)
