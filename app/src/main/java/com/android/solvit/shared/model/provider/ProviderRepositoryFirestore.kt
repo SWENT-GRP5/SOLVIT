@@ -4,6 +4,7 @@ import android.util.Log
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.service.Services
 import com.google.android.gms.tasks.Task
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
@@ -30,6 +31,38 @@ class ProviderRepositoryFirestore(private val db: FirebaseFirestore) : ProviderR
       val languages = (doc.get("languages") as List<*>).map { Language.valueOf(it as String) }
       val companyName = doc.getString("companyName") ?: ""
       val phone = doc.getString("phone") ?: ""
+
+      // Convert schedule
+      val scheduleDoc = doc.get("schedule") as? Map<*, *>
+      val schedule =
+          scheduleDoc?.let { docMap ->
+            // Convert regular hours
+            val regularHours =
+                (docMap["regularHours"] as? Map<*, *>)
+                    ?.mapNotNull { (day, slots) ->
+                      val dayStr = (day as? String) ?: return@mapNotNull null
+                      val convertedSlots =
+                          convertTimeSlots(slots as? List<*>).toSet().toMutableList()
+                      dayStr to convertedSlots
+                    }
+                    ?.toMap()
+                    ?.toMutableMap() ?: mutableMapOf()
+
+            // Convert exceptions
+            val exceptions =
+                (docMap["_exceptions"] as? List<*>)
+                    ?.mapNotNull { exception ->
+                      (exception as? Map<*, *>)?.let { exMap ->
+                        val timestamp = exMap["timestamp"] as? Timestamp ?: return@mapNotNull null
+                        val timeSlots = convertTimeSlots(exMap["timeSlots"] as? List<*>)
+                        ScheduleException(timestamp, timeSlots.toMutableList())
+                      }
+                    }
+                    ?.toMutableList() ?: mutableListOf()
+
+            Schedule(regularHours, exceptions)
+          } ?: Schedule()
+
       return Provider(
           doc.id,
           name,
@@ -43,7 +76,8 @@ class ProviderRepositoryFirestore(private val db: FirebaseFirestore) : ProviderR
           rating,
           price,
           deliveryTime,
-          languages)
+          languages,
+          schedule)
     } catch (e: Exception) {
       Log.e("ProviderRepositoryFirestore", "failed to convert doc $e")
       return null
@@ -82,7 +116,6 @@ class ProviderRepositoryFirestore(private val db: FirebaseFirestore) : ProviderR
   }
 
   override fun filterProviders(filter: () -> Unit) {
-    // TODO("Not yet implemented")
     filter()
   }
 
@@ -91,7 +124,6 @@ class ProviderRepositoryFirestore(private val db: FirebaseFirestore) : ProviderR
       onSuccess: (List<Provider>) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-
     if (service != null) {
       val collectionRef = db.collection(collectionPath).whereEqualTo("service", service.toString())
       collectionRef.get().addOnCompleteListener { task ->
@@ -151,5 +183,17 @@ class ProviderRepositoryFirestore(private val db: FirebaseFirestore) : ProviderR
         }
       }
     }
+  }
+
+  private fun convertTimeSlots(slots: List<*>?): List<TimeSlot> {
+    return slots?.mapNotNull { slot ->
+      (slot as? Map<*, *>)?.let { slotMap ->
+        val startHour = (slotMap["startHour"] as? Long)?.toInt() ?: return@mapNotNull null
+        val startMinute = (slotMap["startMinute"] as? Long)?.toInt() ?: return@mapNotNull null
+        val endHour = (slotMap["endHour"] as? Long)?.toInt() ?: return@mapNotNull null
+        val endMinute = (slotMap["endMinute"] as? Long)?.toInt() ?: return@mapNotNull null
+        TimeSlot(startHour, startMinute, endHour, endMinute)
+      }
+    } ?: emptyList()
   }
 }
