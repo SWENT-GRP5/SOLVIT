@@ -5,14 +5,19 @@ interface ChatRepository {
 
   fun sendMessage(
       chatRoomId: String,
-      message: ChatMessage,
+      message: ChatMessage.TextMessage,
       onSuccess: () -> Unit,
       onFailure: () -> Unit
   )
 
   fun listenForMessages(
       chatRoomId: String,
-      onSuccess: (List<ChatMessage>) -> Unit,
+      onSuccess: (List<ChatMessage.TextMessage>) -> Unit,
+      onFailure: () -> Unit
+  )
+
+  fun listenForLastMessages(
+      onSuccess: (List<ChatMessage.TextMessage>) -> Unit,
       onFailure: () -> Unit
   )
 }

@@ -144,6 +144,82 @@ open class UserRepositoryFirestore(private val db: FirebaseFirestore) : UserRepo
     }
   }
 
+  override fun addUserPreference(
+      userId: String,
+      preference: String,
+      onSuccess: () -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+
+    db.collection(collectionPath).document(userId).get().addOnCompleteListener { task ->
+      if (task.isSuccessful) {
+        val doc = task.result
+        // Check if the document exists, else create a new one
+        val currentPreferences = doc?.get("preferences") as? MutableList<String> ?: mutableListOf()
+
+        // Add the new preference to the list
+        if (!currentPreferences.contains(preference)) {
+          currentPreferences.add(preference)
+        }
+
+        // Update or create the document with the updated preferences list
+        db.collection(collectionPath)
+            .document(userId)
+            .set(mapOf("preferences" to currentPreferences))
+            .addOnCompleteListener {
+              if (it.isSuccessful) onSuccess() else it.exception?.let(onFailure)
+            }
+      } else {
+        task.exception?.let(onFailure)
+      }
+    }
+  }
+
+  // Delete a preference from the user's preferences
+  override fun deleteUserPreference(
+      userId: String,
+      preference: String,
+      onSuccess: () -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    db.collection(collectionPath).document(userId).get().addOnCompleteListener { task ->
+      if (task.isSuccessful) {
+        val doc = task.result
+        val currentPreferences = doc?.get("preferences") as? MutableList<String> ?: mutableListOf()
+
+        // Remove the preference from the list
+        currentPreferences.remove(preference)
+
+        // Update the document with the new preferences list
+        db.collection(collectionPath)
+            .document(userId)
+            .update("preferences", currentPreferences)
+            .addOnCompleteListener {
+              if (it.isSuccessful) onSuccess() else it.exception?.let(onFailure)
+            }
+      } else {
+        task.exception?.let(onFailure)
+      }
+    }
+  }
+
+  // Get the list of preferences for the user
+  override fun getUserPreferences(
+      userId: String,
+      onSuccess: (List<String>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    db.collection(collectionPath).document(userId).get().addOnCompleteListener { task ->
+      if (task.isSuccessful) {
+        val doc = task.result
+        val preferences = doc?.get("preferences") as? List<String> ?: emptyList()
+        onSuccess(preferences)
+      } else {
+        task.exception?.let(onFailure)
+      }
+    }
+  }
+
   private fun performFirestoreOperation(
       task: Task<Void>,
       onSuccess: () -> Unit,
@@ -169,6 +245,7 @@ open class UserRepositoryFirestore(private val db: FirebaseFirestore) : UserRepo
       val email = document.getString("email") ?: return null
       val phone = document.getString("phone") ?: return null
       val address = document.getString("address") ?: return null
+      val preferences = document.get("preferences") as? List<String> ?: emptyList()
 
       SeekerProfile(
           uid = uid,
@@ -176,7 +253,8 @@ open class UserRepositoryFirestore(private val db: FirebaseFirestore) : UserRepo
           username = username,
           email = email,
           phone = phone,
-          address = address)
+          address = address,
+          preferences = preferences)
     } catch (e: Exception) {
       Log.e("RepositoryFirestore", "Error converting document to UserProfile", e)
       null

@@ -590,15 +590,16 @@ fun googleSignInLauncher(
 fun CustomOutlinedTextField(
     value: String,
     onValueChange: (String) -> Unit,
-    label: String,
+    label: String? = null,
     placeholder: String,
     isValueOk: Boolean,
     modifier: Modifier = Modifier,
     errorMessage: String = "Invalid input",
-    leadingIcon: ImageVector,
+    leadingIcon: ImageVector? = null,
     leadingIconDescription: String = "",
     testTag: String,
-    errorTestTag: String = "errorMessage"
+    errorTestTag: String = "errorMessage",
+    maxLines: Int = Int.MAX_VALUE
 ) {
   // State to track if the field has been "visited" (focused and then unfocused)
   var hasBeenFocused by remember { mutableStateOf(false) }
@@ -615,14 +616,16 @@ fun CustomOutlinedTextField(
             hasLostFocusAfterTyping = false
           }
         },
-        label = { Text(label, color = colorScheme.onBackground) },
+        label = { if (label != null) Text(label, color = colorScheme.onBackground) },
         singleLine = true,
         placeholder = { Text(placeholder) },
         leadingIcon = {
-          Icon(
-              leadingIcon,
-              contentDescription = leadingIconDescription,
-              tint = if (isValueOk) colorScheme.secondary else colorScheme.onSurfaceVariant)
+          if (leadingIcon != null) {
+            Icon(
+                leadingIcon,
+                contentDescription = leadingIconDescription,
+                tint = if (isValueOk) colorScheme.secondary else colorScheme.onSurfaceVariant)
+          }
         },
         modifier =
             Modifier.fillMaxWidth().testTag(testTag).onFocusChanged { focusState ->
@@ -645,7 +648,8 @@ fun CustomOutlinedTextField(
                       value.isEmpty() -> colorScheme.onSurfaceVariant
                       isValueOk -> colorScheme.secondary
                       else -> colorScheme.error
-                    }))
+                    }),
+        maxLines = maxLines)
 
     // Display the error message if the field has been visited, input is incorrect, and focus was
     // lost after typing
