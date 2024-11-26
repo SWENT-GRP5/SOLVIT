@@ -52,7 +52,7 @@ class ProviderCalendarViewModel(
   }
 
   private fun loadServiceRequests() {
-    serviceRequestViewModel.getServiceRequests()
+    serviceRequestViewModel.getRequests()
   }
 
   fun getServiceRequests() =

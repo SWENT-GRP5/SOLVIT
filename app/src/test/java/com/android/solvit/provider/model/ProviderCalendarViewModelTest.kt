@@ -76,6 +76,11 @@ class ProviderCalendarViewModelTest {
     requestsFlow = MutableStateFlow(emptyList())
     whenever(serviceRequestViewModel.requests)
         .thenReturn(requestsFlow as StateFlow<List<ServiceRequest>>)
+    whenever(serviceRequestViewModel.getServiceRequests()).then {
+      // Simulate loading requests
+      requestsFlow.value = listOf(ServiceRequest())
+      Unit
+    }
 
     // Configure provider repository mock
     whenever(providerRepository.getProvider(eq(testUserId), any(), any())).then {
@@ -268,7 +273,7 @@ class ProviderCalendarViewModelTest {
   @Test
   fun testGetServiceRequests() {
     // Verify that getServiceRequests is called and returns the flow
-    verify(serviceRequestViewModel).requests
+    verify(serviceRequestViewModel).getServiceRequests()
 
     // Test that the flow is accessible
     val requests = calendarViewModel.getServiceRequests()
