@@ -1,6 +1,7 @@
 package com.android.solvit.provider.ui.request
 
 import android.widget.Toast
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -8,6 +9,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,11 +23,15 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -34,10 +40,12 @@ import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -52,21 +60,29 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.android.solvit.R
 import com.android.solvit.seeker.ui.navigation.BottomNavigationMenu
+import com.android.solvit.seeker.ui.provider.PackageCard
 import com.android.solvit.shared.model.map.Location
+import com.android.solvit.shared.model.packages.PackageProposal
+import com.android.solvit.shared.model.packages.PackageProposalViewModel
 import com.android.solvit.shared.model.request.ServiceRequest
+import com.android.solvit.shared.model.request.ServiceRequestStatus
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.map.GetDirectionsBubble
 import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_PROVIDER
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.theme.Orange
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -155,16 +171,22 @@ fun SearchBar(searchQuery: MutableState<String>) {
  * Composable function that displays the list of service requests.
  *
  * @param requests The list of service requests
+ * @param showDialog The showDialog state
+ * @param selectedRequest The selected request
  */
 @Composable
-fun ListRequests(requests: List<ServiceRequest>) {
+fun ListRequests(
+    requests: List<ServiceRequest>,
+    showDialog: MutableState<Boolean>,
+    selectedRequest: MutableState<ServiceRequest?>
+) {
   LazyColumn(
       modifier =
           Modifier.fillMaxSize()
               .padding(start = 16.dp, end = 16.dp)
               .background(colorScheme.background),
       verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        items(requests) { request -> ServiceRequestItem(request) }
+        items(requests) { request -> ServiceRequestItem(request, showDialog, selectedRequest) }
       }
 }
 
@@ -172,9 +194,15 @@ fun ListRequests(requests: List<ServiceRequest>) {
  * Composable function that displays a service request item.
  *
  * @param request The service request
+ * @param showDialog The showDialog state
+ * @param selectedRequest The selected request
  */
 @Composable
-fun ServiceRequestItem(request: ServiceRequest) {
+fun ServiceRequestItem(
+    request: ServiceRequest,
+    showDialog: MutableState<Boolean>,
+    selectedRequest: MutableState<ServiceRequest?>
+) {
   // State to hold the selected location
   var selectedLocation by remember { mutableStateOf<Location?>(null) }
   val context = LocalContext.current
@@ -283,13 +311,143 @@ fun ServiceRequestItem(request: ServiceRequest) {
         // Row for interaction buttons
         Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
           InteractionBar("Comment", R.drawable.comment_icon, onClick)
-          InteractionBar("Share", R.drawable.share_icon, onClick)
+          InteractionBar("Propose your service", R.drawable.share_icon) {
+            selectedRequest.value = request
+            showDialog.value = true
+          }
           InteractionBar("Reply", R.drawable.reply_icon, onClick)
         }
 
         // Display directions bubble if location is selected
         selectedLocation?.let { GetDirectionsBubble(location = it) { selectedLocation = null } }
       }
+}
+
+/**
+ * Composable function that displays a dialog to propose a provider's package to a seeker's service
+ * request.
+ *
+ * @param providerId The provider's ID
+ * @param request The service request
+ * @param packages The list of package proposals
+ * @param showDialog The showDialog state
+ * @param requestViewModel The service request view model
+ */
+@Composable
+fun ProposePackageDialog(
+    providerId: String,
+    request: ServiceRequest,
+    packages: List<PackageProposal>,
+    showDialog: MutableState<Boolean>,
+    requestViewModel: ServiceRequestViewModel
+) {
+  val selectedPackage = remember { mutableStateOf<PackageProposal?>(null) }
+  var selectedIndex by remember { mutableIntStateOf(-1) }
+
+  if (showDialog.value) {
+    Dialog(onDismissRequest = { showDialog.value = false }) {
+      Column(
+          modifier =
+              Modifier.fillMaxSize().padding(16.dp), // Add padding to avoid content touching edges
+          horizontalAlignment = Alignment.CenterHorizontally, // Center items horizontally
+          verticalArrangement = Arrangement.Center // Center items vertically in the Column
+          ) {
+            if (packages.isNotEmpty()) {
+              // Horizontal scrollable list
+              LazyRow(
+                  modifier = Modifier.fillMaxWidth().testTag("packagesScrollableList"),
+                  horizontalArrangement = Arrangement.spacedBy(20.dp), // Adjusted for spacing
+                  contentPadding =
+                      PaddingValues(top = 40.dp, start = 12.dp, end = 12.dp), // Increased padding
+              ) {
+                items(packages.size) { index ->
+                  // If package is selected, we display it bigger
+                  val isSelected = selectedIndex == index
+                  val size by
+                      animateDpAsState(
+                          targetValue = if (isSelected) 350.dp else 320.dp,
+                          label = "PackageCardSize")
+                  PackageCard(
+                      packageProposal = packages[index],
+                      isSelected = isSelected,
+                      modifier =
+                          Modifier.width(260.dp) // Slightly wider for better touch targets
+                              .height(size)
+                              .clickable { selectedIndex = if (isSelected) -1 else index }
+                              .testTag("PackageCard"),
+                      selectedPackage = selectedPackage)
+                }
+              }
+              Spacer(modifier = Modifier.height(16.dp)) // Add space between LazyRow and Button
+              Button(
+                  onClick = {
+                    selectedPackage.value?.let {
+                      requestViewModel.saveServiceRequest(
+                          request.copy(
+                              providerId = providerId,
+                              packageId = it.uid,
+                              status = ServiceRequestStatus.ACCEPTED))
+                      showDialog.value = false
+                    }
+                  },
+                  enabled = selectedPackage.value != null) {
+                    Text(text = "Propose Package")
+                  }
+            } else {
+              Card(
+                  modifier = Modifier.fillMaxWidth().padding(16.dp),
+                  elevation = CardDefaults.cardElevation(8.dp),
+                  colors = CardDefaults.cardColors(containerColor = colorScheme.primaryContainer)) {
+                    Column(
+                        modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally) {
+                          Text(
+                              text =
+                                  "No packages available. Please enter a price for this service:",
+                              fontSize = 18.sp,
+                              fontWeight = FontWeight.Bold,
+                              color = colorScheme.onPrimaryContainer)
+                          Spacer(modifier = Modifier.height(16.dp))
+                          var priceInput by remember { mutableStateOf("") }
+                          val isPriceValid = priceInput.matches(Regex("^[0-9]+(\\.[0-9]{0,2})?$"))
+                          TextField(
+                              value = priceInput,
+                              onValueChange = { input ->
+                                if (input.matches(Regex("^[0-9]*(\\.[0-9]{0,2})?$"))) {
+                                  priceInput = input
+                                }
+                              },
+                              label = { Text("Price") },
+                              modifier = Modifier.fillMaxWidth(),
+                              keyboardOptions =
+                                  KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                              singleLine = true,
+                              isError = !isPriceValid && priceInput.isNotEmpty())
+                          if (!isPriceValid && priceInput.isNotEmpty()) {
+                            Text(
+                                text = "Please enter a valid number (e.g., 99 or 99.99)",
+                                color = colorScheme.error,
+                                fontSize = 12.sp)
+                          }
+                          Spacer(modifier = Modifier.height(16.dp))
+                          Button(
+                              onClick = {
+                                requestViewModel.saveServiceRequest(
+                                    request.copy(
+                                        providerId = providerId,
+                                        agreedPrice = priceInput.toDouble(),
+                                        status = ServiceRequestStatus.ACCEPTED))
+                                showDialog.value = false
+                              },
+                              enabled = isPriceValid && priceInput.isNotEmpty()) {
+                                Text(text = "Confirm")
+                              }
+                        }
+                  }
+            }
+          }
+    }
+  }
 }
 
 /**
@@ -465,12 +623,19 @@ private fun Modifier.chipModifier(backgroundColor: Color, borderTextColor: Color
 fun ListRequestsFeedScreen(
     serviceRequestViewModel: ServiceRequestViewModel =
         viewModel(factory = ServiceRequestViewModel.Factory),
+    packageProposalViewModel: PackageProposalViewModel =
+        viewModel(factory = PackageProposalViewModel.Factory),
     navigationActions: NavigationActions
 ) {
-  val requests by serviceRequestViewModel.requests.collectAsState()
+  val allRequests by serviceRequestViewModel.requests.collectAsState()
+  val requests = allRequests.filter { it.status == ServiceRequestStatus.PENDING }
+  val selectedRequest = remember { mutableStateOf<ServiceRequest?>(null) }
   val selectedFilters = remember { mutableStateOf(setOf<String>()) }
   var selectedService by remember { mutableStateOf("Service") }
   val searchQuery = remember { mutableStateOf("") }
+  val showDialog = remember { mutableStateOf(false) }
+  val providerId = Firebase.auth.currentUser?.uid ?: "-1"
+  val packages = packageProposalViewModel.proposal.collectAsState()
 
   Scaffold(
       topBar = { RequestsTopBar() },
@@ -518,7 +683,16 @@ fun ListRequestsFeedScreen(
                     matchesQuery && matchesFilters
                   }
 
-              ListRequests(filteredRequests)
+              ListRequests(filteredRequests, showDialog, selectedRequest)
+
+              selectedRequest.value?.let {
+                ProposePackageDialog(
+                    providerId = providerId,
+                    request = it,
+                    packages = packages.value.filter { pckg -> pckg.providerId == providerId },
+                    showDialog = showDialog,
+                    requestViewModel = serviceRequestViewModel)
+              }
             }
       }
 }
