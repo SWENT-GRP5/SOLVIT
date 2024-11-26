@@ -203,7 +203,11 @@ fun SeekerUI(
       RequestsOverviewScreen(navigationActions, serviceRequestViewModel, authViewModel)
     }
     composable(Route.BOOKING_DETAILS) {
-      ServiceBookingScreen(navigationActions, listProviderViewModel, serviceRequestViewModel)
+      ServiceBookingScreen(
+          navigationActions,
+          listProviderViewModel,
+          serviceRequestViewModel,
+          chatViewModel = chatViewModel)
     }
     composable(Route.EDIT_REQUEST) {
       EditRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)

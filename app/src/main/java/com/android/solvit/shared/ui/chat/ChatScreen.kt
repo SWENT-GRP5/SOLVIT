@@ -26,7 +26,6 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults.shape
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -46,9 +45,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.android.solvit.R
+import com.android.solvit.seeker.model.profile.SeekerProfile
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.chat.ChatMessage
 import com.android.solvit.shared.model.chat.ChatViewModel
+import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.google.firebase.auth.FirebaseAuth
 
@@ -56,20 +57,31 @@ import com.google.firebase.auth.FirebaseAuth
 fun ChatScreen(
     navigationActions: NavigationActions,
     chatViewModel: ChatViewModel,
-    authViewModel: AuthViewModel
+    authViewModel: AuthViewModel,
 ) {
 
   val messages by chatViewModel.coMessage.collectAsState()
-  val receiverName by chatViewModel.receiverName.collectAsState()
+  val receiver by chatViewModel.receiver.collectAsState()
 
   chatViewModel.getConversation()
-  // picture is hardCoded since we didn't implement yet a logic to all informations of a user
-  // starting from its id
-  val picture =
-      "https://firebasestorage.googleapis.com/v0/b/solvit-14cc1.appspot.com/o/serviceRequestImages%2F98a09ae2-fddf-4ab8-96a5-3b10210230c7.jpg?alt=media&token=ce9376d6-de0f-42eb-ad97-5e4af0a74b16"
+  val receiverName =
+      when (receiver) {
+        is Provider -> (receiver as Provider).name
+        is SeekerProfile -> (receiver as SeekerProfile).name
+        else -> "Unknown"
+      }
+
+  val receiverPicture =
+      when (receiver) {
+        is Provider -> (receiver as Provider).imageUrl
+        is SeekerProfile -> (receiver as SeekerProfile).imageUrl
+        else -> "Unknown"
+      }
+
   Scaffold(
       topBar = {
-        ChatHeader(name = receiverName, picture = picture, navigationActions = navigationActions)
+        ChatHeader(
+            name = receiverName, picture = receiverPicture, navigationActions = navigationActions)
       },
       bottomBar = {
         MessageInputBar(chatViewModel = chatViewModel, authViewModel = authViewModel)
@@ -82,7 +94,7 @@ fun ChatScreen(
                   SentMessage(message.message, true)
                 } else {
                   // Item for messages authentified user receive
-                  SentMessage(message.message, false, true, picture)
+                  SentMessage(message.message, false, true, receiverPicture)
                 }
               }
             }

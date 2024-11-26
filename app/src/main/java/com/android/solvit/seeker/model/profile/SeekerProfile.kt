@@ -5,6 +5,8 @@ import com.android.solvit.shared.model.map.Location
 data class SeekerProfile(
     val uid: String,
     val name: String = "",
+    val lastname: String = "",
+    val imageUrl: String = "",
     val username: String = "",
     val email: String = "",
     val phone: String = "",

@@ -75,6 +75,7 @@ import coil.compose.AsyncImage
 import com.android.solvit.R
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.seeker.ui.provider.Note
+import com.android.solvit.shared.model.chat.ChatViewModel
 import com.android.solvit.shared.model.packages.PackageProposal
 import com.android.solvit.shared.model.packages.PackageProposalViewModel
 import com.android.solvit.shared.model.provider.Provider
@@ -105,7 +106,8 @@ fun ServiceBookingScreen(
     requestViewModel: ServiceRequestViewModel =
         viewModel(factory = ServiceRequestViewModel.Factory),
     packageViewModel: PackageProposalViewModel =
-        viewModel(factory = PackageProposalViewModel.Factory)
+        viewModel(factory = PackageProposalViewModel.Factory),
+    chatViewModel: ChatViewModel = viewModel(factory = ChatViewModel.Factory)
 ) {
   // Lock Orientation to Portrait
   val context = LocalContext.current
@@ -372,7 +374,16 @@ fun ServiceBookingScreen(
               }
 
               if (request!!.status == ServiceRequestStatus.PENDING) {
-                EditButton(navigationActions)
+                if (provider != null) {
+                  EditButton(
+                      navigationActions = navigationActions,
+                      chatViewModel = chatViewModel,
+                      provider = provider)
+                }
+              }
+
+              if (request!!.status == ServiceRequestStatus.ACCEPTED) {
+                // TODO
               }
               if (request!!.status == ServiceRequestStatus.COMPLETED) {
                 ReviewButton(navigationActions)
@@ -439,17 +450,46 @@ fun ProviderCard(
 }
 
 @Composable
-fun EditButton(navigationActions: NavigationActions) {
-  Box(
-      modifier = Modifier.fillMaxWidth().padding(top = 16.dp).testTag("edit_button"),
-      contentAlignment = Alignment.Center) {
-        Button(
-            onClick = { navigationActions.navigateTo(Route.EDIT_REQUEST) },
-            colors =
-                ButtonDefaults.buttonColors(
-                    containerColor = colorScheme.primary, contentColor = colorScheme.onPrimary),
-            shape = RoundedCornerShape(8.dp)) {
-              Text(text = "Edit details", style = typography.labelLarge)
+fun EditButton(
+    navigationActions: NavigationActions,
+    chatViewModel: ChatViewModel,
+    provider: Provider
+) {
+  Row(
+      modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+      horizontalArrangement = Arrangement.SpaceEvenly,
+      verticalAlignment = Alignment.CenterVertically) {
+        Box(
+            modifier = Modifier.weight(1f).padding(horizontal = 8.dp).testTag("edit_button"),
+            contentAlignment = Alignment.Center) {
+              Button(
+                  onClick = { navigationActions.navigateTo(Route.EDIT_REQUEST) },
+                  colors =
+                      ButtonDefaults.buttonColors(
+                          containerColor = colorScheme.primary,
+                          contentColor = colorScheme.onPrimary),
+                  shape = RoundedCornerShape(8.dp)) {
+                    Text(text = "Edit details", style = typography.labelLarge)
+                  }
+            }
+
+        Box(
+            modifier = Modifier.weight(1f).padding(horizontal = 8.dp).testTag("chat_button"),
+            contentAlignment = Alignment.Center) {
+              Button(
+                  onClick = {
+                    chatViewModel.setReceiverUid(provider.uid)
+                    chatViewModel.setReceiver(provider)
+                    chatViewModel.initChat()
+                    navigationActions.navigateTo(Screen.CHAT)
+                  },
+                  colors =
+                      ButtonDefaults.buttonColors(
+                          containerColor = colorScheme.primary,
+                          contentColor = colorScheme.onPrimary),
+                  shape = RoundedCornerShape(8.dp)) {
+                    Text(text = "Discuss", style = typography.labelLarge)
+                  }
             }
       }
 }
