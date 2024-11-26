@@ -81,6 +81,13 @@ class ListProviderViewModel(private val repository: ProviderRepository) : ViewMo
         onFailure = { Log.e("getProviders", "failed to get Providers") })
   }
 
+  fun getProvider(uid: String) {
+    repository.getProvider(
+        uid,
+        onSuccess = { _selectedProvider.value = it },
+        onFailure = { Log.e("ListProviderVM", "Failer to get provider with $uid") })
+  }
+
   fun filterProviders(filter: (Provider) -> Boolean, filterField: String) {
 
     activeFilters[filterField] = filter

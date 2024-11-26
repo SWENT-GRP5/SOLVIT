@@ -45,12 +45,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.android.solvit.R
-import com.android.solvit.seeker.model.profile.SeekerProfile
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.chat.ChatMessage
 import com.android.solvit.shared.model.chat.ChatViewModel
-import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.android.solvit.shared.ui.utils.getReceiverImageUrl
+import com.android.solvit.shared.ui.utils.getReceiverName
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
@@ -64,19 +64,9 @@ fun ChatScreen(
   val receiver by chatViewModel.receiver.collectAsState()
 
   chatViewModel.getConversation()
-  val receiverName =
-      when (receiver) {
-        is Provider -> (receiver as Provider).name
-        is SeekerProfile -> (receiver as SeekerProfile).name
-        else -> "Unknown"
-      }
 
-  val receiverPicture =
-      when (receiver) {
-        is Provider -> (receiver as Provider).imageUrl
-        is SeekerProfile -> (receiver as SeekerProfile).imageUrl
-        else -> "Unknown"
-      }
+  val receiverName = getReceiverName(receiver)
+  val receiverPicture = getReceiverImageUrl(receiver)
 
   Scaffold(
       topBar = {

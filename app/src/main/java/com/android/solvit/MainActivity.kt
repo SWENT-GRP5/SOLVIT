@@ -186,7 +186,9 @@ fun SeekerUI(
         MessageBox(
             chatViewModel = chatViewModel,
             navigationActions = navigationActions,
-            authViewModel = authViewModel)
+            authViewModel = authViewModel,
+            listProviderViewModel = listProviderViewModel,
+            seekerProfileViewModel = seekerProfileViewModel)
       }
       composable(Screen.CHAT) {
         ChatScreen(
@@ -262,7 +264,9 @@ fun ProviderUI(
         MessageBox(
             chatViewModel = chatViewModel,
             navigationActions = navigationActions,
-            authViewModel = authViewModel)
+            authViewModel = authViewModel,
+            listProviderViewModel = listProviderViewModel,
+            seekerProfileViewModel = seekerProfileViewModel)
       }
       composable(Screen.CHAT) {
         ChatScreen(

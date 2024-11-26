@@ -124,11 +124,11 @@ class ChatRepositoryFirestore(private val auth: FirebaseAuth, private val db: Fi
   }
 
   override fun listenForLastMessages(
-      onSuccess: (List<ChatMessage.TextMessage>) -> Unit,
+      onSuccess: (Map<String?, ChatMessage.TextMessage>) -> Unit,
       onFailure: () -> Unit
   ) {
     val chatNode = db.getReference(collectionPath)
-    val lastMessages = mutableListOf<ChatMessage.TextMessage>()
+    val lastMessages = mutableMapOf<String?, ChatMessage.TextMessage>()
 
     chatNode
         .orderByChild("users/${auth.currentUser?.uid}")
@@ -142,17 +142,24 @@ class ChatRepositoryFirestore(private val auth: FirebaseAuth, private val db: Fi
                   var processedCount = 0
                   for (chatRoomsSnapshot in p0.children) {
                     val chatRoomId = chatRoomsSnapshot.key ?: continue
+                    // Retrieve the receiver Uid
+                    val usersSnapshots = chatRoomsSnapshot.child("users")
+                    val receiverUid =
+                        usersSnapshots.children
+                            .mapNotNull { it.key }
+                            .find { it != auth.currentUser?.uid }
+
+                    // Retrieve the last Message in the Chat Room
                     getLastMessageForChatRoom(
                         chatRoomId,
                         onComplete = { chatMessage ->
                           if (chatMessage != null) {
                             Log.e("add chatMessage to Last Message", "$chatMessage")
-                            lastMessages.add(chatMessage)
+                            lastMessages[receiverUid] = chatMessage
                             processedCount++
                             // If we get All last messages
                             if (processedCount == p0.children.count()) {
-                              val sortedMessages = lastMessages.sortedByDescending { it.timestamp }
-                              onSuccess(sortedMessages)
+                              onSuccess(lastMessages)
                             }
                             Log.e("lastMessages.add", "${lastMessages.toList()}")
                           } else {

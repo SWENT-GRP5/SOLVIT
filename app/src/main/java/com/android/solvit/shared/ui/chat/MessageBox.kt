@@ -28,14 +28,16 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -43,27 +45,29 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.android.solvit.R
+import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
+import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.chat.ChatMessage
 import com.android.solvit.shared.model.chat.ChatViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
+import com.android.solvit.shared.ui.utils.getReceiverImageUrl
+import com.android.solvit.shared.ui.utils.getReceiverName
 
 @Composable
 fun MessageBox(
     chatViewModel: ChatViewModel,
     navigationActions: NavigationActions,
-    authViewModel: AuthViewModel
+    authViewModel: AuthViewModel,
+    listProviderViewModel: ListProviderViewModel,
+    seekerProfileViewModel: SeekerProfileViewModel
 ) {
 
   val allMessages by chatViewModel.allMessages.collectAsState()
+  val role by authViewModel.role.collectAsState()
 
   chatViewModel.getAllLastMessages()
-
-  // picture is hardCoded since we didn't implement yet a logic to all informations of a user
-  // starting from its id
-  val picture =
-      "https://firebasestorage.googleapis.com/v0/b/solvit-14cc1.appspot.com/o/serviceRequestImages%2F98a09ae2-fddf-4ab8-96a5-3b10210230c7.jpg?alt=media&token=ce9376d6-de0f-42eb-ad97-5e4af0a74b16"
 
   Scaffold(
       topBar = { ChatListTopBar(navigationActions, chatViewModel, authViewModel) },
@@ -72,8 +76,17 @@ fun MessageBox(
           LazyColumn(
               modifier = Modifier.padding(paddingValues).fillMaxSize(),
               contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)) {
-                items(allMessages) { chat ->
-                  ChatListItem(chat, picture, navigationActions, chatViewModel)
+                items(allMessages.entries.toList()) { message ->
+                  message.key?.let {
+                    ChatListItem(
+                        message = message.value,
+                        receiverId = it,
+                        role = role,
+                        navigationActions = navigationActions,
+                        providersViewModel = listProviderViewModel,
+                        seekerProfileViewModel = seekerProfileViewModel,
+                        chatViewModel = chatViewModel)
+                  }
                 }
               }
         } else {
@@ -89,7 +102,7 @@ fun ChatListTopBar(
     chatViewModel: ChatViewModel,
     authViewModel: AuthViewModel
 ) {
-  val context = LocalContext.current
+
   chatViewModel.setReceiverUid("12345")
   chatViewModel.initChat()
   TopAppBar(
@@ -146,23 +159,40 @@ fun ChatListTopBar(
 @Composable
 fun ChatListItem(
     message: ChatMessage.TextMessage,
-    picture: String,
+    receiverId: String,
+    role: String,
     navigationActions: NavigationActions,
-    listChatViewModel: ChatViewModel
+    providersViewModel: ListProviderViewModel,
+    seekerProfileViewModel: SeekerProfileViewModel,
+    chatViewModel: ChatViewModel
 ) {
+
+  val receiver = remember { mutableStateOf<Any?>(null) }
+
+  LaunchedEffect(receiverId, role) {
+    // Given the current authenticated user, we retrieve the receiver Profile
+    if (role == "Seeker") {
+      providersViewModel.getProvider(receiverId) // Fetch provider
+      providersViewModel.selectedProvider.collect { provider -> receiver.value = provider }
+    } else {
+      seekerProfileViewModel.getUserProfile(receiverId) // Fetch seeker
+      seekerProfileViewModel.seekerProfile.collect { seeker -> receiver.value = seeker }
+    }
+  }
+  val receiverName = getReceiverName(receiver)
+  val receiverPicture = getReceiverImageUrl(receiver)
 
   Row(
       modifier =
           Modifier.fillMaxWidth().padding(vertical = 8.dp).testTag("ChatListItem").clickable {
-            // Actions to retrieve the conversation with correct user
-            listChatViewModel.setReceiverUid(message.senderId)
-            listChatViewModel.setReceiverName(message.senderName)
+            chatViewModel.setReceiverUid(receiverId)
+            chatViewModel.setReceiver(receiver)
             navigationActions.navigateTo(Screen.CHAT)
           },
       verticalAlignment = Alignment.CenterVertically) {
         AsyncImage(
             modifier = Modifier.size(40.dp).clip(CircleShape),
-            model = picture.ifEmpty { R.drawable.empty_profile_img },
+            model = receiverPicture.ifEmpty { R.drawable.default_pdp },
             placeholder = painterResource(id = R.drawable.loading),
             error = painterResource(id = R.drawable.error),
             contentDescription = "provider image",
@@ -172,7 +202,7 @@ fun ChatListItem(
 
         Column(modifier = Modifier.weight(1f)) {
           Text(
-              text = message.senderName,
+              text = receiverName,
               style = MaterialTheme.typography.titleMedium,
               fontWeight = FontWeight.Bold)
           Text(

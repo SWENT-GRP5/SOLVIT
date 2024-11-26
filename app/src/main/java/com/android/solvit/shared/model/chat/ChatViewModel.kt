@@ -16,11 +16,11 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
   private val _coMessage = MutableStateFlow<List<ChatMessage.TextMessage>>(emptyList())
   val coMessage: StateFlow<List<ChatMessage.TextMessage>> = _coMessage
 
-  private val _allMessages = MutableStateFlow<List<ChatMessage.TextMessage>>(emptyList())
-  val allMessages: StateFlow<List<ChatMessage.TextMessage>> = _allMessages
+  private val _allMessages = MutableStateFlow<Map<String?, ChatMessage.TextMessage>>(emptyMap())
+  val allMessages: StateFlow<Map<String?, ChatMessage.TextMessage>> = _allMessages
 
-  private val _receiverName = MutableStateFlow<String>("")
-  val receiverName: StateFlow<String> = _receiverName
+  private val _receiver = MutableStateFlow<Any>("")
+  val receiver: StateFlow<Any> = _receiver
 
   // Create factory
   companion object {
@@ -36,7 +36,6 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
   }
 
   init {
-    Log.e("Debug Test", "Init")
     getAllLastMessages()
   }
 
@@ -44,13 +43,12 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
     receiverUid = uid
   }
 
-  fun setReceiverName(name: String) {
-    _receiverName.value = name
+  fun setReceiver(receiver: Any) {
+    _receiver.value = receiver
   }
 
   fun initChat() {
     receiverUid?.let {
-      Log.e("receiverUid", "notnNull")
       repository.initChat(
           onSuccess = { uid ->
             Log.e("initChat", "onSuccess $uid")
@@ -84,7 +82,10 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
   fun getAllLastMessages() {
 
     repository.listenForLastMessages(
-        onSuccess = { list -> _allMessages.value = list },
+        onSuccess = { unsortedMap ->
+          _allMessages.value =
+              unsortedMap.toList().sortedByDescending { it.second.timestamp }.toMap()
+        },
         onFailure = { Log.e("ChatViewModel", "Failed to get All messages") })
   }
 }

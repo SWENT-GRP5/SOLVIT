@@ -17,7 +17,7 @@ interface ChatRepository {
   )
 
   fun listenForLastMessages(
-      onSuccess: (List<ChatMessage.TextMessage>) -> Unit,
+      onSuccess: (Map<String?, ChatMessage.TextMessage>) -> Unit,
       onFailure: () -> Unit
   )
 }
