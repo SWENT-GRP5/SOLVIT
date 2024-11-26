@@ -7,15 +7,14 @@ import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.provider.ProviderRepository
 import com.android.solvit.shared.model.provider.ProviderRepositoryFirestore
-import com.android.solvit.shared.model.provider.Schedule
-import com.android.solvit.shared.model.provider.ScheduleException
 import com.android.solvit.shared.model.provider.TimeSlot
+import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.storage
-import java.time.DayOfWeek
 import java.time.LocalDateTime
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 class ProviderCalendarViewModel(
@@ -28,7 +27,7 @@ class ProviderCalendarViewModel(
 
   init {
     loadProvider()
-    loadServiceRequests()
+    serviceRequestViewModel.getServiceRequests()
   }
 
   private fun loadProvider() {
@@ -51,15 +50,12 @@ class ProviderCalendarViewModel(
         onFailure = { e -> Log.e("ProviderCalendarViewModel", "Failed to load provider", e) })
   }
 
-  private fun loadServiceRequests() {
-    serviceRequestViewModel.getServiceRequests()
-  }
-
-  fun getServiceRequests() =
+  val serviceRequests: Flow<List<ServiceRequest>> =
       serviceRequestViewModel.requests.map { requests ->
         requests.filter { request ->
           try {
-            request.meetingDate != null
+            // Filter requests that have a meeting date and are assigned to this provider
+            request.meetingDate != null && request.providerId == currentProvider.uid
           } catch (e: Exception) {
             Log.e("ProviderCalendarViewModel", "Error processing service request", e)
             false
@@ -67,57 +63,12 @@ class ProviderCalendarViewModel(
         }
       }
 
-  fun setRegularHours(
-      day: DayOfWeek,
-      timeSlots: List<TimeSlot>,
-      onSuccess: () -> Unit = {},
-      onError: (String) -> Unit = {}
-  ) {
-    val newSchedule = currentProvider.schedule.setRegularHours(day, timeSlots)
-    updateProviderSchedule(newSchedule, onSuccess, onError)
-  }
-
-  fun addException(
-      date: LocalDateTime,
-      timeSlots: List<TimeSlot>,
-      onSuccess: () -> Unit = {},
-      onError: (String) -> Unit = {}
-  ) {
-    val exception = ScheduleException(date, timeSlots)
-    val newSchedule = currentProvider.schedule.addException(exception)
-    updateProviderSchedule(newSchedule, onSuccess, onError)
-  }
-
-  fun removeException(
-      date: LocalDateTime,
-      onSuccess: () -> Unit = {},
-      onError: (String) -> Unit = {}
-  ) {
-    val newSchedule = currentProvider.schedule.removeException(date)
-    updateProviderSchedule(newSchedule, onSuccess, onError)
-  }
-
   fun isAvailable(dateTime: LocalDateTime): Boolean {
     return currentProvider.schedule.isAvailable(dateTime)
   }
 
   fun getAvailableSlots(date: LocalDateTime): List<TimeSlot> {
     return currentProvider.schedule.getAvailableSlots(date)
-  }
-
-  private fun updateProviderSchedule(
-      newSchedule: Schedule,
-      onSuccess: () -> Unit,
-      onError: (String) -> Unit
-  ) {
-    val updatedProvider = currentProvider.copy(schedule = newSchedule)
-    providerRepository.updateProvider(
-        updatedProvider,
-        onSuccess = {
-          currentProvider = updatedProvider
-          onSuccess()
-        },
-        onFailure = { e -> onError("Failed to update schedule: ${e.message}") })
   }
 
   companion object {

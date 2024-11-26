@@ -6,17 +6,19 @@ import com.android.solvit.shared.model.authentication.User
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.provider.*
 import com.android.solvit.shared.model.request.ServiceRequest
+import com.android.solvit.shared.model.request.ServiceRequestStatus
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.service.Services
 import com.google.firebase.Timestamp
 import java.time.DayOfWeek
 import java.time.LocalDateTime
 import java.time.LocalTime
+import java.time.ZoneOffset
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import org.junit.Assert
-import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertTrue
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
+import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.mockito.kotlin.*
@@ -24,6 +26,24 @@ import org.mockito.kotlin.*
 class ProviderCalendarViewModelTest {
   private val testUserId = "test_user_id"
   private val testLocation = Location(37.7749, -122.4194, "San Francisco")
+
+  // Create a test schedule with regular hours and exceptions
+  private val testSchedule =
+      Schedule(
+          regularHours =
+              mapOf(
+                  DayOfWeek.MONDAY.name to
+                      listOf(
+                          TimeSlot(LocalTime.of(9, 0), LocalTime.of(12, 0)),
+                          TimeSlot(LocalTime.of(13, 0), LocalTime.of(17, 0))),
+                  DayOfWeek.WEDNESDAY.name to
+                      listOf(TimeSlot(LocalTime.of(10, 0), LocalTime.of(16, 0)))),
+          exceptions =
+              listOf(
+                  ScheduleException(
+                      LocalDateTime.of(2024, 1, 1, 0, 0), // First Monday of 2024
+                      listOf(TimeSlot(LocalTime.of(14, 0), LocalTime.of(18, 0))))))
+
   private val testProvider =
       Provider(
           uid = testUserId,
@@ -39,7 +59,7 @@ class ProviderCalendarViewModelTest {
           price = 0.0,
           deliveryTime = Timestamp.now(),
           languages = listOf(Language.ENGLISH),
-          schedule = Schedule())
+          schedule = testSchedule)
 
   private lateinit var authRepository: AuthRepository
   private lateinit var providerRepository: ProviderRepository
@@ -49,7 +69,58 @@ class ProviderCalendarViewModelTest {
   private lateinit var authViewModel: AuthViewModel
   private lateinit var serviceRequestViewModel: ServiceRequestViewModel
   private lateinit var calendarViewModel: ProviderCalendarViewModel
-  private lateinit var request: ServiceRequest
+
+  // Test data for service requests
+  private val testDate = LocalDateTime.of(2024, 1, 8, 10, 0) // A Monday at 10:00
+  private val assignedRequest =
+      ServiceRequest(
+          uid = "request1",
+          title = "Fix leaky faucet",
+          type = Services.PLUMBER,
+          description = "Test request",
+          userId = "seeker1",
+          providerId = testUserId, // Assigned to our test provider
+          dueDate = Timestamp(testDate.plusDays(7).toInstant(ZoneOffset.UTC).epochSecond, 0),
+          meetingDate = Timestamp(testDate.toInstant(ZoneOffset.UTC).epochSecond, 0),
+          location = testLocation,
+          imageUrl = null,
+          packageId = null,
+          agreedPrice = 100.0,
+          status = ServiceRequestStatus.PENDING)
+
+  private val unassignedRequest =
+      ServiceRequest(
+          uid = "request2",
+          title = "Unassigned plumbing job",
+          type = Services.PLUMBER,
+          description = "Unassigned request",
+          userId = "seeker2",
+          providerId = null, // Not assigned to any provider
+          dueDate = Timestamp(testDate.plusDays(7).toInstant(ZoneOffset.UTC).epochSecond, 0),
+          meetingDate = Timestamp(testDate.toInstant(ZoneOffset.UTC).epochSecond, 0),
+          location = testLocation,
+          imageUrl = null,
+          packageId = null,
+          agreedPrice = null,
+          status = ServiceRequestStatus.PENDING)
+
+  private val otherProviderRequest =
+      ServiceRequest(
+          uid = "request3",
+          title = "Other provider job",
+          type = Services.PLUMBER,
+          description = "Other provider request",
+          userId = "seeker3",
+          providerId = "other_provider_id", // Assigned to a different provider
+          dueDate = Timestamp(testDate.plusDays(7).toInstant(ZoneOffset.UTC).epochSecond, 0),
+          meetingDate = Timestamp(testDate.toInstant(ZoneOffset.UTC).epochSecond, 0),
+          location = testLocation,
+          imageUrl = null,
+          packageId = null,
+          agreedPrice = 150.0,
+          status = ServiceRequestStatus.PENDING)
+
+  private lateinit var noMeetingRequest: ServiceRequest
 
   @Before
   fun setUp() {
@@ -58,7 +129,6 @@ class ProviderCalendarViewModelTest {
     providerRepository = mock()
     mockUser = mock()
     serviceRequestViewModel = mock()
-    request = mock()
 
     // Configure mock user
     whenever(mockUser.uid).thenReturn(testUserId)
@@ -74,12 +144,12 @@ class ProviderCalendarViewModelTest {
     // Configure auth view model with mock user
     authViewModel = AuthViewModel(authRepository)
 
-    // Configure service request view model
+    // Configure service request view model with test data
     requestsFlow = MutableStateFlow(emptyList())
     whenever(serviceRequestViewModel.requests)
         .thenReturn(requestsFlow as StateFlow<List<ServiceRequest>>)
     doAnswer {
-          requestsFlow.value = listOf(request)
+          requestsFlow.value = listOf(assignedRequest, unassignedRequest, otherProviderRequest)
           Unit
         }
         .whenever(serviceRequestViewModel)
@@ -92,13 +162,6 @@ class ProviderCalendarViewModelTest {
       Unit
     }
 
-    // Configure successful provider updates
-    whenever(providerRepository.updateProvider(any(), any(), any())).then {
-      val onSuccess = it.getArgument<() -> Unit>(1)
-      onSuccess()
-      Unit
-    }
-
     // Initialize view model with mocked dependencies
     calendarViewModel =
         ProviderCalendarViewModel(providerRepository, authViewModel, serviceRequestViewModel)
@@ -108,179 +171,106 @@ class ProviderCalendarViewModelTest {
   }
 
   @Test
-  fun testSetRegularHours() {
-    // Test setting regular hours
-    val timeSlots =
-        listOf(
-            TimeSlot(LocalTime.of(9, 0), LocalTime.of(12, 0)),
-            TimeSlot(LocalTime.of(13, 0), LocalTime.of(17, 0)))
+  fun testServiceRequests() = runBlocking {
+    // Verify that getServiceRequests is called during initialization
+    verify(serviceRequestViewModel).getServiceRequests()
 
-    var successCalled = false
-    calendarViewModel.setRegularHours(
-        DayOfWeek.MONDAY, timeSlots, onSuccess = { successCalled = true })
+    // Test that the flow only emits requests assigned to the current provider
+    val requests = calendarViewModel.serviceRequests.first()
+    assertEquals("Should only contain requests for current provider", 1, requests.size)
+    assertEquals("Should be the assigned request", assignedRequest, requests[0])
 
-    verify(providerRepository, timeout(1000)).updateProvider(any(), any(), any())
-    Assert.assertTrue("setRegularHours should call onSuccess", successCalled)
+    // Test filtering out requests with null meeting date
+    noMeetingRequest = assignedRequest.copy(meetingDate = null)
+    requestsFlow.value = listOf(noMeetingRequest, unassignedRequest, otherProviderRequest)
+    val filteredRequests = calendarViewModel.serviceRequests.first()
+    assertTrue("Should filter out requests with null meeting date", filteredRequests.isEmpty())
 
-    // Verify the hours were set correctly
-    val availableSlots =
-        calendarViewModel.getAvailableSlots(
-            LocalDateTime.of(2024, 1, 1, 0, 0) // A Monday
-            )
-    Assert.assertEquals(2, availableSlots.size)
-    Assert.assertEquals(LocalTime.of(9, 0), availableSlots[0].start)
-    Assert.assertEquals(LocalTime.of(12, 0), availableSlots[0].end)
-    Assert.assertEquals(LocalTime.of(13, 0), availableSlots[1].start)
-    Assert.assertEquals(LocalTime.of(17, 0), availableSlots[1].end)
+    // Test filtering out unassigned requests
+    requestsFlow.value = listOf(unassignedRequest)
+    val unassignedRequests = calendarViewModel.serviceRequests.first()
+    assertTrue("Should filter out unassigned requests", unassignedRequests.isEmpty())
+
+    // Test filtering out requests for other providers
+    requestsFlow.value = listOf(otherProviderRequest)
+    val wrongProviderRequests = calendarViewModel.serviceRequests.first()
+    assertTrue("Should filter out requests for other providers", wrongProviderRequests.isEmpty())
   }
 
   @Test
-  fun testAddException() {
-    // First set regular hours
-    val regularSlots = listOf(TimeSlot(LocalTime.of(9, 0), LocalTime.of(17, 0)))
+  fun testServiceRequestsErrorHandling() = runBlocking {
+    // Create a request that will cause an error when accessing providerId
+    val errorRequest = mock<ServiceRequest>()
+    whenever(errorRequest.meetingDate)
+        .thenReturn(Timestamp(testDate.toInstant(ZoneOffset.UTC).epochSecond, 0))
+    whenever(errorRequest.providerId).thenThrow(RuntimeException("Test error"))
 
-    var regularHoursSet = false
-    calendarViewModel.setRegularHours(
-        DayOfWeek.MONDAY, regularSlots, onSuccess = { regularHoursSet = true })
-    verify(providerRepository, timeout(1000)).updateProvider(any(), any(), any())
-    Assert.assertTrue("Failed to set regular hours", regularHoursSet)
+    // Update the flow with the error-causing request
+    requestsFlow.value = listOf(errorRequest)
 
-    // Add an exception
-    val exceptionDate = LocalDateTime.of(2024, 1, 1, 0, 0) // A Monday
-    val exceptionSlots = listOf(TimeSlot(LocalTime.of(10, 0), LocalTime.of(15, 0)))
-
-    var exceptionAdded = false
-    calendarViewModel.addException(
-        exceptionDate, exceptionSlots, onSuccess = { exceptionAdded = true })
-
-    verify(providerRepository, timeout(1000).times(2)).updateProvider(any(), any(), any())
-    Assert.assertTrue("addException should call onSuccess", exceptionAdded)
-
-    // Verify the exception was added
-    val availableSlots = calendarViewModel.getAvailableSlots(exceptionDate)
-    Assert.assertEquals(1, availableSlots.size)
-    Assert.assertEquals(LocalTime.of(10, 0), availableSlots[0].start)
-    Assert.assertEquals(LocalTime.of(15, 0), availableSlots[0].end)
-  }
-
-  @Test
-  fun testRemoveException() {
-    // First set regular hours and add an exception
-    val regularSlots = listOf(TimeSlot(LocalTime.of(9, 0), LocalTime.of(17, 0)))
-
-    val exceptionDate = LocalDateTime.of(2024, 1, 1, 0, 0) // A Monday
-    val exceptionSlots = listOf(TimeSlot(LocalTime.of(10, 0), LocalTime.of(15, 0)))
-
-    var regularHoursSet = false
-    calendarViewModel.setRegularHours(
-        DayOfWeek.MONDAY, regularSlots, onSuccess = { regularHoursSet = true })
-    verify(providerRepository, timeout(1000)).updateProvider(any(), any(), any())
-    Assert.assertTrue("Failed to set regular hours", regularHoursSet)
-
-    var exceptionAdded = false
-    calendarViewModel.addException(
-        exceptionDate, exceptionSlots, onSuccess = { exceptionAdded = true })
-    verify(providerRepository, timeout(1000).times(2)).updateProvider(any(), any(), any())
-    Assert.assertTrue("addException should call onSuccess", exceptionAdded)
-
-    // Remove the exception
-    var successCalled = false
-    calendarViewModel.removeException(exceptionDate, onSuccess = { successCalled = true })
-
-    verify(providerRepository, timeout(1000).times(3)).updateProvider(any(), any(), any())
-    Assert.assertTrue("removeException should call onSuccess", successCalled)
-
-    // Verify the exception was removed and regular hours are back
-    val availableSlots = calendarViewModel.getAvailableSlots(exceptionDate)
-    Assert.assertEquals(1, availableSlots.size)
-    Assert.assertEquals(LocalTime.of(9, 0), availableSlots[0].start)
-    Assert.assertEquals(LocalTime.of(17, 0), availableSlots[0].end)
+    // Verify that the error is handled gracefully
+    val requests = calendarViewModel.serviceRequests.first()
+    assertTrue("Should filter out requests that cause errors", requests.isEmpty())
   }
 
   @Test
   fun testIsAvailable() {
-    // Set up regular hours for Monday
-    val regularSlots = listOf(TimeSlot(LocalTime.of(9, 0), LocalTime.of(17, 0)))
+    // Test regular Monday slot (should be available)
+    val regularMonday = LocalDateTime.of(2024, 1, 8, 10, 0) // Second Monday of 2024
+    assertTrue(
+        "Should be available during regular Monday hours",
+        calendarViewModel.isAvailable(regularMonday))
 
-    var regularHoursSet = false
-    calendarViewModel.setRegularHours(
-        DayOfWeek.MONDAY, regularSlots, onSuccess = { regularHoursSet = true })
-    verify(providerRepository, timeout(1000)).updateProvider(any(), any(), any())
-    Assert.assertTrue("Failed to set regular hours", regularHoursSet)
+    // Test regular Monday lunch break (should not be available)
+    val mondayLunch = LocalDateTime.of(2024, 1, 8, 12, 30)
+    assertFalse(
+        "Should not be available during lunch break", calendarViewModel.isAvailable(mondayLunch))
 
-    // Test availability for a Monday at 10 AM (should be available)
-    val mondayAt10 = LocalDateTime.of(2024, 1, 1, 10, 0) // This is a Monday
-    Assert.assertTrue(calendarViewModel.isAvailable(mondayAt10))
+    // Test exception Monday (should be available according to exception hours)
+    val exceptionMonday = LocalDateTime.of(2024, 1, 1, 15, 0)
+    assertTrue(
+        "Should be available during exception hours",
+        calendarViewModel.isAvailable(exceptionMonday))
 
-    // Test availability for a Monday at 18 PM (should not be available)
-    val mondayAt18 = LocalDateTime.of(2024, 1, 1, 18, 0)
-    Assert.assertFalse(calendarViewModel.isAvailable(mondayAt18))
+    // Test regular Wednesday slot (should be available)
+    val wednesday = LocalDateTime.of(2024, 1, 3, 11, 0)
+    assertTrue(
+        "Should be available during Wednesday hours", calendarViewModel.isAvailable(wednesday))
 
-    // Test availability for a Sunday (should not be available)
-    val sundayAt10 = LocalDateTime.of(2024, 1, 7, 10, 0)
-    Assert.assertFalse(calendarViewModel.isAvailable(sundayAt10))
+    // Test Tuesday (should not be available)
+    val tuesday = LocalDateTime.of(2024, 1, 2, 10, 0)
+    assertFalse("Should not be available on Tuesday", calendarViewModel.isAvailable(tuesday))
   }
 
   @Test
   fun testGetAvailableSlots() {
-    // Set up regular hours for Monday
-    val regularSlots =
-        listOf(
-            TimeSlot(LocalTime.of(9, 0), LocalTime.of(12, 0)),
-            TimeSlot(LocalTime.of(13, 0), LocalTime.of(17, 0)))
+    // Test regular Monday slots
+    val regularMonday = LocalDateTime.of(2024, 1, 8, 0, 0)
+    val regularMondaySlots = calendarViewModel.getAvailableSlots(regularMonday)
+    assertEquals("Should have 2 slots on regular Monday", 2, regularMondaySlots.size)
+    assertEquals(LocalTime.of(9, 0), regularMondaySlots[0].start)
+    assertEquals(LocalTime.of(12, 0), regularMondaySlots[0].end)
+    assertEquals(LocalTime.of(13, 0), regularMondaySlots[1].start)
+    assertEquals(LocalTime.of(17, 0), regularMondaySlots[1].end)
 
-    var regularHoursSet = false
-    calendarViewModel.setRegularHours(
-        DayOfWeek.MONDAY, regularSlots, onSuccess = { regularHoursSet = true })
-    verify(providerRepository, timeout(1000)).updateProvider(any(), any(), any())
-    Assert.assertTrue("Failed to set regular hours", regularHoursSet)
+    // Test exception Monday slots
+    val exceptionMonday = LocalDateTime.of(2024, 1, 1, 0, 0)
+    val exceptionSlots = calendarViewModel.getAvailableSlots(exceptionMonday)
+    assertEquals("Should have 1 slot on exception Monday", 1, exceptionSlots.size)
+    assertEquals(LocalTime.of(14, 0), exceptionSlots[0].start)
+    assertEquals(LocalTime.of(18, 0), exceptionSlots[0].end)
 
-    // Test getting available slots for a Monday
-    val monday = LocalDateTime.of(2024, 1, 1, 0, 0)
-    val availableSlots = calendarViewModel.getAvailableSlots(monday)
+    // Test Wednesday slots
+    val wednesday = LocalDateTime.of(2024, 1, 3, 0, 0)
+    val wednesdaySlots = calendarViewModel.getAvailableSlots(wednesday)
+    assertEquals("Should have 1 slot on Wednesday", 1, wednesdaySlots.size)
+    assertEquals(LocalTime.of(10, 0), wednesdaySlots[0].start)
+    assertEquals(LocalTime.of(16, 0), wednesdaySlots[0].end)
 
-    Assert.assertEquals(2, availableSlots.size)
-    Assert.assertEquals(LocalTime.of(9, 0), availableSlots[0].start)
-    Assert.assertEquals(LocalTime.of(12, 0), availableSlots[0].end)
-    Assert.assertEquals(LocalTime.of(13, 0), availableSlots[1].start)
-    Assert.assertEquals(LocalTime.of(17, 0), availableSlots[1].end)
-
-    // Test getting available slots for a Sunday (should be empty)
-    val sunday = LocalDateTime.of(2024, 1, 7, 0, 0)
-    val sundaySlots = calendarViewModel.getAvailableSlots(sunday)
-    Assert.assertTrue(sundaySlots.isEmpty())
-  }
-
-  @Test
-  fun testSetRegularHoursWithDefaultCallbacks() {
-    val timeSlots = listOf(TimeSlot(9, 0, 17, 0))
-    calendarViewModel.setRegularHours(DayOfWeek.MONDAY, timeSlots)
-    verify(providerRepository, timeout(1000)).updateProvider(any(), any(), any())
-  }
-
-  @Test
-  fun testAddExceptionWithDefaultCallbacks() {
-    val timeSlots = listOf(TimeSlot(9, 0, 17, 0))
-    val date = LocalDateTime.now()
-    calendarViewModel.addException(date, timeSlots)
-    verify(providerRepository, timeout(1000)).updateProvider(any(), any(), any())
-  }
-
-  @Test
-  fun testRemoveExceptionWithDefaultCallbacks() {
-    val date = LocalDateTime.now()
-    calendarViewModel.removeException(date)
-    verify(providerRepository, timeout(1000)).updateProvider(any(), any(), any())
-  }
-
-  @Test
-  fun testGetServiceRequests() {
-    // Verify that getServiceRequests is called and returns the flow
-    verify(serviceRequestViewModel).getServiceRequests()
-
-    // Test that the flow is accessible
-    val requests = calendarViewModel.getServiceRequests()
-    assertNotNull(requests)
+    // Test Tuesday (no slots)
+    val tuesday = LocalDateTime.of(2024, 1, 2, 0, 0)
+    val tuesdaySlots = calendarViewModel.getAvailableSlots(tuesday)
+    assertTrue("Should have no slots on Tuesday", tuesdaySlots.isEmpty())
   }
 
   @Test
@@ -299,70 +289,45 @@ class ProviderCalendarViewModelTest {
     // Create new provider repository for this test
     val testProviderRepo = mock<ProviderRepository>()
 
-    // Create new view model with null user auth
-    val newViewModel =
+    // Create new view model with null user
+    val viewModel =
         ProviderCalendarViewModel(testProviderRepo, nullAuthViewModel, serviceRequestViewModel)
 
-    // Verify getProvider is not called when no user is logged in
+    // Verify that getProvider was not called
     verify(testProviderRepo, never()).getProvider(any(), any(), any())
   }
 
   @Test
   fun testLoadProviderFailure() {
-    // Create new provider repository for this test
-    val testProviderRepo = mock<ProviderRepository>()
-
-    // Configure provider repository to fail
-    whenever(testProviderRepo.getProvider(eq(testUserId), any(), any())).then {
+    // Create new provider repository that fails
+    val failingRepo = mock<ProviderRepository>()
+    whenever(failingRepo.getProvider(eq(testUserId), any(), any())).then {
       val onFailure = it.getArgument<(Exception) -> Unit>(2)
-      onFailure(Exception("Test error"))
+      onFailure(Exception("Test failure"))
       Unit
     }
 
-    // Create new view model to trigger load
-    val newViewModel =
-        ProviderCalendarViewModel(testProviderRepo, authViewModel, serviceRequestViewModel)
+    // Create new view model with failing repository
+    val viewModel = ProviderCalendarViewModel(failingRepo, authViewModel, serviceRequestViewModel)
 
-    // Verify getProvider was called with failure callback
-    verify(testProviderRepo, timeout(1000)).getProvider(eq(testUserId), any(), any())
+    // Verify that getProvider was called
+    verify(failingRepo, timeout(1000)).getProvider(eq(testUserId), any(), any())
   }
 
   @Test
   fun testLoadProviderNullProvider() {
-    // Create new provider repository for this test
-    val testProviderRepo = mock<ProviderRepository>()
-
-    // Configure provider repository to return null provider
-    whenever(testProviderRepo.getProvider(eq(testUserId), any(), any())).then {
+    // Create new provider repository that returns null
+    val nullRepo = mock<ProviderRepository>()
+    whenever(nullRepo.getProvider(eq(testUserId), any(), any())).then {
       val onSuccess = it.getArgument<(Provider?) -> Unit>(1)
       onSuccess(null)
       Unit
     }
 
-    // Create new view model to trigger load
-    val newViewModel =
-        ProviderCalendarViewModel(testProviderRepo, authViewModel, serviceRequestViewModel)
+    // Create new view model with null-returning repository
+    val viewModel = ProviderCalendarViewModel(nullRepo, authViewModel, serviceRequestViewModel)
 
-    // Verify getProvider was called
-    verify(testProviderRepo, timeout(1000)).getProvider(eq(testUserId), any(), any())
-  }
-
-  @Test
-  fun testUpdateProviderScheduleFailure() {
-    // Configure provider repository to fail on update
-    whenever(providerRepository.updateProvider(any(), any(), any())).then {
-      val onFailure = it.getArgument<(Exception) -> Unit>(2)
-      onFailure(Exception("Test error"))
-      Unit
-    }
-
-    var errorMessage: String? = null
-    calendarViewModel.setRegularHours(
-        DayOfWeek.MONDAY, listOf(TimeSlot(9, 0, 17, 0)), onError = { errorMessage = it })
-
-    // Verify error callback was called with correct message
-    verify(providerRepository, timeout(1000)).updateProvider(any(), any(), any())
-    assertNotNull(errorMessage)
-    assertTrue(errorMessage!!.contains("Failed to update schedule"))
+    // Verify that getProvider was called
+    verify(nullRepo, timeout(1000)).getProvider(eq(testUserId), any(), any())
   }
 }

@@ -66,29 +66,14 @@ class ScheduleTest {
   }
 
   @Test
-  fun testScheduleExceptions() {
-    val schedule = Schedule()
-    val date = LocalDateTime.now()
-    val timeSlots = listOf(TimeSlot(9, 0, 17, 0))
-    val exception = ScheduleException(date, timeSlots)
-
-    // Add exception and get new schedule
-    val updatedSchedule = schedule.addException(exception)
-
-    // Test exceptions getter
-    assertEquals(1, updatedSchedule.exceptions.size)
-    assertEquals(exception, updatedSchedule.exceptions[0])
-  }
-
-  @Test
   fun testIsAvailableWithException() {
-    var schedule = Schedule()
-    val date = LocalDateTime.of(2024, 1, 1, 10, 0) // 10:00 AM
-    val timeSlots = listOf(TimeSlot(9, 0, 17, 0))
-    val exception = ScheduleException(date, timeSlots)
-
-    // Add exception and update schedule
-    schedule = schedule.addException(exception)
+    val schedule =
+        Schedule(
+            regularHours = mapOf(),
+            exceptions =
+                listOf(
+                    ScheduleException(
+                        LocalDateTime.of(2024, 1, 1, 10, 0), listOf(TimeSlot(9, 0, 17, 0)))))
 
     // Test availability within exception time slot
     val timeInSlot = LocalDateTime.of(2024, 1, 1, 10, 30) // 10:30 AM
@@ -100,16 +85,58 @@ class ScheduleTest {
   }
 
   @Test
-  fun testIsAvailableWithExceptionEmptySlots() {
-    var schedule = Schedule()
-    val date = LocalDateTime.of(2024, 1, 1, 10, 0)
-    val exception = ScheduleException(date, emptyList()) // Provider is off
+  fun testIsAvailableWithRegularHours() {
+    val schedule =
+        Schedule(
+            regularHours = mapOf("MONDAY" to listOf(TimeSlot(9, 0, 17, 0))), exceptions = listOf())
 
-    // Add exception and update schedule
-    schedule = schedule.addException(exception)
+    // Test availability within regular hours
+    val timeInSlot = LocalDateTime.of(2024, 1, 1, 10, 30) // Monday 10:30 AM
+    assertTrue(schedule.isAvailable(timeInSlot))
 
-    // Test availability on exception date
-    val timeOnDate = LocalDateTime.of(2024, 1, 1, 10, 30)
-    assertFalse(schedule.isAvailable(timeOnDate))
+    // Test availability outside regular hours
+    val timeOutsideSlot = LocalDateTime.of(2024, 1, 1, 8, 0) // Monday 8:00 AM
+    assertFalse(schedule.isAvailable(timeOutsideSlot))
+
+    // Test availability on different day
+    val differentDay = LocalDateTime.of(2024, 1, 2, 10, 30) // Tuesday 10:30 AM
+    assertFalse(schedule.isAvailable(differentDay))
+  }
+
+  @Test
+  fun testGetAvailableSlots() {
+    val mondaySlots = listOf(TimeSlot(9, 0, 12, 0), TimeSlot(13, 0, 17, 0))
+    val schedule = Schedule(regularHours = mapOf("MONDAY" to mondaySlots), exceptions = listOf())
+
+    // Test getting slots for a Monday
+    val monday = LocalDateTime.of(2024, 1, 1, 0, 0)
+    val mondayAvailableSlots = schedule.getAvailableSlots(monday)
+    assertEquals(mondaySlots, mondayAvailableSlots)
+
+    // Test getting slots for a day with no hours
+    val tuesday = LocalDateTime.of(2024, 1, 2, 0, 0)
+    val tuesdayAvailableSlots = schedule.getAvailableSlots(tuesday)
+    assertTrue(tuesdayAvailableSlots.isEmpty())
+  }
+
+  @Test
+  fun testGetAvailableSlotsWithException() {
+    val regularSlots = listOf(TimeSlot(9, 0, 17, 0))
+    val exceptionSlots = listOf(TimeSlot(14, 0, 18, 0))
+    val schedule =
+        Schedule(
+            regularHours = mapOf("MONDAY" to regularSlots),
+            exceptions =
+                listOf(ScheduleException(LocalDateTime.of(2024, 1, 1, 0, 0), exceptionSlots)))
+
+    // Test getting slots for the exception day
+    val exceptionDay = LocalDateTime.of(2024, 1, 1, 0, 0)
+    val exceptionDaySlots = schedule.getAvailableSlots(exceptionDay)
+    assertEquals(exceptionSlots, exceptionDaySlots)
+
+    // Test getting slots for a regular day
+    val regularDay = LocalDateTime.of(2024, 1, 8, 0, 0)
+    val regularDaySlots = schedule.getAvailableSlots(regularDay)
+    assertEquals(regularSlots, regularDaySlots)
   }
 }

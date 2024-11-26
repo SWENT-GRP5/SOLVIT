@@ -87,7 +87,7 @@ fun ProviderCalendarScreen(
     viewModel: ProviderCalendarViewModel = viewModel(factory = ProviderCalendarViewModel.Factory)
 ) {
   val serviceRequests by
-      viewModel.getServiceRequests().collectAsStateWithLifecycle(initialValue = emptyList())
+      viewModel.serviceRequests.collectAsStateWithLifecycle(initialValue = emptyList())
 
   var selectedDate by remember { mutableStateOf(LocalDate.now()) }
   var currentViewDate by remember { mutableStateOf(LocalDate.now()) }
