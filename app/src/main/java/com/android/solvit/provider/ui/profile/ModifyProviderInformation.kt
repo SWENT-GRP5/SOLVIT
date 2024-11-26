@@ -234,13 +234,14 @@ fun ModifyInput(
   Button(
       onClick = {
         if (allIsGood) {
-            val updatedProvider = provider.copy(
-                name = newName,
-                companyName = newCompanyName,
-                service = newService,
-                phone = newPhoneNumber,
-                location = selectedLocation ?: provider.location,
-                languages = newLanguage)
+          val updatedProvider =
+              provider.copy(
+                  name = newName,
+                  companyName = newCompanyName,
+                  service = newService,
+                  phone = newPhoneNumber,
+                  location = selectedLocation ?: provider.location,
+                  languages = newLanguage)
 
           listProviderViewModel.updateProvider(provider = updatedProvider)
 
