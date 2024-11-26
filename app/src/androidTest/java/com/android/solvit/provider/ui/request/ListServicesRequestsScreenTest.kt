@@ -193,7 +193,7 @@ class ListServicesRequestsScreenTest {
     }
 
     composeTestRule.onNodeWithTag("packagesScrollableList").assertExists()
-    composeTestRule.onNodeWithTag("PackageCard").performClick()
+    composeTestRule.onAllNodesWithTag("PackageCard")[0].performClick()
     composeTestRule.onNodeWithText("Propose Package").performClick()
   }
 
