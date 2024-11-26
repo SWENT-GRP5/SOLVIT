@@ -418,7 +418,7 @@ fun ProposePackageDialog(
                                 }
                               },
                               label = { Text("Price") },
-                              modifier = Modifier.fillMaxWidth(),
+                              modifier = Modifier.fillMaxWidth().testTag("PriceInput"),
                               keyboardOptions =
                                   KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
                               singleLine = true,
@@ -431,6 +431,7 @@ fun ProposePackageDialog(
                           }
                           Spacer(modifier = Modifier.height(16.dp))
                           Button(
+                              modifier = Modifier.testTag("ConfirmButton"),
                               onClick = {
                                 requestViewModel.saveServiceRequest(
                                     request.copy(

@@ -1,13 +1,19 @@
 package com.android.solvit.provider.ui.request
 
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.navigation.NavController
 import com.android.solvit.shared.model.map.Location
+import com.android.solvit.shared.model.packages.PackageProposal
+import com.android.solvit.shared.model.packages.PackageProposalRepository
+import com.android.solvit.shared.model.packages.PackageProposalViewModel
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestRepository
 import com.android.solvit.shared.model.request.ServiceRequestStatus
@@ -28,6 +34,8 @@ import org.mockito.kotlin.any
 class ListServicesRequestsScreenTest {
   private lateinit var serviceRequestRepository: ServiceRequestRepository
   private lateinit var serviceRequestViewModel: ServiceRequestViewModel
+  private lateinit var packageProposalRepository: PackageProposalRepository
+  private lateinit var packageProposalViewModel: PackageProposalViewModel
   private lateinit var navController: NavController
   private lateinit var navigationActions: NavigationActions
   @get:Rule val composeTestRule = createComposeRule()
@@ -66,10 +74,32 @@ class ListServicesRequestsScreenTest {
               imageUrl =
                   "https://firebasestorage.googleapis.com/v0/b/solvit-14cc1.appspot.com/o/serviceRequestImages%2F588d3bd9-bcb7-47bc-9911-61fae59eaece.jpg?alt=media&token=5f747f33-9732-4b90-9b34-55e28732ebc3"))
 
+  private val emptyPackages = emptyList<PackageProposal>()
+  private val packages =
+      listOf(
+          PackageProposal(
+              uid = "1",
+              packageNumber = 1.0,
+              providerId = "provider1",
+              title = "Package 1",
+              description = "Description 1",
+              price = 99.99,
+              bulletPoints = listOf("Point 1", "Point 2")),
+          PackageProposal(
+              uid = "2",
+              packageNumber = 2.0,
+              providerId = "provider1",
+              title = "Package 2",
+              description = "Description 2",
+              price = 199.99,
+              bulletPoints = listOf("Point 1", "Point 2")))
+
   @Before
   fun setUp() {
     serviceRequestRepository = mock(ServiceRequestRepository::class.java)
     serviceRequestViewModel = ServiceRequestViewModel(serviceRequestRepository)
+    packageProposalRepository = mock(PackageProposalRepository::class.java)
+    packageProposalViewModel = PackageProposalViewModel(packageProposalRepository)
     navController = mock(NavController::class.java)
     navigationActions = mock(NavigationActions::class.java)
     // Mocking the getServiceRequests function to return the pre-defined request list
@@ -78,9 +108,6 @@ class ListServicesRequestsScreenTest {
       onSuccess(requests) // Simulate success
     }
     `when`(navigationActions.currentRoute()).thenReturn(Route.REQUESTS_FEED)
-    composeTestRule.setContent {
-      ListRequestsFeedScreen(serviceRequestViewModel, navigationActions)
-    }
 
     // Fetch service requests via the ViewModel
     serviceRequestViewModel.getServiceRequests()
@@ -89,6 +116,9 @@ class ListServicesRequestsScreenTest {
   // Test to check if all important UI components are displayed
   @Test
   fun allComponentsAreDisplayed() {
+    composeTestRule.setContent {
+      ListRequestsFeedScreen(serviceRequestViewModel, packageProposalViewModel, navigationActions)
+    }
     // Verify if the main screen container is displayed
     composeTestRule.onNodeWithTag("ListRequestsScreen").isDisplayed()
 
@@ -117,6 +147,10 @@ class ListServicesRequestsScreenTest {
   // Test the functionality of the search bar
   @Test
   fun testSearchBar() {
+    composeTestRule.setContent {
+      ListRequestsFeedScreen(serviceRequestViewModel, packageProposalViewModel, navigationActions)
+    }
+
     composeTestRule.onNodeWithTag("SearchBar").performTextInput("French")
     // Check that only the service request with the word "French" in the title is displayed
     assert(composeTestRule.onAllNodesWithTag("ServiceRequest").fetchSemanticsNodes().size == 1)
@@ -129,6 +163,9 @@ class ListServicesRequestsScreenTest {
 
   @Test
   fun testFilterServices() {
+    composeTestRule.setContent {
+      ListRequestsFeedScreen(serviceRequestViewModel, packageProposalViewModel, navigationActions)
+    }
     assert(composeTestRule.onAllNodesWithTag("FilterBar").fetchSemanticsNodes().isNotEmpty())
     // Perform Service Filtering
     composeTestRule.onNodeWithTag("ServiceChip").isDisplayed()
@@ -139,5 +176,48 @@ class ListServicesRequestsScreenTest {
 
     // Check that only tutor service request is displayed on the screen
     assert(composeTestRule.onAllNodesWithTag("ServiceRequest").fetchSemanticsNodes().size == 1)
+  }
+
+  @Test
+  fun proposePackageDialogProposesSelectedPackage() {
+    val showDialog = mutableStateOf(true)
+    val request = requests[0]
+
+    composeTestRule.setContent {
+      ProposePackageDialog(
+          providerId = "provider1",
+          request = request,
+          packages = packages,
+          showDialog = showDialog,
+          requestViewModel = serviceRequestViewModel)
+    }
+
+    composeTestRule.onNodeWithTag("packagesScrollableList").assertExists()
+    composeTestRule.onNodeWithTag("PackageCard").performClick()
+    composeTestRule.onNodeWithText("Propose Package").performClick()
+  }
+
+  @Test
+  fun proposePackageDialogDisplaysErrorForInvalidPrice() {
+    val showDialog = mutableStateOf(true)
+    val request = requests[0]
+
+    composeTestRule.setContent {
+      ProposePackageDialog(
+          providerId = "provider1",
+          request = request,
+          packages = emptyPackages,
+          showDialog = showDialog,
+          requestViewModel = serviceRequestViewModel)
+    }
+
+    composeTestRule
+        .onNodeWithText("No packages available. Please enter a price for this service:")
+        .assertExists()
+    composeTestRule.onNodeWithTag("PriceInput").performTextInput(".99")
+    composeTestRule.onNodeWithText("Please enter a valid number (e.g., 99 or 99.99)").assertExists()
+    composeTestRule.onNodeWithTag("PriceInput").performTextClearance()
+    composeTestRule.onNodeWithTag("PriceInput").performTextInput("99.9")
+    composeTestRule.onNodeWithTag("ConfirmButton").performClick()
   }
 }
