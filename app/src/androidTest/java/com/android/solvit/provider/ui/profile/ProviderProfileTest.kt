@@ -2,7 +2,6 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.solvit.provider.ui.profile.ProfileHeader
 import com.android.solvit.provider.ui.profile.StatsSection
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
@@ -14,12 +13,10 @@ import com.android.solvit.shared.ui.navigation.NavigationActions
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.verify
 
-@RunWith(AndroidJUnit4::class)
-class ProfessionalProfileScreenTest {
+class ProviderProfileScreenTest {
 
   private lateinit var mockNavigationActions: NavigationActions
   private lateinit var providerRepository: ProviderRepository
