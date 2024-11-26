@@ -49,6 +49,7 @@ class ProviderCalendarViewModelTest {
   private lateinit var authViewModel: AuthViewModel
   private lateinit var serviceRequestViewModel: ServiceRequestViewModel
   private lateinit var calendarViewModel: ProviderCalendarViewModel
+  private lateinit var request: ServiceRequest
 
   @Before
   fun setUp() {
@@ -57,6 +58,7 @@ class ProviderCalendarViewModelTest {
     providerRepository = mock()
     mockUser = mock()
     serviceRequestViewModel = mock()
+    request = mock()
 
     // Configure mock user
     whenever(mockUser.uid).thenReturn(testUserId)
@@ -76,11 +78,12 @@ class ProviderCalendarViewModelTest {
     requestsFlow = MutableStateFlow(emptyList())
     whenever(serviceRequestViewModel.requests)
         .thenReturn(requestsFlow as StateFlow<List<ServiceRequest>>)
-    whenever(serviceRequestViewModel.getServiceRequests()).then {
-      // Simulate loading requests
-      requestsFlow.value = listOf(ServiceRequest())
-      Unit
-    }
+    doAnswer {
+          requestsFlow.value = listOf(request)
+          Unit
+        }
+        .whenever(serviceRequestViewModel)
+        .getServiceRequests()
 
     // Configure provider repository mock
     whenever(providerRepository.getProvider(eq(testUserId), any(), any())).then {
