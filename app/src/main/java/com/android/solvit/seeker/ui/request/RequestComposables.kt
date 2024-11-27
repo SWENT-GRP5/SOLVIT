@@ -22,16 +22,26 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.AlertDialog
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -43,6 +53,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -67,12 +78,16 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.PopupProperties
 import coil.compose.AsyncImage
+import com.android.solvit.R
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
@@ -126,7 +141,8 @@ fun ServiceTypeDropdown(
     showDropdownType: Boolean,
     onShowDropdownTypeChange: (Boolean) -> Unit,
     filteredServiceTypes: List<Services>,
-    onServiceTypeSelected: (Services) -> Unit
+    onServiceTypeSelected: (Services) -> Unit,
+    readOnly: Boolean = false
 ) {
   Box(modifier = Modifier.fillMaxWidth()) {
     OutlinedTextField(
@@ -138,6 +154,7 @@ fun ServiceTypeDropdown(
           onTypeQueryChange(it)
           onShowDropdownTypeChange(true)
         },
+        readOnly = readOnly,
         label = { Text("Service Type") },
         placeholder = { Text("Select a Service Type") },
         shape = RoundedCornerShape(12.dp),
@@ -207,12 +224,14 @@ fun LocationDropdown(
     showDropdownLocation: Boolean,
     onShowDropdownLocationChange: (Boolean) -> Unit,
     locationSuggestions: List<Location>,
+    userLocations: List<Location>,
     onLocationSelected: (Location) -> Unit,
     requestLocation: Location?,
     backgroundColor: Color = colorScheme.background,
     debounceDelay: Long = 1001L, // debounce delay longer than 1 second,
     isValueOk: Boolean = false,
-    errorMessage: String = "Invalid location" // Default error message
+    errorMessage: String = "Invalid location", // Default error message
+    testTag: String = "inputRequestAddress"
 ) {
   val coroutineScope = rememberCoroutineScope()
   var debounceJob by remember { mutableStateOf<Job?>(null) }
@@ -251,7 +270,7 @@ fun LocationDropdown(
         placeholder = { requestLocation?.name?.let { Text(it) } ?: Text("Enter your address") },
         shape = RoundedCornerShape(12.dp),
         modifier =
-            Modifier.fillMaxWidth().testTag("inputRequestAddress").onFocusChanged { focusState ->
+            Modifier.fillMaxWidth().testTag(testTag).onFocusChanged { focusState ->
               // Mark field as "visited" once it loses focus after user types
               if (!focusState.isFocused && localQuery.isNotBlank()) {
                 hasBeenFocused = true
@@ -282,7 +301,7 @@ fun LocationDropdown(
 
     // Dropdown menu for location suggestions
     DropdownMenu(
-        expanded = showDropdownLocation && locationSuggestions.isNotEmpty(),
+        expanded = showDropdownLocation,
         onDismissRequest = { onShowDropdownLocationChange(false) },
         properties = PopupProperties(focusable = false),
         modifier =
@@ -291,21 +310,51 @@ fun LocationDropdown(
                 .background(backgroundColor)
                 .border(1.dp, colorScheme.onSurfaceVariant, shape = RoundedCornerShape(8.dp))
                 .padding(start = 8.dp, end = 8.dp)) {
-          locationSuggestions.forEach { location ->
-            DropdownMenuItem(
-                modifier = Modifier.padding(start = 8.dp, end = 8.dp).testTag("locationResult"),
-                text = {
-                  Text(
-                      text = location.name.take(50) + if (location.name.length > 50) "..." else "",
-                      maxLines = 1)
-                },
-                onClick = {
-                  onLocationQueryChange(location.name)
-                  localQuery = location.name
-                  onLocationSelected(location)
-                  onShowDropdownLocationChange(false)
-                })
-            HorizontalDivider()
+          if (userLocations.isNotEmpty()) {
+            Text(
+                text = "Previously used locations",
+                modifier = Modifier.padding(8.dp),
+                color = colorScheme.primary)
+            userLocations.forEach { location ->
+              DropdownMenuItem(
+                  modifier = Modifier.padding(start = 8.dp, end = 8.dp).testTag("locationResult"),
+                  text = {
+                    Text(
+                        text =
+                            location.name.take(50) + if (location.name.length > 50) "..." else "",
+                        maxLines = 1)
+                  },
+                  onClick = {
+                    onLocationQueryChange(location.name)
+                    localQuery = location.name
+                    onLocationSelected(location)
+                    onShowDropdownLocationChange(false)
+                  })
+              HorizontalDivider()
+            }
+          }
+          if (locationSuggestions.isNotEmpty()) {
+            Text(
+                text = "Suggested locations",
+                modifier = Modifier.padding(8.dp),
+                color = colorScheme.primary)
+            locationSuggestions.forEach { location ->
+              DropdownMenuItem(
+                  modifier = Modifier.padding(start = 8.dp, end = 8.dp).testTag("locationResult"),
+                  text = {
+                    Text(
+                        text =
+                            location.name.take(50) + if (location.name.length > 50) "..." else "",
+                        maxLines = 1)
+                  },
+                  onClick = {
+                    onLocationQueryChange(location.name)
+                    localQuery = location.name
+                    onLocationSelected(location)
+                    onShowDropdownLocationChange(false)
+                  })
+              HorizontalDivider()
+            }
           }
         }
 
@@ -472,75 +521,264 @@ fun DeleteButton(
       }
 }
 
+@Composable
+fun AIAssistantDialog(
+    onCancel: () -> Unit,
+    onUploadPictures: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = { onCancel() },
+        title = {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Icon in a Blue Circle
+                Box(
+                    modifier = Modifier
+                        .size(64.dp)
+                        .background(Color(0xFF2196F3), shape = CircleShape), // Blue Circle
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_ai_assistant), // Replace with proper icon
+                        contentDescription = "AI Assistant",
+                        tint = Color.White,
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
+                // Title
+                Box(
+                    modifier = Modifier
+                        .offset(x = -16.dp)
+                        .background(
+                            Color(0xFF2196F3),
+                            shape = RoundedCornerShape(
+                                topStart = 0.dp,
+                                topEnd = 18.dp,
+                                bottomStart = 0.dp,
+                                bottomEnd = 18.dp
+                            )
+                        )
+                        .padding(horizontal = 18.dp, vertical = 10.dp)
+                ) {
+                    Text(
+                        text = "Your AI-Powered Assistant",
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontWeight = FontWeight.Bold
+                        ),
+                        color = Color.White,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+        },
+        text = {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "Would you like to use the AI assistant to create your request by uploading pictures of your issue?",
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center
+                )
+            }
+        },
+        confirmButton = {
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Button(
+                    onClick = { onUploadPictures() },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Green),
+                    modifier = Modifier.padding(end = 8.dp) // Space between buttons
+                ) {
+                    Text("Upload Pictures")
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Icon(Icons.Default.ArrowForward, contentDescription = null)
+                }
+
+                Button(
+                    onClick = { onCancel() },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                ) {
+                    Text("Cancel")
+                }
+            }
+        },
+        shape = RoundedCornerShape(16.dp),
+        modifier = Modifier.padding(16.dp) // Padding around the entire dialog
+    )
+}
+
 
 @Composable
-fun AIPopup(
-    onDismiss: () -> Unit,
-    onAIResult: (title: String, serviceType: String, description: String, images: List<Uri>) -> Unit
+fun ImagePickerStep(
+    stepNumber: Int,
+    title: String,
+    selectedImages: List<Uri>,
+    onImagesSelected: (List<Uri>) -> Unit,
+    onRemoveImage: (Uri) -> Unit,
+    onStartAnalyzing: () -> Unit
 ) {
-    val context = LocalContext.current
-    val selectedImages = remember { mutableStateListOf<Uri>() }
+    val imagePickerLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris ->
+            if (uris != null) {
+                onImagesSelected(selectedImages + uris)
+            }
+        }
 
-    Dialog(onDismissRequest = { onDismiss() }) {
-        Box(
-            Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-                .background(Color.White, shape = RoundedCornerShape(12.dp))
-        ) {
-            AndroidView(factory = { ctx ->
-                WebView(ctx).apply {
-                    settings.javaScriptEnabled = true
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState())
+    ) {
+        StepHeader(stepNumber, title)
 
-                    // Add the JavascriptInterface
-                    addJavascriptInterface(
-                        AIWebInterface { jsonResult ->
-                            // Parse JSON result
-                            val results = JSONArray(jsonResult)
-                            val firstResult = results.getJSONObject(0)
-
-                            val title = firstResult.getString("title")
-                            val serviceType = firstResult.getString("serviceType")
-                            val description = firstResult.getString("description")
-
-                            onAIResult(title, serviceType, description, selectedImages)
-                            onDismiss()
-                        },
-                        "Android"
-                    )
-
-                    webViewClient = object : WebViewClient() {
-                        override fun onPageFinished(view: WebView?, url: String?) {
-                            super.onPageFinished(view, url)
-
-                            // Inject JavaScript to pass image URIs to WebView
-                            val imageUrisJs = selectedImages.joinToString(",") { "\"${it.toString()}\"" }
-                            val jsCode = """
-                                const images = [$imageUrisJs];
-                                analyzeImages(images);
-                            """
-                            evaluateJavascript(jsCode, null)
+        if (selectedImages.isEmpty()) {
+            Text(
+                text = "No Images added",
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center
+            )
+        } else {
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                items(selectedImages) { uri ->
+                    Box(
+                        modifier = Modifier
+                            .size(80.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(Color.Gray)
+                            .padding(4.dp)
+                    ) {
+                        AsyncImage(
+                            model = uri,
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                        Box(
+                            Modifier
+                                .align(Alignment.TopEnd)
+                                .background(Color.White, shape = CircleShape)
+                                .clickable { onRemoveImage(uri) }
+                                .padding(4.dp)
+                        ) {
+                            Icon(Icons.Default.Delete, contentDescription = "Remove Image", tint = Color.Red)
                         }
                     }
-
-                    // Load the local HTML file containing TensorFlow.js logic
-                    loadUrl("file:///android_asset/index.html")
                 }
-            }, modifier = Modifier.fillMaxSize())
+            }
+        }
+
+        Button(
+            onClick = { imagePickerLauncher.launch("image/*") },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Add Images")
+            Spacer(modifier = Modifier.width(8.dp))
+            Icon(Icons.Default.KeyboardArrowDown, contentDescription = null)
+        }
+
+        if (selectedImages.isNotEmpty()) {
+            Button(
+                onClick = { onStartAnalyzing() },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Start Analyzing")
+                Spacer(modifier = Modifier.width(8.dp))
+                Icon(Icons.Default.ArrowForward, contentDescription = null)
+            }
         }
     }
 }
 
+@Composable
+fun AnalyzingImagesStep(stepNumber: Int, title: String) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState()),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        StepHeader(stepNumber, title)
 
+        CircularProgressIndicator(modifier = Modifier.size(48.dp))
 
-fun processImagesWithAI(
-    images: List<Uri>,
-    onResult: (title: String, serviceType: String, description: String) -> Unit
+        Text(
+            text = "Analyzing images. Please wait...",
+            style = MaterialTheme.typography.bodyMedium,
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
+@Composable
+fun AnalysisCompleteStep(stepNumber: Int, title: String) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState()),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        StepHeader(stepNumber, title)
+
+        Icon(
+            imageVector = Icons.Default.CheckCircle,
+            contentDescription = "Complete",
+            tint = Color.Green,
+            modifier = Modifier.size(48.dp)
+        )
+
+        Text(
+            text = "Analysis complete! Fields have been filled with AI suggestions.",
+            style = MaterialTheme.typography.bodyMedium,
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
+@Composable
+fun StepHeader(
+    stepNumber: Int,
+    title: String
 ) {
-    // Simulate AI processing
-    GlobalScope.launch {
-        delay(3000) // Simulating AI processing delay
-        onResult("Sample Title", "PLUMBER", "Detected plumbing issue")
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color(0xFF2196F3)) // Blue header background
+            .padding(16.dp)
+    ) {
+        // Step number inside a circular badge
+        Box(
+            modifier = Modifier
+                .size(32.dp)
+                .background(Color.White, shape = CircleShape)
+                .wrapContentSize(Alignment.Center)
+        ) {
+            Text(
+                text = stepNumber.toString(),
+                style = MaterialTheme.typography.bodyLarge,
+                color = Color(0xFF2196F3)
+            )
+        }
+
+        // Step title
+        Text(
+            text = title,
+            style = MaterialTheme.typography.headlineSmall,
+            color = Color.White
+        )
     }
 }
 

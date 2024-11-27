@@ -77,7 +77,13 @@ class AuthViewModelTest {
 
   @Test
   fun logout() {
-    authViewModel.logout({})
+    authViewModel.logout {}
     verify(authRepository).logout(any())
+    assert(authViewModel.user.value == null)
+    assert(authViewModel.email.value == "")
+    assert(authViewModel.password.value == "")
+    assert(authViewModel.googleAccount.value == null)
+    assert(!authViewModel.userRegistered.value)
+    assert(authViewModel.role.value == "")
   }
 }

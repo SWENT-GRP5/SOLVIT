@@ -9,8 +9,43 @@ interface ServiceRequestRepository {
   // Initialize the repository
   fun init(onSuccess: () -> Unit)
 
+  fun addListenerOnServiceRequests(
+      onSuccess: (List<ServiceRequest>) -> Unit,
+      onFailure: (Exception) -> Unit
+  )
+
   // Retrieve all service requests
   fun getServiceRequests(onSuccess: (List<ServiceRequest>) -> Unit, onFailure: (Exception) -> Unit)
+
+  fun getPendingServiceRequests(
+      onSuccess: (List<ServiceRequest>) -> Unit,
+      onFailure: (Exception) -> Unit
+  )
+
+  fun getAcceptedServiceRequests(
+      onSuccess: (List<ServiceRequest>) -> Unit,
+      onFailure: (Exception) -> Unit
+  )
+
+  fun getScheduledServiceRequests(
+      onSuccess: (List<ServiceRequest>) -> Unit,
+      onFailure: (Exception) -> Unit
+  )
+
+  fun getCompletedServiceRequests(
+      onSuccess: (List<ServiceRequest>) -> Unit,
+      onFailure: (Exception) -> Unit
+  )
+
+  fun getCancelledServiceRequests(
+      onSuccess: (List<ServiceRequest>) -> Unit,
+      onFailure: (Exception) -> Unit
+  )
+
+  fun getArchivedServiceRequests(
+      onSuccess: (List<ServiceRequest>) -> Unit,
+      onFailure: (Exception) -> Unit
+  )
 
   // Add a new service request
   fun saveServiceRequest(
@@ -30,8 +65,10 @@ interface ServiceRequestRepository {
       onFailure: (Exception) -> Unit
   )
 
-
-
-
+    fun uploadMultipleImagesToStorage(
+        imageUris: List<Uri>,
+        onSuccess: (List<String>) -> Unit,
+        onFailure: (Exception) -> Unit
+    )
 
 }

@@ -8,8 +8,6 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import androidx.test.core.app.ApplicationProvider
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.seeker.model.profile.UserRepository
@@ -20,6 +18,9 @@ import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.map.LocationRepository
 import com.android.solvit.shared.model.map.LocationViewModel
+import com.android.solvit.shared.model.packages.PackageProposalRepository
+import com.android.solvit.shared.model.packages.PackageProposalRepositoryFirestore
+import com.android.solvit.shared.model.packages.PackageProposalViewModel
 import com.android.solvit.shared.model.provider.ProviderRepository
 import com.android.solvit.shared.model.provider.ProviderRepositoryFirestore
 import com.android.solvit.shared.model.request.ServiceRequestRepository
@@ -28,7 +29,6 @@ import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.review.ReviewRepository
 import com.android.solvit.shared.model.review.ReviewRepositoryFirestore
 import com.android.solvit.shared.model.review.ReviewViewModel
-import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.TopLevelDestinations
 import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
@@ -57,6 +57,7 @@ class EndToEndSeekerCreateRequest {
   private lateinit var serviceRequestViewModel: ServiceRequestViewModel
   private lateinit var locationViewModel: LocationViewModel
   private lateinit var reviewViewModel: ReviewViewModel
+  private lateinit var packageProposalViewModel: PackageProposalViewModel
 
   private lateinit var authRepository: AuthRepository
   private lateinit var seekerRepository: UserRepository
@@ -64,9 +65,7 @@ class EndToEndSeekerCreateRequest {
   private lateinit var locationRepository: LocationRepository
   private lateinit var serviceRequestRepository: ServiceRequestRepository
   private lateinit var reviewRepository: ReviewRepository
-
-  private lateinit var navHostController: NavHostController
-  private lateinit var navigationActions: NavigationActions
+  private lateinit var packageProposalRepository: PackageProposalRepository
 
   private val email = "test@test.ch"
   private val password = "password"
@@ -93,10 +92,11 @@ class EndToEndSeekerCreateRequest {
 
     authRepository = AuthRepository(Firebase.auth, firestore)
     seekerRepository = UserRepositoryFirestore(firestore)
-    providerRepository = ProviderRepositoryFirestore(firestore)
+    providerRepository = ProviderRepositoryFirestore(firestore, storage)
     locationRepository = mock(LocationRepository::class.java)
     serviceRequestRepository = ServiceRequestRepositoryFirebase(firestore, storage)
     reviewRepository = ReviewRepositoryFirestore(firestore)
+    packageProposalRepository = PackageProposalRepositoryFirestore(firestore)
 
     authViewModel = AuthViewModel(authRepository)
     seekerProfileViewModel = SeekerProfileViewModel(seekerRepository)
@@ -104,6 +104,7 @@ class EndToEndSeekerCreateRequest {
     locationViewModel = LocationViewModel(locationRepository)
     serviceRequestViewModel = ServiceRequestViewModel(serviceRequestRepository)
     reviewViewModel = ReviewViewModel(reviewRepository)
+    packageProposalViewModel = PackageProposalViewModel(packageProposalRepository)
 
     `when`(locationRepository.search(ArgumentMatchers.anyString(), anyOrNull(), anyOrNull()))
         .thenAnswer { invocation ->
@@ -139,11 +140,8 @@ class EndToEndSeekerCreateRequest {
   }
 
   @Test
-  fun CreateServiceRequest() {
+  fun createServiceRequest() {
     composeTestRule.setContent {
-      navHostController = rememberNavController()
-      navigationActions = NavigationActions(navHostController)
-
       val user = authViewModel.user.collectAsState()
       val userRegistered = authViewModel.userRegistered.collectAsState()
 
@@ -153,8 +151,7 @@ class EndToEndSeekerCreateRequest {
             listProviderViewModel,
             seekerProfileViewModel,
             locationViewModel,
-            navHostController,
-            navigationActions)
+            packageProposalViewModel)
       } else {
         when (user.value!!.role) {
           "seeker" ->
@@ -165,7 +162,13 @@ class EndToEndSeekerCreateRequest {
                   serviceRequestViewModel,
                   reviewViewModel,
                   locationViewModel)
-          "provider" -> ProviderUI(authViewModel, listProviderViewModel, seekerProfileViewModel)
+          "provider" ->
+              ProviderUI(
+                  authViewModel,
+                  listProviderViewModel,
+                  serviceRequestViewModel,
+                  seekerProfileViewModel,
+                  locationViewModel)
         }
       }
     }
@@ -185,6 +188,8 @@ class EndToEndSeekerCreateRequest {
     composeTestRule.waitUntil(timeoutMillis = 10000) {
       composeTestRule.onNodeWithTag("servicesScreen").isDisplayed()
     }
+
+    authViewModel.user.value?.locations?.forEach { authViewModel.removeUserLocation(it, {}, {}) }
 
     // Navigate to the requests overview screen
     composeTestRule.onNodeWithTag(TopLevelDestinations.REQUESTS_OVERVIEW.textId).performClick()
@@ -221,6 +226,20 @@ class EndToEndSeekerCreateRequest {
     // Assert the requests to be displayed
     composeTestRule.waitUntil(timeoutMillis = 10000) {
       composeTestRule.onNodeWithTag("requestsList").isDisplayed()
+    }
+
+    // Delete the request
+    composeTestRule.onNodeWithTag("requestListItem").performClick()
+    composeTestRule.waitUntil(timeoutMillis = 10000) {
+      composeTestRule.onNodeWithTag("edit_button").isDisplayed()
+    }
+    composeTestRule.onNodeWithTag("edit_button").performClick()
+    composeTestRule.waitUntil(timeoutMillis = 10000) {
+      composeTestRule.onNodeWithTag("requestScreen").isDisplayed()
+    }
+    composeTestRule.onNodeWithTag("deleteRequestButton").performClick()
+    composeTestRule.waitUntil(timeoutMillis = 10000) {
+      composeTestRule.onNodeWithTag("edit_button").isDisplayed()
     }
   }
 }

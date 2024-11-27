@@ -55,9 +55,13 @@ class ServiceRequestRepositoryFirebaseTest {
           title = "Test Request",
           description = "Test Description",
           userId = "1",
+          providerId = "1",
           dueDate = Timestamp.now(),
+          meetingDate = Timestamp.now(),
           location = Location(name = "EPFL", latitude = 0.0, longitude = 0.0),
           imageUrl = null,
+          packageId = "1",
+          agreedPrice = 200.15,
           type = Services.PLUMBER,
           status = ServiceRequestStatus.PENDING)
 
@@ -157,18 +161,23 @@ class ServiceRequestRepositoryFirebaseTest {
   @Test
   fun documentToServiceRequest_validDocumentSnapshot_returnsServiceRequest() {
     // Set up mock DocumentSnapshot
+    val time = Timestamp.now()
 
     `when`(mockDocumentSnapshot.id).thenReturn("1")
     `when`(mockDocumentSnapshot.getString("title")).thenReturn("Test Request")
     `when`(mockDocumentSnapshot.getString("description")).thenReturn("Test Description")
     `when`(mockDocumentSnapshot.getString("userId")).thenReturn("1")
-    `when`(mockDocumentSnapshot.getTimestamp("dueDate")).thenReturn(Timestamp.now())
+    `when`(mockDocumentSnapshot.getTimestamp("dueDate")).thenReturn(time)
     `when`(mockDocumentSnapshot.getDouble("location.latitude")).thenReturn(0.0)
     `when`(mockDocumentSnapshot.getDouble("location.longitude")).thenReturn(0.0)
     `when`(mockDocumentSnapshot.getString("location.name")).thenReturn("EPFL")
     `when`(mockDocumentSnapshot.getString("imageUrl")).thenReturn(null)
     `when`(mockDocumentSnapshot.getString("type")).thenReturn("CLEANER")
     `when`(mockDocumentSnapshot.getString("status")).thenReturn("PENDING")
+    `when`(mockDocumentSnapshot.getString("providerId")).thenReturn("1")
+    `when`(mockDocumentSnapshot.getTimestamp("meetingDate")).thenReturn(time)
+    `when`(mockDocumentSnapshot.getString("packageId")).thenReturn("1")
+    `when`(mockDocumentSnapshot.getDouble("agreedPrice")).thenReturn(200.15)
 
     val result = serviceRequestRepositoryFirebase.documentToServiceRequest(mockDocumentSnapshot)
 
@@ -181,6 +190,11 @@ class ServiceRequestRepositoryFirebaseTest {
     assert(result?.location?.name == "EPFL")
     assert(result?.type == Services.CLEANER)
     assert(result?.status == ServiceRequestStatus.PENDING)
+    assert(result?.providerId == "1")
+    assert(result?.dueDate == time)
+    assert(result?.meetingDate == time)
+    assert(result?.packageId == "1")
+    assert(result?.agreedPrice == 200.15)
   }
 
   @Test

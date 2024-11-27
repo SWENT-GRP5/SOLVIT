@@ -51,15 +51,15 @@ class EditRequestScreenTest {
 
   private val request =
       ServiceRequest(
-          "uid",
-          "title",
-          Services.CLEANER,
-          "description",
-          "assigneeName",
-          Timestamp(GregorianCalendar(2024, 0, 1).time),
-          Location(37.7749, -122.4194, "San Francisco"),
-          "imageUrl",
-          ServiceRequestStatus.PENDING)
+          uid = "uid",
+          title = "title",
+          type = Services.CLEANER,
+          description = "description",
+          userId = "assigneeName",
+          dueDate = Timestamp(GregorianCalendar(2024, 0, 1).time),
+          location = Location(37.7749, -122.4194, "San Francisco"),
+          imageUrl = "imageUrl",
+          status = ServiceRequestStatus.PENDING)
 
   @Before
   fun setUp() {

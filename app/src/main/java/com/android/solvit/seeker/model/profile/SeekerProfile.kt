@@ -9,5 +9,6 @@ data class SeekerProfile(
     val email: String = "",
     val phone: String = "",
     val address: String = "",
-    val cachedLocations: List<Location> = emptyList()
+    val cachedLocations: List<Location> = emptyList(),
+    val preferences: List<String> = emptyList()
 )

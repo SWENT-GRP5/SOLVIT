@@ -11,16 +11,16 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navigation
 import com.android.solvit.provider.ui.calendar.ProviderCalendarScreen
-import com.android.solvit.provider.ui.jobs.JobDashboardScreen
 import com.android.solvit.provider.ui.map.ProviderMapScreen
+import com.android.solvit.provider.ui.profile.ModifyProviderInformationScreen
 import com.android.solvit.provider.ui.profile.ProviderProfileScreen
 import com.android.solvit.provider.ui.request.ListRequestsFeedScreen
+import com.android.solvit.provider.ui.request.RequestsDashboardScreen
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.seeker.ui.map.SeekerMapScreen
@@ -33,9 +33,11 @@ import com.android.solvit.seeker.ui.provider.SelectProviderScreen
 import com.android.solvit.seeker.ui.request.CreateRequestScreen
 import com.android.solvit.seeker.ui.request.EditRequestScreen
 import com.android.solvit.seeker.ui.request.RequestsOverviewScreen
+import com.android.solvit.seeker.ui.review.CreateReviewScreen
 import com.android.solvit.seeker.ui.service.ServicesScreen
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.map.LocationViewModel
+import com.android.solvit.shared.model.packages.PackageProposalViewModel
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.review.ReviewViewModel
 import com.android.solvit.shared.ui.authentication.ForgotPassword
@@ -43,13 +45,12 @@ import com.android.solvit.shared.ui.authentication.OpeningScreen
 import com.android.solvit.shared.ui.authentication.SignInScreen
 import com.android.solvit.shared.ui.authentication.SignUpChooseProfile
 import com.android.solvit.shared.ui.authentication.SignUpScreen
+import com.android.solvit.shared.ui.booking.ServiceBookingScreen
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.navigation.Screen
 import com.android.solvit.shared.ui.theme.SampleAppTheme
 import com.android.solvit.ui.message.MessageScreen
-import com.google.firebase.Firebase
-import com.google.firebase.auth.auth
 
 
 class MainActivity : ComponentActivity() {
@@ -57,11 +58,9 @@ class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
-    Firebase.auth.signOut()
-
     setContent {
       SampleAppTheme {
-        Surface(modifier = Modifier.fillMaxSize(), color = colorScheme.background) { ZyadApp() }
+        Surface(modifier = Modifier.fillMaxSize(), color = colorScheme.background) { SolvitApp() }
       }
     }
   }
@@ -80,8 +79,8 @@ fun SolvitApp() {
       viewModel<ServiceRequestViewModel>(factory = ServiceRequestViewModel.Factory)
   val locationViewModel = viewModel<LocationViewModel>(factory = LocationViewModel.Factory)
   val reviewViewModel = viewModel<ReviewViewModel>(factory = ReviewViewModel.Factory)
-  val navController = rememberNavController()
-  val navigationActions = NavigationActions(navController)
+  val packageProposalViewModel =
+      viewModel<PackageProposalViewModel>(factory = PackageProposalViewModel.Factory)
 
   if (!userRegistered.value) {
     SharedUI(
@@ -89,8 +88,7 @@ fun SolvitApp() {
         listProviderViewModel,
         seekerProfileViewModel,
         locationViewModel,
-        navController,
-        navigationActions)
+        packageProposalViewModel)
   } else {
     when (user.value!!.role) {
       "seeker" ->
@@ -101,7 +99,13 @@ fun SolvitApp() {
               serviceRequestViewModel,
               reviewViewModel,
               locationViewModel)
-      "provider" -> ProviderUI(authViewModel, listProviderViewModel, seekerProfileViewModel)
+      "provider" ->
+          ProviderUI(
+              authViewModel,
+              listProviderViewModel,
+              serviceRequestViewModel,
+              seekerProfileViewModel,
+              locationViewModel)
     }
   }
 }
@@ -112,9 +116,10 @@ fun SharedUI(
     listProviderViewModel: ListProviderViewModel,
     seekerProfileViewModel: SeekerProfileViewModel,
     locationViewModel: LocationViewModel,
-    navController: NavHostController,
-    navigationActions: NavigationActions
+    packageProposalViewModel: PackageProposalViewModel
 ) {
+  val navController = rememberNavController()
+  val navigationActions = NavigationActions(navController)
 
   NavHost(navController = navController, startDestination = Route.AUTH) {
     composable(Route.AUTH) { OpeningScreen(navigationActions) }
@@ -123,7 +128,11 @@ fun SharedUI(
     composable(Screen.SIGN_UP_CHOOSE_ROLE) { SignUpChooseProfile(navigationActions, authViewModel) }
     composable(Screen.PROVIDER_REGISTRATION_PROFILE) {
       ProviderRegistrationScreen(
-          listProviderViewModel, navigationActions, locationViewModel, authViewModel)
+          listProviderViewModel,
+          navigationActions,
+          locationViewModel,
+          authViewModel,
+          packageProposalViewModel)
     }
     composable(Screen.FORGOT_PASSWORD) { ForgotPassword(navigationActions) }
     composable(Screen.SEEKER_REGISTRATION_PROFILE) {
@@ -158,7 +167,12 @@ fun SeekerUI(
       }
     }
     composable(Route.PROVIDER_PROFILE) {
-      ProviderInfoScreen(navigationActions, listProviderViewModel, reviewViewModel)
+      ProviderInfoScreen(
+          navigationActions,
+          listProviderViewModel,
+          reviewViewModel,
+          serviceRequestViewModel,
+          authViewModel)
     }
     composable(Route.MESSAGE) { MessageScreen() }
     composable(Route.CREATE_REQUEST) {
@@ -166,6 +180,9 @@ fun SeekerUI(
     }
     composable(Route.REQUESTS_OVERVIEW) {
       RequestsOverviewScreen(navigationActions, serviceRequestViewModel, authViewModel)
+    }
+    composable(Route.BOOKING_DETAILS) {
+      ServiceBookingScreen(navigationActions, listProviderViewModel, serviceRequestViewModel)
     }
     composable(Route.EDIT_REQUEST) {
       EditRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
@@ -179,6 +196,10 @@ fun SeekerUI(
         EditSeekerProfileScreen(seekerProfileViewModel, navigationActions, authViewModel)
       }
     }
+    composable(Screen.REVIEW_SCREEN) {
+      CreateReviewScreen(
+          reviewViewModel, serviceRequestViewModel, listProviderViewModel, navigationActions)
+    }
   }
 }
 
@@ -186,20 +207,33 @@ fun SeekerUI(
 fun ProviderUI(
     authViewModel: AuthViewModel,
     listProviderViewModel: ListProviderViewModel,
-    seekerProfileViewModel: SeekerProfileViewModel
+    serviceRequestViewModel: ServiceRequestViewModel,
+    seekerProfileViewModel: SeekerProfileViewModel,
+    locationViewModel: LocationViewModel,
 ) {
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
 
   NavHost(navController = navController, startDestination = Route.REQUESTS_FEED) {
     composable(Route.REQUESTS_FEED) {
-      ListRequestsFeedScreen(navigationActions = navigationActions)
+      ListRequestsFeedScreen(
+          serviceRequestViewModel = serviceRequestViewModel, navigationActions = navigationActions)
     }
-    composable(Route.MAP_OF_SEEKERS) { ProviderMapScreen(navigationActions = navigationActions) }
+    composable(Route.MAP_OF_SEEKERS) {
+      ProviderMapScreen(
+          serviceRequestViewModel = serviceRequestViewModel, navigationActions = navigationActions)
+    }
     composable(Screen.CALENDAR) { ProviderCalendarScreen(navigationActions = navigationActions) }
-    composable(Screen.MYJOBS) { JobDashboardScreen(navigationActions = navigationActions) }
-    composable(Screen.PROFESSIONAL_PROFILE) {
+    composable(Screen.MY_JOBS) {
+      RequestsDashboardScreen(
+          navigationActions = navigationActions, serviceRequestViewModel = serviceRequestViewModel)
+    }
+    composable(Screen.PROVIDER_PROFILE) {
       ProviderProfileScreen(listProviderViewModel, authViewModel, navigationActions)
+    }
+    composable(Screen.PROVIDER_MODIFY_PROFILE) {
+      ModifyProviderInformationScreen(
+          listProviderViewModel, authViewModel, locationViewModel, navigationActions)
     }
   }
 }

@@ -223,6 +223,10 @@ dependencies {
 
     // Networking with OkHttp
     implementation(libs.okhttp)
+    implementation(libs.okhttp.v4100)
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
 
     // Testing Unit
     testImplementation(libs.junit)
