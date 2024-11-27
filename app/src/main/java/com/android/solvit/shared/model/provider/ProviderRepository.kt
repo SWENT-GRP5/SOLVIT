@@ -26,7 +26,9 @@ interface ProviderRepository {
       onFailure: (Exception) -> Unit
   )
 
+  fun filterProviders(filter: () -> Unit)
+
   fun getProvider(userId: String, onSuccess: (Provider?) -> Unit, onFailure: (Exception) -> Unit)
 
-  fun filterProviders(filter: () -> Unit)
+  suspend fun returnProvider(uid: String): Provider?
 }

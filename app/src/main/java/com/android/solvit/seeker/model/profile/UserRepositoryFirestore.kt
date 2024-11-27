@@ -37,6 +37,7 @@ open class UserRepositoryFirestore(private val db: FirebaseFirestore) : UserRepo
     db.collection(collectionPath).document(uid).get().addOnCompleteListener { document ->
       if (document.isSuccessful) {
 
+        Log.e("Repo", "${document.result}")
         val user = documentToUser(document.result)
         if (user != null) {
           onSuccess(user)
@@ -242,6 +243,7 @@ open class UserRepositoryFirestore(private val db: FirebaseFirestore) : UserRepo
       val uid = document.id
       val name = document.getString("name") ?: return null
       val username = document.getString("username") ?: return null
+      val imageUrl = document.getString("imageUrl") ?: return null
       val email = document.getString("email") ?: return null
       val phone = document.getString("phone") ?: return null
       val address = document.getString("address") ?: return null
@@ -251,6 +253,7 @@ open class UserRepositoryFirestore(private val db: FirebaseFirestore) : UserRepo
           uid = uid,
           name = name,
           username = username,
+          imageUrl = imageUrl,
           email = email,
           phone = phone,
           address = address,

@@ -43,6 +43,10 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
     receiverUid = uid
   }
 
+  fun setChatId(uid: String) {
+    chatId = uid
+  }
+
   fun setReceiver(receiver: Any) {
     _receiver.value = receiver
   }

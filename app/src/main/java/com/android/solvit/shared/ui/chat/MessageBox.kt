@@ -65,7 +65,7 @@ fun MessageBox(
 ) {
 
   val allMessages by chatViewModel.allMessages.collectAsState()
-  val role by authViewModel.role.collectAsState()
+  val user by authViewModel.user.collectAsState()
 
   chatViewModel.getAllLastMessages()
 
@@ -77,16 +77,14 @@ fun MessageBox(
               modifier = Modifier.padding(paddingValues).fillMaxSize(),
               contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)) {
                 items(allMessages.entries.toList()) { message ->
-                  message.key?.let {
-                    ChatListItem(
-                        message = message.value,
-                        receiverId = it,
-                        role = role,
-                        navigationActions = navigationActions,
-                        providersViewModel = listProviderViewModel,
-                        seekerProfileViewModel = seekerProfileViewModel,
-                        chatViewModel = chatViewModel)
-                  }
+                  ChatListItem(
+                      message = message.value,
+                      receiverId = message.key ?: "",
+                      role = authViewModel.user.value?.role ?: "",
+                      listProviderViewModel = listProviderViewModel,
+                      seekerProfileViewModel = seekerProfileViewModel,
+                      navigationActions = navigationActions,
+                      chatViewModel = chatViewModel)
                 }
               }
         } else {
@@ -103,8 +101,6 @@ fun ChatListTopBar(
     authViewModel: AuthViewModel
 ) {
 
-  chatViewModel.setReceiverUid("12345")
-  chatViewModel.initChat()
   TopAppBar(
       modifier = Modifier.testTag("InboxTopAppBar"),
       title = {
@@ -137,7 +133,6 @@ fun ChatListTopBar(
                     )
                   }
               if (message != null) {
-                Log.e("SendMessage", "Soy Aqui")
                 chatViewModel.sendMessage(message)
               }
             }) {
@@ -161,38 +156,47 @@ fun ChatListItem(
     message: ChatMessage.TextMessage,
     receiverId: String,
     role: String,
-    navigationActions: NavigationActions,
-    providersViewModel: ListProviderViewModel,
+    listProviderViewModel: ListProviderViewModel,
     seekerProfileViewModel: SeekerProfileViewModel,
+    navigationActions: NavigationActions,
     chatViewModel: ChatViewModel
 ) {
 
-  val receiver = remember { mutableStateOf<Any?>(null) }
+  // Local state for receiver data
+  val receiverState = remember { mutableStateOf<Any?>(null) }
 
-  LaunchedEffect(receiverId, role) {
-    // Given the current authenticated user, we retrieve the receiver Profile
-    if (role == "Seeker") {
-      providersViewModel.getProvider(receiverId) // Fetch provider
-      providersViewModel.selectedProvider.collect { provider -> receiver.value = provider }
+  // Fetch receiver data without affecting shared ViewModel state
+  LaunchedEffect(receiverId) {
+    if (role == "seeker") {
+      val provider = listProviderViewModel.fetchProviderById(receiverId)
+      Log.e("provider", "$provider")
+      receiverState.value = provider
     } else {
-      seekerProfileViewModel.getUserProfile(receiverId) // Fetch seeker
-      seekerProfileViewModel.seekerProfile.collect { seeker -> receiver.value = seeker }
+      // val seeker = seekerProfileViewModel.fetchSeekerById(receiverId)
+      // receiverState.value = seeker
     }
   }
-  val receiverName = getReceiverName(receiver)
-  val receiverPicture = getReceiverImageUrl(receiver)
+
+  // Extract receiver data
+  val receiver = receiverState.value
+  val receiverName = receiver?.let { getReceiverName(it) }
+  val receiverPicture = receiver?.let { getReceiverImageUrl(it) }
+  Log.e("Message Box", "receiver : $receiver ")
 
   Row(
       modifier =
           Modifier.fillMaxWidth().padding(vertical = 8.dp).testTag("ChatListItem").clickable {
             chatViewModel.setReceiverUid(receiverId)
-            chatViewModel.setReceiver(receiver)
+            chatViewModel.initChat()
+            if (receiver != null) {
+              chatViewModel.setReceiver(receiver)
+            }
             navigationActions.navigateTo(Screen.CHAT)
           },
       verticalAlignment = Alignment.CenterVertically) {
         AsyncImage(
             modifier = Modifier.size(40.dp).clip(CircleShape),
-            model = receiverPicture.ifEmpty { R.drawable.default_pdp },
+            model = receiverPicture?.ifEmpty { R.drawable.default_pdp },
             placeholder = painterResource(id = R.drawable.loading),
             error = painterResource(id = R.drawable.error),
             contentDescription = "provider image",
@@ -202,7 +206,7 @@ fun ChatListItem(
 
         Column(modifier = Modifier.weight(1f)) {
           Text(
-              text = receiverName,
+              text = receiverName ?: "",
               style = MaterialTheme.typography.titleMedium,
               fontWeight = FontWeight.Bold)
           Text(
