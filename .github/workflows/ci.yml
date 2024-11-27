@@ -82,7 +82,7 @@ jobs:
 
       - name : Setup Google AI key
         run: |
-          echo "GOOGLE_AI_API_KEY=${{ secrets.GOOGLE_AI_KEY }}" >> local.properties
+          echo "GOOGLE_AI_API_KEY=${{ secrets.GOOGLE_AI_API_KEY }}" >> local.properties
 
       # Cache the Emulator, if the cache does not hit, create the emulator
       - name: AVD cache
