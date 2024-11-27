@@ -163,6 +163,7 @@ fun SeekerUI(
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
   val user by authViewModel.user.collectAsState()
+  val chatAssistant = viewModel<ChatAssistantViewModel>(factory = ChatAssistantViewModel.Factory)
 
   NavHost(navController = navController, startDestination = Route.SERVICES) {
     composable(Route.SERVICES) { ServicesScreen(navigationActions, listProviderViewModel) }
@@ -183,7 +184,7 @@ fun SeekerUI(
           serviceRequestViewModel,
           authViewModel)
     }
-    navigation(startDestination = Screen.INBOX, route = Route.INBOX) {
+    /*navigation(startDestination = Screen.INBOX, route = Route.INBOX) {
       composable(Screen.INBOX) {
         MessageBox(
             chatViewModel = chatViewModel,
@@ -196,7 +197,8 @@ fun SeekerUI(
             chatViewModel = chatViewModel,
             authViewModel = authViewModel)
       }
-    }
+    }*/
+    composable(Route.INBOX) { TestChatScreen(chatAssistant, navigationActions) }
 
     composable(Route.CREATE_REQUEST) {
       CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
