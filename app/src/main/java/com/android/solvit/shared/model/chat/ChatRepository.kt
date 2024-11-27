@@ -1,7 +1,7 @@
 package com.android.solvit.shared.model.chat
 
 interface ChatRepository {
-  fun initChat(onSuccess: (String) -> Unit, receiverUid: String)
+  fun initChat(currentUserUid: String?, onSuccess: (String) -> Unit, receiverUid: String)
 
   fun sendMessage(
       chatRoomId: String,
@@ -17,6 +17,7 @@ interface ChatRepository {
   )
 
   fun listenForLastMessages(
+      currentUserUid: String?,
       onSuccess: (Map<String?, ChatMessage.TextMessage>) -> Unit,
       onFailure: () -> Unit
   )

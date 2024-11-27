@@ -75,6 +75,7 @@ import coil.compose.AsyncImage
 import com.android.solvit.R
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.seeker.ui.provider.Note
+import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.chat.ChatViewModel
 import com.android.solvit.shared.model.packages.PackageProposal
 import com.android.solvit.shared.model.packages.PackageProposalViewModel
@@ -102,6 +103,7 @@ import java.util.Locale
 @Composable
 fun ServiceBookingScreen(
     navigationActions: NavigationActions,
+    authViewModel: AuthViewModel,
     providerViewModel: ListProviderViewModel = viewModel(factory = ListProviderViewModel.Factory),
     requestViewModel: ServiceRequestViewModel =
         viewModel(factory = ServiceRequestViewModel.Factory),
@@ -116,6 +118,8 @@ fun ServiceBookingScreen(
     activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
     onDispose { activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED }
   }
+
+  val user by authViewModel.user.collectAsState()
 
   val request by requestViewModel.selectedRequest.collectAsState()
   if (request == null) {
@@ -376,6 +380,7 @@ fun ServiceBookingScreen(
               if (request!!.status == ServiceRequestStatus.PENDING) {
                 if (provider != null) {
                   EditAndChatButton(
+                      currentUserId = user?.uid ?: "",
                       navigationActions = navigationActions,
                       chatViewModel = chatViewModel,
                       provider = provider)
@@ -472,6 +477,7 @@ fun EditButton(
 @Composable
 fun EditAndChatButton(
     navigationActions: NavigationActions,
+    currentUserId: String,
     chatViewModel: ChatViewModel,
     provider: Provider
 ) {
@@ -489,7 +495,7 @@ fun EditAndChatButton(
                 chatViewModel.setReceiverUid(provider.uid)
                 chatViewModel.setReceiver(provider)
                 chatViewModel.setReceiver(provider)
-                chatViewModel.initChat()
+                chatViewModel.initChat(currentUserId)
                 navigationActions.navigateTo(Screen.CHAT)
               },
               colors =

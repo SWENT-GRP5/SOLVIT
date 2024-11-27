@@ -4,7 +4,6 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -33,22 +32,16 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
         object : ViewModelProvider.Factory {
           @Suppress("UNCHECKED_CAST")
           override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return ChatViewModel(
-                ChatRepositoryFirestore(FirebaseAuth.getInstance(), FirebaseDatabase.getInstance()))
-                as T
+            return ChatViewModel(ChatRepositoryFirestore(FirebaseDatabase.getInstance())) as T
           }
         }
   }
 
-  init {
-    getAllLastMessages()
-  }
-
-  fun prepareForChat(receiverId: String, receiver: Any?) {
+  fun prepareForChat(currentUserUid: String?, receiverId: String, receiver: Any?) {
     viewModelScope.launch {
       _isReadyToNavigate.value = false
       setReceiverUid(receiverId)
-      initChat()
+      initChat(currentUserUid)
       receiver?.let { setReceiver(receiver) }
       _isReadyToNavigate.value = true
     }
@@ -62,17 +55,14 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
     _isReadyToNavigate.value = false
   }
 
-  fun setChatId(uid: String) {
-    chatId = uid
-  }
-
   fun setReceiver(receiver: Any) {
     _receiver.value = receiver
   }
 
-  fun initChat() {
+  fun initChat(currentUserUid: String?) {
     receiverUid?.let {
       repository.initChat(
+          currentUserUid,
           onSuccess = { uid ->
             Log.e("initChat", "onSuccess $uid")
             chatId = uid
@@ -102,9 +92,10 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
     }
   }
 
-  fun getAllLastMessages() {
+  fun getAllLastMessages(currentUserUid: String?) {
 
     repository.listenForLastMessages(
+        currentUserUid,
         onSuccess = { unsortedMap ->
           _allMessages.value =
               unsortedMap.toList().sortedByDescending { it.second.timestamp }.toMap()

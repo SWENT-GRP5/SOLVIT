@@ -52,6 +52,7 @@ import com.android.solvit.shared.model.chat.ChatMessage
 import com.android.solvit.shared.model.chat.ChatViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
+import com.android.solvit.shared.ui.utils.formatTimestamp
 import com.android.solvit.shared.ui.utils.getReceiverImageUrl
 import com.android.solvit.shared.ui.utils.getReceiverName
 import com.google.firebase.auth.FirebaseAuth
@@ -73,7 +74,7 @@ fun MessageBox(
   Log.e(
       "AuthRep",
       " Firebase Auth : ${FirebaseAuth.getInstance().currentUser?.uid} , AuthViewModel : ${user?.uid} ")
-  chatViewModel.getAllLastMessages()
+  chatViewModel.getAllLastMessages(user?.uid)
 
   LaunchedEffect(isReadyToNavigate) {
     if (isReadyToNavigate) {
@@ -92,6 +93,7 @@ fun MessageBox(
                 items(allMessages.entries.toList()) { message ->
                   ChatListItem(
                       message = message.value,
+                      currentUserId = user?.uid ?: "",
                       receiverId = message.key ?: "",
                       role = authViewModel.user.value?.role ?: "",
                       listProviderViewModel = listProviderViewModel,
@@ -167,6 +169,7 @@ fun ChatListTopBar(
 @Composable
 fun ChatListItem(
     message: ChatMessage.TextMessage,
+    currentUserId: String,
     receiverId: String,
     role: String,
     listProviderViewModel: ListProviderViewModel,
@@ -201,7 +204,7 @@ fun ChatListItem(
       modifier =
           Modifier.fillMaxWidth().padding(vertical = 8.dp).testTag("ChatListItem").clickable {
             if (receiver != null) {
-              chatViewModel.prepareForChat(receiverId, receiver)
+              chatViewModel.prepareForChat(currentUserId, receiverId, receiver)
             }
           },
       verticalAlignment = Alignment.CenterVertically) {
@@ -228,7 +231,10 @@ fun ChatListItem(
               overflow = TextOverflow.Ellipsis)
         }
         Spacer(modifier = Modifier.width(8.dp))
-        Text(text = "Friday", style = MaterialTheme.typography.bodyLarge, color = Color.Gray)
+        Text(
+            text = formatTimestamp(message.timestamp),
+            style = MaterialTheme.typography.bodyLarge,
+            color = Color.Gray)
       }
 }
 
