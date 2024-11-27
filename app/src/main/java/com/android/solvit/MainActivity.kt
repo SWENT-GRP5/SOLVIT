@@ -36,6 +36,7 @@ import com.android.solvit.seeker.ui.request.RequestsOverviewScreen
 import com.android.solvit.seeker.ui.review.CreateReviewScreen
 import com.android.solvit.seeker.ui.service.ServicesScreen
 import com.android.solvit.shared.model.authentication.AuthViewModel
+import com.android.solvit.shared.model.chat.ChatAssistantViewModel
 import com.android.solvit.shared.model.chat.ChatViewModel
 import com.android.solvit.shared.model.map.LocationViewModel
 import com.android.solvit.shared.model.packages.PackageProposalViewModel
@@ -49,6 +50,7 @@ import com.android.solvit.shared.ui.authentication.SignUpScreen
 import com.android.solvit.shared.ui.booking.ServiceBookingScreen
 import com.android.solvit.shared.ui.chat.ChatScreen
 import com.android.solvit.shared.ui.chat.MessageBox
+import com.android.solvit.shared.ui.chat.TestChatScreen
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.navigation.Screen
