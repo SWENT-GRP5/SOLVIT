@@ -2,6 +2,7 @@ package com.android.solvit.seeker.model.profile
 
 import com.android.solvit.shared.model.authentication.AuthRepository
 import com.android.solvit.shared.model.authentication.AuthViewModel
+import kotlinx.coroutines.runBlocking
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Before
@@ -159,5 +160,13 @@ class SeekerProfileViewModelTest {
 
     // Verify repository interaction
     verify(firebaseRepository).getUserPreferences(eq(testUserId), any(), any())
+  }
+
+  @Test
+  fun getSeekerById() {
+    runBlocking {
+      seekerProfileViewModel.fetchUserById("1234")
+      verify(firebaseRepository).returnSeekerById("1234")
+    }
   }
 }

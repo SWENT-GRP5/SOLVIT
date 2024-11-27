@@ -14,6 +14,8 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
 import junit.framework.TestCase
 import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.assertNull
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -424,5 +426,53 @@ class UserRepositoryFirestoreTest {
     assertEquals("+1234567890", profile?.phone)
     assertEquals("Chemin des Triaudes", profile?.address)
     assertEquals("", profile?.imageUrl)
+  }
+
+  @Test
+  fun `returnSeekerById returns valid SeekerProfile on success`() = runTest {
+    // Mock the behavior of Firestore to return a successful task
+    val uid = "12345"
+    `when`(mockDocumentReference.get()).thenReturn(Tasks.forResult(mockDocumentSnapshot))
+
+    // Mock the document fields
+    `when`(mockDocumentSnapshot.id).thenReturn(uid)
+    `when`(mockDocumentSnapshot.getString("name")).thenReturn("John Doe")
+    `when`(mockDocumentSnapshot.getString("username")).thenReturn("johndoe")
+    `when`(mockDocumentSnapshot.getString("email")).thenReturn("john.doe@example.com")
+    `when`(mockDocumentSnapshot.getString("phone")).thenReturn("+1234567890")
+    `when`(mockDocumentSnapshot.getString("address")).thenReturn("Chemin des Triaudes")
+    `when`(mockDocumentSnapshot.getString("imageUrl")).thenReturn("")
+    `when`(mockDocumentSnapshot.get("preferences")).thenReturn(mockPreferences)
+
+    // Call the suspend function
+    val result = firebaseRepository.returnSeekerById(uid)
+
+    // Validate the result
+    assertEquals(
+        SeekerProfile(
+            uid = "12345",
+            name = "John Doe",
+            username = "johndoe",
+            email = "john.doe@example.com",
+            phone = "+1234567890",
+            address = "Chemin des Triaudes",
+            preferences = mockPreferences),
+        result)
+  }
+
+  @Test
+  fun `returnSeekerById returns null when document does not exist`() = runTest {
+    // Mock the behavior of Firestore to return an empty document
+    val uid = "56789"
+    `when`(mockDocumentReference.get()).thenReturn(Tasks.forResult(mockDocumentSnapshot))
+
+    // Mock the document as missing fields
+    `when`(mockDocumentSnapshot.getString("name")).thenReturn(null)
+
+    // Call the suspend function
+    val result = firebaseRepository.returnSeekerById(uid)
+
+    // Validate the result is null
+    assertNull(result)
   }
 }
