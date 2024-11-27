@@ -409,12 +409,26 @@ fun ProposePackageDialog(
                               color = colorScheme.onPrimaryContainer)
                           Spacer(modifier = Modifier.height(16.dp))
                           var priceInput by remember { mutableStateOf("") }
+                          var containsInvalidChars by remember { mutableStateOf(false) }
                           val isPriceValid = priceInput.matches(Regex("^[0-9]+(\\.[0-9]{0,2})?$"))
                           TextField(
                               value = priceInput,
                               onValueChange = { input ->
-                                if (input.matches(Regex("^[0-9]*(\\.[0-9]{0,2})?$"))) {
-                                  priceInput = input
+                                // Check for invalid characters
+                                containsInvalidChars = !input.matches(Regex("^[0-9.]*$"))
+                                val sanitizedInput =
+                                    when {
+                                      input.startsWith("0.") -> input // Allow numbers like "0.99"
+                                      input == "0" -> input // Allow single "0"
+                                      else ->
+                                          input.trimStart('0').ifEmpty {
+                                            "0"
+                                          } // Remove leading zeros
+                                    }
+                                // Validate the format and update priceInput if valid
+                                if (sanitizedInput.matches(
+                                    Regex("^[0-9]{0,10}(\\.[0-9]{0,2})?$"))) {
+                                  priceInput = sanitizedInput
                                 }
                               },
                               label = { Text("Price") },
@@ -422,10 +436,21 @@ fun ProposePackageDialog(
                               keyboardOptions =
                                   KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
                               singleLine = true,
-                              isError = !isPriceValid && priceInput.isNotEmpty())
+                              isError =
+                                  (!isPriceValid && priceInput.isNotEmpty()) ||
+                                      containsInvalidChars)
+                          // Error message for invalid format
                           if (!isPriceValid && priceInput.isNotEmpty()) {
                             Text(
                                 text = "Please enter a valid number (e.g., 99 or 99.99)",
+                                color = colorScheme.error,
+                                fontSize = 12.sp)
+                          }
+                          // Error message for invalid characters
+                          if (containsInvalidChars) {
+                            Text(
+                                text =
+                                    "Invalid characters entered. Please use numbers and a decimal point only.",
                                 color = colorScheme.error,
                                 fontSize = 12.sp)
                           }
