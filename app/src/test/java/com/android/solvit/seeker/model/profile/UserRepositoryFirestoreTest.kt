@@ -411,6 +411,7 @@ class UserRepositoryFirestoreTest {
     `when`(mockDocumentSnapshot.getString("email")).thenReturn("john.doe@example.com")
     `when`(mockDocumentSnapshot.getString("phone")).thenReturn("+1234567890")
     `when`(mockDocumentSnapshot.getString("address")).thenReturn("Chemin des Triaudes")
+    `when`(mockDocumentSnapshot.getString("imageUrl")).thenReturn("")
 
     // Call the helper method
     val profile = firebaseRepository.documentToUser(mockDocumentSnapshot)
@@ -422,5 +423,6 @@ class UserRepositoryFirestoreTest {
     assertEquals("john.doe@example.com", profile?.email)
     assertEquals("+1234567890", profile?.phone)
     assertEquals("Chemin des Triaudes", profile?.address)
+    assertEquals("", profile?.imageUrl)
   }
 }

@@ -230,6 +230,26 @@ class ChatRepositoryTest {
     `when`(mockChatRoomSnapshot1.key).thenReturn(chatRoomId1)
     `when`(mockChatRoomSnapshot2.key).thenReturn(chatRoomId2)
 
+    val mockUsersSnapshot1 = mock(DataSnapshot::class.java)
+    val mockUsersSnapshot2 = mock(DataSnapshot::class.java)
+
+    `when`(mockChatRoomSnapshot1.child("users")).thenReturn(mockUsersSnapshot1)
+    `when`(mockChatRoomSnapshot2.child("users")).thenReturn(mockUsersSnapshot2)
+
+    // Mock children of "users"
+    val child1 = mock(DataSnapshot::class.java)
+    val child2 = mock(DataSnapshot::class.java)
+    `when`(child1.key).thenReturn("user1Uid")
+    `when`(child2.key).thenReturn("currentUserUid")
+    `when`(mockUsersSnapshot1.children).thenReturn(listOf(child1, child2))
+
+    // Mock children of "users"
+    val child3 = mock(DataSnapshot::class.java)
+    val child4 = mock(DataSnapshot::class.java)
+    `when`(child3.key).thenReturn("user2Uid")
+    `when`(child4.key).thenReturn("currentUserUid")
+    `when`(mockUsersSnapshot2.children).thenReturn(listOf(child3, child3))
+
     val mockChatRoomsDataSnapshot = mock(DataSnapshot::class.java)
     `when`(mockChatRoomsDataSnapshot.hasChildren()).thenReturn(true)
     `when`(mockChatRoomsDataSnapshot.children)
@@ -273,7 +293,7 @@ class ChatRepositoryTest {
         .addListenerForSingleValueEvent(chatsValueEventListenerCaptor2.capture())
 
     // Prepare the result variables
-    var receivedMessages: List<ChatMessage.TextMessage>? = null
+    var receivedMessages: Map<String?, ChatMessage.TextMessage>? = null
     var onFailureCalled = false
 
     // Call the method under test
@@ -316,7 +336,10 @@ class ChatRepositoryTest {
     chatsValueEventListenerCaptor2.firstValue.onDataChange(mockLastMessageSnapshot2)
 
     // Verify that the received messages are as expected
-    val expectedMessages = listOf(lastMessage2, lastMessage1) // Sorted by timestamp descending
+    val expectedMessages =
+        mapOf(
+            "user1Uid" to lastMessage1,
+            "user2Uid" to lastMessage2) // Sorted by timestamp descending
     assertEquals(expectedMessages, receivedMessages)
     assertEquals(false, onFailureCalled)
   }
