@@ -15,6 +15,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.android.solvit.seeker.model.provider.ListProviderViewModel
+import com.android.solvit.shared.model.NotificationsViewModel
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.map.LocationViewModel
 import com.android.solvit.shared.model.request.ServiceRequest
@@ -32,6 +34,8 @@ fun CreateRequestScreen(
     navigationActions: NavigationActions,
     requestViewModel: ServiceRequestViewModel =
         viewModel(factory = ServiceRequestViewModel.Factory),
+    notificationViewModel: NotificationsViewModel= viewModel(factory = NotificationsViewModel.Factory),
+    listProviderViewModel: ListProviderViewModel= viewModel(factory = ListProviderViewModel.Factory),
     locationViewModel: LocationViewModel = viewModel(factory = LocationViewModel.Factory)
 ) {
   // Lock Orientation to Portrait
@@ -112,11 +116,11 @@ fun CreateRequestScreen(
                     imageUrl = null)
             if (selectedImageUri != null) {
               requestViewModel.saveServiceRequestWithImage(serviceRequest, selectedImageUri!!)
-              navigationActions.goBack()
             } else {
               requestViewModel.saveServiceRequest(serviceRequest)
-              navigationActions.goBack()
             }
+            notificationViewModel.sendNotifications(serviceRequest,listProviderViewModel.providersList.value)
+            navigationActions.goBack()
             return@RequestScreen
           } catch (_: NumberFormatException) {}
         }
