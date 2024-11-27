@@ -54,6 +54,7 @@ import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
 import com.android.solvit.shared.ui.utils.getReceiverImageUrl
 import com.android.solvit.shared.ui.utils.getReceiverName
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun MessageBox(
@@ -65,9 +66,21 @@ fun MessageBox(
 ) {
 
   val allMessages by chatViewModel.allMessages.collectAsState()
-  val user by authViewModel.user.collectAsState()
 
+  val isReadyToNavigate by chatViewModel.isReadyToNavigate.collectAsState()
+
+  val user by authViewModel.user.collectAsState()
+  Log.e(
+      "AuthRep",
+      " Firebase Auth : ${FirebaseAuth.getInstance().currentUser?.uid} , AuthViewModel : ${user?.uid} ")
   chatViewModel.getAllLastMessages()
+
+  LaunchedEffect(isReadyToNavigate) {
+    if (isReadyToNavigate) {
+      navigationActions.navigateTo(Screen.CHAT)
+      chatViewModel.resetIsReadyToNavigate()
+    }
+  }
 
   Scaffold(
       topBar = { ChatListTopBar(navigationActions, chatViewModel, authViewModel) },
@@ -172,8 +185,9 @@ fun ChatListItem(
       Log.e("provider", "$provider")
       receiverState.value = provider
     } else {
-      // val seeker = seekerProfileViewModel.fetchSeekerById(receiverId)
-      // receiverState.value = seeker
+      val seeker = seekerProfileViewModel.fetchUserById(receiverId)
+      Log.e("seeker", "$seeker")
+      receiverState.value = seeker
     }
   }
 
@@ -186,12 +200,9 @@ fun ChatListItem(
   Row(
       modifier =
           Modifier.fillMaxWidth().padding(vertical = 8.dp).testTag("ChatListItem").clickable {
-            chatViewModel.setReceiverUid(receiverId)
-            chatViewModel.initChat()
             if (receiver != null) {
-              chatViewModel.setReceiver(receiver)
+              chatViewModel.prepareForChat(receiverId, receiver)
             }
-            navigationActions.navigateTo(Screen.CHAT)
           },
       verticalAlignment = Alignment.CenterVertically) {
         AsyncImage(

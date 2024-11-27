@@ -77,6 +77,10 @@ class SeekerProfileViewModel(
         onFailure = { Log.e("SeekerProfileViewModel", "Failed to get user profile") })
   }
 
+  suspend fun fetchUserById(uid: String): SeekerProfile? {
+    return repository.returnSeekerById(uid)
+  }
+
   fun getUsersProfile() {
     repository.getUsersProfile(onSuccess = { _seekerProfileList.value = it }, onFailure = {})
   }

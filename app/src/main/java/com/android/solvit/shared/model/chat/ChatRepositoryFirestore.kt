@@ -153,18 +153,16 @@ class ChatRepositoryFirestore(private val auth: FirebaseAuth, private val db: Fi
                     getLastMessageForChatRoom(
                         chatRoomId,
                         onComplete = { chatMessage ->
+                          Log.e("add chatMessage to Last Message", "$chatMessage")
                           if (chatMessage != null) {
-                            Log.e("add chatMessage to Last Message", "$chatMessage")
                             lastMessages[receiverUid] = chatMessage
-                            processedCount++
-                            // If we get All last messages
-                            if (processedCount == p0.children.count()) {
-                              onSuccess(lastMessages)
-                            }
-                            Log.e("lastMessages.add", "${lastMessages.toList()}")
-                          } else {
-                            Log.e("listenForLastMessages", "Chat Message is null")
                           }
+                          processedCount++
+                          // If we get All last messages
+                          if (processedCount == p0.children.count()) {
+                            onSuccess(lastMessages)
+                          }
+                          Log.e("lastMessages.add", "${lastMessages.toList()}")
                         })
                   }
                 } else {
