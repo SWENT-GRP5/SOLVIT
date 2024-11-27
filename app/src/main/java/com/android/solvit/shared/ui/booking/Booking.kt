@@ -375,10 +375,12 @@ fun ServiceBookingScreen(
 
               if (request!!.status == ServiceRequestStatus.PENDING) {
                 if (provider != null) {
-                  EditButton(
+                  EditAndChatButton(
                       navigationActions = navigationActions,
                       chatViewModel = chatViewModel,
                       provider = provider)
+                } else {
+                  EditButton(navigationActions)
                 }
               }
 
@@ -452,46 +454,52 @@ fun ProviderCard(
 @Composable
 fun EditButton(
     navigationActions: NavigationActions,
+) {
+  Box(
+      modifier = Modifier.padding(horizontal = 8.dp).testTag("edit_button"),
+      contentAlignment = Alignment.Center) {
+        Button(
+            onClick = { navigationActions.navigateTo(Route.EDIT_REQUEST) },
+            colors =
+                ButtonDefaults.buttonColors(
+                    containerColor = colorScheme.primary, contentColor = colorScheme.onPrimary),
+            shape = RoundedCornerShape(8.dp)) {
+              Text(text = "Edit details", style = typography.labelLarge)
+            }
+      }
+}
+
+@Composable
+fun EditAndChatButton(
+    navigationActions: NavigationActions,
     chatViewModel: ChatViewModel,
     provider: Provider
 ) {
   Row(
-      modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+      modifier = Modifier.fillMaxWidth().padding(top = 16.dp).testTag("edit_discuss_button"),
       horizontalArrangement = Arrangement.SpaceEvenly,
-      verticalAlignment = Alignment.CenterVertically) {
-        Box(
-            modifier = Modifier.weight(1f).padding(horizontal = 8.dp).testTag("edit_button"),
-            contentAlignment = Alignment.Center) {
-              Button(
-                  onClick = { navigationActions.navigateTo(Route.EDIT_REQUEST) },
-                  colors =
-                      ButtonDefaults.buttonColors(
-                          containerColor = colorScheme.primary,
-                          contentColor = colorScheme.onPrimary),
-                  shape = RoundedCornerShape(8.dp)) {
-                    Text(text = "Edit details", style = typography.labelLarge)
-                  }
-            }
-
-        Box(
-            modifier = Modifier.weight(1f).padding(horizontal = 8.dp).testTag("chat_button"),
-            contentAlignment = Alignment.Center) {
-              Button(
-                  onClick = {
-                    chatViewModel.setReceiverUid(provider.uid)
-                    chatViewModel.setReceiver(provider)
-                    chatViewModel.initChat()
-                    navigationActions.navigateTo(Screen.CHAT)
-                  },
-                  colors =
-                      ButtonDefaults.buttonColors(
-                          containerColor = colorScheme.primary,
-                          contentColor = colorScheme.onPrimary),
-                  shape = RoundedCornerShape(8.dp)) {
-                    Text(text = "Discuss", style = typography.labelLarge)
-                  }
-            }
-      }
+      verticalAlignment = Alignment.CenterVertically,
+  ) {
+    EditButton(navigationActions)
+    Box(
+        modifier = Modifier.weight(1f).padding(horizontal = 8.dp).testTag("chat_button"),
+        contentAlignment = Alignment.Center) {
+          Button(
+              onClick = {
+                chatViewModel.setReceiverUid(provider.uid)
+                chatViewModel.setReceiver(provider)
+                chatViewModel.setReceiver(provider)
+                chatViewModel.initChat()
+                navigationActions.navigateTo(Screen.CHAT)
+              },
+              colors =
+                  ButtonDefaults.buttonColors(
+                      containerColor = colorScheme.primary, contentColor = colorScheme.onPrimary),
+              shape = RoundedCornerShape(8.dp)) {
+                Text(text = "Discuss", style = typography.labelLarge)
+              }
+        }
+  }
 }
 
 @Composable
