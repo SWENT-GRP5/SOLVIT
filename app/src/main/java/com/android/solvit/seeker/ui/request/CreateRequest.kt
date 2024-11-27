@@ -25,9 +25,7 @@ import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.model.utils.isInternetAvailable
 import com.android.solvit.shared.model.utils.loadBitmapFromUri
 import com.android.solvit.shared.ui.navigation.NavigationActions
-import com.google.firebase.Firebase
 import com.google.firebase.Timestamp
-import com.google.firebase.auth.auth
 
 @Composable
 fun CreateRequestScreen(
@@ -62,7 +60,7 @@ fun CreateRequestScreen(
       Services.entries.filter { it.name.contains(typeQuery, ignoreCase = true) }
   var selectedServiceType by remember { mutableStateOf(Services.OTHER) }
   val localContext = LocalContext.current
-  val userId = Firebase.auth.currentUser?.uid ?: "-1"
+  val userId = user?.uid ?: "-1"
 
   RequestScreen(
       navigationActions = navigationActions,

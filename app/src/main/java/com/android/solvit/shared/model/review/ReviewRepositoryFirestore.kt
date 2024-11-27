@@ -14,7 +14,7 @@ class ReviewRepositoryFirestore(private val db: FirebaseFirestore) : ReviewRepos
 
   override fun init(onSuccess: () -> Unit) {
     // Add an authentication state listener to call onSuccess when the user is authenticated
-    auth.addAuthStateListener { it.currentUser?.let { onSuccess() } }
+    auth.addAuthStateListener { onSuccess() }
   }
 
   override fun addReview(review: Review, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
