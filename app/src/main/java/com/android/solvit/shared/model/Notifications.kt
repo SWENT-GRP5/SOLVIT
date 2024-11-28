@@ -12,5 +12,5 @@ data class Notification(
             .now(), // The timestamp when the notification was created; defaults to current time
     val isRead: Boolean =
         false // Flag indicating if the notification has been read by the provider, defaults to
-              // `false`
+    // `false`
 )
