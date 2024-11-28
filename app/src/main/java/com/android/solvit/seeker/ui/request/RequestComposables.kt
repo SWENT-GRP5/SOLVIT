@@ -1,5 +1,6 @@
 package com.android.solvit.seeker.ui.request
 
+import analyzeImagesWithOpenAI
 import android.net.Uri
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -98,6 +99,9 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
 
 @Composable
@@ -780,6 +784,7 @@ fun PreviewAIAssistantDialog() {
 
 @Composable
 fun MultiStepDialog(
+    requestViewModel: ServiceRequestViewModel,
     showDialog: Boolean,
     currentStep: Int,
     selectedImages: List<Uri>,
@@ -809,7 +814,7 @@ fun MultiStepDialog(
                             if (selectedImages.isNotEmpty() && !isLoading) {
                                 isLoading = true
                                 try {
-                                    val (type, title, description) = uploadAndAnalyze(selectedImages)
+                                    val (type, title, description) = uploadAndAnalyze(requestViewModel,selectedImages)
                                     onAnalyzeComplete(type, title, description)
                                 } catch (e: Exception) {
                                     Log.e("MultiStepDialog", "Error: ${e.message}")
@@ -865,19 +870,29 @@ fun MultiStepDialog(
     }
 }
 
-suspend fun uploadAndAnalyze(imageUris: List<Uri>): Triple<String, String, String> {
+suspend fun uploadAndAnalyze(
+    requestViewModel: ServiceRequestViewModel,
+    imageUris: List<Uri>
+): Triple<String, String, String> {
     return withContext(Dispatchers.IO) {
         try {
-            // Simulate a delay for upload and analysis
-            delay(3000L) // 3 seconds
+            // Step 1: Upload images and get their URLs
+            val imageUrls = suspendCoroutine<List<String>> { continuation ->
+                requestViewModel.uploadMultipleImages(
+                    imageUris = imageUris,
+                    onSuccess = { urls -> continuation.resume(urls) },
+                    onFailure = { exception -> continuation.resumeWithException(exception) }
+                )
+            }
 
-            // Mock results for the type, title, and description
-            Triple("Mocked Type", "Mocked Title", "Mocked Description")
+            // Log uploaded image URLs
+            Log.i("uploadAndAnalyze", "Uploaded image URLs: $imageUrls")
+
+            // Step 2: Analyze uploaded images with OpenAI
+            analyzeImagesWithOpenAI(imageUrls)
         } catch (e: Exception) {
+            Log.e("uploadAndAnalyze", "Error: ${e.message}", e)
             throw Exception("Error during upload and analysis: ${e.message}")
         }
     }
 }
-
-
-

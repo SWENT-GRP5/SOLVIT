@@ -55,7 +55,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import androidx.lifecycle.viewModelScope
-import isFileExists
 
 
 @Composable
@@ -120,6 +119,7 @@ fun CreateRequestScreen(
     // Multi-Step Dialog
     if (showMultiStepDialog) {
         MultiStepDialog(
+            requestViewModel = requestViewModel,
             showDialog = showMultiStepDialog,
             currentStep = currentStep,
             selectedImages = selectedImages,

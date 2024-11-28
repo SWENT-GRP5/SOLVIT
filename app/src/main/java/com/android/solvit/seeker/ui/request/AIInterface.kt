@@ -88,8 +88,7 @@ fun prepareRequestBody(imageUrls: List<String>): RequestBody {
 
 
 suspend fun analyzeImagesWithOpenAI(
-    imageUrls: List<String>,
-    context: Context
+    imageUrls: List<String>
 ): Triple<String, String, String> {
     val service = createAIAnalysisService()
 
@@ -114,9 +113,4 @@ suspend fun analyzeImagesWithOpenAI(
             throw Exception("Error during AI analysis: ${e.message}")
         }
     }
-}
-
-fun isFileExists(context: Context, uri: Uri): Boolean {
-    val file = DocumentFile.fromSingleUri(context, uri)
-    return file?.exists() == true
 }
