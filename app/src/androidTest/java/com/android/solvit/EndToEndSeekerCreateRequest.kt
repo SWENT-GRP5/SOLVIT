@@ -15,6 +15,7 @@ import com.android.solvit.seeker.model.profile.UserRepositoryFirestore
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.shared.model.authentication.AuthRepository
 import com.android.solvit.shared.model.authentication.AuthViewModel
+import com.android.solvit.shared.model.chat.ChatAssistantViewModel
 import com.android.solvit.shared.model.chat.ChatRepository
 import com.android.solvit.shared.model.chat.ChatRepositoryFirestore
 import com.android.solvit.shared.model.chat.ChatViewModel
@@ -62,6 +63,7 @@ class EndToEndSeekerCreateRequest {
   private lateinit var reviewViewModel: ReviewViewModel
   private lateinit var chatViewModel: ChatViewModel
   private lateinit var packageProposalViewModel: PackageProposalViewModel
+  private lateinit var chatAssistantViewModel: ChatAssistantViewModel
 
   private lateinit var authRepository: AuthRepository
   private lateinit var seekerRepository: UserRepository
@@ -112,6 +114,7 @@ class EndToEndSeekerCreateRequest {
     reviewViewModel = ReviewViewModel(reviewRepository)
     packageProposalViewModel = PackageProposalViewModel(packageProposalRepository)
     chatViewModel = ChatViewModel(chatRepository)
+    chatAssistantViewModel = ChatAssistantViewModel()
 
     `when`(locationRepository.search(ArgumentMatchers.anyString(), anyOrNull(), anyOrNull()))
         .thenAnswer { invocation ->
@@ -169,7 +172,8 @@ class EndToEndSeekerCreateRequest {
                   serviceRequestViewModel,
                   reviewViewModel,
                   locationViewModel,
-                  chatViewModel)
+                  chatViewModel,
+                  chatAssistantViewModel)
           "provider" ->
               ProviderUI(
                   authViewModel,
@@ -177,7 +181,8 @@ class EndToEndSeekerCreateRequest {
                   serviceRequestViewModel,
                   seekerProfileViewModel,
                   chatViewModel,
-                  locationViewModel)
+                  locationViewModel,
+                  chatAssistantViewModel)
         }
       }
     }
