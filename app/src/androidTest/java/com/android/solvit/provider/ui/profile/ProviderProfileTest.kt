@@ -2,6 +2,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import com.android.solvit.provider.ui.profile.DescriptionSection
 import com.android.solvit.provider.ui.profile.ProfileHeader
 import com.android.solvit.provider.ui.profile.StatsSection
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
@@ -60,6 +61,16 @@ class ProviderProfileScreenTest {
     composeTestRule.onNodeWithTag("locationTitle").assertIsDisplayed()
     composeTestRule.onNodeWithTag("location").assertIsDisplayed()
     composeTestRule.onNodeWithTag("logoutButton").assertIsDisplayed()
+  }
+
+  @Test
+  fun providerProfileScreen_description_displaysCorrectly() {
+
+    composeTestRule.setContent { DescriptionSection(provider) }
+
+    composeTestRule.onNodeWithTag("descriptionSection").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("descriptionTitle").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("descriptionText").assertIsDisplayed()
   }
 
   @Test

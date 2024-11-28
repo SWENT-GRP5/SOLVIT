@@ -95,8 +95,8 @@ fun ModifyProviderInformationScreen(
             modifier =
                 Modifier.fillMaxSize()
                     .padding(padding)
-                    .background(colorScheme.background)
                     .padding(16.dp)
+                    .background(colorScheme.background)
                     .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top) {
@@ -109,9 +109,9 @@ fun ModifyProviderInformationScreen(
 
               ModifyInput(
                   provider = provider,
-                  locationViewModel,
-                  listProviderViewModel,
-                  authViewModel,
+                  locationViewModel = locationViewModel,
+                  listProviderViewModel = listProviderViewModel,
+                  authViewModel = authViewModel,
                   navigationActions = navigationActions)
             }
       })
@@ -138,7 +138,7 @@ fun ModifyInput(
   var newService by remember { mutableStateOf(provider.service) }
 
   var newPhoneNumber by remember { mutableStateOf(provider.phone) }
-  val phoneRegex = Regex("^\\+?[0-9]{10,15}$")
+  val phoneRegex = Regex("^\\+?[0-9]{6,15}$")
   val okNewPhoneNumber = phoneRegex.matches(newPhoneNumber)
 
   val newLocation by remember { mutableStateOf(provider.location.name) }
@@ -180,7 +180,7 @@ fun ModifyInput(
       leadingIcon = Icons.Default.AccountCircle,
       leadingIconDescription = "Name Icon",
       testTag = "newNameInputField",
-      errorMessage = "Your name must have at least 2 characters",
+      errorMessage = "Your name must have at least 2 characters and less than 50",
       errorTestTag = "nameErrorMessage",
       maxLines = 2)
 
@@ -350,13 +350,14 @@ fun ServiceDropdownMenu(selectedService: Services, onServiceSelected: (Services)
             label = { Text("Select Service") },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             colors =
-                TextFieldDefaults.textFieldColors(
+                TextFieldDefaults.outlinedTextFieldColors(
                     // Set the background color of the TextField to match the screen or be white
                     containerColor = colorScheme.background,
-                    unfocusedIndicatorColor = colorScheme.secondary,
-                    focusedIndicatorColor = colorScheme.secondary,
-                    focusedTrailingIconColor = colorScheme.onSurfaceVariant,
-                    unfocusedTrailingIconColor = colorScheme.onSurfaceVariant),
+                    focusedTextColor = colorScheme.onBackground,
+                    unfocusedTextColor = colorScheme.onBackground,
+                    focusedBorderColor = colorScheme.background,
+                    unfocusedBorderColor = colorScheme.background,
+                ),
             modifier =
                 Modifier.fillMaxWidth()
                     .menuAnchor()
@@ -414,16 +415,11 @@ fun LanguageDropdownMenu(
                 TextFieldDefaults.outlinedTextFieldColors(
                     containerColor = colorScheme.background,
                     focusedTextColor = colorScheme.onBackground,
-                    unfocusedTextColor =
-                        if (selectedLanguages.isEmpty()) colorScheme.error
-                        else colorScheme.onBackground,
+                    unfocusedTextColor = colorScheme.onBackground,
                     focusedBorderColor =
-                        if (selectedLanguages.isEmpty()) colorScheme.error else colorScheme.primary,
-                    unfocusedBorderColor =
-                        when {
-                          selectedLanguages.isEmpty() -> colorScheme.error
-                          else -> colorScheme.error
-                        },
+                        if (selectedLanguages.isEmpty()) colorScheme.background
+                        else colorScheme.primary,
+                    unfocusedBorderColor = colorScheme.background,
                 ),
             modifier =
                 Modifier.menuAnchor()

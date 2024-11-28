@@ -193,7 +193,7 @@ fun ProfileHeader(
               maxLines = 2,
               overflow = TextOverflow.Ellipsis)
 
-          Spacer(modifier = Modifier.height(40.dp))
+          Spacer(modifier = Modifier.height(50.dp))
 
           Button(
               onClick = { authViewModel.logout {} },
@@ -208,7 +208,7 @@ fun ProfileHeader(
         }
 
     Column(
-        modifier = Modifier.padding(vertical = 20.dp).padding(8.dp).weight(1f),
+        modifier = Modifier.padding(8.dp).weight(1f).wrapContentHeight(),
         verticalArrangement = Arrangement.spacedBy(10.dp),
         horizontalAlignment = Alignment.Start) {
           val titleColor = colorScheme.onBackground
@@ -220,9 +220,7 @@ fun ProfileHeader(
                 text = text,
                 color = titleColor,
                 fontSize = fontSize,
-                modifier = Modifier.testTag(testTag),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis)
+                modifier = Modifier.testTag(testTag))
           }
 
           @Composable
@@ -300,13 +298,15 @@ fun DescriptionSection(provider: Provider) {
               color = colorScheme.onPrimary,
               fontWeight = FontWeight.Bold,
               maxLines = 7,
-              overflow = TextOverflow.Ellipsis)
+              overflow = TextOverflow.Ellipsis,
+              modifier = Modifier.testTag("descriptionTitle"))
           Text(
               description,
               fontSize = 15.sp,
               color = colorScheme.onPrimary,
               maxLines = 7,
-              overflow = TextOverflow.Ellipsis)
+              overflow = TextOverflow.Ellipsis,
+              modifier = Modifier.testTag("descriptionText"))
         }
       }
 }
