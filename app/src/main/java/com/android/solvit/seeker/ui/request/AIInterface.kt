@@ -2,9 +2,13 @@ import android.util.Log
 import com.android.solvit.BuildConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import okhttp3.Authenticator
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
+import okhttp3.Request
 import okhttp3.RequestBody
+import okhttp3.Response
+import okhttp3.Route
 import org.json.JSONArray
 import org.json.JSONObject
 import retrofit2.Call
@@ -27,20 +31,36 @@ data class AIAnalysisResponse(val type: String, val title: String, val descripti
 
 // A Retrofit Instance
 fun createAIAnalysisService(): AIAnalysisService {
-
   val apiKey = BuildConfig.OPENAI_API_KEY
 
-  // Add Authorization header to each request
+  // Define an Authenticator to retry requests with updated credentials if needed
+  val authenticator =
+      object : Authenticator {
+        override fun authenticate(route: Route?, response: Response): Request? {
+          // Check if the API key is valid
+          if (response.request.header("Authorization") == "Bearer $apiKey") {
+            // Log the authentication failure
+            Log.e(
+                "Authenticator",
+                "Authentication failed. Retrying is not applicable with static keys.")
+            return null // Cannot retry with the same static API key
+          }
+          return null
+        }
+      }
+
+  // Configure OkHttpClient with the Authenticator
   val client =
       OkHttpClient.Builder()
+          .authenticator(authenticator)
           .addInterceptor { chain ->
             val request =
                 chain
                     .request()
                     .newBuilder()
-                    .addHeader("Authorization", "Bearer $apiKey") // API Key
+                    .addHeader("Authorization", "Bearer $apiKey") // Attach API key as Bearer token
                     .build()
-            Log.d("API Request", request.headers.toString())
+            Log.d("API Request", "Headers: ${request.headers}")
             chain.proceed(request)
           }
           .build()
