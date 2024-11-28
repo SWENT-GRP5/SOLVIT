@@ -94,9 +94,9 @@ fun CreateRequestScreen(
         onStartAnalyzing = {
           currentStep = 2 // Move to the analyzing step
         },
-        onAnalyzeComplete = { generatedType, generatedTitle, generatedDescription ->
-          typeQuery = generatedType
+        onAnalyzeComplete = { generatedTitle, generatedType, generatedDescription ->
           title = generatedTitle
+          typeQuery = generatedType
           description = generatedDescription
           currentStep = 3 // Move to the analysis complete step
         },
