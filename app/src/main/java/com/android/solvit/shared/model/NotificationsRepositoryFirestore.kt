@@ -50,7 +50,7 @@ override fun getNotification(
         }
     }
  }
-    private fun documentToNotif(document: DocumentSnapshot): Notification? {
+    fun documentToNotif(document: DocumentSnapshot): Notification? {
         return try {
             val id = document.id
             val providerId = document.getString("providerId") ?: return null
