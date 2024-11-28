@@ -11,7 +11,6 @@ import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -160,7 +159,7 @@ fun SuggestionsGrid2(
 fun SuggestionButton2(text: String, isSelected: Boolean, onClick: () -> Unit) {
   // Update color based on selection state
   val backgroundColor = if (isSelected) colorScheme.secondary else colorScheme.background
-  val contentColor = if (isSelected) colorScheme.onSecondary else Color.Black
+  val contentColor = if (isSelected) colorScheme.onSecondary else colorScheme.onBackground
 
   Surface(
       modifier = Modifier.padding(8.dp).clickable { onClick() },

@@ -94,7 +94,6 @@ class SeekerProfileViewModel(
   }
 
   fun addUserPreference(userId: String, preference: String) {
-
     val updatedPreferences = _userPreferences.value.toMutableList()
     if (!updatedPreferences.contains(preference)) {
       updatedPreferences.add(preference)
@@ -109,7 +108,6 @@ class SeekerProfileViewModel(
   }
 
   fun deleteUserPreference(userId: String, preference: String) {
-
     // Optimistically remove the preference from the local state
     val updatedPreferences = _userPreferences.value.toMutableList()
     updatedPreferences.remove(preference)
