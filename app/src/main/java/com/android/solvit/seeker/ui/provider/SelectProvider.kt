@@ -109,13 +109,6 @@ fun SpTopAppBar(
     onClickAction: () -> Unit,
     seekerProfileViewModel: SeekerProfileViewModel
 ) {
-  // Lock Orientation to Portrait
-  val context = LocalContext.current
-  DisposableEffect(Unit) {
-    val activity = context as? ComponentActivity
-    activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-    onDispose { activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED }
-  }
 
   val location by seekerProfileViewModel.locationSearched.collectAsState()
   Box(modifier = Modifier.fillMaxWidth().testTag("topAppBar")) {
@@ -921,6 +914,17 @@ fun SelectProviderScreen(
     navigationActions: NavigationActions,
     locationViewModel: LocationViewModel = viewModel(factory = LocationViewModel.Factory)
 ) {
+  // Lock Orientation to Portrait
+  val context = LocalContext.current
+  DisposableEffect(Unit) {
+    val activity = context as? ComponentActivity
+    activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+    onDispose {
+      locationViewModel.clear()
+      activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+    }
+  }
+
   val selectedService by listProviderViewModel.selectedService.collectAsState()
   if (selectedService != null)
       listProviderViewModel.filterProviders(

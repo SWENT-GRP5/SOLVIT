@@ -152,7 +152,7 @@ open class UserRepositoryFirestore(private val db: FirebaseFirestore) : UserRepo
       onSuccess: (List<Location>) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    db.collection(collectionPath).document(userId).get().addOnCompleteListener() { task ->
+    db.collection(collectionPath).document(userId).get().addOnCompleteListener { task ->
       if (task.isSuccessful) {
         val doc = task.result
         val locations = getLocations(doc)
@@ -263,7 +263,7 @@ open class UserRepositoryFirestore(private val db: FirebaseFirestore) : UserRepo
       val uid = document.id
       val name = document.getString("name") ?: return null
       val username = document.getString("username") ?: return null
-      val imageUrl = document.getString("imageUrl") ?: return null
+      val imageUrl = document.getString("imageUrl") ?: ""
       val email = document.getString("email") ?: return null
       val phone = document.getString("phone") ?: return null
       val address = document.getString("address") ?: return null
