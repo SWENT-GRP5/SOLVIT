@@ -864,14 +864,17 @@ fun AnimatedSparkleEffectOverlay() {
   val sparkles = remember { List(20) { SparkleState() } } // Generate multiple sparkles
   val infiniteTransition = rememberInfiniteTransition()
 
-  sparkles.forEach { sparkle -> sparkle.AnimateSparkle(infiniteTransition) }
+  // Animate properties for each sparkle
+  sparkles.forEach { sparkle -> sparkle.animateSparkle(infiniteTransition) }
 
+  // Overlay to display the sparkles
   Box(
       modifier =
           Modifier.fillMaxSize()
               .background(Color.Transparent)
               .zIndex(1f), // Ensure it overlays the dialog
       contentAlignment = Alignment.Center) {
+        // Render each sparkle
         sparkles.forEach { sparkle ->
           Box(
               modifier =
@@ -888,15 +891,15 @@ fun AnimatedSparkleEffectOverlay() {
 }
 
 data class SparkleState(
-    var xOffset: Float = (0..300).random().toFloat(),
-    var yOffset: Float = (0..300).random().toFloat(),
-    var alpha: Float = (0..100).random() / 100f,
-    var scale: Float = (50..100).random() / 100f,
-    var size: Float = (10..20).random().toFloat()
+    var xOffset: Float = (0..300).random().toFloat(), // Random horizontal offset
+    var yOffset: Float = (0..300).random().toFloat(), // Random vertical offset
+    var alpha: Float = (50..100).random() / 100f, // Random transparency
+    var scale: Float = (50..100).random() / 100f, // Random initial scale
+    var size: Float = (10..20).random().toFloat() // Random size for the sparkle
 ) {
-
   @Composable
-  fun AnimateSparkle(infiniteTransition: InfiniteTransition) {
+  fun animateSparkle(infiniteTransition: InfiniteTransition) {
+    // Animate horizontal offset
     xOffset =
         infiniteTransition
             .animateFloat(
@@ -904,9 +907,12 @@ data class SparkleState(
                 targetValue = xOffset + (0..50).random(),
                 animationSpec =
                     infiniteRepeatable(
-                        tween(durationMillis = 1000, easing = LinearEasing), RepeatMode.Reverse))
+                        animation = tween(durationMillis = 1000, easing = LinearEasing),
+                        repeatMode = RepeatMode.Reverse),
+                label = "xOffset")
             .value
 
+    // Animate vertical offset
     yOffset =
         infiniteTransition
             .animateFloat(
@@ -914,9 +920,12 @@ data class SparkleState(
                 targetValue = yOffset + (0..50).random(),
                 animationSpec =
                     infiniteRepeatable(
-                        tween(durationMillis = 1000, easing = LinearEasing), RepeatMode.Reverse))
+                        animation = tween(durationMillis = 1000, easing = LinearEasing),
+                        repeatMode = RepeatMode.Reverse),
+                label = "yOffset")
             .value
 
+    // Animate transparency (alpha)
     alpha =
         infiniteTransition
             .animateFloat(
@@ -924,9 +933,12 @@ data class SparkleState(
                 targetValue = 0.2f,
                 animationSpec =
                     infiniteRepeatable(
-                        tween(durationMillis = 1000, easing = LinearEasing), RepeatMode.Reverse))
+                        animation = tween(durationMillis = 1000, easing = LinearEasing),
+                        repeatMode = RepeatMode.Reverse),
+                label = "alpha")
             .value
 
+    // Animate scale
     scale =
         infiniteTransition
             .animateFloat(
@@ -934,7 +946,9 @@ data class SparkleState(
                 targetValue = 1.2f,
                 animationSpec =
                     infiniteRepeatable(
-                        tween(durationMillis = 1000, easing = LinearEasing), RepeatMode.Reverse))
+                        animation = tween(durationMillis = 1000, easing = LinearEasing),
+                        repeatMode = RepeatMode.Reverse),
+                label = "scale")
             .value
   }
 }

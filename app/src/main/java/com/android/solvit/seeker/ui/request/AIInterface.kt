@@ -40,6 +40,7 @@ fun createAIAnalysisService(): AIAnalysisService {
                     .newBuilder()
                     .addHeader("Authorization", "Bearer $apiKey") // API Key
                     .build()
+            Log.d("API Request", request.headers.toString())
             chain.proceed(request)
           }
           .build()
