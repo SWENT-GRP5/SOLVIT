@@ -259,7 +259,6 @@ fun ModifyInput(
       testTag = "newDescriptionInputField",
       errorMessage = "Your description name must not be empty",
       errorTestTag = "newDescriptionErrorMessage",
-      height = 200.dp,
       textAlign = TextAlign.Start,
       maxLines = 7)
 

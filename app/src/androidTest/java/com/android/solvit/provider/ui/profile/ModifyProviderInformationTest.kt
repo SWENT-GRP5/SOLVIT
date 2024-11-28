@@ -96,6 +96,7 @@ class ProfessionalProfileScreenTest {
     composeTestRule.onNodeWithTag("newPhoneNumberInputField").assertIsDisplayed()
     composeTestRule.onNodeWithTag("newServiceInputField").assertIsDisplayed()
     composeTestRule.onNodeWithTag("newLocationInputField").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("newDescriptionInputField").assertIsDisplayed()
   }
 
   @Test
@@ -143,6 +144,21 @@ class ProfessionalProfileScreenTest {
     composeTestRule.onNodeWithTag("newPhoneNumberInputField").performTextClearance()
     composeTestRule.onNodeWithTag("newPhoneNumberInputField").performTextInput("+1234567")
     composeTestRule.onNodeWithTag("newPhoneNumberErrorMessage").assertIsNotDisplayed()
+  }
+
+  @Test
+  fun modifyProviderInformationScreen_errorIsDisplayInTheDescriptionContent() {
+
+    composeTestRule.setContent {
+      ModifyInput(provider, locationViewModel, navigationActions = navigationActions)
+    }
+    composeTestRule.onNodeWithTag("newDescriptionInputField").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("newDescriptionErrorMessage").assertIsNotDisplayed()
+    composeTestRule.onNodeWithTag("newDescriptionInputField").performTextClearance()
+    composeTestRule.onNodeWithTag("newDescriptionErrorMessage").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("newDescriptionInputField").performTextClearance()
+    composeTestRule.onNodeWithTag("newDescriptionInputField").performTextInput("Bonjour")
+    composeTestRule.onNodeWithTag("newDescriptionErrorMessage").assertIsNotDisplayed()
   }
 
   @Test
