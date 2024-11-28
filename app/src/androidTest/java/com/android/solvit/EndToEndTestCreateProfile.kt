@@ -16,6 +16,9 @@ import com.android.solvit.seeker.model.profile.UserRepository
 import com.android.solvit.seeker.model.profile.UserRepositoryFirestore
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.seeker.ui.provider.ProviderRegistrationScreen
+import com.android.solvit.shared.model.NotificationsRepository
+import com.android.solvit.shared.model.NotificationsRepositoryFirestore
+import com.android.solvit.shared.model.NotificationsViewModel
 import com.android.solvit.shared.model.authentication.AuthRep
 import com.android.solvit.shared.model.authentication.AuthRepository
 import com.android.solvit.shared.model.authentication.AuthViewModel
@@ -70,6 +73,7 @@ class EndToEndTestCreateProfile {
   private lateinit var reviewViewModel: ReviewViewModel
   private lateinit var chatViewModel: ChatViewModel
   private lateinit var packageProposalViewModel: PackageProposalViewModel
+  private lateinit var notificationsViewModel: NotificationsViewModel
 
   private lateinit var authRepository: AuthRepository
   private lateinit var authRepository2: AuthRep
@@ -80,6 +84,7 @@ class EndToEndTestCreateProfile {
   private lateinit var reviewRepository: ReviewRepository
   private lateinit var packageProposalRepositoryFirestore: PackageProposalRepository
   private lateinit var chatRepository: ChatRepository
+  private lateinit var notificationsRepository: NotificationsRepository
 
   private val locations =
       listOf(
@@ -112,6 +117,7 @@ class EndToEndTestCreateProfile {
     reviewRepository = ReviewRepositoryFirestore(firestore)
     packageProposalRepositoryFirestore = PackageProposalRepositoryFirestore(firestore)
     chatRepository = ChatRepositoryFirestore(database)
+    notificationsRepository = NotificationsRepositoryFirestore(firestore)
 
     authViewModel = AuthViewModel(authRepository)
     seekerProfileViewModel = SeekerProfileViewModel(seekerRepository)
@@ -121,6 +127,7 @@ class EndToEndTestCreateProfile {
     reviewViewModel = ReviewViewModel(reviewRepository)
     packageProposalViewModel = PackageProposalViewModel(packageProposalRepositoryFirestore)
     chatViewModel = ChatViewModel(chatRepository)
+    notificationsViewModel = NotificationsViewModel(notificationsRepository)
 
     `when`(locationRepository.search(ArgumentMatchers.anyString(), anyOrNull(), anyOrNull()))
         .thenAnswer { invocation ->
@@ -167,6 +174,7 @@ class EndToEndTestCreateProfile {
                   serviceRequestViewModel,
                   reviewViewModel,
                   locationViewModel,
+                  notificationsViewModel,
                   chatViewModel)
           "provider" ->
               ProviderUI(
@@ -175,6 +183,7 @@ class EndToEndTestCreateProfile {
                   serviceRequestViewModel,
                   seekerProfileViewModel,
                   chatViewModel,
+                  notificationsViewModel,
                   locationViewModel)
         }
       }
