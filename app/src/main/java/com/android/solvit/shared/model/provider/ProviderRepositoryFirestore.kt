@@ -63,6 +63,22 @@ class ProviderRepositoryFirestore(
     FirebaseAuth.getInstance().addAuthStateListener { onSuccess() }
   }
 
+  override fun addListenerOnProviders(
+      onSuccess: (List<Provider>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    db.collection(collectionPath).addSnapshotListener { value, error ->
+      if (error != null) {
+        onFailure(error)
+        return@addSnapshotListener
+      }
+      if (value != null) {
+        val providers = value.mapNotNull { convertDoc(it) }
+        onSuccess(providers)
+      }
+    }
+  }
+
   override fun getNewUid(): String {
     return db.collection(collectionPath).document().id
   }
