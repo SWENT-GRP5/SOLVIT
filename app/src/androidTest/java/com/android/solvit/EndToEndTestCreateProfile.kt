@@ -9,7 +9,6 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import androidx.test.core.app.ApplicationProvider
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
@@ -21,6 +20,9 @@ import com.android.solvit.shared.model.authentication.AuthRep
 import com.android.solvit.shared.model.authentication.AuthRepository
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.authentication.User
+import com.android.solvit.shared.model.chat.ChatRepository
+import com.android.solvit.shared.model.chat.ChatRepositoryFirestore
+import com.android.solvit.shared.model.chat.ChatViewModel
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.map.LocationRepository
 import com.android.solvit.shared.model.map.LocationViewModel
@@ -36,7 +38,6 @@ import com.android.solvit.shared.model.review.ReviewRepository
 import com.android.solvit.shared.model.review.ReviewRepositoryFirestore
 import com.android.solvit.shared.model.review.ReviewViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
-import com.android.solvit.shared.ui.navigation.Screen
 import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
@@ -67,6 +68,7 @@ class EndToEndTestCreateProfile {
   private lateinit var serviceRequestViewModel: ServiceRequestViewModel
   private lateinit var locationViewModel: LocationViewModel
   private lateinit var reviewViewModel: ReviewViewModel
+  private lateinit var chatViewModel: ChatViewModel
   private lateinit var packageProposalViewModel: PackageProposalViewModel
 
   private lateinit var authRepository: AuthRepository
@@ -77,9 +79,8 @@ class EndToEndTestCreateProfile {
   private lateinit var serviceRequestRepository: ServiceRequestRepository
   private lateinit var reviewRepository: ReviewRepository
   private lateinit var packageProposalRepositoryFirestore: PackageProposalRepository
+  private lateinit var chatRepository: ChatRepository
 
-  private lateinit var navHostController: NavHostController
-  private lateinit var navigationActions: NavigationActions
   private val locations =
       listOf(
           Location(37.7749, -122.4194, "San Francisco"),
@@ -110,6 +111,7 @@ class EndToEndTestCreateProfile {
     serviceRequestRepository = ServiceRequestRepositoryFirebase(firestore, storage)
     reviewRepository = ReviewRepositoryFirestore(firestore)
     packageProposalRepositoryFirestore = PackageProposalRepositoryFirestore(firestore)
+    chatRepository = ChatRepositoryFirestore(Firebase.auth, database)
 
     authViewModel = AuthViewModel(authRepository)
     seekerProfileViewModel = SeekerProfileViewModel(seekerRepository)
@@ -118,6 +120,7 @@ class EndToEndTestCreateProfile {
     serviceRequestViewModel = ServiceRequestViewModel(serviceRequestRepository)
     reviewViewModel = ReviewViewModel(reviewRepository)
     packageProposalViewModel = PackageProposalViewModel(packageProposalRepositoryFirestore)
+    chatViewModel = ChatViewModel(chatRepository)
 
     `when`(locationRepository.search(ArgumentMatchers.anyString(), anyOrNull(), anyOrNull()))
         .thenAnswer { invocation ->
@@ -144,9 +147,6 @@ class EndToEndTestCreateProfile {
   @Test
   fun CreateSeekerProfile() {
     composeTestRule.setContent {
-      navHostController = rememberNavController()
-      navigationActions = NavigationActions(navHostController)
-
       val userRegistered = authViewModel.userRegistered.collectAsState()
       val user = authViewModel.user.collectAsState()
 
@@ -156,8 +156,6 @@ class EndToEndTestCreateProfile {
             listProviderViewModel,
             seekerProfileViewModel,
             locationViewModel,
-            navHostController,
-            navigationActions,
             packageProposalViewModel)
       } else {
         when (user.value!!.role) {
@@ -168,20 +166,26 @@ class EndToEndTestCreateProfile {
                   seekerProfileViewModel,
                   serviceRequestViewModel,
                   reviewViewModel,
-                  locationViewModel)
+                  locationViewModel,
+                  chatViewModel)
           "provider" ->
               ProviderUI(
-                  authViewModel, listProviderViewModel, seekerProfileViewModel, locationViewModel)
+                  authViewModel,
+                  listProviderViewModel,
+                  serviceRequestViewModel,
+                  seekerProfileViewModel,
+                  chatViewModel,
+                  locationViewModel)
         }
       }
     }
 
     composeTestRule.onNodeWithTag("ctaButtonPortrait").performClick()
 
-    assertEquals(Screen.SIGN_IN, navHostController.currentDestination?.route)
+    composeTestRule.onNodeWithTag("loginImage").assertIsDisplayed()
     composeTestRule.onNodeWithTag("signUpLink").performClick()
 
-    assertEquals(Screen.SIGN_UP, navHostController.currentDestination?.route)
+    composeTestRule.onNodeWithTag("signUpIllustration").assertIsDisplayed()
     val email = "e2eTest20@test.com"
     val password = "password"
 
@@ -192,7 +196,7 @@ class EndToEndTestCreateProfile {
     assertEquals(email, authViewModel.email.value)
     assertEquals(password, authViewModel.password.value)
 
-    assertEquals(Screen.SIGN_UP_CHOOSE_ROLE, navHostController.currentDestination?.route)
+    composeTestRule.onNodeWithTag("roleIllustration").assertIsDisplayed()
     composeTestRule.onNodeWithTag("seekerButton").performClick()
     assertEquals("seeker", authViewModel.role.value)
 
@@ -207,7 +211,6 @@ class EndToEndTestCreateProfile {
     composeTestRule.onAllNodesWithTag("locationResult")[0].performClick()
 
     composeTestRule.onNodeWithTag("completeRegistrationButton").performClick()
-
     composeTestRule.onNodeWithTag("savePreferencesButton").performClick()
     composeTestRule.onNodeWithTag("exploreServicesButton").performClick()
 
@@ -241,8 +244,8 @@ class EndToEndTestCreateProfile {
     authViewModel2 = AuthViewModel(authRepository2)
 
     composeTestRule.setContent {
-      navHostController = rememberNavController()
-      navigationActions = NavigationActions(navHostController)
+      val navHostController = rememberNavController()
+      val navigationActions = NavigationActions(navHostController)
       ProviderRegistrationScreen(
           navigationActions = navigationActions,
           viewModel = listProviderViewModel,

@@ -12,6 +12,8 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.navigation.NavController
+import com.android.solvit.shared.model.authentication.AuthRep
+import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.map.LocationRepository
 import com.android.solvit.shared.model.map.LocationViewModel
@@ -38,6 +40,8 @@ class CreateRequestScreenTest {
   private lateinit var serviceRequestViewModel: ServiceRequestViewModel
   private lateinit var locationRepository: LocationRepository
   private lateinit var locationViewModel: LocationViewModel
+  private lateinit var authRepository: AuthRep
+  private lateinit var authViewModel: AuthViewModel
   private lateinit var navController: NavController
   private lateinit var navigationActions: NavigationActions
 
@@ -67,6 +71,8 @@ class CreateRequestScreenTest {
     serviceRequestViewModel = ServiceRequestViewModel(serviceRequestRepository)
     locationRepository = Mockito.mock(LocationRepository::class.java)
     locationViewModel = LocationViewModel(locationRepository)
+    authRepository = Mockito.mock(AuthRep::class.java)
+    authViewModel = AuthViewModel(authRepository)
     navController = Mockito.mock(NavController::class.java)
     navigationActions = NavigationActions(navController)
 
@@ -83,6 +89,11 @@ class CreateRequestScreenTest {
     }
 
     `when`(serviceRequestRepository.getNewUid()).thenAnswer { "1" }
+
+    `when`(authRepository.updateUserLocations(any(), any(), any())).thenAnswer {
+      val onSuccess = it.getArgument<() -> Unit>(1)
+      onSuccess()
+    }
   }
 
   @Test
@@ -136,7 +147,8 @@ class CreateRequestScreenTest {
   @Test
   fun locationSelectionFromDropdown() {
     composeTestRule.setContent {
-      CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
+      CreateRequestScreen(
+          navigationActions, serviceRequestViewModel, locationViewModel, authViewModel)
     }
 
     composeTestRule.onNodeWithTag("inputRequestAddress").performTextInput("USA")

@@ -83,6 +83,7 @@ import com.android.solvit.shared.model.request.ServiceRequestStatus
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
+import com.android.solvit.shared.ui.navigation.Screen
 import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.Timestamp
 import com.google.maps.android.compose.GoogleMap
@@ -373,6 +374,9 @@ fun ServiceBookingScreen(
               if (request!!.status == ServiceRequestStatus.PENDING) {
                 EditButton(navigationActions)
               }
+              if (request!!.status == ServiceRequestStatus.COMPLETED) {
+                ReviewButton(navigationActions)
+              }
             }
       }
 }
@@ -446,6 +450,22 @@ fun EditButton(navigationActions: NavigationActions) {
                     containerColor = colorScheme.primary, contentColor = colorScheme.onPrimary),
             shape = RoundedCornerShape(8.dp)) {
               Text(text = "Edit details", style = typography.labelLarge)
+            }
+      }
+}
+
+@Composable
+fun ReviewButton(navigationActions: NavigationActions) {
+  Box(
+      modifier = Modifier.fillMaxWidth().padding(top = 16.dp).testTag("review_button"),
+      contentAlignment = Alignment.Center) {
+        Button(
+            onClick = { navigationActions.navigateTo(Screen.REVIEW_SCREEN) },
+            colors =
+                ButtonDefaults.buttonColors(
+                    containerColor = colorScheme.primary, contentColor = colorScheme.onPrimary),
+            shape = RoundedCornerShape(8.dp)) {
+              Text(text = "Leave a review", style = typography.labelLarge)
             }
       }
 }

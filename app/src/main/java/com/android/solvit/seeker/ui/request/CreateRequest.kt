@@ -17,12 +17,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.shared.model.NotificationsViewModel
+import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.map.LocationViewModel
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestStatus
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.service.Services
+import com.android.solvit.shared.model.utils.isInternetAvailable
 import com.android.solvit.shared.model.utils.loadBitmapFromUri
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.google.firebase.Firebase
@@ -34,6 +36,7 @@ fun CreateRequestScreen(
     navigationActions: NavigationActions,
     requestViewModel: ServiceRequestViewModel =
         viewModel(factory = ServiceRequestViewModel.Factory),
+    authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory),
     notificationViewModel: NotificationsViewModel =
         viewModel(factory = NotificationsViewModel.Factory),
     listProviderViewModel: ListProviderViewModel =
@@ -58,6 +61,7 @@ fun CreateRequestScreen(
   var showDropdownLocation by remember { mutableStateOf(false) }
   val locationSuggestions by
       locationViewModel.locationSuggestions.collectAsState(initial = emptyList<Location?>())
+  val user by authViewModel.user.collectAsState()
   var showDropdownType by remember { mutableStateOf(false) }
   var typeQuery by remember { mutableStateOf("") }
   val filteredServiceTypes =
@@ -89,7 +93,11 @@ fun CreateRequestScreen(
       showDropdownLocation = showDropdownLocation,
       onShowDropdownLocationChange = { showDropdownLocation = it },
       locationSuggestions = locationSuggestions.filterNotNull(),
-      onLocationSelected = { selectedLocation = it },
+      userLocations = user?.locations ?: emptyList(),
+      onLocationSelected = {
+        selectedLocation = it
+        authViewModel.addUserLocation(it, {}, {})
+      },
       selectedLocation = selectedLocation,
       dueDate = dueDate,
       onDueDateChange = { dueDate = it },
@@ -117,6 +125,13 @@ fun CreateRequestScreen(
                     type = selectedServiceType,
                     imageUrl = null)
             if (selectedImageUri != null) {
+              if (!isInternetAvailable(localContext)) {
+                Toast.makeText(
+                        localContext,
+                        "Image will show when you are back online",
+                        Toast.LENGTH_SHORT)
+                    .show()
+              }
               requestViewModel.saveServiceRequestWithImage(serviceRequest, selectedImageUri!!)
             } else {
               requestViewModel.saveServiceRequest(serviceRequest)

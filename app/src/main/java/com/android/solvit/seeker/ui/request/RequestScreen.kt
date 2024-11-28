@@ -62,6 +62,7 @@ fun RequestScreen(
     showDropdownLocation: Boolean,
     onShowDropdownLocationChange: (Boolean) -> Unit,
     locationSuggestions: List<Location>,
+    userLocations: List<Location>,
     onLocationSelected: (Location) -> Unit,
     selectedLocation: Location?,
     selectedRequest: ServiceRequest?,
@@ -129,6 +130,7 @@ fun RequestScreen(
                   showDropdownLocation = showDropdownLocation,
                   onShowDropdownLocationChange = onShowDropdownLocationChange,
                   locationSuggestions = locationSuggestions,
+                  userLocations = userLocations,
                   onLocationSelected = onLocationSelected,
                   requestLocation = selectedRequest?.location,
                   isValueOk = selectedLocation != null)

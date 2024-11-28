@@ -1,5 +1,6 @@
 package com.android.solvit.shared.model.authentication
 
+import com.android.solvit.shared.model.map.Location
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 
 interface AuthRep {
@@ -37,4 +38,10 @@ interface AuthRep {
   )
 
   fun logout(onSuccess: () -> Unit)
+
+  fun updateUserLocations(
+      locations: List<Location>,
+      onSuccess: () -> Unit,
+      onFailure: (Exception) -> Unit
+  )
 }
