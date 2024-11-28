@@ -75,6 +75,7 @@ import coil.compose.AsyncImage
 import com.android.solvit.R
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.seeker.ui.provider.Note
+import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.packages.PackageProposal
 import com.android.solvit.shared.model.packages.PackageProposalViewModel
 import com.android.solvit.shared.model.provider.Provider
@@ -105,7 +106,8 @@ fun ServiceBookingScreen(
     requestViewModel: ServiceRequestViewModel =
         viewModel(factory = ServiceRequestViewModel.Factory),
     packageViewModel: PackageProposalViewModel =
-        viewModel(factory = PackageProposalViewModel.Factory)
+        viewModel(factory = PackageProposalViewModel.Factory),
+    authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory)
 ) {
   // Lock Orientation to Portrait
   val context = LocalContext.current
@@ -114,6 +116,9 @@ fun ServiceBookingScreen(
     activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
     onDispose { activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED }
   }
+
+  val user = authViewModel.user.collectAsState().value ?: return
+  val role = user.role
 
   val request by requestViewModel.selectedRequest.collectAsState()
   if (request == null) {
@@ -240,8 +245,10 @@ fun ServiceBookingScreen(
                                   .testTag("profile_box")
                                   .clickable(
                                       onClick = {
-                                        providerViewModel.selectService(request!!.type)
-                                        navigationActions.navigateTo(Route.PROVIDERS)
+                                        if (role == "seeker") {
+                                          providerViewModel.selectService(request!!.type)
+                                          navigationActions.navigateTo(Route.PROVIDERS)
+                                        }
                                       })) {
                             Column(
                                 horizontalAlignment =
@@ -254,8 +261,8 @@ fun ServiceBookingScreen(
                                   // Placeholder text for the missing provider information
                                   Text(
                                       text =
-                                          "No provider is assigned to this request. \n " +
-                                              "CLICK to select a provider or wait for one to contact you.",
+                                          if (role == "seeker") "Select a provider"
+                                          else "No provider",
                                       color = colorScheme.onPrimary,
                                       textAlign = TextAlign.Center)
                                 }
@@ -333,7 +340,7 @@ fun ServiceBookingScreen(
                                             fontSize = 15.sp,
                                             color = colorScheme.onPrimary)
                                       }
-                                  if (acceptedOrScheduled) {
+                                  if (acceptedOrScheduled && role == "seeker") {
                                     DateAndTimePickers(request!!, requestViewModel)
                                   }
                                 }

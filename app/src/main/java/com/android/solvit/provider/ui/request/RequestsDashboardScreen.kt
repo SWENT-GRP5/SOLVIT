@@ -56,6 +56,7 @@ import com.android.solvit.shared.model.request.ServiceRequestStatus.Companion.ge
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.utils.isInternetAvailable
 import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.android.solvit.shared.ui.navigation.Route
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import java.text.SimpleDateFormat
@@ -90,7 +91,9 @@ fun RequestsDashboardScreen(
                   tabs = statusTabs,
                   onTabSelected = { selectedTab = it })
               JobSectionContent(
-                  selectedTab = selectedTab, serviceRequestViewModel = serviceRequestViewModel)
+                  selectedTab = selectedTab,
+                  serviceRequestViewModel = serviceRequestViewModel,
+                  navigationActions = navigationActions)
             }
       })
 }
@@ -163,10 +166,14 @@ fun StatusTabs(selectedTab: Int, tabs: Array<ServiceRequestStatus>, onTabSelecte
  * @param serviceRequestViewModel ViewModel for managing service requests.
  */
 @Composable
-fun JobSectionContent(selectedTab: Int, serviceRequestViewModel: ServiceRequestViewModel) {
+fun JobSectionContent(
+    selectedTab: Int,
+    serviceRequestViewModel: ServiceRequestViewModel,
+    navigationActions: NavigationActions
+) {
   when (selectedTab) {
-    0 -> PendingJobsSection(serviceRequestViewModel)
-    1 -> AcceptedJobSection(serviceRequestViewModel)
+    0 -> PendingJobsSection(serviceRequestViewModel, navigationActions)
+    1 -> AcceptedJobSection(serviceRequestViewModel, navigationActions)
     2 -> ScheduledJobsSection(serviceRequestViewModel)
     3 -> CompletedJobsSection(serviceRequestViewModel)
     4 -> CanceledJobsSection(serviceRequestViewModel)
@@ -193,6 +200,7 @@ fun JobListSection(
     title: String,
     requests: List<ServiceRequest>,
     emptyMessage: String,
+    onLearnMore: ((ServiceRequest) -> Unit)? = null,
     onNavigateToJob: ((ServiceRequest) -> Unit)? = null,
     onContactCustomer: ((ServiceRequest) -> Unit)? = null,
     onMarkAsCompleted: ((ServiceRequest) -> Unit)? = null,
@@ -222,6 +230,7 @@ fun JobListSection(
             filteredRequests.forEach { request ->
               JobItem(
                   request = request,
+                  onLearnMore = { onLearnMore?.invoke(request) },
                   onNavigateToJob = { onNavigateToJob?.invoke(request) },
                   onContactCustomer = { onContactCustomer?.invoke(request) },
                   onMarkAsCompleted = { onMarkAsCompleted?.invoke(request) },
@@ -241,7 +250,7 @@ fun JobListSection(
  * @param viewModel ViewModel for managing service requests.
  */
 @Composable
-fun PendingJobsSection(viewModel: ServiceRequestViewModel) {
+fun PendingJobsSection(viewModel: ServiceRequestViewModel, navigationActions: NavigationActions) {
   val context = LocalContext.current
   val pendingRequests by viewModel.pendingRequests.collectAsState()
 
@@ -249,6 +258,10 @@ fun PendingJobsSection(viewModel: ServiceRequestViewModel) {
       title = "Pending",
       requests = pendingRequests,
       emptyMessage = "No pending jobs",
+      onLearnMore = {
+        viewModel.selectRequest(it)
+        navigationActions.navigateTo(Route.BOOKING_DETAILS)
+      },
       onContactCustomer = {
         Toast.makeText(context, "Contact Not yet Implemented", Toast.LENGTH_SHORT).show()
       },
@@ -262,7 +275,7 @@ fun PendingJobsSection(viewModel: ServiceRequestViewModel) {
  * @param viewModel ViewModel for managing service requests.
  */
 @Composable
-fun AcceptedJobSection(viewModel: ServiceRequestViewModel) {
+fun AcceptedJobSection(viewModel: ServiceRequestViewModel, navigationActions: NavigationActions) {
   val context = LocalContext.current
   val acceptedRequests by viewModel.acceptedRequests.collectAsState()
 
@@ -270,6 +283,10 @@ fun AcceptedJobSection(viewModel: ServiceRequestViewModel) {
       title = "Accepted",
       requests = acceptedRequests,
       emptyMessage = "No accepted jobs",
+      onLearnMore = {
+        viewModel.selectRequest(it)
+        navigationActions.navigateTo(Route.BOOKING_DETAILS)
+      },
       onContactCustomer = {
         Toast.makeText(context, "Contact Not yet Implemented", Toast.LENGTH_SHORT).show()
       },
@@ -399,6 +416,7 @@ fun ArchivedJobsSection(viewModel: ServiceRequestViewModel) {
 @Composable
 fun JobItem(
     request: ServiceRequest,
+    onLearnMore: (() -> Unit)? = null,
     onNavigateToJob: (() -> Unit)? = null,
     onContactCustomer: (() -> Unit)? = null,
     onMarkAsCompleted: (() -> Unit)? = null,
@@ -427,6 +445,18 @@ fun JobItem(
                 Text(
                     request.title, style = typography.titleMedium, color = colorScheme.onBackground)
 
+                // See more button
+                if (status == ServiceRequestStatus.PENDING ||
+                    status == ServiceRequestStatus.ACCEPTED) {
+                  onLearnMore?.let {
+                    Button(
+                        onClick = it,
+                        colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
+                        modifier = Modifier.testTag("LearnMoreButton_${request.uid}")) {
+                          Text("Learn More", color = colorScheme.onPrimary)
+                        }
+                  }
+                }
                 // Navigate Button for Scheduled Jobs
                 if (status == ServiceRequestStatus.SCHEDULED) {
                   onNavigateToJob?.let {
