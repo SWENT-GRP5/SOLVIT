@@ -6,6 +6,7 @@ import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.provider.ProviderRepository
 import com.android.solvit.shared.model.service.Services
 import com.google.firebase.Timestamp
+import kotlinx.coroutines.runBlocking
 import org.hamcrest.CoreMatchers
 import org.hamcrest.MatcherAssert
 import org.junit.Before
@@ -85,5 +86,13 @@ class ListProviderViewModelTest {
     listProviderViewModel.selectService(Services.PLUMBER)
     MatcherAssert.assertThat(
         listProviderViewModel.selectedService.value, CoreMatchers.`is`(Services.PLUMBER))
+  }
+
+  @Test
+  fun getProviderById() {
+    runBlocking {
+      listProviderViewModel.fetchProviderById("1234")
+      verify(providerRepository).returnProvider("1234")
+    }
   }
 }

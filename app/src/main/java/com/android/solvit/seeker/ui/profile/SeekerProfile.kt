@@ -234,10 +234,7 @@ fun SeekerProfileScreen(
                             icon = Icons.Default.Favorite,
                             optionName = "Preferences",
                             subtitle = "Set your preferences",
-                            onClick = {
-                              Toast.makeText(context, "Not implemented yet", Toast.LENGTH_SHORT)
-                                  .show()
-                            },
+                            onClick = { navigationActions.navigateTo(Screen.EDIT_PREFERENCES) },
                             modifier = Modifier.testTag("PreferencesOption"))
                       }
                 }

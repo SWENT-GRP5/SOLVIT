@@ -15,6 +15,9 @@ import com.android.solvit.seeker.model.profile.UserRepositoryFirestore
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.shared.model.authentication.AuthRepository
 import com.android.solvit.shared.model.authentication.AuthViewModel
+import com.android.solvit.shared.model.chat.ChatRepository
+import com.android.solvit.shared.model.chat.ChatRepositoryFirestore
+import com.android.solvit.shared.model.chat.ChatViewModel
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.map.LocationRepository
 import com.android.solvit.shared.model.map.LocationViewModel
@@ -57,6 +60,7 @@ class EndToEndSeekerCreateRequest {
   private lateinit var serviceRequestViewModel: ServiceRequestViewModel
   private lateinit var locationViewModel: LocationViewModel
   private lateinit var reviewViewModel: ReviewViewModel
+  private lateinit var chatViewModel: ChatViewModel
   private lateinit var packageProposalViewModel: PackageProposalViewModel
 
   private lateinit var authRepository: AuthRepository
@@ -66,6 +70,7 @@ class EndToEndSeekerCreateRequest {
   private lateinit var serviceRequestRepository: ServiceRequestRepository
   private lateinit var reviewRepository: ReviewRepository
   private lateinit var packageProposalRepository: PackageProposalRepository
+  private lateinit var chatRepository: ChatRepository
 
   private val email = "test@test.ch"
   private val password = "password"
@@ -97,6 +102,7 @@ class EndToEndSeekerCreateRequest {
     serviceRequestRepository = ServiceRequestRepositoryFirebase(firestore, storage)
     reviewRepository = ReviewRepositoryFirestore(firestore)
     packageProposalRepository = PackageProposalRepositoryFirestore(firestore)
+    chatRepository = ChatRepositoryFirestore(database)
 
     authViewModel = AuthViewModel(authRepository)
     seekerProfileViewModel = SeekerProfileViewModel(seekerRepository)
@@ -105,6 +111,7 @@ class EndToEndSeekerCreateRequest {
     serviceRequestViewModel = ServiceRequestViewModel(serviceRequestRepository)
     reviewViewModel = ReviewViewModel(reviewRepository)
     packageProposalViewModel = PackageProposalViewModel(packageProposalRepository)
+    chatViewModel = ChatViewModel(chatRepository)
 
     `when`(locationRepository.search(ArgumentMatchers.anyString(), anyOrNull(), anyOrNull()))
         .thenAnswer { invocation ->
@@ -161,13 +168,15 @@ class EndToEndSeekerCreateRequest {
                   seekerProfileViewModel,
                   serviceRequestViewModel,
                   reviewViewModel,
-                  locationViewModel)
+                  locationViewModel,
+                  chatViewModel)
           "provider" ->
               ProviderUI(
                   authViewModel,
                   listProviderViewModel,
                   serviceRequestViewModel,
                   seekerProfileViewModel,
+                  chatViewModel,
                   locationViewModel)
         }
       }

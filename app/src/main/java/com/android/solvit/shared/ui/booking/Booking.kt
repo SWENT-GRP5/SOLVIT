@@ -74,8 +74,11 @@ import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.android.solvit.R
+import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.seeker.ui.provider.Note
+import com.android.solvit.shared.model.authentication.AuthViewModel
+import com.android.solvit.shared.model.chat.ChatViewModel
 import com.android.solvit.shared.model.packages.PackageProposal
 import com.android.solvit.shared.model.packages.PackageProposalViewModel
 import com.android.solvit.shared.model.provider.Provider
@@ -102,11 +105,15 @@ import java.util.Locale
 @Composable
 fun ServiceBookingScreen(
     navigationActions: NavigationActions,
+    authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory),
+    seekerProfileViewModel: SeekerProfileViewModel =
+        viewModel(factory = SeekerProfileViewModel.Factory),
     providerViewModel: ListProviderViewModel = viewModel(factory = ListProviderViewModel.Factory),
     requestViewModel: ServiceRequestViewModel =
         viewModel(factory = ServiceRequestViewModel.Factory),
     packageViewModel: PackageProposalViewModel =
-        viewModel(factory = PackageProposalViewModel.Factory)
+        viewModel(factory = PackageProposalViewModel.Factory),
+    chatViewModel: ChatViewModel = viewModel(factory = ChatViewModel.Factory)
 ) {
   // Lock Orientation to Portrait
   val context = LocalContext.current
@@ -115,6 +122,18 @@ fun ServiceBookingScreen(
     activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
     onDispose { activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED }
   }
+
+  val isReadyToNavigate by chatViewModel.isReadyToNavigate.collectAsState()
+  LaunchedEffect(isReadyToNavigate) {
+    if (isReadyToNavigate) {
+      navigationActions.navigateTo(Screen.CHAT)
+      chatViewModel.resetIsReadyToNavigate()
+    }
+  }
+
+  val user = authViewModel.user.collectAsState().value
+  val role = user?.role ?: "seeker"
+  val seekerState = remember { mutableStateOf<Any?>(null) }
 
   val request by requestViewModel.selectedRequest.collectAsState()
   if (request == null) {
@@ -128,6 +147,12 @@ fun ServiceBookingScreen(
           providerViewModel.providersList.collectAsState().value.firstOrNull {
             it.uid == request!!.providerId
           }
+
+  LaunchedEffect(request) {
+    val seeker = request?.userId?.let { seekerProfileViewModel.fetchUserById(it) }
+    seekerState.value = seeker
+  }
+
   val packageId = request!!.packageId
   val packageProposal =
       if (packageId.isNullOrEmpty()) null
@@ -241,8 +266,10 @@ fun ServiceBookingScreen(
                                   .testTag("profile_box")
                                   .clickable(
                                       onClick = {
-                                        providerViewModel.selectService(request!!.type)
-                                        navigationActions.navigateTo(Route.PROVIDERS)
+                                        if (role == "seeker") {
+                                          providerViewModel.selectService(request!!.type)
+                                          navigationActions.navigateTo(Route.PROVIDERS)
+                                        }
                                       })) {
                             Column(
                                 horizontalAlignment =
@@ -255,8 +282,8 @@ fun ServiceBookingScreen(
                                   // Placeholder text for the missing provider information
                                   Text(
                                       text =
-                                          "No provider is assigned to this request. \n " +
-                                              "CLICK to select a provider or wait for one to contact you.",
+                                          if (role == "seeker") "Select a provider"
+                                          else "No provider",
                                       color = colorScheme.onPrimary,
                                       textAlign = TextAlign.Center)
                                 }
@@ -334,7 +361,7 @@ fun ServiceBookingScreen(
                                             fontSize = 15.sp,
                                             color = colorScheme.onPrimary)
                                       }
-                                  if (acceptedOrScheduled) {
+                                  if (acceptedOrScheduled && role == "seeker") {
                                     DateAndTimePickers(request!!, requestViewModel)
                                   }
                                 }
@@ -375,7 +402,31 @@ fun ServiceBookingScreen(
               }
 
               if (request!!.status == ServiceRequestStatus.PENDING) {
-                EditButton(navigationActions)
+                // If on Seeker View, Init a chat with as receiver the provider
+                if (role == "seeker") {
+                  if (provider != null) {
+                    EditAndChatButton(
+                        currentUserId = user?.uid ?: "",
+                        navigationActions = navigationActions,
+                        chatViewModel = chatViewModel,
+                        receiverId = providerId ?: "",
+                        receiver = provider)
+                  } else {
+                    EditButton(navigationActions)
+                  }
+                  // Else Init Chat with as receiver Seeker
+                } else {
+                  if (seekerState.value != null) {
+                    EditAndChatButton(
+                        currentUserId = user?.uid ?: "",
+                        navigationActions = navigationActions,
+                        chatViewModel = chatViewModel,
+                        receiverId = request?.userId ?: "",
+                        receiver = seekerState.value!!)
+                  } else {
+                    EditButton(navigationActions)
+                  }
+                }
               }
               if (request!!.status == ServiceRequestStatus.COMPLETED) {
                 ReviewButton(navigationActions)
@@ -442,9 +493,11 @@ fun ProviderCard(
 }
 
 @Composable
-fun EditButton(navigationActions: NavigationActions) {
+fun EditButton(
+    navigationActions: NavigationActions,
+) {
   Box(
-      modifier = Modifier.fillMaxWidth().padding(top = 16.dp).testTag("edit_button"),
+      modifier = Modifier.padding(horizontal = 8.dp).testTag("edit_button"),
       contentAlignment = Alignment.Center) {
         Button(
             onClick = { navigationActions.navigateTo(Route.EDIT_REQUEST) },
@@ -455,6 +508,35 @@ fun EditButton(navigationActions: NavigationActions) {
               Text(text = "Edit details", style = typography.labelLarge)
             }
       }
+}
+
+@Composable
+fun EditAndChatButton(
+    navigationActions: NavigationActions,
+    currentUserId: String,
+    chatViewModel: ChatViewModel,
+    receiverId: String,
+    receiver: Any
+) {
+  Row(
+      modifier = Modifier.fillMaxWidth().padding(top = 16.dp).testTag("edit_discuss_button"),
+      horizontalArrangement = Arrangement.SpaceEvenly,
+      verticalAlignment = Alignment.CenterVertically,
+  ) {
+    EditButton(navigationActions)
+    Box(
+        modifier = Modifier.weight(1f).padding(horizontal = 8.dp).testTag("chat_button"),
+        contentAlignment = Alignment.Center) {
+          Button(
+              onClick = { chatViewModel.prepareForChat(currentUserId, receiverId, receiver) },
+              colors =
+                  ButtonDefaults.buttonColors(
+                      containerColor = colorScheme.primary, contentColor = colorScheme.onPrimary),
+              shape = RoundedCornerShape(8.dp)) {
+                Text(text = "Discuss", style = typography.labelLarge)
+              }
+        }
+  }
 }
 
 @Composable
