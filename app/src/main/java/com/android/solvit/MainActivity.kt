@@ -250,6 +250,9 @@ fun ProviderUI(
       RequestsDashboardScreen(
           navigationActions = navigationActions, serviceRequestViewModel = serviceRequestViewModel)
     }
+    composable(Route.BOOKING_DETAILS) {
+      ServiceBookingScreen(navigationActions, listProviderViewModel, serviceRequestViewModel)
+    }
     composable(Screen.PROVIDER_PROFILE) {
       ProviderProfileScreen(listProviderViewModel, authViewModel, navigationActions)
     }
