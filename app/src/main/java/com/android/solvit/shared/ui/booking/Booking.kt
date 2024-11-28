@@ -104,7 +104,7 @@ import java.util.Locale
 @Composable
 fun ServiceBookingScreen(
     navigationActions: NavigationActions,
-    authViewModel: AuthViewModel,
+    authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory),
     providerViewModel: ListProviderViewModel = viewModel(factory = ListProviderViewModel.Factory),
     requestViewModel: ServiceRequestViewModel =
         viewModel(factory = ServiceRequestViewModel.Factory),

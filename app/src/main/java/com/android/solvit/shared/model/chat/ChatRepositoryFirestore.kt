@@ -14,7 +14,12 @@ class ChatRepositoryFirestore(private val db: FirebaseDatabase) : ChatRepository
 
   // Create a chat room in the collection or retrive if a conversation already exits between user
   // sender and receiver
-  override fun initChat(currentUserUid: String?, onSuccess: (String) -> Unit, receiverUid: String) {
+  override fun initChat(
+      currentUserUid: String?,
+      onSuccess: (String) -> Unit,
+      onFailure: () -> Unit,
+      receiverUid: String
+  ) {
     // Check that sender (current authenticated user is not null)
     if (currentUserUid != null) {
       val databaseRef = db.getReference(collectionPath)
@@ -54,17 +59,23 @@ class ChatRepositoryFirestore(private val db: FirebaseDatabase) : ChatRepository
                   databaseRef.child(chatId ?: "").child("users").setValue(chatData)
                   if (chatId != null) {
                     onSuccess(chatId)
+                  } else {
+                    onFailure()
                   }
                 }
               }
 
               override fun onCancelled(p0: DatabaseError) {
+                onFailure()
                 TODO("Not yet implemented")
               }
             })
       } catch (e: Exception) {
+        onFailure()
         Log.e("Init Chat Failed", "$e")
       }
+    } else {
+      onFailure()
     }
   }
 

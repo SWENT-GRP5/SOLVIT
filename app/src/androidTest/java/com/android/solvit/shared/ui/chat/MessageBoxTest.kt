@@ -11,7 +11,6 @@ import com.android.solvit.seeker.model.profile.UserRepository
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.shared.model.authentication.AuthRep
 import com.android.solvit.shared.model.authentication.AuthViewModel
-import com.android.solvit.shared.model.authentication.User
 import com.android.solvit.shared.model.chat.ChatMessage
 import com.android.solvit.shared.model.chat.ChatRepository
 import com.android.solvit.shared.model.chat.ChatViewModel
@@ -22,11 +21,9 @@ import junit.framework.TestCase.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.mockito.Mockito.doAnswer
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
 import org.mockito.kotlin.any
-import org.mockito.kotlin.whenever
 
 class MessageBoxTest {
   private lateinit var chatRepository: ChatRepository
@@ -100,16 +97,8 @@ class MessageBoxTest {
 
     var message: ChatMessage.TextMessage? = null
 
-    // Mock the `init` method
-    doAnswer { invocation ->
-          val callback = invocation.getArgument<(User?) -> Unit>(0)
-          callback(User(uid = "user_alice", role = "Provider")) // Pass the mocked user
-        }
-        .whenever(authRep)
-        .init(any())
-
-    `when`(chatRepository.initChat(any(), any())).thenAnswer {
-      val onSuccess = it.getArgument<(String) -> Unit>(0)
+    `when`(chatRepository.initChat(any(), any(), any(), any())).thenAnswer {
+      val onSuccess = it.getArgument<(String) -> Unit>(1)
       onSuccess("chatId") // Simulate success
     }
   }
@@ -117,8 +106,8 @@ class MessageBoxTest {
   @Test
   fun emptyMessageListDisplaysNoMessagesScreen() {
 
-    `when`(chatRepository.listenForLastMessages(any(), any())).thenAnswer {
-      val onSuccess = it.getArgument<(Map<String, ChatMessage.TextMessage>) -> Unit>(0)
+    `when`(chatRepository.listenForLastMessages(any(), any(), any())).thenAnswer {
+      val onSuccess = it.getArgument<(Map<String, ChatMessage.TextMessage>) -> Unit>(1)
       onSuccess(emptyMap()) // Simulate success
     }
     composeTestRule.setContent {
@@ -140,11 +129,11 @@ class MessageBoxTest {
   @Test
   fun messagesAreDisplayedCorrectly() {
 
-    `when`(chatRepository.listenForLastMessages(any(), any())).thenAnswer {
-      val onSuccess = it.getArgument<(Map<String, ChatMessage.TextMessage>) -> Unit>(0)
+    `when`(chatRepository.listenForLastMessages(any(), any(), any())).thenAnswer {
+      val onSuccess = it.getArgument<(Map<String, ChatMessage.TextMessage>) -> Unit>(1)
       onSuccess(testMessages) // Simulate success
     }
-
+    chatViewModel.getAllLastMessages("currentUserId")
     composeTestRule.setContent {
       MessageBox(
           chatViewModel,

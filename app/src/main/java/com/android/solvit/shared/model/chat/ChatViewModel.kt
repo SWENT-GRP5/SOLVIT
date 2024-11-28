@@ -62,7 +62,7 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
   }
 
   suspend fun initChat(currentUserUid: String?): String? {
-      //Suspend Coroutine to make sure that get conversation is not called before init chat
+    // Suspend Coroutine to make sure that get conversation is not called before init chat
     return suspendCoroutine { continuation ->
       receiverUid?.let {
         repository.initChat(
@@ -72,6 +72,7 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
               chatId = uid
               continuation.resume(uid)
             },
+            onFailure = { continuation.resume(null) },
             it)
       }
     }

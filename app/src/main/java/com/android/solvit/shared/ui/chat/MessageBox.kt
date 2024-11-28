@@ -55,7 +55,6 @@ import com.android.solvit.shared.ui.navigation.Screen
 import com.android.solvit.shared.ui.utils.formatTimestamp
 import com.android.solvit.shared.ui.utils.getReceiverImageUrl
 import com.android.solvit.shared.ui.utils.getReceiverName
-import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun MessageBox(
@@ -71,9 +70,6 @@ fun MessageBox(
   val isReadyToNavigate by chatViewModel.isReadyToNavigate.collectAsState()
 
   val user by authViewModel.user.collectAsState()
-  Log.e(
-      "AuthRep",
-      " Firebase Auth : ${FirebaseAuth.getInstance().currentUser?.uid} , AuthViewModel : ${user?.uid} ")
   chatViewModel.getAllLastMessages(user?.uid)
 
   LaunchedEffect(isReadyToNavigate) {
