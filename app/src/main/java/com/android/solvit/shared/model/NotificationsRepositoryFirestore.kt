@@ -84,7 +84,7 @@ class NotificationsRepositoryFirestore(private val db: FirebaseFirestore) :
    * @param document The Firestore document snapshot to convert.
    * @return A Notification object or null if the document could not be converted.
    */
-  private fun documentToNotif(document: DocumentSnapshot): Notification? {
+  fun documentToNotif(document: DocumentSnapshot): Notification? {
     return try {
       val id = document.id
       val providerId = document.getString("providerId") ?: return null
