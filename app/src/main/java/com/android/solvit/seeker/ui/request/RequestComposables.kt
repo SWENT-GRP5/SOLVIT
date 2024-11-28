@@ -6,6 +6,13 @@ import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.DrawableRes
+import androidx.compose.animation.core.InfiniteTransition
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -71,6 +78,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
@@ -83,6 +91,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.PopupProperties
+import androidx.compose.ui.zIndex
 import coil.compose.AsyncImage
 import com.android.solvit.R
 import com.android.solvit.shared.model.map.Location
@@ -748,6 +757,7 @@ fun MultiStepDialog(
     onClose: () -> Unit
 ) {
   var isLoading by remember { mutableStateOf(false) }
+  var showSparkleEffect by remember { mutableStateOf(false) } // Control for the sparkle effect
 
   if (showDialog) {
     Dialog(onDismissRequest = { onClose() }) {
@@ -788,6 +798,12 @@ fun MultiStepDialog(
             }
           }
           3 -> {
+            LaunchedEffect(Unit) {
+              showSparkleEffect = true
+              kotlinx.coroutines.delay(2000L) // Let the effect play for 2 seconds
+              showSparkleEffect = false
+              onClose()
+            }
             Column(
                 modifier =
                     Modifier.fillMaxWidth().padding(16.dp).verticalScroll(rememberScrollState()),
@@ -808,6 +824,10 @@ fun MultiStepDialog(
           }
         }
       }
+    }
+    // Show the animated sparkle effect
+    if (showSparkleEffect) {
+      AnimatedSparkleEffectOverlay()
     }
   }
 }
@@ -836,5 +856,85 @@ suspend fun uploadAndAnalyze(
       Log.e("uploadAndAnalyze", "Error: ${e.message}", e)
       throw Exception("Error during upload and analysis: ${e.message}")
     }
+  }
+}
+
+@Composable
+fun AnimatedSparkleEffectOverlay() {
+  val sparkles = remember { List(20) { SparkleState() } } // Generate multiple sparkles
+  val infiniteTransition = rememberInfiniteTransition()
+
+  sparkles.forEach { sparkle -> sparkle.AnimateSparkle(infiniteTransition) }
+
+  Box(
+      modifier =
+          Modifier.fillMaxSize()
+              .background(Color.Transparent)
+              .zIndex(1f), // Ensure it overlays the dialog
+      contentAlignment = Alignment.Center) {
+        sparkles.forEach { sparkle ->
+          Box(
+              modifier =
+                  Modifier.size(sparkle.size.dp)
+                      .offset(x = sparkle.xOffset.dp, y = sparkle.yOffset.dp)
+                      .graphicsLayer {
+                        alpha = sparkle.alpha
+                        scaleX = sparkle.scale
+                        scaleY = sparkle.scale
+                      }
+                      .background(Color.Yellow.copy(alpha = 0.8f), shape = CircleShape))
+        }
+      }
+}
+
+data class SparkleState(
+    var xOffset: Float = (0..300).random().toFloat(),
+    var yOffset: Float = (0..300).random().toFloat(),
+    var alpha: Float = (0..100).random() / 100f,
+    var scale: Float = (50..100).random() / 100f,
+    var size: Float = (10..20).random().toFloat()
+) {
+
+  @Composable
+  fun AnimateSparkle(infiniteTransition: InfiniteTransition) {
+    xOffset =
+        infiniteTransition
+            .animateFloat(
+                initialValue = xOffset,
+                targetValue = xOffset + (0..50).random(),
+                animationSpec =
+                    infiniteRepeatable(
+                        tween(durationMillis = 1000, easing = LinearEasing), RepeatMode.Reverse))
+            .value
+
+    yOffset =
+        infiniteTransition
+            .animateFloat(
+                initialValue = yOffset,
+                targetValue = yOffset + (0..50).random(),
+                animationSpec =
+                    infiniteRepeatable(
+                        tween(durationMillis = 1000, easing = LinearEasing), RepeatMode.Reverse))
+            .value
+
+    alpha =
+        infiniteTransition
+            .animateFloat(
+                initialValue = alpha,
+                targetValue = 0.2f,
+                animationSpec =
+                    infiniteRepeatable(
+                        tween(durationMillis = 1000, easing = LinearEasing), RepeatMode.Reverse))
+            .value
+
+    scale =
+        infiniteTransition
+            .animateFloat(
+                initialValue = scale,
+                targetValue = 1.2f,
+                animationSpec =
+                    infiniteRepeatable(
+                        tween(durationMillis = 1000, easing = LinearEasing), RepeatMode.Reverse))
+            .value
   }
 }

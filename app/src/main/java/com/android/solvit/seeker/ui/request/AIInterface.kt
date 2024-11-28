@@ -1,3 +1,4 @@
+import android.util.Log
 import com.android.solvit.BuildConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -87,6 +88,7 @@ fun prepareRequestBody(imageUrls: List<String>): RequestBody {
                   })
             })
         put("max_tokens", 500)
+        put("temperature", 0.7)
       }
 
   return RequestBody.create("application/json".toMediaTypeOrNull(), jsonPayload.toString())
@@ -104,6 +106,11 @@ suspend fun analyzeImagesWithOpenAI(imageUrls: List<String>): Triple<String, Str
 
       if (response.isSuccessful) {
         val body = response.body()
+
+        // Log the raw response
+        Log.d("analyzeImagesWithOpenAI", "Response: ${response.raw()}")
+        Log.d("analyzeImagesWithOpenAI", "Parsed Body: $body")
+
         Triple(
             body?.type ?: "OTHER",
             body?.title ?: "Generated Title",
