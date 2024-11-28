@@ -220,7 +220,7 @@ fun MessageInputBar(chatViewModel: ChatViewModel, authViewModel: AuthViewModel) 
                     timestamp = System.currentTimeMillis(),
                 )
               }
-          if (chatMessage != null) {
+          if (chatMessage != null && message.isNotEmpty()) {
             chatViewModel.sendMessage(chatMessage)
             message = ""
             // chatViewModel.getConversation()

@@ -24,6 +24,7 @@ import com.android.solvit.provider.ui.request.RequestsDashboardScreen
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.seeker.ui.map.SeekerMapScreen
+import com.android.solvit.seeker.ui.profile.EditPreferences
 import com.android.solvit.seeker.ui.profile.EditSeekerProfileScreen
 import com.android.solvit.seeker.ui.profile.SeekerProfileScreen
 import com.android.solvit.seeker.ui.profile.SeekerRegistrationScreen
@@ -85,7 +86,6 @@ fun SolvitApp() {
   val chatViewModel = viewModel<ChatViewModel>(factory = ChatViewModel.Factory)
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
-
   if (!userRegistered.value) {
     SharedUI(
         authViewModel,
@@ -199,7 +199,8 @@ fun SeekerUI(
     }
 
     composable(Route.CREATE_REQUEST) {
-      CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
+      CreateRequestScreen(
+          navigationActions, serviceRequestViewModel, locationViewModel, authViewModel)
     }
     composable(Route.REQUESTS_OVERVIEW) {
       RequestsOverviewScreen(navigationActions, serviceRequestViewModel, authViewModel)
@@ -208,6 +209,7 @@ fun SeekerUI(
       ServiceBookingScreen(
           navigationActions,
           authViewModel = authViewModel,
+          seekerProfileViewModel = seekerProfileViewModel,
           listProviderViewModel,
           serviceRequestViewModel,
           chatViewModel = chatViewModel)
@@ -222,6 +224,9 @@ fun SeekerUI(
       }
       composable(Screen.EDIT_PROFILE) {
         EditSeekerProfileScreen(seekerProfileViewModel, navigationActions, authViewModel)
+      }
+      composable(Screen.EDIT_PREFERENCES) {
+        EditPreferences(user!!.uid, seekerProfileViewModel, navigationActions)
       }
     }
     composable(Screen.REVIEW_SCREEN) {
@@ -242,6 +247,7 @@ fun ProviderUI(
 ) {
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
+  val user by authViewModel.user.collectAsState()
 
   NavHost(navController = navController, startDestination = Route.REQUESTS_FEED) {
     composable(Route.REQUESTS_FEED) {
@@ -256,6 +262,12 @@ fun ProviderUI(
     composable(Screen.MY_JOBS) {
       RequestsDashboardScreen(
           navigationActions = navigationActions, serviceRequestViewModel = serviceRequestViewModel)
+    }
+    composable(Route.BOOKING_DETAILS) {
+      ServiceBookingScreen(
+          navigationActions,
+          providerViewModel = listProviderViewModel,
+          requestViewModel = serviceRequestViewModel)
     }
     composable(Screen.PROVIDER_PROFILE) {
       ProviderProfileScreen(listProviderViewModel, authViewModel, navigationActions)

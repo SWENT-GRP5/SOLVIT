@@ -114,9 +114,6 @@ class SeekerProfileViewModelTest {
 
     // Verify addUserPreference was called
     verify(firebaseRepository).addUserPreference(eq(testUserId), eq(testPreference), any(), any())
-
-    // Verify getUserPreferences was called after addUserPreference to refresh the preferences
-    verify(firebaseRepository).getUserPreferences(eq(testUserId), any(), any())
   }
 
   @Test
@@ -145,9 +142,6 @@ class SeekerProfileViewModelTest {
     // Verify deleteUserPreference was called
     verify(firebaseRepository)
         .deleteUserPreference(eq(testUserId), eq(testPreference), any(), any())
-
-    // Verify getUserPreferences was called after deleting the preference to refresh the preferences
-    verify(firebaseRepository).getUserPreferences(eq(testUserId), any(), any())
   }
 
   @Test

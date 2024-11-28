@@ -74,6 +74,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.android.solvit.R
+import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.seeker.ui.provider.Note
 import com.android.solvit.shared.model.authentication.AuthViewModel
@@ -105,6 +106,8 @@ import java.util.Locale
 fun ServiceBookingScreen(
     navigationActions: NavigationActions,
     authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory),
+    seekerProfileViewModel: SeekerProfileViewModel =
+        viewModel(factory = SeekerProfileViewModel.Factory),
     providerViewModel: ListProviderViewModel = viewModel(factory = ListProviderViewModel.Factory),
     requestViewModel: ServiceRequestViewModel =
         viewModel(factory = ServiceRequestViewModel.Factory),
@@ -128,7 +131,9 @@ fun ServiceBookingScreen(
     }
   }
 
-  val user by authViewModel.user.collectAsState()
+  val user = authViewModel.user.collectAsState().value
+  val role = user?.role ?: "seeker"
+  val seekerState = remember { mutableStateOf<Any?>(null) }
 
   val request by requestViewModel.selectedRequest.collectAsState()
   if (request == null) {
@@ -142,6 +147,12 @@ fun ServiceBookingScreen(
           providerViewModel.providersList.collectAsState().value.firstOrNull {
             it.uid == request!!.providerId
           }
+
+  LaunchedEffect(request) {
+    val seeker = request?.userId?.let { seekerProfileViewModel.fetchUserById(it) }
+    seekerState.value = seeker
+  }
+
   val packageId = request!!.packageId
   val packageProposal =
       if (packageId.isNullOrEmpty()) null
@@ -255,8 +266,10 @@ fun ServiceBookingScreen(
                                   .testTag("profile_box")
                                   .clickable(
                                       onClick = {
-                                        providerViewModel.selectService(request!!.type)
-                                        navigationActions.navigateTo(Route.PROVIDERS)
+                                        if (role == "seeker") {
+                                          providerViewModel.selectService(request!!.type)
+                                          navigationActions.navigateTo(Route.PROVIDERS)
+                                        }
                                       })) {
                             Column(
                                 horizontalAlignment =
@@ -269,8 +282,8 @@ fun ServiceBookingScreen(
                                   // Placeholder text for the missing provider information
                                   Text(
                                       text =
-                                          "No provider is assigned to this request. \n " +
-                                              "CLICK to select a provider or wait for one to contact you.",
+                                          if (role == "seeker") "Select a provider"
+                                          else "No provider",
                                       color = colorScheme.onPrimary,
                                       textAlign = TextAlign.Center)
                                 }
@@ -348,7 +361,7 @@ fun ServiceBookingScreen(
                                             fontSize = 15.sp,
                                             color = colorScheme.onPrimary)
                                       }
-                                  if (acceptedOrScheduled) {
+                                  if (acceptedOrScheduled && role == "seeker") {
                                     DateAndTimePickers(request!!, requestViewModel)
                                   }
                                 }
@@ -387,19 +400,31 @@ fun ServiceBookingScreen(
               }
 
               if (request!!.status == ServiceRequestStatus.PENDING) {
-                if (provider != null) {
-                  EditAndChatButton(
-                      currentUserId = user?.uid ?: "",
-                      navigationActions = navigationActions,
-                      chatViewModel = chatViewModel,
-                      provider = provider)
+                // If on Seeker View, Init a chat with as receiver the provider
+                if (role == "seeker") {
+                  if (provider != null) {
+                    EditAndChatButton(
+                        currentUserId = user?.uid ?: "",
+                        navigationActions = navigationActions,
+                        chatViewModel = chatViewModel,
+                        receiverId = providerId ?: "",
+                        receiver = provider)
+                  } else {
+                    EditButton(navigationActions)
+                  }
+                  // Else Init Chat with as receiver Seeker
                 } else {
-                  EditButton(navigationActions)
+                  if (seekerState.value != null) {
+                    EditAndChatButton(
+                        currentUserId = user?.uid ?: "",
+                        navigationActions = navigationActions,
+                        chatViewModel = chatViewModel,
+                        receiverId = request?.userId ?: "",
+                        receiver = seekerState.value!!)
+                  } else {
+                    EditButton(navigationActions)
+                  }
                 }
-              }
-
-              if (request!!.status == ServiceRequestStatus.ACCEPTED) {
-                // TODO
               }
               if (request!!.status == ServiceRequestStatus.COMPLETED) {
                 ReviewButton(navigationActions)
@@ -488,7 +513,8 @@ fun EditAndChatButton(
     navigationActions: NavigationActions,
     currentUserId: String,
     chatViewModel: ChatViewModel,
-    provider: Provider
+    receiverId: String,
+    receiver: Any
 ) {
   Row(
       modifier = Modifier.fillMaxWidth().padding(top = 16.dp).testTag("edit_discuss_button"),
@@ -500,7 +526,7 @@ fun EditAndChatButton(
         modifier = Modifier.weight(1f).padding(horizontal = 8.dp).testTag("chat_button"),
         contentAlignment = Alignment.Center) {
           Button(
-              onClick = { chatViewModel.prepareForChat(currentUserId, provider.uid, provider) },
+              onClick = { chatViewModel.prepareForChat(currentUserId, receiverId, receiver) },
               colors =
                   ButtonDefaults.buttonColors(
                       containerColor = colorScheme.primary, contentColor = colorScheme.onPrimary),
