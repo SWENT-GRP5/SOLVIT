@@ -8,6 +8,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.navigation.NavController
 import com.android.solvit.shared.model.authentication.AuthRep
 import com.android.solvit.shared.model.authentication.AuthViewModel
+import com.android.solvit.shared.model.chat.ChatAssistantViewModel
 import com.android.solvit.shared.model.chat.ChatMessage
 import com.android.solvit.shared.model.chat.ChatRepository
 import com.android.solvit.shared.model.chat.ChatViewModel
@@ -30,6 +31,7 @@ class ChatScreenTest {
 
   private lateinit var chatViewModel: ChatViewModel
   private lateinit var authViewModel: AuthViewModel
+  private lateinit var chatAssistantViewModel: ChatAssistantViewModel
   @get:Rule val composeTestRule = createComposeRule()
 
   // Create a list of TextMessage instances
@@ -75,6 +77,7 @@ class ChatScreenTest {
     authRep = mock(AuthRep::class.java)
     chatViewModel = ChatViewModel(chatRepository)
     authViewModel = AuthViewModel(authRep)
+    chatAssistantViewModel = ChatAssistantViewModel()
 
     navController = mock(NavController::class.java)
     navigationActions = NavigationActions(navController)
@@ -101,7 +104,9 @@ class ChatScreenTest {
   // Check that All Components are display and messages are retrieved correctly
   @Test
   fun AllComponentsAreDisplayed() = runTest {
-    composeTestRule.setContent { ChatScreen(navigationActions, chatViewModel, authViewModel) }
+    composeTestRule.setContent {
+      ChatScreen(navigationActions, chatViewModel, authViewModel, chatAssistantViewModel)
+    }
 
     chatViewModel.setReceiverUid("1234")
     chatViewModel.initChat("123")
