@@ -15,7 +15,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navigation
-import com.android.solvit.provider.ui.NotificationScreen
 import com.android.solvit.provider.ui.calendar.ProviderCalendarScreen
 import com.android.solvit.provider.ui.map.ProviderMapScreen
 import com.android.solvit.provider.ui.profile.ModifyProviderInformationScreen
@@ -290,9 +289,6 @@ fun ProviderUI(
     composable(Screen.PROVIDER_MODIFY_PROFILE) {
       ModifyProviderInformationScreen(
           listProviderViewModel, authViewModel, locationViewModel, navigationActions)
-    }
-    composable(Route.NOTIFICATIONS) {
-      user?.let { it1 -> NotificationScreen(notificationViewModel, it1.uid, navigationActions) }
     }
   }
 }
