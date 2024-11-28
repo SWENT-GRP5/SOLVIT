@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.android.solvit.R
 import com.android.solvit.shared.model.authentication.AuthViewModel
+import com.android.solvit.shared.model.chat.ChatAssistantViewModel
 import com.android.solvit.shared.model.chat.ChatMessage
 import com.android.solvit.shared.model.chat.ChatViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
@@ -59,7 +60,9 @@ fun ChatScreen(
     navigationActions: NavigationActions,
     chatViewModel: ChatViewModel,
     authViewModel: AuthViewModel,
+    chatAssistantViewModel: ChatAssistantViewModel
 ) {
+  chatAssistantViewModel.clear()
 
   val messages by chatViewModel.coMessage.collectAsState()
   val receiver by chatViewModel.receiver.collectAsState()
@@ -69,13 +72,19 @@ fun ChatScreen(
   val receiverName = getReceiverName(receiver)
   val receiverPicture = getReceiverImageUrl(receiver)
 
+  val user by authViewModel.user.collectAsState()
+  chatAssistantViewModel.setContext(messages, "Hassan", receiverName)
+
   Scaffold(
       topBar = {
         ChatHeader(
             name = receiverName, picture = receiverPicture, navigationActions = navigationActions)
       },
       bottomBar = {
-        MessageInputBar(chatViewModel = chatViewModel, authViewModel = authViewModel)
+        MessageInputBar(
+            chatViewModel = chatViewModel,
+            authViewModel = authViewModel,
+            chatAssistantViewModel = chatAssistantViewModel)
       }) { paddingValues ->
         LazyColumn(
             modifier = Modifier.padding(paddingValues).imePadding().testTag("conversation")) {
@@ -172,7 +181,11 @@ fun SentMessage(
 }
 
 @Composable
-fun MessageInputBar(chatViewModel: ChatViewModel, authViewModel: AuthViewModel) {
+fun MessageInputBar(
+    chatViewModel: ChatViewModel,
+    authViewModel: AuthViewModel,
+    chatAssistantViewModel: ChatAssistantViewModel
+) {
 
   var message by remember { mutableStateOf("") }
   val current = LocalContext.current
@@ -206,6 +219,23 @@ fun MessageInputBar(chatViewModel: ChatViewModel, authViewModel: AuthViewModel) 
         singleLine = true // Ensures the TextField stays compact
         )
 
+    // State to control the visibility of the Chat Assistant Dialog
+    var showDialog by remember { mutableStateOf(false) }
+
+    // Button to Use the Chat Assistant
+    IconButton(onClick = { showDialog = true }, modifier = Modifier.size(48.dp)) {
+      Icon(
+          painter = painterResource(R.drawable.ai_message),
+          contentDescription = "chat assistant",
+          tint = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+
+    // Show the Chat Assistant Dialog if showDialog is true
+    if (showDialog) {
+      ChatAssistantDialog(
+          chatAssistantViewModel, onDismiss = { showDialog = false }, onResponse = { message = it })
+    }
+
     // Button to send your message
     IconButton(
         onClick = {
@@ -222,6 +252,7 @@ fun MessageInputBar(chatViewModel: ChatViewModel, authViewModel: AuthViewModel) 
               }
           if (chatMessage != null && message.isNotEmpty()) {
             chatViewModel.sendMessage(chatMessage)
+            chatAssistantViewModel.updateMessageContext(chatMessage)
             message = ""
             // chatViewModel.getConversation()
           } else {
