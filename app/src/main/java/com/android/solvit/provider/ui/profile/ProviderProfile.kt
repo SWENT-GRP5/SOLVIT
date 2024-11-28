@@ -299,7 +299,12 @@ fun DescriptionSection(provider: Provider) {
               fontWeight = FontWeight.Bold,
               maxLines = 7,
               overflow = TextOverflow.Ellipsis)
-          Text(description, fontSize = 15.sp, color = colorScheme.onPrimary, maxLines = 7, overflow = TextOverflow.Ellipsis)
+          Text(
+              description,
+              fontSize = 15.sp,
+              color = colorScheme.onPrimary,
+              maxLines = 7,
+              overflow = TextOverflow.Ellipsis)
         }
       }
 }

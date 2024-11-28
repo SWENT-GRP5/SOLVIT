@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
-import android.util.Patterns
 import android.widget.Toast
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -75,7 +74,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -339,8 +337,8 @@ fun FormSection(
 ) {
   val isFormComplete = email.isNotBlank() && password.isNotBlank()
   val passwordLengthComplete = password.length >= 6
-    val emailRegex = Regex("^[\\w.-]+@[\\w.-]+\\.[a-zA-Z]{2,}$")
-    val goodFormEmail = emailRegex.matches(email)
+  val emailRegex = Regex("^[\\w.-]+@[\\w.-]+\\.[a-zA-Z]{2,}$")
+  val goodFormEmail = emailRegex.matches(email)
 
   CustomOutlinedTextField(
       value = email,
@@ -626,7 +624,8 @@ fun CustomOutlinedTextField(
           }
         },
         modifier =
-            Modifier.fillMaxWidth().testTag(testTag).wrapContentHeight().onFocusChanged { focusState ->
+            Modifier.fillMaxWidth().testTag(testTag).wrapContentHeight().onFocusChanged { focusState
+              ->
               // Mark the field as "visited" as soon as it loses focus after an entry
               if (!focusState.isFocused && value.isNotBlank()) {
                 hasBeenFocused = true
