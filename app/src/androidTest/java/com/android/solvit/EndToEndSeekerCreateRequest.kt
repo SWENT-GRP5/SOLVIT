@@ -13,6 +13,8 @@ import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.seeker.model.profile.UserRepository
 import com.android.solvit.seeker.model.profile.UserRepositoryFirestore
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
+import com.android.solvit.shared.model.NotificationsRepository
+import com.android.solvit.shared.model.NotificationsViewModel
 import com.android.solvit.shared.model.authentication.AuthRepository
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.chat.ChatRepository
@@ -62,6 +64,7 @@ class EndToEndSeekerCreateRequest {
   private lateinit var reviewViewModel: ReviewViewModel
   private lateinit var chatViewModel: ChatViewModel
   private lateinit var packageProposalViewModel: PackageProposalViewModel
+  private lateinit var notificationsViewModel: NotificationsViewModel
 
   private lateinit var authRepository: AuthRepository
   private lateinit var seekerRepository: UserRepository
@@ -71,6 +74,7 @@ class EndToEndSeekerCreateRequest {
   private lateinit var reviewRepository: ReviewRepository
   private lateinit var packageProposalRepository: PackageProposalRepository
   private lateinit var chatRepository: ChatRepository
+  private lateinit var notificationsRepository: NotificationsRepository
 
   private val email = "test@test.ch"
   private val password = "password"
@@ -169,6 +173,7 @@ class EndToEndSeekerCreateRequest {
                   serviceRequestViewModel,
                   reviewViewModel,
                   locationViewModel,
+                  notificationsViewModel,
                   chatViewModel)
           "provider" ->
               ProviderUI(
@@ -177,6 +182,7 @@ class EndToEndSeekerCreateRequest {
                   serviceRequestViewModel,
                   seekerProfileViewModel,
                   chatViewModel,
+                  notificationsViewModel,
                   locationViewModel)
         }
       }
