@@ -121,7 +121,7 @@ class EndToEndProviderJobs {
     serviceRequestRepository = ServiceRequestRepositoryFirebase(firestore, storage)
     reviewRepository = ReviewRepositoryFirestore(firestore)
     packageProposalRepository = PackageProposalRepositoryFirestore(firestore)
-    chatRepository = ChatRepositoryFirestore(Firebase.auth, database)
+    chatRepository = ChatRepositoryFirestore(database)
 
     authViewModel = AuthViewModel(authRepository)
     seekerProfileViewModel = SeekerProfileViewModel(seekerRepository)

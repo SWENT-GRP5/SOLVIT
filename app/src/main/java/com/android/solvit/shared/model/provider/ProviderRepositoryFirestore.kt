@@ -10,6 +10,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
+import kotlinx.coroutines.tasks.await
 
 class ProviderRepositoryFirestore(
     private val db: FirebaseFirestore,
@@ -144,16 +145,30 @@ class ProviderRepositoryFirestore(
       onSuccess: (Provider?) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    val collectionRef =
-        db.collection(collectionPath).document(userId).get().addOnCompleteListener { task ->
-          if (task.isSuccessful) {
-            val doc = task.result
-            val provider = convertDoc(doc)
-            onSuccess(provider)
-          } else {
-            task.exception?.let { onFailure(it) }
-          }
-        }
+    Log.e("Get Provider", "Debut $userId")
+    db.collection(collectionPath).document(userId).get().addOnCompleteListener { task ->
+      if (task.isSuccessful) {
+        val doc = task.result
+        val provider = convertDoc(doc)
+        Log.e("Let's go", "$provider")
+
+        onSuccess(provider)
+      } else {
+        task.exception?.let { onFailure(it) }
+      }
+    }
+  }
+
+  override suspend fun returnProvider(uid: String): Provider? {
+    return try {
+      val doc = db.collection(collectionPath).document(uid).get().await()
+      val provider = convertDoc(doc)
+      Log.e("Get Provider", "Success: $provider")
+      provider
+    } catch (e: Exception) {
+      Log.e("Get Provider", "Failed to get provider: $e")
+      null
+    }
   }
 
   private fun performFirestoreOperation(

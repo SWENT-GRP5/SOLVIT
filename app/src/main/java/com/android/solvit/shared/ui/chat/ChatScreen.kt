@@ -26,9 +26,9 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults.shape
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -50,26 +50,29 @@ import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.chat.ChatMessage
 import com.android.solvit.shared.model.chat.ChatViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.android.solvit.shared.ui.utils.getReceiverImageUrl
+import com.android.solvit.shared.ui.utils.getReceiverName
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun ChatScreen(
     navigationActions: NavigationActions,
     chatViewModel: ChatViewModel,
-    authViewModel: AuthViewModel
+    authViewModel: AuthViewModel,
 ) {
 
   val messages by chatViewModel.coMessage.collectAsState()
-  val receiverName by chatViewModel.receiverName.collectAsState()
+  val receiver by chatViewModel.receiver.collectAsState()
 
-  chatViewModel.getConversation()
-  // picture is hardCoded since we didn't implement yet a logic to all informations of a user
-  // starting from its id
-  val picture =
-      "https://firebasestorage.googleapis.com/v0/b/solvit-14cc1.appspot.com/o/serviceRequestImages%2F98a09ae2-fddf-4ab8-96a5-3b10210230c7.jpg?alt=media&token=ce9376d6-de0f-42eb-ad97-5e4af0a74b16"
+  LaunchedEffect(receiver) { chatViewModel.getConversation() }
+
+  val receiverName = getReceiverName(receiver)
+  val receiverPicture = getReceiverImageUrl(receiver)
+
   Scaffold(
       topBar = {
-        ChatHeader(name = receiverName, picture = picture, navigationActions = navigationActions)
+        ChatHeader(
+            name = receiverName, picture = receiverPicture, navigationActions = navigationActions)
       },
       bottomBar = {
         MessageInputBar(chatViewModel = chatViewModel, authViewModel = authViewModel)
@@ -82,7 +85,7 @@ fun ChatScreen(
                   SentMessage(message.message, true)
                 } else {
                   // Item for messages authentified user receive
-                  SentMessage(message.message, false, true, picture)
+                  SentMessage(message.message, false, true, receiverPicture)
                 }
               }
             }
@@ -217,7 +220,7 @@ fun MessageInputBar(chatViewModel: ChatViewModel, authViewModel: AuthViewModel) 
                     timestamp = System.currentTimeMillis(),
                 )
               }
-          if (chatMessage != null) {
+          if (chatMessage != null && message.isNotEmpty()) {
             chatViewModel.sendMessage(chatMessage)
             message = ""
             // chatViewModel.getConversation()

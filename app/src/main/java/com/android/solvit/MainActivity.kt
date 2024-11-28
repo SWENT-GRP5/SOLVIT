@@ -186,7 +186,9 @@ fun SeekerUI(
         MessageBox(
             chatViewModel = chatViewModel,
             navigationActions = navigationActions,
-            authViewModel = authViewModel)
+            authViewModel = authViewModel,
+            listProviderViewModel = listProviderViewModel,
+            seekerProfileViewModel = seekerProfileViewModel)
       }
       composable(Screen.CHAT) {
         ChatScreen(
@@ -204,7 +206,13 @@ fun SeekerUI(
       RequestsOverviewScreen(navigationActions, serviceRequestViewModel, authViewModel)
     }
     composable(Route.BOOKING_DETAILS) {
-      ServiceBookingScreen(navigationActions, listProviderViewModel, serviceRequestViewModel)
+      ServiceBookingScreen(
+          navigationActions,
+          authViewModel = authViewModel,
+          seekerProfileViewModel = seekerProfileViewModel,
+          listProviderViewModel,
+          serviceRequestViewModel,
+          chatViewModel = chatViewModel)
     }
     composable(Route.EDIT_REQUEST) {
       EditRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
@@ -256,7 +264,10 @@ fun ProviderUI(
           navigationActions = navigationActions, serviceRequestViewModel = serviceRequestViewModel)
     }
     composable(Route.BOOKING_DETAILS) {
-      ServiceBookingScreen(navigationActions, listProviderViewModel, serviceRequestViewModel)
+      ServiceBookingScreen(
+          navigationActions,
+          providerViewModel = listProviderViewModel,
+          requestViewModel = serviceRequestViewModel)
     }
     composable(Screen.PROVIDER_PROFILE) {
       ProviderProfileScreen(listProviderViewModel, authViewModel, navigationActions)
@@ -266,7 +277,9 @@ fun ProviderUI(
         MessageBox(
             chatViewModel = chatViewModel,
             navigationActions = navigationActions,
-            authViewModel = authViewModel)
+            authViewModel = authViewModel,
+            listProviderViewModel = listProviderViewModel,
+            seekerProfileViewModel = seekerProfileViewModel)
       }
       composable(Screen.CHAT) {
         ChatScreen(
