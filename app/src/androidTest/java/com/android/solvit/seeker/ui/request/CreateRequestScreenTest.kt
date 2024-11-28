@@ -20,6 +20,7 @@ import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.map.LocationRepository
 import com.android.solvit.shared.model.map.LocationViewModel
+import com.android.solvit.shared.model.provider.ProviderRepository
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestRepository
 import com.android.solvit.shared.model.request.ServiceRequestStatus
@@ -49,6 +50,7 @@ class CreateRequestScreenTest {
   private lateinit var navigationActions: NavigationActions
   private lateinit var notificationsRepository: NotificationsRepository
   private lateinit var notificationsViewModel: NotificationsViewModel
+  private lateinit var providerRepository: ProviderRepository
   private lateinit var listProviderViewModel: ListProviderViewModel
 
   @get:Rule val composeTestRule = createComposeRule()
@@ -83,6 +85,8 @@ class CreateRequestScreenTest {
     navigationActions = NavigationActions(navController)
     notificationsRepository = Mockito.mock(NotificationsRepository::class.java)
     notificationsViewModel = NotificationsViewModel(notificationsRepository)
+    providerRepository = Mockito.mock(ProviderRepository::class.java)
+    listProviderViewModel = ListProviderViewModel(providerRepository)
 
     `when`(locationRepository.search(ArgumentMatchers.anyString(), anyOrNull(), anyOrNull()))
         .thenAnswer { invocation ->
