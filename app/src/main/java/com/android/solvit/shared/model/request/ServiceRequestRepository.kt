@@ -65,10 +65,9 @@ interface ServiceRequestRepository {
       onFailure: (Exception) -> Unit
   )
 
-    fun uploadMultipleImagesToStorage(
-        imageUris: List<Uri>,
-        onSuccess: (List<String>) -> Unit,
-        onFailure: (Exception) -> Unit
-    )
-
+  fun uploadMultipleImagesToStorage(
+      imageUris: List<Uri>,
+      onSuccess: (List<String>) -> Unit,
+      onFailure: (Exception) -> Unit
+  )
 }

@@ -150,21 +150,20 @@ open class ServiceRequestViewModel(private val repository: ServiceRequestReposit
         })
   }
 
-    fun uploadMultipleImages(
-        imageUris: List<Uri>,
-        onSuccess: (List<String>) -> Unit,
-        onFailure: (Exception) -> Unit
-    ) {
-        repository.uploadMultipleImagesToStorage(
-            imageUris = imageUris,
-            onSuccess = { urls ->
-                onSuccess(urls) // Pass URLs back to the UI
-            },
-            onFailure = { exception ->
-                onFailure(exception) // Pass exception back to the UI
-            }
-        )
-    }
+  fun uploadMultipleImages(
+      imageUris: List<Uri>,
+      onSuccess: (List<String>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    repository.uploadMultipleImagesToStorage(
+        imageUris = imageUris,
+        onSuccess = { urls ->
+          onSuccess(urls) // Pass URLs back to the UI
+        },
+        onFailure = { exception ->
+          onFailure(exception) // Pass exception back to the UI
+        })
+  }
 
   fun deleteServiceRequestById(id: String) {
     repository.deleteServiceRequestById(
@@ -221,6 +220,4 @@ open class ServiceRequestViewModel(private val repository: ServiceRequestReposit
           time.format(timeFormatter)
         }
   }
-
-
 }

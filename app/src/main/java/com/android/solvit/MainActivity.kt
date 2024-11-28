@@ -52,7 +52,6 @@ import com.android.solvit.shared.ui.navigation.Screen
 import com.android.solvit.shared.ui.theme.SampleAppTheme
 import com.android.solvit.ui.message.MessageScreen
 
-
 class MainActivity : ComponentActivity() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -238,21 +237,17 @@ fun ProviderUI(
   }
 }
 
-
 @Composable
 fun ZyadApp() {
-    // Create necessary view models
-    val serviceRequestViewModel =
-        viewModel<ServiceRequestViewModel>(factory = ServiceRequestViewModel.Factory)
-    val locationViewModel = viewModel<LocationViewModel>(factory = LocationViewModel.Factory)
+  // Create necessary view models
+  val serviceRequestViewModel =
+      viewModel<ServiceRequestViewModel>(factory = ServiceRequestViewModel.Factory)
+  val locationViewModel = viewModel<LocationViewModel>(factory = LocationViewModel.Factory)
 
-    // Navigation setup
-    val navController = rememberNavController()
-    val navigationActions = NavigationActions(navController)
+  // Navigation setup
+  val navController = rememberNavController()
+  val navigationActions = NavigationActions(navController)
 
-    // Show only the screen you want to test
-    CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
+  // Show only the screen you want to test
+  CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
 }
-
-
-
