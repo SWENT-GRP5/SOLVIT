@@ -52,14 +52,16 @@ fun createAIAnalysisService(): AIAnalysisService {
 }
 
 fun prepareRequestBody(imageUrls: List<String>): RequestBody {
-  val promptText =
+  val systemMessage =
       """
-        Analyze the following images:
-        ${imageUrls.joinToString("\n") { "Image: $it" }}
-        Classify the issue into one of the following categories: PLUMBER, ELECTRICIAN, TUTOR, EVENT_PLANNER, WRITER, CLEANER, CARPENTER, PHOTOGRAPHER, PERSONAL_TRAINER, HAIR_STYLIST, OTHER.
-        Additionally, provide a descriptive title and detailed description for the issue.
+        You are an AI that analyzes images and classifies them into one of the following 
+        categories: PLUMBER, ELECTRICIAN, TUTOR, EVENT_PLANNER, WRITER, CLEANER, CARPENTER, 
+        PHOTOGRAPHER, PERSONAL_TRAINER, HAIR_STYLIST, OTHER. 
+        Then, describe the issue depicted in the images and provide a suitable title and type.
     """
           .trimIndent()
+
+  val userMessage = imageUrls.joinToString("\n") { "Image URL: $it" }
 
   val jsonPayload =
       JSONObject().apply {
@@ -70,12 +72,18 @@ fun prepareRequestBody(imageUrls: List<String>): RequestBody {
               put(
                   JSONObject().apply {
                     put("role", "system")
-                    put("content", "You are an AI assistant analyzing issues.")
+                    put("content", systemMessage)
                   })
               put(
                   JSONObject().apply {
                     put("role", "user")
-                    put("content", promptText)
+                    put(
+                        "content",
+                        """
+                    Analyze the following images:
+                    $userMessage
+                    """
+                            .trimIndent())
                   })
             })
         put("max_tokens", 500)
