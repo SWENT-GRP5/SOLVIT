@@ -6,10 +6,13 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -21,8 +24,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import com.android.solvit.R
 import com.android.solvit.shared.model.chat.ChatAssistantViewModel
 
 val TONES_LIST = listOf("Formal", "Neutral", "Friendly", "Positive", "Negative", "Professional")
@@ -41,8 +47,13 @@ fun ChatAssistantDialog(
           modifier = Modifier.padding(16.dp),
           verticalArrangement = Arrangement.spacedBy(8.dp),
           horizontalAlignment = Alignment.CenterHorizontally) {
+            Icon(
+                painter = painterResource(R.drawable.ai_stars),
+                contentDescription = "AI Logo",
+                modifier = Modifier.size(64.dp).testTag("aiLogo"))
+
             Row(
-                modifier = Modifier.horizontalScroll(rememberScrollState()),
+                modifier = Modifier.horizontalScroll(rememberScrollState()).testTag("tonesRow"),
                 horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                   TONES_LIST.forEach { tone ->
                     ToneItem(tone, { selectedTones += tone }, { selectedTones -= tone })
@@ -52,18 +63,22 @@ fun ChatAssistantDialog(
             OutlinedTextField(
                 value = input,
                 onValueChange = { input = it },
+                modifier = Modifier.testTag("inputField"),
                 label = { Text("Optional additional infos") },
                 shape = RoundedCornerShape(8.dp))
 
+            var isGenerating by remember { mutableStateOf(false) }
             Button(
                 onClick = {
                   chatAssistantViewModel.updateSelectedTones(selectedTones)
+                  isGenerating = true
                   chatAssistantViewModel.generateMessage(input) {
                     onResponse(it)
                     onDismiss()
                   }
-                }) {
-                  Text("Generate Response")
+                },
+                modifier = Modifier.fillMaxWidth(.6f).testTag("generateButton")) {
+                  if (isGenerating) Text("...") else Text("Generate Response")
                 }
           }
     }
@@ -76,12 +91,13 @@ fun ToneItem(tone: String, onSelect: (String) -> Unit, onUnselect: (String) -> U
   Text(
       text = tone,
       modifier =
-          Modifier.clickable {
+          Modifier.border(
+                  1.dp, if (isSelected) Color.Black else Color.LightGray, RoundedCornerShape(8.dp))
+              .clickable {
                 isSelected = !isSelected
                 if (isSelected) onSelect(tone) else onUnselect(tone)
               }
-              .border(
-                  1.dp, if (isSelected) Color.Black else Color.LightGray, RoundedCornerShape(8.dp))
-              .padding(8.dp),
+              .padding(8.dp)
+              .testTag("toneItem$tone"),
       color = if (isSelected) Color.Black else Color.Gray)
 }

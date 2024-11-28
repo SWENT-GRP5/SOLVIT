@@ -26,6 +26,12 @@ class ChatAssistantViewModel() : ViewModel() {
   private val _selectedTones = MutableStateFlow<List<String>>(emptyList())
   val selectedTones: StateFlow<List<String>> = _selectedTones
 
+  private val _senderName = MutableStateFlow<String>("")
+  val senderName: StateFlow<String> = _senderName
+
+  private val _receiverName = MutableStateFlow<String>("")
+  val receiverName: StateFlow<String> = _receiverName
+
   private val model =
       GenerativeModel(
           modelName = "gemini-1.5-flash",
@@ -54,8 +60,15 @@ class ChatAssistantViewModel() : ViewModel() {
         }
   }
 
-  fun setContext(messageContext: List<ChatMessage.TextMessage>, requestContext: ServiceRequest) {
+  fun setContext(
+      messageContext: List<ChatMessage.TextMessage>,
+      senderName: String,
+      receiverName: String,
+      requestContext: ServiceRequest? = null
+  ) {
     _messageContext.value = messageContext
+    _senderName.value = senderName
+    _receiverName.value = receiverName
     _requestContext.value = requestContext
   }
 
@@ -69,12 +82,20 @@ class ChatAssistantViewModel() : ViewModel() {
 
   fun clear() {
     _messageContext.value = emptyList()
+    _senderName.value = ""
+    _receiverName.value = ""
     _requestContext.value = null
     _selectedTones.value = emptyList()
   }
 
-  fun generateMessage(input: String, onResponse: (String) -> Unit) {
-    var prompt = "Write a single message response for the user"
+  fun buildPrompt(input: String): String {
+    var prompt = "Write a single message response"
+    if (senderName.value.isNotEmpty()) {
+      prompt += " from " + senderName.value
+    }
+    if (receiverName.value.isNotEmpty()) {
+      prompt += " to " + receiverName.value
+    }
     if (_messageContext.value.isNotEmpty()) {
       prompt += ", based on the following conversation:\n"
       prompt += messageContext.value.joinToString("\n") { it.senderName + ": " + it.message }
@@ -88,9 +109,14 @@ class ChatAssistantViewModel() : ViewModel() {
       prompt += selectedTones.value.joinToString(", ")
     }
     if (input.isNotEmpty()) {
-      prompt += ", with the following input:\n"
+      prompt += ", with the following infos provided by the sender:\n"
       prompt += input
     }
+    return prompt
+  }
+
+  fun generateMessage(input: String, onResponse: (String) -> Unit) {
+    val prompt = buildPrompt(input)
     Log.d("ChatAssistantViewModel", "Prompt: $prompt")
     viewModelScope.launch {
       val response = model.generateContent(prompt)
