@@ -81,6 +81,10 @@ class ListProviderViewModel(private val repository: ProviderRepository) : ViewMo
         onFailure = { Log.e("getProviders", "failed to get Providers") })
   }
 
+  suspend fun fetchProviderById(uid: String): Provider? {
+    return repository.returnProvider(uid)
+  }
+
   fun filterProviders(filter: (Provider) -> Boolean, filterField: String) {
 
     activeFilters[filterField] = filter

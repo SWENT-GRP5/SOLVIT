@@ -17,6 +17,8 @@ import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.storage.FirebaseStorage
 import junit.framework.TestCase
 import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.assertNull
+import kotlinx.coroutines.test.runTest
 import org.hamcrest.CoreMatchers
 import org.hamcrest.MatcherAssert
 import org.junit.Before
@@ -164,5 +166,58 @@ class ProviderRepositoryFirestoneTest {
 
     verify(mockDocumentReference).get()
     Mockito.verify(mockTaskDoc).addOnCompleteListener(Mockito.any())
+  }
+
+  @Test
+  fun `returnProvider returns valid Provider on success`() = runTest {
+    // Mock Firestore to return a successful DocumentSnapshot
+    val uid = "test"
+    `when`(mockDocumentReference.get()).thenReturn(Tasks.forResult(mockDocumentSnapshot))
+
+    // Mock the document fields
+    `when`(mockDocumentSnapshot.id).thenReturn(uid)
+    `when`(mockDocumentSnapshot.getString("name")).thenReturn(provider.name)
+    `when`(mockDocumentSnapshot.getString("service")).thenReturn(provider.service.name)
+    `when`(mockDocumentSnapshot.getString("imageUrl")).thenReturn(provider.imageUrl)
+    `when`(mockDocumentSnapshot.getString("description")).thenReturn(provider.description)
+    `when`(mockDocumentSnapshot.getString("companyName")).thenReturn(provider.companyName)
+    `when`(mockDocumentSnapshot.getString("phone")).thenReturn(provider.phone)
+
+    // Mock location map field
+    val locationMap =
+        mapOf(
+            "latitude" to provider.location.latitude,
+            "longitude" to provider.location.longitude,
+            "name" to provider.location.name)
+    `when`(mockDocumentSnapshot.get("location")).thenReturn(locationMap)
+
+    // Mock other fields
+    `when`(mockDocumentSnapshot.getDouble("rating")).thenReturn(provider.rating)
+    `when`(mockDocumentSnapshot.getBoolean("popular")).thenReturn(provider.popular)
+    `when`(mockDocumentSnapshot.getDouble("price")).thenReturn(provider.price)
+    `when`(mockDocumentSnapshot.getTimestamp("deliveryTime")).thenReturn(provider.deliveryTime)
+    `when`(mockDocumentSnapshot.get("languages")).thenReturn(provider.languages.map { it })
+
+    // Call the suspend function
+    val result = providerRepositoryFirestore.returnProvider(uid)
+
+    // Validate the result
+    assertEquals(provider, result)
+  }
+
+  @Test
+  fun `returnProvider returns null when document does not exist`() = runTest {
+    // Mock Firestore to return a DocumentSnapshot without necessary data
+    val uid = "nonexistent"
+    `when`(mockDocumentReference.get()).thenReturn(Tasks.forResult(mockDocumentSnapshot))
+
+    // Mock the document as missing fields
+    `when`(mockDocumentSnapshot.getString("name")).thenReturn(null)
+
+    // Call the suspend function
+    val result = providerRepositoryFirestore.returnProvider(uid)
+
+    // Validate the result is null
+    assertNull(result)
   }
 }
