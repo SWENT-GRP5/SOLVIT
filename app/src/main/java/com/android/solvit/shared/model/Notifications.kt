@@ -3,7 +3,7 @@ package com.android.solvit.shared.model
 import com.google.firebase.Timestamp
 
 data class Notification(
-    val id: String,
+    val uid: String,
     val providerId: String,
     val title: String,
     val message: String,

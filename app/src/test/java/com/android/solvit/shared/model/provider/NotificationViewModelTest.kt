@@ -99,7 +99,7 @@ class NotificationViewModelTest {
 
   private fun mockNotification(): Notification {
     return Notification(
-        id = "notif123",
+        uid = "notif123",
         providerId = providerId,
         title = "New Service Request",
         message = "You have a new service request for tutoring",

@@ -177,7 +177,7 @@ class NotificationsRepositoryTest {
     val notification = notificationsRepository.documentToNotif(mockDocumentSnapshot)
 
     // Assert the notification fields
-    assertEquals("notif123", notification?.id)
+    assertEquals("notif123", notification?.uid)
     assertEquals("provider123", notification?.providerId)
     assertEquals("New Request", notification?.title)
     assertEquals("A new service request has been posted.", notification?.message)

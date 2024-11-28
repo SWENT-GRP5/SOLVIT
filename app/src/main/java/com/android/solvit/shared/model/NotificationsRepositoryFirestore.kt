@@ -61,7 +61,7 @@ class NotificationsRepositoryFirestore(private val db: FirebaseFirestore) :
       val isRead = document.getBoolean("isRead") ?: false
 
       Notification(
-          id = id,
+          uid = id,
           providerId = providerId,
           title = title,
           message = message,
@@ -107,7 +107,7 @@ class NotificationsRepositoryFirestore(private val db: FirebaseFirestore) :
       matchingProviders.forEach { provider ->
         val notification =
             Notification(
-                id = getNewUid(),
+                uid = getNewUid(),
                 providerId = provider.uid,
                 title = "New Service Request for ${serviceRequest.type}",
                 message =
@@ -117,7 +117,7 @@ class NotificationsRepositoryFirestore(private val db: FirebaseFirestore) :
 
         // Save the notification for the provider (can call save function here)
         performFirestoreOperation(
-            db.collection(collectionPath).document(notification.id).set(notification),
+            db.collection(collectionPath).document(notification.uid).set(notification),
             onSuccess,
             onFailure)
       }
