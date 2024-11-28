@@ -798,12 +798,6 @@ fun MultiStepDialog(
             }
           }
           3 -> {
-            LaunchedEffect(Unit) {
-              showSparkleEffect = true
-              kotlinx.coroutines.delay(2000L) // Let the effect play for 2 seconds
-              showSparkleEffect = false
-              onClose()
-            }
             Column(
                 modifier =
                     Modifier.fillMaxWidth().padding(16.dp).verticalScroll(rememberScrollState()),
@@ -824,10 +818,6 @@ fun MultiStepDialog(
           }
         }
       }
-    }
-    // Show the animated sparkle effect
-    if (showSparkleEffect) {
-      AnimatedSparkleEffectOverlay()
     }
   }
 }
@@ -856,99 +846,5 @@ suspend fun uploadAndAnalyze(
       Log.e("uploadAndAnalyze", "Error: ${e.message}", e)
       throw Exception("Error during upload and analysis: ${e.message}")
     }
-  }
-}
-
-@Composable
-fun AnimatedSparkleEffectOverlay() {
-  val sparkles = remember { List(20) { SparkleState() } } // Generate multiple sparkles
-  val infiniteTransition = rememberInfiniteTransition()
-
-  // Animate properties for each sparkle
-  sparkles.forEach { sparkle -> sparkle.animateSparkle(infiniteTransition) }
-
-  // Overlay to display the sparkles
-  Box(
-      modifier =
-          Modifier.fillMaxSize()
-              .background(Color.Transparent)
-              .zIndex(1f), // Ensure it overlays the dialog
-      contentAlignment = Alignment.Center) {
-        // Render each sparkle
-        sparkles.forEach { sparkle ->
-          Box(
-              modifier =
-                  Modifier.size(sparkle.size.dp)
-                      .offset(x = sparkle.xOffset.dp, y = sparkle.yOffset.dp)
-                      .graphicsLayer {
-                        alpha = sparkle.alpha
-                        scaleX = sparkle.scale
-                        scaleY = sparkle.scale
-                      }
-                      .background(Color.Yellow.copy(alpha = 0.8f), shape = CircleShape))
-        }
-      }
-}
-
-data class SparkleState(
-    var xOffset: Float = (0..300).random().toFloat(), // Random horizontal offset
-    var yOffset: Float = (0..300).random().toFloat(), // Random vertical offset
-    var alpha: Float = (50..100).random() / 100f, // Random transparency
-    var scale: Float = (50..100).random() / 100f, // Random initial scale
-    var size: Float = (10..20).random().toFloat() // Random size for the sparkle
-) {
-  @Composable
-  fun animateSparkle(infiniteTransition: InfiniteTransition) {
-    // Animate horizontal offset
-    xOffset =
-        infiniteTransition
-            .animateFloat(
-                initialValue = xOffset,
-                targetValue = xOffset + (0..50).random(),
-                animationSpec =
-                    infiniteRepeatable(
-                        animation = tween(durationMillis = 1000, easing = LinearEasing),
-                        repeatMode = RepeatMode.Reverse),
-                label = "xOffset")
-            .value
-
-    // Animate vertical offset
-    yOffset =
-        infiniteTransition
-            .animateFloat(
-                initialValue = yOffset,
-                targetValue = yOffset + (0..50).random(),
-                animationSpec =
-                    infiniteRepeatable(
-                        animation = tween(durationMillis = 1000, easing = LinearEasing),
-                        repeatMode = RepeatMode.Reverse),
-                label = "yOffset")
-            .value
-
-    // Animate transparency (alpha)
-    alpha =
-        infiniteTransition
-            .animateFloat(
-                initialValue = alpha,
-                targetValue = 0.2f,
-                animationSpec =
-                    infiniteRepeatable(
-                        animation = tween(durationMillis = 1000, easing = LinearEasing),
-                        repeatMode = RepeatMode.Reverse),
-                label = "alpha")
-            .value
-
-    // Animate scale
-    scale =
-        infiniteTransition
-            .animateFloat(
-                initialValue = scale,
-                targetValue = 1.2f,
-                animationSpec =
-                    infiniteRepeatable(
-                        animation = tween(durationMillis = 1000, easing = LinearEasing),
-                        repeatMode = RepeatMode.Reverse),
-                label = "scale")
-            .value
   }
 }
