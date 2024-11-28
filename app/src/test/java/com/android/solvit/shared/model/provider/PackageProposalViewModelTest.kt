@@ -1,5 +1,8 @@
 package com.android.solvit.shared.model.provider
 
+import com.android.solvit.shared.model.packages.PackageProposal
+import com.android.solvit.shared.model.packages.PackageProposalRepository
+import com.android.solvit.shared.model.packages.PackageProposalViewModel
 import org.hamcrest.CoreMatchers
 import org.hamcrest.MatcherAssert
 import org.junit.Before
@@ -18,7 +21,9 @@ class PackageProposalViewModelTest {
   fun setup() {
     proposalRepository = Mockito.mock(PackageProposalRepository::class.java)
     proposalViewModel = PackageProposalViewModel(proposalRepository)
-    proposal = PackageProposal("test", "test", "test", 0.0, emptyList())
+    proposal =
+        PackageProposal(
+            "test", packageNumber = 0.0, providerId = "1", "test", "test", 0.0, emptyList())
   }
 
   @Test

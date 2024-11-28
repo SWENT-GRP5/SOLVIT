@@ -1,5 +1,8 @@
 package com.android.solvit.provider.ui.profile
 
+import android.annotation.SuppressLint
+import android.content.pm.ActivityInfo
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -13,11 +16,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -25,20 +31,18 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -48,8 +52,11 @@ import com.android.solvit.R
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.provider.Provider
+import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.android.solvit.shared.ui.navigation.Screen
 
+@SuppressLint("SourceLockedOrientationActivity")
 @Composable
 fun ProviderProfileScreen(
     listProviderViewModel: ListProviderViewModel =
@@ -57,17 +64,24 @@ fun ProviderProfileScreen(
     authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory),
     navigationActions: NavigationActions
 ) {
+  val context = LocalContext.current
+  DisposableEffect(Unit) {
+    val activity = context as? ComponentActivity
+    activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+    onDispose { activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED }
+  }
   val user = authViewModel.user.collectAsState()
   val userId = user.value?.uid ?: "-1"
   val provider =
       listProviderViewModel.providersList.collectAsState().value.find { it.uid == userId } ?: return
-  Column(modifier = Modifier.fillMaxSize().background(colorScheme.background)) {
-    ProfileHeader(navigationActions, provider, authViewModel)
-    Spacer(modifier = Modifier.height(10.dp))
-    JobsDoneSection()
-    Spacer(modifier = Modifier.height(10.dp))
-    StatsSection(provider = provider)
-  }
+  Column(
+      modifier =
+          Modifier.fillMaxSize()
+              .background(colorScheme.background)
+              .verticalScroll(rememberScrollState())) {
+        ProfileHeader(navigationActions, provider, authViewModel)
+        StatsSection(provider = provider)
+      }
 }
 
 @Composable
@@ -163,113 +177,63 @@ fun ProfileHeader(
           }
 
           @Composable
-          fun BodyText(text: String, fontSize: TextUnit = 15.sp, testTag: String = "") {
+          fun BodyText(
+              text: String,
+              fontSize: TextUnit = 15.sp,
+              testTag: String = "",
+              maxLines: Int = Int.MAX_VALUE
+          ) {
             Text(
                 text = text,
                 color = bodyColor,
                 fontSize = fontSize,
-                modifier = Modifier.testTag(testTag))
+                modifier = Modifier.testTag(testTag),
+                maxLines = maxLines,
+                overflow = TextOverflow.Ellipsis)
           }
 
-          Column(modifier = Modifier.align(Alignment.End)) { TitleText("Profile") }
+          Column(modifier = Modifier.align(Alignment.End)) {
+            Icon(
+                Icons.Default.Edit,
+                contentDescription = "Edit Profile",
+                modifier =
+                    Modifier.size(24.dp).clickable {
+                      navigationActions.navigateTo(Screen.PROVIDER_MODIFY_PROFILE)
+                    })
+          }
 
-          Spacer(modifier = Modifier.height(20.dp))
+          Spacer(modifier = Modifier.height(5.dp))
 
           Column {
             TitleText("Company name", testTag = "companyNameTitle")
-            BodyText(provider.companyName.ifEmpty { "Not provided" }, testTag = "companyName")
+            BodyText(
+                provider.companyName.ifEmpty { "Not provided" }.replaceFirstChar { it.uppercase() },
+                testTag = "companyName",
+                maxLines = 2)
           }
 
           Column {
             TitleText("Profession", testTag = "serviceTitle")
-            BodyText(provider.service.toString(), testTag = "service")
+            BodyText(
+                Services.format(provider.service).ifEmpty { "Not provided" },
+                testTag = "service",
+                maxLines = 1)
           }
 
           Column {
             TitleText("Contact", testTag = "contactTitle")
-            BodyText(provider.phone, testTag = "contact")
+            BodyText(provider.phone.ifEmpty { "Not provided" }, testTag = "contact", maxLines = 1)
           }
 
           Column {
             TitleText("Location", testTag = "locationTitle")
-            BodyText(provider.location.name, testTag = "location")
-          }
-
-          var isOpen by remember { mutableStateOf(true) }
-
-          Column {
-            TitleText("Position", testTag = "positionTitle")
-            Spacer(modifier = Modifier.width(8.dp))
-
-            Row(
-                // TODO : Stores the value position in memory
-                modifier = Modifier.testTag("position"),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically) {
-                  Box(
-                      modifier =
-                          Modifier.size(32.dp, 16.dp)
-                              .background(colorScheme.onSurface, shape = CircleShape)
-                              .clickable { isOpen = !isOpen },
-                      contentAlignment =
-                          if (isOpen) Alignment.CenterEnd else Alignment.CenterStart) {
-                        Box(
-                            modifier =
-                                Modifier.size(12.dp)
-                                    .background(
-                                        if (isOpen) colorScheme.secondary else colorScheme.error,
-                                        shape = CircleShape))
-                      }
-
-                  Spacer(modifier = Modifier.width(8.dp))
-
-                  Text(
-                      text = if (isOpen) "open" else "close",
-                      color = if (isOpen) colorScheme.secondary else colorScheme.error,
-                      fontSize = 14.sp,
-                      fontWeight = FontWeight.Bold)
-                }
+            BodyText(
+                provider.location.name.ifEmpty { "Not provided" },
+                testTag = "location",
+                maxLines = 3)
           }
         }
   }
-}
-
-@Composable
-fun JobsDoneSection() {
-  // TODO : Change the hardcoded value to jobs done by the provider
-  Column(modifier = Modifier.fillMaxWidth().background(colorScheme.background).padding(16.dp)) {
-    Text(
-        "Jobs done",
-        fontWeight = FontWeight.Bold,
-        fontSize = 18.sp,
-        modifier = Modifier.align(Alignment.CenterHorizontally).testTag("jobsDoneTitle"))
-    Spacer(modifier = Modifier.height(20.dp))
-    Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-      JobItem("Back end")
-      JobItem("Front end")
-      JobItem("Visual Designer")
-      JobItem("Voyager")
-    }
-  }
-}
-
-@Composable
-fun JobItem(title: String) {
-  Box(
-      modifier =
-          Modifier.size(80.dp)
-              .shadow(4.dp, shape = RoundedCornerShape(12.dp))
-              .background(colorScheme.background, shape = RoundedCornerShape(12.dp))
-              .padding(8.dp)
-              .testTag("jobItem"),
-      contentAlignment = Alignment.Center) {
-        Text(
-            text = title,
-            fontSize = 14.sp,
-            textAlign = TextAlign.Center,
-            maxLines = 2,
-            color = colorScheme.error)
-      }
 }
 
 @Composable
@@ -277,7 +241,7 @@ fun StatsSection(provider: Provider) {
   Column(
       modifier =
           Modifier.fillMaxWidth()
-              .height(400.dp)
+              .height(500.dp)
               .background(colorScheme.primary)
               .padding(16.dp)
               .testTag("statsSection"),
@@ -289,66 +253,39 @@ fun StatsSection(provider: Provider) {
                 fontSize = 40.sp,
                 color = colorScheme.onPrimary,
                 fontWeight = FontWeight.Bold)
-            Text("Average Rating", fontSize = 10.sp, color = colorScheme.onPrimary)
-          }
-          Column(horizontalAlignment = Alignment.End) {
-            // TODO : Change the hardcoded value to the actual number of jobs completed by the
-            // provider
-            Text(
-                "37", fontSize = 40.sp, color = colorScheme.onPrimary, fontWeight = FontWeight.Bold)
-            Text("Jobs Completed", fontSize = 10.sp, color = colorScheme.onPrimary)
-          }
-        }
-
-        Spacer(modifier = Modifier.height(30.dp))
-        Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
-          Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(
-                "1500-2300$", // TODO : modify later with real value
-                fontSize = 20.sp,
-                color = colorScheme.onPrimary,
-                fontWeight = FontWeight.Bold)
-            Text("pay range", fontSize = 10.sp, color = colorScheme.onPrimary)
-          }
-          Column(horizontalAlignment = Alignment.End) {
-            Text(
-                "5 days", // TODO : modify later with real value
-                fontSize = 20.sp,
-                color = colorScheme.onPrimary,
-                fontWeight = FontWeight.Bold)
-            Text("delivery Time", fontSize = 10.sp, color = colorScheme.onPrimary)
-          }
-        }
-
-        Spacer(modifier = Modifier.height(30.dp))
-        Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
-          Column(horizontalAlignment = Alignment.Start) {
-            // TODO : Change the hardcoded value to the actual availability of the provider
-            Text(
-                "Excellent",
-                fontSize = 15.sp,
-                color = colorScheme.onPrimary,
-                fontWeight = FontWeight.Bold)
-            Text("Availability", fontSize = 10.sp, color = colorScheme.onPrimary)
+            Text("Average Rating", fontSize = 15.sp, color = colorScheme.onPrimary)
           }
           Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
                 provider.popular.toString().replaceFirstChar {
                   if (it.isLowerCase()) it.uppercase() else it.toString()
                 },
-                fontSize = 15.sp,
+                fontSize = 40.sp,
                 color = colorScheme.onPrimary,
                 fontWeight = FontWeight.Bold)
-            Text("Popular", fontSize = 10.sp, color = colorScheme.onPrimary)
+            Text("Popular", fontSize = 15.sp, color = colorScheme.onPrimary)
           }
-          Column(horizontalAlignment = Alignment.End) {
-            Text(
-                if (provider.languages.isEmpty()) "Not provided" else provider.languages.toString(),
-                fontSize = 15.sp,
-                color = colorScheme.onPrimary,
-                fontWeight = FontWeight.Bold)
-            Text("Languages", fontSize = 10.sp, color = colorScheme.onPrimary)
+        }
+
+        Spacer(modifier = Modifier.height(5.dp))
+
+        Column(horizontalAlignment = Alignment.Start) {
+          if (provider.languages.isEmpty()) {
+            Text("Not provided")
+          } else {
+            LazyRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                  items(provider.languages) { language ->
+                    Text(
+                        language.toString().replaceFirstChar { it.uppercase() },
+                        fontSize = 40.sp,
+                        color = colorScheme.onPrimary,
+                        fontWeight = FontWeight.Bold)
+                  }
+                }
           }
+          Text("Languages", fontSize = 15.sp, color = colorScheme.onPrimary)
         }
       }
 }

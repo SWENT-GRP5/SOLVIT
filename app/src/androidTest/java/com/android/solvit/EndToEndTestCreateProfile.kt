@@ -1,24 +1,34 @@
 package com.android.solvit
 
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import androidx.test.core.app.ApplicationProvider
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.seeker.model.profile.UserRepository
 import com.android.solvit.seeker.model.profile.UserRepositoryFirestore
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
+import com.android.solvit.seeker.ui.provider.ProviderRegistrationScreen
+import com.android.solvit.shared.model.authentication.AuthRep
 import com.android.solvit.shared.model.authentication.AuthRepository
 import com.android.solvit.shared.model.authentication.AuthViewModel
+import com.android.solvit.shared.model.authentication.User
+import com.android.solvit.shared.model.chat.ChatRepository
+import com.android.solvit.shared.model.chat.ChatRepositoryFirestore
+import com.android.solvit.shared.model.chat.ChatViewModel
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.map.LocationRepository
 import com.android.solvit.shared.model.map.LocationViewModel
+import com.android.solvit.shared.model.packages.PackageProposalRepository
+import com.android.solvit.shared.model.packages.PackageProposalRepositoryFirestore
+import com.android.solvit.shared.model.packages.PackageProposalViewModel
 import com.android.solvit.shared.model.provider.ProviderRepository
 import com.android.solvit.shared.model.provider.ProviderRepositoryFirestore
 import com.android.solvit.shared.model.request.ServiceRequestRepository
@@ -28,7 +38,6 @@ import com.android.solvit.shared.model.review.ReviewRepository
 import com.android.solvit.shared.model.review.ReviewRepositoryFirestore
 import com.android.solvit.shared.model.review.ReviewViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
-import com.android.solvit.shared.ui.navigation.Screen
 import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
@@ -43,28 +52,35 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.ArgumentMatchers
+import org.mockito.Mockito.doAnswer
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
+import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.whenever
 
 class EndToEndTestCreateProfile {
 
   private lateinit var authViewModel: AuthViewModel
+  private lateinit var authViewModel2: AuthViewModel
   private lateinit var listProviderViewModel: ListProviderViewModel
   private lateinit var seekerProfileViewModel: SeekerProfileViewModel
   private lateinit var serviceRequestViewModel: ServiceRequestViewModel
   private lateinit var locationViewModel: LocationViewModel
   private lateinit var reviewViewModel: ReviewViewModel
+  private lateinit var chatViewModel: ChatViewModel
+  private lateinit var packageProposalViewModel: PackageProposalViewModel
 
   private lateinit var authRepository: AuthRepository
+  private lateinit var authRepository2: AuthRep
   private lateinit var seekerRepository: UserRepository
   private lateinit var providerRepository: ProviderRepository
   private lateinit var locationRepository: LocationRepository
   private lateinit var serviceRequestRepository: ServiceRequestRepository
   private lateinit var reviewRepository: ReviewRepository
+  private lateinit var packageProposalRepositoryFirestore: PackageProposalRepository
+  private lateinit var chatRepository: ChatRepository
 
-  private lateinit var navHostController: NavHostController
-  private lateinit var navigationActions: NavigationActions
   private val locations =
       listOf(
           Location(37.7749, -122.4194, "San Francisco"),
@@ -90,10 +106,12 @@ class EndToEndTestCreateProfile {
 
     authRepository = AuthRepository(Firebase.auth, firestore)
     seekerRepository = UserRepositoryFirestore(firestore)
-    providerRepository = ProviderRepositoryFirestore(firestore)
+    providerRepository = ProviderRepositoryFirestore(firestore, storage)
     locationRepository = mock(LocationRepository::class.java)
     serviceRequestRepository = ServiceRequestRepositoryFirebase(firestore, storage)
     reviewRepository = ReviewRepositoryFirestore(firestore)
+    packageProposalRepositoryFirestore = PackageProposalRepositoryFirestore(firestore)
+    chatRepository = ChatRepositoryFirestore(Firebase.auth, database)
 
     authViewModel = AuthViewModel(authRepository)
     seekerProfileViewModel = SeekerProfileViewModel(seekerRepository)
@@ -101,6 +119,8 @@ class EndToEndTestCreateProfile {
     locationViewModel = LocationViewModel(locationRepository)
     serviceRequestViewModel = ServiceRequestViewModel(serviceRequestRepository)
     reviewViewModel = ReviewViewModel(reviewRepository)
+    packageProposalViewModel = PackageProposalViewModel(packageProposalRepositoryFirestore)
+    chatViewModel = ChatViewModel(chatRepository)
 
     `when`(locationRepository.search(ArgumentMatchers.anyString(), anyOrNull(), anyOrNull()))
         .thenAnswer { invocation ->
@@ -127,9 +147,6 @@ class EndToEndTestCreateProfile {
   @Test
   fun CreateSeekerProfile() {
     composeTestRule.setContent {
-      navHostController = rememberNavController()
-      navigationActions = NavigationActions(navHostController)
-
       val userRegistered = authViewModel.userRegistered.collectAsState()
       val user = authViewModel.user.collectAsState()
 
@@ -139,8 +156,7 @@ class EndToEndTestCreateProfile {
             listProviderViewModel,
             seekerProfileViewModel,
             locationViewModel,
-            navHostController,
-            navigationActions)
+            packageProposalViewModel)
       } else {
         when (user.value!!.role) {
           "seeker" ->
@@ -150,18 +166,26 @@ class EndToEndTestCreateProfile {
                   seekerProfileViewModel,
                   serviceRequestViewModel,
                   reviewViewModel,
+                  locationViewModel,
+                  chatViewModel)
+          "provider" ->
+              ProviderUI(
+                  authViewModel,
+                  listProviderViewModel,
+                  serviceRequestViewModel,
+                  seekerProfileViewModel,
+                  chatViewModel,
                   locationViewModel)
-          "provider" -> ProviderUI(authViewModel, listProviderViewModel, seekerProfileViewModel)
         }
       }
     }
 
     composeTestRule.onNodeWithTag("ctaButtonPortrait").performClick()
 
-    assertEquals(Screen.SIGN_IN, navHostController.currentDestination?.route)
+    composeTestRule.onNodeWithTag("loginImage").assertIsDisplayed()
     composeTestRule.onNodeWithTag("signUpLink").performClick()
 
-    assertEquals(Screen.SIGN_UP, navHostController.currentDestination?.route)
+    composeTestRule.onNodeWithTag("signUpIllustration").assertIsDisplayed()
     val email = "e2eTest20@test.com"
     val password = "password"
 
@@ -172,7 +196,7 @@ class EndToEndTestCreateProfile {
     assertEquals(email, authViewModel.email.value)
     assertEquals(password, authViewModel.password.value)
 
-    assertEquals(Screen.SIGN_UP_CHOOSE_ROLE, navHostController.currentDestination?.route)
+    composeTestRule.onNodeWithTag("roleIllustration").assertIsDisplayed()
     composeTestRule.onNodeWithTag("seekerButton").performClick()
     assertEquals("seeker", authViewModel.role.value)
 
@@ -201,5 +225,84 @@ class EndToEndTestCreateProfile {
     }
 
     Firebase.auth.currentUser?.delete()
+  }
+
+  @Test
+  fun setProviderInfoDetails() {
+
+    val sizeBefore = listProviderViewModel.providersList.value.size
+    authRepository2 = mock(AuthRep::class.java)
+
+    // Mock the `init` method
+    doAnswer { invocation ->
+          val callback = invocation.getArgument<(User?) -> Unit>(0)
+          callback(User(uid = "1234", role = "Provider")) // Pass the mocked user
+        }
+        .whenever(authRepository2)
+        .init(any())
+
+    authViewModel2 = AuthViewModel(authRepository2)
+
+    composeTestRule.setContent {
+      val navHostController = rememberNavController()
+      val navigationActions = NavigationActions(navHostController)
+      ProviderRegistrationScreen(
+          navigationActions = navigationActions,
+          viewModel = listProviderViewModel,
+          locationViewModel = locationViewModel,
+          authViewModel = authViewModel2,
+          packageViewModel = packageProposalViewModel)
+    }
+
+    composeTestRule.onNodeWithTag("fullNameInput").performTextInput("John Doe")
+    composeTestRule.onNodeWithTag("phoneNumberInput").performTextInput("123456789")
+    composeTestRule.onNodeWithTag("companyNameInput").performTextInput("Company")
+    composeTestRule.onNodeWithTag("inputRequestAddress").performTextInput("123 Main St")
+    composeTestRule.waitUntil { locationViewModel.locationSuggestions.value.isNotEmpty() }
+    composeTestRule.onAllNodesWithTag("locationResult")[0].performClick()
+
+    composeTestRule.onNodeWithTag("completeRegistrationButton").performClick()
+
+    composeTestRule.onNodeWithTag("servicesDropDown").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("servicesDropDown").performClick()
+    composeTestRule.onNodeWithTag("PLUMBER").performClick() // choose plumber as Service
+    composeTestRule.onNodeWithTag("providerImageButton").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("descriptionInputProviderRegistration").assertIsDisplayed()
+    composeTestRule
+        .onNodeWithTag("descriptionInputProviderRegistration")
+        .performTextInput("No need a description ! I'm the Best Plumber In Town")
+    composeTestRule.onNodeWithTag("startingPriceInputProviderRegistration").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("startingPriceInputProviderRegistration").performTextInput("25")
+    composeTestRule.onNodeWithTag("languageDropdown").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("languageDropdown").performClick()
+    composeTestRule.onNodeWithTag("FRENCH").performClick() // Set French as language spoken
+
+    composeTestRule.onNodeWithTag("savePreferencesButton").performScrollTo().performClick()
+
+    composeTestRule.waitUntil(timeoutMillis = 10000) {
+      composeTestRule.onNodeWithTag("offerPackagesDropDown").isDisplayed()
+    }
+
+    composeTestRule.onNodeWithTag("offerPackagesDropDown").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("offerPackagesDropDown").performClick()
+    composeTestRule.onNodeWithTag("Yes").performClick() // Choose to offer packages services
+    composeTestRule.onNodeWithTag("package1").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("packageName1").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("packageName1").performTextInput("Basic")
+    composeTestRule.onNodeWithTag("packagePrice1").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("packagePrice1").performTextInput("50")
+    composeTestRule.onNodeWithTag("packageDetails1").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("packageDetails1").performTextInput("Basic plumber services")
+    composeTestRule.onNodeWithTag("packageFeatures10").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("packageFeatures10").performTextInput("a")
+    composeTestRule.onNodeWithTag("packageFeatures11").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("packageFeatures11").performTextInput("a")
+    composeTestRule.onNodeWithTag("packageFeatures12").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("packageFeatures12").performTextInput("a")
+
+    composeTestRule.onNodeWithTag("savePreferences2Button").performScrollTo().performClick()
+
+    composeTestRule.onNodeWithTag("continueDashboardButton").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("continueDashboardButton").performClick()
   }
 }

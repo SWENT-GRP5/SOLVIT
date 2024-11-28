@@ -30,12 +30,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme.colorScheme
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -48,13 +46,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -71,7 +70,6 @@ fun EditSeekerProfileScreen(
     navigationActions: NavigationActions,
     authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory)
 ) {
-
   // Lock Orientation to Portrait
   val context = LocalContext.current
   DisposableEffect(Unit) {
@@ -79,7 +77,14 @@ fun EditSeekerProfileScreen(
     activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
     onDispose { activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED }
   }
-  // Collect the user profile from the StateFlow
+
+  val configuration = LocalConfiguration.current
+  val screenWidth = configuration.screenWidthDp.dp
+  val screenHeight = configuration.screenHeightDp.dp
+
+  val horizontalPadding = if (screenWidth < 360.dp) 8.dp else 16.dp
+  val verticalSpacing = if (screenHeight < 640.dp) 8.dp else 16.dp
+
   val user by authViewModel.user.collectAsState()
   val userProfile by viewModel.seekerProfile.collectAsState()
   user?.let { viewModel.getUserProfile(it.uid) }
@@ -99,15 +104,18 @@ fun EditSeekerProfileScreen(
   }
 
   Scaffold(
-      backgroundColor = colorScheme.background,
+      backgroundColor = MaterialTheme.colorScheme.background,
       topBar = {
         TopAppBar(
-            backgroundColor = colorScheme.background,
+            backgroundColor = MaterialTheme.colorScheme.background,
             title = {
               Box(
                   modifier = Modifier.fillMaxWidth().testTag("goBackButton"),
                   contentAlignment = Alignment.Center) {
-                    Text("Bio-data", color = colorScheme.onBackground, fontWeight = FontWeight.Bold)
+                    Text(
+                        "Bio-data",
+                        color = MaterialTheme.colorScheme.onBackground,
+                        fontWeight = FontWeight.Bold)
                   }
             },
             navigationIcon = {
@@ -115,121 +123,108 @@ fun EditSeekerProfileScreen(
                 Icon(
                     Icons.Default.ArrowBack,
                     contentDescription = "Back",
-                    tint = colorScheme.onBackground)
+                    tint = MaterialTheme.colorScheme.onBackground)
               }
             },
-            // Set actions parameter to an empty Box to balance the alignment caused by
-            // navigationIcon
             actions = { Box(modifier = Modifier.size(48.dp)) })
-      }) { padding -> // Apply padding from Scaffold
+      }) { padding ->
         Column(
             modifier =
                 Modifier.fillMaxWidth()
-                    .padding(padding) // Use Scaffold's padding here
+                    .padding(padding)
                     .padding(top = 32.dp)
                     .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally) {
+              // Profile Picture
               Image(
                   painter = painterResource(id = R.drawable.empty_profile_img),
                   contentDescription = "Profile Picture",
                   modifier =
-                      Modifier.size(74.dp)
+                      Modifier.size(if (screenWidth < 360.dp) 60.dp else 74.dp)
                           .clip(CircleShape)
-                          .border(2.dp, colorScheme.primaryContainer, CircleShape))
+                          .border(2.dp, MaterialTheme.colorScheme.primaryContainer, CircleShape))
 
+              Spacer(modifier = Modifier.height(verticalSpacing))
+
+              // Full Name Text
               Text(
                   text = fullName,
                   fontWeight = FontWeight.Bold,
-                  fontSize = 20.sp,
-                  color = colorScheme.onBackground,
+                  fontSize = if (screenWidth < 360.dp) 18.sp else 20.sp,
+                  color = MaterialTheme.colorScheme.onBackground,
                   textAlign = TextAlign.Center,
                   modifier = Modifier.padding(top = 8.dp))
 
+              // Email Text
               Text(
                   text = email,
-                  fontSize = 14.sp,
-                  color = colorScheme.onSurfaceVariant,
+                  fontSize = if (screenWidth < 360.dp) 12.sp else 14.sp,
+                  color = MaterialTheme.colorScheme.onSurfaceVariant,
                   textAlign = TextAlign.Center,
                   modifier = Modifier.padding(top = 4.dp))
 
-              Spacer(modifier = Modifier.height(16.dp)) // Move spacer inside the column
+              Spacer(modifier = Modifier.height(verticalSpacing))
 
               // Full Name Input
-
-              Spacer(modifier = Modifier.height(8.dp))
               OutlinedTextField(
                   value = fullName,
                   onValueChange = { fullName = it },
-                  label = { Text("Enter your full name", color = colorScheme.onBackground) },
+                  label = { Text("Enter your full name") },
                   modifier =
                       Modifier.fillMaxWidth()
                           .testTag("profileName")
-                          .padding(horizontal = 16.dp), // Add padding to avoid edge clipping
-                  colors =
-                      TextFieldDefaults.outlinedTextFieldColors(
-                          focusedBorderColor = colorScheme.secondary,
-                          unfocusedBorderColor = colorScheme.onSurfaceVariant))
+                          .padding(horizontal = horizontalPadding))
 
-              Spacer(modifier = Modifier.height(16.dp))
+              Spacer(modifier = Modifier.height(verticalSpacing))
 
               // Username Input
               OutlinedTextField(
                   value = username,
                   onValueChange = { username = it },
-                  label = { Text("Enter your username", color = colorScheme.onBackground) },
+                  label = { Text("Enter your username") },
                   modifier =
                       Modifier.fillMaxWidth()
                           .testTag("profileUsername")
-                          .padding(horizontal = 16.dp),
-                  colors =
-                      TextFieldDefaults.outlinedTextFieldColors(
-                          focusedBorderColor = colorScheme.secondary,
-                          unfocusedBorderColor = colorScheme.onSurfaceVariant))
+                          .padding(horizontal = horizontalPadding))
 
-              Spacer(modifier = Modifier.height(16.dp))
+              Spacer(modifier = Modifier.height(verticalSpacing))
 
               // Email Input
               OutlinedTextField(
                   value = email,
                   onValueChange = { email = it },
-                  label = { Text("Enter your email", color = colorScheme.onBackground) },
+                  label = { Text("Enter your email") },
                   modifier =
-                      Modifier.fillMaxWidth().testTag("profileEmail").padding(horizontal = 16.dp),
-                  colors =
-                      TextFieldDefaults.outlinedTextFieldColors(
-                          focusedBorderColor = colorScheme.secondary,
-                          unfocusedBorderColor = colorScheme.onSurfaceVariant))
+                      Modifier.fillMaxWidth()
+                          .testTag("profileEmail")
+                          .padding(horizontal = horizontalPadding))
 
-              Spacer(modifier = Modifier.height(16.dp))
+              Spacer(modifier = Modifier.height(verticalSpacing))
 
-              CountryDropdownMenu()
+              // Country Dropdown and Phone Number
+              CountryDropdownMenu(screenWidth)
 
-              Spacer(modifier = Modifier.height(16.dp))
-
-              Spacer(modifier = Modifier.height(16.dp))
+              Spacer(modifier = Modifier.height(verticalSpacing))
 
               // Address Input
               OutlinedTextField(
                   value = address,
                   onValueChange = { address = it },
-                  label = { Text("Enter your address", color = colorScheme.onBackground) },
+                  label = { Text("Enter your address") },
                   modifier =
-                      Modifier.fillMaxWidth().testTag("profileAddress").padding(horizontal = 16.dp),
-                  colors =
-                      TextFieldDefaults.outlinedTextFieldColors(
-                          focusedBorderColor = colorScheme.secondary,
-                          unfocusedBorderColor = colorScheme.onSurfaceVariant))
+                      Modifier.fillMaxWidth()
+                          .testTag("profileAddress")
+                          .padding(horizontal = horizontalPadding))
 
-              Spacer(modifier = Modifier.height(16.dp))
+              Spacer(modifier = Modifier.height(verticalSpacing))
 
               // Save Button
               Button(
                   onClick = {
                     userProfile.let { profile ->
-                      // Update the profile with the new values
                       viewModel.updateUserProfile(
                           SeekerProfile(
-                              uid = userProfile.uid, // Use the existing UID
+                              uid = userProfile.uid,
                               name = fullName,
                               username = username,
                               email = email,
@@ -238,26 +233,25 @@ fun EditSeekerProfileScreen(
                     }
                     navigationActions.goBack()
                   },
-                  colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
                   shape = RoundedCornerShape(25.dp),
                   modifier =
                       Modifier.fillMaxWidth()
+                          .height(60.dp)
+                          .padding(horizontal = horizontalPadding)
                           .background(
                               brush =
                                   Brush.horizontalGradient(
-                                      listOf(colorScheme.secondary, colorScheme.secondary)),
-                              shape = RoundedCornerShape(25.dp),
-                              // add padding
-                          )
-                          .height(60.dp)
-                          .padding(horizontal = 32.dp), // Add padding to button
-              ) {
-                Text("Update Profile", color = colorScheme.onPrimary)
-              }
+                                      listOf(
+                                          MaterialTheme.colorScheme.secondary,
+                                          MaterialTheme.colorScheme.secondary)),
+                              shape = RoundedCornerShape(25.dp))) {
+                    Text("Update Profile", color = MaterialTheme.colorScheme.onPrimary)
+                  }
             }
       }
 }
 
+// Country Model and Dropdown Menu
 data class Country(val name: String, val code: String, val flagResId: Int)
 
 val countries =
@@ -269,20 +263,22 @@ val countries =
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CountryDropdownMenu() {
+fun CountryDropdownMenu(screenWidth: Dp) {
   var expanded by remember { mutableStateOf(false) }
   var selectedCountry by remember { mutableStateOf(countries[0]) }
   var phoneNumber by remember { mutableStateOf("") }
 
   Column(modifier = Modifier.fillMaxWidth()) {
+    // Country Code Field with Dropdown
     OutlinedTextField(
         value = selectedCountry.code,
-        onValueChange = { /* Country code is static, don't update */},
-        label = { Text("Country code", color = colorScheme.onBackground) },
+        onValueChange = {},
+        label = { Text("Country code") },
         modifier =
-            Modifier.fillMaxWidth().padding(horizontal = 16.dp).testTag("CountryCode").clickable {
-              expanded = true
-            }, // Open dropdown on click
+            Modifier.fillMaxWidth()
+                .testTag("CountryCode")
+                .padding(horizontal = if (screenWidth < 360.dp) 8.dp else 16.dp)
+                .clickable { expanded = true },
         leadingIcon = {
           Row(
               modifier = Modifier.padding(start = 8.dp),
@@ -294,53 +290,41 @@ fun CountryDropdownMenu() {
                 Spacer(modifier = Modifier.width(8.dp))
               }
         },
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
         trailingIcon = {
-          Icon(
-              Icons.Default.ArrowDropDown,
-              contentDescription = "Dropdown Icon",
-              tint = colorScheme.onBackground)
+          Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = "Dropdown Arrow")
         },
-        colors =
-            TextFieldDefaults.outlinedTextFieldColors(
-                focusedBorderColor = colorScheme.secondary,
-                unfocusedBorderColor = colorScheme.onSurfaceVariant))
+        readOnly = true)
 
-    // Dropdown Menu
-    DropdownMenu(
-        expanded = expanded,
-        onDismissRequest = { expanded = false },
-        modifier = Modifier.fillMaxWidth()) {
-          countries.forEach { country ->
-            DropdownMenuItem(
-                onClick = {
-                  selectedCountry = country
-                  expanded = false
-                }) {
-                  Row(verticalAlignment = Alignment.CenterVertically) {
-                    Image(
-                        painter = painterResource(id = country.flagResId),
-                        contentDescription = country.name,
-                        modifier = Modifier.size(24.dp))
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(country.name) // Display the country name for clarity
-                  }
-                }
-          }
-        }
+    DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+      countries.forEach { country ->
+        DropdownMenuItem(
+            onClick = {
+              selectedCountry = country
+              expanded = false
+            }) {
+              Row(verticalAlignment = Alignment.CenterVertically) {
+                Image(
+                    painter = painterResource(id = country.flagResId),
+                    contentDescription = "Country Flag",
+                    modifier = Modifier.size(24.dp))
+                Spacer(modifier = Modifier.width(16.dp))
+                Text(country.name)
+              }
+            }
+      }
+    }
 
     Spacer(modifier = Modifier.height(16.dp))
 
-    // Input field for the phone number
+    // Phone Number Field
     OutlinedTextField(
         value = phoneNumber,
         onValueChange = { phoneNumber = it },
-        label = { Text("Enter your phone number", color = colorScheme.onBackground) },
-        modifier = Modifier.fillMaxWidth().testTag("profilePhone").padding(horizontal = 16.dp),
+        label = { Text("Phone number") },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-        colors =
-            TextFieldDefaults.outlinedTextFieldColors(
-                focusedBorderColor = colorScheme.secondary,
-                unfocusedBorderColor = colorScheme.onSurfaceVariant))
+        modifier =
+            Modifier.fillMaxWidth()
+                .testTag("profilePhone")
+                .padding(horizontal = if (screenWidth < 360.dp) 8.dp else 16.dp))
   }
 }

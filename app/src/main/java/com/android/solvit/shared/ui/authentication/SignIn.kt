@@ -13,7 +13,9 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -22,7 +24,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
@@ -62,13 +65,16 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -308,7 +314,6 @@ fun LogoSection() {
         fontWeight = FontWeight.Bold,
         color = colorScheme.primary,
         modifier = Modifier.testTag("welcomeText"))
-    // Spacer(modifier = Modifier.height(4.dp))
     Text(text = "Sign in to continue", color = colorScheme.onBackground)
   }
 }
@@ -347,7 +352,9 @@ fun FormSection(
       isValueOk = goodFormEmail,
       leadingIcon = Icons.Default.Email,
       leadingIconDescription = "Email Icon",
-      testTag = "emailInput")
+      testTag = "emailInput",
+      errorMessage = "Your email must have \"@\" and \".\"",
+      errorTestTag = "emailErrorMessage")
 
   Spacer(modifier = Modifier.height(10.dp))
 
@@ -362,44 +369,52 @@ fun FormSection(
       passwordLengthComplete = passwordLengthComplete)
 
   Text(
-      text = "Your passport must have at least 6 characters",
+      text = "Your password must have at least 6 characters",
       color = colorScheme.onSurfaceVariant,
       fontSize = 12.sp,
       textAlign = TextAlign.Start,
+      style = TextStyle(fontSize = 12.sp, lineHeight = 16.sp),
       modifier = Modifier.padding(top = 4.dp).fillMaxWidth())
 
   Spacer(modifier = Modifier.height(8.dp))
 
   // Remember me & Forgot password
-  Row(
-      modifier = Modifier.fillMaxWidth(),
-      horizontalArrangement = Arrangement.SpaceBetween,
-      verticalAlignment = Alignment.CenterVertically) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-          Checkbox(
-              checked = isChecked,
-              onCheckedChange = onCheckedChange,
-              modifier = Modifier.size(24.dp),
-              colors =
-                  CheckboxDefaults.colors(
-                      checkmarkColor = colorScheme.onSecondary,
-                      uncheckedColor = colorScheme.onSurfaceVariant,
-                      checkedColor = colorScheme.secondary))
-          Text(
-              text = " Remember me",
-              modifier = Modifier.testTag("rememberMeCheckbox"),
-              color = colorScheme.onSurfaceVariant)
-        }
+  Row(modifier = Modifier.fillMaxWidth()) {
+    // Section Remember Me
+    Row(modifier = Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
+      Checkbox(
+          checked = isChecked,
+          onCheckedChange = onCheckedChange,
+          modifier = Modifier.size(24.dp),
+          colors =
+              CheckboxDefaults.colors(
+                  checkmarkColor = colorScheme.onSecondary,
+                  uncheckedColor = colorScheme.onSurfaceVariant,
+                  checkedColor = colorScheme.secondary))
+      Spacer(modifier = Modifier.width(4.dp))
+      Text(
+          text = "Remember me",
+          modifier = Modifier.testTag("rememberMeCheckbox"),
+          color = colorScheme.onSurfaceVariant,
+          fontSize = 16.sp)
+    }
 
-        ClickableText(
-            text = AnnotatedString("Forgot password?"),
-            onClick = { navigationActions.navigateTo(Screen.FORGOT_PASSWORD) },
-            style =
-                TextStyle(
-                    color = colorScheme.onSurfaceVariant,
-                    textDecoration = TextDecoration.Underline),
-            modifier = Modifier.wrapContentWidth(Alignment.End).testTag("forgotPasswordLink"))
-      }
+    // Section Forgot Password
+    Row(
+        modifier = Modifier.weight(1f),
+        horizontalArrangement = Arrangement.End,
+        verticalAlignment = Alignment.CenterVertically) {
+          Text(
+              text = "Forgot password?",
+              color = colorScheme.onSurfaceVariant,
+              fontSize = 16.sp,
+              textDecoration = TextDecoration.Underline,
+              modifier =
+                  Modifier.clickable { navigationActions.navigateTo(Screen.FORGOT_PASSWORD) }
+                      .testTag("forgotPasswordLink"),
+              textAlign = TextAlign.End)
+        }
+  }
 
   Spacer(modifier = Modifier.height(16.dp))
 
@@ -421,8 +436,8 @@ fun FormSection(
   Spacer(modifier = Modifier.height(4.dp))
 
   // Google sign in button
-  GoogleSignInButton(
-      onSignInClick = {
+  GoogleButton(
+      onClick = {
         val gso =
             GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(token)
@@ -430,18 +445,36 @@ fun FormSection(
                 .build()
         val googleSignInClient = GoogleSignIn.getClient(context, gso)
         launcher.launch(googleSignInClient.signInIntent)
-      })
+      },
+      text = "Sign in with Google",
+      testTag = "googleSignInButton",
+      roundedCornerShape = RoundedCornerShape(25.dp))
 }
 
 @Composable
 fun SignUpSection(navigationActions: NavigationActions) {
-  Row(verticalAlignment = Alignment.CenterVertically) {
-    Text("I'm a new user, ", color = colorScheme.onSurface)
+  val annotatedText = buildAnnotatedString {
+    append("I'm a new user, ")
+
+    pushStringAnnotation(tag = "Sign up", annotation = "sign up")
+    withStyle(
+        style = SpanStyle(color = colorScheme.primary, textDecoration = TextDecoration.Underline)) {
+          append("Sign-Up")
+        }
+    pop()
+  }
+
+  Box(
+      modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
+      contentAlignment = Alignment.Center,
+  ) {
     ClickableText(
-        text = AnnotatedString("Sign up"),
+        text = annotatedText,
+        style =
+            TextStyle(
+                color = colorScheme.onSurface, fontSize = 16.sp, textAlign = TextAlign.Center),
         onClick = { navigationActions.navigateTo(Screen.SIGN_UP) },
-        style = TextStyle(color = colorScheme.primary, textDecoration = TextDecoration.Underline),
-        modifier = Modifier.testTag("signUpLink"))
+        modifier = Modifier.fillMaxWidth().testTag("signUpLink"))
   }
 }
 
@@ -483,7 +516,7 @@ fun SignInButton(
                   brush =
                       if (isFormComplete && goodFormEmail && passwordLengthComplete) {
                         Brush.horizontalGradient(
-                            colors = listOf(colorScheme.secondary, colorScheme.secondary))
+                            colors = listOf(colorScheme.primary, colorScheme.secondary))
                       } else {
                         Brush.horizontalGradient(
                             colors =
@@ -500,35 +533,33 @@ fun SignInButton(
 }
 
 @Composable
-fun GoogleSignInButton(onSignInClick: () -> Unit) {
+fun GoogleButton(
+    onClick: () -> Unit,
+    text: String,
+    testTag: String,
+    roundedCornerShape: RoundedCornerShape
+) {
   Button(
-      onClick = onSignInClick,
-      colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent), // Button color
-      shape = RoundedCornerShape(25.dp), // Circular edges for the button
-      border = BorderStroke(1.dp, colorScheme.onSurfaceVariant), // Border color
-      modifier =
-          Modifier.fillMaxWidth()
-              .height(50.dp) // Adjust height as needed
-              .testTag("googleSignInButton")) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxWidth()) {
-              // Load the Google logo from resources
-              Image(
-                  painter = painterResource(id = R.drawable.google_logo),
-                  contentDescription = "Google Logo",
-                  modifier =
-                      Modifier.size(30.dp) // Size of the Google logo
-                          .padding(end = 8.dp))
+      onClick = onClick,
+      colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+      shape = roundedCornerShape,
+      border = BorderStroke(1.dp, colorScheme.onSurfaceVariant),
+      modifier = Modifier.fillMaxWidth().wrapContentHeight().testTag(testTag)) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+          Image(
+              painter = painterResource(id = R.drawable.google_logo),
+              contentDescription = "Google Logo",
+              modifier = Modifier.size(30.dp).padding(end = 8.dp))
 
-              // Text for the button
-              Text(
-                  text = "Sign in with Google",
-                  color = colorScheme.onSurface, // Text color
-                  fontSize = 16.sp, // Font size
-                  fontWeight = FontWeight.Medium)
-            }
+          Text(
+              text = text,
+              color = colorScheme.onSurface,
+              fontSize = 16.sp,
+              maxLines = 2,
+              overflow = TextOverflow.Ellipsis,
+              modifier = Modifier.weight(1f),
+              textAlign = TextAlign.Center)
+        }
       }
 }
 
@@ -559,15 +590,16 @@ fun googleSignInLauncher(
 fun CustomOutlinedTextField(
     value: String,
     onValueChange: (String) -> Unit,
-    label: String,
+    label: String? = null,
     placeholder: String,
     isValueOk: Boolean,
     modifier: Modifier = Modifier,
     errorMessage: String = "Invalid input",
-    leadingIcon: ImageVector,
+    leadingIcon: ImageVector? = null,
     leadingIconDescription: String = "",
     testTag: String,
-    errorTestTag: String = "emailErrorMessage"
+    errorTestTag: String = "errorMessage",
+    maxLines: Int = Int.MAX_VALUE
 ) {
   // State to track if the field has been "visited" (focused and then unfocused)
   var hasBeenFocused by remember { mutableStateOf(false) }
@@ -584,14 +616,16 @@ fun CustomOutlinedTextField(
             hasLostFocusAfterTyping = false
           }
         },
-        label = { Text(label, color = colorScheme.onBackground) },
+        label = { if (label != null) Text(label, color = colorScheme.onBackground) },
         singleLine = true,
         placeholder = { Text(placeholder) },
         leadingIcon = {
-          Icon(
-              leadingIcon,
-              contentDescription = leadingIconDescription,
-              tint = if (isValueOk) colorScheme.secondary else colorScheme.onSurfaceVariant)
+          if (leadingIcon != null) {
+            Icon(
+                leadingIcon,
+                contentDescription = leadingIconDescription,
+                tint = if (isValueOk) colorScheme.secondary else colorScheme.onSurfaceVariant)
+          }
         },
         modifier =
             Modifier.fillMaxWidth().testTag(testTag).onFocusChanged { focusState ->
@@ -614,7 +648,8 @@ fun CustomOutlinedTextField(
                       value.isEmpty() -> colorScheme.onSurfaceVariant
                       isValueOk -> colorScheme.secondary
                       else -> colorScheme.error
-                    }))
+                    }),
+        maxLines = maxLines)
 
     // Display the error message if the field has been visited, input is incorrect, and focus was
     // lost after typing

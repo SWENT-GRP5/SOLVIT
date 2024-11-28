@@ -1,5 +1,6 @@
 package com.android.solvit.seeker.model.provider
 
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -8,6 +9,7 @@ import com.android.solvit.shared.model.provider.ProviderRepository
 import com.android.solvit.shared.model.provider.ProviderRepositoryFirestore
 import com.android.solvit.shared.model.service.Services
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -33,7 +35,9 @@ class ListProviderViewModel(private val repository: ProviderRepository) : ViewMo
           @Suppress("UNCHECKED_CAST")
           override fun <T : ViewModel> create(modelClass: Class<T>): T {
             return ListProviderViewModel(
-                repository = ProviderRepositoryFirestore(FirebaseFirestore.getInstance()))
+                repository =
+                    ProviderRepositoryFirestore(
+                        FirebaseFirestore.getInstance(), FirebaseStorage.getInstance()))
                 as T
           }
         }
@@ -47,11 +51,10 @@ class ListProviderViewModel(private val repository: ProviderRepository) : ViewMo
     return repository.getNewUid()
   }
 
-  fun addProvider(
-      provider: Provider,
-  ) {
+  fun addProvider(provider: Provider, imageUri: Uri?) {
     repository.addProvider(
         provider,
+        imageUri,
         onSuccess = { getProviders() },
         onFailure = { Log.e("add Provider", "failed to add Provider") })
   }

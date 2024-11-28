@@ -138,7 +138,7 @@ fun SeekerRegistrationScreen(
                     contentDescription = "App Logo",
                     modifier =
                         Modifier.testTag("signUpIcon")
-                            .size(150.dp)
+                            .size(100.dp)
                             .align(Alignment.CenterHorizontally))
                 Text(
                     text = "Sign Up as a Seeker",
@@ -182,7 +182,7 @@ fun SeekerRegistrationScreen(
                     label = "Phone Number",
                     placeholder = "Enter your phone number",
                     isValueOk = isPhoneOk,
-                    errorMessage = "Your phone number must be at least 6 digits",
+                    errorMessage = "Your phone number must be at least 7 digits",
                     leadingIcon = Icons.Default.Phone,
                     leadingIconDescription = "Phone Icon",
                     testTag = "phoneNumberInput",
@@ -196,6 +196,7 @@ fun SeekerRegistrationScreen(
                     showDropdownLocation = showDropdown,
                     onShowDropdownLocationChange = { showDropdown = it },
                     locationSuggestions = locationSuggestions.filterNotNull(),
+                    userLocations = user?.locations ?: emptyList(),
                     onLocationSelected = { selectedLocation = it },
                     requestLocation = null,
                     backgroundColor = colorScheme.background,
@@ -219,10 +220,7 @@ fun SeekerRegistrationScreen(
                 Column(
                     modifier =
                         Modifier.fillMaxWidth() // Ensure content takes up full width
-                            .padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally, // Center horizontally
-                    verticalArrangement = Arrangement.Center // Center vertically
-                    ) {
+                            .padding(16.dp)) {
                       Text(
                           text = "Set Your Preferences",
                           style = MaterialTheme.typography.titleLarge,
@@ -236,17 +234,23 @@ fun SeekerRegistrationScreen(
                           painter = painterResource(id = R.drawable.userpref),
                           contentDescription = "Completion Image",
                           modifier =
-                              Modifier.size(300.dp)
+                              Modifier.size(100.dp)
                                   .align(Alignment.CenterHorizontally)
                                   .testTag("preferencesIllustration"))
                       Spacer(modifier = Modifier.height(20.dp))
-                      Text(
-                          text = "This feature is not implemented yet.",
-                          style = MaterialTheme.typography.bodyLarge,
-                          modifier = Modifier.align(Alignment.CenterHorizontally),
-                          textAlign = TextAlign.Center,
-                          color = colorScheme.primary)
-                      Spacer(modifier = Modifier.height(100.dp))
+                      val userId = user?.uid
+                      if (userId != null) {
+                        Preferences(userId, viewModel)
+                      } else {
+                        Text(
+                            text = "User not authenticated. Please sign in again.",
+                            color = colorScheme.error,
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier =
+                                Modifier.align(Alignment.CenterHorizontally)
+                                    .testTag("userNotAuthenticatedError"))
+                      }
+                      Spacer(modifier = Modifier.height(20.dp))
                       Button(
                           onClick = { currentStep = 3 },
                           modifier = Modifier.fillMaxWidth().testTag("savePreferencesButton"),
@@ -324,9 +328,9 @@ fun SeekerRegistrationScreen(
 fun Stepper(currentStep: Int, isFormComplete: Boolean) {
   val stepLabels = listOf("Information", "Details", "All Done")
   Row(
-      modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
-      horizontalArrangement = Arrangement.SpaceBetween,
-      verticalAlignment = Alignment.CenterVertically) {
+      modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+      horizontalArrangement = Arrangement.Start,
+      verticalAlignment = Alignment.Top) {
         stepLabels.forEachIndexed { index, label ->
           StepCircle(
               stepNumber = index + 1,
@@ -335,7 +339,7 @@ fun Stepper(currentStep: Int, isFormComplete: Boolean) {
           )
 
           if (index < stepLabels.size - 1) {
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.weight(1f))
           }
         }
       }
@@ -343,15 +347,11 @@ fun Stepper(currentStep: Int, isFormComplete: Boolean) {
 
 @Composable
 fun StepCircle(stepNumber: Int, isCompleted: Boolean, label: String) {
-
-  // Use a Column to stack the circle and the label vertically
   val testTag = "stepCircle-$stepNumber-${if (isCompleted) "completed" else "incomplete"}"
 
   Column(
       horizontalAlignment = Alignment.CenterHorizontally,
-      verticalArrangement = Arrangement.Center,
-      modifier = Modifier.width(80.dp).testTag(testTag) // Set a width for alignment
-      ) {
+      modifier = Modifier.width(100.dp).testTag(testTag)) {
         Box(
             modifier =
                 Modifier.size(40.dp)
@@ -368,7 +368,7 @@ fun StepCircle(stepNumber: Int, isCompleted: Boolean, label: String) {
         // Display the label below the circle
         Text(
             text = label,
-            color = colorScheme.onBackground, // You can customize this color
+            color = colorScheme.onBackground,
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.padding(top = 4.dp) // Add space between circle and label
             )
