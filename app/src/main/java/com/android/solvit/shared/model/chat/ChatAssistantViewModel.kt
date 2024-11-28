@@ -60,6 +60,14 @@ class ChatAssistantViewModel() : ViewModel() {
         }
   }
 
+  /**
+   * Set the context for the chat assistant to generate a response
+   *
+   * @param messageContext List of previous messages in the conversation
+   * @param senderName Name of the sender
+   * @param receiverName Name of the receiver
+   * @param requestContext (Optional) The concerned service request
+   */
   fun setContext(
       messageContext: List<ChatMessage.TextMessage>,
       senderName: String,
@@ -72,14 +80,25 @@ class ChatAssistantViewModel() : ViewModel() {
     _requestContext.value = requestContext
   }
 
+  /**
+   * Add a new message to the context
+   *
+   * @param message The new message to add
+   */
   fun updateMessageContext(message: ChatMessage.TextMessage) {
     _messageContext.value += message
   }
 
+  /**
+   * Update the selected tones of the response
+   *
+   * @param tones List of selected tones
+   */
   fun updateSelectedTones(tones: List<String>) {
     _selectedTones.value = tones
   }
 
+  /** Clear all the context values */
   fun clear() {
     _messageContext.value = emptyList()
     _senderName.value = ""
@@ -88,6 +107,12 @@ class ChatAssistantViewModel() : ViewModel() {
     _selectedTones.value = emptyList()
   }
 
+  /**
+   * Build the prompt for the chat assistant
+   *
+   * @param input Additional infos to add to the prompt
+   * @return The generated prompt
+   */
   fun buildPrompt(input: String): String {
     var prompt = "Write a single message response"
     if (senderName.value.isNotEmpty()) {
@@ -115,6 +140,12 @@ class ChatAssistantViewModel() : ViewModel() {
     return prompt
   }
 
+  /**
+   * Generate a response message from the chat assistant
+   *
+   * @param input Additional infos to add to the prompt
+   * @param onResponse Callback to handle the response
+   */
   fun generateMessage(input: String, onResponse: (String) -> Unit) {
     val prompt = buildPrompt(input)
     Log.d("ChatAssistantViewModel", "Prompt: $prompt")

@@ -47,11 +47,13 @@ fun ChatAssistantDialog(
           modifier = Modifier.padding(16.dp),
           verticalArrangement = Arrangement.spacedBy(8.dp),
           horizontalAlignment = Alignment.CenterHorizontally) {
+            // AI chat assistant Logo
             Icon(
                 painter = painterResource(R.drawable.ai_stars),
                 contentDescription = "AI Logo",
                 modifier = Modifier.size(64.dp).testTag("aiLogo"))
 
+            // Tones selection row
             Row(
                 modifier = Modifier.horizontalScroll(rememberScrollState()).testTag("tonesRow"),
                 horizontalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -60,6 +62,7 @@ fun ChatAssistantDialog(
                   }
                 }
 
+            // Additional infos input field
             OutlinedTextField(
                 value = input,
                 onValueChange = { input = it },
@@ -67,6 +70,7 @@ fun ChatAssistantDialog(
                 label = { Text("Optional additional infos") },
                 shape = RoundedCornerShape(8.dp))
 
+            // Generate response button
             var isGenerating by remember { mutableStateOf(false) }
             Button(
                 onClick = {
