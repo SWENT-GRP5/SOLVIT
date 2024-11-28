@@ -1,12 +1,10 @@
 package com.android.solvit.seeker.ui.request
 
-import android.annotation.SuppressLint
 import android.net.Uri
 import android.util.Log
-import android.webkit.WebView
-import android.webkit.WebViewClient
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -26,18 +24,18 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.AlertDialog
+import androidx.compose.material.Surface
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Home
@@ -62,8 +60,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -76,14 +74,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.PopupProperties
 import coil.compose.AsyncImage
@@ -93,14 +90,15 @@ import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Dispatchers
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.json.JSONArray
+import kotlinx.coroutines.withContext
+
 
 @Composable
 fun TitleInput(title: String, onTitleChange: (String) -> Unit) {
@@ -520,105 +518,109 @@ fun DeleteButton(
             }
       }
 }
-
 @Composable
 fun AIAssistantDialog(
     onCancel: () -> Unit,
     onUploadPictures: () -> Unit
 ) {
-    AlertDialog(
-        onDismissRequest = { onCancel() },
-        title = {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
+    Dialog(
+        onDismissRequest = { onCancel() }
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(0.9f) // Adjust width as 90% of the screen
+                .wrapContentHeight()
+                .background(Color.White, shape = RoundedCornerShape(16.dp))
+                .padding(16.dp) // Padding around the dialog content
+        ) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Icon in a Blue Circle
-                Box(
-                    modifier = Modifier
-                        .size(64.dp)
-                        .background(Color(0xFF2196F3), shape = CircleShape), // Blue Circle
-                    contentAlignment = Alignment.Center
+                // Header Row
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(bottom = 4.dp)
                 ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_ai_assistant), // Replace with proper icon
-                        contentDescription = "AI Assistant",
-                        tint = Color.White,
-                        modifier = Modifier.size(32.dp)
-                    )
-                }
-                // Title
-                Box(
-                    modifier = Modifier
-                        .offset(x = -16.dp)
-                        .background(
-                            Color(0xFF2196F3),
-                            shape = RoundedCornerShape(
-                                topStart = 0.dp,
-                                topEnd = 18.dp,
-                                bottomStart = 0.dp,
-                                bottomEnd = 18.dp
-                            )
+                    // Icon
+                    Box(
+                        modifier = Modifier
+                            .size(64.dp)
+                            .background(Color(0xFF2196F3), shape = CircleShape), // Blue Circle
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_ai_assistant), // Replace with proper icon
+                            contentDescription = "AI Assistant",
+                            tint = Color.White,
+                            modifier = Modifier.size(32.dp)
                         )
-                        .padding(horizontal = 18.dp, vertical = 10.dp)
-                ) {
-                    Text(
-                        text = "Your AI-Powered Assistant",
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            fontWeight = FontWeight.Bold
-                        ),
-                        color = Color.White,
-                        textAlign = TextAlign.Center
-                    )
+                    }
+
+                    // Title
+                    Box(
+                        modifier = Modifier
+                            .offset(x = -14.dp)
+                            .fillMaxWidth()
+                            .background(
+                                Color(0xFF2196F3),
+                                shape = RoundedCornerShape(
+                                    topStart = 0.dp,
+                                    topEnd = 18.dp,
+                                    bottomStart = 0.dp,
+                                    bottomEnd = 18.dp
+                                )
+                            )
+                            .padding(horizontal = 8.dp, vertical = 10.dp)
+                    ) {
+                        Text(
+                            text = "Your AI-Powered Assistant",
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                fontWeight = FontWeight.Bold
+                            ),
+                            color = Color.White,
+                            textAlign = TextAlign.Center
+                        )
+                    }
                 }
-            }
-        },
-        text = {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                contentAlignment = Alignment.Center
-            ) {
+
+                // Dialog Content
                 Text(
                     text = "Would you like to use the AI assistant to create your request by uploading pictures of your issue?",
                     style = MaterialTheme.typography.bodyMedium,
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(vertical = 16.dp)
                 )
-            }
-        },
-        confirmButton = {
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Button(
-                    onClick = { onUploadPictures() },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Green),
-                    modifier = Modifier.padding(end = 8.dp) // Space between buttons
-                ) {
-                    Text("Upload Pictures")
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Icon(Icons.Default.ArrowForward, contentDescription = null)
-                }
 
-                Button(
-                    onClick = { onCancel() },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                // Buttons
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Cancel")
+                    Button(
+                        onClick = { onCancel() },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
+                        modifier = Modifier.padding(end = 8.dp) // Space between buttons
+                    ) {
+                        Text("Cancel")
+                    }
+
+                    Button(
+                        onClick = { onUploadPictures() },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Green)
+                    ) {
+                        Text("Upload Pictures")
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Icon(Icons.Default.ArrowForward, contentDescription = null)
+                    }
                 }
             }
-        },
-        shape = RoundedCornerShape(16.dp),
-        modifier = Modifier.padding(16.dp) // Padding around the entire dialog
-    )
+        }
+    }
 }
-
 
 @Composable
 fun ImagePickerStep(
-    stepNumber: Int,
-    title: String,
     selectedImages: List<Uri>,
     onImagesSelected: (List<Uri>) -> Unit,
     onRemoveImage: (Uri) -> Unit,
@@ -637,13 +639,17 @@ fun ImagePickerStep(
             .padding(16.dp)
             .verticalScroll(rememberScrollState())
     ) {
-        StepHeader(stepNumber, title)
+
+        StepHeader(R.drawable.circle_one_icon, title = "Upload Images")
+
+        Spacer(modifier = Modifier.height(16.dp)) // Spacing below the header
 
         if (selectedImages.isEmpty()) {
             Text(
                 text = "No Images added",
                 style = MaterialTheme.typography.bodyMedium,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
             )
         } else {
             LazyRow(
@@ -677,108 +683,201 @@ fun ImagePickerStep(
             }
         }
 
-        Button(
-            onClick = { imagePickerLauncher.launch("image/*") },
+        Spacer(modifier = Modifier.height(16.dp)) // Spacing before the buttons
+
+        // Buttons Row
+        Row(
+            horizontalArrangement = Arrangement.Center,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Add Images")
-            Spacer(modifier = Modifier.width(8.dp))
-            Icon(Icons.Default.KeyboardArrowDown, contentDescription = null)
-        }
-
-        if (selectedImages.isNotEmpty()) {
             Button(
-                onClick = { onStartAnalyzing() },
-                modifier = Modifier.fillMaxWidth()
+                onClick = { imagePickerLauncher.launch("image/*") },
+                modifier = Modifier.weight(1f) // Ensures centering in the row
             ) {
-                Text("Start Analyzing")
-                Spacer(modifier = Modifier.width(8.dp))
-                Icon(Icons.Default.ArrowForward, contentDescription = null)
+                Text("Add Images")
+                Spacer(modifier = Modifier.width(4.dp))
+                Icon(Icons.Default.Add, contentDescription = null)
+            }
+
+            if (selectedImages.isNotEmpty()) {
+                Spacer(modifier = Modifier.width(8.dp)) // Space between buttons
+
+                Button(
+                    onClick = { onStartAnalyzing() },
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Green)
+                ) {
+                    Text("Analyze")
+                    Icon(Icons.Default.ArrowForward, contentDescription = null)
+                }
             }
         }
     }
 }
 
-@Composable
-fun AnalyzingImagesStep(stepNumber: Int, title: String) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-            .verticalScroll(rememberScrollState()),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        StepHeader(stepNumber, title)
 
-        CircularProgressIndicator(modifier = Modifier.size(48.dp))
-
-        Text(
-            text = "Analyzing images. Please wait...",
-            style = MaterialTheme.typography.bodyMedium,
-            textAlign = TextAlign.Center
-        )
-    }
-}
-
-@Composable
-fun AnalysisCompleteStep(stepNumber: Int, title: String) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-            .verticalScroll(rememberScrollState()),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        StepHeader(stepNumber, title)
-
-        Icon(
-            imageVector = Icons.Default.CheckCircle,
-            contentDescription = "Complete",
-            tint = Color.Green,
-            modifier = Modifier.size(48.dp)
-        )
-
-        Text(
-            text = "Analysis complete! Fields have been filled with AI suggestions.",
-            style = MaterialTheme.typography.bodyMedium,
-            textAlign = TextAlign.Center
-        )
-    }
-}
 
 @Composable
 fun StepHeader(
-    stepNumber: Int,
+    @DrawableRes iconRes: Int,
     title: String
 ) {
+    // Header Row
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Color(0xFF2196F3)) // Blue header background
-            .padding(16.dp)
+        modifier = Modifier.padding(bottom = 4.dp)
     ) {
-        // Step number inside a circular badge
+        // Icon Number
         Box(
             modifier = Modifier
-                .size(32.dp)
-                .background(Color.White, shape = CircleShape)
-                .wrapContentSize(Alignment.Center)
+                .size(60.dp)
+                .background(Color(0xFF2196F3), shape = CircleShape), // Blue Circle
+            contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = stepNumber.toString(),
-                style = MaterialTheme.typography.bodyLarge,
-                color = Color(0xFF2196F3)
+            Icon(
+                painter = painterResource(id = iconRes), // Replace with proper icon
+                contentDescription = "Stepper Icon",
+                tint = Color.White,
+                modifier = Modifier.size(40.dp)
             )
         }
 
-        // Step title
-        Text(
-            text = title,
-            style = MaterialTheme.typography.headlineSmall,
-            color = Color.White
-        )
+        // Title
+        Box(
+            modifier = Modifier
+                .offset(x = -14.dp)
+                .fillMaxWidth()
+                .background(
+                    Color(0xFF2196F3),
+                    shape = RoundedCornerShape(
+                        topStart = 0.dp,
+                        topEnd = 18.dp,
+                        bottomStart = 0.dp,
+                        bottomEnd = 18.dp
+                    )
+                )
+                .padding(horizontal = 8.dp, vertical = 10.dp),
+            contentAlignment = Alignment.Center
+        ) {
+
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    fontWeight = FontWeight.Bold
+                ),
+                color = Color.White,
+                textAlign = TextAlign.Center
+            )
+        }
     }
 }
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewAIAssistantDialog() {
+    StepHeader(R.drawable.circle_one_icon, title = "Upload Images")
+}
+
+@Composable
+fun MultiStepDialog(
+    showDialog: Boolean,
+    currentStep: Int,
+    selectedImages: List<Uri>,
+    onImagesSelected: (List<Uri>) -> Unit,
+    onRemoveImage: (Uri) -> Unit,
+    onStartAnalyzing: () -> Unit,
+    onAnalyzeComplete: (String, String, String) -> Unit,
+    onClose: () -> Unit
+) {
+    var isLoading by remember { mutableStateOf(false) }
+
+    if (showDialog) {
+        Dialog(onDismissRequest = { onClose() }) {
+            Surface(
+                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier.padding(16.dp)
+            ) {
+                when (currentStep) {
+                    1 -> ImagePickerStep(
+                        selectedImages = selectedImages,
+                        onImagesSelected = onImagesSelected,
+                        onRemoveImage = onRemoveImage,
+                        onStartAnalyzing = onStartAnalyzing
+                    )
+                    2 -> {
+                        LaunchedEffect(selectedImages) {
+                            if (selectedImages.isNotEmpty() && !isLoading) {
+                                isLoading = true
+                                try {
+                                    val (type, title, description) = uploadAndAnalyze(selectedImages)
+                                    onAnalyzeComplete(type, title, description)
+                                } catch (e: Exception) {
+                                    Log.e("MultiStepDialog", "Error: ${e.message}")
+                                } finally {
+                                    isLoading = false
+                                }
+                            }
+                        }
+
+                        if (isLoading) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                StepHeader(R.drawable.circle_two_icon, title = "Analyzing Images")
+                                Spacer(modifier = Modifier.height(16.dp))
+                                CircularProgressIndicator(modifier = Modifier.size(48.dp))
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Text("Analyzing your uploaded images. Please wait...")
+                            }
+                        }
+                    }
+                    3 -> {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp)
+                                .verticalScroll(rememberScrollState()),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+
+                            StepHeader(R.drawable.circle_three_icon, title = "Analysis Completed")
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Icon(
+                                imageVector = Icons.Default.CheckCircle,
+                                contentDescription = "Complete",
+                                tint = Color.Green,
+                                modifier = Modifier.size(48.dp)
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(
+                                text = "Analysis complete! Fields have been filled with AI suggestions.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+suspend fun uploadAndAnalyze(imageUris: List<Uri>): Triple<String, String, String> {
+    return withContext(Dispatchers.IO) {
+        try {
+            // Simulate a delay for upload and analysis
+            delay(3000L) // 3 seconds
+
+            // Mock results for the type, title, and description
+            Triple("Mocked Type", "Mocked Title", "Mocked Description")
+        } catch (e: Exception) {
+            throw Exception("Error during upload and analysis: ${e.message}")
+        }
+    }
+}
+
+
 

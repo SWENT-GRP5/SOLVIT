@@ -94,7 +94,7 @@ fun CreateRequestScreen(
   val userId = Firebase.auth.currentUser?.uid ?: "-1"
 
     var showAIAssistantDialog by remember { mutableStateOf(true) }
-    var showImagePickerDialog by remember { mutableStateOf(false) }
+    var showMultiStepDialog by remember { mutableStateOf(false) }
     var currentStep by remember { mutableStateOf(1) }
     var selectedImages by remember { mutableStateOf<List<Uri>>(emptyList()) }
     var isAnalyzing by remember { mutableStateOf(false) }
@@ -112,124 +112,38 @@ fun CreateRequestScreen(
             onCancel = { showAIAssistantDialog = false },
             onUploadPictures = {
                 showAIAssistantDialog = false
-                showImagePickerDialog = true
+                showMultiStepDialog  = true
             }
         )
     }
 
     // Multi-Step Dialog
-    if (showImagePickerDialog) {
-        AlertDialog(
-            onDismissRequest = { showImagePickerDialog = false },
-            title = {
-                Text(
-                    text = when (currentStep) {
-                        1 -> "Upload Images"
-                        2 -> "Analyzing Images"
-                        3 -> "Analysis Complete"
-                        else -> ""
-                    },
-                    style = MaterialTheme.typography.headlineSmall
-                )
+    if (showMultiStepDialog) {
+        MultiStepDialog(
+            showDialog = showMultiStepDialog,
+            currentStep = currentStep,
+            selectedImages = selectedImages,
+            onImagesSelected = { images ->
+                selectedImages = images
             },
-            text = {
-                when (currentStep) {
-                    1 -> ImagePickerStep(
-                        stepNumber = 1,
-                        title = "Upload Images",
-                        selectedImages = selectedImages,
-                        onImagesSelected = { images -> selectedImages = images },
-                        onRemoveImage = { uri -> selectedImages = selectedImages.filter { it != uri } },
-                        onStartAnalyzing = {
-                            isAnalyzing = true
-                            currentStep = 2
-                        }
-                    )
-                    2 -> {
-                        LaunchedEffect(selectedImages) {
-                            if (selectedImages.isNotEmpty() && imageUrls == null) { // Ensure images are only uploaded once
-                                isAnalyzing = true
-                                selectedImages.forEach { uri ->
-                                    if (!isFileExists(context, uri)) {
-                                        Log.e("ImageUpload", "File does not exist for URI: $uri")
-                                        // Handle the invalid URI here
-                                    }
-                                }
-
-                                requestViewModel.uploadMultipleImages(
-                                    imageUris = selectedImages,
-                                    onSuccess = { urls ->
-                                        imageUrls = urls // Store the uploaded image URLs
-                                        isAnalyzing = false
-                                    },
-                                    onFailure = { exception ->
-                                        uploadError = "Failed to upload images: ${exception.message}"
-                                        isAnalyzing = false
-                                    }
-                                )
-                            }
-                        }
-
-// Step 2: Analyze Images After Upload
-                        LaunchedEffect(imageUrls) {
-                            imageUrls?.let { urls ->
-                                isAnalyzing = true
-                                try {
-                                    val (generatedType, generatedTitle, generatedDescription) =
-                                        analyzeImagesWithOpenAI(urls, context) // Analyze uploaded images
-                                    analysisResult = Triple(generatedType, generatedTitle, generatedDescription)
-                                    isAnalyzing = false
-                                } catch (e: Exception) {
-                                    analysisError = "Failed to analyze images: ${e.message}"
-                                    isAnalyzing = false
-                                }
-                            }
-                        }
-
-                        // UI Rendering
-                        if (isAnalyzing) {
-                            // Show loading spinner
-                            CircularProgressIndicator(modifier = Modifier.size(48.dp))
-                        } else if (uploadError != null) {
-                            // Show upload error message
-                            Text("Error: $uploadError", color = Color.Red, textAlign = TextAlign.Center)
-                        } else if (analysisError != null) {
-                            // Show analysis error message
-                            Text("Error: $analysisError", color = Color.Red, textAlign = TextAlign.Center)
-                        } else if (analysisResult != null) {
-                            // Display AI analysis results
-                            val (type, title, description) = analysisResult!!
-                            Column(modifier = Modifier.fillMaxWidth()) {
-                                Text("Type: $type", style = MaterialTheme.typography.bodyLarge)
-                                Text("Title: $title", style = MaterialTheme.typography.bodyLarge)
-                                Text("Description: $description", style = MaterialTheme.typography.bodyLarge)
-                            }
-                        }
-                    }
-                    3 -> AnalysisCompleteStep(
-                        stepNumber = 3,
-                        title = "Analysis Complete"
-                    )
-                }
+            onRemoveImage = { uri ->
+                selectedImages = selectedImages.filter { it != uri }
             },
-            confirmButton = {
-                when (currentStep) {
-                    1 -> null
-                    3 -> {
-                        TextButton(onClick = { showImagePickerDialog = false }) {
-                            Text("Proceed")
-                        }
-                    }
-                }
+            onStartAnalyzing = {
+                currentStep = 2 // Move to the analyzing step
             },
-            dismissButton = {
-                TextButton(onClick = { showImagePickerDialog = false }) {
-                    Text("Cancel")
-                }
+            onAnalyzeComplete = { generatedType, generatedTitle, generatedDescription ->
+                typeQuery = generatedType
+                title = generatedTitle
+                description = generatedDescription
+                currentStep = 3 // Move to the analysis complete step
+            },
+            onClose = {
+                showMultiStepDialog = false
+                currentStep = 1 // Reset step for the next time
             }
         )
     }
-
 
 
   RequestScreen(

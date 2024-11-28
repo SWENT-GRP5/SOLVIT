@@ -60,7 +60,7 @@ class MainActivity : ComponentActivity() {
 
     setContent {
       SampleAppTheme {
-        Surface(modifier = Modifier.fillMaxSize(), color = colorScheme.background) { SolvitApp() }
+        Surface(modifier = Modifier.fillMaxSize(), color = colorScheme.background) { ZyadApp() }
       }
     }
   }

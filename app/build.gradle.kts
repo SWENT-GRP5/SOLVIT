@@ -27,6 +27,7 @@ android {
     }
 
     val mapsApiKey: String = localProperties.getProperty("MAPS_API_KEY") ?: ""
+    val openaiApiKey: String = localProperties.getProperty("OPENAI_API_KEY") ?: ""
 
     defaultConfig {
         applicationId = "com.android.solvit"
@@ -35,6 +36,7 @@ android {
         versionCode = 1
         versionName = "1.0"
         manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
+        buildConfigField("String", "OPENAI_API_KEY", "\"$openaiApiKey\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

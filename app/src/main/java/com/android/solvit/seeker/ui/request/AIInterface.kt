@@ -9,6 +9,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import android.content.Context
 import android.net.Uri
 import androidx.documentfile.provider.DocumentFile
+import com.android.solvit.BuildConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -38,7 +39,7 @@ data class AIAnalysisResponse(
 
 // A Retrofit Instance
 fun createAIAnalysisService(): AIAnalysisService {
-    val apiKey = "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" // Replace with your actual API key
+    val apiKey = BuildConfig.OPENAI_API_KEY // Replace with your actual API key
 
     // Add Authorization header to each request
     val client = OkHttpClient.Builder()
