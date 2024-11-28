@@ -1,8 +1,10 @@
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import com.android.solvit.provider.ui.profile.DescriptionSection
+import com.android.solvit.provider.ui.profile.LanguageList
 import com.android.solvit.provider.ui.profile.ProfileHeader
 import com.android.solvit.provider.ui.profile.StatsSection
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
@@ -95,5 +97,41 @@ class ProviderProfileScreenTest {
 
     composeTestRule.setContent { StatsSection(provider) }
     composeTestRule.onNodeWithTag("statsSection").assertIsDisplayed()
+  }
+
+  @Test
+  fun languageList_displaysNotProvidedWhenEmpty() {
+    val provider = Provider(languages = emptyList()) // A provider with no languages
+    composeTestRule.setContent { LanguageList(provider = provider) }
+    composeTestRule.onNodeWithTag("noLanguagesText").assertIsDisplayed()
+  }
+
+  @Test
+  fun languageList_displaysThreeLanguagesInitially() {
+    val provider =
+        Provider(
+            languages = listOf(Language.ENGLISH, Language.FRENCH, Language.ARABIC, Language.GERMAN))
+    composeTestRule.setContent { LanguageList(provider = provider) }
+    composeTestRule.onNodeWithTag("languageItem_ENGLISH").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("languageItem_FRENCH").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("languageItem_ARABIC").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("languageItem_GERMAN").assertIsNotDisplayed()
+  }
+
+  @Test
+  fun languageList_displaysAllLanguagesAfterViewMoreClicked() {
+    val provider =
+        Provider(
+            languages = listOf(Language.ENGLISH, Language.FRENCH, Language.ARABIC, Language.GERMAN))
+    composeTestRule.setContent { LanguageList(provider = provider) }
+
+    // Click the "View more" button
+    composeTestRule.onNodeWithTag("viewMoreButton").performClick()
+
+    // Assert all languages are displayed
+    composeTestRule.onNodeWithTag("languageItem_ENGLISH").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("languageItem_FRENCH").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("languageItem_ARABIC").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("languageItem_GERMAN").assertIsDisplayed()
   }
 }

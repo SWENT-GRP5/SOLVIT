@@ -277,6 +277,10 @@ fun ProfileHeader(
   }
 }
 
+/**
+ * Displays a styled description section with a title and provider description, supporting state
+ * updates and test tags.
+ */
 @Composable
 fun DescriptionSection(provider: Provider) {
 
@@ -377,40 +381,59 @@ fun LanguageList(provider: Provider) {
     mutableStateOf(false)
   } // State to toggle between showing 3 items or all
 
-  Column(horizontalAlignment = Alignment.Start) {
-    if (provider.languages.isEmpty()) {
-      Text("Not provided", color = colorScheme.error)
-    } else {
-      LazyColumn(
-          modifier =
-              Modifier.fillMaxWidth()
-                  .heightIn(
-                      max =
-                          if (!showAll && provider.languages.size > 3) 200.dp else Dp.Unspecified),
-          verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            // Show either all items or just the first 3 based on showAll
-            val languagesToShow = if (showAll) provider.languages else provider.languages.take(3)
-            items(languagesToShow) { language ->
-              Text(
-                  language.toString().replaceFirstChar { it.uppercase() },
-                  fontSize = 40.sp,
-                  color = colorScheme.onPrimary,
-                  fontWeight = FontWeight.Bold)
-            }
-            if (!showAll && provider.languages.size > 3) {
-              item {
-                Text(
-                    "View more...",
-                    fontSize = 16.sp,
-                    color = colorScheme.secondary,
-                    fontWeight = FontWeight.Medium,
-                    modifier =
-                        Modifier.clickable {
-                          showAll = true // Updates state to show all items
-                        })
+  Column(
+      horizontalAlignment = Alignment.Start,
+      modifier = Modifier.testTag("languageListColumn") // Test tag for the whole section
+      ) {
+        if (provider.languages.isEmpty()) {
+          Text(
+              "Not provided",
+              color = colorScheme.error,
+              modifier = Modifier.testTag("noLanguagesText") // Tag for "Not provided" text
+              )
+        } else {
+          LazyColumn(
+              modifier =
+                  Modifier.fillMaxWidth()
+                      .heightIn(
+                          max =
+                              if (!showAll && provider.languages.size > 3) 200.dp
+                              else Dp.Unspecified)
+                      .testTag("languagesLazyColumn"), // Tag for the LazyColumn
+              verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                // Show either all items or just the first 3 based on showAll
+                val languagesToShow =
+                    if (showAll) provider.languages else provider.languages.take(3)
+                items(languagesToShow) { language ->
+                  Text(
+                      text =
+                          language.name.replaceFirstChar {
+                            it.uppercase()
+                          }, // Affiche le nom de l'objet
+                      fontSize = 40.sp,
+                      color = colorScheme.onPrimary,
+                      fontWeight = FontWeight.Bold,
+                      modifier =
+                          Modifier.testTag(
+                              "languageItem_${language.name}") // Tag for each language item
+                      )
+                }
+                if (!showAll && provider.languages.size > 3) {
+                  item {
+                    Text(
+                        "View more...",
+                        fontSize = 16.sp,
+                        color = colorScheme.secondary,
+                        fontWeight = FontWeight.Medium,
+                        modifier =
+                            Modifier.clickable {
+                                  showAll = true // Updates state to show all items
+                                }
+                                .testTag("viewMoreButton") // Tag for the "View more" button
+                        )
+                  }
+                }
               }
-            }
-          }
-    }
-  }
+        }
+      }
 }
