@@ -17,6 +17,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.android.solvit.R
 import com.android.solvit.shared.model.chat.ChatAssistantViewModel
+import kotlinx.coroutines.delay
 
 val TONES_LIST = listOf("Formal", "Neutral", "Friendly", "Positive", "Negative", "Professional")
 
@@ -82,7 +84,18 @@ fun ChatAssistantDialog(
                   }
                 },
                 modifier = Modifier.fillMaxWidth(.6f).testTag("generateButton")) {
-                  if (isGenerating) Text("...") else Text("Generate Response")
+                  if (isGenerating) {
+                    var dotCount by remember { mutableStateOf(1) }
+                    LaunchedEffect(Unit) {
+                      while (isGenerating) {
+                        dotCount = (dotCount % 3) + 1
+                        delay(500)
+                      }
+                    }
+                    Text(".".repeat(dotCount))
+                  } else {
+                    Text("Generate Response")
+                  }
                 }
           }
     }
