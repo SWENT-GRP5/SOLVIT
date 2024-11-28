@@ -22,6 +22,8 @@ import com.android.solvit.shared.model.map.LocationViewModel
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestStatus
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
+import com.android.solvit.shared.model.request.analyzer.AIAssistantDialog
+import com.android.solvit.shared.model.request.analyzer.MultiStepDialog
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.model.utils.isInternetAvailable
 import com.android.solvit.shared.model.utils.loadBitmapFromUri

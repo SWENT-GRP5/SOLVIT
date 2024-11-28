@@ -115,7 +115,7 @@ fun prepareRequestBody(imageUrls: List<String>): RequestBody {
   return RequestBody.create("application/json".toMediaTypeOrNull(), jsonPayload.toString())
 }
 
-suspend fun analyzeImagesWithOpenAI(imageUrls: List<String>): Triple<String, String, String> {
+suspend fun analyzeImagesWithRetrofit(imageUrls: List<String>): Triple<String, String, String> {
   val service = createAIAnalysisService()
 
   // Create the prompt as a RequestBody
