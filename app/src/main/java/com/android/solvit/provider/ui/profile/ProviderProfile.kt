@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -91,9 +92,6 @@ fun ProviderProfileScreen(
   val userId = user.value?.uid ?: "-1"
   val providers = listProviderViewModel.providersList.collectAsState()
   val provider by remember { mutableStateOf(providers.value.firstOrNull { it.uid == userId }) }
-  if (provider == null) {
-    return
-  }
 
   Column(
       modifier =
@@ -101,6 +99,7 @@ fun ProviderProfileScreen(
               .background(colorScheme.background)
               .verticalScroll(rememberScrollState())) {
         ProfileHeader(navigationActions, provider!!, authViewModel)
+        DescriptionSection(provider = provider!!)
         StatsSection(provider = provider!!)
       }
 }
@@ -119,11 +118,26 @@ fun ProfileHeader(
     provider: Provider,
     authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory)
 ) {
+
+  var fullName by remember { mutableStateOf("") }
+  var companyName by remember { mutableStateOf("") }
+  var service by remember { mutableStateOf("") }
+  var phone by remember { mutableStateOf("") }
+  var location by remember { mutableStateOf("") }
+
+  LaunchedEffect(provider) {
+    fullName = provider.name
+    companyName = provider.companyName
+    service = Services.format(provider.service)
+    phone = provider.phone
+    location = provider.location.name
+  }
+
   Row(modifier = Modifier.fillMaxWidth()) {
     Column(
         modifier =
             Modifier.background(colorScheme.primaryContainer)
-                .height(400.dp)
+                .wrapContentHeight()
                 .padding(8.dp)
                 .weight(1f),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -168,7 +182,7 @@ fun ProfileHeader(
           Spacer(modifier = Modifier.height(40.dp))
 
           Text(
-              text = provider.name,
+              text = fullName,
               modifier = Modifier.testTag("professionalName"),
               color = colorScheme.onBackground,
               fontSize = 24.sp,
@@ -240,34 +254,54 @@ fun ProfileHeader(
           Column {
             TitleText("Company name", testTag = "companyNameTitle")
             BodyText(
-                provider.companyName.ifEmpty { "Not provided" }.replaceFirstChar { it.uppercase() },
+                companyName.ifEmpty { "Not provided" }.replaceFirstChar { it.uppercase() },
                 testTag = "companyName",
                 maxLines = 2)
           }
 
           Column {
             TitleText("Profession", testTag = "serviceTitle")
-            BodyText(
-                Services.format(provider.service).ifEmpty { "Not provided" },
-                testTag = "service",
-                maxLines = 1)
+            BodyText(service.ifEmpty { "Not provided" }, testTag = "service", maxLines = 1)
           }
 
           Column {
             TitleText("Phone number", testTag = "phoneNumberTitle")
-            BodyText(
-                provider.phone.ifEmpty { "Not provided" }, testTag = "phoneNumber", maxLines = 1)
+            BodyText(phone.ifEmpty { "Not provided" }, testTag = "phoneNumber", maxLines = 1)
           }
 
           Column {
             TitleText("Location", testTag = "locationTitle")
-            BodyText(
-                provider.location.name.ifEmpty { "Not provided" },
-                testTag = "location",
-                maxLines = 3)
+            BodyText(location.ifEmpty { "Not provided" }, testTag = "location", maxLines = 3)
           }
         }
   }
+}
+
+@Composable
+fun DescriptionSection(provider: Provider) {
+
+  var description by remember { mutableStateOf("") }
+
+  LaunchedEffect(provider) { description = provider.description }
+  Column(
+      modifier =
+          Modifier.fillMaxWidth()
+              .wrapContentHeight()
+              .background(colorScheme.primary)
+              .padding(16.dp)
+              .testTag("descriptionSection"),
+      horizontalAlignment = Alignment.Start) {
+        Column {
+          Text(
+              "Description",
+              fontSize = 40.sp,
+              color = colorScheme.onPrimary,
+              fontWeight = FontWeight.Bold,
+              maxLines = 7,
+              overflow = TextOverflow.Ellipsis)
+          Text(description, fontSize = 15.sp, color = colorScheme.onPrimary, maxLines = 7, overflow = TextOverflow.Ellipsis)
+        }
+      }
 }
 
 /**
@@ -278,6 +312,14 @@ fun ProfileHeader(
  */
 @Composable
 fun StatsSection(provider: Provider) {
+
+  var rating by remember { mutableStateOf("") }
+  var popular by remember { mutableStateOf("") }
+
+  LaunchedEffect(provider) {
+    rating = provider.rating.toString()
+    popular = provider.popular.toString()
+  }
   Column(
       modifier =
           Modifier.fillMaxWidth()
@@ -289,7 +331,7 @@ fun StatsSection(provider: Provider) {
         Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
           Column(horizontalAlignment = Alignment.Start) {
             Text(
-                provider.rating.toString(),
+                rating,
                 fontSize = 40.sp,
                 color = colorScheme.onPrimary,
                 fontWeight = FontWeight.Bold)
@@ -297,7 +339,7 @@ fun StatsSection(provider: Provider) {
           }
           Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
-                provider.popular.toString().replaceFirstChar {
+                popular.replaceFirstChar {
                   if (it.isLowerCase()) it.uppercase() else it.toString()
                 },
                 fontSize = 40.sp,
@@ -323,13 +365,14 @@ fun StatsSection(provider: Provider) {
  */
 @Composable
 fun LanguageList(provider: Provider) {
+
   var showAll by remember {
     mutableStateOf(false)
   } // State to toggle between showing 3 items or all
 
   Column(horizontalAlignment = Alignment.Start) {
     if (provider.languages.isEmpty()) {
-      Text("Not provided")
+      Text("Not provided", color = colorScheme.error)
     } else {
       LazyColumn(
           modifier =

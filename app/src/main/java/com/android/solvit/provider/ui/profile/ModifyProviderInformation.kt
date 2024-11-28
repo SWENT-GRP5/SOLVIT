@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.*
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -28,6 +29,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -153,7 +155,21 @@ fun ModifyInput(
 
   var newLanguage by remember { mutableStateOf(provider.languages) }
 
-  val allIsGood = okNewName && okNewCompanyName && okNewPhoneNumber && okNewLocation
+  var newDescription by remember { mutableStateOf(provider.description) }
+  val okNewDescription = newDescription.isNotBlank()
+
+  val allIsGood =
+      okNewName && okNewCompanyName && okNewPhoneNumber && okNewLocation && okNewDescription
+
+  LaunchedEffect(provider) {
+    newName = provider.name
+    newCompanyName = provider.companyName
+    newService = provider.service
+    newPhoneNumber = provider.phone
+    selectedLocation = provider.location
+    newLanguage = provider.languages
+    newDescription = provider.description
+  }
 
   CustomOutlinedTextField(
       value = newName,
@@ -199,7 +215,8 @@ fun ModifyInput(
       leadingIconDescription = "Phone Number Icon",
       testTag = "newPhoneNumberInputField",
       errorMessage = "Your phone number name must have at least 7 characters",
-      errorTestTag = "newPhoneNumberErrorMessage")
+      errorTestTag = "newPhoneNumberErrorMessage",
+      maxLines = 1)
 
   Spacer(modifier = Modifier.height(10.dp))
 
@@ -231,6 +248,23 @@ fun ModifyInput(
 
   Spacer(modifier = Modifier.height(10.dp))
 
+  CustomOutlinedTextField(
+      value = newDescription,
+      onValueChange = { newDescription = it },
+      label = "Description",
+      placeholder = "Enter your new description",
+      isValueOk = okNewDescription,
+      leadingIcon = Icons.Default.Info,
+      leadingIconDescription = "Description Icon",
+      testTag = "newDescriptionInputField",
+      errorMessage = "Your description name must not be empty",
+      errorTestTag = "newDescriptionErrorMessage",
+      height = 200.dp,
+      textAlign = TextAlign.Start,
+      maxLines = 7)
+
+  Spacer(modifier = Modifier.height(10.dp))
+
   Button(
       onClick = {
         if (allIsGood) {
@@ -241,7 +275,8 @@ fun ModifyInput(
                   service = newService,
                   phone = newPhoneNumber,
                   location = selectedLocation ?: provider.location,
-                  languages = newLanguage)
+                  languages = newLanguage,
+                  description = newDescription)
 
           listProviderViewModel.updateProvider(provider = updatedProvider)
 
@@ -272,6 +307,7 @@ fun ModifyInput(
                           25.dp,
                       )),
       colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)) {
+        Icons.Default.AccountCircle
         Text(
             "Save !",
             color = colorScheme.onPrimary,
@@ -320,6 +356,8 @@ fun ServiceDropdownMenu(selectedService: Services, onServiceSelected: (Services)
                     containerColor = colorScheme.background,
                     unfocusedIndicatorColor = colorScheme.secondary,
                     focusedIndicatorColor = colorScheme.secondary,
+                    focusedTrailingIconColor = colorScheme.onSurfaceVariant,
+                    unfocusedTrailingIconColor = colorScheme.onSurfaceVariant
                 ),
             modifier =
                 Modifier.fillMaxWidth()
@@ -375,10 +413,18 @@ fun LanguageDropdownMenu(
             label = { Text("Select languages") },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             colors =
-                TextFieldDefaults.textFieldColors(
+                TextFieldDefaults.outlinedTextFieldColors(
                     containerColor = colorScheme.background,
-                    unfocusedIndicatorColor = colorScheme.secondary,
-                    focusedIndicatorColor = colorScheme.secondary,
+                    focusedTextColor = colorScheme.onBackground,
+                    unfocusedTextColor =
+                    if (selectedLanguages.isEmpty()) colorScheme.error
+                    else colorScheme.onBackground,
+                    focusedBorderColor = if (selectedLanguages.isEmpty()) colorScheme.error else colorScheme.primary,
+                    unfocusedBorderColor =
+                    when {
+                        selectedLanguages.isEmpty() -> colorScheme.error
+                        else -> colorScheme.error
+                    },
                 ),
             modifier =
                 Modifier.menuAnchor()
