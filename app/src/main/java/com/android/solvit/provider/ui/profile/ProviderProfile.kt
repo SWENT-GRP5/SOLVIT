@@ -33,6 +33,7 @@ import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -62,6 +63,15 @@ import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
 
+/**
+ * A composable function that displays the provider's profile screen. It includes the profile header
+ * and the statistics section. It also ensures that the provider's data is updated from Firebase
+ * each time the screen is launched.
+ *
+ * @param listProviderViewModel The ViewModel managing the list of providers.
+ * @param authViewModel The ViewModel managing authentication.
+ * @param navigationActions Actions for navigating between screens.
+ */
 @SuppressLint("SourceLockedOrientationActivity")
 @Composable
 fun ProviderProfileScreen(
@@ -70,6 +80,7 @@ fun ProviderProfileScreen(
     authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory),
     navigationActions: NavigationActions
 ) {
+  LaunchedEffect(Unit) { listProviderViewModel.getProviders() }
   val context = LocalContext.current
   DisposableEffect(Unit) {
     val activity = context as? ComponentActivity
@@ -78,18 +89,30 @@ fun ProviderProfileScreen(
   }
   val user = authViewModel.user.collectAsState()
   val userId = user.value?.uid ?: "-1"
-  val provider =
-      listProviderViewModel.providersList.collectAsState().value.find { it.uid == userId } ?: return
+  val providers = listProviderViewModel.providersList.collectAsState()
+  val provider by remember { mutableStateOf(providers.value.firstOrNull { it.uid == userId }) }
+  if (provider == null) {
+    return
+  }
+
   Column(
       modifier =
           Modifier.fillMaxSize()
               .background(colorScheme.background)
               .verticalScroll(rememberScrollState())) {
-        ProfileHeader(navigationActions, provider, authViewModel)
-        StatsSection(provider = provider)
+        ProfileHeader(navigationActions, provider!!, authViewModel)
+        StatsSection(provider = provider!!)
       }
 }
 
+/**
+ * A composable function that displays the profile header for the provider. It includes the profile
+ * picture, name, and other basic information.
+ *
+ * @param navigationActions Actions for navigating between screens.
+ * @param provider The provider whose profile is being displayed.
+ * @param authViewModel The ViewModel managing authentication.
+ */
 @Composable
 fun ProfileHeader(
     navigationActions: NavigationActions,
@@ -247,6 +270,12 @@ fun ProfileHeader(
   }
 }
 
+/**
+ * A composable function that displays the statistics section for a provider. It shows the
+ * provider's average rating, popularity status, and the languages they support.
+ *
+ * @param provider The provider whose statistics are to be displayed.
+ */
 @Composable
 fun StatsSection(provider: Provider) {
   Column(
@@ -286,6 +315,12 @@ fun StatsSection(provider: Provider) {
       }
 }
 
+/**
+ * A composable function that displays a list of languages for a provider. It shows either all
+ * languages or only the first three, with an option to toggle between them.
+ *
+ * @param provider The provider whose languages are to be displayed.
+ */
 @Composable
 fun LanguageList(provider: Provider) {
   var showAll by remember {

@@ -291,6 +291,12 @@ fun ModifyInput(
       modifier = Modifier.padding(top = 4.dp).fillMaxWidth())
 }
 
+/**
+ * A composable function that displays a dropdown menu for selecting a service.
+ *
+ * @param selectedService The currently selected service.
+ * @param onServiceSelected Callback invoked when a new service is selected.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ServiceDropdownMenu(selectedService: Services, onServiceSelected: (Services) -> Unit) {
@@ -341,6 +347,13 @@ fun ServiceDropdownMenu(selectedService: Services, onServiceSelected: (Services)
       }
 }
 
+/**
+ * A composable function that displays a dropdown menu for selecting multiple languages.
+ *
+ * @param selectedLanguages The list of currently selected languages.
+ * @param onLanguageSelected Callback invoked when a language is selected or deselected.
+ * @param modifier Modifier to be applied to the dropdown menu.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LanguageDropdownMenu(
