@@ -117,8 +117,8 @@ fun ServiceBookingScreen(
     onDispose { activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED }
   }
 
-  val user = authViewModel.user.collectAsState().value ?: return
-  val role = user.role
+  val user = authViewModel.user.collectAsState().value
+  val role = user?.role ?: "seeker"
 
   val request by requestViewModel.selectedRequest.collectAsState()
   if (request == null) {
