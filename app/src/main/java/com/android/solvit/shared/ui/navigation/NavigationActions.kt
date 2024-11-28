@@ -28,6 +28,7 @@ object Route {
   const val PROVIDER_PROFILE = "Provider Profile"
   const val MY_JOBS = "My Jobs"
   const val BOOKING_DETAILS = "Booking Details"
+  const val NOTIFICATIONS = "Notifications Screen"
 }
 
 object Screen {
@@ -47,6 +48,7 @@ object Screen {
   const val INBOX = "Inbox Screen"
   const val CHAT = "Chat Room Screen"
   const val REVIEW_SCREEN = "Review Screen"
+  const val EDIT_PREFERENCES = "Edit Preferences"
 }
 
 data class TopLevelDestination(val route: String, val icon: ImageVector, val textId: String)

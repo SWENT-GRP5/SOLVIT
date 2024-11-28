@@ -94,18 +94,29 @@ class SeekerProfileViewModel(
   }
 
   fun addUserPreference(userId: String, preference: String) {
+    val updatedPreferences = _userPreferences.value.toMutableList()
+    if (!updatedPreferences.contains(preference)) {
+      updatedPreferences.add(preference)
+      _userPreferences.value = updatedPreferences // Update the state optimistically
+    }
+    // Perform the addition from Firestore
     repository.addUserPreference(
         userId = userId,
         preference = preference,
-        onSuccess = { getUserPreferences(userId) }, // Refresh preferences after adding
+        onSuccess = { Log.d("SeekerProfileViewModel", "Preference added successfully") },
         onFailure = { Log.e("SeekerProfileViewModel", "Failed to add preference") })
   }
 
   fun deleteUserPreference(userId: String, preference: String) {
+    // Optimistically remove the preference from the local state
+    val updatedPreferences = _userPreferences.value.toMutableList()
+    updatedPreferences.remove(preference)
+    _userPreferences.value = updatedPreferences
+    // Perform the deletion from Firestore
     repository.deleteUserPreference(
         userId = userId,
         preference = preference,
-        onSuccess = { getUserPreferences(userId) }, // Refresh preferences after deletion
+        onSuccess = { Log.d("SeekerProfileViewModel", "Preference deleted successfully") },
         onFailure = { Log.e("SeekerProfileViewModel", "Failed to delete preference") })
   }
 
