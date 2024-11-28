@@ -49,6 +49,7 @@ import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -117,6 +118,14 @@ fun ServiceBookingScreen(
     val activity = context as? ComponentActivity
     activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
     onDispose { activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED }
+  }
+
+  val isReadyToNavigate by chatViewModel.isReadyToNavigate.collectAsState()
+  LaunchedEffect(isReadyToNavigate) {
+    if (isReadyToNavigate) {
+      navigationActions.navigateTo(Screen.CHAT)
+      chatViewModel.resetIsReadyToNavigate()
+    }
   }
 
   val user by authViewModel.user.collectAsState()
@@ -491,13 +500,7 @@ fun EditAndChatButton(
         modifier = Modifier.weight(1f).padding(horizontal = 8.dp).testTag("chat_button"),
         contentAlignment = Alignment.Center) {
           Button(
-              onClick = {
-                chatViewModel.setReceiverUid(provider.uid)
-                chatViewModel.setReceiver(provider)
-                chatViewModel.setReceiver(provider)
-                chatViewModel.initChat(currentUserId)
-                navigationActions.navigateTo(Screen.CHAT)
-              },
+              onClick = { chatViewModel.prepareForChat(currentUserId, provider.uid, provider) },
               colors =
                   ButtonDefaults.buttonColors(
                       containerColor = colorScheme.primary, contentColor = colorScheme.onPrimary),

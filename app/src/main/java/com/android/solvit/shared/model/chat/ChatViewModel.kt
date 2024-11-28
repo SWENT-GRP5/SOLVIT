@@ -5,6 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.database.FirebaseDatabase
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -59,15 +61,19 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
     _receiver.value = receiver
   }
 
-  fun initChat(currentUserUid: String?) {
-    receiverUid?.let {
-      repository.initChat(
-          currentUserUid,
-          onSuccess = { uid ->
-            Log.e("initChat", "onSuccess $uid")
-            chatId = uid
-          },
-          it)
+  suspend fun initChat(currentUserUid: String?): String? {
+      //Suspend Coroutine to make sure that get conversation is not called before init chat
+    return suspendCoroutine { continuation ->
+      receiverUid?.let {
+        repository.initChat(
+            currentUserUid,
+            onSuccess = { uid ->
+              Log.e("initChat", "onSuccess $uid")
+              chatId = uid
+              continuation.resume(uid)
+            },
+            it)
+      }
     }
   }
 
