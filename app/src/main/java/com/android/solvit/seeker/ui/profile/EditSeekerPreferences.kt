@@ -159,7 +159,7 @@ fun SuggestionsGrid2(
 @Composable
 fun SuggestionButton2(text: String, isSelected: Boolean, onClick: () -> Unit) {
   // Update color based on selection state
-  val backgroundColor = if (isSelected) colorScheme.secondary else Color(0xFFF1F1F1)
+  val backgroundColor = if (isSelected) colorScheme.secondary else colorScheme.background
   val contentColor = if (isSelected) colorScheme.onSecondary else Color.Black
 
   Surface(
