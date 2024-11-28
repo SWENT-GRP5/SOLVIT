@@ -148,10 +148,15 @@ class ChatAssistantViewModel() : ViewModel() {
    */
   fun generateMessage(input: String, onResponse: (String) -> Unit) {
     val prompt = buildPrompt(input)
-    Log.d("ChatAssistantViewModel", "Prompt: $prompt")
+    Log.d("ChatAssistantViewModel", "model prompted")
     viewModelScope.launch {
-      val response = model.generateContent(prompt)
-      response.text?.let { onResponse(it) }
+      try {
+        val response = model.generateContent(prompt)
+        response.text?.let { onResponse(it) }
+      } catch (e: Exception) {
+        Log.e("ChatAssistantViewModel", "Error generating response", e)
+        onResponse("Sorry, I couldn't process that.")
+      }
     }
   }
 }
