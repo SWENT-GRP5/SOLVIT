@@ -34,8 +34,10 @@ fun CreateRequestScreen(
     navigationActions: NavigationActions,
     requestViewModel: ServiceRequestViewModel =
         viewModel(factory = ServiceRequestViewModel.Factory),
-    notificationViewModel: NotificationsViewModel= viewModel(factory = NotificationsViewModel.Factory),
-    listProviderViewModel: ListProviderViewModel= viewModel(factory = ListProviderViewModel.Factory),
+    notificationViewModel: NotificationsViewModel =
+        viewModel(factory = NotificationsViewModel.Factory),
+    listProviderViewModel: ListProviderViewModel =
+        viewModel(factory = ListProviderViewModel.Factory),
     locationViewModel: LocationViewModel = viewModel(factory = LocationViewModel.Factory)
 ) {
   // Lock Orientation to Portrait
@@ -119,7 +121,8 @@ fun CreateRequestScreen(
             } else {
               requestViewModel.saveServiceRequest(serviceRequest)
             }
-            notificationViewModel.sendNotifications(serviceRequest,listProviderViewModel.providersList.value)
+            notificationViewModel.sendNotifications(
+                serviceRequest, listProviderViewModel.providersList.value)
             navigationActions.goBack()
             return@RequestScreen
           } catch (_: NumberFormatException) {}

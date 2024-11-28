@@ -29,7 +29,7 @@ object Route {
   const val PROVIDER_PROFILE = "Provider Profile"
   const val MY_JOBS = "My Jobs"
   const val BOOKING_DETAILS = "Booking Details"
-  const val NOTIFICATIONS= "Notifications Screen"
+  const val NOTIFICATIONS = "Notifications Screen"
 }
 
 object Screen {
@@ -47,8 +47,7 @@ object Screen {
   const val PROVIDER_MODIFY_PROFILE = "Modify Provider Profile"
   const val PREFERENCES = "Preferences"
   const val EDIT_PREFERENCES = "Edit Preferences"
-  const val NOTIFICATIONS= "Notifications Screen"
-
+  const val NOTIFICATIONS = "Notifications Screen"
 }
 
 data class TopLevelDestination(val route: String, val icon: ImageVector, val textId: String)
@@ -68,10 +67,11 @@ object TopLevelDestinations {
   val MYJOBS =
       TopLevelDestination(
           route = Route.MY_JOBS, icon = Icons.Outlined.CheckCircle, textId = "My Jobs")
-    val NOTIFICATIONS=
-        TopLevelDestination(
-            route = Route.NOTIFICATIONS, icon = Icons.Outlined.Notifications, textId = "Notifications")
-
+  val NOTIFICATIONS =
+      TopLevelDestination(
+          route = Route.NOTIFICATIONS,
+          icon = Icons.Outlined.Notifications,
+          textId = "Notifications")
 
   ////////////////////////////////// SEEKER //////////////////////////////////
   val SERVICES =
@@ -110,8 +110,7 @@ val LIST_TOP_LEVEL_DESTINATION_PROVIDER =
         TopLevelDestinations.MAP_OF_SEEKERS,
         TopLevelDestinations.CALENDAR,
         TopLevelDestinations.PROFESSIONAL_PROFILE,
-        TopLevelDestinations.NOTIFICATIONS
-    )
+        TopLevelDestinations.NOTIFICATIONS)
 
 open class NavigationActions(
     private val navController: NavController,

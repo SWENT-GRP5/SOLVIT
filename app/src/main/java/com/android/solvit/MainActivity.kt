@@ -89,7 +89,8 @@ fun SolvitApp() {
       viewModel<PackageProposalViewModel>(factory = PackageProposalViewModel.Factory)
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
-  val notificationViewModel =viewModel<NotificationsViewModel>(factory=NotificationsViewModel.Factory)
+  val notificationViewModel =
+      viewModel<NotificationsViewModel>(factory = NotificationsViewModel.Factory)
   if (!userRegistered.value) {
     SharedUI(
         authViewModel,
@@ -112,7 +113,11 @@ fun SolvitApp() {
               notificationViewModel)
       "provider" ->
           ProviderUI(
-              authViewModel, listProviderViewModel, seekerProfileViewModel,notificationViewModel,locationViewModel)
+              authViewModel,
+              listProviderViewModel,
+              seekerProfileViewModel,
+              notificationViewModel,
+              locationViewModel)
     }
   }
 }
@@ -184,7 +189,12 @@ fun SeekerUI(
     }
     composable(Route.MESSAGE) { MessageScreen() }
     composable(Route.CREATE_REQUEST) {
-      CreateRequestScreen(navigationActions, serviceRequestViewModel,notificationViewModel,listProviderViewModel, locationViewModel)
+      CreateRequestScreen(
+          navigationActions,
+          serviceRequestViewModel,
+          notificationViewModel,
+          listProviderViewModel,
+          locationViewModel)
     }
     composable(Route.REQUESTS_OVERVIEW) {
       RequestsOverviewScreen(navigationActions, serviceRequestViewModel, authViewModel)
@@ -236,11 +246,8 @@ fun ProviderUI(
       ModifyProviderInformationScreen(
           listProviderViewModel, authViewModel, locationViewModel, navigationActions)
     }
-    composable(Route.NOTIFICATIONS){
-          user?.let { it1 ->
-              NotificationScreen(notificationViewModel,
-                  it1.uid,navigationActions)
-          }
-      }
+    composable(Route.NOTIFICATIONS) {
+      user?.let { it1 -> NotificationScreen(notificationViewModel, it1.uid, navigationActions) }
+    }
   }
 }
