@@ -2,7 +2,6 @@ package com.android.solvit.provider.ui.profile
 
 import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -94,7 +93,7 @@ fun ProviderProfileScreen(
   val providers = listProviderViewModel.providersList.collectAsState()
   val provider by remember { mutableStateOf(providers.value.firstOrNull { it.uid == userId }) }
 
-    //Log.d("ProviderProfileScreen", "Provider: $provider")
+  // Log.d("ProviderProfileScreen", "Provider: $provider")
 
   Column(
       modifier =

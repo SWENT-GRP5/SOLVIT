@@ -3,7 +3,6 @@ package com.android.solvit.shared.model.provider
 import android.net.Uri
 import android.util.Log
 import com.android.solvit.shared.model.map.Location
-import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.model.utils.uploadImageToStorage
 import com.google.android.gms.tasks.Task
@@ -63,21 +62,21 @@ class ProviderRepositoryFirestore(
     FirebaseAuth.getInstance().addAuthStateListener { onSuccess() }
   }
 
-    override fun addListenerOnProviders(
-        onSuccess: (List<Provider>) -> Unit,
-        onFailure: (Exception) -> Unit
-    ) {
-        db.collection(collectionPath).addSnapshotListener { value, error ->
-            if (error != null) {
-                onFailure(error)
-                return@addSnapshotListener
-            }
-            if (value != null) {
-                val providers = value.mapNotNull { convertDoc(it) }
-                onSuccess(providers)
-            }
-        }
+  override fun addListenerOnProviders(
+      onSuccess: (List<Provider>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    db.collection(collectionPath).addSnapshotListener { value, error ->
+      if (error != null) {
+        onFailure(error)
+        return@addSnapshotListener
+      }
+      if (value != null) {
+        val providers = value.mapNotNull { convertDoc(it) }
+        onSuccess(providers)
+      }
     }
+  }
 
   override fun getNewUid(): String {
     return db.collection(collectionPath).document().id

@@ -45,11 +45,11 @@ class ListProviderViewModel(private val repository: ProviderRepository) : ViewMo
 
   init {
     repository.init { getProviders() }
-      repository.addListenerOnProviders(
-          onSuccess = { _providersList.value = it },
-          onFailure = { exception ->
-              Log.e("ListProviderViewModel", "Error listening List of Providers", exception)
-          })
+    repository.addListenerOnProviders(
+        onSuccess = { _providersList.value = it },
+        onFailure = { exception ->
+          Log.e("ListProviderViewModel", "Error listening List of Providers", exception)
+        })
   }
 
   fun getNewUid(): String {
