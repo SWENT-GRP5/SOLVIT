@@ -39,7 +39,8 @@ data class AIAnalysisResponse(
 
 // A Retrofit Instance
 fun createAIAnalysisService(): AIAnalysisService {
-    val apiKey = BuildConfig.OPENAI_API_KEY // Replace with your actual API key
+
+    val apiKey = BuildConfig.OPENAI_API_KEY
 
     // Add Authorization header to each request
     val client = OkHttpClient.Builder()
