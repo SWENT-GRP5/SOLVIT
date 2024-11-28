@@ -71,12 +71,6 @@ fun CreateRequestScreen(
   var showMultiStepDialog by remember { mutableStateOf(false) }
   var currentStep by remember { mutableStateOf(1) }
   var selectedImages by remember { mutableStateOf<List<Uri>>(emptyList()) }
-  var isAnalyzing by remember { mutableStateOf(false) }
-  var analysisComplete by remember { mutableStateOf(false) }
-  var imageUrls by remember { mutableStateOf<List<String>?>(null) }
-  var uploadError by remember { mutableStateOf<String?>(null) }
-  var analysisError by remember { mutableStateOf<String?>(null) }
-  var analysisResult by remember { mutableStateOf<Triple<String, String, String>?>(null) }
 
   // AI Assistant Dialog
   if (showAIAssistantDialog) {

@@ -23,7 +23,10 @@ suspend fun analyzeImagesWithOkHttp(imageUrls: List<String>): Triple<String, Str
         Then, describe the issue depicted in the images and provide a suitable title and type.
     """.trimIndent()
 
-    val userMessage = imageUrls.joinToString("\n") { "Image URL: $it" }
+    // Generate a user message for each image URL
+    val userMessage = imageUrls.joinToString("\n") { url ->
+        "Analyze the image available at: $url"
+    }
 
     val jsonPayload = JSONObject().apply {
         put("model", "gpt-4o-mini")
@@ -39,7 +42,7 @@ suspend fun analyzeImagesWithOkHttp(imageUrls: List<String>): Triple<String, Str
                 put(
                     JSONObject().apply {
                         put("role", "user")
-                        put("content", "Analyze the following images:\n$userMessage")
+                        put("content", userMessage)
                     }
                 )
             }
