@@ -1,11 +1,17 @@
 package com.android.solvit.shared.model.provider
 
 import android.net.Uri
+import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.service.Services
 
 interface ProviderRepository {
 
   fun init(onSuccess: () -> Unit)
+
+    fun addListenerOnProviders(
+        onSuccess: (List<Provider>) -> Unit,
+        onFailure: (Exception) -> Unit
+    )
 
   fun getNewUid(): String
 
