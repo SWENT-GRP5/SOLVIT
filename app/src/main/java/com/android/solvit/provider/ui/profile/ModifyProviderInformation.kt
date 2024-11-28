@@ -129,7 +129,8 @@ fun ModifyInput(
   val context = LocalContext.current
 
   var newName by remember { mutableStateOf(provider.name) }
-  val okNewName = newName.length >= 2 && newName.isNotBlank()
+    val nameRegex = Regex("^[a-zA-ZÀ-ÿ '-]{2,50}$")
+  val okNewName = nameRegex.matches(newName)
 
   var newCompanyName by remember { mutableStateOf(provider.companyName) }
   val okNewCompanyName = newCompanyName.length >= 2 && newCompanyName.isNotBlank()
@@ -137,10 +138,8 @@ fun ModifyInput(
   var newService by remember { mutableStateOf(provider.service) }
 
   var newPhoneNumber by remember { mutableStateOf(provider.phone) }
-  val okNewPhoneNumber =
-      newPhoneNumber.isNotBlank() &&
-          newPhoneNumber.all { it.isDigit() || it == '+' } &&
-          newPhoneNumber.length > 6
+    val phoneRegex = Regex("^\\+?[0-9]{10,15}$")
+    val okNewPhoneNumber = phoneRegex.matches(newPhoneNumber)
 
   val newLocation by remember { mutableStateOf(provider.location.name) }
 
@@ -156,7 +155,8 @@ fun ModifyInput(
   var newLanguage by remember { mutableStateOf(provider.languages) }
 
   var newDescription by remember { mutableStateOf(provider.description) }
-  val okNewDescription = newDescription.isNotBlank()
+    val regexDescription = Regex("^[a-zA-ZÀ-ÿ0-9 ,.!?-]{1,500}$")
+  val okNewDescription = regexDescription.matches(newDescription)
 
   val allIsGood =
       okNewName && okNewCompanyName && okNewPhoneNumber && okNewLocation && okNewDescription

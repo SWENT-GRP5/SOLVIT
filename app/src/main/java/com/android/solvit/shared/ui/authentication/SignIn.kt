@@ -339,11 +339,8 @@ fun FormSection(
 ) {
   val isFormComplete = email.isNotBlank() && password.isNotBlank()
   val passwordLengthComplete = password.length >= 6
-  val goodFormEmail =
-      email.isNotBlank() &&
-          Patterns.EMAIL_ADDRESS.matcher(email).matches() &&
-          email.contains(".") &&
-          email.contains("@")
+    val emailRegex = Regex("^[\\w.-]+@[\\w.-]+\\.[a-zA-Z]{2,}$")
+    val goodFormEmail = emailRegex.matches(email)
 
   CustomOutlinedTextField(
       value = email,

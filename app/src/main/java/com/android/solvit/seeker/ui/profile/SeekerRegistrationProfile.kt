@@ -100,10 +100,16 @@ fun SeekerRegistrationScreen(
 
   val backgroundColor = colorScheme.background
 
-  val isFullNameOk = fullName.isNotBlank() && fullName.length > 2
+    val fullNameRegex = Regex("^[a-zA-Z]+ [a-zA-Z]+\$")
+    val isFullNameOk = fullNameRegex.matches(fullName)
+
   val isUserNameOk = userName.isNotBlank() && userName.length > 2
-  val isPhoneOk = phone.isNotBlank() && phone.all { it.isDigit() || it == '+' } && phone.length > 6
+
+    val phoneRegex = Regex("^[+]?[0-9]{6,}$")
+    val isPhoneOk = phoneRegex.matches(phone)
+
   val isLocationOK = selectedLocation != null
+
   val isFormComplete = isFullNameOk && isUserNameOk && isPhoneOk && isLocationOK
 
   Scaffold(
