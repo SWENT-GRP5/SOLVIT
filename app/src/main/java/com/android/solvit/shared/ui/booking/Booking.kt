@@ -378,8 +378,10 @@ fun ServiceBookingScreen(
 
               val address = request!!.location
               // Google Map showing the service location
-              val mapPosition = rememberCameraPositionState {
-                position =
+              val mapPosition = rememberCameraPositionState()
+
+              LaunchedEffect(address) {
+                mapPosition.position =
                     com.google.android.gms.maps.model.CameraPosition.fromLatLngZoom(
                         LatLng(address?.latitude ?: 0.0, address?.longitude ?: 0.0), 15f)
               }

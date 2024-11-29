@@ -23,6 +23,7 @@ import com.android.solvit.shared.model.authentication.AuthRep
 import com.android.solvit.shared.model.authentication.AuthRepository
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.authentication.User
+import com.android.solvit.shared.model.chat.ChatAssistantViewModel
 import com.android.solvit.shared.model.chat.ChatRepository
 import com.android.solvit.shared.model.chat.ChatRepositoryFirestore
 import com.android.solvit.shared.model.chat.ChatViewModel
@@ -73,6 +74,7 @@ class EndToEndTestCreateProfile {
   private lateinit var reviewViewModel: ReviewViewModel
   private lateinit var chatViewModel: ChatViewModel
   private lateinit var packageProposalViewModel: PackageProposalViewModel
+  private lateinit var chatAssistantViewModel: ChatAssistantViewModel
   private lateinit var notificationsViewModel: NotificationsViewModel
 
   private lateinit var authRepository: AuthRepository
@@ -127,6 +129,7 @@ class EndToEndTestCreateProfile {
     reviewViewModel = ReviewViewModel(reviewRepository)
     packageProposalViewModel = PackageProposalViewModel(packageProposalRepositoryFirestore)
     chatViewModel = ChatViewModel(chatRepository)
+    chatAssistantViewModel = ChatAssistantViewModel()
     notificationsViewModel = NotificationsViewModel(notificationsRepository)
 
     `when`(locationRepository.search(ArgumentMatchers.anyString(), anyOrNull(), anyOrNull()))
@@ -174,8 +177,10 @@ class EndToEndTestCreateProfile {
                   serviceRequestViewModel,
                   reviewViewModel,
                   locationViewModel,
-                  notificationsViewModel,
-                  chatViewModel)
+                  chatViewModel,
+                  chatAssistantViewModel,
+                  notificationsViewModel)
+
           "provider" ->
               ProviderUI(
                   authViewModel,
@@ -184,7 +189,10 @@ class EndToEndTestCreateProfile {
                   seekerProfileViewModel,
                   chatViewModel,
                   notificationsViewModel,
-                  locationViewModel)
+                  locationViewModel,
+                  chatAssistantViewModel)
+
+
         }
       }
     }

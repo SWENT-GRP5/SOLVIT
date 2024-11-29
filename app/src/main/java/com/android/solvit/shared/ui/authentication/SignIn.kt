@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
-import android.util.Patterns
 import android.widget.Toast
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -338,11 +337,8 @@ fun FormSection(
 ) {
   val isFormComplete = email.isNotBlank() && password.isNotBlank()
   val passwordLengthComplete = password.length >= 6
-  val goodFormEmail =
-      email.isNotBlank() &&
-          Patterns.EMAIL_ADDRESS.matcher(email).matches() &&
-          email.contains(".") &&
-          email.contains("@")
+  val emailRegex = Regex("^[\\w.-]+@[\\w.-]+\\.[a-zA-Z]{2,}$")
+  val goodFormEmail = emailRegex.matches(email)
 
   CustomOutlinedTextField(
       value = email,
@@ -593,13 +589,14 @@ fun CustomOutlinedTextField(
     label: String? = null,
     placeholder: String,
     isValueOk: Boolean,
-    modifier: Modifier = Modifier,
+    @SuppressLint("ModifierParameter") modifier: Modifier = Modifier,
     errorMessage: String = "Invalid input",
     leadingIcon: ImageVector? = null,
     leadingIconDescription: String = "",
     testTag: String,
     errorTestTag: String = "errorMessage",
-    maxLines: Int = Int.MAX_VALUE
+    maxLines: Int = 1,
+    textAlign: TextAlign = TextAlign.Unspecified
 ) {
   // State to track if the field has been "visited" (focused and then unfocused)
   var hasBeenFocused by remember { mutableStateOf(false) }
@@ -617,7 +614,6 @@ fun CustomOutlinedTextField(
           }
         },
         label = { if (label != null) Text(label, color = colorScheme.onBackground) },
-        singleLine = true,
         placeholder = { Text(placeholder) },
         leadingIcon = {
           if (leadingIcon != null) {
@@ -628,7 +624,8 @@ fun CustomOutlinedTextField(
           }
         },
         modifier =
-            Modifier.fillMaxWidth().testTag(testTag).onFocusChanged { focusState ->
+            Modifier.fillMaxWidth().testTag(testTag).wrapContentHeight().onFocusChanged { focusState
+              ->
               // Mark the field as "visited" as soon as it loses focus after an entry
               if (!focusState.isFocused && value.isNotBlank()) {
                 hasBeenFocused = true
@@ -649,7 +646,8 @@ fun CustomOutlinedTextField(
                       isValueOk -> colorScheme.secondary
                       else -> colorScheme.error
                     }),
-        maxLines = maxLines)
+        maxLines = maxLines,
+        textStyle = TextStyle(textAlign = textAlign, color = colorScheme.onBackground))
 
     // Display the error message if the field has been visited, input is incorrect, and focus was
     // lost after typing

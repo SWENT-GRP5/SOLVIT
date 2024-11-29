@@ -39,6 +39,7 @@ import com.android.solvit.seeker.ui.review.CreateReviewScreen
 import com.android.solvit.seeker.ui.service.ServicesScreen
 import com.android.solvit.shared.model.NotificationsViewModel
 import com.android.solvit.shared.model.authentication.AuthViewModel
+import com.android.solvit.shared.model.chat.ChatAssistantViewModel
 import com.android.solvit.shared.model.chat.ChatViewModel
 import com.android.solvit.shared.model.map.LocationViewModel
 import com.android.solvit.shared.model.packages.PackageProposalViewModel
@@ -86,6 +87,8 @@ fun SolvitApp() {
   val packageProposalViewModel =
       viewModel<PackageProposalViewModel>(factory = PackageProposalViewModel.Factory)
   val chatViewModel = viewModel<ChatViewModel>(factory = ChatViewModel.Factory)
+  val chatAssistantViewModel =
+      viewModel<ChatAssistantViewModel>(factory = ChatAssistantViewModel.Factory)
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
   val notificationViewModel =
@@ -107,8 +110,9 @@ fun SolvitApp() {
               serviceRequestViewModel,
               reviewViewModel,
               locationViewModel,
-              notificationViewModel,
-              chatViewModel)
+              chatViewModel,
+              chatAssistantViewModel,
+              notificationViewModel)
       "provider" ->
           ProviderUI(
               authViewModel,
@@ -117,7 +121,8 @@ fun SolvitApp() {
               seekerProfileViewModel,
               chatViewModel,
               notificationViewModel,
-              locationViewModel)
+              locationViewModel,
+              chatAssistantViewModel)
     }
   }
 }
@@ -162,8 +167,10 @@ fun SeekerUI(
     serviceRequestViewModel: ServiceRequestViewModel,
     reviewViewModel: ReviewViewModel,
     locationViewModel: LocationViewModel,
+    chatViewModel: ChatViewModel,
+    chatAssistantViewModel: ChatAssistantViewModel,
     notificationViewModel: NotificationsViewModel,
-    chatViewModel: ChatViewModel
+
 ) {
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
@@ -201,7 +208,8 @@ fun SeekerUI(
         ChatScreen(
             navigationActions = navigationActions,
             chatViewModel = chatViewModel,
-            authViewModel = authViewModel)
+            authViewModel = authViewModel,
+            chatAssistantViewModel = chatAssistantViewModel)
       }
     }
 
@@ -257,6 +265,7 @@ fun ProviderUI(
     chatViewModel: ChatViewModel,
     notificationViewModel: NotificationsViewModel,
     locationViewModel: LocationViewModel,
+    chatAssistantViewModel: ChatAssistantViewModel
 ) {
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
@@ -298,7 +307,8 @@ fun ProviderUI(
         ChatScreen(
             navigationActions = navigationActions,
             chatViewModel = chatViewModel,
-            authViewModel = authViewModel)
+            authViewModel = authViewModel,
+            chatAssistantViewModel = chatAssistantViewModel)
       }
     }
 

@@ -27,6 +27,7 @@ android {
     }
 
     val mapsApiKey: String = localProperties.getProperty("MAPS_API_KEY") ?: ""
+    val googleAiApiKey: String = localProperties.getProperty("GOOGLE_AI_API_KEY") ?: ""
 
     defaultConfig {
         applicationId = "com.android.solvit"
@@ -35,6 +36,8 @@ android {
         versionCode = 1
         versionName = "1.0"
         manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
+        buildConfigField("String", "GOOGLE_AI_API_KEY", "\"$googleAiApiKey\"")
+
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -260,6 +263,9 @@ dependencies {
 
     // ----------       Load Images from URL     ------------
     implementation("io.coil-kt:coil-compose:2.4.0")
+
+    // ----------       Google AI     ------------
+    implementation("com.google.ai.client.generativeai:generativeai:0.7.0")
 }
 
 tasks.withType<Test> {
