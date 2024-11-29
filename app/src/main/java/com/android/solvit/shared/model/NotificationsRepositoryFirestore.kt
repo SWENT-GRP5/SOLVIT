@@ -10,15 +10,34 @@ import com.google.firebase.auth.auth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 
+/**
+ * NotificationsRepositoryFirestore is a repository class responsible for managing notifications for
+ * providers stored in Firestore. It implements the NotificationsRepository interface to handle
+ * operations like fetching, sending, and processing notifications for providers.
+ *
+ * @param db An instance of FirebaseFirestore used to interact with Firestore.
+ */
 class NotificationsRepositoryFirestore(private val db: FirebaseFirestore) :
     NotificationsRepository {
 
+  // Collection path for notifications in Firestore
   private val collectionPath = "notifications"
 
+  /**
+   * Generates a new unique ID for a notification document.
+   *
+   * @return A new unique document ID.
+   */
   override fun getNewUid(): String {
     return db.collection(collectionPath).document().id
   }
 
+  /**
+   * Initializes the repository by adding an authentication state listener to Firebase Auth. When
+   * the user is authenticated, the provided `onSuccess` callback is triggered.
+   *
+   * @param onSuccess Callback to execute when a user is authenticated.
+   */
   override fun init(onSuccess: () -> Unit) {
     Firebase.auth.addAuthStateListener {
       if (it.currentUser != null) {
@@ -27,6 +46,13 @@ class NotificationsRepositoryFirestore(private val db: FirebaseFirestore) :
     }
   }
 
+  /**
+   * Retrieves notifications for a specific provider from Firestore.
+   *
+   * @param providerId The ID of the provider whose notifications are to be retrieved.
+   * @param onSuccess Callback to execute with the list of notifications on success.
+   * @param onFailure Callback to execute if there is an error retrieving the notifications.
+   */
   override fun getNotification(
       providerId: String,
       onSuccess: (List<Notification>) -> Unit,
@@ -39,6 +65,7 @@ class NotificationsRepositoryFirestore(private val db: FirebaseFirestore) :
         .get()
         .addOnCompleteListener { task ->
           if (task.isSuccessful) {
+            // Convert Firestore documents to Notification objects
             val notif =
                 task.result?.mapNotNull { document -> documentToNotif(document) } ?: emptyList()
             onSuccess(notif)
@@ -51,6 +78,12 @@ class NotificationsRepositoryFirestore(private val db: FirebaseFirestore) :
         }
   }
 
+  /**
+   * Converts a Firestore document snapshot into a Notification object.
+   *
+   * @param document The Firestore document snapshot to convert.
+   * @return A Notification object or null if the document could not be converted.
+   */
   fun documentToNotif(document: DocumentSnapshot): Notification? {
     return try {
       val id = document.id
@@ -61,7 +94,7 @@ class NotificationsRepositoryFirestore(private val db: FirebaseFirestore) :
       val isRead = document.getBoolean("isRead") ?: false
 
       Notification(
-          id = id,
+          uid = id,
           providerId = providerId,
           title = title,
           message = message,
@@ -73,6 +106,13 @@ class NotificationsRepositoryFirestore(private val db: FirebaseFirestore) :
     }
   }
 
+  /**
+   * Executes a Firestore operation and handles success or failure.
+   *
+   * @param task The Firestore task to perform.
+   * @param onSuccess Callback to execute on successful operation.
+   * @param onFailure Callback to execute if the operation fails.
+   */
   private fun performFirestoreOperation(
       task: Task<Void>,
       onSuccess: () -> Unit,
@@ -90,6 +130,14 @@ class NotificationsRepositoryFirestore(private val db: FirebaseFirestore) :
     }
   }
 
+  /**
+   * Sends notifications to providers whose services match the type of a service request.
+   *
+   * @param serviceRequest The service request for which notifications are to be sent.
+   * @param providers The list of providers to check for matching services.
+   * @param onSuccess Callback to execute after all notifications are processed successfully.
+   * @param onFailure Callback to execute if an error occurs while sending notifications.
+   */
   override fun sendNotification(
       serviceRequest: ServiceRequest,
       providers: List<Provider>,
@@ -97,7 +145,7 @@ class NotificationsRepositoryFirestore(private val db: FirebaseFirestore) :
       onFailure: (Exception) -> Unit
   ) {
     try {
-      // Filter providers whose service matches the service request type
+      // Filter providers whose services match the service request type
       val matchingProviders =
           providers.filter { provider -> provider.service == serviceRequest.type }
       val matchingProvidersSize = matchingProviders.size
@@ -107,7 +155,7 @@ class NotificationsRepositoryFirestore(private val db: FirebaseFirestore) :
       matchingProviders.forEach { provider ->
         val notification =
             Notification(
-                id = getNewUid(),
+                uid = getNewUid(),
                 providerId = provider.uid,
                 title = "New Service Request for ${serviceRequest.type}",
                 message =
@@ -115,16 +163,18 @@ class NotificationsRepositoryFirestore(private val db: FirebaseFirestore) :
                 timestamp = Timestamp.now(),
                 isRead = false)
 
-        // Save the notification for the provider (can call save function here)
+        // Save the notification for the provider
         performFirestoreOperation(
-            db.collection(collectionPath).document(notification.id).set(notification),
+            db.collection(collectionPath).document(notification.uid).set(notification),
             onSuccess,
             onFailure)
       }
 
-      onSuccess() // Notify success after processing all providers
+      // Notify success after processing all providers
+      onSuccess()
     } catch (exception: Exception) {
-      onFailure(exception) // Notify failure in case of error
+      // Notify failure in case of error
+      onFailure(exception)
     }
   }
 }

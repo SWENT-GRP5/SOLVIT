@@ -9,6 +9,7 @@ import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.MailOutline
 import androidx.compose.material.icons.outlined.Menu
+import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavController
 
@@ -49,6 +50,7 @@ object Screen {
   const val CHAT = "Chat Room Screen"
   const val REVIEW_SCREEN = "Review Screen"
   const val EDIT_PREFERENCES = "Edit Preferences"
+  const val NOTIFICATIONS = "Notifications Screen"
 }
 
 data class TopLevelDestination(val route: String, val icon: ImageVector, val textId: String)
@@ -72,6 +74,11 @@ object TopLevelDestinations {
   val MYJOBS =
       TopLevelDestination(
           route = Route.MY_JOBS, icon = Icons.Outlined.CheckCircle, textId = "My Jobs")
+  val NOTIFICATIONS =
+      TopLevelDestination(
+          route = Route.NOTIFICATIONS,
+          icon = Icons.Outlined.Notifications,
+          textId = "Notifications")
 
   ////////////////////////////////// SEEKER //////////////////////////////////
   val SERVICES =
@@ -108,7 +115,8 @@ val LIST_TOP_LEVEL_DESTINATION_PROVIDER =
         TopLevelDestinations.MAP_OF_SEEKERS,
         TopLevelDestinations.MESSAGES,
         TopLevelDestinations.CALENDAR,
-        TopLevelDestinations.PROFESSIONAL_PROFILE)
+        TopLevelDestinations.PROFESSIONAL_PROFILE,
+        TopLevelDestinations.NOTIFICATIONS)
 
 open class NavigationActions(
     private val navController: NavController,

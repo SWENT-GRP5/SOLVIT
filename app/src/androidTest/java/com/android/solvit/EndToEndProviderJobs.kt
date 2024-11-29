@@ -11,6 +11,9 @@ import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.seeker.model.profile.UserRepository
 import com.android.solvit.seeker.model.profile.UserRepositoryFirestore
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
+import com.android.solvit.shared.model.NotificationsRepository
+import com.android.solvit.shared.model.NotificationsRepositoryFirestore
+import com.android.solvit.shared.model.NotificationsViewModel
 import com.android.solvit.shared.model.authentication.AuthRepository
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.chat.ChatAssistantViewModel
@@ -69,6 +72,8 @@ class EndToEndProviderJobs {
   private lateinit var chatAssistantViewModel: ChatAssistantViewModel
 
   private lateinit var chatRepository: ChatRepository
+  private lateinit var notificationsViewModel: NotificationsViewModel
+
   private lateinit var authRepository: AuthRepository
   private lateinit var seekerRepository: UserRepository
   private lateinit var providerRepository: ProviderRepository
@@ -76,6 +81,7 @@ class EndToEndProviderJobs {
   private lateinit var serviceRequestRepository: ServiceRequestRepository
   private lateinit var reviewRepository: ReviewRepository
   private lateinit var packageProposalRepository: PackageProposalRepository
+  private lateinit var notificationsRepository: NotificationsRepository
 
   private val email = "test@provider.ch"
   private val password = "password"
@@ -124,6 +130,7 @@ class EndToEndProviderJobs {
     reviewRepository = ReviewRepositoryFirestore(firestore)
     packageProposalRepository = PackageProposalRepositoryFirestore(firestore)
     chatRepository = ChatRepositoryFirestore(database)
+    notificationsRepository = NotificationsRepositoryFirestore(firestore)
 
     authViewModel = AuthViewModel(authRepository)
     seekerProfileViewModel = SeekerProfileViewModel(seekerRepository)
@@ -134,6 +141,7 @@ class EndToEndProviderJobs {
     packageProposalViewModel = PackageProposalViewModel(packageProposalRepository)
     chatViewModel = ChatViewModel(chatRepository)
     chatAssistantViewModel = ChatAssistantViewModel()
+    notificationsViewModel = NotificationsViewModel(notificationsRepository)
 
     `when`(locationRepository.search(ArgumentMatchers.anyString(), anyOrNull(), anyOrNull()))
         .thenAnswer { invocation ->
@@ -187,7 +195,8 @@ class EndToEndProviderJobs {
                   reviewViewModel,
                   locationViewModel,
                   chatViewModel,
-                  chatAssistantViewModel)
+                  chatAssistantViewModel,
+                  notificationsViewModel)
           "provider" ->
               ProviderUI(
                   authViewModel,
@@ -195,6 +204,7 @@ class EndToEndProviderJobs {
                   serviceRequestViewModel,
                   seekerProfileViewModel,
                   chatViewModel,
+                  notificationsViewModel,
                   locationViewModel,
                   chatAssistantViewModel)
         }
