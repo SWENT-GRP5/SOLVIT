@@ -180,7 +180,6 @@ class EndToEndTestCreateProfile {
                   chatViewModel,
                   chatAssistantViewModel,
                   notificationsViewModel)
-
           "provider" ->
               ProviderUI(
                   authViewModel,
@@ -191,8 +190,6 @@ class EndToEndTestCreateProfile {
                   notificationsViewModel,
                   locationViewModel,
                   chatAssistantViewModel)
-
-
         }
       }
     }

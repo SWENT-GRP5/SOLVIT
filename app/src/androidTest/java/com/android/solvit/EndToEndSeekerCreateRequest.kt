@@ -189,10 +189,9 @@ class EndToEndSeekerCreateRequest {
                   serviceRequestViewModel,
                   seekerProfileViewModel,
                   chatViewModel,
-                 notificationsViewModel,
+                  notificationsViewModel,
                   locationViewModel,
                   chatAssistantViewModel)
-
         }
       }
     }

@@ -170,7 +170,6 @@ fun SeekerUI(
     chatViewModel: ChatViewModel,
     chatAssistantViewModel: ChatAssistantViewModel,
     notificationViewModel: NotificationsViewModel,
-
 ) {
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
