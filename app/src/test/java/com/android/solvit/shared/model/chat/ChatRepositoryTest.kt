@@ -1,8 +1,6 @@
 package com.android.solvit.shared.model.chat
 
 import com.google.android.gms.tasks.Task
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
@@ -21,7 +19,6 @@ import org.mockito.kotlin.verify
 
 class ChatRepositoryTest {
   private lateinit var mockFirebaseDatabase: FirebaseDatabase
-  private lateinit var mockAuth: FirebaseAuth
   private lateinit var chatRepository: ChatRepository
   private lateinit var mockDatabaseReference: DatabaseReference
   private lateinit var mockDataSnapshot: DataSnapshot
@@ -31,9 +28,8 @@ class ChatRepositoryTest {
     MockitoAnnotations.openMocks(this)
     mockFirebaseDatabase = mock(FirebaseDatabase::class.java)
     mockDatabaseReference = mock(DatabaseReference::class.java)
-    mockAuth = mock(FirebaseAuth::class.java)
     mockDataSnapshot = mock(DataSnapshot::class.java)
-    chatRepository = ChatRepositoryFirestore(mockAuth, mockFirebaseDatabase)
+    chatRepository = ChatRepositoryFirestore(mockFirebaseDatabase)
 
     `when`(mockFirebaseDatabase.getReference(any())).thenReturn(mockDatabaseReference)
   }
@@ -45,10 +41,6 @@ class ChatRepositoryTest {
 
     val mockChildSnapshot = mock(DataSnapshot::class.java)
     val mockUserSnapshot = mock(DataSnapshot::class.java)
-
-    val mockCurrentUser = mock(FirebaseUser::class.java)
-    `when`(mockAuth.currentUser).thenReturn(mockCurrentUser)
-    `when`(mockCurrentUser.uid).thenReturn("currentUserUid")
 
     // Mocking child snapshot structure to simulate Firebase data
     `when`(mockChildSnapshot.child("users")).thenReturn(mockUserSnapshot)
@@ -65,10 +57,6 @@ class ChatRepositoryTest {
     val mockSetValueTask = mock(Task::class.java) as Task<Void>
     `when`(mockUsersReference.setValue(any())).thenReturn(mockSetValueTask)
 
-    // Capture the AuthStateListener
-    val authStateListenerCaptor = argumentCaptor<FirebaseAuth.AuthStateListener>()
-    doNothing().`when`(mockAuth).addAuthStateListener(authStateListenerCaptor.capture())
-
     // Set up DataSnapshot to return children
     `when`(mockDataSnapshot.hasChildren()).thenReturn(true)
     `when`(mockDataSnapshot.children).thenReturn(listOf(mockChildSnapshot).asIterable())
@@ -81,10 +69,12 @@ class ChatRepositoryTest {
 
     var resultChatId: String? = null
 
-    chatRepository.initChat(onSuccess = { chatid -> resultChatId = chatid }, receiverUid)
+    chatRepository.initChat(
+        "currentUserUid",
+        onSuccess = { chatid -> resultChatId = chatid },
+        onFailure = {},
+        receiverUid)
 
-    verify(mockAuth).addAuthStateListener(authStateListenerCaptor.capture())
-    authStateListenerCaptor.firstValue.onAuthStateChanged(mockAuth)
     verify(mockDatabaseReference).addListenerForSingleValueEvent(valueEventListenerCaptor.capture())
     valueEventListenerCaptor.firstValue.onDataChange(mockDataSnapshot)
 
@@ -97,10 +87,6 @@ class ChatRepositoryTest {
     val receiverUid = "receiverUid"
     val chatId = "newChatId"
 
-    val mockCurrentUser = mock(FirebaseUser::class.java)
-    `when`(mockAuth.currentUser).thenReturn(mockCurrentUser)
-    `when`(mockCurrentUser.uid).thenReturn("currentUserUid")
-
     val mockPushReference = mock(DatabaseReference::class.java)
     `when`(mockDatabaseReference.child(any())).thenReturn(mockPushReference)
     `when`(mockDatabaseReference.push()).thenReturn(mockPushReference)
@@ -110,10 +96,6 @@ class ChatRepositoryTest {
     `when`(mockPushReference.child("users")).thenReturn(mockUsersReference)
     val mockSetValueTask = mock(Task::class.java) as Task<Void>
     `when`(mockUsersReference.setValue(any())).thenReturn(mockSetValueTask)
-
-    // Capture the AuthStateListener
-    val authStateListenerCaptor = argumentCaptor<FirebaseAuth.AuthStateListener>()
-    doNothing().`when`(mockAuth).addAuthStateListener(authStateListenerCaptor.capture())
 
     // Make sure that data Snapshot has no children
     `when`(mockDataSnapshot.hasChildren()).thenReturn(false)
@@ -126,10 +108,12 @@ class ChatRepositoryTest {
 
     var resultChatId: String? = null
 
-    chatRepository.initChat(onSuccess = { chatid -> resultChatId = chatid }, receiverUid)
+    chatRepository.initChat(
+        "currentUserUid",
+        onSuccess = { chatid -> resultChatId = chatid },
+        onFailure = {},
+        receiverUid)
 
-    verify(mockAuth).addAuthStateListener(authStateListenerCaptor.capture())
-    authStateListenerCaptor.firstValue.onAuthStateChanged(mockAuth)
     verify(mockDatabaseReference).addListenerForSingleValueEvent(valueEventListenerCaptor.capture())
     valueEventListenerCaptor.firstValue.onDataChange(mockDataSnapshot)
 
@@ -207,9 +191,6 @@ class ChatRepositoryTest {
   fun `listenForLastMessages Test`() {
     // Set up the current user
     val currentUserUid = "currentUserUid"
-    val mockCurrentUser = mock(FirebaseUser::class.java)
-    `when`(mockAuth.currentUser).thenReturn(mockCurrentUser)
-    `when`(mockCurrentUser.uid).thenReturn(currentUserUid)
 
     // Mock the database reference for "messages"
     val mockChatNodeReference = mock(DatabaseReference::class.java)
@@ -229,6 +210,26 @@ class ChatRepositoryTest {
 
     `when`(mockChatRoomSnapshot1.key).thenReturn(chatRoomId1)
     `when`(mockChatRoomSnapshot2.key).thenReturn(chatRoomId2)
+
+    val mockUsersSnapshot1 = mock(DataSnapshot::class.java)
+    val mockUsersSnapshot2 = mock(DataSnapshot::class.java)
+
+    `when`(mockChatRoomSnapshot1.child("users")).thenReturn(mockUsersSnapshot1)
+    `when`(mockChatRoomSnapshot2.child("users")).thenReturn(mockUsersSnapshot2)
+
+    // Mock children of "users"
+    val child1 = mock(DataSnapshot::class.java)
+    val child2 = mock(DataSnapshot::class.java)
+    `when`(child1.key).thenReturn("user1Uid")
+    `when`(child2.key).thenReturn("currentUserUid")
+    `when`(mockUsersSnapshot1.children).thenReturn(listOf(child1, child2))
+
+    // Mock children of "users"
+    val child3 = mock(DataSnapshot::class.java)
+    val child4 = mock(DataSnapshot::class.java)
+    `when`(child3.key).thenReturn("user2Uid")
+    `when`(child4.key).thenReturn("currentUserUid")
+    `when`(mockUsersSnapshot2.children).thenReturn(listOf(child3, child3))
 
     val mockChatRoomsDataSnapshot = mock(DataSnapshot::class.java)
     `when`(mockChatRoomsDataSnapshot.hasChildren()).thenReturn(true)
@@ -273,11 +274,12 @@ class ChatRepositoryTest {
         .addListenerForSingleValueEvent(chatsValueEventListenerCaptor2.capture())
 
     // Prepare the result variables
-    var receivedMessages: List<ChatMessage.TextMessage>? = null
+    var receivedMessages: Map<String?, ChatMessage.TextMessage>? = null
     var onFailureCalled = false
 
     // Call the method under test
     chatRepository.listenForLastMessages(
+        "currentUserUid",
         onSuccess = { messages -> receivedMessages = messages },
         onFailure = { onFailureCalled = true })
 
@@ -316,7 +318,10 @@ class ChatRepositoryTest {
     chatsValueEventListenerCaptor2.firstValue.onDataChange(mockLastMessageSnapshot2)
 
     // Verify that the received messages are as expected
-    val expectedMessages = listOf(lastMessage2, lastMessage1) // Sorted by timestamp descending
+    val expectedMessages =
+        mapOf(
+            "user1Uid" to lastMessage1,
+            "user2Uid" to lastMessage2) // Sorted by timestamp descending
     assertEquals(expectedMessages, receivedMessages)
     assertEquals(false, onFailureCalled)
   }

@@ -37,4 +37,18 @@ class LocationViewModelTest {
     locationViewModel.setQuery("EPFL")
     Mockito.verify(locationRepository).search(eq("EPFL"), any(), any())
   }
+
+  @Test
+  fun clearSetsQueryToEmptyString() {
+    locationViewModel.setQuery("EPFL")
+    locationViewModel.clear()
+    assert(locationViewModel.query.value.isEmpty())
+  }
+
+  @Test
+  fun clearSetsLocationSuggestionsToEmptyList() {
+    locationViewModel.setQuery("EPFL")
+    locationViewModel.clear()
+    assert(locationViewModel.locationSuggestions.value.isEmpty())
+  }
 }

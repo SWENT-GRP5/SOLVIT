@@ -8,21 +8,20 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.navigation.NavController
 import com.android.solvit.shared.model.authentication.AuthRep
 import com.android.solvit.shared.model.authentication.AuthViewModel
-import com.android.solvit.shared.model.authentication.User
+import com.android.solvit.shared.model.chat.ChatAssistantViewModel
 import com.android.solvit.shared.model.chat.ChatMessage
 import com.android.solvit.shared.model.chat.ChatRepository
 import com.android.solvit.shared.model.chat.ChatViewModel
 import com.android.solvit.shared.model.chat.MESSAGE_STATUS
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import junit.framework.TestCase.assertEquals
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.mockito.Mockito.doAnswer
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
 import org.mockito.kotlin.any
-import org.mockito.kotlin.whenever
 
 class ChatScreenTest {
   private lateinit var chatRepository: ChatRepository
@@ -32,6 +31,7 @@ class ChatScreenTest {
 
   private lateinit var chatViewModel: ChatViewModel
   private lateinit var authViewModel: AuthViewModel
+  private lateinit var chatAssistantViewModel: ChatAssistantViewModel
   @get:Rule val composeTestRule = createComposeRule()
 
   // Create a list of TextMessage instances
@@ -77,21 +77,18 @@ class ChatScreenTest {
     authRep = mock(AuthRep::class.java)
     chatViewModel = ChatViewModel(chatRepository)
     authViewModel = AuthViewModel(authRep)
+    chatAssistantViewModel = ChatAssistantViewModel()
 
     navController = mock(NavController::class.java)
     navigationActions = NavigationActions(navController)
 
     var message: ChatMessage.TextMessage? = null
 
-    // Mock the `init` method
-    doAnswer { invocation ->
-          val callback = invocation.getArgument<(User?) -> Unit>(0)
-          callback(User(uid = "user_alice", role = "Provider")) // Pass the mocked user
-        }
-        .whenever(authRep)
-        .init(any())
-
-    `when`(chatRepository.listenForLastMessages(any(), any())).thenAnswer {
+    `when`(chatRepository.initChat(any(), any(), any(), any())).thenAnswer {
+      val onSuccess = it.getArgument<(String) -> Unit>(1)
+      onSuccess("chatId") // Simulate success
+    }
+    `when`(chatRepository.listenForLastMessages(any(), any(), any())).thenAnswer {
       println("je suis rentré")
       val onSuccess = it.getArgument<(List<ChatMessage.TextMessage>) -> Unit>(0)
       onSuccess(listOf(testMessages[0])) // Simulate success
@@ -102,20 +99,17 @@ class ChatScreenTest {
       val onSuccess = it.getArgument<(List<ChatMessage.TextMessage>) -> Unit>(1)
       onSuccess(testMessages) // Simulate success
     }
-    `when`(chatRepository.initChat(any(), any())).thenAnswer {
-      val onSuccess = it.getArgument<(String) -> Unit>(0)
-      onSuccess("chatId") // Simulate success
-    }
   }
 
   // Check that All Components are display and messages are retrieved correctly
   @Test
-  fun AllComponentsAreDisplayed() {
-
-    composeTestRule.setContent { ChatScreen(navigationActions, chatViewModel, authViewModel) }
+  fun AllComponentsAreDisplayed() = runTest {
+    composeTestRule.setContent {
+      ChatScreen(navigationActions, chatViewModel, authViewModel, chatAssistantViewModel)
+    }
 
     chatViewModel.setReceiverUid("1234")
-    chatViewModel.initChat()
+    chatViewModel.initChat("123")
     chatViewModel.getConversation()
 
     composeTestRule.onNodeWithTag("ChatHeader").assertIsDisplayed()

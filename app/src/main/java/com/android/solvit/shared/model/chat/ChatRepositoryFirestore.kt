@@ -1,74 +1,81 @@
 package com.android.solvit.shared.model.chat
 
 import android.util.Log
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.getValue
 
-class ChatRepositoryFirestore(private val auth: FirebaseAuth, private val db: FirebaseDatabase) :
-    ChatRepository {
+class ChatRepositoryFirestore(private val db: FirebaseDatabase) : ChatRepository {
 
   // Name of collection containing messages
   private val collectionPath = "messages"
 
   // Create a chat room in the collection or retrive if a conversation already exits between user
   // sender and receiver
-  override fun initChat(onSuccess: (String) -> Unit, receiverUid: String) {
+  override fun initChat(
+      currentUserUid: String?,
+      onSuccess: (String) -> Unit,
+      onFailure: () -> Unit,
+      receiverUid: String
+  ) {
     // Check that sender (current authenticated user is not null)
-    auth.addAuthStateListener {
-      if (it.currentUser != null) {
-        val databaseRef = db.getReference(collectionPath)
-        Log.e("InitChat", "$databaseRef")
-        try {
-          databaseRef.addListenerForSingleValueEvent(
-              object : ValueEventListener {
-                override fun onDataChange(p0: DataSnapshot) {
-                  Log.e("initChat", "entered there")
-                  var chatId: String? = null
-                  // p0 represent all chat Rooms
-                  if (p0.hasChildren()) {
-                    // Chat Snapshot represents a specific chatRoom
-                    for (chatSnapshot in p0.children) {
-                      // Each Chat Room is linked to 2 users
-                      val chatUsers = chatSnapshot.child("users").value as? Map<*, *>
-                      // Check if there is an already existing chat room between 2 users
-                      if (chatUsers?.containsKey(receiverUid) == true &&
-                          chatUsers.containsKey(auth.currentUser?.uid)) {
-                        Log.e("initChat", "soy Aqui")
-                        chatId = chatSnapshot.key
-                        if (chatId != null) {
-                          onSuccess(chatId)
-                        }
-                        break
+    if (currentUserUid != null) {
+      val databaseRef = db.getReference(collectionPath)
+      Log.e("InitChat", "$databaseRef")
+      try {
+        databaseRef.addListenerForSingleValueEvent(
+            object : ValueEventListener {
+              override fun onDataChange(p0: DataSnapshot) {
+                Log.e("initChat", "entered there")
+                var chatId: String? = null
+                // p0 represent all chat Rooms
+                if (p0.hasChildren()) {
+                  // Chat Snapshot represents a specific chatRoom
+                  for (chatSnapshot in p0.children) {
+                    // Each Chat Room is linked to 2 users
+                    val chatUsers = chatSnapshot.child("users").value as? Map<*, *>
+                    // Check if there is an already existing chat room between 2 users
+                    if (chatUsers?.containsKey(receiverUid) == true &&
+                        chatUsers.containsKey(currentUserUid)) {
+                      Log.e("initChat", "soy Aqui")
+                      chatId = chatSnapshot.key
+                      if (chatId != null) {
+                        onSuccess(chatId)
                       }
-                    }
-                  }
-                  // In case it doesn't exist, we create a new chatRoom
-                  if (chatId == null) {
-                    chatId = databaseRef.push().key
-                    val chatData =
-                        mapOf(
-                            (auth.currentUser?.uid ?: "") to true,
-                            receiverUid to true,
-                        )
-                    databaseRef.child(chatId ?: "").child("users").setValue(chatData)
-                    if (chatId != null) {
-                      onSuccess(chatId)
+                      break
                     }
                   }
                 }
+                // In case it doesn't exist, we create a new chatRoom
+                if (chatId == null) {
+                  chatId = databaseRef.push().key
+                  val chatData =
+                      mapOf(
+                          (currentUserUid) to true,
+                          receiverUid to true,
+                      )
+                  databaseRef.child(chatId ?: "").child("users").setValue(chatData)
+                  if (chatId != null) {
+                    onSuccess(chatId)
+                  } else {
+                    onFailure()
+                  }
+                }
+              }
 
-                override fun onCancelled(p0: DatabaseError) {
-                  TODO("Not yet implemented")
-                }
-              })
-        } catch (e: Exception) {
-          Log.e("Init Chat Failed", "$e")
-        }
+              override fun onCancelled(p0: DatabaseError) {
+                onFailure()
+                TODO("Not yet implemented")
+              }
+            })
+      } catch (e: Exception) {
+        onFailure()
+        Log.e("Init Chat Failed", "$e")
       }
+    } else {
+      onFailure()
     }
   }
 
@@ -124,14 +131,15 @@ class ChatRepositoryFirestore(private val auth: FirebaseAuth, private val db: Fi
   }
 
   override fun listenForLastMessages(
-      onSuccess: (List<ChatMessage.TextMessage>) -> Unit,
+      currentUserUid: String?,
+      onSuccess: (Map<String?, ChatMessage.TextMessage>) -> Unit,
       onFailure: () -> Unit
   ) {
     val chatNode = db.getReference(collectionPath)
-    val lastMessages = mutableListOf<ChatMessage.TextMessage>()
+    val lastMessages = mutableMapOf<String?, ChatMessage.TextMessage>()
 
     chatNode
-        .orderByChild("users/${auth.currentUser?.uid}")
+        .orderByChild("users/${currentUserUid}")
         .equalTo(true)
         .addListenerForSingleValueEvent(
             object : ValueEventListener {
@@ -142,22 +150,25 @@ class ChatRepositoryFirestore(private val auth: FirebaseAuth, private val db: Fi
                   var processedCount = 0
                   for (chatRoomsSnapshot in p0.children) {
                     val chatRoomId = chatRoomsSnapshot.key ?: continue
+                    // Retrieve the receiver Uid
+                    val usersSnapshots = chatRoomsSnapshot.child("users")
+                    val receiverUid =
+                        usersSnapshots.children.mapNotNull { it.key }.find { it != currentUserUid }
+
+                    // Retrieve the last Message in the Chat Room
                     getLastMessageForChatRoom(
                         chatRoomId,
                         onComplete = { chatMessage ->
+                          Log.e("add chatMessage to Last Message", "$chatMessage")
                           if (chatMessage != null) {
-                            Log.e("add chatMessage to Last Message", "$chatMessage")
-                            lastMessages.add(chatMessage)
-                            processedCount++
-                            // If we get All last messages
-                            if (processedCount == p0.children.count()) {
-                              val sortedMessages = lastMessages.sortedByDescending { it.timestamp }
-                              onSuccess(sortedMessages)
-                            }
-                            Log.e("lastMessages.add", "${lastMessages.toList()}")
-                          } else {
-                            Log.e("listenForLastMessages", "Chat Message is null")
+                            lastMessages[receiverUid] = chatMessage
                           }
+                          processedCount++
+                          // If we get All last messages
+                          if (processedCount == p0.children.count()) {
+                            onSuccess(lastMessages)
+                          }
+                          Log.e("lastMessages.add", "${lastMessages.toList()}")
                         })
                   }
                 } else {

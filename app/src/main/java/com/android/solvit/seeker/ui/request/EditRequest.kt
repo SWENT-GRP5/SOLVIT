@@ -37,7 +37,10 @@ fun EditRequestScreen(
   DisposableEffect(Unit) {
     val activity = localContext as? ComponentActivity
     activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-    onDispose { activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED }
+    onDispose {
+      locationViewModel.clear()
+      activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+    }
   }
   val request = requestViewModel.selectedRequest.collectAsState().value ?: return
   var title by remember { mutableStateOf(request.title) }

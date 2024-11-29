@@ -1,5 +1,7 @@
 package com.android.solvit.seeker.ui.request
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
@@ -12,11 +14,15 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.navigation.NavController
+import com.android.solvit.seeker.model.provider.ListProviderViewModel
+import com.android.solvit.shared.model.NotificationsRepository
+import com.android.solvit.shared.model.NotificationsViewModel
 import com.android.solvit.shared.model.authentication.AuthRep
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.map.LocationRepository
 import com.android.solvit.shared.model.map.LocationViewModel
+import com.android.solvit.shared.model.provider.ProviderRepository
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestRepository
 import com.android.solvit.shared.model.request.ServiceRequestStatus
@@ -44,6 +50,10 @@ class CreateRequestScreenTest {
   private lateinit var authViewModel: AuthViewModel
   private lateinit var navController: NavController
   private lateinit var navigationActions: NavigationActions
+  private lateinit var notificationsRepository: NotificationsRepository
+  private lateinit var notificationsViewModel: NotificationsViewModel
+  private lateinit var providerRepository: ProviderRepository
+  private lateinit var listProviderViewModel: ListProviderViewModel
 
   @get:Rule val composeTestRule = createComposeRule()
 
@@ -75,6 +85,10 @@ class CreateRequestScreenTest {
     authViewModel = AuthViewModel(authRepository)
     navController = Mockito.mock(NavController::class.java)
     navigationActions = NavigationActions(navController)
+    notificationsRepository = Mockito.mock(NotificationsRepository::class.java)
+    notificationsViewModel = NotificationsViewModel(notificationsRepository)
+    providerRepository = Mockito.mock(ProviderRepository::class.java)
+    listProviderViewModel = ListProviderViewModel(providerRepository)
 
     `when`(locationRepository.search(ArgumentMatchers.anyString(), anyOrNull(), anyOrNull()))
         .thenAnswer { invocation ->
@@ -99,7 +113,13 @@ class CreateRequestScreenTest {
   @Test
   fun displayAllComponents() {
     composeTestRule.setContent {
-      CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
+      CreateRequestScreen(
+          navigationActions,
+          serviceRequestViewModel,
+          authViewModel,
+          notificationsViewModel,
+          listProviderViewModel,
+          locationViewModel)
     }
 
     composeTestRule.onNodeWithTag("screenTitle").assertIsDisplayed()
@@ -120,7 +140,13 @@ class CreateRequestScreenTest {
   @Test
   fun doesNotSubmitWithInvalidDate() {
     composeTestRule.setContent {
-      CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
+      CreateRequestScreen(
+          navigationActions,
+          serviceRequestViewModel,
+          authViewModel,
+          notificationsViewModel,
+          listProviderViewModel,
+          locationViewModel)
     }
 
     composeTestRule.onNodeWithTag("inputRequestDate").performTextClearance()
@@ -133,7 +159,13 @@ class CreateRequestScreenTest {
   @Test
   fun locationMenuExpandsWithInput() {
     composeTestRule.setContent {
-      CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
+      CreateRequestScreen(
+          navigationActions,
+          serviceRequestViewModel,
+          authViewModel,
+          notificationsViewModel,
+          listProviderViewModel,
+          locationViewModel)
     }
 
     composeTestRule.onNodeWithTag("inputRequestAddress").performTextInput("USA")
@@ -148,7 +180,12 @@ class CreateRequestScreenTest {
   fun locationSelectionFromDropdown() {
     composeTestRule.setContent {
       CreateRequestScreen(
-          navigationActions, serviceRequestViewModel, locationViewModel, authViewModel)
+          navigationActions,
+          serviceRequestViewModel,
+          authViewModel,
+          notificationsViewModel,
+          listProviderViewModel,
+          locationViewModel)
     }
 
     composeTestRule.onNodeWithTag("inputRequestAddress").performTextInput("USA")
@@ -162,7 +199,13 @@ class CreateRequestScreenTest {
   @Test
   fun serviceTypeDropdown_showsFilteredResults() {
     composeTestRule.setContent {
-      CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
+      CreateRequestScreen(
+          navigationActions,
+          serviceRequestViewModel,
+          authViewModel,
+          notificationsViewModel,
+          listProviderViewModel,
+          locationViewModel)
     }
 
     composeTestRule.onNodeWithTag("inputServiceType").performTextInput("Plumber")
@@ -173,7 +216,13 @@ class CreateRequestScreenTest {
   @Test
   fun serviceTypeDropdown_closesOnSelection() {
     composeTestRule.setContent {
-      CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
+      CreateRequestScreen(
+          navigationActions,
+          serviceRequestViewModel,
+          authViewModel,
+          notificationsViewModel,
+          listProviderViewModel,
+          locationViewModel)
     }
 
     composeTestRule.onNodeWithTag("inputServiceType").performTextInput("Plumber")
@@ -184,7 +233,13 @@ class CreateRequestScreenTest {
   @Test
   fun serviceTypeDropdown_showsNoResultsMessage() {
     composeTestRule.setContent {
-      CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
+      CreateRequestScreen(
+          navigationActions,
+          serviceRequestViewModel,
+          authViewModel,
+          notificationsViewModel,
+          listProviderViewModel,
+          locationViewModel)
     }
 
     composeTestRule.onNodeWithTag("inputServiceType").performTextInput("NonExistentType")
@@ -194,7 +249,13 @@ class CreateRequestScreenTest {
   @Test
   fun serviceTypeDropdown_closesOnFocusLost() {
     composeTestRule.setContent {
-      CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
+      CreateRequestScreen(
+          navigationActions,
+          serviceRequestViewModel,
+          authViewModel,
+          notificationsViewModel,
+          listProviderViewModel,
+          locationViewModel)
     }
 
     composeTestRule.onNodeWithTag("inputServiceType").performTextInput("Plumbing")
@@ -205,12 +266,62 @@ class CreateRequestScreenTest {
   @Test
   fun doesNotSubmitWithInvalidTitle() {
     composeTestRule.setContent {
-      CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
+      CreateRequestScreen(
+          navigationActions,
+          serviceRequestViewModel,
+          authViewModel,
+          notificationsViewModel,
+          listProviderViewModel,
+          locationViewModel)
     }
 
     composeTestRule.onNodeWithTag("inputRequestTitle").performTextClearance()
     composeTestRule.onNodeWithTag("requestSubmit").performClick()
 
     Mockito.verify(serviceRequestRepository, never()).saveServiceRequest(any(), any(), any())
+  }
+
+  @Test
+  fun aiAssistantDialog_displaysCorrectlyAndCanBeDismissed() {
+    composeTestRule.setContent {
+      CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
+    }
+
+    // Check that the AI Assistant Dialog is displayed initially
+    composeTestRule.onNodeWithTag("aIAssistantDialog").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("aiAssistantHeaderRow").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("aiAssistantIcon").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("aiAssistantTitleBox").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("aiAssistantDescription").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("cancelButton").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("uploadPicturesButton").assertIsDisplayed()
+
+    composeTestRule.onNodeWithTag("cancelButton").performClick() // Dismiss the dialog
+
+    // Ensure the dialog is dismissed
+    composeTestRule.onNodeWithTag("aIAssistantDialog").assertDoesNotExist()
+    composeTestRule.onNodeWithTag("aiAssistantHeaderRow").assertDoesNotExist()
+    composeTestRule.onNodeWithTag("aiAssistantIcon").assertDoesNotExist()
+    composeTestRule.onNodeWithTag("aiAssistantTitleBox").assertDoesNotExist()
+    composeTestRule.onNodeWithTag("aiAssistantDescription").assertDoesNotExist()
+    composeTestRule.onNodeWithTag("cancelButton").assertDoesNotExist()
+  }
+
+  @Test
+  fun aiAssistantDialog_navigatesToImagePickerStep() {
+    composeTestRule.setContent {
+      CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
+    }
+
+    // Check that the AI Assistant Dialog is displayed initially
+    composeTestRule.onNodeWithTag("aIAssistantDialog").assertIsDisplayed()
+    composeTestRule
+        .onNodeWithTag("uploadPicturesButton")
+        .performClick() // Navigate to ImagePickerStep
+
+    // Ensure Image Picker Step is displayed
+    composeTestRule.onNodeWithTag("imagePickerStep").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("noImagesText").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("addImagesButton").assertIsDisplayed()
   }
 }

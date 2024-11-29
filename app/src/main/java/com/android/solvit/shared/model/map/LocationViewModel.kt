@@ -22,6 +22,11 @@ class LocationViewModel(private val repository: LocationRepository) : ViewModel(
         onFailure = { exception -> println("Error fetching locations: $exception") })
   }
 
+  fun clear() {
+    _query.value = ""
+    _locationSuggestions.value = emptyList()
+  }
+
   companion object {
     val Factory: ViewModelProvider.Factory = viewModelFactory {
       initializer {

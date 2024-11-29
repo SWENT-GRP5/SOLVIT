@@ -14,8 +14,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 class ListProviderViewModel(private val repository: ProviderRepository) : ViewModel() {
-  private val _uiState = MutableStateFlow<List<Provider>>(emptyList())
-  val providersList: StateFlow<List<Provider>> = _uiState
+  private val _providersList = MutableStateFlow<List<Provider>>(emptyList())
+  val providersList: StateFlow<List<Provider>> = _providersList
 
   private val _selectedService = MutableStateFlow<Services?>(null)
   val selectedService: StateFlow<Services?> = _selectedService
@@ -45,6 +45,11 @@ class ListProviderViewModel(private val repository: ProviderRepository) : ViewMo
 
   init {
     repository.init { getProviders() }
+    repository.addListenerOnProviders(
+        onSuccess = { _providersList.value = it },
+        onFailure = { exception ->
+          Log.e("ListProviderViewModel", "Error listening List of Providers", exception)
+        })
   }
 
   fun getNewUid(): String {
@@ -75,10 +80,14 @@ class ListProviderViewModel(private val repository: ProviderRepository) : ViewMo
     repository.getProviders(
         _selectedService.value,
         onSuccess = { providers ->
-          _uiState.value = providers
+          _providersList.value = providers
           _providersListFiltered.value = providers
         },
         onFailure = { Log.e("getProviders", "failed to get Providers") })
+  }
+
+  suspend fun fetchProviderById(uid: String): Provider? {
+    return repository.returnProvider(uid)
   }
 
   fun filterProviders(filter: (Provider) -> Boolean, filterField: String) {
@@ -86,7 +95,7 @@ class ListProviderViewModel(private val repository: ProviderRepository) : ViewMo
     activeFilters[filterField] = filter
     repository.filterProviders {
       _providersListFiltered.value =
-          _uiState.value.filter { provider ->
+          _providersList.value.filter { provider ->
             activeFilters.values.all { filterA -> filterA(provider) }
           }
     }
@@ -101,7 +110,7 @@ class ListProviderViewModel(private val repository: ProviderRepository) : ViewMo
   }
 
   fun applyFilters() {
-    _uiState.value = _providersListFiltered.value
+    _providersList.value = _providersListFiltered.value
   }
 
   fun refreshFilters() {

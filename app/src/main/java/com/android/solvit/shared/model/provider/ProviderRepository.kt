@@ -7,6 +7,8 @@ interface ProviderRepository {
 
   fun init(onSuccess: () -> Unit)
 
+  fun addListenerOnProviders(onSuccess: (List<Provider>) -> Unit, onFailure: (Exception) -> Unit)
+
   fun getNewUid(): String
 
   fun addProvider(
@@ -26,7 +28,9 @@ interface ProviderRepository {
       onFailure: (Exception) -> Unit
   )
 
+  fun filterProviders(filter: () -> Unit)
+
   fun getProvider(userId: String, onSuccess: (Provider?) -> Unit, onFailure: (Exception) -> Unit)
 
-  fun filterProviders(filter: () -> Unit)
+  suspend fun returnProvider(uid: String): Provider?
 }

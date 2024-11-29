@@ -6,6 +6,7 @@ import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.tasks.await
 
 open class UserRepositoryFirestore(private val db: FirebaseFirestore) : UserRepository {
 
@@ -37,6 +38,7 @@ open class UserRepositoryFirestore(private val db: FirebaseFirestore) : UserRepo
     db.collection(collectionPath).document(uid).get().addOnCompleteListener { document ->
       if (document.isSuccessful) {
 
+        Log.e("Repo", "${document.result}")
         val user = documentToUser(document.result)
         if (user != null) {
           onSuccess(user)
@@ -49,6 +51,24 @@ open class UserRepositoryFirestore(private val db: FirebaseFirestore) : UserRepo
           onFailure(e)
         }
       }
+    }
+  }
+
+  override suspend fun returnSeekerById(uid: String): SeekerProfile? {
+    return try {
+      val document = db.collection(collectionPath).document(uid).get().await()
+      Log.e("UserRepositoryFirestore", "$document")
+      val user = documentToUser(document)
+      if (user != null) {
+        Log.d("RepositoryFirestore", "User fetched successfully: $user")
+        user
+      } else {
+        Log.e("RepositoryFirestore", "User not found for uid: $uid")
+        null
+      }
+    } catch (e: Exception) {
+      Log.e("RepositoryFirestore", "Error fetching user by Id : $e")
+      null
     }
   }
 
@@ -132,7 +152,7 @@ open class UserRepositoryFirestore(private val db: FirebaseFirestore) : UserRepo
       onSuccess: (List<Location>) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    db.collection(collectionPath).document(userId).get().addOnCompleteListener() { task ->
+    db.collection(collectionPath).document(userId).get().addOnCompleteListener { task ->
       if (task.isSuccessful) {
         val doc = task.result
         val locations = getLocations(doc)
@@ -239,18 +259,31 @@ open class UserRepositoryFirestore(private val db: FirebaseFirestore) : UserRepo
 
   fun documentToUser(document: DocumentSnapshot): SeekerProfile? {
     return try {
+      Log.e("DocumentToUser", "")
       val uid = document.id
       val name = document.getString("name") ?: return null
       val username = document.getString("username") ?: return null
+      val imageUrl = document.getString("imageUrl") ?: ""
       val email = document.getString("email") ?: return null
       val phone = document.getString("phone") ?: return null
       val address = document.getString("address") ?: return null
       val preferences = document.get("preferences") as? List<String> ?: emptyList()
-
+      Log.e(
+          "DocumentToUser",
+          "${SeekerProfile(
+            uid = uid,
+            name = name,
+            username = username,
+            imageUrl = imageUrl,
+            email = email,
+            phone = phone,
+            address = address,
+            preferences = preferences)}")
       SeekerProfile(
           uid = uid,
           name = name,
           username = username,
+          imageUrl = imageUrl,
           email = email,
           phone = phone,
           address = address,
