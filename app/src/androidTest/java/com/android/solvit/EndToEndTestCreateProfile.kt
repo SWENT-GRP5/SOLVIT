@@ -20,6 +20,7 @@ import com.android.solvit.shared.model.authentication.AuthRep
 import com.android.solvit.shared.model.authentication.AuthRepository
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.authentication.User
+import com.android.solvit.shared.model.chat.ChatAssistantViewModel
 import com.android.solvit.shared.model.chat.ChatRepository
 import com.android.solvit.shared.model.chat.ChatRepositoryFirestore
 import com.android.solvit.shared.model.chat.ChatViewModel
@@ -70,6 +71,7 @@ class EndToEndTestCreateProfile {
   private lateinit var reviewViewModel: ReviewViewModel
   private lateinit var chatViewModel: ChatViewModel
   private lateinit var packageProposalViewModel: PackageProposalViewModel
+  private lateinit var chatAssistantViewModel: ChatAssistantViewModel
 
   private lateinit var authRepository: AuthRepository
   private lateinit var authRepository2: AuthRep
@@ -111,7 +113,7 @@ class EndToEndTestCreateProfile {
     serviceRequestRepository = ServiceRequestRepositoryFirebase(firestore, storage)
     reviewRepository = ReviewRepositoryFirestore(firestore)
     packageProposalRepositoryFirestore = PackageProposalRepositoryFirestore(firestore)
-    chatRepository = ChatRepositoryFirestore(Firebase.auth, database)
+    chatRepository = ChatRepositoryFirestore(database)
 
     authViewModel = AuthViewModel(authRepository)
     seekerProfileViewModel = SeekerProfileViewModel(seekerRepository)
@@ -121,6 +123,7 @@ class EndToEndTestCreateProfile {
     reviewViewModel = ReviewViewModel(reviewRepository)
     packageProposalViewModel = PackageProposalViewModel(packageProposalRepositoryFirestore)
     chatViewModel = ChatViewModel(chatRepository)
+    chatAssistantViewModel = ChatAssistantViewModel()
 
     `when`(locationRepository.search(ArgumentMatchers.anyString(), anyOrNull(), anyOrNull()))
         .thenAnswer { invocation ->
@@ -167,7 +170,8 @@ class EndToEndTestCreateProfile {
                   serviceRequestViewModel,
                   reviewViewModel,
                   locationViewModel,
-                  chatViewModel)
+                  chatViewModel,
+                  chatAssistantViewModel)
           "provider" ->
               ProviderUI(
                   authViewModel,
@@ -175,7 +179,8 @@ class EndToEndTestCreateProfile {
                   serviceRequestViewModel,
                   seekerProfileViewModel,
                   chatViewModel,
-                  locationViewModel)
+                  locationViewModel,
+                  chatAssistantViewModel)
         }
       }
     }

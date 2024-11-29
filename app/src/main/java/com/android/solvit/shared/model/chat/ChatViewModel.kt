@@ -3,10 +3,13 @@ package com.android.solvit.shared.model.chat
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.google.firebase.auth.FirebaseAuth
+import androidx.lifecycle.viewModelScope
 import com.google.firebase.database.FirebaseDatabase
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 
 class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
 
@@ -16,11 +19,14 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
   private val _coMessage = MutableStateFlow<List<ChatMessage.TextMessage>>(emptyList())
   val coMessage: StateFlow<List<ChatMessage.TextMessage>> = _coMessage
 
-  private val _allMessages = MutableStateFlow<List<ChatMessage.TextMessage>>(emptyList())
-  val allMessages: StateFlow<List<ChatMessage.TextMessage>> = _allMessages
+  private val _allMessages = MutableStateFlow<Map<String?, ChatMessage.TextMessage>>(emptyMap())
+  val allMessages: StateFlow<Map<String?, ChatMessage.TextMessage>> = _allMessages
 
-  private val _receiverName = MutableStateFlow<String>("")
-  val receiverName: StateFlow<String> = _receiverName
+  private val _receiver = MutableStateFlow<Any>("")
+  val receiver: StateFlow<Any> = _receiver
+
+  private val _isReadyToNavigate = MutableStateFlow(false)
+  val isReadyToNavigate: StateFlow<Boolean> = _isReadyToNavigate
 
   // Create factory
   companion object {
@@ -28,35 +34,47 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
         object : ViewModelProvider.Factory {
           @Suppress("UNCHECKED_CAST")
           override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return ChatViewModel(
-                ChatRepositoryFirestore(FirebaseAuth.getInstance(), FirebaseDatabase.getInstance()))
-                as T
+            return ChatViewModel(ChatRepositoryFirestore(FirebaseDatabase.getInstance())) as T
           }
         }
   }
 
-  init {
-    Log.e("Debug Test", "Init")
-    getAllLastMessages()
+  fun prepareForChat(currentUserUid: String?, receiverId: String, receiver: Any?) {
+    viewModelScope.launch {
+      _isReadyToNavigate.value = false
+      setReceiverUid(receiverId)
+      initChat(currentUserUid)
+      receiver?.let { setReceiver(receiver) }
+      _isReadyToNavigate.value = true
+    }
   }
 
   fun setReceiverUid(uid: String) {
     receiverUid = uid
   }
 
-  fun setReceiverName(name: String) {
-    _receiverName.value = name
+  fun resetIsReadyToNavigate() {
+    _isReadyToNavigate.value = false
   }
 
-  fun initChat() {
-    receiverUid?.let {
-      Log.e("receiverUid", "notnNull")
-      repository.initChat(
-          onSuccess = { uid ->
-            Log.e("initChat", "onSuccess $uid")
-            chatId = uid
-          },
-          it)
+  fun setReceiver(receiver: Any) {
+    _receiver.value = receiver
+  }
+
+  suspend fun initChat(currentUserUid: String?): String? {
+    // Suspend Coroutine to make sure that get conversation is not called before init chat
+    return suspendCoroutine { continuation ->
+      receiverUid?.let {
+        repository.initChat(
+            currentUserUid,
+            onSuccess = { uid ->
+              Log.e("initChat", "onSuccess $uid")
+              chatId = uid
+              continuation.resume(uid)
+            },
+            onFailure = { continuation.resume(null) },
+            it)
+      }
     }
   }
 
@@ -81,10 +99,14 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
     }
   }
 
-  fun getAllLastMessages() {
+  fun getAllLastMessages(currentUserUid: String?) {
 
     repository.listenForLastMessages(
-        onSuccess = { list -> _allMessages.value = list },
+        currentUserUid,
+        onSuccess = { unsortedMap ->
+          _allMessages.value =
+              unsortedMap.toList().sortedByDescending { it.second.timestamp }.toMap()
+        },
         onFailure = { Log.e("ChatViewModel", "Failed to get All messages") })
   }
 }

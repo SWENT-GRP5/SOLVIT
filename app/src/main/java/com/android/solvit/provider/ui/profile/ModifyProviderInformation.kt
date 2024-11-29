@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.*
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -28,6 +29,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -74,13 +76,20 @@ fun ModifyProviderInformationScreen(
   DisposableEffect(Unit) {
     val activity = context as? ComponentActivity
     activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-    onDispose { activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED }
+    onDispose {
+      locationViewModel.clear()
+      activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+    }
   }
 
   Scaffold(
       topBar = {
         TopAppBar(
-            title = { Text("Modify your profile information") },
+            title = {
+              Text(
+                  "Modify your profile information",
+                  modifier = Modifier.testTag("titleModifyProvider"))
+            },
             navigationIcon = { GoBackButton(navigationActions) },
             colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background))
       },
@@ -89,8 +98,8 @@ fun ModifyProviderInformationScreen(
             modifier =
                 Modifier.fillMaxSize()
                     .padding(padding)
-                    .background(colorScheme.background)
                     .padding(16.dp)
+                    .background(colorScheme.background)
                     .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top) {
@@ -103,9 +112,9 @@ fun ModifyProviderInformationScreen(
 
               ModifyInput(
                   provider = provider,
-                  locationViewModel,
-                  listProviderViewModel,
-                  authViewModel,
+                  locationViewModel = locationViewModel,
+                  listProviderViewModel = listProviderViewModel,
+                  authViewModel = authViewModel,
                   navigationActions = navigationActions)
             }
       })
@@ -121,20 +130,21 @@ fun ModifyInput(
     navigationActions: NavigationActions
 ) {
   val context = LocalContext.current
-  var newProviderName by remember { mutableStateOf(provider.companyName) }
-  val okNewProviderName = newProviderName.length >= 2 && newProviderName.isNotBlank()
-  var newProfession by remember { mutableStateOf(provider.service) }
-  var showDropdownType by remember { mutableStateOf(false) }
-  var query = remember { mutableStateOf(provider.service.name) }
+
+  var newName by remember { mutableStateOf(provider.name) }
+  val nameRegex = Regex("^[a-zA-ZÀ-ÿ '-]{2,50}$")
+  val okNewName = nameRegex.matches(newName)
+
+  var newCompanyName by remember { mutableStateOf(provider.companyName) }
+  val okNewCompanyName = newCompanyName.length >= 2 && newCompanyName.isNotBlank()
+
+  var newService by remember { mutableStateOf(provider.service) }
 
   var newPhoneNumber by remember { mutableStateOf(provider.phone) }
-  val okNewPhoneNumber =
-      newPhoneNumber.isNotBlank() &&
-          newPhoneNumber.all { it.isDigit() || it == '+' } &&
-          newPhoneNumber.length > 6
+  val phoneRegex = Regex("^\\+?[0-9]{6,15}$")
+  val okNewPhoneNumber = phoneRegex.matches(newPhoneNumber)
 
   val newLocation by remember { mutableStateOf(provider.location.name) }
-  var selectedServiceType by remember { mutableStateOf(Services.OTHER) }
 
   var showDropdown by remember { mutableStateOf(false) }
 
@@ -147,24 +157,54 @@ fun ModifyInput(
 
   var newLanguage by remember { mutableStateOf(provider.languages) }
 
-  val allIsGood = okNewProviderName && okNewPhoneNumber && okNewLocation
+  var newDescription by remember { mutableStateOf(provider.description) }
+  val regexDescription = Regex("^[a-zA-ZÀ-ÿ0-9 ,.!?-]{1,500}$")
+  val okNewDescription = regexDescription.matches(newDescription)
+
+  val allIsGood =
+      okNewName && okNewCompanyName && okNewPhoneNumber && okNewLocation && okNewDescription
+
+  LaunchedEffect(provider) {
+    newName = provider.name
+    newCompanyName = provider.companyName
+    newService = provider.service
+    newPhoneNumber = provider.phone
+    selectedLocation = provider.location
+    newLanguage = provider.languages
+    newDescription = provider.description
+  }
 
   CustomOutlinedTextField(
-      value = newProviderName,
-      onValueChange = { newProviderName = it },
-      label = "Provider Name",
-      placeholder = "Enter your new Provider name",
-      isValueOk = okNewProviderName,
+      value = newName,
+      onValueChange = { newName = it },
+      label = "Name",
+      placeholder = "Enter your new name",
+      isValueOk = okNewName,
       leadingIcon = Icons.Default.AccountCircle,
-      leadingIconDescription = "Company Name Icon",
-      testTag = "newProviderNameInputField",
-      errorMessage = "Your provider name must have at least 2 characters",
-      errorTestTag = "providerNameErrorMessage",
+      leadingIconDescription = "Name Icon",
+      testTag = "newNameInputField",
+      errorMessage = "Your name must have at least 2 characters and less than 50",
+      errorTestTag = "nameErrorMessage",
       maxLines = 2)
 
   Spacer(modifier = Modifier.height(10.dp))
 
-  ServiceDropdownMenu(selectedService = newProfession, onServiceSelected = { newProfession = it })
+  CustomOutlinedTextField(
+      value = newCompanyName,
+      onValueChange = { newCompanyName = it },
+      label = "Company Name",
+      placeholder = "Enter your new Company name",
+      isValueOk = okNewCompanyName,
+      leadingIcon = Icons.Default.AccountCircle,
+      leadingIconDescription = "Company Name Icon",
+      testTag = "newCompanyNameInputField",
+      errorMessage = "Your company name must have at least 2 characters",
+      errorTestTag = "companyNameErrorMessage",
+      maxLines = 2)
+
+  Spacer(modifier = Modifier.height(10.dp))
+
+  ServiceDropdownMenu(selectedService = newService, onServiceSelected = { newService = it })
 
   Spacer(modifier = Modifier.height(10.dp))
 
@@ -178,7 +218,8 @@ fun ModifyInput(
       leadingIconDescription = "Phone Number Icon",
       testTag = "newPhoneNumberInputField",
       errorMessage = "Your phone number name must have at least 7 characters",
-      errorTestTag = "newPhoneNumberErrorMessage")
+      errorTestTag = "newPhoneNumberErrorMessage",
+      maxLines = 1)
 
   Spacer(modifier = Modifier.height(10.dp))
 
@@ -210,16 +251,36 @@ fun ModifyInput(
 
   Spacer(modifier = Modifier.height(10.dp))
 
+  CustomOutlinedTextField(
+      value = newDescription,
+      onValueChange = { newDescription = it },
+      label = "Description",
+      placeholder = "Enter your new description",
+      isValueOk = okNewDescription,
+      leadingIcon = Icons.Default.Info,
+      leadingIconDescription = "Description Icon",
+      testTag = "newDescriptionInputField",
+      errorMessage = "Your description name must not be empty",
+      errorTestTag = "newDescriptionErrorMessage",
+      textAlign = TextAlign.Start,
+      maxLines = 7)
+
+  Spacer(modifier = Modifier.height(10.dp))
+
   Button(
       onClick = {
         if (allIsGood) {
-          provider.companyName = newProviderName
-          provider.service = newProfession
-          provider.phone = newPhoneNumber
-          provider.location = selectedLocation ?: provider.location
-          provider.languages = newLanguage
+          val updatedProvider =
+              provider.copy(
+                  name = newName,
+                  companyName = newCompanyName,
+                  service = newService,
+                  phone = newPhoneNumber,
+                  location = selectedLocation ?: provider.location,
+                  languages = newLanguage,
+                  description = newDescription)
 
-          listProviderViewModel.updateProvider(provider = provider)
+          listProviderViewModel.updateProvider(provider = updatedProvider)
 
           navigationActions.goBack()
         } else {
@@ -248,8 +309,13 @@ fun ModifyInput(
                           25.dp,
                       )),
       colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)) {
+        Icons.Default.AccountCircle
         Text(
-            "Save !", color = colorScheme.onPrimary, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            "Save !",
+            color = colorScheme.onPrimary,
+            fontWeight = FontWeight.Bold,
+            fontSize = 16.sp,
+            modifier = Modifier.testTag("saveButton"))
       }
 
   Spacer(modifier = Modifier.height(3.dp))
@@ -263,6 +329,12 @@ fun ModifyInput(
       modifier = Modifier.padding(top = 4.dp).fillMaxWidth())
 }
 
+/**
+ * A composable function that displays a dropdown menu for selecting a service.
+ *
+ * @param selectedService The currently selected service.
+ * @param onServiceSelected Callback invoked when a new service is selected.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ServiceDropdownMenu(selectedService: Services, onServiceSelected: (Services) -> Unit) {
@@ -281,11 +353,13 @@ fun ServiceDropdownMenu(selectedService: Services, onServiceSelected: (Services)
             label = { Text("Select Service") },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             colors =
-                TextFieldDefaults.textFieldColors(
+                TextFieldDefaults.outlinedTextFieldColors(
                     // Set the background color of the TextField to match the screen or be white
                     containerColor = colorScheme.background,
-                    unfocusedIndicatorColor = colorScheme.secondary,
-                    focusedIndicatorColor = colorScheme.secondary,
+                    focusedTextColor = colorScheme.onBackground,
+                    unfocusedTextColor = colorScheme.onBackground,
+                    focusedBorderColor = colorScheme.background,
+                    unfocusedBorderColor = colorScheme.background,
                 ),
             modifier =
                 Modifier.fillMaxWidth()
@@ -313,6 +387,13 @@ fun ServiceDropdownMenu(selectedService: Services, onServiceSelected: (Services)
       }
 }
 
+/**
+ * A composable function that displays a dropdown menu for selecting multiple languages.
+ *
+ * @param selectedLanguages The list of currently selected languages.
+ * @param onLanguageSelected Callback invoked when a language is selected or deselected.
+ * @param modifier Modifier to be applied to the dropdown menu.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LanguageDropdownMenu(
@@ -334,10 +415,14 @@ fun LanguageDropdownMenu(
             label = { Text("Select languages") },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             colors =
-                TextFieldDefaults.textFieldColors(
+                TextFieldDefaults.outlinedTextFieldColors(
                     containerColor = colorScheme.background,
-                    unfocusedIndicatorColor = colorScheme.secondary,
-                    focusedIndicatorColor = colorScheme.secondary,
+                    focusedTextColor = colorScheme.onBackground,
+                    unfocusedTextColor = colorScheme.onBackground,
+                    focusedBorderColor =
+                        if (selectedLanguages.isEmpty()) colorScheme.background
+                        else colorScheme.primary,
+                    unfocusedBorderColor = colorScheme.background,
                 ),
             modifier =
                 Modifier.menuAnchor()

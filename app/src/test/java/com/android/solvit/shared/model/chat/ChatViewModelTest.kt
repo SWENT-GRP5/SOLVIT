@@ -1,11 +1,14 @@
 package com.android.solvit.shared.model.chat
 
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 
 class ChatViewModelTest {
   private lateinit var chatRepository: ChatRepository
@@ -18,26 +21,40 @@ class ChatViewModelTest {
   }
 
   @Test
-  fun initChat() {
-    chatViewModel.setReceiverUid("1234")
-    chatViewModel.initChat()
-    verify(chatRepository).initChat(any(), any())
-  }
+  fun initChat() = runTest {
+    chatViewModel.setReceiverUid("receiver123")
+    val currentUserUid = "currentUserUid"
 
-  @Test
-  fun sendMessage() {
-    chatViewModel.setReceiverUid("1234")
-
-    // Simulate initChat behavior to set chatId
+    // Mock the behavior of repository.initChat
     doAnswer { invocation ->
-          val onSuccess = invocation.arguments[0] as (String) -> Unit
+          val onSuccess = invocation.arguments[1] as (String) -> Unit
+          val onFailure = invocation.arguments[2] as () -> Unit
           onSuccess("testChatId")
           null
         }
-        .`when`(chatRepository)
-        .initChat(any(), any())
+        .whenever(chatRepository)
+        .initChat(any(), any(), any(), any())
 
-    chatViewModel.initChat()
+    chatViewModel.initChat(currentUserUid)
+    verify(chatRepository).initChat(eq(currentUserUid), any(), any(), eq("receiver123"))
+  }
+
+  @Test
+  fun sendMessage() = runTest {
+    chatViewModel.setReceiverUid("receiver123")
+    val currentUserUid = "currentUserUid"
+
+    // Mock the behavior of repository.initChat
+    doAnswer { invocation ->
+          val onSuccess = invocation.arguments[1] as (String) -> Unit
+          val onFailure = invocation.arguments[2] as () -> Unit
+          onSuccess("testChatId")
+          null
+        }
+        .whenever(chatRepository)
+        .initChat(any(), any(), any(), any())
+
+    chatViewModel.initChat("currentUserUid")
 
     chatViewModel.sendMessage(
         ChatMessage.TextMessage("Message 1", "senderName", "Hello", System.currentTimeMillis()))
@@ -45,19 +62,21 @@ class ChatViewModelTest {
   }
 
   @Test
-  fun getMessages() {
-    chatViewModel.setReceiverUid("1234")
+  fun getMessages() = runTest {
+    chatViewModel.setReceiverUid("receiver123")
+    val currentUserUid = "currentUserUid"
 
-    // Simulate initChat behavior to set chatId
+    // Mock the behavior of repository.initChat
     doAnswer { invocation ->
-          val onSuccess = invocation.arguments[0] as (String) -> Unit
+          val onSuccess = invocation.arguments[1] as (String) -> Unit
+          val onFailure = invocation.arguments[2] as () -> Unit
           onSuccess("testChatId")
           null
         }
-        .`when`(chatRepository)
-        .initChat(any(), any())
+        .whenever(chatRepository)
+        .initChat(any(), any(), any(), any())
 
-    chatViewModel.initChat()
+    chatViewModel.initChat("currentUserUid")
     chatViewModel.getConversation()
     verify(chatRepository).listenForMessages(any(), any(), any())
   }
@@ -65,6 +84,18 @@ class ChatViewModelTest {
   @Test
   fun getAllMessages() {
     // Check that in the init it indeed retrive last messages
-    verify(chatRepository).listenForLastMessages(any(), any())
+    chatViewModel.getAllLastMessages("currentUserUid")
+    verify(chatRepository).listenForLastMessages(any(), any(), any())
+  }
+
+  @Test
+  fun `setReceiver updates _receiver`() {
+    // Act
+    val testReceiver = "Test Receiver"
+    chatViewModel.setReceiver(testReceiver)
+
+    // Assert
+    val receiver = chatViewModel.receiver.value
+    assert(receiver == testReceiver)
   }
 }

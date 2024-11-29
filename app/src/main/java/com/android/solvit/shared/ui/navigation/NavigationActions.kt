@@ -143,6 +143,15 @@ open class NavigationActions(
   }
 
   /**
+   * Navigate back to the specified route.
+   *
+   * @param route The route to navigate back to
+   */
+  open fun goBackTo(route: String) {
+    navController.popBackStack(route, false)
+  }
+
+  /**
    * Get the current route of the navigation controller.
    *
    * @return The current route

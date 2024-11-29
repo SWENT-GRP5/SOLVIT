@@ -134,7 +134,12 @@ open class ServiceRequestViewModel(private val repository: ServiceRequestReposit
   fun saveServiceRequest(serviceRequest: ServiceRequest) {
     repository.saveServiceRequest(
         serviceRequest,
-        onSuccess = { updateAllRequests() },
+        onSuccess = {
+          updateAllRequests()
+          if (serviceRequest.uid == _selectedRequest.value?.uid) {
+            _selectedRequest.value = serviceRequest
+          }
+        },
         onFailure = { exception ->
           Log.e("ServiceRequestViewModel", "Error saving ServiceRequest", exception)
         })
@@ -144,7 +149,12 @@ open class ServiceRequestViewModel(private val repository: ServiceRequestReposit
     repository.saveServiceRequestWithImage(
         serviceRequest,
         imageUri,
-        onSuccess = { updateAllRequests() },
+        onSuccess = {
+          updateAllRequests()
+          if (serviceRequest.uid == _selectedRequest.value?.uid) {
+            _selectedRequest.value = serviceRequest
+          }
+        },
         onFailure = { exception ->
           Log.e("ServiceRequestViewModel", "Error saving ServiceRequest", exception)
         })
@@ -168,7 +178,12 @@ open class ServiceRequestViewModel(private val repository: ServiceRequestReposit
   fun deleteServiceRequestById(id: String) {
     repository.deleteServiceRequestById(
         id,
-        onSuccess = { updateAllRequests() },
+        onSuccess = {
+          updateAllRequests()
+          if (_selectedRequest.value?.uid == id) {
+            _selectedRequest.value = null
+          }
+        },
         onFailure = { exception ->
           Log.e("ServiceRequestViewModel", "Error deleting ServiceRequest", exception)
         })
