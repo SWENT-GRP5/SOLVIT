@@ -6,6 +6,7 @@ import android.icu.util.GregorianCalendar
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
@@ -23,6 +24,8 @@ import com.android.solvit.shared.model.map.LocationViewModel
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestStatus
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
+import com.android.solvit.shared.model.request.analyzer.AIAssistantDialog
+import com.android.solvit.shared.model.request.analyzer.MultiStepDialog
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.model.utils.isInternetAvailable
 import com.android.solvit.shared.model.utils.loadBitmapFromUri
@@ -72,6 +75,45 @@ fun CreateRequestScreen(
   var selectedServiceType by remember { mutableStateOf(Services.OTHER) }
   val localContext = LocalContext.current
   val userId = Firebase.auth.currentUser?.uid ?: "-1"
+
+  var showAIAssistantDialog by remember { mutableStateOf(true) }
+  var showMultiStepDialog by remember { mutableStateOf(false) }
+  var currentStep by remember { mutableStateOf(1) }
+  var selectedImages by remember { mutableStateOf<List<Uri>>(emptyList()) }
+
+  // AI Assistant Dialog
+  if (showAIAssistantDialog) {
+    AIAssistantDialog(
+        onCancel = { showAIAssistantDialog = false },
+        onUploadPictures = {
+          showAIAssistantDialog = false
+          showMultiStepDialog = true
+        })
+  }
+
+  // Multi-Step Dialog
+  if (showMultiStepDialog) {
+    MultiStepDialog(
+        requestViewModel = requestViewModel,
+        showDialog = showMultiStepDialog,
+        currentStep = currentStep,
+        selectedImages = selectedImages,
+        onImagesSelected = { images -> selectedImages = images },
+        onRemoveImage = { uri -> selectedImages = selectedImages.filter { it != uri } },
+        onStartAnalyzing = {
+          currentStep = 2 // Move to the analyzing step
+        },
+        onAnalyzeComplete = { generatedTitle, generatedType, generatedDescription ->
+          title = generatedTitle
+          typeQuery = generatedType
+          description = generatedDescription
+          currentStep = 3 // Move to the analysis complete step
+        },
+        onClose = {
+          showMultiStepDialog = false
+          currentStep = 1 // Reset step for the next time
+        })
+  }
 
   RequestScreen(
       navigationActions = navigationActions,

@@ -26,15 +26,16 @@ fun uploadImageToStorage(
     onSuccess: (String) -> Unit,
     onFailure: (Exception) -> Unit
 ) {
-  val uniqueFileName = UUID.randomUUID().toString() + ".jpg"
-  val imageRef: StorageReference = storage.reference.child(path + uniqueFileName)
+  val uniqueFileName = "${UUID.randomUUID()}.jpg"
+  val imageRef: StorageReference = storage.reference.child("$path$uniqueFileName")
 
   imageRef
       .putFile(imageUri)
       .addOnSuccessListener {
-        imageRef.downloadUrl
-            .addOnSuccessListener { downloadUrl -> onSuccess(downloadUrl.toString()) }
-            .addOnFailureListener { exception -> onFailure(exception) }
+        // Construct clean URL
+        val cleanUrl =
+            "https://firebasestorage.googleapis.com/v0/b/${storage.app.options.storageBucket}/o/${Uri.encode("$path$uniqueFileName")}"
+        onSuccess(cleanUrl)
       }
       .addOnFailureListener { exception -> onFailure(exception) }
 }
