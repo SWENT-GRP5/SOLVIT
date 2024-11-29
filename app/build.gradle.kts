@@ -37,6 +37,8 @@ android {
         versionCode = 1
         versionName = "1.0"
         manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
+        buildConfigField("String", "OPENAI_API_KEY", "\"$openaiApiKey\"")
+        buildConfigField("String", "GOOGLE_AI_API_KEY", "\"$googleAiApiKey\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -257,11 +259,21 @@ dependencies {
     globalTestImplementation(libs.kaspresso.compose.support)
     androidTestImplementation(libs.kaspresso.allure.support)
 
+    // --------- Coroutines ----------
+    implementation(libs.okhttp)
+    implementation(libs.okhttp.v4100)
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+
     // ----------       Robolectric     ------------
     testImplementation(libs.robolectric)
 
     // ----------       Load Images from URL     ------------
     implementation("io.coil-kt:coil-compose:2.4.0")
+
+    // ----------       Google AI     ------------
+    implementation("com.google.ai.client.generativeai:generativeai:0.7.0")
 }
 
 tasks.withType<Test> {
