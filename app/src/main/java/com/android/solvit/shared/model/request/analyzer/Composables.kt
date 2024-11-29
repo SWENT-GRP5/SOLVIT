@@ -83,7 +83,7 @@ fun AIAssistantDialog(onCancel: () -> Unit, onUploadPictures: () -> Unit) {
                 .wrapContentHeight()
                 .background(Background, shape = RoundedCornerShape(16.dp))
                 .padding(16.dp) // Padding around the dialog content
-                .testTag("aiAssistantDialog")) {
+                .testTag("aIAssistantDialog")) {
           Column(
               modifier = Modifier.fillMaxWidth(),
               horizontalAlignment = Alignment.CenterHorizontally) {

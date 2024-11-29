@@ -265,10 +265,8 @@ dependencies {
     testImplementation(libs.robolectric)
 
     // ----------       Load Images from URL     ------------
-    implementation("io.coil-kt:coil-compose:2.4.0")
+    implementation(libs.coil.compose)
 
-    // ----------       WebKit     ------------
-    implementation ("androidx.webkit:webkit:1.4.0")
 
 }
 

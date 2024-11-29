@@ -283,18 +283,3 @@ fun ProviderUI(
     }
   }
 }
-
-@Composable
-fun ZyadApp() {
-  // Create necessary view models
-  val serviceRequestViewModel =
-      viewModel<ServiceRequestViewModel>(factory = ServiceRequestViewModel.Factory)
-  val locationViewModel = viewModel<LocationViewModel>(factory = LocationViewModel.Factory)
-
-  // Navigation setup
-  val navController = rememberNavController()
-  val navigationActions = NavigationActions(navController)
-
-  // Show only the screen you want to test
-  CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
-}

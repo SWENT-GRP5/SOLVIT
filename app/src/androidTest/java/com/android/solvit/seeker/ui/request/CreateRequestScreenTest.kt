@@ -1,5 +1,7 @@
 package com.android.solvit.seeker.ui.request
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
@@ -212,5 +214,49 @@ class CreateRequestScreenTest {
     composeTestRule.onNodeWithTag("requestSubmit").performClick()
 
     Mockito.verify(serviceRequestRepository, never()).saveServiceRequest(any(), any(), any())
+  }
+
+  @Test
+  fun aiAssistantDialog_displaysCorrectlyAndCanBeDismissed() {
+    composeTestRule.setContent {
+      CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
+    }
+
+    // Check that the AI Assistant Dialog is displayed initially
+    composeTestRule.onNodeWithTag("aIAssistantDialog").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("aiAssistantHeaderRow").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("aiAssistantIcon").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("aiAssistantTitleBox").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("aiAssistantDescription").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("cancelButton").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("uploadPicturesButton").assertIsDisplayed()
+
+    composeTestRule.onNodeWithTag("cancelButton").performClick() // Dismiss the dialog
+
+    // Ensure the dialog is dismissed
+    composeTestRule.onNodeWithTag("aIAssistantDialog").assertDoesNotExist()
+    composeTestRule.onNodeWithTag("aiAssistantHeaderRow").assertDoesNotExist()
+    composeTestRule.onNodeWithTag("aiAssistantIcon").assertDoesNotExist()
+    composeTestRule.onNodeWithTag("aiAssistantTitleBox").assertDoesNotExist()
+    composeTestRule.onNodeWithTag("aiAssistantDescription").assertDoesNotExist()
+    composeTestRule.onNodeWithTag("cancelButton").assertDoesNotExist()
+  }
+
+  @Test
+  fun aiAssistantDialog_navigatesToImagePickerStep() {
+    composeTestRule.setContent {
+      CreateRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
+    }
+
+    // Check that the AI Assistant Dialog is displayed initially
+    composeTestRule.onNodeWithTag("aIAssistantDialog").assertIsDisplayed()
+    composeTestRule
+        .onNodeWithTag("uploadPicturesButton")
+        .performClick() // Navigate to ImagePickerStep
+
+    // Ensure Image Picker Step is displayed
+    composeTestRule.onNodeWithTag("imagePickerStep").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("noImagesText").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("addImagesButton").assertIsDisplayed()
   }
 }
