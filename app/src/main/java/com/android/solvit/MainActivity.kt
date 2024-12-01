@@ -145,7 +145,11 @@ fun SharedUI(
     composable(Screen.SIGN_UP_CHOOSE_ROLE) { SignUpChooseProfile(navigationActions, authViewModel) }
     composable(Screen.PROVIDER_REGISTRATION_PROFILE) {
       ProviderRegistrationScreen(
-          listProviderViewModel, navigationActions, locationViewModel, authViewModel, packageProposalViewModel)
+          listProviderViewModel,
+          navigationActions,
+          locationViewModel,
+          authViewModel,
+          packageProposalViewModel)
     }
     composable(Screen.FORGOT_PASSWORD) { ForgotPassword(navigationActions) }
     composable(Screen.SEEKER_REGISTRATION_PROFILE) {
