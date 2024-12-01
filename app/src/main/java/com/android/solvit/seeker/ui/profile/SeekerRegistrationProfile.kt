@@ -177,7 +177,7 @@ fun SeekerRegistrationScreen(
                     label = "User Name",
                     placeholder = "Enter your user name",
                     isValueOk = isUserNameOk,
-                    errorMessage = "Your user name must be at least 3 characters",
+                    errorMessage = "Enter a valid first and last name",
                     leadingIcon = Icons.Default.Person,
                     leadingIconDescription = "Person Icon",
                     testTag = "userNameInput",

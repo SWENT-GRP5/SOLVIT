@@ -220,7 +220,7 @@ fun ProviderRegistrationScreen(
                     label = "Full Name",
                     placeholder = "Enter your full name",
                     isValueOk = isFullNameOk,
-                    errorMessage = "Your full name must be at least 3 characters",
+                    errorMessage = "Enter a valid first and last name",
                     leadingIcon = Icons.Default.Person,
                     leadingIconDescription = "Person Icon",
                     testTag = "fullNameInput",
