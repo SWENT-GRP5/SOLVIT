@@ -239,7 +239,8 @@ class CreateRequestScreenTest {
           locationViewModel,
           authViewModel,
           notificationsViewModel,
-          listProviderViewModel,)
+          listProviderViewModel,
+      )
     }
 
     composeTestRule.onNodeWithTag("inputServiceType").performTextInput("NonExistentType")
@@ -255,7 +256,8 @@ class CreateRequestScreenTest {
           locationViewModel,
           authViewModel,
           notificationsViewModel,
-          listProviderViewModel,)
+          listProviderViewModel,
+      )
     }
 
     composeTestRule.onNodeWithTag("inputServiceType").performTextInput("Plumbing")

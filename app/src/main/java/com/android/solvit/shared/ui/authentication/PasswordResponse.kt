@@ -6,4 +6,3 @@ data class PasswordResponse(
     val api_version: String,
     val api_last_update_date: String
 )
-

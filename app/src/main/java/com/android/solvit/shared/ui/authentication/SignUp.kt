@@ -3,7 +3,6 @@ package com.android.solvit.shared.ui.authentication
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.ActivityInfo
-import android.util.Patterns
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.ManagedActivityResultLauncher
@@ -99,42 +98,42 @@ fun SignUpScreen(
   val token = stringResource(R.string.default_web_client_id)
 
   val emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$".toRegex()
-    val goodFormEmail = emailRegex.matches(email)
+  val goodFormEmail = emailRegex.matches(email)
 
   val passwordLengthComplete = password.length >= 6
   val samePassword = password == confirmPassword
 
   val isFormComplete = goodFormEmail && passwordLengthComplete && samePassword
 
+  val passwordApiService = createPasswordService()
+  val scope = rememberCoroutineScope()
+  val clipboardManager = LocalClipboardManager.current
 
-    val passwordApiService = createPasswordService()
-    val scope = rememberCoroutineScope()
-    val clipboardManager = LocalClipboardManager.current
+  val generatePassword: () -> Unit = {
+    scope.launch {
+      try {
+        val response =
+            passwordApiService.createPassword(
+                includeDigits = true,
+                includeLowercase = true,
+                includeUppercase = false,
+                includeSpecialCharacters = false,
+                passwordLength = 12,
+                quantity = 1)
+        val generatedPassword = response.passwords.first()
+        password = generatedPassword
+        confirmPassword = generatedPassword
 
-    val generatePassword: () -> Unit = {
-        scope.launch {
-            try {
-                val response = passwordApiService.createPassword(
-                    includeDigits = true,
-                    includeLowercase = true,
-                    includeUppercase = false,
-                    includeSpecialCharacters = false,
-                    passwordLength = 12,
-                    quantity = 1
-                )
-                val generatedPassword = response.passwords.first()
-                password = generatedPassword
-                confirmPassword = generatedPassword
-
-
-                val annotatedString = AnnotatedString(generatedPassword)
-                clipboardManager.setText(annotatedString)
-                Toast.makeText(context, "Password copied to clipboard : $annotatedString", Toast.LENGTH_SHORT).show()
-            } catch (e: Exception) {
-                Toast.makeText(context, "Error generating password", Toast.LENGTH_SHORT).show()
-            }
-        }
+        val annotatedString = AnnotatedString(generatedPassword)
+        clipboardManager.setText(annotatedString)
+        Toast.makeText(
+                context, "Password copied to clipboard : $annotatedString", Toast.LENGTH_SHORT)
+            .show()
+      } catch (e: Exception) {
+        Toast.makeText(context, "Error generating password", Toast.LENGTH_SHORT).show()
+      }
     }
+  }
 
   Scaffold(
       topBar = {
@@ -234,21 +233,18 @@ fun SignUpScreen(
                   style = TextStyle(fontSize = 12.sp, lineHeight = 16.sp),
                   modifier = Modifier.padding(top = 4.dp).fillMaxWidth())
 
-            Button(
-                onClick = generatePassword,
-                modifier = Modifier
-                    .align(Alignment.End)
-                    .padding(top = 16.dp)
-                    .height(30.dp),
-                shape = RoundedCornerShape(25.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = colorScheme.primary,
-                    contentColor = colorScheme.background
-                )) {
-                Text("Generate a password")
-            }
+              Button(
+                  onClick = generatePassword,
+                  modifier = Modifier.align(Alignment.End).padding(top = 16.dp).height(30.dp),
+                  shape = RoundedCornerShape(25.dp),
+                  colors =
+                      ButtonDefaults.buttonColors(
+                          containerColor = colorScheme.primary,
+                          contentColor = colorScheme.background)) {
+                    Text("Generate a password")
+                  }
 
-            Spacer(modifier = Modifier.height(20.dp))
+              Spacer(modifier = Modifier.height(20.dp))
 
               SignUpButton(
                   {
@@ -389,11 +385,11 @@ fun AlreadyHaveAccountText(navigationActions: NavigationActions) {
 }
 
 fun createPasswordService(): PasswordApiService {
-    val retrofit = Retrofit.Builder()
-        .baseUrl("https://api.motdepasse.xyz/")
-        .addConverterFactory(GsonConverterFactory.create())
-        .build()
+  val retrofit =
+      Retrofit.Builder()
+          .baseUrl("https://api.motdepasse.xyz/")
+          .addConverterFactory(GsonConverterFactory.create())
+          .build()
 
-    return retrofit.create(PasswordApiService::class.java)
+  return retrofit.create(PasswordApiService::class.java)
 }
-
