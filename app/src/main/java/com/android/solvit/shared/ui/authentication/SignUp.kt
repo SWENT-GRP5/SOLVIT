@@ -235,7 +235,11 @@ fun SignUpScreen(
 
               Button(
                   onClick = generatePassword,
-                  modifier = Modifier.align(Alignment.End).padding(top = 16.dp).height(50.dp),
+                  modifier =
+                      Modifier.align(Alignment.End)
+                          .padding(top = 16.dp)
+                          .height(50.dp)
+                          .testTag("generatePasswordButton"),
                   shape = RoundedCornerShape(25.dp),
                   colors =
                       ButtonDefaults.buttonColors(
