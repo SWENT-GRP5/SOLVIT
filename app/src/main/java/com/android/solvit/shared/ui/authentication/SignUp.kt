@@ -48,10 +48,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -70,6 +72,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import kotlinx.coroutines.launch
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "SourceLockedOrientationActivity")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -101,6 +105,36 @@ fun SignUpScreen(
   val samePassword = password == confirmPassword
 
   val isFormComplete = goodFormEmail && passwordLengthComplete && samePassword
+
+
+    val passwordApiService = createPasswordService()
+    val scope = rememberCoroutineScope()
+    val clipboardManager = LocalClipboardManager.current
+
+    val generatePassword: () -> Unit = {
+        scope.launch {
+            try {
+                val response = passwordApiService.createPassword(
+                    includeDigits = true,
+                    includeLowercase = true,
+                    includeUppercase = false,
+                    includeSpecialCharacters = false,
+                    passwordLength = 12,
+                    quantity = 1
+                )
+                val generatedPassword = response.passwords.first()
+                password = generatedPassword
+                confirmPassword = generatedPassword
+
+
+                val annotatedString = AnnotatedString(generatedPassword)
+                clipboardManager.setText(annotatedString)
+                Toast.makeText(context, "Password copied to clipboard : $annotatedString", Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) {
+                Toast.makeText(context, "Error generating password", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
 
   Scaffold(
       topBar = {
@@ -200,7 +234,21 @@ fun SignUpScreen(
                   style = TextStyle(fontSize = 12.sp, lineHeight = 16.sp),
                   modifier = Modifier.padding(top = 4.dp).fillMaxWidth())
 
-              Spacer(modifier = Modifier.height(20.dp))
+            Button(
+                onClick = generatePassword,
+                modifier = Modifier
+                    .align(Alignment.End)
+                    .padding(top = 16.dp)
+                    .height(30.dp),
+                shape = RoundedCornerShape(25.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = colorScheme.primary,
+                    contentColor = colorScheme.background
+                )) {
+                Text("Generate a password")
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
 
               SignUpButton(
                   {
@@ -339,3 +387,13 @@ fun AlreadyHaveAccountText(navigationActions: NavigationActions) {
     }
   }
 }
+
+fun createPasswordService(): PasswordApiService {
+    val retrofit = Retrofit.Builder()
+        .baseUrl("https://api.motdepasse.xyz/")
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+
+    return retrofit.create(PasswordApiService::class.java)
+}
+
