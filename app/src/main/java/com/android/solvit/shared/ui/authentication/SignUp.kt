@@ -94,11 +94,9 @@ fun SignUpScreen(
           authViewModel, { navigationActions.navigateTo(Screen.SIGN_UP_CHOOSE_ROLE) }, {})
   val token = stringResource(R.string.default_web_client_id)
 
-  val goodFormEmail =
-      email.isNotBlank() &&
-          Patterns.EMAIL_ADDRESS.matcher(email).matches() &&
-          email.contains(".") &&
-          email.contains("@")
+  val emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$".toRegex()
+    val goodFormEmail = emailRegex.matches(email)
+
   val passwordLengthComplete = password.length >= 6
   val samePassword = password == confirmPassword
 
