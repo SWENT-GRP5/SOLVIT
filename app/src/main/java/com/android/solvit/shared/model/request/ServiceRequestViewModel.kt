@@ -1,27 +1,19 @@
 package com.android.solvit.shared.model.request
 
-import android.Manifest
-import android.app.PendingIntent
 import android.content.Context
-import android.content.Intent
-import android.content.pm.PackageManager
 import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.util.Log
-import androidx.core.app.NotificationCompat
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.android.solvit.MainActivity
 import com.android.solvit.R
 import com.android.solvit.shared.notifications.FcmTokenManager
 import com.android.solvit.shared.notifications.NotificationManager
 import com.android.solvit.shared.notifications.NotificationService
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.auth
 import com.google.firebase.firestore.firestore
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.storage.storage
@@ -429,90 +421,6 @@ open class ServiceRequestViewModel(private val repository: ServiceRequestReposit
         Log.d("FCM_DEBUG", "Test: Created notification channel")
       } catch (e: Exception) {
         Log.e("FCM_DEBUG", "Test: Error creating channel: ${e.message}", e)
-      }
-    }
-  }
-
-  fun testNotification(context: Context) {
-    viewModelScope.launch {
-      try {
-        // Get current user ID as the seeker (for testing)
-        val currentUser = Firebase.auth.currentUser
-        if (currentUser == null) {
-          Log.e("FCM_DEBUG", "No user logged in")
-          return@launch
-        }
-
-        // Test both local and FCM notifications
-        // 1. Local notification
-        createNotificationChannel(context)
-        val systemNotificationManager =
-            context.getSystemService(Context.NOTIFICATION_SERVICE)
-                as android.app.NotificationManager
-
-        val intent =
-            Intent(context, MainActivity::class.java).apply {
-              flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            }
-        val pendingIntent =
-            PendingIntent.getActivity(
-                context,
-                0,
-                intent,
-                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
-
-        val notification =
-            NotificationCompat.Builder(context, NotificationService.CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_launcher_foreground)
-                .setContentTitle("Test Local Notification")
-                .setContentText("This is a test local notification")
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setAutoCancel(true)
-                .setContentIntent(pendingIntent)
-                .setDefaults(NotificationCompat.DEFAULT_ALL)
-                .build()
-
-        // Check notification permission
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-          if (ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) !=
-              PackageManager.PERMISSION_GRANTED) {
-            Log.e("FCM_DEBUG", "Test: Notification permission not granted")
-            return@launch
-          }
-        }
-
-        Log.d("FCM_DEBUG", "Test: Sending local notification")
-        systemNotificationManager.notify(100, notification)
-        Log.d("FCM_DEBUG", "Test: Local notification sent")
-
-        // 2. FCM notification
-        Log.d("FCM_DEBUG", "Test: Sending FCM notification")
-        this@ServiceRequestViewModel.notificationManager
-            .sendServiceRequestAcceptedNotification(
-                recipientUserId = currentUser.uid,
-                requestId = "test_request_id",
-                providerName = "Test Provider")
-            .onFailure { e -> Log.e("FCM_DEBUG", "Test: Error sending FCM notification", e) }
-        Log.d("FCM_DEBUG", "Test: FCM notification sent to user: ${currentUser.uid}")
-      } catch (e: Exception) {
-        Log.e("FCM_DEBUG", "Test: Error sending notification: ${e.message}", e)
-        e.printStackTrace()
-      }
-    }
-  }
-
-  fun testNotification(seekerId: String) {
-    viewModelScope.launch {
-      try {
-        notificationManager
-            .sendServiceRequestAcceptedNotification(
-                recipientUserId = seekerId,
-                requestId = "test_request_id",
-                providerName = "Test Provider")
-            .onFailure { e -> Log.e("FCM_DEBUG", "Error sending test notification", e) }
-        Log.d("FCM_DEBUG", "Test notification sent successfully")
-      } catch (e: Exception) {
-        Log.e("FCM_DEBUG", "Error sending test notification", e)
       }
     }
   }

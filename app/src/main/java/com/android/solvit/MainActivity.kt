@@ -4,8 +4,6 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -104,32 +102,6 @@ class MainActivity : ComponentActivity() {
     setContent {
       val serviceRequestViewModel: ServiceRequestViewModel =
           viewModel(factory = ServiceRequestViewModel.Factory)
-
-      // Test notification only if permission is granted
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
-            PackageManager.PERMISSION_GRANTED) {
-          // Create a test notification after a delay to ensure channel is created
-          Handler(Looper.getMainLooper())
-              .postDelayed(
-                  {
-                    Log.d("FCM_DEBUG", "Triggering test notification")
-                    serviceRequestViewModel.testNotification(this)
-                  },
-                  3000)
-        } else {
-          Log.d("FCM_DEBUG", "Notification permission not granted")
-        }
-      } else {
-        // For older Android versions, no runtime permission needed
-        Handler(Looper.getMainLooper())
-            .postDelayed(
-                {
-                  Log.d("FCM_DEBUG", "Triggering test notification (pre-Tiramisu)")
-                  serviceRequestViewModel.testNotification(this)
-                },
-                3000)
-      }
 
       SampleAppTheme {
         Surface(modifier = Modifier.fillMaxSize(), color = colorScheme.background) { SolvitApp() }
