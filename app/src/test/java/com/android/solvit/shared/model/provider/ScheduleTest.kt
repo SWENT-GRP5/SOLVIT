@@ -183,4 +183,145 @@ class ScheduleTest {
     assertTrue(schedule.isAvailable(monday.withHour(16))) // After exception, during regular hours
     assertFalse(schedule.isAvailable(monday.withHour(19))) // Outside regular hours
   }
+
+  @Test
+  fun `setRegularHours updates existing hours`() {
+    val schedule = Schedule(mutableMapOf(), mutableListOf())
+    val initialSlots = listOf(TimeSlot(9, 0, 17, 0))
+    val newSlots = listOf(TimeSlot(10, 0, 15, 0))
+
+    // Set initial hours
+    schedule.setRegularHours(DayOfWeek.MONDAY.name, initialSlots)
+    assertEquals(1, schedule.regularHours[DayOfWeek.MONDAY.name]?.size)
+    assertEquals(9, schedule.regularHours[DayOfWeek.MONDAY.name]?.first()?.startHour)
+
+    // Update hours
+    schedule.setRegularHours(DayOfWeek.MONDAY.name, newSlots)
+    assertEquals(1, schedule.regularHours[DayOfWeek.MONDAY.name]?.size)
+    assertEquals(10, schedule.regularHours[DayOfWeek.MONDAY.name]?.first()?.startHour)
+  }
+
+  @Test
+  fun `clearRegularHours removes hours for specific day`() {
+    val schedule =
+        Schedule(
+            mutableMapOf(
+                DayOfWeek.MONDAY.name to mutableListOf(TimeSlot(9, 0, 17, 0)),
+                DayOfWeek.TUESDAY.name to mutableListOf(TimeSlot(10, 0, 16, 0))),
+            mutableListOf())
+
+    // Clear Monday's hours
+    schedule.clearRegularHours(DayOfWeek.MONDAY.name)
+    assertNull(schedule.regularHours[DayOfWeek.MONDAY.name])
+    assertNotNull(schedule.regularHours[DayOfWeek.TUESDAY.name])
+  }
+
+  @Test
+  fun `getExceptions filters by date range`() {
+    val schedule = Schedule(mutableMapOf(), mutableListOf())
+    val date1 = LocalDateTime.of(2024, 1, 1, 0, 0)
+    val date2 = LocalDateTime.of(2024, 1, 15, 0, 0)
+    val date3 = LocalDateTime.of(2024, 2, 1, 0, 0)
+
+    // Add exceptions on different dates
+    schedule.addException(date1, listOf(TimeSlot(9, 0, 17, 0)), ExceptionType.OFF_TIME)
+    schedule.addException(date2, listOf(TimeSlot(10, 0, 16, 0)), ExceptionType.EXTRA_TIME)
+    schedule.addException(date3, listOf(TimeSlot(11, 0, 15, 0)), ExceptionType.OFF_TIME)
+
+    // Test date range filtering
+    val januaryExceptions = schedule.getExceptions(date1, date2)
+    assertEquals(2, januaryExceptions.size)
+
+    val firstWeekExceptions = schedule.getExceptions(date1, date1.plusDays(7))
+    assertEquals(1, firstWeekExceptions.size)
+
+    val februaryExceptions = schedule.getExceptions(date3, date3.plusDays(1))
+    assertEquals(1, februaryExceptions.size)
+  }
+
+  @Test
+  fun `getExceptions filters by type`() {
+    val schedule = Schedule(mutableMapOf(), mutableListOf())
+    val date = LocalDateTime.of(2024, 1, 1, 0, 0)
+
+    // Add both types of exceptions
+    schedule.addException(date, listOf(TimeSlot(9, 0, 12, 0)), ExceptionType.OFF_TIME)
+    schedule.addException(date, listOf(TimeSlot(14, 0, 17, 0)), ExceptionType.EXTRA_TIME)
+
+    // Test filtering by type
+    val offTimeExceptions = schedule.getExceptions(date, date.plusDays(1), ExceptionType.OFF_TIME)
+    assertEquals(1, offTimeExceptions.size)
+    assertEquals(ExceptionType.OFF_TIME, offTimeExceptions.first().type)
+
+    val extraTimeExceptions =
+        schedule.getExceptions(date, date.plusDays(1), ExceptionType.EXTRA_TIME)
+    assertEquals(1, extraTimeExceptions.size)
+    assertEquals(ExceptionType.EXTRA_TIME, extraTimeExceptions.first().type)
+  }
+
+  @Test
+  fun `updateException handles type change`() {
+    val schedule = Schedule(mutableMapOf(), mutableListOf())
+    val date = LocalDateTime.of(2024, 1, 1, 0, 0)
+    val timeSlot = TimeSlot(9, 0, 17, 0)
+
+    // Add initial off-time exception
+    schedule.addException(date, listOf(timeSlot), ExceptionType.OFF_TIME)
+
+    // Update to extra-time
+    val result = schedule.updateException(date, listOf(timeSlot), ExceptionType.EXTRA_TIME)
+
+    // Verify type change
+    assertEquals(ExceptionType.EXTRA_TIME, result.exception.type)
+    assertEquals(1, schedule.exceptions.size)
+    assertEquals(ExceptionType.EXTRA_TIME, schedule.exceptions.first().type)
+  }
+
+  @Test
+  fun `overlapping exceptions with different types remain separate`() {
+    val schedule = Schedule(mutableMapOf(), mutableListOf())
+    val date = LocalDateTime.of(2024, 1, 1, 0, 0)
+    val timeSlot1 = TimeSlot(9, 0, 13, 0)
+    val timeSlot2 = TimeSlot(11, 0, 15, 0)
+
+    // Add overlapping exceptions of different types
+    schedule.addException(date, listOf(timeSlot1), ExceptionType.OFF_TIME)
+    schedule.addException(date, listOf(timeSlot2), ExceptionType.EXTRA_TIME)
+
+    // Verify exceptions remain separate
+    assertEquals(2, schedule.exceptions.size)
+    val exceptions = schedule.getExceptions(date, date)
+    assertEquals(2, exceptions.size)
+    assertTrue(
+        exceptions.any { it.type == ExceptionType.OFF_TIME && it.timeSlots.first().startHour == 9 })
+    assertTrue(
+        exceptions.any {
+          it.type == ExceptionType.EXTRA_TIME && it.timeSlots.first().startHour == 11
+        })
+  }
+
+  @Test
+  fun `test TimeSlot constructor validates time values`() {
+    // Valid time slots should be created without exception
+    TimeSlot(9, 0, 17, 0)
+    TimeSlot(0, 0, 23, 59)
+    TimeSlot(8, 30, 8, 45)
+
+    // Invalid hours
+    assertThrows(IllegalArgumentException::class.java) { TimeSlot(-1, 0, 17, 0) }
+    assertThrows(IllegalArgumentException::class.java) { TimeSlot(24, 0, 17, 0) }
+    assertThrows(IllegalArgumentException::class.java) { TimeSlot(9, 0, -1, 0) }
+    assertThrows(IllegalArgumentException::class.java) { TimeSlot(9, 0, 24, 0) }
+
+    // Invalid minutes
+    assertThrows(IllegalArgumentException::class.java) { TimeSlot(9, -1, 17, 0) }
+    assertThrows(IllegalArgumentException::class.java) { TimeSlot(9, 60, 17, 0) }
+    assertThrows(IllegalArgumentException::class.java) { TimeSlot(9, 0, 17, -1) }
+    assertThrows(IllegalArgumentException::class.java) { TimeSlot(9, 0, 17, 60) }
+
+    // End time before or equal to start time
+    assertThrows(IllegalArgumentException::class.java) { TimeSlot(17, 0, 9, 0) }
+    assertThrows(IllegalArgumentException::class.java) { TimeSlot(9, 0, 9, 0) }
+    assertThrows(IllegalArgumentException::class.java) { TimeSlot(9, 30, 9, 15) }
+  }
 }

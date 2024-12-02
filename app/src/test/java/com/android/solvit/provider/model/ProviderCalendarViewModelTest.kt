@@ -171,4 +171,135 @@ class ProviderCalendarViewModelTest {
     assert(successResult)
     assert(feedbackMessage.isNotEmpty())
   }
+
+  @Test
+  fun testSetRegularHours() = runTest {
+    // Given
+    val timeSlots = listOf(TimeSlot(9, 0, 17, 0))
+    var successResult = false
+
+    // When
+    providerCalendarViewModel.setRegularHours(DayOfWeek.TUESDAY.name, timeSlots) { success ->
+      successResult = success
+    }
+
+    // Then
+    verify(providerRepository).updateProvider(any(), any(), any())
+    assert(successResult)
+  }
+
+  @Test
+  fun testClearRegularHours() = runTest {
+    // Given
+    var successResult = false
+
+    // When
+    providerCalendarViewModel.clearRegularHours(DayOfWeek.MONDAY.name) { success ->
+      successResult = success
+    }
+
+    // Then
+    verify(providerRepository).updateProvider(any(), any(), any())
+    assert(successResult)
+  }
+
+  @Test
+  fun testUpdateException() = runTest {
+    // Given
+    val timeSlots = listOf(TimeSlot(10, 0, 15, 0))
+    val date = LocalDateTime.of(2024, 1, 1, 0, 0)
+    var successResult = false
+    var feedbackMessage = ""
+
+    // When
+    providerCalendarViewModel.updateException(date, timeSlots, ExceptionType.OFF_TIME) {
+        success,
+        feedback ->
+      successResult = success
+      feedbackMessage = feedback
+    }
+
+    // Then
+    verify(providerRepository).updateProvider(any(), any(), any())
+    assert(successResult)
+    assert(feedbackMessage.isNotEmpty())
+  }
+
+  @Test
+  fun testGetExceptions() = runTest {
+    // Given
+    val startDate = LocalDateTime.of(2024, 1, 1, 0, 0)
+    val endDate = LocalDateTime.of(2024, 1, 7, 0, 0)
+
+    // When
+    val exceptions = providerCalendarViewModel.getExceptions(startDate, endDate)
+
+    // Then
+    assert(exceptions.isNotEmpty())
+    assert(exceptions.first().type == ExceptionType.EXTRA_TIME)
+  }
+
+  @Test
+  fun testGetExceptionsWithType() = runTest {
+    // Given
+    val startDate = LocalDateTime.of(2024, 1, 1, 0, 0)
+    val endDate = LocalDateTime.of(2024, 1, 7, 0, 0)
+
+    // When
+    val extraTimeExceptions =
+        providerCalendarViewModel.getExceptions(startDate, endDate, ExceptionType.EXTRA_TIME)
+    val offTimeExceptions =
+        providerCalendarViewModel.getExceptions(startDate, endDate, ExceptionType.OFF_TIME)
+
+    // Then
+    assert(extraTimeExceptions.isNotEmpty())
+    assert(offTimeExceptions.isEmpty())
+    assert(extraTimeExceptions.all { it.type == ExceptionType.EXTRA_TIME })
+  }
+
+  @Test
+  fun testMergeOverlappingExceptions() = runTest {
+    // Given
+    val existingSlot = TimeSlot(9, 0, 13, 0)
+    val newSlot = TimeSlot(12, 0, 17, 0)
+    val date = LocalDateTime.of(2024, 1, 1, 0, 0)
+    var successResult = false
+    var feedbackMessage = ""
+
+    // Mock provider repository to return updated provider
+    doAnswer { invocation ->
+          val provider = invocation.getArgument<Provider>(0)
+          val onSuccess = invocation.getArgument<() -> Unit>(1)
+          onSuccess()
+          doAnswer { innerInvocation ->
+                val onSuccess = innerInvocation.getArgument<(Provider?) -> Unit>(1)
+                onSuccess(provider)
+                null
+              }
+              .`when`(providerRepository)
+              .getProvider(any(), any(), any())
+          null
+        }
+        .`when`(providerRepository)
+        .updateProvider(any(), any(), any())
+
+    // When
+    providerCalendarViewModel.addException(date, listOf(existingSlot), ExceptionType.EXTRA_TIME) {
+        success,
+        _ ->
+      if (success) {
+        providerCalendarViewModel.addException(date, listOf(newSlot), ExceptionType.EXTRA_TIME) {
+            mergeSuccess,
+            mergeFeedback ->
+          successResult = mergeSuccess
+          feedbackMessage = mergeFeedback
+        }
+      }
+    }
+
+    // Then
+    verify(providerRepository, times(2)).updateProvider(any(), any(), any())
+    assert(successResult)
+    assert(feedbackMessage.contains("merged"))
+  }
 }

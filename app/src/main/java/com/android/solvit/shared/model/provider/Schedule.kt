@@ -26,6 +26,10 @@ data class TimeSlot(
     get() = LocalTime.of(endHour, endMinute)
 
   init {
+    require(startHour in 0..23) { "Start hour must be between 0 and 23" }
+    require(startMinute in 0..59) { "Start minute must be between 0 and 59" }
+    require(endHour in 0..23) { "End hour must be between 0 and 23" }
+    require(endMinute in 0..59) { "End minute must be between 0 and 59" }
     require(startHour < endHour || (startHour == endHour && startMinute < endMinute)) {
       "Start time must be before end time"
     }
@@ -192,9 +196,8 @@ data class Schedule(
       timeSlots: List<TimeSlot>,
       type: ExceptionType
   ): ExceptionUpdateResult {
-    // Remove any existing exception of the same type on the same date
-    val existingException =
-        exceptions.find { it.date.toLocalDate() == date.toLocalDate() && it.type == type }
+    // Remove any existing exception on the same date
+    val existingException = exceptions.find { it.date.toLocalDate() == date.toLocalDate() }
 
     if (existingException != null) {
       exceptions.remove(existingException)
