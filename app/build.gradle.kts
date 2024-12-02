@@ -219,14 +219,17 @@ dependencies {
     implementation(libs.play.services.auth)
 
     // Firebase
+    implementation(platform(libs.firebase.bom.v3270))
     implementation(libs.firebase.database.ktx)
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.ui.auth)
     implementation(libs.firebase.auth.ktx)
     implementation(libs.firebase.auth)
+    implementation(libs.firebase.messaging.ktx)
 
     // Networking with OkHttp
     implementation(libs.okhttp)
+    implementation(libs.gson)
 
     // Testing Unit
     testImplementation(libs.junit)
@@ -274,6 +277,10 @@ dependencies {
 
     // ----------       Google AI     ------------
     implementation("com.google.ai.client.generativeai:generativeai:0.7.0")
+
+    // Add Firebase Functions dependency
+    implementation(platform("com.google.firebase:firebase-bom:32.6.0"))
+    implementation("com.google.firebase:firebase-functions-ktx")
 }
 
 tasks.withType<Test> {
@@ -313,4 +320,3 @@ tasks.register("jacocoTestReport", JacocoReport::class) {
         include("outputs/code_coverage/debugAndroidTest/connected/*/coverage.ec")
     })
 }
-
