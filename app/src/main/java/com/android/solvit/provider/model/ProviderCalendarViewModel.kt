@@ -17,6 +17,7 @@ import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.storage
 import java.time.LocalDateTime
+import java.time.ZoneId
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -252,21 +253,6 @@ class ProviderCalendarViewModel(
   }
 
   /**
-   * Validates a list of time slots. Ensures that each slot's start time is before its end time.
-   *
-   * @param timeSlots List of time slots to validate
-   * @return List of valid time slots
-   */
-  private fun validateTimeSlots(timeSlots: List<TimeSlot>): List<TimeSlot> {
-    val validSlots = timeSlots.filter { it.start < it.end }
-    if (validSlots.isEmpty() && timeSlots.isNotEmpty()) {
-      throw IllegalArgumentException(
-          "All time slots are invalid. End time must be after start time.")
-    }
-    return validSlots
-  }
-
-  /**
    * Adds a new schedule exception with validation and merging. Provides detailed feedback on the
    * operation result.
    *
@@ -300,6 +286,101 @@ class ProviderCalendarViewModel(
       onComplete(false, e.message ?: "Failed to add exception")
     }
   }
+
+  /**
+   * Checks if a service request conflicts with the provider's schedule. A conflict occurs when:
+   * 1. The request is outside regular working hours and no EXTRA_TIME exception exists
+   * 2. The request overlaps with an OFF_TIME exception
+   * 3. The request overlaps with another accepted service request
+   *
+   * @param serviceRequest The service request to check
+   * @return ConflictResult containing whether there's a conflict and the reason
+   */
+  fun checkServiceRequestConflict(serviceRequest: ServiceRequest): ConflictResult {
+    if (!::currentProvider.isInitialized) {
+      return ConflictResult(true, "Provider data not loaded")
+    }
+
+    val meetingTimestamp =
+        serviceRequest.meetingDate ?: return ConflictResult(true, "Meeting date not set")
+    val meetingDate =
+        LocalDateTime.ofInstant(meetingTimestamp.toDate().toInstant(), ZoneId.systemDefault())
+
+    // Create a TimeSlot for the 1-hour service duration
+    val timeSlot =
+        TimeSlot(
+            meetingDate.hour,
+            meetingDate.minute,
+            meetingDate.plusHours(1).hour,
+            meetingDate.plusHours(1).minute)
+
+    val dayOfWeek = meetingDate.dayOfWeek.name
+
+    // Check if it's during regular hours
+    val regularHours = currentProvider.schedule.regularHours[dayOfWeek] ?: emptyList()
+    val duringRegularHours =
+        regularHours.any { slot -> timeSlot.start >= slot.start && timeSlot.end <= slot.end }
+
+    // Check exceptions
+    val exceptions =
+        currentProvider.schedule.exceptions.filter {
+          it.date.toLocalDate() == meetingDate.toLocalDate()
+        }
+
+    val hasOffTimeConflict =
+        exceptions
+            .filter { it.type == ExceptionType.OFF_TIME }
+            .any { exception -> exception.timeSlots.any { it.overlaps(timeSlot) } }
+
+    // If outside regular hours, check for EXTRA_TIME exception
+    val hasExtraTimeException =
+        if (!duringRegularHours) {
+          exceptions
+              .filter { it.type == ExceptionType.EXTRA_TIME }
+              .any { exception ->
+                exception.timeSlots.any { slot ->
+                  timeSlot.start >= slot.start && timeSlot.end <= slot.end
+                }
+              }
+        } else true // During regular hours, so no need for EXTRA_TIME
+
+    // Check other service requests
+    val acceptedRequests = serviceRequestViewModel.acceptedRequests.value
+    val hasServiceRequestConflict =
+        acceptedRequests
+            .filter { request ->
+              request.meetingDate?.let { timestamp ->
+                LocalDateTime.ofInstant(timestamp.toDate().toInstant(), ZoneId.systemDefault())
+                    .toLocalDate() == meetingDate.toLocalDate()
+              } ?: false
+            }
+            .mapNotNull { request ->
+              request.meetingDate?.let { timestamp ->
+                val date =
+                    LocalDateTime.ofInstant(timestamp.toDate().toInstant(), ZoneId.systemDefault())
+                TimeSlot(date.hour, date.minute, date.plusHours(1).hour, date.plusHours(1).minute)
+              }
+            }
+            .any { it.overlaps(timeSlot) }
+
+    return when {
+      hasOffTimeConflict ->
+          ConflictResult(true, "This time slot conflicts with your off-time schedule")
+      hasServiceRequestConflict ->
+          ConflictResult(true, "This time slot conflicts with another accepted service request")
+      !duringRegularHours && !hasExtraTimeException ->
+          ConflictResult(true, "This time slot is outside your regular working hours")
+      else -> ConflictResult(false, "No conflicts")
+    }
+  }
+
+  /**
+   * Result of checking a service request for conflicts
+   *
+   * @param hasConflict Whether there is a conflict
+   * @param reason Description of the conflict or confirmation message
+   */
+  data class ConflictResult(val hasConflict: Boolean, val reason: String)
 
   companion object {
     /** Factory for creating instances of ProviderCalendarViewModel. */

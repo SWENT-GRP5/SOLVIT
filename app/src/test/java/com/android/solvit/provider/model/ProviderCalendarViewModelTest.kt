@@ -5,11 +5,16 @@ import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.authentication.User
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.provider.*
+import com.android.solvit.shared.model.request.ServiceRequest
+import com.android.solvit.shared.model.request.ServiceRequestStatus
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.service.Services
 import com.google.firebase.Timestamp
 import java.time.DayOfWeek
 import java.time.LocalDateTime
+import java.time.ZoneId
+import java.util.Date
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -31,7 +36,7 @@ class ProviderCalendarViewModelTest {
           exceptions =
               mutableListOf(
                   ScheduleException(
-                      LocalDateTime.of(2024, 1, 1, 0, 0), // First Monday of 2024
+                      LocalDateTime.of(2024, 1, 1, 0, 0),
                       listOf(TimeSlot(14, 0, 18, 0)),
                       ExceptionType.EXTRA_TIME)))
 
@@ -58,7 +63,7 @@ class ProviderCalendarViewModelTest {
   private lateinit var providerCalendarViewModel: ProviderCalendarViewModel
 
   @Before
-  fun setUp() {
+  fun setup() {
     providerRepository = Mockito.mock(ProviderRepository::class.java)
     val authRepository = Mockito.mock(AuthRepository::class.java)
     serviceRequestViewModel = Mockito.mock(ServiceRequestViewModel::class.java)
@@ -301,5 +306,241 @@ class ProviderCalendarViewModelTest {
     verify(providerRepository, times(2)).updateProvider(any(), any(), any())
     assert(successResult)
     assert(feedbackMessage.contains("merged"))
+  }
+
+  @Test
+  fun testCheckServiceRequestNoConflict() = runTest {
+    // Given
+    val meetingDate = LocalDateTime.of(2024, 1, 1, 10, 0) // Monday at 10:00
+    val timestamp = Timestamp(Date.from(meetingDate.atZone(ZoneId.systemDefault()).toInstant()))
+    val serviceRequest =
+        ServiceRequest(
+            uid = "test_request",
+            title = "Test Request",
+            type = Services.PLUMBER,
+            description = "",
+            userId = "test_customer",
+            providerId = testUserId,
+            dueDate = Timestamp.now(),
+            meetingDate = timestamp,
+            location = null,
+            status = ServiceRequestStatus.PENDING)
+
+    // Mock service request view model to return empty list
+    val emptyFlow = MutableStateFlow<List<ServiceRequest>>(emptyList())
+    doReturn(emptyFlow).`when`(serviceRequestViewModel).acceptedRequests
+
+    // When
+    val result = providerCalendarViewModel.checkServiceRequestConflict(serviceRequest)
+
+    // Then
+    assert(!result.hasConflict)
+    assert(result.reason == "No conflicts")
+  }
+
+  @Test
+  fun testCheckServiceRequestOutsideRegularHours() = runTest {
+    // Given
+    val meetingDate = LocalDateTime.of(2024, 1, 1, 8, 0) // Monday at 8:00 (before regular hours)
+    val timestamp = Timestamp(Date.from(meetingDate.atZone(ZoneId.systemDefault()).toInstant()))
+    val serviceRequest =
+        ServiceRequest(
+            uid = "test_request",
+            title = "Test Request",
+            type = Services.PLUMBER,
+            description = "",
+            userId = "test_customer",
+            providerId = testUserId,
+            dueDate = Timestamp.now(),
+            meetingDate = timestamp,
+            location = null,
+            status = ServiceRequestStatus.PENDING)
+
+    // Mock service request view model to return empty list
+    val emptyFlow = MutableStateFlow<List<ServiceRequest>>(emptyList())
+    doReturn(emptyFlow).`when`(serviceRequestViewModel).acceptedRequests
+
+    // When
+    val result = providerCalendarViewModel.checkServiceRequestConflict(serviceRequest)
+
+    // Then
+    assert(result.hasConflict)
+    assert(result.reason.contains("outside your regular working hours"))
+  }
+
+  @Test
+  fun testCheckServiceRequestWithOffTimeConflict() = runTest {
+    // Given
+    val exceptionDate = LocalDateTime.of(2024, 1, 1, 0, 0)
+    val offTimeException =
+        ScheduleException(exceptionDate, listOf(TimeSlot(10, 0, 11, 0)), ExceptionType.OFF_TIME)
+    testProvider.schedule.exceptions.add(offTimeException)
+
+    val meetingDate = LocalDateTime.of(2024, 1, 1, 10, 0)
+    val timestamp = Timestamp(Date.from(meetingDate.atZone(ZoneId.systemDefault()).toInstant()))
+    val serviceRequest =
+        ServiceRequest(
+            uid = "test_request",
+            title = "Test Request",
+            type = Services.PLUMBER,
+            description = "",
+            userId = "test_customer",
+            providerId = testUserId,
+            dueDate = Timestamp.now(),
+            meetingDate = timestamp,
+            location = null,
+            status = ServiceRequestStatus.PENDING)
+
+    // Mock service request view model to return empty list
+    val emptyFlow = MutableStateFlow<List<ServiceRequest>>(emptyList())
+    doReturn(emptyFlow).`when`(serviceRequestViewModel).acceptedRequests
+
+    // When
+    val result = providerCalendarViewModel.checkServiceRequestConflict(serviceRequest)
+
+    // Then
+    assert(result.hasConflict)
+    assert(result.reason.contains("conflicts with your off-time schedule"))
+  }
+
+  @Test
+  fun testCheckServiceRequestWithExistingRequestConflict() = runTest {
+    // Given
+    val existingMeetingDate = LocalDateTime.of(2024, 1, 1, 10, 0)
+    val existingTimestamp =
+        Timestamp(Date.from(existingMeetingDate.atZone(ZoneId.systemDefault()).toInstant()))
+    val existingRequest =
+        ServiceRequest(
+            uid = "existing_request",
+            title = "Existing Request",
+            type = Services.PLUMBER,
+            description = "",
+            userId = "test_customer",
+            providerId = testUserId,
+            dueDate = Timestamp.now(),
+            meetingDate = existingTimestamp,
+            location = null,
+            status = ServiceRequestStatus.ACCEPTED)
+
+    // Mock service request view model to return the existing request
+    val requestsFlow = MutableStateFlow(listOf(existingRequest))
+    doReturn(requestsFlow).`when`(serviceRequestViewModel).acceptedRequests
+
+    val newMeetingDate = LocalDateTime.of(2024, 1, 1, 10, 30) // Overlaps with existing request
+    val newTimestamp =
+        Timestamp(Date.from(newMeetingDate.atZone(ZoneId.systemDefault()).toInstant()))
+    val newRequest =
+        ServiceRequest(
+            uid = "new_request",
+            title = "New Request",
+            type = Services.PLUMBER,
+            description = "",
+            userId = "test_customer",
+            providerId = testUserId,
+            dueDate = Timestamp.now(),
+            meetingDate = newTimestamp,
+            location = null,
+            status = ServiceRequestStatus.PENDING)
+
+    // When
+    val result = providerCalendarViewModel.checkServiceRequestConflict(newRequest)
+
+    // Then
+    assert(result.hasConflict)
+    assert(result.reason.contains("conflicts with another accepted service request"))
+  }
+
+  @Test
+  fun testCheckServiceRequestNoMeetingDate() = runTest {
+    // Given
+    val serviceRequest =
+        ServiceRequest(
+            uid = "test_request",
+            title = "Test Request",
+            type = Services.PLUMBER,
+            description = "",
+            userId = "test_customer",
+            providerId = testUserId,
+            dueDate = Timestamp.now(),
+            meetingDate = null, // No meeting date set
+            location = null,
+            status = ServiceRequestStatus.PENDING)
+
+    // When
+    val result = providerCalendarViewModel.checkServiceRequestConflict(serviceRequest)
+
+    // Then
+    assert(result.hasConflict)
+    assert(result.reason == "Meeting date not set")
+  }
+
+  @Test
+  fun testProviderNotLoaded() = runTest {
+    // Given
+    val testId = "test_user_id"
+    val providerRepository = mock<ProviderRepository>()
+    val authViewModel = mock<AuthViewModel>()
+    val serviceRequestViewModel = mock<ServiceRequestViewModel>()
+
+    // Setup auth view model mock
+    val userFlow = MutableStateFlow(User(testId, "test@test.com", "provider"))
+    doReturn(userFlow).`when`(authViewModel).user
+
+    // Setup provider repository to return null provider
+    doAnswer { invocation ->
+          val onSuccess = invocation.getArgument<(Provider?) -> Unit>(1)
+          onSuccess(null)
+          null
+        }
+        .`when`(providerRepository)
+        .getProvider(eq(testId), any(), any())
+
+    // Setup service request view model mock
+    val acceptedRequestsFlow = MutableStateFlow<List<ServiceRequest>>(emptyList())
+    doReturn(acceptedRequestsFlow).`when`(serviceRequestViewModel).acceptedRequests
+
+    // Create view model with mocked dependencies
+    val calendarViewModel =
+        ProviderCalendarViewModel(providerRepository, authViewModel, serviceRequestViewModel)
+
+    // When
+    val result =
+        calendarViewModel.checkServiceRequestConflict(
+            ServiceRequest(
+                uid = "test_request",
+                title = "Test Request",
+                type = Services.PLUMBER,
+                description = "",
+                userId = "test_customer",
+                providerId = testId,
+                dueDate = Timestamp.now(),
+                meetingDate = Timestamp.now(),
+                location = null,
+                status = ServiceRequestStatus.PENDING))
+
+    // Then
+    assert(result.hasConflict)
+    assert(result.reason == "Provider data not loaded")
+  }
+
+  @Test
+  fun testLoadProviderData() = runTest {
+    // Given
+    val providerRepository = mock<ProviderRepository>()
+    val authViewModel = mock<AuthViewModel>()
+    val serviceRequestViewModel = mock<ServiceRequestViewModel>()
+
+    // Setup auth view model mock
+    val userFlow = MutableStateFlow(User(testUserId, "test@test.com", "provider"))
+    doReturn(userFlow).`when`(authViewModel).user
+
+    // Create view model with mocked dependencies
+    val calendarViewModel =
+        ProviderCalendarViewModel(providerRepository, authViewModel, serviceRequestViewModel)
+
+    // When - loadProvider() is called automatically in init
+
+    // Then
+    verify(providerRepository).getProvider(eq(testUserId), any(), any())
   }
 }
