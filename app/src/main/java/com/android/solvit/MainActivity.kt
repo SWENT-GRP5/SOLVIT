@@ -52,6 +52,7 @@ import com.android.solvit.shared.ui.authentication.SignUpChooseProfile
 import com.android.solvit.shared.ui.authentication.SignUpScreen
 import com.android.solvit.shared.ui.booking.ServiceBookingScreen
 import com.android.solvit.shared.ui.chat.AiSolverScreen
+import com.android.solvit.shared.ui.chat.AiSolverWelcomeScreen
 import com.android.solvit.shared.ui.chat.ChatScreen
 import com.android.solvit.shared.ui.chat.MessageBox
 import com.android.solvit.shared.ui.navigation.NavigationActions
@@ -67,8 +68,8 @@ class MainActivity : ComponentActivity() {
     setContent {
       SampleAppTheme {
         Surface(modifier = Modifier.fillMaxSize(), color = colorScheme.background) {
-          // SolvitApp()
-          AiSolverScreen()
+          SolvitApp()
+          // AiSolverScreen()
         }
       }
     }
@@ -197,6 +198,10 @@ fun SeekerUI(
           reviewViewModel,
           serviceRequestViewModel,
           authViewModel)
+    }
+    navigation(startDestination = Screen.AI_SOLVER_WELCOME_SCREEN, Route.AI_SOLVER) {
+      composable(Screen.AI_SOLVER_WELCOME_SCREEN) { AiSolverWelcomeScreen(navigationActions) }
+      composable(Screen.AI_SOLVER_CHAT_SCREEN) { AiSolverScreen(navigationActions) }
     }
     navigation(startDestination = Screen.INBOX, route = Route.INBOX) {
       composable(Screen.INBOX) {

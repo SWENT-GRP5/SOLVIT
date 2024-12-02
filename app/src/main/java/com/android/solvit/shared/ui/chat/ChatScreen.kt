@@ -72,6 +72,8 @@ import com.android.solvit.shared.model.chat.ChatMessage
 import com.android.solvit.shared.model.chat.ChatViewModel
 import com.android.solvit.shared.model.utils.loadBitmapFromUri
 import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.android.solvit.shared.ui.navigation.Route
+import com.android.solvit.shared.ui.navigation.Screen
 import com.android.solvit.shared.ui.utils.getReceiverImageUrl
 import com.android.solvit.shared.ui.utils.getReceiverName
 import com.google.firebase.auth.FirebaseAuth
@@ -132,73 +134,87 @@ fun ChatScreen(
       }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AiSolverWelcomeScreen() {
-  BoxWithConstraints(
-      modifier =
-          Modifier.fillMaxSize()
-              .background(color = Color(0xFFF5F5F5))
-              .testTag("AiGetStartedScreen"),
-      contentAlignment = Alignment.Center) {
-        val screenHeight = maxHeight
+fun AiSolverWelcomeScreen(navigationActions: NavigationActions) {
+  Scaffold(
+      topBar = {
+        TopAppBar(
+            title = {},
+            navigationIcon = {
+              IconButton(onClick = { navigationActions.goBack() }) {
+                Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+              }
+            },
+        )
+      }) { innerPadding ->
+        BoxWithConstraints(
+            modifier =
+                Modifier.fillMaxSize()
+                    .background(color = Color(0xFFF5F5F5))
+                    .padding(innerPadding)
+                    .testTag("AiGetStartedScreen"),
+            contentAlignment = Alignment.Center) {
+              val screenHeight = maxHeight
 
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceEvenly,
-            modifier = Modifier.fillMaxHeight()) {
-              Text(
-                  text =
-                      buildAnnotatedString {
-                        withStyle(
-                            style =
-                                SpanStyle(
-                                    color = Color.Black,
-                                    fontSize = screenHeight.times(0.03f).value.sp)) {
-                              append("Meet Your Personal ")
-                            }
-                        withStyle(
-                            style =
-                                SpanStyle(
-                                    color = Color(0xFF6AA84F),
-                                    fontSize = screenHeight.times(0.03f).value.sp)) {
-                              append("AI\n")
-                            }
-                        withStyle(
-                            style =
-                                SpanStyle(
-                                    color = Color(0xFF6AA84F),
-                                    fontSize = screenHeight.times(0.03f).value.sp)) {
-                              append("Problem Solver")
-                            }
-                      },
-                  textAlign = TextAlign.Center,
-                  modifier = Modifier.padding(horizontal = 16.dp).testTag("title"))
-
-              Image(
-                  modifier = Modifier.testTag("image"),
-                  painter = painterResource(id = R.drawable.ai_logo),
-                  contentDescription = "ai logo",
-                  contentScale = ContentScale.FillBounds)
-
-              Text(
-                  text = "I'm pleased that I meet you! How can\nI help you right now?",
-                  fontSize = screenHeight.times(0.02f).value.sp,
-                  color = Color.Gray,
-                  textAlign = TextAlign.Center,
-                  modifier = Modifier.padding(horizontal = 16.dp))
-
-              Button(
-                  onClick = {},
-                  colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6AA84F)),
-                  shape = RoundedCornerShape(50),
-                  modifier =
-                      Modifier.fillMaxWidth(0.8f)
-                          .height(screenHeight.times(0.07f))
-                          .testTag("getStartedButton")) {
+              Column(
+                  horizontalAlignment = Alignment.CenterHorizontally,
+                  verticalArrangement = Arrangement.SpaceEvenly,
+                  modifier = Modifier.fillMaxHeight()) {
                     Text(
-                        text = "Get Started",
-                        fontSize = screenHeight.times(0.025f).value.sp,
-                        color = Color.White)
+                        text =
+                            buildAnnotatedString {
+                              withStyle(
+                                  style =
+                                      SpanStyle(
+                                          color = Color.Black,
+                                          fontSize = screenHeight.times(0.03f).value.sp)) {
+                                    append("Meet Your Personal ")
+                                  }
+                              withStyle(
+                                  style =
+                                      SpanStyle(
+                                          color = Color(0xFF6AA84F),
+                                          fontSize = screenHeight.times(0.03f).value.sp)) {
+                                    append("AI\n")
+                                  }
+                              withStyle(
+                                  style =
+                                      SpanStyle(
+                                          color = Color(0xFF6AA84F),
+                                          fontSize = screenHeight.times(0.03f).value.sp)) {
+                                    append("Problem Solver")
+                                  }
+                            },
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(horizontal = 16.dp).testTag("title"))
+
+                    Image(
+                        modifier = Modifier.testTag("image"),
+                        painter = painterResource(id = R.drawable.ai_logo),
+                        contentDescription = "ai logo",
+                        contentScale = ContentScale.FillBounds)
+
+                    Text(
+                        text = "I'm pleased that I meet you! How can\nI help you right now?",
+                        fontSize = screenHeight.times(0.02f).value.sp,
+                        color = Color.Gray,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(horizontal = 16.dp))
+
+                    Button(
+                        onClick = { navigationActions.navigateTo(Screen.AI_SOLVER_CHAT_SCREEN) },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6AA84F)),
+                        shape = RoundedCornerShape(50),
+                        modifier =
+                            Modifier.fillMaxWidth(0.8f)
+                                .height(screenHeight.times(0.07f))
+                                .testTag("getStartedButton")) {
+                          Text(
+                              text = "Get Started",
+                              fontSize = screenHeight.times(0.025f).value.sp,
+                              color = Color.White)
+                        }
                   }
             }
       }
@@ -206,14 +222,14 @@ fun AiSolverWelcomeScreen() {
 
 /** Chat with Ai problem solver chatbot */
 @Composable
-fun AiSolverScreen() {
+fun AiSolverScreen(navigationActions: NavigationActions) {
   // To send Image Messages
   var imageUri by remember { mutableStateOf<Uri?>(null) }
   var imageBitmap by remember { mutableStateOf<Bitmap?>(null) }
   val localContext = LocalContext.current
   Scaffold(
       modifier = Modifier.testTag("AiSolverScreen"),
-      topBar = { AiSolverHeader() },
+      topBar = { AiSolverHeader(navigationActions) },
       bottomBar = {
         MessageInputBar(
             isAiSolverScreen = true,
@@ -229,7 +245,7 @@ fun AiSolverScreen() {
 /** Header of Chat with Ai problem solver */
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun AiSolverHeader() {
+fun AiSolverHeader(navigationActions: NavigationActions) {
   TopAppBar(
       modifier = Modifier.testTag("AiChatHeader"),
       title = {
@@ -238,7 +254,9 @@ fun AiSolverHeader() {
         }
       },
       navigationIcon = {
-        IconButton(onClick = {}) { Icon(Icons.Default.ArrowBack, contentDescription = "Back") }
+        IconButton(onClick = { navigationActions.navigateTo(Route.SERVICES) }) {
+          Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+        }
       },
       colors =
           TopAppBarDefaults.topAppBarColors(

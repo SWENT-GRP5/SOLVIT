@@ -194,24 +194,21 @@ fun ShortcutsSection(
             modifier =
                 Modifier.fillMaxWidth()
                     .background(LightOrange, shape = RoundedCornerShape(16.dp))
-                    .clickable {
-                      listProviderViewModel.getProviders()
-                      navigationActions.navigateTo(Route.PROVIDERS)
-                    }
+                    .clickable { navigationActions.navigateTo(Route.AI_SOLVER) }
                     .testTag("servicesScreenProvidersShortcut")) {
               Row(
                   modifier = Modifier.padding(16.dp).fillMaxWidth(),
                   verticalAlignment = Alignment.CenterVertically,
                   horizontalArrangement = Arrangement.SpaceBetween) {
                     Text(
-                        "Service Providers",
+                        "Solve It with AI",
                         color = colorScheme.onPrimary,
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold)
                     Image(
-                        painter = painterResource(id = R.drawable.providers_ovw_image),
-                        contentDescription = "service providers",
-                        modifier = Modifier.size(32.dp).clip(CircleShape))
+                        painter = painterResource(id = R.drawable.ai_logo),
+                        contentDescription = "ai_logo",
+                        modifier = Modifier.size(40.dp).clip(CircleShape))
                   }
             }
         Row(
