@@ -152,7 +152,7 @@ class ServiceRequestViewModelTest {
 
   @Test
   fun confirmRequest_callsRepository() {
-    serviceRequestViewModel.confirmRequest(serviceRequest)
+    serviceRequestViewModel.confirmRequest(serviceRequest, providerName = "Test Provider")
     verify(serviceRequestRepository)
         .saveServiceRequest(
             eq(serviceRequest.copy(status = ServiceRequestStatus.ACCEPTED)), any(), any())
