@@ -26,7 +26,6 @@ class AiSolverChat {
   @Test
   fun AllComponentsAreDisplayedAiChatScreen() {
     composeTestRule.setContent { AiSolverScreen() }
-
     composeTestRule.onNodeWithTag("AiSolverScreen").assertIsDisplayed()
     composeTestRule.onNodeWithTag("AiChatHeader").assertIsDisplayed()
     composeTestRule.onNodeWithTag("SendMessageBar").assertIsDisplayed()

@@ -49,6 +49,15 @@ class AiSolverViewModel : ViewModel() {
 
   data class UserInput(val description: String, val imagePath: String?)
 
+  /** set the MessageContext of conversation */
+  fun setMessageContext(messages: List<ChatMessage>) {
+    _messageContext.value = messages
+  }
+
+  /** Update Message Context With New Messages */
+  fun updateMessageContext(message: ChatMessage) {
+    _messageContext.value += message
+  }
   /**
    * Build prompt for the AI problem's solver
    *
