@@ -95,6 +95,7 @@ fun CreateRequestScreen(
   if (showMultiStepDialog) {
     MultiStepDialog(
         requestViewModel = requestViewModel,
+        context = localContext,
         showDialog = showMultiStepDialog,
         currentStep = currentStep,
         selectedImages = selectedImages,

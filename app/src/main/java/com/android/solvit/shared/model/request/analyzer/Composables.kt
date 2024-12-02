@@ -1,6 +1,8 @@
 package com.android.solvit.shared.model.request.analyzer
 
+import android.content.Context
 import android.net.Uri
+import android.util.Base64
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -58,6 +60,7 @@ import androidx.compose.ui.window.Dialog
 import coil.compose.AsyncImage
 import com.android.solvit.R
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
+import com.android.solvit.shared.model.utils.loadBitmapFromUri
 import com.android.solvit.shared.ui.theme.Background
 import com.android.solvit.shared.ui.theme.Error
 import com.android.solvit.shared.ui.theme.OnBackground
@@ -73,6 +76,8 @@ import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.io.ByteArrayOutputStream
+import java.io.InputStream
 
 @Composable
 fun AIAssistantDialog(onCancel: () -> Unit, onUploadPictures: () -> Unit) {
@@ -317,6 +322,7 @@ fun PreviewAIAssistantDialog() {
 @Composable
 fun MultiStepDialog(
     requestViewModel: ServiceRequestViewModel,
+    context: Context,
     showDialog: Boolean,
     currentStep: Int,
     selectedImages: List<Uri>,
@@ -348,7 +354,7 @@ fun MultiStepDialog(
                     isLoading = true
                     try {
                       val (title, type, description) =
-                          uploadAndAnalyze(requestViewModel, selectedImages)
+                          uploadAndAnalyze(context,selectedImages)
                       onAnalyzeComplete(title, type, description)
                     } catch (e: Exception) {
                       Log.e("MultiStepDialog", "Error: ${e.message}")
@@ -403,6 +409,8 @@ fun MultiStepDialog(
   }
 }
 
+
+/*
 suspend fun uploadAndAnalyze(
     requestViewModel: ServiceRequestViewModel,
     imageUris: List<Uri>
@@ -428,4 +436,30 @@ suspend fun uploadAndAnalyze(
       throw Exception("Error during upload and analysis: ${e.message}")
     }
   }
+}
+*/
+
+
+
+suspend fun uploadAndAnalyze(
+    context: Context,
+    imageUris: List<Uri>
+): Triple<String, String, String> {
+    return withContext(Dispatchers.IO) {
+        try {
+            // Step 1: Convert URIs to Base64 strings
+            val bitMapImages = imageUris.mapNotNull { uri ->
+                loadBitmapFromUri(context,uri)
+            }
+
+            // Log converted Base64 strings (For debugging, avoid logging sensitive data in production)
+            //Log.i("uploadAndAnalyze", "Converted Base64 Images: ${base64Images.size}")
+
+            // Step 2: Analyze images using Base64 strings
+            analyzeImagesGemini(bitMapImages)
+        } catch (e: Exception) {
+            Log.e("uploadAndAnalyze", "Error: ${e.message}", e)
+            throw Exception("Error during conversion and analysis: ${e.message}")
+        }
+    }
 }
