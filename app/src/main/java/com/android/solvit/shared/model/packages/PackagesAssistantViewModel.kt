@@ -25,7 +25,7 @@ class PackagesAssistantViewModel : ViewModel() {
   private val _isLoading = MutableStateFlow(false)
   val isLoading: StateFlow<Boolean> = _isLoading
 
-    // Schema for the package proposals structured response
+  // Schema for the package proposals structured response
   private val schema =
       Schema(
           name = "PackageProposals",
@@ -83,7 +83,7 @@ class PackagesAssistantViewModel : ViewModel() {
                                           description = "A bullet point of the package proposal"),
                               ))))
 
-    // Generative model for generating package proposals
+  // Generative model for generating package proposals
   private val model =
       GenerativeModel(
           modelName = "gemini-1.5-flash",
@@ -104,7 +104,7 @@ class PackagesAssistantViewModel : ViewModel() {
                   SafetySetting(HarmCategory.SEXUALLY_EXPLICIT, BlockThreshold.MEDIUM_AND_ABOVE),
                   SafetySetting(HarmCategory.DANGEROUS_CONTENT, BlockThreshold.MEDIUM_AND_ABOVE)))
 
-    // Fetch package proposals for a given service type
+  // Fetch package proposals for a given service type
   fun fetchPackageProposals(
       type: Services,
       numberOfPackages: Int,
@@ -138,7 +138,7 @@ class PackagesAssistantViewModel : ViewModel() {
         }
   }
 
-    // Convert the JSON response to a list of package proposals
+  // Convert the JSON response to a list of package proposals
   private fun jsonToPackageProposals(
       response: String,
       viewModel: PackageProposalViewModel,
@@ -152,13 +152,13 @@ class PackagesAssistantViewModel : ViewModel() {
     }
   }
 
-    /**
-     * Generate a prompt for the package proposals to ensure the model generates the correct content.
-     * The prompt can be refined further based on the specific requirements of the service type.
-     *
-     * @param type The type of service for which the package proposals are being generated.
-     * @param numberOfPackages The number of package proposals to generate.
-     */
+  /**
+   * Generate a prompt for the package proposals to ensure the model generates the correct content.
+   * The prompt can be refined further based on the specific requirements of the service type.
+   *
+   * @param type The type of service for which the package proposals are being generated.
+   * @param numberOfPackages The number of package proposals to generate.
+   */
   private fun generatePrompt(type: Services, numberOfPackages: Int): String {
     return """
             Generate a list of $numberOfPackages package proposals for this type of service ($type) using the provided schema.

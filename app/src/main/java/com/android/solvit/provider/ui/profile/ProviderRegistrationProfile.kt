@@ -720,7 +720,7 @@ fun ProviderPackages(
     providerId: String,
     type: Services
 ) {
-    // States to manage the menus and dialogs
+  // States to manage the menus and dialogs
   var expanded by remember { mutableStateOf(false) }
   var showDialog by remember { mutableStateOf(false) }
   var showForm by remember { mutableStateOf(false) }
@@ -932,17 +932,17 @@ fun PackageProposalDialog(
     assistantViewModel: PackagesAssistantViewModel,
     packageViewModel: PackageProposalViewModel
 ) {
-    // States to manage the dialog
+  // States to manage the dialog
   var numberOfPackages by remember { mutableIntStateOf(0) }
   var expanded by remember { mutableStateOf(false) }
   val assistantPackages = assistantViewModel.packageProposals.collectAsState()
   val isLoading = assistantViewModel.isLoading.collectAsState()
 
-    // Dialog to generate packages with AI
+  // Dialog to generate packages with AI
   AlertDialog(
       onDismissRequest = onDismiss,
       title = {
-          // Dialog Title
+        // Dialog Title
         Text(
             text = "Generate Packages with AI",
             style = MaterialTheme.typography.titleLarge,
@@ -952,7 +952,7 @@ fun PackageProposalDialog(
         Column(
             modifier = Modifier.fillMaxWidth().padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            // Select the number of packages
+              // Select the number of packages
               ExposedDropdownMenuBox(
                   expanded = expanded, onExpandedChange = { expanded = !expanded }) {
                     TextField(
@@ -976,7 +976,7 @@ fun PackageProposalDialog(
                           }
                         }
                   }
-                // Button to generate packages
+              // Button to generate packages
               Button(
                   onClick = {
                     assistantViewModel.fetchPackageProposals(
@@ -989,11 +989,11 @@ fun PackageProposalDialog(
                     Text("Generate")
                   }
               if (isLoading.value) {
-                  // Show loading indicator while fetching packages
+                // Show loading indicator while fetching packages
                 CircularProgressIndicator(
                     modifier = Modifier.align(Alignment.CenterHorizontally).padding(top = 16.dp))
               } else if (assistantPackages.value.isNotEmpty()) {
-                    // Display the generated packages
+                // Display the generated packages
                 LazyRow(
                     modifier = Modifier.fillMaxWidth().testTag("packagesScrollableList"),
                     horizontalArrangement = Arrangement.spacedBy(20.dp),
