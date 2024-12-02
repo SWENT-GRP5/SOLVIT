@@ -135,7 +135,10 @@ fun ChatScreen(
 @Composable
 fun AiSolverWelcomeScreen() {
   BoxWithConstraints(
-      modifier = Modifier.fillMaxSize().background(color = Color(0xFFF5F5F5)),
+      modifier =
+          Modifier.fillMaxSize()
+              .background(color = Color(0xFFF5F5F5))
+              .testTag("AiGetStartedScreen"),
       contentAlignment = Alignment.Center) {
         val screenHeight = maxHeight
 
@@ -169,9 +172,10 @@ fun AiSolverWelcomeScreen() {
                             }
                       },
                   textAlign = TextAlign.Center,
-                  modifier = Modifier.padding(horizontal = 16.dp))
+                  modifier = Modifier.padding(horizontal = 16.dp).testTag("title"))
 
               Image(
+                  modifier = Modifier.testTag("image"),
                   painter = painterResource(id = R.drawable.ai_logo),
                   contentDescription = "ai logo",
                   contentScale = ContentScale.FillBounds)
@@ -187,7 +191,10 @@ fun AiSolverWelcomeScreen() {
                   onClick = {},
                   colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6AA84F)),
                   shape = RoundedCornerShape(50),
-                  modifier = Modifier.fillMaxWidth(0.8f).height(screenHeight.times(0.07f))) {
+                  modifier =
+                      Modifier.fillMaxWidth(0.8f)
+                          .height(screenHeight.times(0.07f))
+                          .testTag("getStartedButton")) {
                     Text(
                         text = "Get Started",
                         fontSize = screenHeight.times(0.025f).value.sp,
@@ -215,7 +222,7 @@ fun AiSolverScreen() {
               uri?.let { imageBitmap = loadBitmapFromUri(localContext, it) }
             })
       }) { paddingValues ->
-        LazyColumn(modifier = Modifier.padding(paddingValues)) {}
+        LazyColumn(modifier = Modifier.padding(paddingValues).imePadding().testTag("chat")) {}
       }
 }
 
@@ -224,7 +231,7 @@ fun AiSolverScreen() {
 @OptIn(ExperimentalMaterial3Api::class)
 fun AiSolverHeader() {
   TopAppBar(
-      modifier = Modifier.testTag("AiHeader"),
+      modifier = Modifier.testTag("AiChatHeader"),
       title = {
         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
           Text(text = "Ai Solver", style = MaterialTheme.typography.headlineLarge)
@@ -389,13 +396,15 @@ fun MessageInputBar(
       }
     }
 
-    IconButton(onClick = { imagePickerLauncher.launch("image/*") }) {
-      Icon(
-          imageVector = Icons.Default.AddCircle,
-          contentDescription = "upload image",
-          tint = MaterialTheme.colorScheme.onSurfaceVariant,
-      )
-    }
+    IconButton(
+        onClick = { imagePickerLauncher.launch("image/*") },
+        modifier = Modifier.testTag("uploadImageButton")) {
+          Icon(
+              imageVector = Icons.Default.AddCircle,
+              contentDescription = "upload image",
+              tint = MaterialTheme.colorScheme.onSurfaceVariant,
+          )
+        }
     // Button to send your message
     IconButton(
         onClick = {
