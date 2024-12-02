@@ -1,12 +1,22 @@
 package com.android.solvit.shared.ui.chat
 
+import android.graphics.Bitmap
+import android.net.Uri
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -16,8 +26,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Send
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -27,6 +40,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -43,13 +57,20 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.android.solvit.R
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.chat.ChatAssistantViewModel
 import com.android.solvit.shared.model.chat.ChatMessage
 import com.android.solvit.shared.model.chat.ChatViewModel
+import com.android.solvit.shared.model.utils.loadBitmapFromUri
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.utils.getReceiverImageUrl
 import com.android.solvit.shared.ui.utils.getReceiverName
@@ -60,7 +81,7 @@ fun ChatScreen(
     navigationActions: NavigationActions,
     chatViewModel: ChatViewModel,
     authViewModel: AuthViewModel,
-    chatAssistantViewModel: ChatAssistantViewModel
+    chatAssistantViewModel: ChatAssistantViewModel,
 ) {
   chatAssistantViewModel.clear()
 
@@ -75,6 +96,11 @@ fun ChatScreen(
   val user by authViewModel.user.collectAsState()
   chatAssistantViewModel.setContext(messages, "Hassan", receiverName)
 
+  // To send Image Messages
+  var imageUri by remember { mutableStateOf<Uri?>(null) }
+  var imageBitmap by remember { mutableStateOf<Bitmap?>(null) }
+  val localContext = LocalContext.current
+
   Scaffold(
       topBar = {
         ChatHeader(
@@ -84,7 +110,12 @@ fun ChatScreen(
         MessageInputBar(
             chatViewModel = chatViewModel,
             authViewModel = authViewModel,
-            chatAssistantViewModel = chatAssistantViewModel)
+            chatAssistantViewModel = chatAssistantViewModel,
+            isAiSolverScreen = false,
+            onImageSelected = { uri: Uri? ->
+              imageUri = uri
+              uri?.let { imageBitmap = loadBitmapFromUri(localContext, it) }
+            })
       }) { paddingValues ->
         LazyColumn(
             modifier = Modifier.padding(paddingValues).imePadding().testTag("conversation")) {
@@ -99,6 +130,116 @@ fun ChatScreen(
               }
             }
       }
+}
+
+@Composable
+fun AiSolverWelcomeScreen() {
+  BoxWithConstraints(
+      modifier = Modifier.fillMaxSize().background(color = Color(0xFFF5F5F5)),
+      contentAlignment = Alignment.Center) {
+        val screenHeight = maxHeight
+
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceEvenly,
+            modifier = Modifier.fillMaxHeight()) {
+              Text(
+                  text =
+                      buildAnnotatedString {
+                        withStyle(
+                            style =
+                                SpanStyle(
+                                    color = Color.Black,
+                                    fontSize = screenHeight.times(0.03f).value.sp)) {
+                              append("Meet Your Personal ")
+                            }
+                        withStyle(
+                            style =
+                                SpanStyle(
+                                    color = Color(0xFF6AA84F),
+                                    fontSize = screenHeight.times(0.03f).value.sp)) {
+                              append("AI\n")
+                            }
+                        withStyle(
+                            style =
+                                SpanStyle(
+                                    color = Color(0xFF6AA84F),
+                                    fontSize = screenHeight.times(0.03f).value.sp)) {
+                              append("Problem Solver")
+                            }
+                      },
+                  textAlign = TextAlign.Center,
+                  modifier = Modifier.padding(horizontal = 16.dp))
+
+              Image(
+                  painter = painterResource(id = R.drawable.ai_logo),
+                  contentDescription = "ai logo",
+                  contentScale = ContentScale.FillBounds)
+
+              Text(
+                  text = "I'm pleased that I meet you! How can\nI help you right now?",
+                  fontSize = screenHeight.times(0.02f).value.sp,
+                  color = Color.Gray,
+                  textAlign = TextAlign.Center,
+                  modifier = Modifier.padding(horizontal = 16.dp))
+
+              Button(
+                  onClick = {},
+                  colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6AA84F)),
+                  shape = RoundedCornerShape(50),
+                  modifier = Modifier.fillMaxWidth(0.8f).height(screenHeight.times(0.07f))) {
+                    Text(
+                        text = "Get Started",
+                        fontSize = screenHeight.times(0.025f).value.sp,
+                        color = Color.White)
+                  }
+            }
+      }
+}
+
+/** Chat with Ai problem solver chatbot */
+@Composable
+fun AiSolverScreen() {
+  // To send Image Messages
+  var imageUri by remember { mutableStateOf<Uri?>(null) }
+  var imageBitmap by remember { mutableStateOf<Bitmap?>(null) }
+  val localContext = LocalContext.current
+  Scaffold(
+      modifier = Modifier.testTag("AiSolverScreen"),
+      topBar = { AiSolverHeader() },
+      bottomBar = {
+        MessageInputBar(
+            isAiSolverScreen = true,
+            onImageSelected = { uri: Uri? ->
+              imageUri = uri
+              uri?.let { imageBitmap = loadBitmapFromUri(localContext, it) }
+            })
+      }) { paddingValues ->
+        LazyColumn(modifier = Modifier.padding(paddingValues)) {}
+      }
+}
+
+/** Header of Chat with Ai problem solver */
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+fun AiSolverHeader() {
+  TopAppBar(
+      modifier = Modifier.testTag("AiHeader"),
+      title = {
+        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+          Text(text = "Ai Solver", style = MaterialTheme.typography.headlineLarge)
+        }
+      },
+      navigationIcon = {
+        IconButton(onClick = {}) { Icon(Icons.Default.ArrowBack, contentDescription = "Back") }
+      },
+      colors =
+          TopAppBarDefaults.topAppBarColors(
+              containerColor = Color.White,
+              titleContentColor = Color.Black,
+              navigationIconContentColor = Color.Black,
+              actionIconContentColor = Color.Black),
+  )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -182,13 +323,21 @@ fun SentMessage(
 
 @Composable
 fun MessageInputBar(
-    chatViewModel: ChatViewModel,
-    authViewModel: AuthViewModel,
-    chatAssistantViewModel: ChatAssistantViewModel
+    chatViewModel: ChatViewModel = viewModel(factory = ChatViewModel.Factory),
+    authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory),
+    chatAssistantViewModel: ChatAssistantViewModel =
+        viewModel(factory = ChatAssistantViewModel.Factory),
+    onImageSelected: (Uri?) -> Unit,
+    isAiSolverScreen: Boolean
 ) {
 
   var message by remember { mutableStateOf("") }
   val current = LocalContext.current
+
+  val imagePickerLauncher =
+      rememberLauncherForActivityResult(
+          contract = ActivityResultContracts.GetContent(),
+          onResult = { uri: Uri? -> onImageSelected(uri) })
   Row(
       modifier =
           Modifier.fillMaxWidth()
@@ -222,20 +371,31 @@ fun MessageInputBar(
     // State to control the visibility of the Chat Assistant Dialog
     var showDialog by remember { mutableStateOf(false) }
 
-    // Button to Use the Chat Assistant
-    IconButton(onClick = { showDialog = true }, modifier = Modifier.size(48.dp)) {
+    if (!isAiSolverScreen) {
+      // Button to Use the Chat Assistant
+      IconButton(onClick = { showDialog = true }, modifier = Modifier.size(48.dp)) {
+        Icon(
+            painter = painterResource(R.drawable.ai_message),
+            contentDescription = "chat assistant",
+            tint = MaterialTheme.colorScheme.onSurfaceVariant)
+      }
+
+      // Show the Chat Assistant Dialog if showDialog is true
+      if (showDialog) {
+        ChatAssistantDialog(
+            chatAssistantViewModel,
+            onDismiss = { showDialog = false },
+            onResponse = { message = it })
+      }
+    }
+
+    IconButton(onClick = { imagePickerLauncher.launch("image/*") }) {
       Icon(
-          painter = painterResource(R.drawable.ai_message),
-          contentDescription = "chat assistant",
-          tint = MaterialTheme.colorScheme.onSurfaceVariant)
+          imageVector = Icons.Default.AddCircle,
+          contentDescription = "upload image",
+          tint = MaterialTheme.colorScheme.onSurfaceVariant,
+      )
     }
-
-    // Show the Chat Assistant Dialog if showDialog is true
-    if (showDialog) {
-      ChatAssistantDialog(
-          chatAssistantViewModel, onDismiss = { showDialog = false }, onResponse = { message = it })
-    }
-
     // Button to send your message
     IconButton(
         onClick = {

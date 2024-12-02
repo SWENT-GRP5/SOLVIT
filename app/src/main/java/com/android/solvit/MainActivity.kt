@@ -51,6 +51,7 @@ import com.android.solvit.shared.ui.authentication.SignInScreen
 import com.android.solvit.shared.ui.authentication.SignUpChooseProfile
 import com.android.solvit.shared.ui.authentication.SignUpScreen
 import com.android.solvit.shared.ui.booking.ServiceBookingScreen
+import com.android.solvit.shared.ui.chat.AiSolverScreen
 import com.android.solvit.shared.ui.chat.ChatScreen
 import com.android.solvit.shared.ui.chat.MessageBox
 import com.android.solvit.shared.ui.navigation.NavigationActions
@@ -65,7 +66,10 @@ class MainActivity : ComponentActivity() {
 
     setContent {
       SampleAppTheme {
-        Surface(modifier = Modifier.fillMaxSize(), color = colorScheme.background) { SolvitApp() }
+        Surface(modifier = Modifier.fillMaxSize(), color = colorScheme.background) {
+          // SolvitApp()
+          AiSolverScreen()
+        }
       }
     }
   }
