@@ -37,7 +37,12 @@ class ServiceRequestViewModelTest {
   @Before
   fun setUp() {
     serviceRequestRepository = mock(ServiceRequestRepository::class.java)
-    serviceRequestViewModel = ServiceRequestViewModel(serviceRequestRepository)
+    serviceRequestViewModel =
+        ServiceRequestViewModel(
+            repository = serviceRequestRepository,
+            notificationManager = null,
+            authViewModel = null,
+            fcmTokenManager = null)
   }
 
   @Test

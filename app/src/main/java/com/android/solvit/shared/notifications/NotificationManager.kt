@@ -7,10 +7,13 @@ import com.google.gson.Gson
 import kotlinx.coroutines.tasks.await
 
 /** Manages sending FCM notifications through Firebase Cloud Functions */
-class NotificationManager private constructor() {
-  private val functions = FirebaseFunctions.getInstance()
+class NotificationManager
+private constructor(
+    private val functions: FirebaseFunctions = FirebaseFunctions.getInstance(),
+    private val auth: FirebaseAuth = FirebaseAuth.getInstance(),
+    private val fcmTokenManager: FcmTokenManager = FcmTokenManager.getInstance()
+) {
   private val gson = Gson()
-  private val fcmTokenManager = FcmTokenManager.getInstance()
 
   companion object {
     private const val TAG = "FCM_DEBUG"
@@ -18,9 +21,19 @@ class NotificationManager private constructor() {
 
     @Volatile private var instance: NotificationManager? = null
 
-    fun getInstance(): NotificationManager {
+    fun getInstance(
+        functions: FirebaseFunctions = FirebaseFunctions.getInstance(),
+        auth: FirebaseAuth = FirebaseAuth.getInstance(),
+        fcmTokenManager: FcmTokenManager = FcmTokenManager.getInstance()
+    ): NotificationManager {
       return instance
-          ?: synchronized(this) { instance ?: NotificationManager().also { instance = it } }
+          ?: synchronized(this) {
+            instance ?: NotificationManager(functions, auth, fcmTokenManager).also { instance = it }
+          }
+    }
+
+    fun clearInstance() {
+      instance = null
     }
   }
 
@@ -32,20 +45,32 @@ class NotificationManager private constructor() {
       data: Map<String, String> = emptyMap()
   ): Result<Unit> {
     return try {
-      Log.d(TAG, "Preparing to send notification to user: $recipientUserId")
-
-      // Get recipient's FCM token
-      val recipientToken = fcmTokenManager.getUserFcmToken(recipientUserId)
-      if (recipientToken == null) {
-        Log.e(TAG, "No FCM token found for user: $recipientUserId")
-        return Result.failure(Exception("Recipient FCM token not found"))
+      if (recipientUserId.isBlank()) {
+        Log.e(TAG, "Invalid recipient user ID provided")
+        return Result.failure(IllegalArgumentException("Recipient user ID cannot be empty"))
       }
 
-      // Get sender's user ID
-      val senderId = FirebaseAuth.getInstance().currentUser?.uid
-      if (senderId == null) {
-        Log.e(TAG, "No authenticated user found")
-        return Result.failure(Exception("No authenticated user"))
+      // Get sender's user ID first to fail fast if not authenticated
+      val senderId =
+          auth.currentUser?.uid
+              ?: run {
+                Log.e(TAG, "No authenticated user found")
+                return Result.failure(IllegalStateException("No authenticated user"))
+              }
+
+      Log.d(TAG, "Preparing to send notification from $senderId to: $recipientUserId")
+
+      // Get recipient's FCM token
+      val recipientToken =
+          fcmTokenManager.getUserFcmToken(recipientUserId)
+              ?: run {
+                Log.e(TAG, "No FCM token found for user: $recipientUserId")
+                return Result.failure(IllegalStateException("Recipient FCM token not found"))
+              }
+
+      if (recipientToken.isBlank()) {
+        Log.e(TAG, "Empty FCM token found for user: $recipientUserId")
+        return Result.failure(IllegalStateException("Invalid recipient FCM token"))
       }
 
       // Prepare notification data
@@ -53,48 +78,45 @@ class NotificationManager private constructor() {
           mapOf(
               "recipientToken" to recipientToken,
               "notification" to mapOf("title" to title, "body" to body),
-              "data" to
-                  data.plus(
-                      mapOf(
-                          "senderId" to senderId,
-                          "timestamp" to System.currentTimeMillis().toString())))
+              "data" to (data + mapOf("senderId" to senderId, "recipientId" to recipientUserId)))
 
-      Log.d(TAG, "Calling Cloud Function with data: ${gson.toJson(notificationData)}")
+      Log.d(TAG, "Sending notification through Cloud Function")
 
-      // Call Firebase Cloud Function
+      // Send notification through Cloud Function
       functions.getHttpsCallable(SEND_NOTIFICATION_FUNCTION).call(notificationData).await()
 
-      Log.d(TAG, "Notification sent successfully")
+      Log.d(TAG, "Notification sent successfully to user: $recipientUserId")
       Result.success(Unit)
     } catch (e: Exception) {
-      Log.e(TAG, "Failed to send notification", e)
+      Log.e(TAG, "Failed to send notification to user: $recipientUserId", e)
       Result.failure(e)
     }
   }
 
-  /** Send a service request update notification */
+  /** Send a notification about a service request update */
   suspend fun sendServiceRequestUpdateNotification(
       recipientUserId: String,
       requestId: String,
       status: String,
       message: String
   ): Result<Unit> {
-    val title = "Service Request Update"
-    val data = mapOf("requestId" to requestId, "status" to status, "type" to "request_update")
-    return sendNotification(recipientUserId, title, message, data)
+    return sendNotification(
+        recipientUserId,
+        "Service Request Update",
+        message,
+        mapOf("requestId" to requestId, "status" to status))
   }
 
-  /** Send a service request accepted notification */
+  /** Send a notification when a service request is accepted */
   suspend fun sendServiceRequestAcceptedNotification(
       recipientUserId: String,
       requestId: String,
       providerName: String
   ): Result<Unit> {
-    val title = "Service Request Accepted"
-    val message = "$providerName has accepted your service request"
-    val data =
-        mapOf(
-            "requestId" to requestId, "providerName" to providerName, "type" to "request_accepted")
-    return sendNotification(recipientUserId, title, message, data)
+    return sendNotification(
+        recipientUserId,
+        "Service Request Accepted",
+        "$providerName has accepted your service request",
+        mapOf("requestId" to requestId, "status" to "ACCEPTED"))
   }
 }

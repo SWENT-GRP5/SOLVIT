@@ -6,19 +6,21 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.notifications.FcmTokenManager
+import com.android.solvit.shared.notifications.NotificationService
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.firestore
 import com.google.firebase.messaging.FirebaseMessaging
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
-class AuthViewModel(private val authRepository: AuthRep) : ViewModel() {
+class AuthViewModel(
+    private val authRepository: AuthRep,
+    private val fcmTokenManager: FcmTokenManager? = null
+) : ViewModel() {
   private val _user = MutableStateFlow<User?>(null)
   val user: StateFlow<User?> = _user
 
@@ -34,45 +36,52 @@ class AuthViewModel(private val authRepository: AuthRep) : ViewModel() {
   private val _googleAccount = MutableStateFlow<GoogleSignInAccount?>(null)
   val googleAccount: StateFlow<GoogleSignInAccount?> = _googleAccount
 
-  private val _userRegistered = MutableStateFlow<Boolean>(false)
+  private val _userRegistered = MutableStateFlow(false)
   val userRegistered: StateFlow<Boolean> = _userRegistered
 
   private val maxLocationsSize = 5
-
-  private val fcmTokenManager = FcmTokenManager.getInstance()
-  private val scope = CoroutineScope(Dispatchers.IO)
 
   companion object {
     val Factory: ViewModelProvider.Factory =
         object : ViewModelProvider.Factory {
           @Suppress("UNCHECKED_CAST")
           override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return AuthViewModel(AuthRepository(Firebase.auth, Firebase.firestore)) as T
+            return AuthViewModel(
+                AuthRepository(Firebase.auth, Firebase.firestore), FcmTokenManager.getInstance())
+                as T
           }
         }
   }
 
   init {
-    viewModelScope.launch {
-      try {
-        val token = FirebaseMessaging.getInstance().token.await()
-        println("FCM Token: $token") // Debug log
-        Firebase.auth.currentUser?.uid?.let { userId ->
-          fcmTokenManager.updateUserFcmToken(userId, token)
-          println("FCM Token stored for user: $userId") // Debug log
-        }
-      } catch (e: Exception) {
-        println("FCM Token Error: ${e.message}") // Debug log
-        e.printStackTrace()
-      }
-    }
-    authRepository.init {
-      _user.value = it
-      if (it != null) {
+    authRepository.init { user ->
+      _user.value = user
+      if (user != null) {
         _userRegistered.value = true
-        updateFcmToken()
+        fcmTokenManager?.let { updateFcmToken() }
       }
     }
+  }
+
+  private fun updateFcmToken() {
+    fcmTokenManager?.let { manager ->
+      viewModelScope.launch {
+        try {
+          val userId = authRepository.getUserId()
+          if (userId.isNotEmpty()) {
+            val token = FirebaseMessaging.getInstance().token.await()
+            manager.updateUserFcmToken(userId, token)
+          }
+        } catch (e: Exception) {
+          Log.e("AuthViewModel", "Error updating FCM token", e)
+        }
+      }
+    }
+  }
+
+  private suspend fun onAuthenticationSuccess() {
+    // Store FCM token after successful authentication
+    fcmTokenManager?.let { NotificationService.storeCurrentToken() }
   }
 
   fun setRole(role: String) {
@@ -101,7 +110,7 @@ class AuthViewModel(private val authRepository: AuthRep) : ViewModel() {
         password.value,
         {
           _user.value = it
-          updateFcmToken()
+          viewModelScope.launch { onAuthenticationSuccess() }
           onSuccess()
         },
         {
@@ -119,7 +128,7 @@ class AuthViewModel(private val authRepository: AuthRep) : ViewModel() {
         {
           _user.value = it
           _email.value = it.email
-          updateFcmToken()
+          viewModelScope.launch { onAuthenticationSuccess() }
           onSuccess()
         },
         {
@@ -135,6 +144,7 @@ class AuthViewModel(private val authRepository: AuthRep) : ViewModel() {
         password.value,
         {
           _user.value = it
+          viewModelScope.launch { onAuthenticationSuccess() }
           onSuccess()
         },
         {
@@ -153,6 +163,7 @@ class AuthViewModel(private val authRepository: AuthRep) : ViewModel() {
         {
           _user.value = it
           _email.value = it.email
+          viewModelScope.launch { onAuthenticationSuccess() }
           onSuccess()
         },
         {
@@ -217,18 +228,5 @@ class AuthViewModel(private val authRepository: AuthRep) : ViewModel() {
           Log.e("AuthViewModel", "Error updating user locations", it)
           onFailure(it)
         })
-  }
-
-  private fun updateFcmToken() {
-    viewModelScope.launch {
-      try {
-        val token = FirebaseMessaging.getInstance().token.await()
-        Firebase.auth.currentUser?.uid?.let { userId ->
-          fcmTokenManager.updateUserFcmToken(userId, token)
-        }
-      } catch (e: Exception) {
-        Log.e("FCM_DEBUG", "Error updating FCM token", e)
-      }
-    }
   }
 }

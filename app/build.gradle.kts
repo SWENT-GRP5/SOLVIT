@@ -256,6 +256,14 @@ dependencies {
     androidTestImplementation(libs.mockito.kotlin)
     testImplementation(libs.robolectric)
 
+    // Mockito for unit tests
+    testImplementation("org.mockito:mockito-core:4.6.1")
+    testImplementation("org.mockito:mockito-inline:4.6.1")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:4.0.0")
+
+    // Mockito for Android instrumented tests (if needed)
+    androidTestImplementation("org.mockito:mockito-android:4.6.1")
+    androidTestImplementation("org.mockito.kotlin:mockito-kotlin:4.0.0")
 
     // --------- Kaspresso test framework ----------
     globalTestImplementation(libs.kaspresso)
