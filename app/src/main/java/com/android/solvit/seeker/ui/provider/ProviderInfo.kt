@@ -178,7 +178,7 @@ fun PackageCard(
     packageProposal: PackageProposal,
     isSelected: Boolean,
     modifier: Modifier,
-    selectedPackage: MutableState<PackageProposal?>
+    selectedPackage: MutableState<PackageProposal?> = remember { mutableStateOf(null) }
 ) {
   Card(
       modifier = modifier.fillMaxHeight(),
