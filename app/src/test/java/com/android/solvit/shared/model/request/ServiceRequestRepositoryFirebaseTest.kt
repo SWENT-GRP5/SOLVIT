@@ -86,13 +86,11 @@ class ServiceRequestRepositoryFirebaseTest {
   }
 
   @Test
-  fun init_doesNotCallOnSuccessWhenUserIsNotAuthenticated() {
-    `when`(mockAuth.currentUser).thenReturn(null)
-
+  fun initCallsOnSuccess() {
     var onSuccessCalled = false
     serviceRequestRepositoryFirebase.init { onSuccessCalled = true }
 
-    Assert.assertFalse(onSuccessCalled)
+    Assert.assertTrue(onSuccessCalled)
   }
 
   @Test

@@ -2,8 +2,6 @@ package com.android.solvit.shared.model.packages
 
 import android.util.Log
 import com.google.android.gms.tasks.Task
-import com.google.firebase.Firebase
-import com.google.firebase.auth.auth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -17,11 +15,7 @@ class PackageProposalRepositoryFirestore(private val db: FirebaseFirestore) :
   }
 
   override fun init(onSuccess: () -> Unit) {
-    Firebase.auth.addAuthStateListener {
-      if (it.currentUser != null) {
-        onSuccess()
-      }
-    }
+    onSuccess()
   }
 
   override fun getPackageProposal(
