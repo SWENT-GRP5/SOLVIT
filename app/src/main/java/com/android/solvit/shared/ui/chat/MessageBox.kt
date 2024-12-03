@@ -131,21 +131,6 @@ fun ChatListTopBar(
         IconButton(
             onClick = {
               // Toast.makeText(context, "Not Yet Implemented", Toast.LENGTH_LONG).show()
-
-              val senderUid = authViewModel.user.value?.uid
-              Log.e("SendMessage", "$senderUid")
-              val message =
-                  senderUid?.let {
-                    ChatMessage.TextMessage(
-                        "Hey",
-                        "Hassan",
-                        it,
-                        System.currentTimeMillis(),
-                    )
-                  }
-              if (message != null) {
-                chatViewModel.sendMessage(message)
-              }
             }) {
               Image(
                   painter = painterResource(id = R.drawable.new_message),
