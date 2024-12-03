@@ -273,7 +273,7 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.4.0")
 
     // ----------       Google AI     ------------
-    implementation("com.google.ai.client.generativeai:generativeai:0.9.0")
+    implementation(libs.generativeai)
 }
 
 tasks.withType<Test> {

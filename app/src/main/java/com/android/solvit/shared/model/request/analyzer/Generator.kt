@@ -4,13 +4,38 @@ import android.graphics.Bitmap
 import com.android.solvit.BuildConfig
 import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.Content
+import com.google.ai.client.generativeai.type.Schema
+import com.google.ai.client.generativeai.type.generationConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.json.JSONObject
 
-// Initialize the generative model
+// Define the response schema using Schema.obj
+private val jsonSchema = Schema.obj(
+    name = "ImageAnalysisResponse",
+    description = "The structured response for images analysis",
+    Schema.str(
+        name = "title",
+        description = "The generated title for the analysis"
+    ),
+    Schema.str(
+        name = "type",
+        description = "The category of the analyzed images"
+    ),
+    Schema.str(
+        name = "description",
+        description = "A detailed description of the analyzed images"
+    )
+)
+
+// Initialize the generative model with a JSON response schema
 private val generativeModel = GenerativeModel(
     modelName = "gemini-1.5-flash",
-    apiKey = BuildConfig.GOOGLE_AI_API_KEY
+    apiKey = BuildConfig.GOOGLE_AI_API_KEY,
+    generationConfig = generationConfig {
+        responseMimeType = "application/json"
+        responseSchema = jsonSchema
+    }
 )
 
 
@@ -30,12 +55,12 @@ suspend fun analyzeImagesGemini(
                     1. Classify each image into one of the following categories: 
                        PLUMBER, ELECTRICIAN, TUTOR, EVENT_PLANNER, WRITER, CLEANER, CARPENTER, PHOTOGRAPHER, 
                        PERSONAL_TRAINER, HAIR_STYLIST, OTHER.
-                    2. Generate a **Title** for the issue, written in the voice of the service seeker.
-                    3. Generate a **Description** for the issue, written as if the seeker is describing the problem to potential providers.
+                    2. Generate a title for the issue, written in the voice of the service seeker.
+                    3. Generate a detailed description for the issue in the images, written as if the seeker is describing the problem to potential providers.
                     Please return the results in the following format:
-                    - **Title**: Generated Title Here
-                    - **Type**: Generated Category Here
-                    - **Description**: Generated Description Here
+                    - title : Generated Title Here
+                    - type : Generated Category Here
+                    - description : Generated Description Here
                     """
                 )
             }.build()
@@ -44,10 +69,10 @@ suspend fun analyzeImagesGemini(
             val response = generativeModel.generateContent(inputContent)
 
             // Parse the response text
-            val content = response.text
-            val title = content?.substringAfter("- **Title**:")?.substringBefore("\n")?.trim() ?: "Generated Title"
-            val type = content?.substringAfter("- **Type**:")?.substringBefore("\n")?.trim()  ?: "Generated Type"
-            val description = content?.substringAfter("- **Description**:")?.trim() ?: "Generated description"
+            val jsonObject = JSONObject(response.text)
+            val title = jsonObject.getString("title")
+            val type = jsonObject.getString("type")
+            val description = jsonObject.getString("description")
 
             Triple(title, type, description)
         } catch (e: Exception) {

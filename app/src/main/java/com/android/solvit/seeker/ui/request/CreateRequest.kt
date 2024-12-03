@@ -94,13 +94,25 @@ fun CreateRequestScreen(
   // Multi-Step Dialog
   if (showMultiStepDialog) {
     MultiStepDialog(
-        requestViewModel = requestViewModel,
         context = localContext,
         showDialog = showMultiStepDialog,
         currentStep = currentStep,
         selectedImages = selectedImages,
-        onImagesSelected = { images -> selectedImages = images },
-        onRemoveImage = { uri -> selectedImages = selectedImages.filter { it != uri } },
+        onImagesSelected = { images ->
+            selectedImages = images
+            if (selectedImages.isNotEmpty()) {
+                val uri = selectedImages[0]
+                selectedImageUri = uri
+            }},
+        onRemoveImage = { uri ->
+            selectedImages = selectedImages.filter { it != uri }
+            if (selectedImages.isEmpty()) {
+                selectedImageUri = null
+            } else {
+                val uri = selectedImages[0]
+                selectedImageUri = uri
+            }
+                        },
         onStartAnalyzing = {
           currentStep = 2 // Move to the analyzing step
         },
