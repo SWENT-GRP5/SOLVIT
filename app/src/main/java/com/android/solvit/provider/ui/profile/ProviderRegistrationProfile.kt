@@ -557,7 +557,7 @@ fun ProviderDetails(
                           modifier = Modifier.testTag("$service"),
                           text = { Text(text = Services.format(service)) },
                           onClick = {
-                            onSelectedServiceChange(service.toString())
+                            onSelectedServiceChange(Services.format(service))
                             servicesExpanded = false
                           })
                     }
@@ -937,9 +937,12 @@ fun PackageProposalDialog(
   var expanded by remember { mutableStateOf(false) }
   val assistantPackages = assistantViewModel.packageProposals.collectAsState()
   val isLoading = assistantViewModel.isLoading.collectAsState()
+  val query = remember { mutableStateOf("") }
 
   // Dialog to generate packages with AI
   AlertDialog(
+      containerColor = colorScheme.background,
+      textContentColor = colorScheme.onBackground,
       onDismissRequest = onDismiss,
       title = {
         // Dialog Title
@@ -950,8 +953,36 @@ fun PackageProposalDialog(
       },
       text = {
         Column(
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            modifier =
+                Modifier.fillMaxWidth()
+                    .padding(16.dp)
+                    .verticalScroll(rememberScrollState())
+                    .background(colorScheme.background),
             verticalArrangement = Arrangement.spacedBy(16.dp)) {
+              if (isLoading.value) {
+                // Show loading indicator while fetching packages
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.CenterHorizontally).padding(top = 16.dp))
+              } else if (assistantPackages.value.isNotEmpty()) {
+                // Display the generated packages
+                LazyRow(
+                    modifier = Modifier.fillMaxWidth().testTag("packagesScrollableList"),
+                    horizontalArrangement = Arrangement.spacedBy(20.dp),
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 40.dp)) {
+                      items(assistantPackages.value) { packageProposal ->
+                        PackageCard(
+                            packageProposal = packageProposal,
+                            modifier = Modifier.width(260.dp).height(320.dp).testTag("PackageCard"))
+                      }
+                    }
+              }
+              // Allow users to provide more context or information to generate packages
+              TextField(
+                  value = query.value,
+                  onValueChange = { query.value = it },
+                  label = { Text("Additional Information") },
+                  placeholder = { Text("Provide more details for package generation...") },
+                  modifier = Modifier.fillMaxWidth().padding(top = 16.dp))
               // Select the number of packages
               ExposedDropdownMenuBox(
                   expanded = expanded, onExpandedChange = { expanded = !expanded }) {
@@ -983,28 +1014,12 @@ fun PackageProposalDialog(
                         type = type,
                         numberOfPackages = numberOfPackages,
                         providerId = providerId,
-                        viewModel = packageViewModel)
+                        viewModel = packageViewModel,
+                        providerQuery = query.value)
                   },
                   modifier = Modifier.fillMaxWidth()) {
                     Text("Generate")
                   }
-              if (isLoading.value) {
-                // Show loading indicator while fetching packages
-                CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.CenterHorizontally).padding(top = 16.dp))
-              } else if (assistantPackages.value.isNotEmpty()) {
-                // Display the generated packages
-                LazyRow(
-                    modifier = Modifier.fillMaxWidth().testTag("packagesScrollableList"),
-                    horizontalArrangement = Arrangement.spacedBy(20.dp),
-                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 40.dp)) {
-                      items(assistantPackages.value) { packageProposal ->
-                        PackageCard(
-                            packageProposal = packageProposal,
-                            modifier = Modifier.width(260.dp).height(320.dp).testTag("PackageCard"))
-                      }
-                    }
-              }
             }
       },
       // Confirm button to accept the generated packages, save them and dismiss the dialog

@@ -109,12 +109,13 @@ class PackagesAssistantViewModel : ViewModel() {
       type: Services,
       numberOfPackages: Int,
       providerId: String,
-      viewModel: PackageProposalViewModel
+      viewModel: PackageProposalViewModel,
+      providerQuery: String
   ) {
     viewModelScope.launch {
       try {
         _isLoading.value = true
-        val response = model.generateContent(generatePrompt(type, numberOfPackages))
+        val response = model.generateContent(generatePrompt(type, numberOfPackages, providerQuery))
         val jsonResponse = response.text // Assuming the response contains JSON text
         Log.d("PackagesAssistantViewModel", "jsonResponse: $jsonResponse")
         val updatedProposals =
@@ -159,9 +160,16 @@ class PackagesAssistantViewModel : ViewModel() {
    * @param type The type of service for which the package proposals are being generated.
    * @param numberOfPackages The number of package proposals to generate.
    */
-  private fun generatePrompt(type: Services, numberOfPackages: Int): String {
+  private fun generatePrompt(type: Services, numberOfPackages: Int, providerQuery: String): String {
     return """
-            Generate a list of $numberOfPackages package proposals for this type of service ($type) using the provided schema.
+            Generate a list of $numberOfPackages package proposals for this type of service ($type)
+             using the provided schema.
+             The Provider making this request can provide additional information and requests here:
+             $providerQuery
+             If the provider has any specific requirements for the package proposals, please include
+             them in the response.
+             THE MOST IMPORTANT INFORMATION IS STILL THE NUMBER OF PACKAGES TO BE GENERATED AND THE SERVICE TYPE.
+             YOU NEED TO RESPECT THEM AND RESPECT THE SCHEMA PROVIDED.
         """
         .trimIndent()
   }
