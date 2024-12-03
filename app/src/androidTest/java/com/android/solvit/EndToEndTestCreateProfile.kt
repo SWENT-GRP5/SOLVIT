@@ -5,6 +5,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -304,6 +305,21 @@ class EndToEndTestCreateProfile {
     composeTestRule.onNodeWithTag("offerPackagesDropDown").assertIsDisplayed()
     composeTestRule.onNodeWithTag("offerPackagesDropDown").performClick()
     composeTestRule.onNodeWithTag("Yes").performClick() // Choose to offer packages services
+    composeTestRule.onNodeWithTag("generatePackagesButton").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("generatePackagesButton").performClick()
+    composeTestRule.onNodeWithTag("packageProposalDialog").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("packageProposalDialogTitle").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("additionalInfoInput").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("additionalInfoInput").performTextInput("Additional info")
+    composeTestRule.onNodeWithTag("numberOfPackagesDropDown").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("numberOfPackagesDropDown").performClick()
+    composeTestRule.onAllNodesWithText("3")[0].performClick()
+    composeTestRule.onNodeWithTag("generateButton").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("acceptSuggestionsButton").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("cancelButton").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("cancelButton").performClick()
+    composeTestRule.onNodeWithTag("enterPackagesButton").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("enterPackagesButton").performClick()
     composeTestRule.onNodeWithTag("package1").assertIsDisplayed()
     composeTestRule.onNodeWithTag("packageName1").assertIsDisplayed()
     composeTestRule.onNodeWithTag("packageName1").performTextInput("Basic")
@@ -311,10 +327,13 @@ class EndToEndTestCreateProfile {
     composeTestRule.onNodeWithTag("packagePrice1").performTextInput("50")
     composeTestRule.onNodeWithTag("packageDetails1").assertIsDisplayed()
     composeTestRule.onNodeWithTag("packageDetails1").performTextInput("Basic plumber services")
+    composeTestRule.onNodeWithTag("packageFeatures10").performScrollTo()
     composeTestRule.onNodeWithTag("packageFeatures10").assertIsDisplayed()
     composeTestRule.onNodeWithTag("packageFeatures10").performTextInput("a")
+    composeTestRule.onNodeWithTag("packageFeatures11").performScrollTo()
     composeTestRule.onNodeWithTag("packageFeatures11").assertIsDisplayed()
     composeTestRule.onNodeWithTag("packageFeatures11").performTextInput("a")
+    composeTestRule.onNodeWithTag("packageFeatures12").performScrollTo()
     composeTestRule.onNodeWithTag("packageFeatures12").assertIsDisplayed()
     composeTestRule.onNodeWithTag("packageFeatures12").performTextInput("a")
 

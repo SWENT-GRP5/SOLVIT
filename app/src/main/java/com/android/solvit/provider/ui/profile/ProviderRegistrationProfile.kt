@@ -942,12 +942,14 @@ fun PackageProposalDialog(
 
   // Dialog to generate packages with AI
   AlertDialog(
+      modifier = Modifier.testTag("packageProposalDialog"),
       containerColor = colorScheme.background,
       textContentColor = colorScheme.onBackground,
       onDismissRequest = onDismiss,
       title = {
         // Dialog Title
         Text(
+            modifier = Modifier.testTag("packageProposalDialogTitle"),
             text = "Generate Packages with AI",
             style = MaterialTheme.typography.titleLarge,
             textAlign = TextAlign.Center)
@@ -983,10 +985,13 @@ fun PackageProposalDialog(
                   onValueChange = { query.value = it },
                   label = { Text("Additional Information") },
                   placeholder = { Text("Provide more details for package generation...") },
-                  modifier = Modifier.fillMaxWidth().padding(top = 16.dp))
+                  modifier =
+                      Modifier.fillMaxWidth().padding(top = 16.dp).testTag("additionalInfoInput"))
               // Select the number of packages
               ExposedDropdownMenuBox(
-                  expanded = expanded, onExpandedChange = { expanded = !expanded }) {
+                  modifier = Modifier.testTag("numberOfPackagesDropDown"),
+                  expanded = expanded,
+                  onExpandedChange = { expanded = !expanded }) {
                     TextField(
                         value = numberOfPackages.toString(),
                         onValueChange = {},
@@ -1018,14 +1023,16 @@ fun PackageProposalDialog(
                         viewModel = packageViewModel,
                         providerQuery = query.value)
                   },
-                  modifier = Modifier.fillMaxWidth()) {
-                    Text("Generate")
-                  }
+                  modifier = Modifier.fillMaxWidth().testTag("generateButton"),
+              ) {
+                Text("Generate")
+              }
             }
       },
       // Confirm button to accept the generated packages, save them and dismiss the dialog
       confirmButton = {
         TextButton(
+            modifier = Modifier.testTag("acceptSuggestionsButton"),
             onClick = {
               assistantPackages.value.forEach { packageProposal ->
                 packageViewModel.addPackageProposal(packageProposal)
@@ -1035,5 +1042,7 @@ fun PackageProposalDialog(
               Text("Accept suggestions")
             }
       },
-      dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } })
+      dismissButton = {
+        TextButton(onClick = onDismiss, Modifier.testTag("cancelButton")) { Text("Cancel") }
+      })
 }
