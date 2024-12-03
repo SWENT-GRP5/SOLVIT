@@ -36,7 +36,15 @@ class PackagesAssistantViewModel : ViewModel() {
                   name = "PackageProposal",
                   type = FunctionType.OBJECT,
                   description = "A package proposal",
-                  required = listOf("title", "description", "price", "bulletPoints"),
+                  required =
+                      listOf(
+                          "uid",
+                          "packageNumber",
+                          "providerId",
+                          "title",
+                          "description",
+                          "price",
+                          "bulletPoints"),
                   properties =
                       mapOf(
                           "uid" to

@@ -392,7 +392,7 @@ fun ProviderRegistrationScreen(
                             assistantViewModel = assistantViewModel,
                             packageViewModel = packageViewModel,
                             providerId = it.uid,
-                            type = Services.valueOf(selectedService))
+                            type = Services.valueOf(selectedService.uppercase().replace(" ", "_")))
                       }
                       Spacer(modifier = Modifier.height(30.dp))
                       Button(
@@ -457,7 +457,8 @@ fun ProviderRegistrationScreen(
                               name = fullName,
                               phone = phone,
                               companyName = companyName,
-                              service = Services.valueOf(selectedService),
+                              service =
+                                  Services.valueOf(selectedService.uppercase().replace(" ", "_")),
                               description = description,
                               price = startingPrice.toDouble(),
                               languages = selectedLanguages.map { Language.valueOf(it) },
