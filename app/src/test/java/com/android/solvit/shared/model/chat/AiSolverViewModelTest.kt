@@ -1,8 +1,10 @@
 package com.android.solvit.shared.model.chat
 
+import android.graphics.Bitmap
 import kotlin.test.assertEquals
 import org.junit.Before
 import org.junit.Test
+import org.mockito.Mockito.mock
 
 class AiSolverViewModelTest {
   private lateinit var aiSolverViewModel: AiSolverViewModel
@@ -38,12 +40,14 @@ class AiSolverViewModelTest {
     assert(prompt.contains("Help Me"))
     assert(prompt.contains("imageUrl"))
     assert(prompt.contains("Describe the problem."))
-    assert(!prompt.contains("If provided, here is an image describing the problem"))
+    assert(!prompt.contains("An image describing the problem is provided"))
   }
 
   @Test
   fun `buildPrompt generates the correct prompt with image`() {
-    val userInput = AiSolverViewModel.UserInput("Describe the problem.", "testImagePath")
+    val bitmap = mock<Bitmap>()
+
+    val userInput = AiSolverViewModel.UserInput("Describe the problem.", bitmap = bitmap)
     aiSolverViewModel.setMessageContext(messagesContext)
 
     val prompt = aiSolverViewModel.buildPrompt(userInput)
@@ -51,6 +55,6 @@ class AiSolverViewModelTest {
     assert(prompt.contains("Help Me"))
     assert(prompt.contains("imageUrl"))
     assert(prompt.contains("Describe the problem."))
-    assert(prompt.contains("testImagePath"))
+    assert(prompt.contains("An image describing the problem is provided"))
   }
 }

@@ -1,5 +1,6 @@
 package com.android.solvit.shared.model.chat
 
+import android.graphics.Bitmap
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -7,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.android.solvit.BuildConfig
 import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.BlockThreshold
+import com.google.ai.client.generativeai.type.Content
 import com.google.ai.client.generativeai.type.HarmCategory
 import com.google.ai.client.generativeai.type.SafetySetting
 import com.google.ai.client.generativeai.type.generationConfig
@@ -47,7 +49,7 @@ class AiSolverViewModel : ViewModel() {
         }
   }
 
-  data class UserInput(val description: String, val imagePath: String?)
+  data class UserInput(val description: String, val bitmap: Bitmap?)
 
   /** set the MessageContext of conversation */
   fun setMessageContext(messages: List<ChatMessage>) {
@@ -93,8 +95,8 @@ class AiSolverViewModel : ViewModel() {
     """
             .trimIndent()
 
-    if (!input.imagePath.isNullOrEmpty()) {
-      prompt += "\n- If provided, here is an image describing the problem:\n${input.imagePath}"
+    if (input.bitmap != null) {
+      prompt += "\n- An image describing the problem is provided"
     }
 
     prompt +=
@@ -125,7 +127,20 @@ class AiSolverViewModel : ViewModel() {
     val prompt = buildPrompt(input)
     viewModelScope.launch {
       try {
-        val response = model.generateContent(prompt)
+        val response =
+            if (input.bitmap != null) {
+              val inputContent =
+                  Content.Builder()
+                      .apply {
+                        image(input.bitmap)
+                        text(prompt)
+                      }
+                      .build()
+              model.generateContent(inputContent)
+            } else {
+              model.generateContent(prompt)
+            }
+
         response.text?.let { onSuccess(it) }
       } catch (e: Exception) {
         Log.d("Ai solver", "Failed to generate a response : $e")
