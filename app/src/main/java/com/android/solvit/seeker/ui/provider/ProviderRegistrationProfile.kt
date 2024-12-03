@@ -112,7 +112,10 @@ fun ProviderRegistrationScreen(
   DisposableEffect(Unit) {
     val activity = context as? ComponentActivity
     activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-    onDispose { activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED }
+    onDispose {
+      locationViewModel.clear()
+      activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+    }
   }
 
   // Form fields
@@ -157,9 +160,14 @@ fun ProviderRegistrationScreen(
 
   val localContext = LocalContext.current
 
-  val isFullNameOk = fullName.isNotBlank() && fullName.length > 2
-  val isPhoneOk = phone.isNotBlank() && phone.all { it.isDigit() || it == '+' } && phone.length > 6
+  val fullNameRegex = Regex("^[a-zA-Z]+ [a-zA-Z]+\$")
+  val isFullNameOk = fullNameRegex.matches(fullName)
+
+  val phoneRegex = Regex("^[+]?[0-9]{6,}$")
+  val isPhoneOk = phoneRegex.matches(phone)
+
   val isCompanyNameOk = companyName.isNotBlank() && companyName.length > 2
+
   val isLocationOK = selectedLocation != null
 
   val isFormComplete = isFullNameOk && isPhoneOk && isCompanyNameOk && isLocationOK

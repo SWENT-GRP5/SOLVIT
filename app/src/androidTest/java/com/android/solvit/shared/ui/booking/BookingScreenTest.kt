@@ -7,6 +7,10 @@ import androidx.compose.ui.test.performClick
 import androidx.navigation.NavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
+import com.android.solvit.shared.model.authentication.AuthRep
+import com.android.solvit.shared.model.authentication.AuthViewModel
+import com.android.solvit.shared.model.chat.ChatRepository
+import com.android.solvit.shared.model.chat.ChatViewModel
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.packages.PackageProposal
 import com.android.solvit.shared.model.packages.PackageProposalRepository
@@ -26,6 +30,8 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.`when`
+import org.mockito.kotlin.any
 
 @RunWith(AndroidJUnit4::class)
 class BookingScreenTest {
@@ -37,6 +43,11 @@ class BookingScreenTest {
   private lateinit var navigationActions: NavigationActions
   private lateinit var packageProposalRepository: PackageProposalRepository
   private lateinit var packageProposalViewModel: PackageProposalViewModel
+
+  private lateinit var authRep: AuthRep
+  private lateinit var authViewModel: AuthViewModel
+  private lateinit var chatRepository: ChatRepository
+  private lateinit var chatViewModel: ChatViewModel
 
   @get:Rule val composeTestRule = createComposeRule()
 
@@ -77,8 +88,16 @@ class BookingScreenTest {
     packageProposalViewModel = PackageProposalViewModel(packageProposalRepository)
     navController = mock(NavController::class.java)
     navigationActions = NavigationActions(navController)
+    chatRepository = mock(ChatRepository::class.java)
+    chatViewModel = ChatViewModel(chatRepository)
+    authRep = mock(AuthRep::class.java)
+    authViewModel = AuthViewModel(authRep)
 
     serviceRequestViewModel.selectRequest(serviceRequest)
+    `when`(providerRepository.getProviders(any(), any(), any())).thenAnswer {
+      val onSuccess = it.getArgument<(List<Provider>) -> Unit>(1)
+      onSuccess(listOf(provider)) // Simulate success
+    }
   }
 
   @Test
@@ -87,8 +106,10 @@ class BookingScreenTest {
       ServiceBookingScreen(
           requestViewModel = serviceRequestViewModel,
           providerViewModel = providerViewModel,
+          authViewModel = authViewModel,
           packageViewModel = packageProposalViewModel,
-          navigationActions = navigationActions)
+          navigationActions = navigationActions,
+          chatViewModel = chatViewModel)
     }
 
     composeTestRule.onNodeWithTag("booking_title").assertIsDisplayed()
@@ -101,6 +122,34 @@ class BookingScreenTest {
     composeTestRule.onNodeWithTag("address_label").assertIsDisplayed()
     composeTestRule.onNodeWithTag("google_map_container").assertIsDisplayed()
     composeTestRule.onNodeWithTag("edit_button").assertIsDisplayed()
+  }
+
+  @Test
+  fun chatWithProvider() {
+
+    composeTestRule.setContent {
+      ServiceBookingScreen(
+          requestViewModel = serviceRequestViewModel,
+          providerViewModel = providerViewModel,
+          authViewModel = authViewModel,
+          packageViewModel = packageProposalViewModel,
+          navigationActions = navigationActions,
+          chatViewModel = chatViewModel)
+    }
+    providerViewModel.selectService(Services.PLUMBER)
+    providerViewModel.getProviders()
+
+    composeTestRule.onNodeWithTag("booking_title").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("goBackButton").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("problem_description_label").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("problem_description").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("price_appointment_box").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("appointment_date").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("address_label").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("google_map_container").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("edit_discuss_button").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("edit_button").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("chat_button").assertIsDisplayed()
   }
 
   @Test

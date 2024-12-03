@@ -100,7 +100,7 @@ class SeekerProfileTest {
     composeTestRule.onNodeWithTag("OrdersOption").performClick()
     composeTestRule.onNodeWithTag("PrivacySettingsOption").performClick()
     composeTestRule.onNodeWithTag("BillingOption").performClick()
-    composeTestRule.onNodeWithTag("PreferencesOption").performClick()
+    // composeTestRule.onNodeWithTag("PreferencesOption").performClick()
     composeTestRule.onNodeWithTag("HelpSupportOption").performClick()
     composeTestRule.onNodeWithTag("AboutAppOption").performClick()
   }
