@@ -68,7 +68,7 @@ class ServicesScreenTest {
   @Test
   fun shortcutsSectionHasRequiredComponents() {
     composeTestRule.onNodeWithTag("servicesScreenShortcuts").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("servicesScreenProvidersShortcut").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("solveItWithAi").assertIsDisplayed()
     composeTestRule.onNodeWithTag("servicesScreenOrdersShortcut").assertIsDisplayed()
     composeTestRule.onNodeWithTag("servicesScreenMapShortcut").assertIsDisplayed()
   }
