@@ -30,6 +30,7 @@ object Route {
   const val MY_JOBS = "My Jobs"
   const val BOOKING_DETAILS = "Booking Details"
   const val NOTIFICATIONS = "Notifications Screen"
+  const val AI_SOLVER = "Ai Solver Screen"
 }
 
 object Screen {
@@ -51,6 +52,8 @@ object Screen {
   const val REVIEW_SCREEN = "Review Screen"
   const val EDIT_PREFERENCES = "Edit Preferences"
   const val NOTIFICATIONS = "Notifications Screen"
+  const val AI_SOLVER_WELCOME_SCREEN = "Ai Get Started Screen"
+  const val AI_SOLVER_CHAT_SCREEN = "AI Solver Chat Screen"
 }
 
 data class TopLevelDestination(val route: String, val icon: ImageVector, val textId: String)
