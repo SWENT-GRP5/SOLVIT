@@ -67,10 +67,7 @@ class MainActivity : ComponentActivity() {
 
     setContent {
       SampleAppTheme {
-        Surface(modifier = Modifier.fillMaxSize(), color = colorScheme.background) {
-          SolvitApp()
-          // AiSolverScreen()
-        }
+        Surface(modifier = Modifier.fillMaxSize(), color = colorScheme.background) { SolvitApp() }
       }
     }
   }

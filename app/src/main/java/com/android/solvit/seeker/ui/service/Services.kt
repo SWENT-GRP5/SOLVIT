@@ -44,6 +44,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -206,9 +207,10 @@ fun ShortcutsSection(
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold)
                     Image(
-                        painter = painterResource(id = R.drawable.ai_logo),
+                        painter = painterResource(id = R.drawable.ai_image),
                         contentDescription = "ai_logo",
-                        modifier = Modifier.size(40.dp).clip(CircleShape))
+                        modifier = Modifier.size(50.dp),
+                    )
                   }
             }
         Row(

@@ -16,10 +16,10 @@ class AiSolverChat {
   private lateinit var navController: NavController
   private lateinit var navigationActions: NavigationActions
 
-  @Before fun SetUp() {
+  @Before
+  fun SetUp() {
     navController = mock(NavController::class.java)
     navigationActions = NavigationActions(navController)
-
   }
 
   @Test

@@ -74,6 +74,7 @@ import com.android.solvit.shared.model.utils.loadBitmapFromUri
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.navigation.Screen
+import com.android.solvit.shared.ui.theme.LightOrange
 import com.android.solvit.shared.ui.utils.getReceiverImageUrl
 import com.android.solvit.shared.ui.utils.getReceiverName
 import com.google.firebase.auth.FirebaseAuth
@@ -174,14 +175,14 @@ fun AiSolverWelcomeScreen(navigationActions: NavigationActions) {
                               withStyle(
                                   style =
                                       SpanStyle(
-                                          color = Color(0xFF6AA84F),
+                                          color = LightOrange,
                                           fontSize = screenHeight.times(0.03f).value.sp)) {
                                     append("AI\n")
                                   }
                               withStyle(
                                   style =
                                       SpanStyle(
-                                          color = Color(0xFF6AA84F),
+                                          color = LightOrange,
                                           fontSize = screenHeight.times(0.03f).value.sp)) {
                                     append("Problem Solver")
                                   }
@@ -191,7 +192,7 @@ fun AiSolverWelcomeScreen(navigationActions: NavigationActions) {
 
                     Image(
                         modifier = Modifier.testTag("image"),
-                        painter = painterResource(id = R.drawable.ai_logo),
+                        painter = painterResource(id = R.drawable.ai_image),
                         contentDescription = "ai logo",
                         contentScale = ContentScale.FillBounds)
 
@@ -204,10 +205,10 @@ fun AiSolverWelcomeScreen(navigationActions: NavigationActions) {
 
                     Button(
                         onClick = { navigationActions.navigateTo(Screen.AI_SOLVER_CHAT_SCREEN) },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6AA84F)),
+                        colors = ButtonDefaults.buttonColors(containerColor = LightOrange),
                         shape = RoundedCornerShape(50),
                         modifier =
-                            Modifier.fillMaxWidth(0.8f)
+                            Modifier.fillMaxWidth(0.6f)
                                 .height(screenHeight.times(0.07f))
                                 .testTag("getStartedButton")) {
                           Text(
