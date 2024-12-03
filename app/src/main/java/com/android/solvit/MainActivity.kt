@@ -82,10 +82,6 @@ class MainActivity : ComponentActivity() {
             PackageManager.PERMISSION_GRANTED -> {
           Log.d("FCM_DEBUG", "Notification permission already granted")
         }
-        shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS) -> {
-          Log.d("FCM_DEBUG", "Should show permission rationale")
-          // Show permission rationale dialog
-        }
         else -> {
           requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
         }
@@ -100,9 +96,6 @@ class MainActivity : ComponentActivity() {
     askNotificationPermission()
 
     setContent {
-      val serviceRequestViewModel: ServiceRequestViewModel =
-          viewModel(factory = ServiceRequestViewModel.Factory)
-
       SampleAppTheme {
         Surface(modifier = Modifier.fillMaxSize(), color = colorScheme.background) { SolvitApp() }
       }
