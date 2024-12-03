@@ -44,7 +44,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -196,7 +195,7 @@ fun ShortcutsSection(
                 Modifier.fillMaxWidth()
                     .background(LightOrange, shape = RoundedCornerShape(16.dp))
                     .clickable { navigationActions.navigateTo(Route.AI_SOLVER) }
-                    .testTag("servicesScreenProvidersShortcut")) {
+                    .testTag("solveItWithAi")) {
               Row(
                   modifier = Modifier.padding(16.dp).fillMaxWidth(),
                   verticalAlignment = Alignment.CenterVertically,

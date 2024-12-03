@@ -75,8 +75,8 @@ class ServicesScreenTest {
 
   @Test
   fun providersShortcutsNavigateToProvidersScreen() {
-    composeTestRule.onNodeWithTag("servicesScreenProvidersShortcut").performClick()
-    verify(navigationActions).navigateTo(Route.PROVIDERS)
+    composeTestRule.onNodeWithTag("solveItWithAi").performClick()
+    verify(navigationActions).navigateTo(Route.AI_SOLVER)
   }
 
   @Test

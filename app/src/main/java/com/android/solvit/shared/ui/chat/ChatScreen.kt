@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -74,6 +73,7 @@ import com.android.solvit.shared.model.utils.loadBitmapFromUri
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.navigation.Screen
+import com.android.solvit.shared.ui.theme.Black
 import com.android.solvit.shared.ui.theme.LightOrange
 import com.android.solvit.shared.ui.utils.getReceiverImageUrl
 import com.android.solvit.shared.ui.utils.getReceiverName
@@ -147,78 +147,84 @@ fun AiSolverWelcomeScreen(navigationActions: NavigationActions) {
                 Icon(Icons.Default.ArrowBack, contentDescription = "Back")
               }
             },
-        )
-      }) { innerPadding ->
-        BoxWithConstraints(
-            modifier =
-                Modifier.fillMaxSize()
-                    .background(color = Color(0xFFF5F5F5))
-                    .padding(innerPadding)
-                    .testTag("AiGetStartedScreen"),
-            contentAlignment = Alignment.Center) {
-              val screenHeight = maxHeight
+            colors =
+                TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background))
+      },
+  ) { innerPadding ->
+    BoxWithConstraints(
+        modifier =
+            Modifier.fillMaxSize()
+                .background(color = MaterialTheme.colorScheme.background)
+                .padding(innerPadding)
+                .testTag("AiGetStartedScreen"),
+        contentAlignment = Alignment.TopCenter) {
+          val screenHeight = maxHeight
 
-              Column(
-                  horizontalAlignment = Alignment.CenterHorizontally,
-                  verticalArrangement = Arrangement.SpaceEvenly,
-                  modifier = Modifier.fillMaxHeight()) {
-                    Text(
-                        text =
-                            buildAnnotatedString {
-                              withStyle(
-                                  style =
-                                      SpanStyle(
-                                          color = Color.Black,
-                                          fontSize = screenHeight.times(0.03f).value.sp)) {
-                                    append("Meet Your Personal ")
-                                  }
-                              withStyle(
-                                  style =
-                                      SpanStyle(
-                                          color = LightOrange,
-                                          fontSize = screenHeight.times(0.03f).value.sp)) {
-                                    append("AI\n")
-                                  }
-                              withStyle(
-                                  style =
-                                      SpanStyle(
-                                          color = LightOrange,
-                                          fontSize = screenHeight.times(0.03f).value.sp)) {
-                                    append("Problem Solver")
-                                  }
-                            },
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(horizontal = 16.dp).testTag("title"))
+          Column(
+              horizontalAlignment = Alignment.CenterHorizontally,
+              verticalArrangement = Arrangement.SpaceBetween,
+              modifier =
+                  Modifier.fillMaxSize()
+                      .padding(
+                          top = screenHeight.times(0.05f), bottom = screenHeight.times(0.1f))) {
+                Text(
+                    text =
+                        buildAnnotatedString {
+                          withStyle(
+                              style =
+                                  SpanStyle(
+                                      color = Black,
+                                      fontSize = screenHeight.times(0.03f).value.sp)) {
+                                append("Meet Your Personal ")
+                              }
+                          withStyle(
+                              style =
+                                  SpanStyle(
+                                      color = LightOrange,
+                                      fontSize = screenHeight.times(0.03f).value.sp)) {
+                                append("AI\n")
+                              }
+                          withStyle(
+                              style =
+                                  SpanStyle(
+                                      color = LightOrange,
+                                      fontSize = screenHeight.times(0.03f).value.sp)) {
+                                append("Problem Solver")
+                              }
+                        },
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(horizontal = 16.dp).testTag("title"))
 
-                    Image(
-                        modifier = Modifier.testTag("image"),
-                        painter = painterResource(id = R.drawable.ai_image),
-                        contentDescription = "ai logo",
-                        contentScale = ContentScale.FillBounds)
+                Image(
+                    modifier = Modifier.testTag("image"),
+                    painter = painterResource(id = R.drawable.ai_image),
+                    contentDescription = "ai logo",
+                    contentScale = ContentScale.FillBounds)
 
-                    Text(
-                        text = "I'm pleased that I meet you! How can\nI help you right now?",
-                        fontSize = screenHeight.times(0.02f).value.sp,
-                        color = Color.Gray,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(horizontal = 16.dp))
+                Text(
+                    text = "I'm pleased that I meet you! How can\nI help you right now?",
+                    fontSize = screenHeight.times(0.02f).value.sp,
+                    color = Color.Gray,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(horizontal = 16.dp))
 
-                    Button(
-                        onClick = { navigationActions.navigateTo(Screen.AI_SOLVER_CHAT_SCREEN) },
-                        colors = ButtonDefaults.buttonColors(containerColor = LightOrange),
-                        shape = RoundedCornerShape(50),
-                        modifier =
-                            Modifier.fillMaxWidth(0.6f)
-                                .height(screenHeight.times(0.07f))
-                                .testTag("getStartedButton")) {
-                          Text(
-                              text = "Get Started",
-                              fontSize = screenHeight.times(0.025f).value.sp,
-                              color = Color.White)
-                        }
-                  }
-            }
-      }
+                Button(
+                    onClick = { navigationActions.navigateTo(Screen.AI_SOLVER_CHAT_SCREEN) },
+                    colors = ButtonDefaults.buttonColors(containerColor = LightOrange),
+                    shape = RoundedCornerShape(50),
+                    modifier =
+                        Modifier.fillMaxWidth(0.6f)
+                            .height(screenHeight.times(0.07f))
+                            .testTag("getStartedButton")) {
+                      Text(
+                          text = "Get Started",
+                          fontSize = screenHeight.times(0.025f).value.sp,
+                          color = Color.White)
+                    }
+              }
+        }
+  }
 }
 
 /** Chat with Ai problem solver chatbot */
