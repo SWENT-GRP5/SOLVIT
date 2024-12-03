@@ -180,7 +180,7 @@ fun ImagePickerStep(
 ) {
   val imagePickerLauncher =
       rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris ->
-          onImagesSelected(selectedImages + uris)
+        onImagesSelected(selectedImages + uris)
       }
 
   Column(
@@ -265,16 +265,15 @@ fun ImagePickerStep(
                     }
               }
             }
-      Spacer(modifier = Modifier.height(8.dp))
-      // Note Text
-      Text(
-          text = "The initial image you select will be displayed in the service request. Feel free to update it after analysis.",
-          style = MaterialTheme.typography.bodySmall,
-          color = MaterialTheme.colorScheme.onBackground,
-          textAlign = TextAlign.Center,
-          modifier = Modifier.fillMaxWidth().padding(top = 8.dp).testTag("imagePickerNote")
-      )
-
+        Spacer(modifier = Modifier.height(8.dp))
+        // Note Text
+        Text(
+            text =
+                "The initial image you select will be displayed in the service request. Feel free to update it after analysis.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onBackground,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth().padding(top = 8.dp).testTag("imagePickerNote"))
       }
 }
 
@@ -353,8 +352,7 @@ fun MultiStepDialog(
                   if (selectedImages.isNotEmpty() && !isLoading) {
                     isLoading = true
                     try {
-                      val (title, type, description) =
-                          uploadAndAnalyze(context,selectedImages)
+                      val (title, type, description) = uploadAndAnalyze(context, selectedImages)
                       onAnalyzeComplete(title, type, description)
                     } catch (e: Exception) {
                       Log.e("MultiStepDialog", "Error: ${e.message}")
@@ -401,24 +399,28 @@ fun MultiStepDialog(
                           textAlign = TextAlign.Center,
                           color = OnBackground,
                           modifier = Modifier.testTag("stepThreeMessage"))
-                    Spacer(modifier = Modifier.height(16.dp))
-                    // New Note for Address and Deadline
-                    Text(
-                        text = "Please note: You still need to manually add the address and deadline for your service request.",
-                        style = MaterialTheme.typography.bodySmall,
-                        textAlign = TextAlign.Center,
-                        color = MaterialTheme.colorScheme.onBackground,
-                        modifier = Modifier.padding(horizontal = 8.dp).testTag("completionNote")
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    // New Proceed Button
-                    Button(
-                        onClick = { onClose() }, // Closes the dialog
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp).testTag("proceedButton"),
-                        colors = ButtonDefaults.buttonColors(containerColor = Primary, contentColor = OnPrimary)
-                    ) {
-                        Text("Apply Changes")
-                    }
+                      Spacer(modifier = Modifier.height(16.dp))
+                      // New Note for Address and Deadline
+                      Text(
+                          text =
+                              "Please note: You still need to manually add the address and deadline for your service request.",
+                          style = MaterialTheme.typography.bodySmall,
+                          textAlign = TextAlign.Center,
+                          color = MaterialTheme.colorScheme.onBackground,
+                          modifier = Modifier.padding(horizontal = 8.dp).testTag("completionNote"))
+                      Spacer(modifier = Modifier.height(16.dp))
+                      // New Proceed Button
+                      Button(
+                          onClick = { onClose() }, // Closes the dialog
+                          modifier =
+                              Modifier.fillMaxWidth()
+                                  .padding(horizontal = 32.dp)
+                                  .testTag("proceedButton"),
+                          colors =
+                              ButtonDefaults.buttonColors(
+                                  containerColor = Primary, contentColor = OnPrimary)) {
+                            Text("Apply Changes")
+                          }
                     }
               }
             }
@@ -431,18 +433,16 @@ suspend fun uploadAndAnalyze(
     context: Context,
     imageUris: List<Uri>
 ): Triple<String, String, String> {
-    return withContext(Dispatchers.IO) {
-        try {
-            // Step 1: Convert URIs to Base64 strings
-            val bitMapImages = imageUris.mapNotNull { uri ->
-                loadBitmapFromUri(context,uri)
-            }
+  return withContext(Dispatchers.IO) {
+    try {
+      // Step 1: Convert URIs to Base64 strings
+      val bitMapImages = imageUris.mapNotNull { uri -> loadBitmapFromUri(context, uri) }
 
-            // Step 2: Analyze images using the Gemini model
-            analyzeImagesGemini(bitMapImages)
-        } catch (e: Exception) {
-            Log.e("uploadAndAnalyze", "Error: ${e.message}", e)
-            throw Exception("Error during conversion and analysis: ${e.message}")
-        }
+      // Step 2: Analyze images using the Gemini model
+      analyzeImagesGemini(bitMapImages)
+    } catch (e: Exception) {
+      Log.e("uploadAndAnalyze", "Error: ${e.message}", e)
+      throw Exception("Error during conversion and analysis: ${e.message}")
     }
+  }
 }

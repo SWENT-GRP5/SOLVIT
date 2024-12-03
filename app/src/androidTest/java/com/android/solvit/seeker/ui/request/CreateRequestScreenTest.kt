@@ -113,16 +113,15 @@ class CreateRequestScreenTest {
     }
   }
 
-    fun mockUri(): Uri {
-        return Mockito.mock(Uri::class.java)
-    }
+  fun mockUri(): Uri {
+    return Mockito.mock(Uri::class.java)
+  }
 
-    fun mockContext(): Context {
-        return Mockito.mock(Context::class.java)
-    }
+  fun mockContext(): Context {
+    return Mockito.mock(Context::class.java)
+  }
 
-
-    @Test
+  @Test
   fun displayAllComponents() {
     composeTestRule.setContent {
       CreateRequestScreen(
@@ -296,7 +295,13 @@ class CreateRequestScreenTest {
   @Test
   fun aiAssistantDialog_displaysCorrectlyAndCanBeDismissed() {
     composeTestRule.setContent {
-      CreateRequestScreen(navigationActions, serviceRequestViewModel, authViewModel, notificationsViewModel, listProviderViewModel, locationViewModel)
+      CreateRequestScreen(
+          navigationActions,
+          serviceRequestViewModel,
+          authViewModel,
+          notificationsViewModel,
+          listProviderViewModel,
+          locationViewModel)
     }
 
     // Check that the AI Assistant Dialog is displayed initially
@@ -322,7 +327,13 @@ class CreateRequestScreenTest {
   @Test
   fun aiAssistantDialog_navigatesToImagePickerStep() {
     composeTestRule.setContent {
-      CreateRequestScreen(navigationActions, serviceRequestViewModel, authViewModel, notificationsViewModel, listProviderViewModel, locationViewModel)
+      CreateRequestScreen(
+          navigationActions,
+          serviceRequestViewModel,
+          authViewModel,
+          notificationsViewModel,
+          listProviderViewModel,
+          locationViewModel)
     }
 
     // Check that the AI Assistant Dialog is displayed initially
@@ -337,52 +348,45 @@ class CreateRequestScreenTest {
     composeTestRule.onNodeWithTag("addImagesButton").assertIsDisplayed()
   }
 
-    @Test
-    fun imagePickerStep_displaysComponentsCorrectly() {
-        val selectedImages = mutableListOf<Uri>() // Simulate empty images initially
+  @Test
+  fun imagePickerStep_displaysComponentsCorrectly() {
+    val selectedImages = mutableListOf<Uri>() // Simulate empty images initially
 
-        composeTestRule.setContent {
-            ImagePickerStep(
-                selectedImages = selectedImages,
-                onImagesSelected = { newImages -> selectedImages.addAll(newImages) },
-                onRemoveImage = { uri -> selectedImages.remove(uri) },
-                onStartAnalyzing = { /* Trigger Analyze Action */ }
-            )
-        }
-
-        // Verify header, message, and buttons exist
-        composeTestRule.onNodeWithTag("imagePickerStep").assertIsDisplayed()
-        composeTestRule.onNodeWithTag("noImagesText").assertIsDisplayed()
-        composeTestRule.onNodeWithTag("addImagesButton").assertIsDisplayed()
-
-        // Test button interactions
-        composeTestRule.onNodeWithTag("addImagesButton").performClick()
-        // Simulate adding images (manually mock `onImagesSelected` behavior)
-
-        selectedImages.add(mockUri()) // Mock a Uri object
-        composeTestRule.runOnIdle {
-            assert(selectedImages.isNotEmpty())
-        }
+    composeTestRule.setContent {
+      ImagePickerStep(
+          selectedImages = selectedImages,
+          onImagesSelected = { newImages -> selectedImages.addAll(newImages) },
+          onRemoveImage = { uri -> selectedImages.remove(uri) },
+          onStartAnalyzing = { /* Trigger Analyze Action */})
     }
 
-    @Test
-    fun imagePickerStep_removesImage() {
-        val selectedImages = mutableListOf(mockUri()) // Mock an initial image
+    // Verify header, message, and buttons exist
+    composeTestRule.onNodeWithTag("imagePickerStep").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("noImagesText").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("addImagesButton").assertIsDisplayed()
 
-        composeTestRule.setContent {
-            ImagePickerStep(
-                selectedImages = selectedImages,
-                onImagesSelected = { newImages -> selectedImages.addAll(newImages) },
-                onRemoveImage = { uri -> selectedImages.remove(uri) },
-                onStartAnalyzing = { /* Trigger Analyze Action */ }
-            )
-        }
+    // Test button interactions
+    composeTestRule.onNodeWithTag("addImagesButton").performClick()
+    // Simulate adding images (manually mock `onImagesSelected` behavior)
 
-        // Simulate removing the image
-        composeTestRule.onNodeWithTag("removeImageButton").performClick()
-        composeTestRule.runOnIdle {
-            assert(selectedImages.isEmpty())
-        }
+    selectedImages.add(mockUri()) // Mock a Uri object
+    composeTestRule.runOnIdle { assert(selectedImages.isNotEmpty()) }
+  }
+
+  @Test
+  fun imagePickerStep_removesImage() {
+    val selectedImages = mutableListOf(mockUri()) // Mock an initial image
+
+    composeTestRule.setContent {
+      ImagePickerStep(
+          selectedImages = selectedImages,
+          onImagesSelected = { newImages -> selectedImages.addAll(newImages) },
+          onRemoveImage = { uri -> selectedImages.remove(uri) },
+          onStartAnalyzing = { /* Trigger Analyze Action */})
     }
 
+    // Simulate removing the image
+    composeTestRule.onNodeWithTag("removeImageButton").performClick()
+    composeTestRule.runOnIdle { assert(selectedImages.isEmpty()) }
+  }
 }

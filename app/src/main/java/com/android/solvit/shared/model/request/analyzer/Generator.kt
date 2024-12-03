@@ -11,42 +11,34 @@ import kotlinx.coroutines.withContext
 import org.json.JSONObject
 
 // Define the response schema using Schema.obj
-private val jsonSchema = Schema.obj(
-    name = "ImageAnalysisResponse",
-    description = "The structured response for images analysis",
-    Schema.str(
-        name = "title",
-        description = "The generated title for the analysis"
-    ),
-    Schema.str(
-        name = "type",
-        description = "The category of the analyzed images"
-    ),
-    Schema.str(
-        name = "description",
-        description = "A detailed description of the analyzed images"
-    )
-)
+private val jsonSchema =
+    Schema.obj(
+        name = "ImageAnalysisResponse",
+        description = "The structured response for images analysis",
+        Schema.str(name = "title", description = "The generated title for the analysis"),
+        Schema.str(name = "type", description = "The category of the analyzed images"),
+        Schema.str(
+            name = "description", description = "A detailed description of the analyzed images"))
 
 // Initialize the generative model with a JSON response schema
-private val generativeModel = GenerativeModel(
-    modelName = "gemini-1.5-flash",
-    apiKey = BuildConfig.GOOGLE_AI_API_KEY,
-    generationConfig = generationConfig {
-        responseMimeType = "application/json"
-        responseSchema = jsonSchema
-    }
-)
-
+private val generativeModel =
+    GenerativeModel(
+        modelName = "gemini-1.5-flash",
+        apiKey = BuildConfig.GOOGLE_AI_API_KEY,
+        generationConfig =
+            generationConfig {
+              responseMimeType = "application/json"
+              responseSchema = jsonSchema
+            })
 
 // Function to analyze images using the Gemini model
-suspend fun analyzeImagesGemini(
-    images: List<Bitmap>
-): Triple<String, String, String> {
-    return withContext(Dispatchers.IO) {
-        try {
-            // Create the input content using the ContentBuilder
-            val inputContent = Content.Builder().apply {
+suspend fun analyzeImagesGemini(images: List<Bitmap>): Triple<String, String, String> {
+  return withContext(Dispatchers.IO) {
+    try {
+      // Create the input content using the ContentBuilder
+      val inputContent =
+          Content.Builder()
+              .apply {
                 images.forEach { image(it) }
                 text(
                     """
@@ -61,22 +53,22 @@ suspend fun analyzeImagesGemini(
                     - title : Generated Title Here
                     - type : Generated Category Here
                     - description : Generated Description Here
-                    """
-                )
-            }.build()
+                    """)
+              }
+              .build()
 
-            // Call the model to generate content
-            val response = generativeModel.generateContent(inputContent)
+      // Call the model to generate content
+      val response = generativeModel.generateContent(inputContent)
 
-            // Parse the response text
-            val jsonObject = JSONObject(response.text)
-            val title = jsonObject.getString("title")
-            val type = jsonObject.getString("type")
-            val description = jsonObject.getString("description")
+      // Parse the response text
+      val jsonObject = JSONObject(response.text)
+      val title = jsonObject.getString("title")
+      val type = jsonObject.getString("type")
+      val description = jsonObject.getString("description")
 
-            Triple(title, type, description)
-        } catch (e: Exception) {
-            throw Exception("Error analyzing images with Gemini: ${e.message}", e)
-        }
+      Triple(title, type, description)
+    } catch (e: Exception) {
+      throw Exception("Error analyzing images with Gemini: ${e.message}", e)
     }
+  }
 }
