@@ -5,6 +5,7 @@ import android.content.pm.ActivityInfo
 import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -71,9 +72,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.android.solvit.R
@@ -272,16 +275,26 @@ fun ProviderRegistrationScreen(
                 Spacer(modifier = Modifier.height(30.dp))
 
                 Button(
-                    onClick = {
+                    onClick = {if (isFormComplete) {
                       // Move to next step (Step 2: Preferences)
                       currentStep = 2
-                    },
+                    } else {
+                        Toast.makeText(
+                            context,
+                            "Please fill in all the correct information",
+                            Toast.LENGTH_SHORT)
+                            .show()
+                    }},
                     modifier =
-                        Modifier.fillMaxWidth().height(60.dp).testTag("completeRegistrationButton"),
-                    enabled = isFormComplete,
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(colorScheme.secondary) // Green button
-                    ) {
+                        Modifier.fillMaxWidth().height(60.dp).testTag("completeRegistrationButton").background(
+                                    if (isFormComplete) { colorScheme.secondary }
+                                    else { colorScheme.onSurfaceVariant },
+                    shape =
+                    RoundedCornerShape(
+                        25.dp,
+                    )),
+                  colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent))// Green button
+                     {
                       Text("Complete registration", color = colorScheme.onSecondary)
                     }
               }
@@ -323,14 +336,8 @@ fun ProviderRegistrationScreen(
                           onImageSelected = { uri: Uri? ->
                             providerImageUri = uri
                             uri?.let { providerImageBitmap = loadBitmapFromUri(localContext, it) }
-                          })
-                      Spacer(modifier = Modifier.height(30.dp))
-                      Button(
-                          onClick = { currentStep = 3 },
-                          modifier = Modifier.fillMaxWidth().testTag("savePreferencesButton"),
-                          colors = ButtonDefaults.buttonColors(colorScheme.secondary)) {
-                            Text("Complete Registration", color = colorScheme.onSecondary)
-                          }
+                          },
+                          onClickButton = { currentStep = 3 })
                       Spacer(modifier = Modifier.height(15.dp))
                       Text(
                           text =
@@ -481,8 +488,10 @@ fun ProviderDetails(
     onStartingPriceChange: (String) -> Unit,
     selectedLanguages: MutableList<String>,
     providerImageUri: Uri?,
-    onImageSelected: (Uri?) -> Unit
+    onImageSelected: (Uri?) -> Unit,
+    onClickButton: () -> Unit
 ) {
+  val context = LocalContext.current
 
   var servicesExpanded by remember { mutableStateOf(false) }
   var languagesExpanded by remember { mutableStateOf(false) }
@@ -494,6 +503,12 @@ fun ProviderDetails(
       description.isNotBlank() &&
           description.length < 250 // (we assume here that a word on average is 5 character)
   val isStartingPriceOk = startingPrice.isNotBlank() && startingPrice.all { it.isDigit() }
+
+  val allIsOk =
+      selectedService.isNotEmpty() &&
+          isDescriptionOk &&
+          isStartingPriceOk &&
+          selectedLanguages.isNotEmpty()
 
   Column(
       modifier = Modifier.fillMaxSize().padding(16.dp),
@@ -597,6 +612,34 @@ fun ProviderDetails(
                           })
                     }
                   }
+            }
+        Spacer(modifier = Modifier.height(30.dp))
+        Button(
+            onClick = {
+              if (allIsOk) {
+                onClickButton()
+              } else {
+                Toast.makeText(
+                        context,
+                        "Please fill in all the correct information",
+                        Toast.LENGTH_SHORT)
+                    .show()
+              }
+            },
+            modifier =
+                Modifier.fillMaxWidth()
+                    .testTag("savePreferencesButton")
+                    .background(
+                        if (allIsOk) { colorScheme.secondary }
+                        else { colorScheme.onSurfaceVariant },
+                        shape = RoundedCornerShape(25.dp)),
+            colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)) {
+              Text(
+                  "Complete Registration",
+                  color = colorScheme.onPrimary,
+                  fontWeight = FontWeight.Bold,
+                  fontSize = 16.sp,
+                  modifier = Modifier.testTag("saveButton"))
             }
       }
 }

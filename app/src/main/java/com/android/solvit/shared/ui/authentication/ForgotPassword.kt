@@ -2,7 +2,6 @@ package com.android.solvit.shared.ui.authentication
 
 import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
-import android.util.Patterns
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
@@ -26,6 +25,7 @@ import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -56,7 +56,7 @@ fun ForgotPassword(navigationActions: NavigationActions) {
 
   val context = LocalContext.current
 
-    val emailRegex = Regex("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$")
+  val emailRegex = Regex("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$")
   val goodFormEmail = emailRegex.matches(email)
 
   DisposableEffect(Unit) {
@@ -70,7 +70,8 @@ fun ForgotPassword(navigationActions: NavigationActions) {
         TopAppBar(
             title = { Text("") },
             navigationIcon = { GoBackButton(navigationActions) },
-            modifier = Modifier.testTag("topAppBar"))
+            modifier = Modifier.testTag("topAppBar"),
+            colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background))
       },
       content = {
         Column(

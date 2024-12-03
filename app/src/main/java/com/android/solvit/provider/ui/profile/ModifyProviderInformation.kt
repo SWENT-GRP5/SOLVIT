@@ -309,7 +309,6 @@ fun ModifyInput(
                           25.dp,
                       )),
       colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)) {
-        Icons.Default.AccountCircle
         Text(
             "Save !",
             color = colorScheme.onPrimary,
