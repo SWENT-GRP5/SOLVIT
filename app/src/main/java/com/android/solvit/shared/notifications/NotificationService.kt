@@ -126,7 +126,7 @@ open class NotificationService(
     }
   }
 
-  private fun showNotification(title: String, message: String) {
+  protected open fun showNotification(title: String, message: String) {
     try {
       val builder =
           NotificationCompat.Builder(applicationContext, CHANNEL_ID)
