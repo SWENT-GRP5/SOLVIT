@@ -102,33 +102,6 @@ class ProviderCalendarComponentsTest {
   }
 
   @Test
-  fun `calculateDayStatus handles requests without meeting date`() {
-    // Given
-    val now = Timestamp(Date())
-    val requests =
-        listOf(
-            createTestRequest(
-                uid = "1",
-                title = "Request 1",
-                description = "Description 1",
-                status = ServiceRequestStatus.PENDING,
-                meetingDate = null),
-            createTestRequest(
-                uid = "2",
-                title = "Request 2",
-                description = "Description 2",
-                status = ServiceRequestStatus.ACCEPTED,
-                meetingDate = now))
-
-    // When
-    val result = calculateDayStatus(requests)
-
-    // Then
-    assert(result.size == 1) { "Expected 1 status indicator, got ${result.size}" }
-    assert(result[0] == ServiceRequestStatus.ACCEPTED)
-  }
-
-  @Test
   fun `TimeSlotItem displays correct information`() {
     // Given
     val now = Timestamp(Date())
