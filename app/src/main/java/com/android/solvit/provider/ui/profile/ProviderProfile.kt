@@ -37,6 +37,8 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableDoubleStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -332,8 +334,8 @@ fun StatsSection(provider: Provider) {
 
   var rating by remember { mutableStateOf("") }
   var popular by remember { mutableStateOf("") }
-  var earnings by remember { mutableStateOf(0.0) }
-  var pendingTasks by remember { mutableStateOf(0) }
+  var earnings by remember { mutableDoubleStateOf(0.0) }
+  var pendingTasks by remember { mutableIntStateOf(0) }
 
   LaunchedEffect(provider) {
     rating = provider.rating.toString()
