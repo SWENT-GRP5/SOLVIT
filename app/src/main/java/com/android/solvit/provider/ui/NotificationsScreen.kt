@@ -155,7 +155,7 @@ fun Dialog(onDismiss: () -> Unit, serviceRequest: ServiceRequest) {
   Dialog(onDismissRequest = onDismiss) {
     Surface(shape = RoundedCornerShape(32.dp), shadowElevation = 8.dp) {
       Column(
-          modifier = Modifier.padding(16.dp),
+          modifier = Modifier.padding(16.dp).testTag("serviceRequestDialog"),
           verticalArrangement = Arrangement.spacedBy(8.dp),
           horizontalAlignment = Alignment.CenterHorizontally) {
 
@@ -163,12 +163,13 @@ fun Dialog(onDismiss: () -> Unit, serviceRequest: ServiceRequest) {
             Text(
                 text = "Title : ${serviceRequest.title}",
                 style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.primary)
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.testTag("dialogTitle"))
             // Description
             Text(
                 text = "Description: ${serviceRequest.description}",
                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-            )
+                modifier = Modifier.testTag("dialogDescription"))
             // Location
             serviceRequest.location?.name?.let { locationName ->
               Row {
@@ -178,7 +179,8 @@ fun Dialog(onDismiss: () -> Unit, serviceRequest: ServiceRequest) {
                 Text(
                     text = locationName,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.primary // Set color for location name
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.testTag("dialogLocation") // Set color for location name
                     )
               }
             }
@@ -192,7 +194,8 @@ fun Dialog(onDismiss: () -> Unit, serviceRequest: ServiceRequest) {
                 Text(
                     text = " $formattedDate",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.primary)
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.testTag("dialogDueDate"))
               }
             }
             // Status
@@ -204,8 +207,8 @@ fun Dialog(onDismiss: () -> Unit, serviceRequest: ServiceRequest) {
                   text = ServiceRequestStatus.format(serviceRequest.status),
                   style = MaterialTheme.typography.bodyMedium,
                   color =
-                      ServiceRequestStatus.getStatusColor(serviceRequest.status) // Colored status
-                  )
+                      ServiceRequestStatus.getStatusColor(serviceRequest.status), // Colored status
+                  modifier = Modifier.testTag("dialogStatus"))
             }
           }
     }

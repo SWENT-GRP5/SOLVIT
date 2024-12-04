@@ -1,8 +1,10 @@
 package com.android.solvit.provider.ui
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
 import androidx.navigation.NavController
 import com.android.solvit.shared.model.Notification
 import com.android.solvit.shared.model.NotificationsRepository
@@ -38,7 +40,7 @@ class NotificationsScreenTest {
           type = Services.CLEANER,
           description = "description",
           userId = "-1",
-          dueDate = Timestamp(GregorianCalendar(2024, 0, 1).time),
+          dueDate = Timestamp(GregorianCalendar(2024, 1, 1).time),
           location = Location(37.7749, -122.4194, "San Francisco"),
           imageUrl = "imageUrl",
           status = ServiceRequestStatus.PENDING)
@@ -157,5 +159,68 @@ class NotificationsScreenTest {
             eq("provider1"), // Use eq() to match the specific value
             any(), // Use matchers for the other arguments
             any())
+  }
+
+  @Test
+  fun showDialogOnNotificationClick() {
+    // Set the content of the NotificationScreen
+    composeTestRule.setContent {
+      NotificationScreen(
+          viewModel = notificationsViewModel,
+          providerId = "provider1",
+          navigationActions = navigationActions)
+    }
+
+    // Simulate a click on the first notification
+    composeTestRule.onNodeWithTag("notificationItem_1").performClick()
+
+    // Check that the dialog is displayed
+    composeTestRule.onNodeWithTag("serviceRequestDialog").assertIsDisplayed()
+
+    // Verify that the dialog displays the correct service request title, description, location, due
+    // date, and status
+    composeTestRule.onNodeWithTag("dialogTitle").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("dialogDescription").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("dialogLocation").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("dialogDueDate").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("dialogStatus").assertIsDisplayed()
+  }
+
+  @Test
+  fun dialogDisplaysCorrectServiceRequestDetails() {
+    composeTestRule.setContent {
+      NotificationScreen(
+          viewModel = notificationsViewModel,
+          providerId = "provider1",
+          navigationActions = navigationActions)
+    }
+
+    // Click on the first notification to open the dialog
+    composeTestRule.onNodeWithTag("notificationItem_1").performClick()
+
+    // Verify the service request details in the dialog
+    composeTestRule.onNodeWithTag("dialogTitle").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("dialogDescription").assertIsDisplayed()
+
+    // Verify the text content of the dialog elements matches the service request details
+    composeTestRule
+        .onNodeWithTag("dialogTitle")
+        .assertTextEquals("Title : title") // Matching the title
+    composeTestRule
+        .onNodeWithTag("dialogDescription")
+        .assertTextEquals("Description: description") // Matching the description
+
+    // For location, check if it displays correctly
+    composeTestRule.onNodeWithTag("dialogLocation").assertTextEquals("San Francisco")
+
+    // For the due date
+    composeTestRule
+        .onNodeWithTag("dialogDueDate")
+        .assertTextEquals(" 01/02/2024") // Make sure this matches the date format used
+
+    // For the status
+    composeTestRule
+        .onNodeWithTag("dialogStatus")
+        .assertTextEquals("Pending") // Ensure this matches the service request status
   }
 }
