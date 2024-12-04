@@ -60,9 +60,9 @@ import com.android.solvit.shared.ui.authentication.GoBackButton
 import com.android.solvit.shared.ui.navigation.NavigationActions
 
 /**
- * A composable function that displays the screen for modifying a provider's profile information.
- * It includes a form to update details such as name, company name, service, phone number,
- * location, languages, and description.
+ * A composable function that displays the screen for modifying a provider's profile information. It
+ * includes a form to update details such as name, company name, service, phone number, location,
+ * languages, and description.
  *
  * @param listProviderViewModel The ViewModel used to manage and update the list of providers.
  * @param authViewModel The ViewModel managing authentication and user-related data.
@@ -74,8 +74,8 @@ import com.android.solvit.shared.ui.navigation.NavigationActions
  * - Displays a top app bar with a title and a "go back" button.
  * - Retrieves the currently authenticated user's provider details and pre-fills the form.
  * - Integrates the `ModifyInput` composable to allow editing of the provider's details.
- * - Ensures proper cleanup (e.g., clearing the location ViewModel and restoring orientation)
- *   when the screen is no longer in use.
+ * - Ensures proper cleanup (e.g., clearing the location ViewModel and restoring orientation) when
+ *   the screen is no longer in use.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint(
@@ -139,10 +139,10 @@ fun ModifyProviderInformationScreen(
 }
 
 /**
- * A composable function that provides an interface to modify a provider's details.
- * The form includes fields for updating the provider's name, company name, service,
- * phone number, location, languages, and description. Each field includes validation
- * and dynamic suggestions where applicable.
+ * A composable function that provides an interface to modify a provider's details. The form
+ * includes fields for updating the provider's name, company name, service, phone number, location,
+ * languages, and description. Each field includes validation and dynamic suggestions where
+ * applicable.
  *
  * @param provider The current provider whose details are being modified.
  * @param locationViewModel The ViewModel used to fetch and manage location suggestions.

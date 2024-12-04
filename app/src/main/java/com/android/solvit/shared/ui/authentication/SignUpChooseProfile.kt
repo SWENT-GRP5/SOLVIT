@@ -63,10 +63,10 @@ import com.android.solvit.shared.ui.navigation.Screen
  * - Displays an illustration and title to guide the user.
  * - Provides buttons for choosing between "Seeker" and "Provider" roles, each with its own
  *   description and action.
- * - Handles role selection and navigates to the corresponding registration profile screen
- *   based on the selected role and authentication method.
- * - Includes a "Learn More" section with a clickable link (currently not implemented)
- *   for additional guidance.
+ * - Handles role selection and navigates to the corresponding registration profile screen based on
+ *   the selected role and authentication method.
+ * - Includes a "Learn More" section with a clickable link (currently not implemented) for
+ *   additional guidance.
  */
 @SuppressLint("SourceLockedOrientationActivity")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -159,7 +159,8 @@ fun SignUpChooseProfile(
 }
 
 /**
- * A composable function that displays a styled button for selecting a role (e.g., "Seeker" or "Provider").
+ * A composable function that displays a styled button for selecting a role (e.g., "Seeker" or
+ * "Provider").
  *
  * @param text The label of the button.
  * @param description A brief description of the role.
@@ -230,15 +231,14 @@ fun SectionTitle(text: String, testTag: String = "") {
 }
 
 /**
- * A composable function that displays a "Learn More" section with an annotated clickable text.
- * The section provides additional guidance for users who are unsure about their role selection.
+ * A composable function that displays a "Learn More" section with an annotated clickable text. The
+ * section provides additional guidance for users who are unsure about their role selection.
  *
  * This function:
  * - Displays an interactive text with a clickable "Learn more" link.
  * - Triggers a Toast message when the link is clicked (functionality not yet implemented).
  * - Adapts the text style to match the application's theme.
  */
-
 @Composable
 fun LearnMoreSection() {
   val context = LocalContext.current

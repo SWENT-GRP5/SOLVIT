@@ -63,9 +63,9 @@ import com.android.solvit.shared.ui.authentication.GoBackButton
 import com.android.solvit.shared.ui.navigation.NavigationActions
 
 /**
- * A composable function that provides a multi-step screen for registering a seeker profile.
- * The registration process includes steps for inputting personal information, setting preferences,
- * and confirming the registration.
+ * A composable function that provides a multi-step screen for registering a seeker profile. The
+ * registration process includes steps for inputting personal information, setting preferences, and
+ * confirming the registration.
  *
  * @param viewModel The `SeekerProfileViewModel` to manage the seeker profile data.
  * @param navigationActions A set of navigation actions to handle transitions between screens.
@@ -75,9 +75,9 @@ import com.android.solvit.shared.ui.navigation.NavigationActions
  * This function:
  * - Locks the screen orientation to portrait mode while active.
  * - Guides the user through three steps:
- *   1. Inputting basic information such as name, username, phone, and location.
- *   2. Setting preferences for the profile.
- *   3. Displaying a confirmation screen upon completion.
+ *     1. Inputting basic information such as name, username, phone, and location.
+ *     2. Setting preferences for the profile.
+ *     3. Displaying a confirmation screen upon completion.
  * - Validates user inputs at each step to ensure accuracy and completeness.
  * - Saves the seeker's profile data upon successful registration.
  * - Navigates to a success or dashboard screen after completing the registration.

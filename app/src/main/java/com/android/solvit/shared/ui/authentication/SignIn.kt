@@ -88,8 +88,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
- * A composable function that displays the sign-in screen, allowing users to log in
- * using email/password or Google Sign-In.
+ * A composable function that displays the sign-in screen, allowing users to log in using
+ * email/password or Google Sign-In.
  *
  * @param navigationActions A set of navigation actions to handle screen transitions.
  * @param authViewModel The ViewModel managing authentication and user-related data.
@@ -191,8 +191,8 @@ fun SignInScreen(
 }
 
 /**
- * A composable function that displays a "Go Back" button with a debounce mechanism
- * to prevent multiple rapid clicks.
+ * A composable function that displays a "Go Back" button with a debounce mechanism to prevent
+ * multiple rapid clicks.
  *
  * @param navigationActions A set of navigation actions to handle screen transitions.
  *
@@ -712,11 +712,11 @@ fun GoogleButton(
  * - Creates a managed activity result launcher to handle the result of the Google Sign-In intent.
  * - Attempts to retrieve the Google account from the result data.
  * - On success:
- *   - Updates the `authViewModel` with the retrieved Google account.
- *   - Calls the `signInWithGoogle` method of the `authViewModel`.
- *   - Invokes the provided `onSuccess` callback.
+ *     - Updates the `authViewModel` with the retrieved Google account.
+ *     - Calls the `signInWithGoogle` method of the `authViewModel`.
+ *     - Invokes the provided `onSuccess` callback.
  * - On failure:
- *   - Invokes the provided `onFailure` callback.
+ *     - Invokes the provided `onFailure` callback.
  */
 @Composable
 fun googleSignInLauncher(
@@ -741,7 +741,8 @@ fun googleSignInLauncher(
 }
 
 /**
- * A composable function that displays a customizable outlined text field with validation and error messages.
+ * A composable function that displays a customizable outlined text field with validation and error
+ * messages.
  *
  * @param value The current text value of the field.
  * @param onValueChange Lambda to update the text value.
@@ -850,7 +851,8 @@ fun CustomOutlinedTextField(
  * @param placeholder The placeholder text when the field is empty.
  * @param contentDescription Description for the password field.
  * @param testTag Test tag for UI testing.
- * @param passwordLengthComplete Boolean indicating whether the password meets the length requirement.
+ * @param passwordLengthComplete Boolean indicating whether the password meets the length
+ *   requirement.
  * @param errorMessage The error message displayed for invalid password length.
  * @param testTagErrorPassword Test tag for the error message.
  *

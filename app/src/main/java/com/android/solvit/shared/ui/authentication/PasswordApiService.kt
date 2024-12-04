@@ -4,19 +4,8 @@ import retrofit2.http.GET
 import retrofit2.http.Query
 
 /**
- * An interface defining API endpoints for password generation.
- * This interface uses Retrofit annotations to specify HTTP requests and query parameters.
- *
- * @GET("create/") Defines an HTTP GET request to the "create/" endpoint.
- *
- * The `createPassword` function:
- * - Generates one or more passwords based on the provided query parameters.
- * - Allows customization of the password characteristics, such as:
- *   - Inclusion of digits.
- *   - Use of lowercase and uppercase letters.
- *   - Use of special characters.
- *   - Length of the password(s).
- *   - Number of passwords to generate.
+ * An interface defining API endpoints for password generation. This interface uses Retrofit
+ * annotations to specify HTTP requests and query parameters.
  *
  * @param includeDigits Whether to include digits in the generated password(s) (default: true).
  * @param includeLowercase Whether to include lowercase letters (default: true).
@@ -25,6 +14,16 @@ import retrofit2.http.Query
  * @param passwordLength The length of the generated password(s) (default: 12).
  * @param quantity The number of passwords to generate (default: 1).
  * @return A `PasswordResponse` object containing the generated passwords.
+ * @GET("create/") Defines an HTTP GET request to the "create/" endpoint.
+ *
+ * The `createPassword` function:
+ * - Generates one or more passwords based on the provided query parameters.
+ * - Allows customization of the password characteristics, such as:
+ *     - Inclusion of digits.
+ *     - Use of lowercase and uppercase letters.
+ *     - Use of special characters.
+ *     - Length of the password(s).
+ *     - Number of passwords to generate.
  */
 interface PasswordApiService {
   @GET("create/")

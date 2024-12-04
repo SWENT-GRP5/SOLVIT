@@ -8,8 +8,8 @@ package com.android.solvit.shared.ui.authentication
  * @property api_version The current version of the API.
  * @property api_last_update_date The last update date of the API.
  *
- * This class encapsulates all the information returned by the API when requesting
- * password generation, including the generated passwords and metadata about the API.
+ * This class encapsulates all the information returned by the API when requesting password
+ * generation, including the generated passwords and metadata about the API.
  */
 data class PasswordResponse(
     val passwords: List<String>,

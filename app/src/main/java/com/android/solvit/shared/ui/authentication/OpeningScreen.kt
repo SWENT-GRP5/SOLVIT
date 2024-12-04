@@ -29,17 +29,15 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.compose.rememberNavController
 import com.android.solvit.R
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
 
 /**
- * A composable function that displays the opening screen of the application.
- * The layout dynamically adjusts based on the device's orientation (portrait or landscape).
+ * A composable function that displays the opening screen of the application. The layout dynamically
+ * adjusts based on the device's orientation (portrait or landscape).
  *
  * @param navigationActions A set of navigation actions to handle screen transitions.
  *
@@ -127,8 +125,8 @@ fun OpeningScreenPortrait(navigationActions: NavigationActions) {
  *
  * This function:
  * - Splits the screen into two sections:
- *   1. The left side displays the app logo.
- *   2. The right side displays the app name, tagline, and a clickable "Tap to Continue" text.
+ *     1. The left side displays the app logo.
+ *     2. The right side displays the app name, tagline, and a clickable "Tap to Continue" text.
  * - Aligns elements horizontally to utilize the wider screen space effectively.
  */
 @Composable
