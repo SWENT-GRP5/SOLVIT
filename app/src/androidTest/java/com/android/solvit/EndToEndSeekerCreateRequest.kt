@@ -9,6 +9,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.test.core.app.ApplicationProvider
+import com.android.solvit.provider.model.ProviderCalendarViewModel
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.seeker.model.profile.UserRepository
 import com.android.solvit.seeker.model.profile.UserRepositoryFirestore
@@ -68,6 +69,7 @@ class EndToEndSeekerCreateRequest {
   private lateinit var packageProposalViewModel: PackageProposalViewModel
   private lateinit var chatAssistantViewModel: ChatAssistantViewModel
   private lateinit var notificationsViewModel: NotificationsViewModel
+  private lateinit var calendarViewModel: ProviderCalendarViewModel
 
   private lateinit var authRepository: AuthRepository
   private lateinit var seekerRepository: UserRepository
@@ -122,6 +124,7 @@ class EndToEndSeekerCreateRequest {
     chatViewModel = ChatViewModel(chatRepository)
     chatAssistantViewModel = ChatAssistantViewModel()
     notificationsViewModel = NotificationsViewModel(notificationsRepository)
+    calendarViewModel = ProviderCalendarViewModel(authViewModel, serviceRequestViewModel)
 
     `when`(locationRepository.search(ArgumentMatchers.anyString(), anyOrNull(), anyOrNull()))
         .thenAnswer { invocation ->
@@ -185,15 +188,14 @@ class EndToEndSeekerCreateRequest {
           "provider" ->
               ProviderUI(
                   authViewModel = authViewModel,
+                  listProviderViewModel = listProviderViewModel,
                   serviceRequestViewModel = serviceRequestViewModel,
+                  seekerProfileViewModel = seekerProfileViewModel,
                   chatViewModel = chatViewModel,
                   notificationViewModel = notificationsViewModel,
                   locationViewModel = locationViewModel,
                   chatAssistantViewModel = chatAssistantViewModel,
-                  calendarViewModel =
-                      viewModel {
-                        ProviderCalendarViewModel(authViewModel, serviceRequestViewModel)
-                      })
+                  calendarViewModel = calendarViewModel)
         }
       }
     }

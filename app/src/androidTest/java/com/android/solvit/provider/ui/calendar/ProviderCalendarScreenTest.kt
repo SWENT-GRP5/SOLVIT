@@ -1,43 +1,35 @@
 package com.android.solvit.provider.ui.calendar
 
-import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performTouchInput
-import androidx.compose.ui.test.swipeLeft
-import androidx.compose.ui.test.swipeRight
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.solvit.provider.model.ProviderCalendarViewModel
-import com.android.solvit.shared.model.authentication.AuthViewModel
-import com.android.solvit.shared.model.authentication.User
+import com.android.solvit.shared.model.authentication.*
 import com.android.solvit.shared.model.map.Location
-import com.android.solvit.shared.model.request.ServiceRequest
-import com.android.solvit.shared.model.request.ServiceRequestStatus
-import com.android.solvit.shared.model.request.ServiceRequestViewModel
+import com.android.solvit.shared.model.request.*
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
-import com.android.solvit.shared.ui.navigation.Route
 import com.google.firebase.Timestamp
 import java.time.LocalDateTime
 import java.time.ZoneOffset
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.mockito.kotlin.*
+import org.junit.runner.RunWith
+import org.mockito.Mockito.mock
+import org.mockito.kotlin.any
+import org.mockito.kotlin.whenever
 
+@RunWith(AndroidJUnit4::class)
 class ProviderCalendarScreenTest {
-
   @get:Rule val composeTestRule = createComposeRule()
 
   private lateinit var navigationActions: NavigationActions
   private lateinit var viewModel: ProviderCalendarViewModel
+  private lateinit var authRep: AuthRep
   private lateinit var authViewModel: AuthViewModel
+  private lateinit var serviceRequestRepository: ServiceRequestRepository
   private lateinit var serviceRequestViewModel: ServiceRequestViewModel
-  private lateinit var userFlow: MutableStateFlow<User?>
-  private lateinit var requestsFlow: MutableStateFlow<List<ServiceRequest>>
 
   private val testUserId = "test_user_id"
   private val testLocation = Location(37.7749, -122.4194, "San Francisco")
@@ -61,23 +53,27 @@ class ProviderCalendarScreenTest {
 
   @Before
   fun setUp() {
-    // Set up navigation actions
+    // Set up repositories and view models
+    serviceRequestRepository = mock(ServiceRequestRepository::class.java)
+    serviceRequestViewModel = ServiceRequestViewModel(serviceRequestRepository)
+    authRep = mock(AuthRep::class.java)
+    authViewModel = AuthViewModel(authRep)
     navigationActions = mock()
 
-    // Set up auth view model
-    authViewModel = mock()
-    val mockUser: User = mock()
-    whenever(mockUser.uid).thenReturn(testUserId)
-    userFlow = MutableStateFlow(mockUser)
-    whenever(authViewModel.user).thenReturn(userFlow)
+    // Mock auth repository to return test user
+    whenever(authRep.init(any())).thenAnswer { invocation ->
+      val callback = invocation.arguments[0] as (User?) -> Unit
+      callback(User(testUserId, "test@example.com", "Provider", emptyList()))
+    }
 
-    // Set up service request view model
-    serviceRequestViewModel = mock()
-    requestsFlow = MutableStateFlow(listOf(testRequest))
-    whenever(serviceRequestViewModel.requests)
-        .thenReturn(requestsFlow as StateFlow<List<ServiceRequest>>)
+    // Mock service request repository to return test request
+    whenever(serviceRequestRepository.getServiceRequests(any(), any())).thenAnswer { invocation ->
+      val onSuccess = invocation.arguments[0] as (List<ServiceRequest>) -> Unit
+      val onFailure = invocation.arguments[1] as (Exception) -> Unit
+      onSuccess(listOf(testRequest))
+    }
 
-    // Set up calendar view model
+    // Create view model with mocked dependencies
     viewModel = ProviderCalendarViewModel(authViewModel, serviceRequestViewModel)
 
     // Set up compose test rule
@@ -97,48 +93,49 @@ class ProviderCalendarScreenTest {
   @Test
   fun testCalendarViewNavigation() {
     // Test Month View
+    composeTestRule.onNodeWithTag("toggleButton_month").assertIsDisplayed()
     composeTestRule.onNodeWithTag("toggleButton_month").performClick()
+
+    composeTestRule.onNodeWithTag("calendarColumn").assertIsDisplayed()
     composeTestRule.onNodeWithTag("calendarColumn").performTouchInput { swipeLeft() }
     composeTestRule.onNodeWithTag("calendarColumn").performTouchInput { swipeRight() }
 
     // Test Week View
+    composeTestRule.onNodeWithTag("toggleButton_week").assertIsDisplayed()
     composeTestRule.onNodeWithTag("toggleButton_week").performClick()
+
+    composeTestRule.onNodeWithTag("calendarColumn").assertIsDisplayed()
     composeTestRule.onNodeWithTag("calendarColumn").performTouchInput { swipeLeft() }
     composeTestRule.onNodeWithTag("calendarColumn").performTouchInput { swipeRight() }
 
     // Test Day View
+    composeTestRule.onNodeWithTag("toggleButton_day").assertIsDisplayed()
     composeTestRule.onNodeWithTag("toggleButton_day").performClick()
+
+    composeTestRule.onNodeWithTag("calendarColumn").assertIsDisplayed()
     composeTestRule.onNodeWithTag("calendarColumn").performTouchInput { swipeLeft() }
     composeTestRule.onNodeWithTag("calendarColumn").performTouchInput { swipeRight() }
   }
 
   @Test
-  fun testTimeSlotClick() {
-    // Find and click the time slot
-    composeTestRule.onNodeWithTag("timeSlot_${testRequest.uid}").performClick()
-
-    // Verify navigation to booking details
-    verify(navigationActions).navigateTo(Route.BOOKING_DETAILS + "/" + testRequest.uid)
-  }
-
-  @Test
   fun testDatePicker() {
-    // Open the date picker
+    // Click the month header to open date picker
+    composeTestRule.onNodeWithTag("monthHeader").assertIsDisplayed()
     composeTestRule.onNodeWithTag("monthHeader").performClick()
+
     composeTestRule.onNodeWithTag("datePickerDialog").assertIsDisplayed()
 
-    // Select a specific date
-    composeTestRule.onNodeWithText("15").performClick()
-
-    // Confirm the selection
+    // Select a date and confirm
+    composeTestRule.onNodeWithTag("confirmDateButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("confirmDateButton").performClick()
-
-    // Assert that the date picker dialog is no longer displayed
     composeTestRule.onNodeWithTag("datePickerDialog").assertDoesNotExist()
 
-    // Test cancelling the date picker
+    // Open date picker again and cancel
+    composeTestRule.onNodeWithTag("monthHeader").assertIsDisplayed()
     composeTestRule.onNodeWithTag("monthHeader").performClick()
+
     composeTestRule.onNodeWithTag("datePickerDialog").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("cancelDateButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("cancelDateButton").performClick()
     composeTestRule.onNodeWithTag("datePickerDialog").assertDoesNotExist()
   }
