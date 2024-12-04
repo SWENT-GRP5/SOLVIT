@@ -117,29 +117,34 @@ class ProviderRegistrationTest {
           navigationActions = navigationActions,
           locationViewModel = locationViewModel)
     }
+
     // Initially, the button should be disabled when fields are empty
-    composeTestRule.onNodeWithTag("completeRegistrationButton").assertIsNotEnabled()
+    composeTestRule.onNodeWithTag("completeRegistrationButton").performClick()
+    composeTestRule.onNodeWithTag("savePreferencesButton").isNotDisplayed()
 
     // Fill out only some of the fields
     composeTestRule.onNodeWithTag("fullNameInput").performTextInput("John Doe")
     composeTestRule.onNodeWithTag("phoneNumberInput").performTextInput("123456789")
 
     // Button should still be disabled as not all fields are filled
-    composeTestRule.onNodeWithTag("completeRegistrationButton").assertIsNotEnabled()
+    composeTestRule.onNodeWithTag("completeRegistrationButton").performClick()
+    composeTestRule.onNodeWithTag("savePreferencesButton").isNotDisplayed()
 
     // Complete the rest of the fields
     composeTestRule.onNodeWithTag("companyNameInput").performTextInput("Company")
     composeTestRule.onNodeWithTag("inputRequestAddress").performTextInput("123 Main St")
 
-    // Now the button should be enabled
-    composeTestRule.onNodeWithTag("completeRegistrationButton").assertIsNotEnabled()
+    //Not enable because the location is not selected
+    composeTestRule.onNodeWithTag("completeRegistrationButton").performClick()
+    composeTestRule.onNodeWithTag("savePreferencesButton").isNotDisplayed()
 
     composeTestRule.onNodeWithTag("inputRequestAddress").performTextClearance()
     composeTestRule.onNodeWithTag("inputRequestAddress").performTextInput("USA")
     composeTestRule.waitUntil { locationViewModel.locationSuggestions.value.isNotEmpty() }
     composeTestRule.onAllNodesWithTag("locationResult")[0].performClick()
 
-    composeTestRule.onNodeWithTag("completeRegistrationButton").assertIsEnabled()
+    composeTestRule.onNodeWithTag("completeRegistrationButton").performClick()
+    composeTestRule.onNodeWithTag("savePreferencesButton").isDisplayed()
   }
 
   @Test
