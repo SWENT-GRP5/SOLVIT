@@ -168,6 +168,7 @@ fun ServiceBookingScreen(
           request!!.status == ServiceRequestStatus.SCHEDULED
   // Scaffold provides the basic structure for the screen with a top bar and content
   Scaffold(
+      modifier = Modifier.testTag("service_booking_screen"),
       topBar = {
         // TopAppBar displays the navigation icon and title of the screen
         TopAppBar(

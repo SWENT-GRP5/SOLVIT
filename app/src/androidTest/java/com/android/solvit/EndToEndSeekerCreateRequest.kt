@@ -250,14 +250,11 @@ class EndToEndSeekerCreateRequest {
 
     // Assert the requests to be displayed
     composeTestRule.waitUntil(timeoutMillis = 10000) {
-      composeTestRule.onNodeWithTag("requestsList").isDisplayed()
+      composeTestRule.onNodeWithTag("service_booking_screen").isDisplayed()
     }
+    composeTestRule.onNodeWithTag("service_booking_screen").assertIsDisplayed()
 
     // Delete the request
-    composeTestRule.onNodeWithTag("requestListItem").performClick()
-    composeTestRule.waitUntil(timeoutMillis = 10000) {
-      composeTestRule.onNodeWithTag("edit_button").isDisplayed()
-    }
     composeTestRule.onNodeWithTag("edit_button").performClick()
     composeTestRule.waitUntil(timeoutMillis = 10000) {
       composeTestRule.onNodeWithTag("requestScreen").isDisplayed()
