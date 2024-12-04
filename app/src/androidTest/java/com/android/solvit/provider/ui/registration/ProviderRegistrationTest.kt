@@ -1,8 +1,6 @@
 package com.android.solvit.provider.ui.registration
 
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertIsEnabled
-import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.isNotDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -134,7 +132,7 @@ class ProviderRegistrationTest {
     composeTestRule.onNodeWithTag("companyNameInput").performTextInput("Company")
     composeTestRule.onNodeWithTag("inputRequestAddress").performTextInput("123 Main St")
 
-    //Not enable because the location is not selected
+    // Not enable because the location is not selected
     composeTestRule.onNodeWithTag("completeRegistrationButton").performClick()
     composeTestRule.onNodeWithTag("savePreferencesButton").isNotDisplayed()
 
