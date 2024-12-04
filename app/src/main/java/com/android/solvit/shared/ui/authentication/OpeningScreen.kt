@@ -37,6 +37,17 @@ import com.android.solvit.R
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
 
+/**
+ * A composable function that displays the opening screen of the application.
+ * The layout dynamically adjusts based on the device's orientation (portrait or landscape).
+ *
+ * @param navigationActions A set of navigation actions to handle screen transitions.
+ *
+ * This function:
+ * - Determines the device orientation and displays either a portrait or landscape layout.
+ * - Serves as the entry point to the app, displaying the app logo, name, tagline, and a
+ *   call-to-action to proceed to the sign-in screen.
+ */
 @Composable
 fun OpeningScreen(navigationActions: NavigationActions) {
   val configuration = LocalConfiguration.current
@@ -47,6 +58,15 @@ fun OpeningScreen(navigationActions: NavigationActions) {
   }
 }
 
+/**
+ * A composable function that displays the opening screen in portrait orientation.
+ *
+ * @param navigationActions A set of navigation actions to handle screen transitions.
+ *
+ * This function:
+ * - Displays the app logo, name, and tagline vertically aligned.
+ * - Includes a clickable "Tap to Continue" text that navigates to the sign-in screen.
+ */
 @Composable
 fun OpeningScreenPortrait(navigationActions: NavigationActions) {
   Surface(
@@ -100,6 +120,17 @@ fun OpeningScreenPortrait(navigationActions: NavigationActions) {
       }
 }
 
+/**
+ * A composable function that displays the opening screen in landscape orientation.
+ *
+ * @param navigationActions A set of navigation actions to handle screen transitions.
+ *
+ * This function:
+ * - Splits the screen into two sections:
+ *   1. The left side displays the app logo.
+ *   2. The right side displays the app name, tagline, and a clickable "Tap to Continue" text.
+ * - Aligns elements horizontally to utilize the wider screen space effectively.
+ */
 @Composable
 fun OpeningScreenLandscape(navigationActions: NavigationActions) {
   Surface(
@@ -165,13 +196,4 @@ fun OpeningScreenLandscape(navigationActions: NavigationActions) {
                   }
             }
       }
-}
-
-// Preview function for testing
-@Preview(showBackground = true)
-@Composable
-fun PreviewOpeningScreen() {
-  val navController = rememberNavController()
-  val navigationActions = NavigationActions(navController)
-  OpeningScreenPortrait(navigationActions)
 }

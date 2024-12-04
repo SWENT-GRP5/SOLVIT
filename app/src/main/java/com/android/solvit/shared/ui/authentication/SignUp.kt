@@ -74,6 +74,21 @@ import kotlinx.coroutines.launch
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
+/**
+ * A composable function that displays the Sign-Up screen for user registration.
+ *
+ * @param navigationActions A set of navigation actions to handle screen transitions.
+ * @param authViewModel The ViewModel managing authentication and user-related data.
+ *
+ * This function:
+ * - Locks the screen orientation to portrait mode while active.
+ * - Provides a form for users to input their email, password, and confirm their password.
+ * - Includes validation for email format, password length, and password matching.
+ * - Offers a "Sign up with Google" option using Google Sign-In.
+ * - Provides a button to generate a secure password via an API, copying it to the clipboard.
+ * - Navigates to the role selection screen upon successful registration.
+ * - Displays error messages for invalid or incomplete form fields.
+ */
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "SourceLockedOrientationActivity")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -276,6 +291,20 @@ fun ScreenTitle(title: String, testTag: String) {
       modifier = Modifier.testTag(testTag))
 }
 
+/**
+ * A composable function that displays the "Sign Up" button with validation and error handling.
+ *
+ * @param onClick A lambda function to execute upon successful validation and button click.
+ * @param isComplete A boolean indicating if all form fields are valid and complete.
+ * @param goodFormEmail A boolean indicating if the email format is valid.
+ * @param passwordLengthComplete A boolean indicating if the password meets the length requirement.
+ * @param samePassword A boolean indicating if the password and confirm password match.
+ *
+ * This function:
+ * - Validates the form fields before executing the `onClick` action.
+ * - Displays appropriate Toast messages for incomplete or invalid fields.
+ * - Dynamically adjusts its appearance based on validation status.
+ */
 @Composable
 fun SignUpButton(
     onClick: () -> Unit,
@@ -331,6 +360,18 @@ fun SignUpButton(
       }
 }
 
+/**
+ * A composable function that returns a launcher for Google Sign-In registration.
+ *
+ * @param authViewModel The ViewModel managing authentication and user-related data.
+ * @param onSuccess A lambda function executed when the Google Sign-In process succeeds.
+ * @param onFailure A lambda function executed when the Google Sign-In process fails.
+ *
+ * This function:
+ * - Launches the Google Sign-In intent and handles the result.
+ * - Updates the `authViewModel` with the Google account upon success.
+ * - Calls the appropriate callback (`onSuccess` or `onFailure`) based on the result.
+ */
 @Composable
 fun googleRegisterLauncher(
     authViewModel: AuthViewModel,
@@ -353,6 +394,15 @@ fun googleRegisterLauncher(
   }
 }
 
+/**
+ * A composable function that displays a clickable text for navigating to the "Log In" screen.
+ *
+ * @param navigationActions A set of navigation actions to handle screen transitions.
+ *
+ * This function:
+ * - Displays an annotated and styled text with a clickable "Log-In here!" link.
+ * - Navigates to the "Log In" screen when the link is clicked.
+ */
 @Composable
 fun AlreadyHaveAccountText(navigationActions: NavigationActions) {
   Row(verticalAlignment = Alignment.CenterVertically) {
@@ -388,6 +438,15 @@ fun AlreadyHaveAccountText(navigationActions: NavigationActions) {
   }
 }
 
+/**
+ * A helper function that creates and returns a Retrofit instance for the Password API service.
+ *
+ * @return A `PasswordApiService` implementation for making password generation requests.
+ *
+ * This function:
+ * - Configures Retrofit with a base URL and a Gson converter for JSON serialization.
+ * - Builds the Retrofit instance and returns the `PasswordApiService` implementation.
+ */
 fun createPasswordService(): PasswordApiService {
   val retrofit =
       Retrofit.Builder()

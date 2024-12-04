@@ -96,6 +96,28 @@ import com.android.solvit.shared.ui.authentication.CustomOutlinedTextField
 import com.android.solvit.shared.ui.authentication.GoBackButton
 import com.android.solvit.shared.ui.navigation.NavigationActions
 
+/**
+ * A composable function that provides a multi-step screen for registering a provider.
+ * The registration process includes steps to input personal details, preferences,
+ * and optional service packages, with validation and user feedback at each stage.
+ *
+ * @param viewModel The `ListProviderViewModel` to manage the list of providers.
+ * @param navigationActions A set of navigation actions to handle transitions between screens.
+ * @param locationViewModel The `LocationViewModel` to fetch and manage location suggestions.
+ * @param authViewModel The `AuthViewModel` to manage authentication and user data.
+ * @param packageViewModel The `PackageProposalViewModel` to manage provider service packages.
+ *
+ * This function:
+ * - Locks the screen orientation to portrait during the registration process.
+ * - Guides the user through four steps:
+ *   1. Entering personal details (name, phone, company, and location).
+ *   2. Specifying preferences such as service type, description, and languages.
+ *   3. Configuring optional service packages with names, prices, and features.
+ *   4. Completing the registration and displaying a confirmation screen.
+ * - Validates user input at each step to ensure data integrity.
+ * - Saves the provider's profile and optional service packages to the database.
+ * - Navigates to the dashboard or appropriate screen after successful registration.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint(
     "UnusedMaterialScaffoldPaddingParameter",
@@ -477,6 +499,29 @@ fun ProviderRegistrationScreen(
       })
 }
 
+/**
+ * A composable function that displays a detailed form for provider registration.
+ * The form allows the user to input essential details about their services,
+ * personal description, starting price, languages, and upload a profile image.
+ *
+ * @param selectedService The currently selected service offered by the provider.
+ * @param onSelectedServiceChange A lambda function to handle changes in the selected service.
+ * @param description A brief description provided by the provider about their skills and services.
+ * @param onDescriptionChange A lambda function to handle changes in the description.
+ * @param startingPrice The minimum price at which the provider offers their services.
+ * @param onStartingPriceChange A lambda function to handle changes in the starting price.
+ * @param selectedLanguages A mutable list of languages selected by the provider.
+ * @param providerImageUri The URI of the provider's uploaded profile image.
+ * @param onImageSelected A lambda function triggered when a new image is selected by the provider.
+ * @param onClickButton A lambda function to handle the completion of the registration process.
+ *
+ * This function:
+ * - Includes dropdown menus for selecting services and languages.
+ * - Provides an input field for a brief provider description with validation.
+ * - Allows uploading a profile image through a file picker.
+ * - Ensures all fields are filled correctly before enabling the registration button.
+ * - Displays a Toast message if the form is incomplete or invalid.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProviderDetails(
@@ -644,6 +689,20 @@ fun ProviderDetails(
       }
 }
 
+/**
+ * A composable function that provides an interface for uploading an image.
+ * It displays a placeholder or the uploaded image, and handles the image selection process.
+ *
+ * @param selectedImageUri The URI of the currently selected image, if any.
+ * @param imageUrl A fallback URL to display an image if no local image is selected.
+ * @param onImageSelected A lambda function triggered when a new image is selected by the user.
+ *
+ * This function:
+ * - Shows a placeholder with an icon and prompt text if no image is selected or provided.
+ * - Opens the system's image picker when the placeholder or current image is clicked.
+ * - Displays the selected image or a fallback image URL when available.
+ * - Ensures the content is styled with rounded corners and appropriate scaling.
+ */
 @Composable
 fun UploadImage(selectedImageUri: Uri?, imageUrl: String?, onImageSelected: (Uri?) -> Unit) {
   // Manage the interaction to upload an image from user's gallery
@@ -689,6 +748,24 @@ fun UploadImage(selectedImageUri: Uri?, imageUrl: String?, onImageSelected: (Uri
       }
 }
 
+/**
+ * A composable function that manages and displays a form for configuring service packages
+ * offered by a provider. It includes a dropdown to toggle whether packages are provided,
+ * and if enabled, it displays sections for configuring up to three packages.
+ *
+ * @param packagesNames A mutable list containing the names of the packages.
+ * @param packagePrices A mutable list containing the prices of the packages.
+ * @param packagesDetails A mutable list containing the details or descriptions of the packages.
+ * @param packagesFeatures A list of lists representing the features of each package,
+ *        where each nested list corresponds to the features of a specific package.
+ * @param providePackages A mutable state representing whether the provider wants to
+ *        offer service packages.
+ *
+ * This function displays:
+ * - A dropdown menu for the user to indicate whether they want to offer packages.
+ * - If packages are enabled, up to three `PackageInputSection` components for configuring
+ *   the name, price, details, and features of each package.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProviderPackages(
@@ -758,6 +835,23 @@ fun ProviderPackages(
       }
 }
 
+/**
+ * A composable function that displays an input section for configuring a package.
+ * This section includes fields for the package name, price, details, and key features,
+ * and allows for toggling visibility of the content.
+ *
+ * @param packageNumber The index of the package being configured (used for UI identification).
+ * @param expanded Boolean flag indicating whether the package section is expanded or collapsed.
+ * @param onToggleVisibility Lambda function to handle visibility toggle actions.
+ * @param packageName The current name of the package.
+ * @param onPackageNameChange Lambda function to handle changes to the package name.
+ * @param packagePrice The current price of the package.
+ * @param onPackagePriceChange Lambda function to handle changes to the package price.
+ * @param packageDetails The current details or description of the package.
+ * @param onPackageDetailsChange Lambda function to handle changes to the package details.
+ * @param packageFeatures A list of lists representing key features of the package, where
+ *        each nested list corresponds to the features for a specific package.
+ */
 @Composable
 fun PackageInputSection(
     packageNumber: Int,

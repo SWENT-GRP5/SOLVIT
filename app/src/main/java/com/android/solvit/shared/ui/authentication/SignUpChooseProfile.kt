@@ -50,6 +50,24 @@ import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
 
+/**
+ * A composable function that displays the "Choose Your Profile" screen during the sign-up process.
+ * This screen allows users to select their role as either a "Seeker" (requesting services) or
+ * "Provider" (offering services).
+ *
+ * @param navigationActions A set of navigation actions to handle screen transitions.
+ * @param authViewModel The ViewModel managing authentication and user-related data.
+ *
+ * This function:
+ * - Locks the screen orientation to portrait mode while active.
+ * - Displays an illustration and title to guide the user.
+ * - Provides buttons for choosing between "Seeker" and "Provider" roles, each with its own
+ *   description and action.
+ * - Handles role selection and navigates to the corresponding registration profile screen
+ *   based on the selected role and authentication method.
+ * - Includes a "Learn More" section with a clickable link (currently not implemented)
+ *   for additional guidance.
+ */
 @SuppressLint("SourceLockedOrientationActivity")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -140,6 +158,19 @@ fun SignUpChooseProfile(
       })
 }
 
+/**
+ * A composable function that displays a styled button for selecting a role (e.g., "Seeker" or "Provider").
+ *
+ * @param text The label of the button.
+ * @param description A brief description of the role.
+ * @param testTag A test tag for UI testing.
+ * @param onClickButton A lambda function to execute when the button is clicked.
+ *
+ * This function:
+ * - Renders a button with a gradient background and bold text.
+ * - Displays a description below the button.
+ * - Executes the provided `onClickButton` action when the button is clicked.
+ */
 @Composable
 fun ButtonCustomerProvider(
     text: String,
@@ -178,6 +209,17 @@ fun ButtonCustomerProvider(
       }
 }
 
+/**
+ * A composable function that displays a section title with customizable text and a test tag.
+ *
+ * @param text The text to display as the section title.
+ * @param testTag An optional test tag for UI testing purposes.
+ *
+ * This function:
+ * - Displays the given text in a larger font size to serve as a section header.
+ * - Uses the application's color scheme for consistent styling.
+ * - Optionally adds a test tag to the title for automated testing.
+ */
 @Composable
 fun SectionTitle(text: String, testTag: String = "") {
   Text(
@@ -186,6 +228,16 @@ fun SectionTitle(text: String, testTag: String = "") {
       color = colorScheme.onBackground,
       modifier = Modifier.testTag(testTag))
 }
+
+/**
+ * A composable function that displays a "Learn More" section with an annotated clickable text.
+ * The section provides additional guidance for users who are unsure about their role selection.
+ *
+ * This function:
+ * - Displays an interactive text with a clickable "Learn more" link.
+ * - Triggers a Toast message when the link is clicked (functionality not yet implemented).
+ * - Adapts the text style to match the application's theme.
+ */
 
 @Composable
 fun LearnMoreSection() {

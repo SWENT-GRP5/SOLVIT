@@ -87,6 +87,20 @@ import com.google.android.gms.common.api.ApiException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+/**
+ * A composable function that displays the sign-in screen, allowing users to log in
+ * using email/password or Google Sign-In.
+ *
+ * @param navigationActions A set of navigation actions to handle screen transitions.
+ * @param authViewModel The ViewModel managing authentication and user-related data.
+ *
+ * This function:
+ * - Dynamically adjusts its layout based on device orientation (portrait or landscape).
+ * - Includes fields for email and password with validation and error messages.
+ * - Provides a "Remember Me" checkbox and a link for forgotten passwords.
+ * - Allows Google Sign-In and navigates to the appropriate screen upon success.
+ * - Displays appropriate Toast messages for form validation and login status.
+ */
 @SuppressLint("InvalidColorHexValue")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -176,6 +190,16 @@ fun SignInScreen(
       })
 }
 
+/**
+ * A composable function that displays a "Go Back" button with a debounce mechanism
+ * to prevent multiple rapid clicks.
+ *
+ * @param navigationActions A set of navigation actions to handle screen transitions.
+ *
+ * This function:
+ * - Navigates to the previous screen when clicked.
+ * - Disables the button for a short duration after being clicked to prevent rapid navigation.
+ */
 @Composable
 fun GoBackButton(navigationActions: NavigationActions) {
   var canGoBack by remember { mutableStateOf(true) }
@@ -197,6 +221,30 @@ fun GoBackButton(navigationActions: NavigationActions) {
       }
 }
 
+/**
+ * A composable function that defines the portrait layout for the sign-in screen.
+ *
+ * @param modifier Modifier applied to the root column.
+ * @param context The current context for showing Toast messages.
+ * @param email The user's email address.
+ * @param onEmailChange Lambda to update the email address.
+ * @param password The user's password.
+ * @param onPasswordChange Lambda to update the password.
+ * @param passwordVisible Boolean indicating whether the password is visible.
+ * @param onPasswordVisibilityChange Lambda to toggle password visibility.
+ * @param isChecked Boolean indicating whether "Remember Me" is checked.
+ * @param onCheckedChange Lambda to update the "Remember Me" state.
+ * @param navigationActions A set of navigation actions for transitions.
+ * @param authViewModel The ViewModel managing authentication.
+ * @param onSuccess Callback invoked upon successful login.
+ * @param onFailure Callback invoked upon login failure.
+ * @param launcher Managed activity result launcher for Google Sign-In.
+ * @param token The Google Sign-In client token.
+ *
+ * This function:
+ * - Displays the logo, email/password fields, and a sign-in button.
+ * - Includes a "Sign-Up" section for new users and links for forgotten passwords.
+ */
 @Composable
 fun PortraitLayout(
     modifier: Modifier,
@@ -244,6 +292,30 @@ fun PortraitLayout(
       }
 }
 
+/**
+ * A composable function that defines the landscape layout for the sign-in screen.
+ *
+ * @param modifier Modifier applied to the root row.
+ * @param context The current context for showing Toast messages.
+ * @param email The user's email address.
+ * @param onEmailChange Lambda to update the email address.
+ * @param password The user's password.
+ * @param onPasswordChange Lambda to update the password.
+ * @param passwordVisible Boolean indicating whether the password is visible.
+ * @param onPasswordVisibilityChange Lambda to toggle password visibility.
+ * @param isChecked Boolean indicating whether "Remember Me" is checked.
+ * @param onCheckedChange Lambda to update the "Remember Me" state.
+ * @param navigationActions A set of navigation actions for transitions.
+ * @param authViewModel The ViewModel managing authentication.
+ * @param onSuccess Callback invoked upon successful login.
+ * @param onFailure Callback invoked upon login failure.
+ * @param launcher Managed activity result launcher for Google Sign-In.
+ * @param token The Google Sign-In client token.
+ *
+ * This function:
+ * - Splits the screen into two sections: logo/sign-up on the left and form inputs on the right.
+ * - Utilizes horizontal space effectively for landscape orientation.
+ */
 @Composable
 fun LandscapeLayout(
     modifier: Modifier,
@@ -317,6 +389,32 @@ fun LogoSection() {
   }
 }
 
+/**
+ * A composable function that displays the main form section for user sign-in.
+ *
+ * @param context The current context used for actions like Toast messages.
+ * @param email The email entered by the user.
+ * @param onEmailChange A lambda function to handle updates to the email field.
+ * @param password The password entered by the user.
+ * @param onPasswordChange A lambda function to handle updates to the password field.
+ * @param passwordVisible A boolean indicating whether the password is visible.
+ * @param onPasswordVisibilityChange A lambda function to toggle password visibility.
+ * @param isChecked A boolean indicating whether the "Remember me" checkbox is selected.
+ * @param onCheckedChange A lambda function to handle changes to the "Remember me" checkbox.
+ * @param authViewModel The ViewModel managing authentication and user-related data.
+ * @param onSuccess A lambda function executed upon successful login.
+ * @param onFailure A lambda function executed when login fails.
+ * @param launcher A managed activity result launcher for handling Google Sign-In.
+ * @param token The Google Sign-In client token.
+ * @param navigationActions A set of navigation actions to handle screen transitions.
+ *
+ * This function:
+ * - Provides input fields for email and password with validation and error messages.
+ * - Includes options for "Remember me" and "Forgot password".
+ * - Displays a "Sign in" button that validates the input and attempts login.
+ * - Offers a Google Sign-In button for alternative authentication.
+ * - Ensures proper alignment and spacing between elements for a clean UI.
+ */
 @Composable
 fun FormSection(
     context: Context,
@@ -447,6 +545,17 @@ fun FormSection(
       roundedCornerShape = RoundedCornerShape(25.dp))
 }
 
+/**
+ * A composable function that displays a clickable "Sign-Up" section for new users.
+ *
+ * @param navigationActions A set of navigation actions to handle screen transitions.
+ *
+ * This function:
+ * - Renders a text message encouraging new users to sign up.
+ * - Highlights the "Sign-Up" text with an underline and a primary color for emphasis.
+ * - Navigates to the sign-up screen when the "Sign-Up" text is clicked.
+ * - Uses a `ClickableText` element for accessibility and interaction.
+ */
 @Composable
 fun SignUpSection(navigationActions: NavigationActions) {
   val annotatedText = buildAnnotatedString {
@@ -474,6 +583,25 @@ fun SignUpSection(navigationActions: NavigationActions) {
   }
 }
 
+/**
+ * A composable function that displays a "Sign In" button with validation and login functionality.
+ *
+ * @param email The email entered by the user.
+ * @param password The password entered by the user.
+ * @param isFormComplete Boolean indicating if all required fields are filled.
+ * @param goodFormEmail Boolean indicating if the email format is valid.
+ * @param passwordLengthComplete Boolean indicating if the password meets the length requirement.
+ * @param authViewModel The ViewModel managing authentication and user-related data.
+ * @param onSuccess A lambda function executed upon successful login.
+ * @param onFailure A lambda function executed when the login fails.
+ *
+ * This function:
+ * - Validates the form fields (email and password) before attempting to log in.
+ * - Displays appropriate Toast messages for invalid or incomplete input.
+ * - Updates the `authViewModel` with the email and password and calls the login method.
+ * - Dynamically styles the button based on the validation status.
+ * - Invokes the `onSuccess` or `onFailure` callback based on the login outcome.
+ */
 @Composable
 fun SignInButton(
     email: String,
@@ -528,6 +656,20 @@ fun SignInButton(
       }
 }
 
+/**
+ * A composable function that displays a styled button for Google Sign-In.
+ *
+ * @param onClick A lambda function to be executed when the button is clicked.
+ * @param text The text displayed on the button.
+ * @param testTag A test tag for UI testing purposes.
+ * @param roundedCornerShape The shape of the button's corners.
+ *
+ * This function:
+ * - Renders a button styled with a border and a transparent background.
+ * - Displays the Google logo on the left and the provided text centered on the button.
+ * - Ensures responsiveness by adjusting text alignment and handling overflow.
+ * - Triggers the `onClick` action when the button is pressed.
+ */
 @Composable
 fun GoogleButton(
     onClick: () -> Unit,
@@ -559,6 +701,23 @@ fun GoogleButton(
       }
 }
 
+/**
+ * A composable function that provides a launcher for handling Google Sign-In.
+ *
+ * @param authViewModel The ViewModel managing authentication and user-related data.
+ * @param onSuccess A lambda function executed when the Google Sign-In process succeeds.
+ * @param onFailure A lambda function executed when the Google Sign-In process fails.
+ *
+ * This function:
+ * - Creates a managed activity result launcher to handle the result of the Google Sign-In intent.
+ * - Attempts to retrieve the Google account from the result data.
+ * - On success:
+ *   - Updates the `authViewModel` with the retrieved Google account.
+ *   - Calls the `signInWithGoogle` method of the `authViewModel`.
+ *   - Invokes the provided `onSuccess` callback.
+ * - On failure:
+ *   - Invokes the provided `onFailure` callback.
+ */
 @Composable
 fun googleSignInLauncher(
     authViewModel: AuthViewModel,
@@ -581,6 +740,27 @@ fun googleSignInLauncher(
   }
 }
 
+/**
+ * A composable function that displays a customizable outlined text field with validation and error messages.
+ *
+ * @param value The current text value of the field.
+ * @param onValueChange Lambda to update the text value.
+ * @param label Optional label displayed inside the field.
+ * @param placeholder Text displayed as a placeholder when the field is empty.
+ * @param isValueOk Boolean indicating whether the current value passes validation.
+ * @param modifier Modifier applied to the field's parent column.
+ * @param errorMessage The error message displayed when the input is invalid.
+ * @param leadingIcon Optional leading icon displayed inside the field.
+ * @param leadingIconDescription Description for accessibility purposes.
+ * @param testTag Test tag for UI testing.
+ * @param errorTestTag Test tag for the error message.
+ * @param maxLines The maximum number of lines the text field can display.
+ * @param textAlign Text alignment for the field's content.
+ *
+ * This function:
+ * - Tracks focus changes to display error messages only after focus loss.
+ * - Dynamically adjusts colors and styles based on validation status.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CustomOutlinedTextField(
@@ -661,6 +841,23 @@ fun CustomOutlinedTextField(
   }
 }
 
+/**
+ * A composable function that displays a password input field with visibility toggle and validation.
+ *
+ * @param value The current password value.
+ * @param onValueChange Lambda to update the password value.
+ * @param label The label displayed inside the field.
+ * @param placeholder The placeholder text when the field is empty.
+ * @param contentDescription Description for the password field.
+ * @param testTag Test tag for UI testing.
+ * @param passwordLengthComplete Boolean indicating whether the password meets the length requirement.
+ * @param errorMessage The error message displayed for invalid password length.
+ * @param testTagErrorPassword Test tag for the error message.
+ *
+ * This function:
+ * - Includes a toggle icon to switch between showing and hiding the password.
+ * - Displays an error message for invalid input after focus loss.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PasswordTextField(
