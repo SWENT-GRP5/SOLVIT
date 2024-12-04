@@ -2,11 +2,12 @@ package com.android.solvit.shared.ui.chat
 
 import android.graphics.Bitmap
 import android.net.Uri
-import android.widget.Toast
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -28,6 +29,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -68,6 +70,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import coil.compose.AsyncImagePainter
 import com.android.solvit.R
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.chat.AiSolverViewModel
@@ -106,60 +109,56 @@ fun ChatScreen(
   var imageUri by remember { mutableStateOf<Uri?>(null) }
   var imageBitmap by remember { mutableStateOf<Bitmap?>(null) }
   val localContext = LocalContext.current
-  var sendMessageWithImage by remember { mutableStateOf(false) }
 
-  // To Upload Image To Firebase
-  if (sendMessageWithImage)
-      Scaffold(
-          topBar = {
-            ChatHeader(
-                name = receiverName,
-                picture = receiverPicture,
-                navigationActions = navigationActions)
-          },
-          bottomBar = {
-            MessageInputBar(
-                chatAssistantViewModel = chatAssistantViewModel,
-                isAiSolverScreen = false,
-                onImageSelected = { uri: Uri? ->
-                  imageUri = uri
-                  uri?.let { imageBitmap = loadBitmapFromUri(localContext, it) }
-                },
-                onSendClickButton = { message, onMessageChange ->
-                  val chatMessage =
-                      authViewModel.user.value?.uid?.let {
-                        ChatMessage.TextMessage(
-                            message,
-                            "Hassan", // Has to be updated once we implement a logic to link the
-                            // authenticated user to its profile (generic class for both provider
-                            // and seeker that contains common informations,
-                            it,
-                            timestamp = System.currentTimeMillis(),
-                        )
-                      }
-
-                  if (chatMessage != null && message.isNotEmpty()) {
-                    chatViewModel.sendMessage(false, chatMessage)
-                    chatAssistantViewModel.updateMessageContext(chatMessage)
-                    onMessageChange("")
-                  } else {
-                    Toast.makeText(localContext, "Failed to send message", Toast.LENGTH_LONG).show()
-                  }
-                })
-          }) { paddingValues ->
-            LazyColumn(
-                modifier = Modifier.padding(paddingValues).imePadding().testTag("conversation")) {
-                  items(messages) { message ->
-                    if (message.senderId == FirebaseAuth.getInstance().currentUser?.uid) {
-                      // Item for messages authentified user send
-                      SentMessage(message, true)
-                    } else {
-                      // Item for messages authentified user receive
-                      SentMessage(message, false, true, receiverPicture)
+  Scaffold(
+      topBar = {
+        ChatHeader(
+            name = receiverName, picture = receiverPicture, navigationActions = navigationActions)
+      },
+      bottomBar = {
+        MessageInputBar(
+            chatAssistantViewModel = chatAssistantViewModel,
+            isAiSolverScreen = false,
+            onImageSelected = { uri: Uri? ->
+              imageUri = uri
+              uri?.let { imageBitmap = loadBitmapFromUri(localContext, it) }
+            },
+            onSendClickButton = { textMessage, onMessageChange ->
+              chatViewModel.viewModelScope.launch {
+                // Don't Forget To Update Context
+                // upload Image User want to send to storage
+                val imageUrl =
+                    if (imageUri != null) chatViewModel.uploadImagesToStorage(imageUri!!) else null
+                val message =
+                    user?.let {
+                      buildMessage(
+                          it.uid,
+                          textMessage,
+                          imageUrl,
+                      )
                     }
-                  }
+                if (message != null) {
+                  chatViewModel.sendMessage(false, message)
+                  onMessageChange("")
+                  imageUri = null
+                  imageBitmap = null
                 }
-          }
+              }
+            })
+      }) { paddingValues ->
+        LazyColumn(
+            modifier = Modifier.padding(paddingValues).imePadding().testTag("conversation")) {
+              items(messages) { message ->
+                if (message.senderId == FirebaseAuth.getInstance().currentUser?.uid) {
+                  // Item for messages authentified user send
+                  SentMessage(message, true)
+                } else {
+                  // Item for messages authentified user receive
+                  SentMessage(message, false, true, receiverPicture)
+                }
+              }
+            }
+      }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -483,15 +482,39 @@ fun SentMessage(
                         color =
                             if (isSentByUser) MaterialTheme.colorScheme.background else Color.Black,
                         style = MaterialTheme.typography.bodySmall)
-                is ChatMessage.ImageMessage ->
-                    AsyncImage(
-                        modifier =
-                            Modifier.fillMaxWidth().aspectRatio(1f).clip(RoundedCornerShape(8.dp)),
-                        model = message.imageUrl.ifEmpty { R.drawable.error },
-                        placeholder = painterResource(id = R.drawable.loading),
-                        error = painterResource(id = R.drawable.error),
-                        contentDescription = "Image message",
-                        contentScale = ContentScale.Crop)
+                is ChatMessage.ImageMessage -> {
+                  Log.e("display Image", message.imageUrl)
+                  AsyncImage(
+                      modifier =
+                          Modifier.fillMaxWidth().aspectRatio(1f).clip(RoundedCornerShape(8.dp)),
+                      model = message.imageUrl,
+                      // placeholder = painterResource(id = R.drawable.loading),
+                      // error = painterResource(id = R.drawable.error),
+                      contentDescription = "Image message",
+                      contentScale = ContentScale.Crop,
+                      onState = { state ->
+                        if (state is AsyncImagePainter.State.Error) {
+                          val cause = state.result.throwable
+                          Log.e("AsyncImage", "Image load failed: ${cause.message}", cause)
+
+                          // Optional: Handle specific error cases
+                          when (cause) {
+                            is java.net.UnknownHostException -> {
+                              // Handle network issues
+                              Log.e("AsyncImage", "No internet connection")
+                            }
+                            is java.io.FileNotFoundException -> {
+                              // Handle 404 or file not found
+                              Log.e("AsyncImage", "Image not found")
+                            }
+                            else -> {
+                              // General error handling
+                              Log.e("AsyncImage", "Unknown error occurred")
+                            }
+                          }
+                        }
+                      })
+                }
                 is ChatMessage.TextImageMessage -> {
                   Column(
                       verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -531,81 +554,106 @@ fun MessageInputBar(
 
   var message by remember { mutableStateOf("") }
   val current = LocalContext.current
-
+  var imageUri by remember { mutableStateOf<Uri?>(null) }
   val imagePickerLauncher =
       rememberLauncherForActivityResult(
           contract = ActivityResultContracts.GetContent(),
-          onResult = { uri: Uri? -> onImageSelected(uri) })
-  Row(
-      modifier =
-          Modifier.fillMaxWidth()
-              .background(
-                  color = MaterialTheme.colorScheme.surface,
-                  shape = RoundedCornerShape(size = 28.dp),
-              )
-              .imePadding()
-              .testTag(
-                  "SendMessageBar"), // To ensure that content of scaffold appears even if keyboard
-      // is
-      // displayed
-  ) {
+          onResult = { uri: Uri? ->
+            imageUri = uri
+            onImageSelected(uri)
+          })
+  Column() {
+    if (imageUri != null) {
+      Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp)) {
+        AsyncImage(
+            modifier = Modifier.height(150.dp).fillMaxWidth().clip(RoundedCornerShape(8.dp)),
+            model = imageUri,
+            contentDescription = "Uploaded Image",
+            contentScale = ContentScale.Crop)
 
-    // Input to enter message you want to send
-    TextField(
-        value = message,
-        onValueChange = { message = it },
-        modifier = Modifier.weight(1f).padding(end = 8.dp),
-        placeholder = {
-          Text(text = "Send Message", color = MaterialTheme.colorScheme.onSurfaceVariant)
-        },
-        colors =
-            OutlinedTextFieldDefaults.colors(
-                unfocusedBorderColor = Color.Black,
-                focusedBorderColor = Color.Black,
-                focusedTextColor = Color.Black),
-        singleLine = true // Ensures the TextField stays compact
-        )
-
-    // State to control the visibility of the Chat Assistant Dialog
-    var showDialog by remember { mutableStateOf(false) }
-
-    if (!isAiSolverScreen) {
-      // Button to Use the Chat Assistant
-      IconButton(onClick = { showDialog = true }, modifier = Modifier.size(48.dp)) {
         Icon(
-            painter = painterResource(R.drawable.ai_message),
-            contentDescription = "chat assistant",
-            tint = MaterialTheme.colorScheme.onSurfaceVariant)
-      }
-
-      // Show the Chat Assistant Dialog if showDialog is true
-      if (showDialog) {
-        ChatAssistantDialog(
-            chatAssistantViewModel,
-            onDismiss = { showDialog = false },
-            onResponse = { message = it })
+            imageVector = Icons.Default.Close,
+            contentDescription = "Delete Image",
+            modifier =
+                Modifier.align(Alignment.TopEnd).padding(8.dp).clickable {
+                  onImageSelected(null)
+                  imageUri = null
+                },
+            tint = Color.Red)
       }
     }
+    Row(
+        modifier =
+            Modifier.fillMaxWidth()
+                .background(
+                    color = MaterialTheme.colorScheme.surface,
+                    shape = RoundedCornerShape(size = 28.dp),
+                )
+                .imePadding()
+                .testTag(
+                    "SendMessageBar"), // To ensure that content of scaffold appears even if
+                                       // keyboard
+        // is
+        // displayed
+    ) {
 
-    IconButton(
-        onClick = { imagePickerLauncher.launch("image/*") },
-        modifier = Modifier.testTag("uploadImageButton")) {
-          Icon(
-              imageVector = Icons.Default.AddCircle,
-              contentDescription = "upload image",
-              tint = MaterialTheme.colorScheme.onSurfaceVariant,
+      // Input to enter message you want to send
+      TextField(
+          value = message,
+          onValueChange = { message = it },
+          modifier = Modifier.weight(1f).padding(end = 8.dp),
+          placeholder = {
+            Text(text = "Send Message", color = MaterialTheme.colorScheme.onSurfaceVariant)
+          },
+          colors =
+              OutlinedTextFieldDefaults.colors(
+                  unfocusedBorderColor = Color.Black,
+                  focusedBorderColor = Color.Black,
+                  focusedTextColor = Color.Black),
+          singleLine = true // Ensures the TextField stays compact
           )
-        }
-    // Button to send your message
-    IconButton(
-        onClick = { onSendClickButton(message) { message = it } },
-        modifier = Modifier.size(48.dp)) {
+
+      // State to control the visibility of the Chat Assistant Dialog
+      var showDialog by remember { mutableStateOf(false) }
+
+      if (!isAiSolverScreen) {
+        // Button to Use the Chat Assistant
+        IconButton(onClick = { showDialog = true }, modifier = Modifier.size(48.dp)) {
           Icon(
-              imageVector = Icons.Default.Send,
-              contentDescription = "send",
-              tint = MaterialTheme.colorScheme.onSurfaceVariant,
-              modifier = Modifier.rotate(-45f))
+              painter = painterResource(R.drawable.ai_message),
+              contentDescription = "chat assistant",
+              tint = MaterialTheme.colorScheme.onSurfaceVariant)
         }
+
+        // Show the Chat Assistant Dialog if showDialog is true
+        if (showDialog) {
+          ChatAssistantDialog(
+              chatAssistantViewModel,
+              onDismiss = { showDialog = false },
+              onResponse = { message = it })
+        }
+      }
+
+      IconButton(
+          onClick = { imagePickerLauncher.launch("image/*") },
+          modifier = Modifier.testTag("uploadImageButton")) {
+            Icon(
+                imageVector = Icons.Default.AddCircle,
+                contentDescription = "upload image",
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+          }
+      // Button to send your message
+      IconButton(
+          onClick = { onSendClickButton(message) { message = it } },
+          modifier = Modifier.size(48.dp)) {
+            Icon(
+                imageVector = Icons.Default.Send,
+                contentDescription = "send",
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.rotate(-45f))
+          }
+    }
   }
 }
 

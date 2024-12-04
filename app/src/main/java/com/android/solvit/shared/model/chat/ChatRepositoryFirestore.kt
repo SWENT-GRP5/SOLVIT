@@ -17,7 +17,7 @@ class ChatRepositoryFirestore(
   // Name of collection containing messages
   private val collectionPath = "messages"
   private val collectionPathIA = "iamessages"
-  private val chatImagesPath = "chatImages"
+  private val chatImagesPath = "chatImages/"
 
   // Create a chat room in the collection or retrive if a conversation already exits between user
   // sender and receiver
@@ -29,6 +29,7 @@ class ChatRepositoryFirestore(
       receiverUid: String
   ) {
     val collection = if (isIaMessage) collectionPathIA else collectionPath
+    Log.e("TEST", "$collection")
     // Check that sender (current authenticated user is not null)
     if (currentUserUid != null) {
       val databaseRef = db.getReference(collection)
@@ -98,17 +99,13 @@ class ChatRepositoryFirestore(
   ) {
 
     val collection = if (isIaMessage) collectionPathIA else collectionPath
-    Log.e("sendMessage", "Entered there")
+    Log.e("sendMessage", "Entered there $collection")
     val chatNode = db.getReference(collection)
     val chatMessageId = chatNode.child(chatRoomId).child("chats").push().key
     try {
       if (chatMessageId != null) {
         Log.e("sendMessage", "$chatMessageId : $chatRoomId")
-        chatNode
-            .child(chatRoomId)
-            .child("chats")
-            .child(chatMessageId)
-            .setValue(mapChatMessageToFirebaseFields(message))
+        chatNode.child(chatRoomId).child("chats").child(chatMessageId).setValue(message)
 
         onSuccess()
       } else {
