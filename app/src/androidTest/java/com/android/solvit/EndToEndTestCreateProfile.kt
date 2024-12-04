@@ -155,7 +155,7 @@ class EndToEndTestCreateProfile {
   }
 
   @Test
-  fun CreateSeekerProfile() {
+  fun createSeekerProfile() {
     composeTestRule.setContent {
       val userRegistered = authViewModel.userRegistered.collectAsState()
       val user = authViewModel.user.collectAsState()
@@ -179,7 +179,8 @@ class EndToEndTestCreateProfile {
                   locationViewModel,
                   chatViewModel,
                   chatAssistantViewModel,
-                  notificationsViewModel)
+                  notificationsViewModel,
+                  packageProposalViewModel)
           "provider" ->
               ProviderUI(
                   authViewModel,
@@ -189,6 +190,7 @@ class EndToEndTestCreateProfile {
                   chatViewModel,
                   notificationsViewModel,
                   locationViewModel,
+                  packageProposalViewModel,
                   chatAssistantViewModel)
         }
       }

@@ -20,11 +20,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -37,6 +40,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -66,6 +70,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -136,10 +141,7 @@ fun ServiceBookingScreen(
   val seekerState = remember { mutableStateOf<Any?>(null) }
 
   val request by requestViewModel.selectedRequest.collectAsState()
-  if (request == null) {
-    navigationActions.goBack()
-    return
-  }
+  if (request == null) return
   val providerId = request!!.providerId
   val provider =
       if (providerId.isNullOrEmpty()) null
@@ -300,72 +302,86 @@ fun ServiceBookingScreen(
                                 .background(colorScheme.primary, RoundedCornerShape(16.dp))
                                 .padding(16.dp)
                                 .testTag("price_appointment_box")) {
-                          Column(
-                              horizontalAlignment =
-                                  Alignment.CenterHorizontally, // Center the text inside the column
-                              modifier =
-                                  Modifier
-                                      .fillMaxWidth() // Ensure the column takes up the full width
-                              ) {
-                                // Price agreed upon
-                                Text(
-                                    text = "Price agreed on:",
-                                    fontWeight = FontWeight.Medium,
-                                    color = colorScheme.secondaryContainer)
-                                Spacer(modifier = Modifier.height(8.dp))
-                                val price = request!!.agreedPrice
-                                Text(
-                                    text = if (price != null) "$price €" else "Not set",
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 20.sp,
-                                    color = colorScheme.onPrimary // White text for contrast
-                                    )
-
-                                Spacer(
-                                    modifier =
-                                        Modifier.height(
-                                            16.dp)) // Space between price and appointment text
-
-                                val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-                                val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
-                                var date = "Not set"
-                                var time = "Not set"
-                                request!!.meetingDate.let {
-                                  if (it != null) {
-                                    date = dateFormat.format(it.toDate())
-                                    time = timeFormat.format(it.toDate())
+                          if (request!!.status == ServiceRequestStatus.PENDING) {
+                            Text(
+                                text = "We are waiting for the provider to accept the request",
+                                fontWeight = FontWeight.Bold,
+                                color = colorScheme.onPrimary,
+                                modifier = Modifier.align(Alignment.Center).testTag("pending_text"),
+                                textAlign = TextAlign.Center)
+                          } else {
+                            Column(
+                                horizontalAlignment =
+                                    Alignment
+                                        .CenterHorizontally, // Center the text inside the column
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth() // Ensure the column takes up the full width
+                                ) {
+                                  var price = "Not set"
+                                  request!!.agreedPrice?.let { price = "$it $" }
+                                  // Price agreed upon
+                                  Text(
+                                      text = "Price agreed on:",
+                                      fontWeight = FontWeight.Medium,
+                                      color = colorScheme.secondaryContainer)
+                                  Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(
+                                        text = price,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 20.sp,
+                                        color = colorScheme.onPrimary,
+                                        modifier =
+                                            if (acceptedOrScheduled) Modifier.weight(1f)
+                                            else Modifier)
+                                    if (acceptedOrScheduled && role == "seeker") {
+                                      // Edit button for the price
+                                      EditPriceDialog(request!!, requestViewModel)
+                                    }
                                   }
-                                }
-                                // Appointment date and time
-                                Text(
-                                    modifier = Modifier.testTag("appointment_date"),
-                                    text = "Your appointment:",
-                                    fontWeight = FontWeight.Medium,
-                                    color = colorScheme.secondaryContainer)
-                                Spacer(
-                                    modifier =
-                                        Modifier.height(8.dp)) // Space between the text and date
-                                Row {
-                                  Column(
+
+                                  val dateFormat =
+                                      SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                                  val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+                                  var date = "Not set"
+                                  var time = "Not set"
+                                  request!!.meetingDate.let {
+                                    if (it != null) {
+                                      date = dateFormat.format(it.toDate())
+                                      time = timeFormat.format(it.toDate())
+                                    }
+                                  }
+                                  // Appointment date and time
+                                  Text(
+                                      modifier = Modifier.testTag("appointment_date"),
+                                      text = "Your appointment:",
+                                      fontWeight = FontWeight.Medium,
+                                      color = colorScheme.secondaryContainer)
+                                  Spacer(
                                       modifier =
-                                          if (acceptedOrScheduled) Modifier.weight(1f)
-                                          else Modifier) {
-                                        Text(
-                                            text = date,
-                                            fontWeight = FontWeight.Bold,
-                                            fontSize = 20.sp,
-                                            color = colorScheme.onPrimary)
-                                        Text(
-                                            text = time,
-                                            fontWeight = FontWeight.Bold,
-                                            fontSize = 15.sp,
-                                            color = colorScheme.onPrimary)
-                                      }
-                                  if (acceptedOrScheduled && role == "seeker") {
-                                    DateAndTimePickers(request!!, requestViewModel)
+                                          Modifier.height(8.dp)) // Space between the text and date
+                                  Row {
+                                    Column(
+                                        modifier =
+                                            if (acceptedOrScheduled) Modifier.weight(1f)
+                                            else Modifier) {
+                                          Text(
+                                              text = date,
+                                              fontWeight = FontWeight.Bold,
+                                              fontSize = 20.sp,
+                                              color = colorScheme.onPrimary)
+                                          Text(
+                                              text = time,
+                                              fontWeight = FontWeight.Bold,
+                                              fontSize = 15.sp,
+                                              color = colorScheme.onPrimary)
+                                        }
+                                    if (acceptedOrScheduled && role == "seeker") {
+                                      DateAndTimePickers(request!!, requestViewModel)
+                                    }
                                   }
                                 }
-                              }
+                          }
                         }
                   }
 
@@ -435,6 +451,13 @@ fun ServiceBookingScreen(
       }
 }
 
+/**
+ * A composable function that displays a provider card with the provider's name and rating.
+ *
+ * @param provider The provider to display in the card.
+ * @param providerViewModel The ViewModel for the provider list.
+ * @param navigationActions The navigation actions to navigate to the provider's profile.
+ */
 @Composable
 fun ProviderCard(
     provider: Provider,
@@ -492,6 +515,11 @@ fun ProviderCard(
       }
 }
 
+/**
+ * A composable function that displays an edit button to edit the service request details.
+ *
+ * @param navigationActions The navigation actions to navigate to the edit request screen.
+ */
 @Composable
 fun EditButton(
     navigationActions: NavigationActions,
@@ -510,6 +538,16 @@ fun EditButton(
       }
 }
 
+/**
+ * A composable function that displays an edit button to edit the service request details and a chat
+ * button to initiate a chat with the provider or the seeker.
+ *
+ * @param navigationActions The navigation actions to navigate to the edit request screen.
+ * @param currentUserId The ID of the current user.
+ * @param chatViewModel The ViewModel for the chat.
+ * @param receiverId The ID of the receiver of the chat.
+ * @param receiver The receiver of the chat.
+ */
 @Composable
 fun EditAndChatButton(
     navigationActions: NavigationActions,
@@ -539,6 +577,11 @@ fun EditAndChatButton(
   }
 }
 
+/**
+ * A composable function that displays a review button to leave a review for the service.
+ *
+ * @param navigationActions The navigation actions to navigate to the review screen.
+ */
 @Composable
 fun ReviewButton(navigationActions: NavigationActions) {
   Box(
@@ -555,6 +598,11 @@ fun ReviewButton(navigationActions: NavigationActions) {
       }
 }
 
+/**
+ * A composable function that displays a package card with the package details.
+ *
+ * @param packageProposal The package proposal to display in the card.
+ */
 @Composable
 fun PackageCard(packageProposal: PackageProposal) {
   Card(
@@ -620,6 +668,13 @@ fun PackageCard(packageProposal: PackageProposal) {
       }
 }
 
+/**
+ * A composable function that displays a date and time picker dialog to select the appointment date
+ * and time for the service.
+ *
+ * @param request The service request to update with the selected date and time.
+ * @param requestViewModel The ViewModel for the service request.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DateAndTimePickers(request: ServiceRequest, requestViewModel: ServiceRequestViewModel) {
@@ -737,5 +792,102 @@ fun DateAndTimePickers(request: ServiceRequest, requestViewModel: ServiceRequest
                 }
           }
     }
+  }
+}
+
+/**
+ * A composable function that displays a dialog to edit the agreed price for the service.
+ *
+ * @param request The service request to update with the agreed price.
+ * @param requestViewModel The ViewModel for the service request.
+ */
+@Composable
+fun EditPriceDialog(
+    request: ServiceRequest,
+    requestViewModel: ServiceRequestViewModel,
+) {
+  // Price input field
+  var price by remember { mutableStateOf(request.agreedPrice?.toString() ?: "") }
+  // Dialog visibility state
+  var showDialog by remember { mutableStateOf(false) }
+
+  // Edit button for the price
+  IconButton(
+      onClick = { showDialog = true },
+      colors = IconButtonDefaults.iconButtonColors(contentColor = colorScheme.onPrimary),
+      modifier = Modifier.testTag("edit_price_button")) {
+        Icon(Icons.Default.Edit, contentDescription = "Edit price")
+      }
+  // Display the dialog for editing the price
+  if (showDialog) {
+    AlertDialog(
+        onDismissRequest = { showDialog = false },
+        title = {
+          Text(
+              text = "Edit Price", style = typography.titleMedium, color = colorScheme.onBackground)
+        },
+        text = {
+          Column {
+            Text(
+                text = "Enter the agreed price for the service",
+                style = typography.bodyMedium,
+                color = colorScheme.onBackground)
+            Spacer(modifier = Modifier.height(8.dp))
+            var containsInvalidChars by remember { mutableStateOf(false) }
+            val isPriceValid = price.matches(Regex("^[0-9]+(\\.[0-9]{0,2})?$"))
+            OutlinedTextField(
+                value = price,
+                onValueChange = { input ->
+                  // Check for invalid characters
+                  containsInvalidChars = !input.matches(Regex("^[0-9.]*$"))
+                  val sanitizedInput =
+                      when {
+                        input.startsWith("0.") -> input // Allow numbers like "0.99"
+                        input == "0" -> input // Allow single "0"
+                        else -> input.trimStart('0').ifEmpty { "0" } // Remove leading zeros
+                      }
+                  // Validate the format and update priceInput if valid
+                  if (sanitizedInput.matches(Regex("^[0-9]{0,10}(\\.[0-9]{0,2})?$"))) {
+                    price = sanitizedInput
+                  }
+                },
+                label = { Text("Price") },
+                leadingIcon = { Text("$") },
+                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                singleLine = true,
+                isError = (!isPriceValid && price.isNotEmpty()) || containsInvalidChars,
+                modifier = Modifier.fillMaxWidth())
+            // Error message for invalid format
+            if (!isPriceValid && price.isNotEmpty()) {
+              Text(
+                  text = "Please enter a valid number (e.g., 99 or 99.99)",
+                  color = colorScheme.error,
+                  fontSize = 12.sp)
+            }
+            // Error message for invalid characters
+            if (containsInvalidChars) {
+              Text(
+                  text = "Invalid characters entered. Please use numbers and a decimal point only.",
+                  color = colorScheme.error,
+                  fontSize = 12.sp)
+            }
+          }
+        },
+        confirmButton = {
+          TextButton(
+              onClick = {
+                val priceValue = price.toDoubleOrNull()
+                priceValue?.let {
+                  requestViewModel.saveServiceRequest(
+                      request.copy(
+                          agreedPrice = priceValue,
+                      ))
+                }
+                showDialog = false
+              }) {
+                Text("Save")
+              }
+        },
+        dismissButton = { TextButton(onClick = { showDialog = false }) { Text("Cancel") } })
   }
 }

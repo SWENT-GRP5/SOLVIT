@@ -181,7 +181,8 @@ class EndToEndSeekerCreateRequest {
                   locationViewModel,
                   chatViewModel,
                   chatAssistantViewModel,
-                  notificationsViewModel)
+                  notificationsViewModel,
+                  packageProposalViewModel)
           "provider" ->
               ProviderUI(
                   authViewModel,
@@ -191,6 +192,7 @@ class EndToEndSeekerCreateRequest {
                   chatViewModel,
                   notificationsViewModel,
                   locationViewModel,
+                  packageProposalViewModel,
                   chatAssistantViewModel)
         }
       }

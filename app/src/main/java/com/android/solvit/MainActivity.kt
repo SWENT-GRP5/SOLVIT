@@ -91,8 +91,6 @@ fun SolvitApp() {
   val chatViewModel = viewModel<ChatViewModel>(factory = ChatViewModel.Factory)
   val chatAssistantViewModel =
       viewModel<ChatAssistantViewModel>(factory = ChatAssistantViewModel.Factory)
-  val navController = rememberNavController()
-  val navigationActions = NavigationActions(navController)
   val notificationViewModel =
       viewModel<NotificationsViewModel>(factory = NotificationsViewModel.Factory)
   if (!userRegistered.value) {
@@ -114,7 +112,8 @@ fun SolvitApp() {
               locationViewModel,
               chatViewModel,
               chatAssistantViewModel,
-              notificationViewModel)
+              notificationViewModel,
+              packageProposalViewModel)
       "provider" ->
           ProviderUI(
               authViewModel,
@@ -124,6 +123,7 @@ fun SolvitApp() {
               chatViewModel,
               notificationViewModel,
               locationViewModel,
+              packageProposalViewModel,
               chatAssistantViewModel)
     }
   }
@@ -172,6 +172,7 @@ fun SeekerUI(
     chatViewModel: ChatViewModel,
     chatAssistantViewModel: ChatAssistantViewModel,
     notificationViewModel: NotificationsViewModel,
+    packageProposalViewModel: PackageProposalViewModel
 ) {
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
@@ -233,11 +234,12 @@ fun SeekerUI(
     composable(Route.BOOKING_DETAILS) {
       ServiceBookingScreen(
           navigationActions,
-          authViewModel = authViewModel,
-          seekerProfileViewModel = seekerProfileViewModel,
+          authViewModel,
+          seekerProfileViewModel,
           listProviderViewModel,
           serviceRequestViewModel,
-          chatViewModel = chatViewModel)
+          packageProposalViewModel,
+          chatViewModel)
     }
     composable(Route.EDIT_REQUEST) {
       EditRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
@@ -270,6 +272,7 @@ fun ProviderUI(
     chatViewModel: ChatViewModel,
     notificationViewModel: NotificationsViewModel,
     locationViewModel: LocationViewModel,
+    packageViewModel: PackageProposalViewModel,
     chatAssistantViewModel: ChatAssistantViewModel
 ) {
   val navController = rememberNavController()
@@ -287,14 +290,17 @@ fun ProviderUI(
     }
     composable(Screen.CALENDAR) { ProviderCalendarScreen(navigationActions = navigationActions) }
     composable(Screen.MY_JOBS) {
-      RequestsDashboardScreen(
-          navigationActions = navigationActions, serviceRequestViewModel = serviceRequestViewModel)
+      RequestsDashboardScreen(navigationActions, serviceRequestViewModel)
     }
     composable(Route.BOOKING_DETAILS) {
       ServiceBookingScreen(
           navigationActions,
-          providerViewModel = listProviderViewModel,
-          requestViewModel = serviceRequestViewModel)
+          authViewModel,
+          seekerProfileViewModel,
+          listProviderViewModel,
+          serviceRequestViewModel,
+          packageViewModel,
+          chatViewModel)
     }
     composable(Screen.PROVIDER_PROFILE) {
       ProviderProfileScreen(listProviderViewModel, authViewModel, navigationActions)
