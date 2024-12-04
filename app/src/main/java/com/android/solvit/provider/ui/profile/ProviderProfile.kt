@@ -239,19 +239,21 @@ fun ProfileHeader(
                 overflow = TextOverflow.Ellipsis)
           }
 
-          Column(modifier = Modifier.align(Alignment.End),
+          Column(
+              modifier = Modifier.align(Alignment.End),
               horizontalAlignment = Alignment.Start,
               verticalArrangement = Arrangement.Bottom) {
-              Box {
-            IconButton(
-                onClick = {
-                  navigationActions.navigateTo(Screen.PROVIDER_MODIFY_PROFILE)
-                },
-                modifier = Modifier.size(24.dp).testTag("editProfileButton")) { Icon(
-                Icons.Default.Edit,
-                contentDescription = "Edit Profile",
-                modifier = Modifier.size(24.dp)) }
-          }}
+                Box {
+                  IconButton(
+                      onClick = { navigationActions.navigateTo(Screen.PROVIDER_MODIFY_PROFILE) },
+                      modifier = Modifier.size(24.dp).testTag("editProfileButton")) {
+                        Icon(
+                            Icons.Default.Edit,
+                            contentDescription = "Edit Profile",
+                            modifier = Modifier.size(24.dp))
+                      }
+                }
+              }
 
           Spacer(modifier = Modifier.height(5.dp))
 
@@ -330,8 +332,8 @@ fun StatsSection(provider: Provider) {
 
   var rating by remember { mutableStateOf("") }
   var popular by remember { mutableStateOf("") }
-    var earnings by remember { mutableStateOf(0.0) }
-    var pendingTasks by remember { mutableStateOf(0) }
+  var earnings by remember { mutableStateOf(0.0) }
+  var pendingTasks by remember { mutableStateOf(0) }
 
   LaunchedEffect(provider) {
     rating = provider.rating.toString()
@@ -368,33 +370,35 @@ fun StatsSection(provider: Provider) {
           }
         }
 
-      Spacer(modifier = Modifier.height(5.dp))
+        Spacer(modifier = Modifier.height(5.dp))
 
-
-      Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
+        Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
           Column(horizontalAlignment = Alignment.Start) {
-              Text(
-                  "$earnings CHF",
-                  fontSize = 40.sp,
-                  color = colorScheme.onPrimary,
-                  fontWeight = FontWeight.Bold)
-              Text("Earnings", fontSize = 15.sp, color = colorScheme.onPrimary)
+            Text(
+                "$earnings CHF",
+                fontSize = 40.sp,
+                color = colorScheme.onPrimary,
+                fontWeight = FontWeight.Bold)
+            Text("Earnings", fontSize = 15.sp, color = colorScheme.onPrimary)
           }
           Column(horizontalAlignment = Alignment.CenterHorizontally) {
-              Text(
-                  pendingTasks.toString(),
-                  fontSize = 40.sp,
-                  color = colorScheme.onPrimary,
-                  fontWeight = FontWeight.Bold)
-              Text("Pending Tasks", fontSize = 15.sp, color = colorScheme.onPrimary)
+            Text(
+                pendingTasks.toString(),
+                fontSize = 40.sp,
+                color = colorScheme.onPrimary,
+                fontWeight = FontWeight.Bold)
+            Text("Pending Tasks", fontSize = 15.sp, color = colorScheme.onPrimary)
           }
-      }
+        }
 
         Spacer(modifier = Modifier.height(5.dp))
 
         LanguageList(provider)
 
-        Text((if (provider.languages.size > 1) "Languages" else "Language"), fontSize = 15.sp, color = colorScheme.onPrimary)
+        Text(
+            (if (provider.languages.size > 1) "Languages" else "Language"),
+            fontSize = 15.sp,
+            color = colorScheme.onPrimary)
       }
 }
 
@@ -436,10 +440,7 @@ fun LanguageList(provider: Provider) {
                     if (showAll) provider.languages else provider.languages.take(3)
                 items(languagesToShow) { language ->
                   Text(
-                      text =
-                          language.name.replaceFirstChar {
-                            it.uppercase()
-                          }, // Affiche le nom de l'objet
+                      text = language.name.replaceFirstChar { it.uppercase() },
                       fontSize = 40.sp,
                       color = colorScheme.onPrimary,
                       fontWeight = FontWeight.Bold,

@@ -30,7 +30,7 @@ class ListProviderViewModel(private val repository: ProviderRepository) : ViewMo
   private val filters = listOf("Price", "Languages", "Rating")
   private val activeFilters = mutableMapOf<String, (Provider) -> Boolean>()
 
-    private val taskRepository = TaskRepository(FirebaseFirestore.getInstance())
+  private val taskRepository = TaskRepository(FirebaseFirestore.getInstance())
 
   companion object {
     val Factory: ViewModelProvider.Factory =
@@ -79,29 +79,27 @@ class ListProviderViewModel(private val repository: ProviderRepository) : ViewMo
     repository.updateProvider(provider, onSuccess = { getProviders() }, onFailure = {})
   }
 
-    fun getProviders() {
-        repository.getProviders(
-            _selectedService.value,
-            onSuccess = { providers ->
-                taskRepository.getTasks(
-                    onSuccess = { tasks ->
-                        val taskCountByProvider = tasks.groupBy { it.providerId }
-                            .mapValues { it.value.size }
+  fun getProviders() {
+    repository.getProviders(
+        _selectedService.value,
+        onSuccess = { providers ->
+          taskRepository.getTasks(
+              onSuccess = { tasks ->
+                val taskCountByProvider =
+                    tasks.groupBy { it.providerId }.mapValues { it.value.size }
 
-                        val updatedProviders = providers.map { provider ->
-                            provider.copy(pendingTasks = taskCountByProvider[provider.uid] ?: 0)
-                        }
+                val updatedProviders =
+                    providers.map { provider ->
+                      provider.copy(pendingTasks = taskCountByProvider[provider.uid] ?: 0)
+                    }
 
-                        _providersList.value = updatedProviders
-                        _providersListFiltered.value = updatedProviders
-                    },
-                    onFailure = { Log.e("getTasks", "failed to get tasks") }
-                )
-            },
-            onFailure = { Log.e("getProviders", "failed to get Providers") }
-        )
-    }
-
+                _providersList.value = updatedProviders
+                _providersListFiltered.value = updatedProviders
+              },
+              onFailure = { Log.e("getTasks", "failed to get tasks") })
+        },
+        onFailure = { Log.e("getProviders", "failed to get Providers") })
+  }
 
   suspend fun fetchProviderById(uid: String): Provider? {
     return repository.returnProvider(uid)
