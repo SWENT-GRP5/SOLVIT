@@ -1,16 +1,23 @@
 package com.android.solvit.shared.model.chat
 
+import android.net.Uri
 import android.util.Log
+import com.android.solvit.shared.model.utils.uploadImageToStorage
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.google.firebase.storage.FirebaseStorage
 
-class ChatRepositoryFirestore(private val db: FirebaseDatabase) : ChatRepository {
+class ChatRepositoryFirestore(
+    private val db: FirebaseDatabase,
+    private val storage: FirebaseStorage
+) : ChatRepository {
 
   // Name of collection containing messages
   private val collectionPath = "messages"
   private val collectionPathIA = "iamessages"
+  private val chatImagesPath = "chatImages"
 
   // Create a chat room in the collection or retrive if a conversation already exits between user
   // sender and receiver
@@ -85,7 +92,7 @@ class ChatRepositoryFirestore(private val db: FirebaseDatabase) : ChatRepository
   override fun sendMessage(
       isIaMessage: Boolean,
       chatRoomId: String,
-      message: ChatMessage.TextMessage,
+      message: ChatMessage,
       onSuccess: () -> Unit,
       onFailure: () -> Unit
   ) {
@@ -97,7 +104,12 @@ class ChatRepositoryFirestore(private val db: FirebaseDatabase) : ChatRepository
     try {
       if (chatMessageId != null) {
         Log.e("sendMessage", "$chatMessageId : $chatRoomId")
-        chatNode.child(chatRoomId).child("chats").child(chatMessageId).setValue(message)
+        chatNode
+            .child(chatRoomId)
+            .child("chats")
+            .child(chatMessageId)
+            .setValue(mapChatMessageToFirebaseFields(message))
+
         onSuccess()
       } else {
         Log.e("Send Message", "chatMessageId is null")
@@ -111,7 +123,7 @@ class ChatRepositoryFirestore(private val db: FirebaseDatabase) : ChatRepository
   override fun listenForMessages(
       isIaConversation: Boolean,
       chatRoomId: String,
-      onSuccess: (List<ChatMessage.TextMessage>) -> Unit,
+      onSuccess: (List<ChatMessage>) -> Unit,
       onFailure: () -> Unit
   ) {
 
@@ -127,7 +139,7 @@ class ChatRepositoryFirestore(private val db: FirebaseDatabase) : ChatRepository
               override fun onDataChange(snapshot: DataSnapshot) {
                 val messages =
                     snapshot.children.mapNotNull { messageSnap ->
-                      messageSnap.getValue(ChatMessage.TextMessage::class.java)
+                      getMessageFromFirebase(messageSnap)
                     }
                 onSuccess(messages)
               }
@@ -138,11 +150,11 @@ class ChatRepositoryFirestore(private val db: FirebaseDatabase) : ChatRepository
 
   override fun listenForLastMessages(
       currentUserUid: String?,
-      onSuccess: (Map<String?, ChatMessage.TextMessage>) -> Unit,
+      onSuccess: (Map<String?, ChatMessage>) -> Unit,
       onFailure: () -> Unit
   ) {
     val chatNode = db.getReference(collectionPath)
-    val lastMessages = mutableMapOf<String?, ChatMessage.TextMessage>()
+    val lastMessages = mutableMapOf<String?, ChatMessage>()
 
     chatNode
         .orderByChild("users/${currentUserUid}")
@@ -199,10 +211,15 @@ class ChatRepositoryFirestore(private val db: FirebaseDatabase) : ChatRepository
     chatRef.removeValue().addOnSuccessListener { onSuccess() }.addOnFailureListener { onFailure() }
   }
 
-  fun getLastMessageForChatRoom(
-      chatRoomId: String,
-      onComplete: (ChatMessage.TextMessage?) -> Unit
+  override fun uploadChatImagesToStorage(
+      imageUri: Uri,
+      onSuccess: (String) -> Unit,
+      onFailure: (Exception) -> Unit
   ) {
+    uploadImageToStorage(storage, chatImagesPath, imageUri, onSuccess, onFailure)
+  }
+
+  fun getLastMessageForChatRoom(chatRoomId: String, onComplete: (ChatMessage?) -> Unit) {
     val chatRef = db.getReference(collectionPath).child(chatRoomId).child("chats")
 
     // Query Messages ordered by timestamp and get last message
@@ -213,8 +230,8 @@ class ChatRepositoryFirestore(private val db: FirebaseDatabase) : ChatRepository
             object : ValueEventListener {
               override fun onDataChange(snapshot: DataSnapshot) {
                 if (snapshot.exists()) {
-                  val lastMessage =
-                      snapshot.children.first().getValue(ChatMessage.TextMessage::class.java)
+                  val firstChild = snapshot.children.first()
+                  val lastMessage = getMessageFromFirebase(firstChild)
                   Log.e("getLastMessage", "$lastMessage")
                   onComplete(lastMessage)
                 } else {
@@ -227,5 +244,53 @@ class ChatRepositoryFirestore(private val db: FirebaseDatabase) : ChatRepository
                 TODO("Not yet implemented")
               }
             })
+  }
+
+  /** map each type of message with its correct fields in firebase */
+  fun mapChatMessageToFirebaseFields(chatMessage: ChatMessage): Map<String, Any> {
+
+    when (chatMessage) {
+      is ChatMessage.TextMessage -> {
+        return mapOf(
+            "type" to "text",
+            "message" to chatMessage.message,
+            "senderId" to chatMessage.senderId,
+            "senderName" to chatMessage.senderName,
+            "timestamp" to chatMessage.timestamp,
+            "status" to chatMessage.status)
+      }
+      is ChatMessage.ImageMessage -> {
+        return mapOf(
+            "type" to "image",
+            "imageUrl" to chatMessage.imageUrl,
+            "senderId" to chatMessage.senderId,
+            "senderName" to chatMessage.senderName,
+            "timestamp" to chatMessage.timestamp,
+            "status" to chatMessage.status)
+      }
+      is ChatMessage.TextImageMessage -> {
+        return mapOf(
+            "type" to "textAndImage",
+            "message" to chatMessage.text,
+            "imageUrl" to chatMessage.imageUrl,
+            "senderId" to chatMessage.senderId,
+            "senderName" to chatMessage.senderName,
+            "timestamp" to chatMessage.timestamp,
+            "status" to chatMessage.status)
+      }
+    }
+  }
+
+  /** given Type Field retrieve the correct ChatMessage format */
+  fun getMessageFromFirebase(firstChild: DataSnapshot): ChatMessage? {
+    return when (val type = firstChild.child("type").value as? String) {
+      "text" -> firstChild.getValue(ChatMessage.TextMessage::class.java)
+      "image" -> firstChild.getValue(ChatMessage.ImageMessage::class.java)
+      "textAndImage" -> firstChild.getValue(ChatMessage.TextImageMessage::class.java)
+      else -> {
+        Log.e("getMessage", "Unknown message type: $type")
+        null
+      }
+    }
   }
 }

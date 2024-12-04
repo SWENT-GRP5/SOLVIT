@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -64,6 +65,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.android.solvit.R
@@ -81,6 +83,7 @@ import com.android.solvit.shared.ui.theme.LightOrange
 import com.android.solvit.shared.ui.utils.getReceiverImageUrl
 import com.android.solvit.shared.ui.utils.getReceiverName
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.launch
 
 @Composable
 fun ChatScreen(
@@ -93,65 +96,70 @@ fun ChatScreen(
 
   val messages by chatViewModel.coMessage.collectAsState()
   val receiver by chatViewModel.receiver.collectAsState()
+  val user by authViewModel.user.collectAsState()
   val receiverName = getReceiverName(receiver)
   val receiverPicture = getReceiverImageUrl(receiver)
 
-  chatAssistantViewModel.setContext(messages, "Hassan", receiverName)
+  // chatAssistantViewModel.setContext(messages, "Hassan", receiverName)
 
   // To send Image Messages
   var imageUri by remember { mutableStateOf<Uri?>(null) }
   var imageBitmap by remember { mutableStateOf<Bitmap?>(null) }
   val localContext = LocalContext.current
+  var sendMessageWithImage by remember { mutableStateOf(false) }
 
-  Scaffold(
-      topBar = {
-        ChatHeader(
-            name = receiverName, picture = receiverPicture, navigationActions = navigationActions)
-      },
-      bottomBar = {
-        MessageInputBar(
-            chatViewModel = chatViewModel,
-            authViewModel = authViewModel,
-            chatAssistantViewModel = chatAssistantViewModel,
-            isAiSolverScreen = false,
-            onImageSelected = { uri: Uri? ->
-              imageUri = uri
-              uri?.let { imageBitmap = loadBitmapFromUri(localContext, it) }
-            },
-            onSendClickButton = { message, onMessageChange ->
-              val chatMessage =
-                  authViewModel.user.value?.uid?.let {
-                    ChatMessage.TextMessage(
-                        message,
-                        "Hassan", // Has to be updated once we implement a logic to link the
-                        // authenticated user to its profile (generic class for both provider
-                        // and seeker that contains common informations,
-                        it,
-                        timestamp = System.currentTimeMillis(),
-                    )
+  // To Upload Image To Firebase
+  if (sendMessageWithImage)
+      Scaffold(
+          topBar = {
+            ChatHeader(
+                name = receiverName,
+                picture = receiverPicture,
+                navigationActions = navigationActions)
+          },
+          bottomBar = {
+            MessageInputBar(
+                chatAssistantViewModel = chatAssistantViewModel,
+                isAiSolverScreen = false,
+                onImageSelected = { uri: Uri? ->
+                  imageUri = uri
+                  uri?.let { imageBitmap = loadBitmapFromUri(localContext, it) }
+                },
+                onSendClickButton = { message, onMessageChange ->
+                  val chatMessage =
+                      authViewModel.user.value?.uid?.let {
+                        ChatMessage.TextMessage(
+                            message,
+                            "Hassan", // Has to be updated once we implement a logic to link the
+                            // authenticated user to its profile (generic class for both provider
+                            // and seeker that contains common informations,
+                            it,
+                            timestamp = System.currentTimeMillis(),
+                        )
+                      }
+
+                  if (chatMessage != null && message.isNotEmpty()) {
+                    chatViewModel.sendMessage(false, chatMessage)
+                    chatAssistantViewModel.updateMessageContext(chatMessage)
+                    onMessageChange("")
+                  } else {
+                    Toast.makeText(localContext, "Failed to send message", Toast.LENGTH_LONG).show()
                   }
-              if (chatMessage != null && message.isNotEmpty()) {
-                chatViewModel.sendMessage(false, chatMessage)
-                chatAssistantViewModel.updateMessageContext(chatMessage)
-                onMessageChange("")
-              } else {
-                Toast.makeText(localContext, "Failed to send message", Toast.LENGTH_LONG).show()
-              }
-            })
-      }) { paddingValues ->
-        LazyColumn(
-            modifier = Modifier.padding(paddingValues).imePadding().testTag("conversation")) {
-              items(messages) { message ->
-                if (message.senderId == FirebaseAuth.getInstance().currentUser?.uid) {
-                  // Item for messages authentified user send
-                  SentMessage(message.message, true)
-                } else {
-                  // Item for messages authentified user receive
-                  SentMessage(message.message, false, true, receiverPicture)
+                })
+          }) { paddingValues ->
+            LazyColumn(
+                modifier = Modifier.padding(paddingValues).imePadding().testTag("conversation")) {
+                  items(messages) { message ->
+                    if (message.senderId == FirebaseAuth.getInstance().currentUser?.uid) {
+                      // Item for messages authentified user send
+                      SentMessage(message, true)
+                    } else {
+                      // Item for messages authentified user receive
+                      SentMessage(message, false, true, receiverPicture)
+                    }
+                  }
                 }
-              }
-            }
-      }
+          }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -309,6 +317,7 @@ fun AiSolverScreen(
   var reply by remember { mutableStateOf("") }
   val localContext = LocalContext.current
   val conversation by chatViewModel.coMessage.collectAsState()
+  val user by authViewModel.user.collectAsState()
   aiSolverViewModel.setMessageContext(conversation)
 
   Scaffold(
@@ -321,49 +330,49 @@ fun AiSolverScreen(
               imageUri = uri
               uri?.let { imageBitmap = loadBitmapFromUri(localContext, it) }
             },
-            onSendClickButton = { message, onMessageChange ->
-              val textMessage =
-                  authViewModel.user.value?.uid?.let {
-                    ChatMessage.TextMessage(
-                        message,
-                        "Hassan", // Has to be updated once we implement a logic to link the
-                        // authenticated user to its profile (generic class for both provider
-                        // and seeker that contains common informations,
-                        it,
-                        timestamp = System.currentTimeMillis(),
-                    )
-                  }
+            onSendClickButton = { textMessage, onMessageChange ->
+              chatViewModel.viewModelScope.launch {
+                // upload Image User want to send to storage
+                val imageUrl =
+                    if (imageUri != null) chatViewModel.uploadImagesToStorage(imageUri!!) else null
+                val message =
+                    user?.let {
+                      buildMessage(
+                          it.uid,
+                          textMessage,
+                          imageUrl,
+                      )
+                    }
+                if (message != null) {
+                  chatViewModel.sendMessage(true, message)
+                  onMessageChange("")
+                  val userInput = AiSolverViewModel.UserInput(textMessage, imageBitmap)
+                  aiSolverViewModel.updateMessageContext(message)
+                  aiSolverViewModel.generateMessage(
+                      userInput,
+                      onSuccess = {
+                        reply = it
+                        val aiReply =
+                            ChatMessage.TextMessage(
+                                message = reply,
+                                senderName = "AiBot",
+                                senderId = "JL36T8yHjWDYkuq4u6S4",
+                                timestamp = System.currentTimeMillis())
 
-              val userInput = AiSolverViewModel.UserInput(message, imageBitmap)
-
-              if (textMessage != null && message.isNotEmpty()) {
-                chatViewModel.sendMessage(true, textMessage)
-                onMessageChange("")
-                aiSolverViewModel.updateMessageContext(textMessage)
-                aiSolverViewModel.generateMessage(
-                    userInput,
-                    onSuccess = {
-                      reply = it
-                      val aiReply =
-                          ChatMessage.TextMessage(
-                              message = reply,
-                              senderName = "AiBot",
-                              senderId = "JL36T8yHjWDYkuq4u6S4",
-                              timestamp = System.currentTimeMillis())
-
-                      chatViewModel.sendMessage(true, aiReply)
-                    })
-              } else {
-                Toast.makeText(localContext, "Failed to send message", Toast.LENGTH_LONG).show()
+                        chatViewModel.sendMessage(true, aiReply)
+                      })
+                  imageUri = null
+                  imageBitmap = null
+                }
               }
             })
       }) { paddingValues ->
         LazyColumn(modifier = Modifier.padding(paddingValues).imePadding().testTag("chat")) {
           items(conversation) { message ->
             if (message.senderId == FirebaseAuth.getInstance().currentUser?.uid) {
-              SentMessage(message.message, true)
+              SentMessage(message, true)
             } else {
-              SentMessage(message.message, false, true, "")
+              SentMessage(message, false, true, "")
             }
           }
         }
@@ -428,7 +437,7 @@ fun ChatHeader(name: String?, picture: String, navigationActions: NavigationActi
 
 @Composable
 fun SentMessage(
-    message: String,
+    message: ChatMessage,
     isSentByUser: Boolean,
     showProfilePicture: Boolean = false,
     receiverPicture: String = ""
@@ -466,18 +475,53 @@ fun SentMessage(
                     .padding(horizontal = 16.dp, vertical = 12.dp)) {
               constraints
 
-              Text(
-                  text = message,
-                  color = if (isSentByUser) MaterialTheme.colorScheme.background else Color.Black,
-                  style = MaterialTheme.typography.bodySmall)
+              // Message Item take different forms given the format
+              when (message) {
+                is ChatMessage.TextMessage ->
+                    Text(
+                        text = message.message,
+                        color =
+                            if (isSentByUser) MaterialTheme.colorScheme.background else Color.Black,
+                        style = MaterialTheme.typography.bodySmall)
+                is ChatMessage.ImageMessage ->
+                    AsyncImage(
+                        modifier =
+                            Modifier.fillMaxWidth().aspectRatio(1f).clip(RoundedCornerShape(8.dp)),
+                        model = message.imageUrl.ifEmpty { R.drawable.error },
+                        placeholder = painterResource(id = R.drawable.loading),
+                        error = painterResource(id = R.drawable.error),
+                        contentDescription = "Image message",
+                        contentScale = ContentScale.Crop)
+                is ChatMessage.TextImageMessage -> {
+                  Column(
+                      verticalArrangement = Arrangement.spacedBy(8.dp),
+                      modifier = Modifier.fillMaxWidth()) {
+                        Text(
+                            text = message.text,
+                            color =
+                                if (isSentByUser) MaterialTheme.colorScheme.onPrimary
+                                else Color.Black,
+                            style = MaterialTheme.typography.bodySmall)
+
+                        AsyncImage(
+                            modifier =
+                                Modifier.fillMaxWidth()
+                                    .aspectRatio(1f) // Maintain 1:1 aspect ratio
+                                    .clip(RoundedCornerShape(8.dp)),
+                            model = message.imageUrl.ifEmpty { R.drawable.error },
+                            placeholder = painterResource(id = R.drawable.loading),
+                            error = painterResource(id = R.drawable.error),
+                            contentDescription = "Image message",
+                            contentScale = ContentScale.Crop)
+                      }
+                }
+              }
             }
       }
 }
 
 @Composable
 fun MessageInputBar(
-    chatViewModel: ChatViewModel = viewModel(factory = ChatViewModel.Factory),
-    authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory),
     chatAssistantViewModel: ChatAssistantViewModel =
         viewModel(factory = ChatAssistantViewModel.Factory),
     onImageSelected: (Uri?) -> Unit,
@@ -562,5 +606,37 @@ fun MessageInputBar(
               tint = MaterialTheme.colorScheme.onSurfaceVariant,
               modifier = Modifier.rotate(-45f))
         }
+  }
+}
+
+/** Handle different messages possible format a user send */
+fun buildMessage(userId: String, messageText: String?, imageUrl: String?): ChatMessage? {
+  return when {
+    // User send both a text and an Image
+    !messageText.isNullOrEmpty() && !imageUrl.isNullOrEmpty() -> {
+      ChatMessage.TextImageMessage(
+          text = messageText,
+          imageUrl = imageUrl,
+          senderId = userId,
+          senderName = "Hassan", // To Update
+          timestamp = System.currentTimeMillis())
+    }
+    // User send only a text
+    !messageText.isNullOrEmpty() -> {
+      ChatMessage.TextMessage(
+          message = messageText,
+          senderId = userId,
+          senderName = "Hassan", // To Update
+          timestamp = System.currentTimeMillis())
+    }
+    // User send only a message
+    !imageUrl.isNullOrEmpty() -> {
+      ChatMessage.ImageMessage(
+          imageUrl = imageUrl,
+          senderId = userId,
+          senderName = "Hassan", // To Update
+          timestamp = System.currentTimeMillis())
+    }
+    else -> null
   }
 }

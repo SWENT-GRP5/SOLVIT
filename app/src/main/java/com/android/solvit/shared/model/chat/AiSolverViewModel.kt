@@ -72,7 +72,8 @@ class AiSolverViewModel : ViewModel() {
           "${message.senderName} : ${
                 when (message){
                     is ChatMessage.TextMessage -> message.message
-                    is ChatMessage.ImageMessage -> message.imageUrl
+                    is ChatMessage.ImageMessage -> ""
+                    is ChatMessage.TextImageMessage -> message.text
                 }
              }"
         }

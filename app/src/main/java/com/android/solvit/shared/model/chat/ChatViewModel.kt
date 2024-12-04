@@ -1,10 +1,12 @@
 package com.android.solvit.shared.model.chat
 
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.storage.FirebaseStorage
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,11 +18,11 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
   private var receiverUid: String? = null
   private var chatId: String? = null
 
-  private val _coMessage = MutableStateFlow<List<ChatMessage.TextMessage>>(emptyList())
-  val coMessage: StateFlow<List<ChatMessage.TextMessage>> = _coMessage
+  private val _coMessage = MutableStateFlow<List<ChatMessage>>(emptyList())
+  val coMessage: StateFlow<List<ChatMessage>> = _coMessage
 
-  private val _allMessages = MutableStateFlow<Map<String?, ChatMessage.TextMessage>>(emptyMap())
-  val allMessages: StateFlow<Map<String?, ChatMessage.TextMessage>> = _allMessages
+  private val _allMessages = MutableStateFlow<Map<String?, ChatMessage>>(emptyMap())
+  val allMessages: StateFlow<Map<String?, ChatMessage>> = _allMessages
 
   private val _receiver = MutableStateFlow<Any>("")
   val receiver: StateFlow<Any> = _receiver
@@ -40,7 +42,10 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
         object : ViewModelProvider.Factory {
           @Suppress("UNCHECKED_CAST")
           override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return ChatViewModel(ChatRepositoryFirestore(FirebaseDatabase.getInstance())) as T
+            return ChatViewModel(
+                ChatRepositoryFirestore(
+                    FirebaseDatabase.getInstance(), FirebaseStorage.getInstance()))
+                as T
           }
         }
   }
@@ -107,7 +112,7 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
     }
   }
 
-  fun sendMessage(isIaConversation: Boolean, message: ChatMessage.TextMessage) {
+  fun sendMessage(isIaConversation: Boolean, message: ChatMessage) {
     Log.e("sendMessage", "$chatId")
     chatId?.let {
       Log.e("chatId", "notNull")
@@ -115,9 +120,7 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
           isIaConversation,
           chatRoomId = it,
           message,
-          onSuccess = {
-            Log.e("send Message", "Message \"${message.message}\" is succesfully sent")
-          },
+          onSuccess = { Log.e("send Message", "Message \"${message}\" is succesfully sent") },
           onFailure = { Log.e("send Message", "Failed") })
     }
   }
@@ -162,6 +165,21 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
             Log.e("Chat View model", "Conversation of $chatId is successfully deleted")
           },
           onFailure = { Log.e("Chat VM", "Failed to delete conversation of $chatId") })
+    }
+  }
+
+  suspend fun uploadImagesToStorage(imageUri: Uri): String? {
+    return suspendCoroutine { continuation ->
+      repository.uploadChatImagesToStorage(
+          imageUri = imageUri,
+          onSuccess = { imageUrl ->
+            Log.e("AiSolverScreen", "Image Uri succesfully uploaded")
+            continuation.resume(imageUrl)
+          },
+          onFailure = { e ->
+            Log.e("ChatViewModel", "Failed to upload image to storage $e")
+            continuation.resume(null)
+          })
     }
   }
 }

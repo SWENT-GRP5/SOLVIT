@@ -156,7 +156,7 @@ fun ChatListTopBar(
 
 @Composable
 fun ChatListItem(
-    message: ChatMessage.TextMessage,
+    message: ChatMessage,
     currentUserId: String,
     receiverId: String,
     role: String,
@@ -212,7 +212,12 @@ fun ChatListItem(
               style = MaterialTheme.typography.titleMedium,
               fontWeight = FontWeight.Bold)
           Text(
-              text = message.message,
+              text =
+                  when (message) {
+                    is ChatMessage.TextMessage -> message.message
+                    is ChatMessage.ImageMessage -> "image"
+                    is ChatMessage.TextImageMessage -> message.text
+                  },
               style = MaterialTheme.typography.bodyLarge,
               color = Color.Gray,
               maxLines = 1,
