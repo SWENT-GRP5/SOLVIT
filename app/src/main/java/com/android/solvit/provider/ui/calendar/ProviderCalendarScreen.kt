@@ -96,11 +96,10 @@ fun ProviderCalendarScreen(
   var showDatePicker by remember { mutableStateOf(false) }
 
   val timeSlotsByDate =
-      serviceRequests
-          .filter { it.meetingDate != null }
-          .groupBy { request ->
-            request.meetingDate!!.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
-          }
+      serviceRequests.groupBy { request ->
+        val date = request.meetingDate?.toInstant() ?: request.dueDate.toInstant()
+        date.atZone(ZoneId.systemDefault()).toLocalDate()
+      }
 
   Scaffold(
       topBar = {
@@ -392,7 +391,7 @@ fun MonthDayItem(
             }
         Spacer(modifier = Modifier.height(4.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-          timeSlots.forEach { status -> StatusIndicator(status.status) }
+          calculateDayStatus(timeSlots).forEach { status -> StatusIndicator(status) }
         }
       }
 }
@@ -611,8 +610,10 @@ fun TimeSlots(
 ) {
   Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
     timeSlots
-        .filter { it.meetingDate != null }
-        .sortedBy { it.meetingDate!!.toInstant() }
+        .sortedBy { request ->
+          val date = request.meetingDate?.toInstant() ?: request.dueDate.toInstant()
+          date
+        }
         .forEach { request -> TimeSlotItem(request, textColor, showDescription, currentView) }
   }
 }
@@ -626,7 +627,9 @@ fun TimeSlotItem(
 ) {
   val backgroundColor = ServiceRequestStatus.getStatusColor(request.status).copy(alpha = 0.1f)
   val statusColor = ServiceRequestStatus.getStatusColor(request.status)
-  val meetingTime = request.meetingDate!!.toInstant().atZone(ZoneId.systemDefault()).toLocalTime()
+  val meetingTime =
+      request.meetingDate?.toInstant()?.atZone(ZoneId.systemDefault())?.toLocalTime()
+          ?: request.dueDate.toInstant().atZone(ZoneId.systemDefault()).toLocalTime()
 
   Column(
       modifier =
@@ -692,7 +695,7 @@ class FakeNavController(context: Context) : NavController(context) {
 
 fun calculateDayStatus(requests: List<ServiceRequest>): List<ServiceRequestStatus> {
   return requests
-      .filter { it.meetingDate != null }
+      .sortedBy { request -> request.meetingDate?.toInstant() ?: request.dueDate.toInstant() }
       .map { it.status }
       .take(4) // Limit to 4 status indicators
 }
