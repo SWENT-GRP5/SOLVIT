@@ -104,6 +104,7 @@ class NotificationViewModelTest {
         title = "New Service Request",
         message = "You have a new service request for tutoring",
         timestamp = Timestamp.now(),
+        serviceRequest = serviceRequest,
         isRead = false)
   }
 
