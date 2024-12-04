@@ -208,7 +208,7 @@ fun ProfileHeader(
         }
 
     Column(
-        modifier = Modifier.padding(8.dp).weight(1f).wrapContentHeight(),
+        modifier = Modifier.wrapContentHeight().padding(8.dp).weight(1f),
         verticalArrangement = Arrangement.spacedBy(10.dp),
         horizontalAlignment = Alignment.Start) {
           val titleColor = colorScheme.onBackground
@@ -239,15 +239,19 @@ fun ProfileHeader(
                 overflow = TextOverflow.Ellipsis)
           }
 
-          Column(modifier = Modifier.align(Alignment.End)) {
-            Icon(
+          Column(modifier = Modifier.align(Alignment.End),
+              horizontalAlignment = Alignment.Start,
+              verticalArrangement = Arrangement.Bottom) {
+              Box {
+            IconButton(
+                onClick = {
+                  navigationActions.navigateTo(Screen.PROVIDER_MODIFY_PROFILE)
+                },
+                modifier = Modifier.size(24.dp).testTag("editProfileButton")) { Icon(
                 Icons.Default.Edit,
                 contentDescription = "Edit Profile",
-                modifier =
-                    Modifier.size(24.dp).clickable {
-                      navigationActions.navigateTo(Screen.PROVIDER_MODIFY_PROFILE)
-                    })
-          }
+                modifier = Modifier.size(24.dp)) }
+          }}
 
           Spacer(modifier = Modifier.height(5.dp))
 
@@ -326,10 +330,14 @@ fun StatsSection(provider: Provider) {
 
   var rating by remember { mutableStateOf("") }
   var popular by remember { mutableStateOf("") }
+    var earnings by remember { mutableStateOf(0.0) }
+    var pendingTasks by remember { mutableStateOf(0) }
 
   LaunchedEffect(provider) {
     rating = provider.rating.toString()
     popular = provider.popular.toString()
+    earnings = provider.earnings
+    pendingTasks = provider.pendingTasks
   }
   Column(
       modifier =
@@ -360,11 +368,33 @@ fun StatsSection(provider: Provider) {
           }
         }
 
+      Spacer(modifier = Modifier.height(5.dp))
+
+
+      Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
+          Column(horizontalAlignment = Alignment.Start) {
+              Text(
+                  "$earnings CHF",
+                  fontSize = 40.sp,
+                  color = colorScheme.onPrimary,
+                  fontWeight = FontWeight.Bold)
+              Text("Earnings", fontSize = 15.sp, color = colorScheme.onPrimary)
+          }
+          Column(horizontalAlignment = Alignment.CenterHorizontally) {
+              Text(
+                  pendingTasks.toString(),
+                  fontSize = 40.sp,
+                  color = colorScheme.onPrimary,
+                  fontWeight = FontWeight.Bold)
+              Text("Pending Tasks", fontSize = 15.sp, color = colorScheme.onPrimary)
+          }
+      }
+
         Spacer(modifier = Modifier.height(5.dp))
 
         LanguageList(provider)
 
-        Text("Languages", fontSize = 15.sp, color = colorScheme.onPrimary)
+        Text((if (provider.languages.size > 1) "Languages" else "Language"), fontSize = 15.sp, color = colorScheme.onPrimary)
       }
 }
 
