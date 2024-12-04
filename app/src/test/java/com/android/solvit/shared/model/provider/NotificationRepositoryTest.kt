@@ -216,4 +216,22 @@ class NotificationsRepositoryTest {
     assertEquals(Services.TUTOR, serviceRequest?.type)
     assertEquals("Need help with Math", serviceRequest?.description)
   }
+
+  /**
+   * Tests that the `updateNotificationReadStatus` function correctly updates the `isRead` field of
+   * a notification document in Firestore.
+   */
+  @Test
+  fun `updateNotificationReadStatus updates notification isRead status in Firestore`() {
+    // Arrange
+    val notificationId = "notif123" // The ID of the notification to be updated
+    val isRead = true // The new read status to set
+
+    val mockTaskCompletionSource = TaskCompletionSource<Void>()
+    `when`(mockDocumentReference.update("isRead", isRead)).thenReturn(mockTaskCompletionSource.task)
+
+    notificationsRepository.updateNotificationReadStatus(notificationId, isRead)
+    // Assert that the Firestore update method was called with the correct arguments
+    verify(mockDocumentReference).update("isRead", isRead)
+  }
 }
