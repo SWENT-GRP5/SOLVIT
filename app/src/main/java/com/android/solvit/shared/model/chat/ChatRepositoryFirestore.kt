@@ -5,24 +5,26 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.google.firebase.database.ktx.getValue
 
 class ChatRepositoryFirestore(private val db: FirebaseDatabase) : ChatRepository {
 
   // Name of collection containing messages
   private val collectionPath = "messages"
+  private val collectionPathIA = "iamessages"
 
   // Create a chat room in the collection or retrive if a conversation already exits between user
   // sender and receiver
   override fun initChat(
+      isIaMessage: Boolean,
       currentUserUid: String?,
       onSuccess: (String) -> Unit,
       onFailure: () -> Unit,
       receiverUid: String
   ) {
+    val collection = if (isIaMessage) collectionPathIA else collectionPath
     // Check that sender (current authenticated user is not null)
     if (currentUserUid != null) {
-      val databaseRef = db.getReference(collectionPath)
+      val databaseRef = db.getReference(collection)
       Log.e("InitChat", "$databaseRef")
       try {
         databaseRef.addListenerForSingleValueEvent(
@@ -81,14 +83,16 @@ class ChatRepositoryFirestore(private val db: FirebaseDatabase) : ChatRepository
 
   // Send Message in a chatRoom than links 2 users
   override fun sendMessage(
+      isIaMessage: Boolean,
       chatRoomId: String,
       message: ChatMessage.TextMessage,
       onSuccess: () -> Unit,
       onFailure: () -> Unit
   ) {
 
+    val collection = if (isIaMessage) collectionPathIA else collectionPath
     Log.e("sendMessage", "Entered there")
-    val chatNode = db.getReference(collectionPath)
+    val chatNode = db.getReference(collection)
     val chatMessageId = chatNode.child(chatRoomId).child("chats").push().key
     try {
       if (chatMessageId != null) {
@@ -105,12 +109,14 @@ class ChatRepositoryFirestore(private val db: FirebaseDatabase) : ChatRepository
 
   // Get All Messages of a chatRoom between 2 users
   override fun listenForMessages(
+      isIaConversation: Boolean,
       chatRoomId: String,
       onSuccess: (List<ChatMessage.TextMessage>) -> Unit,
       onFailure: () -> Unit
   ) {
 
-    val chatNode = db.getReference(collectionPath)
+    val collection = if (isIaConversation) collectionPathIA else collectionPath
+    val chatNode = db.getReference(collection)
     // Listener to trigger new list of message when changes occur
     chatNode
         .child(chatRoomId)
@@ -180,6 +186,17 @@ class ChatRepositoryFirestore(private val db: FirebaseDatabase) : ChatRepository
                 TODO("Not yet implemented")
               }
             })
+  }
+
+  override fun clearConversation(
+      isIaConversation: Boolean,
+      chatRoomId: String,
+      onSuccess: () -> Unit,
+      onFailure: () -> Unit
+  ) {
+    val collection = if (isIaConversation) collectionPathIA else collectionPath
+    val chatRef = db.getReference(collection).child(chatRoomId).child("chats")
+    chatRef.removeValue().addOnSuccessListener { onSuccess() }.addOnFailureListener { onFailure() }
   }
 
   fun getLastMessageForChatRoom(

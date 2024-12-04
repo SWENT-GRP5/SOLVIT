@@ -28,6 +28,12 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
   private val _isReadyToNavigate = MutableStateFlow(false)
   val isReadyToNavigate: StateFlow<Boolean> = _isReadyToNavigate
 
+  private val _isLoading = MutableStateFlow(true)
+  val isLoading: StateFlow<Boolean> = _isLoading
+
+  private val _isLoadingMessageBox = MutableStateFlow(true)
+  val isLoadingMessageBox: StateFlow<Boolean> = _isLoadingMessageBox
+
   // Create factory
   companion object {
     val Factory: ViewModelProvider.Factory =
@@ -39,13 +45,35 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
         }
   }
 
-  fun prepareForChat(currentUserUid: String?, receiverId: String, receiver: Any?) {
+  fun prepareForChat(
+      isIaConversation: Boolean,
+      currentUserUid: String?,
+      receiverId: String,
+      receiver: Any?
+  ) {
     viewModelScope.launch {
       _isReadyToNavigate.value = false
       setReceiverUid(receiverId)
-      initChat(currentUserUid)
+      initChat(isIaConversation, currentUserUid)
       receiver?.let { setReceiver(receiver) }
+      getConversation(false)
       _isReadyToNavigate.value = true
+    }
+  }
+
+  fun prepareForIaChat(
+      isIaConversation: Boolean,
+      currentUserUid: String?,
+      receiverId: String,
+      receiver: Any?
+  ) {
+    viewModelScope.launch {
+      _isLoading.value = true
+      setReceiverUid(receiverId)
+      initChat(isIaConversation, currentUserUid)
+      receiver?.let { setReceiver(receiver) }
+      getConversation(isIaConversation)
+      _isLoading.value = false
     }
   }
 
@@ -61,11 +89,12 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
     _receiver.value = receiver
   }
 
-  suspend fun initChat(currentUserUid: String?): String? {
+  suspend fun initChat(isIaConversation: Boolean, currentUserUid: String?): String? {
     // Suspend Coroutine to make sure that get conversation is not called before init chat
     return suspendCoroutine { continuation ->
       receiverUid?.let {
         repository.initChat(
+            isIaConversation,
             currentUserUid,
             onSuccess = { uid ->
               Log.e("initChat", "onSuccess $uid")
@@ -78,11 +107,12 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
     }
   }
 
-  fun sendMessage(message: ChatMessage.TextMessage) {
+  fun sendMessage(isIaConversation: Boolean, message: ChatMessage.TextMessage) {
     Log.e("sendMessage", "$chatId")
     chatId?.let {
       Log.e("chatId", "notNull")
       repository.sendMessage(
+          isIaConversation,
           chatRoomId = it,
           message,
           onSuccess = {
@@ -92,21 +122,46 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
     }
   }
 
-  fun getConversation() {
+  fun getConversation(isIaConversation: Boolean) {
+
     chatId?.let {
       repository.listenForMessages(
-          it, onSuccess = { list -> _coMessage.value = list }, onFailure = {})
+          isIaConversation, it, onSuccess = { list -> _coMessage.value = list }, onFailure = {})
     }
   }
 
   fun getAllLastMessages(currentUserUid: String?) {
 
-    repository.listenForLastMessages(
-        currentUserUid,
-        onSuccess = { unsortedMap ->
-          _allMessages.value =
-              unsortedMap.toList().sortedByDescending { it.second.timestamp }.toMap()
-        },
-        onFailure = { Log.e("ChatViewModel", "Failed to get All messages") })
+    viewModelScope.launch {
+      _isLoadingMessageBox.value = true
+      repository.listenForLastMessages(
+          currentUserUid,
+          onSuccess = { unsortedMap ->
+            _allMessages.value =
+                unsortedMap.toList().sortedByDescending { it.second.timestamp }.toMap()
+            Log.e("ChatVM", "${allMessages.value}")
+            _isLoadingMessageBox.value = false
+            Log.e("Chat VM is loading Success", "${_isLoadingMessageBox.value}")
+          },
+          onFailure = {
+            _isLoadingMessageBox.value = false
+            Log.e("ChatViewModel", "Failed to get All messages")
+          })
+
+      Log.e("Chat VM is loading", "${_isLoadingMessageBox.value}")
+    }
+  }
+
+  fun clearConversation(isIaConversation: Boolean) {
+    Log.e("clear", "$chatId")
+    chatId?.let {
+      repository.clearConversation(
+          isIaConversation,
+          it,
+          onSuccess = {
+            Log.e("Chat View model", "Conversation of $chatId is successfully deleted")
+          },
+          onFailure = { Log.e("Chat VM", "Failed to delete conversation of $chatId") })
+    }
   }
 }

@@ -2,6 +2,7 @@ package com.android.solvit.shared.model.chat
 
 interface ChatRepository {
   fun initChat(
+      isIaMessage: Boolean,
       currentUserUid: String?,
       onSuccess: (String) -> Unit,
       onFailure: () -> Unit,
@@ -9,6 +10,7 @@ interface ChatRepository {
   )
 
   fun sendMessage(
+      isIaMessage: Boolean,
       chatRoomId: String,
       message: ChatMessage.TextMessage,
       onSuccess: () -> Unit,
@@ -16,6 +18,7 @@ interface ChatRepository {
   )
 
   fun listenForMessages(
+      isIaConversation: Boolean,
       chatRoomId: String,
       onSuccess: (List<ChatMessage.TextMessage>) -> Unit,
       onFailure: () -> Unit
@@ -24,6 +27,13 @@ interface ChatRepository {
   fun listenForLastMessages(
       currentUserUid: String?,
       onSuccess: (Map<String?, ChatMessage.TextMessage>) -> Unit,
+      onFailure: () -> Unit
+  )
+
+  fun clearConversation(
+      isIaConversation: Boolean,
+      chatRoomId: String,
+      onSuccess: () -> Unit,
       onFailure: () -> Unit
   )
 }

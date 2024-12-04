@@ -44,7 +44,7 @@ class AiSolverViewModel : ViewModel() {
         object : ViewModelProvider.Factory {
           @Suppress("UNCHECKED_CAST")
           override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return ChatAssistantViewModel() as T
+            return AiSolverViewModel() as T
           }
         }
   }

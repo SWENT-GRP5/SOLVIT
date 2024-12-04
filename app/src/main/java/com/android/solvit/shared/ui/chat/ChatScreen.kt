@@ -30,6 +30,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -60,12 +61,14 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.android.solvit.R
 import com.android.solvit.shared.model.authentication.AuthViewModel
+import com.android.solvit.shared.model.chat.AiSolverViewModel
 import com.android.solvit.shared.model.chat.ChatAssistantViewModel
 import com.android.solvit.shared.model.chat.ChatMessage
 import com.android.solvit.shared.model.chat.ChatViewModel
@@ -90,13 +93,9 @@ fun ChatScreen(
 
   val messages by chatViewModel.coMessage.collectAsState()
   val receiver by chatViewModel.receiver.collectAsState()
-
-  LaunchedEffect(receiver) { chatViewModel.getConversation() }
-
   val receiverName = getReceiverName(receiver)
   val receiverPicture = getReceiverImageUrl(receiver)
 
-  val user by authViewModel.user.collectAsState()
   chatAssistantViewModel.setContext(messages, "Hassan", receiverName)
 
   // To send Image Messages
@@ -118,6 +117,26 @@ fun ChatScreen(
             onImageSelected = { uri: Uri? ->
               imageUri = uri
               uri?.let { imageBitmap = loadBitmapFromUri(localContext, it) }
+            },
+            onSendClickButton = { message, onMessageChange ->
+              val chatMessage =
+                  authViewModel.user.value?.uid?.let {
+                    ChatMessage.TextMessage(
+                        message,
+                        "Hassan", // Has to be updated once we implement a logic to link the
+                        // authenticated user to its profile (generic class for both provider
+                        // and seeker that contains common informations,
+                        it,
+                        timestamp = System.currentTimeMillis(),
+                    )
+                  }
+              if (chatMessage != null && message.isNotEmpty()) {
+                chatViewModel.sendMessage(false, chatMessage)
+                chatAssistantViewModel.updateMessageContext(chatMessage)
+                onMessageChange("")
+              } else {
+                Toast.makeText(localContext, "Failed to send message", Toast.LENGTH_LONG).show()
+              }
             })
       }) { paddingValues ->
         LazyColumn(
@@ -137,7 +156,20 @@ fun ChatScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AiSolverWelcomeScreen(navigationActions: NavigationActions) {
+fun AiSolverWelcomeScreen(
+    navigationActions: NavigationActions,
+    chatViewModel: ChatViewModel = viewModel(factory = ChatViewModel.Factory),
+    authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory)
+) {
+
+  val user by authViewModel.user.collectAsState()
+  val iaBotUserId = "JL36T8yHjWDYkuq4u6S4" // The default Id of the IA Bot created
+  // Fetch conversation
+  val isLoading by chatViewModel.isLoading.collectAsState()
+  val conversation by chatViewModel.coMessage.collectAsState()
+
+  LaunchedEffect(Unit) { chatViewModel.prepareForIaChat(true, user?.uid, iaBotUserId, "IaBot") }
+
   Scaffold(
       topBar = {
         TopAppBar(
@@ -159,81 +191,126 @@ fun AiSolverWelcomeScreen(navigationActions: NavigationActions) {
                 .padding(innerPadding)
                 .testTag("AiGetStartedScreen"),
         contentAlignment = Alignment.TopCenter) {
-          val screenHeight = maxHeight
+          if (isLoading) {
+            CircularProgressIndicator(modifier = Modifier.testTag("loadingIndicator"))
+          } else {
+            val screenHeight = maxHeight
 
-          Column(
-              horizontalAlignment = Alignment.CenterHorizontally,
-              verticalArrangement = Arrangement.SpaceBetween,
-              modifier =
-                  Modifier.fillMaxSize()
-                      .padding(
-                          top = screenHeight.times(0.05f), bottom = screenHeight.times(0.1f))) {
-                Text(
-                    text =
-                        buildAnnotatedString {
-                          withStyle(
-                              style =
-                                  SpanStyle(
-                                      color = Black,
-                                      fontSize = screenHeight.times(0.03f).value.sp)) {
-                                append("Meet Your Personal ")
-                              }
-                          withStyle(
-                              style =
-                                  SpanStyle(
-                                      color = LightOrange,
-                                      fontSize = screenHeight.times(0.03f).value.sp)) {
-                                append("AI\n")
-                              }
-                          withStyle(
-                              style =
-                                  SpanStyle(
-                                      color = LightOrange,
-                                      fontSize = screenHeight.times(0.03f).value.sp)) {
-                                append("Problem Solver")
-                              }
-                        },
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(horizontal = 16.dp).testTag("title"))
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceBetween,
+                modifier =
+                    Modifier.fillMaxSize()
+                        .padding(
+                            top = screenHeight.times(0.05f), bottom = screenHeight.times(0.1f))) {
+                  Text(
+                      text =
+                          buildAnnotatedString {
+                            withStyle(
+                                style =
+                                    SpanStyle(
+                                        color = Black,
+                                        fontSize = screenHeight.times(0.03f).value.sp)) {
+                                  append("Meet Your Personal ")
+                                }
+                            withStyle(
+                                style =
+                                    SpanStyle(
+                                        color = LightOrange,
+                                        fontSize = screenHeight.times(0.03f).value.sp)) {
+                                  append("AI\n")
+                                }
+                            withStyle(
+                                style =
+                                    SpanStyle(
+                                        color = LightOrange,
+                                        fontSize = screenHeight.times(0.03f).value.sp)) {
+                                  append("Problem Solver")
+                                }
+                          },
+                      textAlign = TextAlign.Center,
+                      modifier = Modifier.padding(horizontal = 16.dp).testTag("title"))
 
-                Image(
-                    modifier = Modifier.testTag("image"),
-                    painter = painterResource(id = R.drawable.ai_image),
-                    contentDescription = "ai logo",
-                    contentScale = ContentScale.FillBounds)
+                  Image(
+                      modifier = Modifier.testTag("image"),
+                      painter = painterResource(id = R.drawable.ai_image),
+                      contentDescription = "ai logo",
+                      contentScale = ContentScale.FillBounds)
 
-                Text(
-                    text = "I'm pleased that I meet you! How can\nI help you right now?",
-                    fontSize = screenHeight.times(0.02f).value.sp,
-                    color = Color.Gray,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(horizontal = 16.dp))
+                  Text(
+                      text = "I'm pleased that I meet you! How can\nI help you right now?",
+                      fontSize = screenHeight.times(0.02f).value.sp,
+                      color = Color.Gray,
+                      textAlign = TextAlign.Center,
+                      modifier = Modifier.padding(horizontal = 16.dp))
 
-                Button(
-                    onClick = { navigationActions.navigateTo(Screen.AI_SOLVER_CHAT_SCREEN) },
-                    colors = ButtonDefaults.buttonColors(containerColor = LightOrange),
-                    shape = RoundedCornerShape(50),
-                    modifier =
-                        Modifier.fillMaxWidth(0.6f)
-                            .height(screenHeight.times(0.07f))
-                            .testTag("getStartedButton")) {
-                      Text(
-                          text = "Get Started",
-                          fontSize = screenHeight.times(0.025f).value.sp,
-                          color = Color.White)
-                    }
-              }
+                  if (conversation.isEmpty()) {
+                    ButtonStartConversationWithAI(
+                        navigationActions = navigationActions,
+                        screenHeight = screenHeight,
+                        title = "Let solve a new problem",
+                        clearConversation = false,
+                        chatViewModel)
+                  } else {
+                    ButtonStartConversationWithAI(
+                        navigationActions = navigationActions,
+                        screenHeight = screenHeight,
+                        title = "Continue",
+                        clearConversation = false,
+                        chatViewModel)
+                    ButtonStartConversationWithAI(
+                        navigationActions = navigationActions,
+                        screenHeight = screenHeight,
+                        title = "Let solve a new problem",
+                        clearConversation = true,
+                        chatViewModel)
+                  }
+                }
+          }
         }
   }
+}
+/** Represent either a solve new Problem Button or continue solving current Problem* */
+@Composable
+fun ButtonStartConversationWithAI(
+    navigationActions: NavigationActions,
+    screenHeight: Dp,
+    title: String,
+    clearConversation: Boolean,
+    chatViewModel: ChatViewModel
+) {
+  Button(
+      onClick = {
+        if (clearConversation) chatViewModel.clearConversation(true)
+        navigationActions.navigateTo(Screen.AI_SOLVER_CHAT_SCREEN)
+      },
+      colors = ButtonDefaults.buttonColors(containerColor = LightOrange),
+      shape = RoundedCornerShape(50),
+      modifier =
+          Modifier.fillMaxWidth(0.6f)
+              .height(screenHeight.times(0.07f))
+              .testTag("getStartedButton")) {
+        Text(text = title, fontSize = screenHeight.times(0.025f).value.sp, color = Color.White)
+      }
 }
 
 /** Chat with Ai problem solver chatbot */
 @Composable
-fun AiSolverScreen(navigationActions: NavigationActions) {
+fun AiSolverScreen(
+    navigationActions: NavigationActions,
+    authViewModel: AuthViewModel,
+    chatViewModel: ChatViewModel,
+    aiSolverViewModel: AiSolverViewModel
+) {
+
   // To send Image Messages
   var imageUri by remember { mutableStateOf<Uri?>(null) }
   var imageBitmap by remember { mutableStateOf<Bitmap?>(null) }
+  var reply by remember { mutableStateOf("") }
   val localContext = LocalContext.current
+  val conversation by chatViewModel.coMessage.collectAsState()
+  aiSolverViewModel.setMessageContext(conversation)
+
   Scaffold(
       modifier = Modifier.testTag("AiSolverScreen"),
       topBar = { AiSolverHeader(navigationActions) },
@@ -243,9 +320,53 @@ fun AiSolverScreen(navigationActions: NavigationActions) {
             onImageSelected = { uri: Uri? ->
               imageUri = uri
               uri?.let { imageBitmap = loadBitmapFromUri(localContext, it) }
+            },
+            onSendClickButton = { message, onMessageChange ->
+              val textMessage =
+                  authViewModel.user.value?.uid?.let {
+                    ChatMessage.TextMessage(
+                        message,
+                        "Hassan", // Has to be updated once we implement a logic to link the
+                        // authenticated user to its profile (generic class for both provider
+                        // and seeker that contains common informations,
+                        it,
+                        timestamp = System.currentTimeMillis(),
+                    )
+                  }
+
+              val userInput = AiSolverViewModel.UserInput(message, imageBitmap)
+
+              if (textMessage != null && message.isNotEmpty()) {
+                chatViewModel.sendMessage(true, textMessage)
+                onMessageChange("")
+                aiSolverViewModel.updateMessageContext(textMessage)
+                aiSolverViewModel.generateMessage(
+                    userInput,
+                    onSuccess = {
+                      reply = it
+                      val aiReply =
+                          ChatMessage.TextMessage(
+                              message = reply,
+                              senderName = "AiBot",
+                              senderId = "JL36T8yHjWDYkuq4u6S4",
+                              timestamp = System.currentTimeMillis())
+
+                      chatViewModel.sendMessage(true, aiReply)
+                    })
+              } else {
+                Toast.makeText(localContext, "Failed to send message", Toast.LENGTH_LONG).show()
+              }
             })
       }) { paddingValues ->
-        LazyColumn(modifier = Modifier.padding(paddingValues).imePadding().testTag("chat")) {}
+        LazyColumn(modifier = Modifier.padding(paddingValues).imePadding().testTag("chat")) {
+          items(conversation) { message ->
+            if (message.senderId == FirebaseAuth.getInstance().currentUser?.uid) {
+              SentMessage(message.message, true)
+            } else {
+              SentMessage(message.message, false, true, "")
+            }
+          }
+        }
       }
 }
 
@@ -360,7 +481,8 @@ fun MessageInputBar(
     chatAssistantViewModel: ChatAssistantViewModel =
         viewModel(factory = ChatAssistantViewModel.Factory),
     onImageSelected: (Uri?) -> Unit,
-    isAiSolverScreen: Boolean
+    isAiSolverScreen: Boolean,
+    onSendClickButton: (String, (String) -> Unit) -> Unit
 ) {
 
   var message by remember { mutableStateOf("") }
@@ -432,27 +554,7 @@ fun MessageInputBar(
         }
     // Button to send your message
     IconButton(
-        onClick = {
-          val chatMessage =
-              authViewModel.user.value?.uid?.let {
-                ChatMessage.TextMessage(
-                    message,
-                    "Hassan", // Has to be updated once we implement a logic to link the
-                    // authenticated user to its profile (generic class for both provider
-                    // and seeker that contains common informations,
-                    it,
-                    timestamp = System.currentTimeMillis(),
-                )
-              }
-          if (chatMessage != null && message.isNotEmpty()) {
-            chatViewModel.sendMessage(chatMessage)
-            chatAssistantViewModel.updateMessageContext(chatMessage)
-            message = ""
-            // chatViewModel.getConversation()
-          } else {
-            Toast.makeText(current, "Failed to send message", Toast.LENGTH_LONG).show()
-          }
-        },
+        onClick = { onSendClickButton(message) { message = it } },
         modifier = Modifier.size(48.dp)) {
           Icon(
               imageVector = Icons.Default.Send,
