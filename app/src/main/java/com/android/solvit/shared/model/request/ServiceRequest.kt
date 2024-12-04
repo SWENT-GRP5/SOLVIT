@@ -12,15 +12,15 @@ import com.android.solvit.shared.ui.theme.STARTED_color
 import com.google.firebase.Timestamp
 
 data class ServiceRequest(
-    val uid: String,
-    val title: String,
-    val type: Services,
-    val description: String,
-    val userId: String,
+    val uid: String = "",
+    val title: String = "",
+    val type: Services = Services.TUTOR,
+    val description: String = "",
+    val userId: String = "",
     val providerId: String? = null,
-    val dueDate: Timestamp,
+    val dueDate: Timestamp = Timestamp.now(),
     val meetingDate: Timestamp? = null,
-    val location: Location?,
+    val location: Location? = Location(0.0, 0.0, ""),
     val imageUrl: String? = null,
     val packageId: String? = null,
     val agreedPrice: Double? = null,
