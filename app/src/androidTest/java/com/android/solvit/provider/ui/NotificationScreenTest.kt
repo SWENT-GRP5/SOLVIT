@@ -7,8 +7,13 @@ import androidx.navigation.NavController
 import com.android.solvit.shared.model.Notification
 import com.android.solvit.shared.model.NotificationsRepository
 import com.android.solvit.shared.model.NotificationsViewModel
+import com.android.solvit.shared.model.map.Location
+import com.android.solvit.shared.model.request.ServiceRequest
+import com.android.solvit.shared.model.request.ServiceRequestStatus
+import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.google.firebase.Timestamp
+import java.util.GregorianCalendar
 import junit.framework.TestCase.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -26,6 +31,18 @@ class NotificationsScreenTest {
 
   @get:Rule val composeTestRule = createComposeRule()
 
+  private val serviceRequest =
+      ServiceRequest(
+          uid = "uid",
+          title = "title",
+          type = Services.CLEANER,
+          description = "description",
+          userId = "-1",
+          dueDate = Timestamp(GregorianCalendar(2024, 0, 1).time),
+          location = Location(37.7749, -122.4194, "San Francisco"),
+          imageUrl = "imageUrl",
+          status = ServiceRequestStatus.PENDING)
+
   private val testNotifications =
       listOf(
           Notification(
@@ -34,6 +51,7 @@ class NotificationsScreenTest {
               title = "New Request",
               message = "You have a new request",
               timestamp = Timestamp.now(),
+              serviceRequest,
               isRead = false),
           Notification(
               uid = "2",
@@ -41,6 +59,7 @@ class NotificationsScreenTest {
               title = "Booking Confirmed",
               message = "Your booking is confirmed",
               timestamp = Timestamp.now(),
+              serviceRequest,
               isRead = false))
 
   @Before
