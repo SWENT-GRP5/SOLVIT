@@ -6,11 +6,11 @@ import android.icu.util.GregorianCalendar
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -30,6 +30,7 @@ import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.model.utils.isInternetAvailable
 import com.android.solvit.shared.model.utils.loadBitmapFromUri
 import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.android.solvit.shared.ui.navigation.Route
 import com.google.firebase.Firebase
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.auth
@@ -57,6 +58,9 @@ fun CreateRequestScreen(
     }
   }
 
+  val selectedProviderId = requestViewModel.selectedProviderId.collectAsState()
+  val selectedProviderService = requestViewModel.selectedProviderService.collectAsState()
+
   var title by remember { mutableStateOf("") }
   var description by remember { mutableStateOf("") }
   var dueDate by remember { mutableStateOf("") }
@@ -73,12 +77,13 @@ fun CreateRequestScreen(
   val filteredServiceTypes =
       Services.entries.filter { it.name.contains(typeQuery, ignoreCase = true) }
   var selectedServiceType by remember { mutableStateOf(Services.OTHER) }
+  selectedProviderService.value?.let { selectedServiceType = it }
   val localContext = LocalContext.current
   val userId = Firebase.auth.currentUser?.uid ?: "-1"
 
   var showAIAssistantDialog by remember { mutableStateOf(true) }
   var showMultiStepDialog by remember { mutableStateOf(false) }
-  var currentStep by remember { mutableStateOf(1) }
+  var currentStep by remember { mutableIntStateOf(1) }
   var selectedImages by remember { mutableStateOf<List<Uri>>(emptyList()) }
 
   // AI Assistant Dialog
@@ -122,7 +127,10 @@ fun CreateRequestScreen(
       onTitleChange = { title = it },
       description = description,
       onDescriptionChange = { description = it },
-      typeQuery = typeQuery,
+      typeQuery =
+          if (selectedProviderService.value != null)
+              Services.format(selectedProviderService.value!!)
+          else typeQuery,
       onTypeQueryChange = { typeQuery = it },
       showDropdownType = showDropdownType,
       onShowDropdownTypeChange = { showDropdownType = it },
@@ -162,6 +170,7 @@ fun CreateRequestScreen(
                 ServiceRequest(
                     title = title,
                     description = description,
+                    providerId = selectedProviderId.value,
                     userId = userId,
                     dueDate = Timestamp(calendar.time),
                     location = selectedLocation,
@@ -181,9 +190,11 @@ fun CreateRequestScreen(
             } else {
               requestViewModel.saveServiceRequest(serviceRequest)
             }
+            requestViewModel.unSelectProvider()
             notificationViewModel.sendNotifications(
                 serviceRequest, listProviderViewModel.providersList.value)
-            navigationActions.goBack()
+            requestViewModel.selectRequest(serviceRequest)
+            navigationActions.navigateTo(Route.BOOKING_DETAILS)
             return@RequestScreen
           } catch (_: NumberFormatException) {}
         }
