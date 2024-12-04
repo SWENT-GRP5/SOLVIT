@@ -822,10 +822,14 @@ fun EditPriceDialog(
   // Display the dialog for editing the price
   if (showDialog) {
     AlertDialog(
+        modifier = Modifier.testTag("edit_price_dialog"),
         onDismissRequest = { showDialog = false },
         title = {
           Text(
-              text = "Edit Price", style = typography.titleMedium, color = colorScheme.onBackground)
+              modifier = Modifier.testTag("edit_price_title"),
+              text = "Edit Price",
+              style = typography.titleMedium,
+              color = colorScheme.onBackground)
         },
         text = {
           Column {
@@ -857,10 +861,11 @@ fun EditPriceDialog(
                 keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
                 singleLine = true,
                 isError = (!isPriceValid && price.isNotEmpty()) || containsInvalidChars,
-                modifier = Modifier.fillMaxWidth())
+                modifier = Modifier.fillMaxWidth().testTag("edit_price_input"))
             // Error message for invalid format
             if (!isPriceValid && price.isNotEmpty()) {
               Text(
+                  modifier = Modifier.testTag("invalid_price_error"),
                   text = "Please enter a valid number (e.g., 99 or 99.99)",
                   color = colorScheme.error,
                   fontSize = 12.sp)
@@ -876,6 +881,7 @@ fun EditPriceDialog(
         },
         confirmButton = {
           TextButton(
+              modifier = Modifier.testTag("save_button"),
               onClick = {
                 val priceValue = price.toDoubleOrNull()
                 priceValue?.let {
@@ -889,6 +895,11 @@ fun EditPriceDialog(
                 Text("Save")
               }
         },
-        dismissButton = { TextButton(onClick = { showDialog = false }) { Text("Cancel") } })
+        dismissButton = {
+          TextButton(
+              modifier = Modifier.testTag("cancel_button"), onClick = { showDialog = false }) {
+                Text("Cancel")
+              }
+        })
   }
 }
