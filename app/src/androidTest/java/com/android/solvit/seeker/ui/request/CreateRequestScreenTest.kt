@@ -30,6 +30,7 @@ import com.android.solvit.shared.model.request.ServiceRequestRepository
 import com.android.solvit.shared.model.request.ServiceRequestStatus
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.request.analyzer.ImagePickerStep
+import com.android.solvit.shared.model.request.analyzer.MultiStepDialog
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.google.firebase.Timestamp
@@ -388,5 +389,77 @@ class CreateRequestScreenTest {
     // Simulate removing the image
     composeTestRule.onNodeWithTag("removeImageButton").performClick()
     composeTestRule.runOnIdle { assert(selectedImages.isEmpty()) }
+  }
+
+  @Test
+  fun multiStepDialog_stepOne() {
+    var showDialog = true
+    var currentStep = 1
+
+    composeTestRule.setContent {
+      MultiStepDialog(
+          context = mockContext(),
+          showDialog = showDialog,
+          currentStep = currentStep,
+          selectedImages = emptyList(),
+          onImagesSelected = { /* Mock action */},
+          onRemoveImage = { /* Mock action */},
+          onStartAnalyzing = { /* Mock action */},
+          onAnalyzeComplete = { _, _, _ -> /* Mock action */ },
+          onClose = { showDialog = false })
+    }
+
+    // Verify dialog components
+    composeTestRule.onNodeWithTag("multiStepDialog").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("imagePickerStep").assertIsDisplayed()
+  }
+
+  @Test
+  fun multiStepDialog_stepTwo() {
+    var showDialog = true
+    var currentStep = 1
+    // Move to next step and verify
+    currentStep = 2
+    composeTestRule.setContent {
+      MultiStepDialog(
+          context = mockContext(),
+          showDialog = showDialog,
+          currentStep = currentStep,
+          selectedImages = listOf(mockUri()),
+          onImagesSelected = { /* Mock action */},
+          onRemoveImage = { /* Mock action */},
+          onStartAnalyzing = { /* Mock action */},
+          onAnalyzeComplete = { _, _, _ -> /* Mock action */ },
+          onClose = { showDialog = false })
+    }
+
+    composeTestRule.onNodeWithTag("stepTwoProgressBar").assertIsDisplayed()
+  }
+
+  @Test
+  fun multiStepDialog_stepThreeDisplaysAndCloses() {
+    var showDialog = true
+
+    composeTestRule.setContent {
+      MultiStepDialog(
+          context = mockContext(),
+          showDialog = showDialog,
+          currentStep = 3,
+          selectedImages = listOf(mockUri()),
+          onImagesSelected = { /* Mock action */},
+          onRemoveImage = { /* Mock action */},
+          onStartAnalyzing = { /* Mock action */},
+          onAnalyzeComplete = { _, _, _ -> /* Mock action */ },
+          onClose = { showDialog = false })
+    }
+
+    // Verify Step 3 UI components
+    composeTestRule.onNodeWithTag("stepThreeIcon").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("completionNote").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("proceedButton").assertIsDisplayed()
+
+    // Simulate closing the dialog
+    composeTestRule.onNodeWithTag("proceedButton").performClick()
+    composeTestRule.runOnIdle { assert(!showDialog) }
   }
 }

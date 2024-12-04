@@ -1,6 +1,7 @@
 package com.android.solvit.shared.model.request.analyzer
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -53,7 +54,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import coil.compose.AsyncImage
@@ -313,12 +313,6 @@ fun StepHeader(@DrawableRes iconRes: Int, title: String) {
   }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewAIAssistantDialog() {
-  StepHeader(R.drawable.circle_one_icon, title = "Upload Images")
-}
-
 @Composable
 fun MultiStepDialog(
     context: Context,
@@ -352,7 +346,9 @@ fun MultiStepDialog(
                   if (selectedImages.isNotEmpty() && !isLoading) {
                     isLoading = true
                     try {
-                      val (title, type, description) = uploadAndAnalyze(context, selectedImages)
+                      val (title, type, description) =
+                          uploadAndAnalyze(
+                              context, selectedImages, ::loadBitmapFromUri, ::analyzeImagesGemini)
                       onAnalyzeComplete(title, type, description)
                     } catch (e: Exception) {
                       Log.e("MultiStepDialog", "Error: ${e.message}")
@@ -431,15 +427,17 @@ fun MultiStepDialog(
 
 suspend fun uploadAndAnalyze(
     context: Context,
-    imageUris: List<Uri>
+    imageUris: List<Uri>,
+    loadBitmap: (Context, Uri) -> Bitmap?,
+    analyzeImages: suspend (List<Bitmap>) -> Triple<String, String, String>
 ): Triple<String, String, String> {
   return withContext(Dispatchers.IO) {
     try {
       // Step 1: Convert URIs to Base64 strings
-      val bitMapImages = imageUris.mapNotNull { uri -> loadBitmapFromUri(context, uri) }
+      val bitMapImages = imageUris.mapNotNull { uri -> loadBitmap(context, uri) }
 
       // Step 2: Analyze images using the Gemini model
-      analyzeImagesGemini(bitMapImages)
+      analyzeImages(bitMapImages)
     } catch (e: Exception) {
       Log.e("uploadAndAnalyze", "Error: ${e.message}", e)
       throw Exception("Error during conversion and analysis: ${e.message}")
