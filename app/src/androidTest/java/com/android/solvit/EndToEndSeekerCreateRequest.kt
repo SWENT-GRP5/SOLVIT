@@ -184,14 +184,16 @@ class EndToEndSeekerCreateRequest {
                   notificationsViewModel)
           "provider" ->
               ProviderUI(
-                  authViewModel,
-                  listProviderViewModel,
-                  serviceRequestViewModel,
-                  seekerProfileViewModel,
-                  chatViewModel,
-                  notificationsViewModel,
-                  locationViewModel,
-                  chatAssistantViewModel)
+                  authViewModel = authViewModel,
+                  serviceRequestViewModel = serviceRequestViewModel,
+                  chatViewModel = chatViewModel,
+                  notificationViewModel = notificationsViewModel,
+                  locationViewModel = locationViewModel,
+                  chatAssistantViewModel = chatAssistantViewModel,
+                  calendarViewModel =
+                      viewModel {
+                        ProviderCalendarViewModel(authViewModel, serviceRequestViewModel)
+                      })
         }
       }
     }

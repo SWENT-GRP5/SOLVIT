@@ -118,7 +118,7 @@ class ProviderCalendarScreenTest {
     composeTestRule.onNodeWithTag("timeSlot_${testRequest.uid}").performClick()
 
     // Verify navigation to booking details
-    verify(navigationActions).navigateTo(Route.BOOKING_DETAILS, testRequest.uid)
+    verify(navigationActions).navigateTo(Route.BOOKING_DETAILS + "/" + testRequest.uid)
   }
 
   @Test

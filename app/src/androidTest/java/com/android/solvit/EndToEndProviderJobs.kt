@@ -37,7 +37,7 @@ import com.android.solvit.shared.model.review.ReviewRepository
 import com.android.solvit.shared.model.review.ReviewRepositoryFirestore
 import com.android.solvit.shared.model.review.ReviewViewModel
 import com.android.solvit.shared.model.service.Services
-import com.android.solvit.shared.ui.navigation.TopLevelDestinations
+import com.android.solvit.shared.model.ui.navigation.TopLevelDestinations
 import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
 import com.google.firebase.Timestamp
@@ -70,6 +70,7 @@ class EndToEndProviderJobs {
   private lateinit var packageProposalViewModel: PackageProposalViewModel
   private lateinit var chatViewModel: ChatViewModel
   private lateinit var chatAssistantViewModel: ChatAssistantViewModel
+  private lateinit var calendarViewModel: ProviderCalendarViewModel
 
   private lateinit var chatRepository: ChatRepository
   private lateinit var notificationsViewModel: NotificationsViewModel
@@ -199,14 +200,16 @@ class EndToEndProviderJobs {
                   notificationsViewModel)
           "provider" ->
               ProviderUI(
-                  authViewModel,
-                  listProviderViewModel,
-                  serviceRequestViewModel,
-                  seekerProfileViewModel,
-                  chatViewModel,
-                  notificationsViewModel,
-                  locationViewModel,
-                  chatAssistantViewModel)
+                  authViewModel = authViewModel,
+                  serviceRequestViewModel = serviceRequestViewModel,
+                  chatViewModel = chatViewModel,
+                  notificationViewModel = notificationsViewModel,
+                  locationViewModel = locationViewModel,
+                  chatAssistantViewModel = chatAssistantViewModel,
+                  calendarViewModel =
+                      viewModel {
+                        ProviderCalendarViewModel(authViewModel, serviceRequestViewModel)
+                      })
         }
       }
     }
