@@ -90,7 +90,6 @@ android {
 
     kotlinOptions {
         jvmTarget = "11"
-        freeCompilerArgs += "-Xenable-unit-conversions"
     }
 
     packaging {
