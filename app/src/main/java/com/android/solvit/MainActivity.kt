@@ -32,7 +32,6 @@ import com.android.solvit.seeker.ui.profile.EditSeekerProfileScreen
 import com.android.solvit.seeker.ui.profile.SeekerProfileScreen
 import com.android.solvit.seeker.ui.profile.SeekerRegistrationScreen
 import com.android.solvit.seeker.ui.provider.ProviderInfoScreen
-import com.android.solvit.seeker.ui.provider.ProviderRegistrationScreen
 import com.android.solvit.seeker.ui.provider.SelectProviderScreen
 import com.android.solvit.seeker.ui.request.CreateRequestScreen
 import com.android.solvit.seeker.ui.request.EditRequestScreen
