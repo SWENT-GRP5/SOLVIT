@@ -262,7 +262,7 @@ fun ProviderRegistrationScreen(
                     label = "Phone Number",
                     placeholder = "Enter your phone number",
                     isValueOk = isPhoneOk,
-                    errorMessage = "Your phone number must be at least 7 digits",
+                    errorMessage = "Your phone number must be at least 6 digits",
                     leadingIcon = Icons.Default.Phone,
                     leadingIconDescription = "Phone Icon",
                     testTag = "phoneNumberInput",
@@ -1029,7 +1029,9 @@ fun PackageProposalDialog(
 
   // Dialog to generate packages with AI
   AlertDialog(
-      modifier = Modifier.testTag("packageProposalDialog"),
+      modifier =
+          Modifier.border(1.dp, colorScheme.onBackground, RoundedCornerShape(30.dp))
+              .testTag("packageProposalDialog"),
       containerColor = colorScheme.background,
       textContentColor = colorScheme.onBackground,
       onDismissRequest = onDismiss,

@@ -48,6 +48,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -201,11 +202,12 @@ fun SeekerRegistrationScreen(
                     label = "Phone Number",
                     placeholder = "Enter your phone number",
                     isValueOk = isPhoneOk,
-                    errorMessage = "Your phone number must be at least 7 digits",
+                    errorMessage = "Your phone number must be at least 6 digits",
                     leadingIcon = Icons.Default.Phone,
                     leadingIconDescription = "Phone Icon",
                     testTag = "phoneNumberInput",
-                    errorTestTag = "phoneNumberErrorSeekerRegistration")
+                    errorTestTag = "phoneNumberErrorSeekerRegistration",
+                    keyboardType = KeyboardType.Number)
 
                 Spacer(modifier = Modifier.height(10.dp))
 
