@@ -57,6 +57,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -396,7 +397,10 @@ fun ProviderRegistrationScreen(
                       }
                       Spacer(modifier = Modifier.height(30.dp))
                       Button(
-                          onClick = { currentStep = 4 },
+                          onClick = {
+                            assistantViewModel.clearPackageProposals()
+                            currentStep = 4
+                          },
                           modifier = Modifier.fillMaxWidth().testTag("savePreferences2Button"),
                           colors = ButtonDefaults.buttonColors(colorScheme.secondary)) {
                             Text("Complete Registration", color = colorScheme.onSecondary)
@@ -726,6 +730,7 @@ fun ProviderPackages(
   var showDialog by remember { mutableStateOf(false) }
   var showForm by remember { mutableStateOf(false) }
   val packagesVisibilityStates = remember { mutableStateMapOf<Int, Boolean>() }
+  val assistantPackages = assistantViewModel.packageProposals.collectAsState()
   Column(
       modifier = Modifier.fillMaxWidth().padding(16.dp),
       verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -779,6 +784,28 @@ fun ProviderPackages(
                 packageViewModel = packageViewModel,
                 providerId = providerId,
                 type = type)
+          }
+          assistantPackages.value.let {
+            if (it.isNotEmpty()) {
+              Text(
+                  text = "Here are the packages we generated for you:",
+                  style = MaterialTheme.typography.bodyLarge,
+                  modifier = Modifier.testTag("generatedPackagesTitle"))
+              // Display the generated packages
+              LazyRow(
+                  contentPadding = PaddingValues(horizontal = 16.dp),
+                  horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    items(it) { packageProposal ->
+                      PackageCard(
+                          packageProposal = packageProposal,
+                          modifier =
+                              Modifier.width(260.dp)
+                                  .height(320.dp)
+                                  .verticalScroll(rememberScrollState())
+                                  .testTag("PackageCard"))
+                    }
+                  }
+            }
           }
           // Display the 3 packages to fill
           Button(
@@ -860,7 +887,6 @@ fun PackageInputSection(
         }
     if (expanded) {
       // Package Inputs
-
       Text("Package Name", style = MaterialTheme.typography.bodyLarge)
       Spacer(modifier = Modifier.height(8.dp))
       CustomOutlinedTextField(
@@ -975,7 +1001,11 @@ fun PackageProposalDialog(
                       items(assistantPackages.value) { packageProposal ->
                         PackageCard(
                             packageProposal = packageProposal,
-                            modifier = Modifier.width(260.dp).height(320.dp).testTag("PackageCard"))
+                            modifier =
+                                Modifier.width(260.dp)
+                                    .height(320.dp)
+                                    .verticalScroll(rememberScrollState())
+                                    .testTag("PackageCard"))
                       }
                     }
               }
@@ -985,6 +1015,8 @@ fun PackageProposalDialog(
                   onValueChange = { query.value = it },
                   label = { Text("Additional Information") },
                   placeholder = { Text("Provide more details for package generation...") },
+                  colors =
+                      TextFieldDefaults.textFieldColors(containerColor = colorScheme.background),
                   modifier =
                       Modifier.fillMaxWidth().padding(top = 16.dp).testTag("additionalInfoInput"))
               // Select the number of packages
@@ -1000,9 +1032,14 @@ fun PackageProposalDialog(
                         trailingIcon = {
                           ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
                         },
+                        colors =
+                            TextFieldDefaults.textFieldColors(
+                                containerColor = colorScheme.background),
                         modifier = Modifier.menuAnchor().fillMaxWidth())
                     ExposedDropdownMenu(
-                        expanded = expanded, onDismissRequest = { expanded = false }) {
+                        modifier = Modifier.background(colorScheme.background),
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }) {
                           (1..3).forEach { number ->
                             DropdownMenuItem(
                                 text = { Text(text = "$number") },

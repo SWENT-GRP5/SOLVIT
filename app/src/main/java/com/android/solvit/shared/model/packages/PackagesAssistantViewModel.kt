@@ -147,7 +147,17 @@ class PackagesAssistantViewModel : ViewModel() {
         }
   }
 
-  // Convert the JSON response to a list of package proposals
+  fun clearPackageProposals() {
+    _packageProposals.value = emptyList()
+  }
+
+  /**
+   * Convert the JSON response to a list of package proposals.
+   *
+   * @param response The JSON response containing the package proposals.
+   * @param viewModel The view model for the package proposals.
+   * @param providerId The unique identifier of the provider creating the package proposals.
+   */
   private fun jsonToPackageProposals(
       response: String,
       viewModel: PackageProposalViewModel,
