@@ -21,10 +21,14 @@ sealed class ChatMessage(
   }
 
   data class ImageMessage(
-      val imageUrl: String,
-      override val senderName: String,
-      override val senderId: String,
+      val imageUrl: String = "",
+      override val senderName: String = "",
+      override val senderId: String = "",
       override val timestamp: Long = System.currentTimeMillis(),
       override val status: MESSAGE_STATUS = MESSAGE_STATUS.SENT
-  ) : ChatMessage(id = "", senderId, senderName, timestamp, status)
+  ) : ChatMessage(id = "", senderId, senderName, timestamp, status) {
+    companion object {
+      @JvmStatic fun default() = ImageMessage()
+    }
+  }
 }
