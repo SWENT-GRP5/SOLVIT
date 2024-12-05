@@ -185,7 +185,7 @@ fun ProviderRegistrationScreen(
 
   val localContext = LocalContext.current
 
-  val fullNameRegex = Regex("^[a-zA-Z]+ [a-zA-Z]+\$")
+  val fullNameRegex = Regex("^[a-zA-Z]+(?:[-' ][a-zA-Z]+)* [a-zA-Z]+$")
   val isFullNameOk = fullNameRegex.matches(fullName)
 
   val phoneRegex = Regex("^[+]?[0-9]{6,}$")
