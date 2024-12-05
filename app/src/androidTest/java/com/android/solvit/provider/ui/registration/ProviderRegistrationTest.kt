@@ -143,6 +143,58 @@ class ProviderRegistrationTest {
 
     composeTestRule.onNodeWithTag("completeRegistrationButton").performClick()
     composeTestRule.onNodeWithTag("savePreferencesButton").isDisplayed()
+
+    // Initially, the button should be disabled when fields are empty
+    composeTestRule.onNodeWithTag("savePreferencesButton").performClick()
+    composeTestRule.onNodeWithTag("enterPackagesButton").isNotDisplayed()
+
+    // Fill out only some of the fields
+    composeTestRule.onNodeWithTag("servicesDropDown").performClick()
+    composeTestRule.onAllNodesWithTag("servicesDropdownMenu")[0].performClick()
+
+    // Button should still be disabled as not all fields are filled
+    composeTestRule.onNodeWithTag("descriptionInputProviderRegistration").performTextInput("ABC")
+    composeTestRule
+        .onNodeWithTag("startingPriceInputProviderRegistration")
+        .performTextInput("1234567")
+
+    // Complete the rest of the fields
+    composeTestRule.onNodeWithTag("languageDropdown").performClick()
+    composeTestRule.onAllNodesWithTag("languageDropdownMenu")[0].performClick()
+
+    composeTestRule.onNodeWithTag("savePreferencesButton").performClick()
+    composeTestRule.onNodeWithTag("enterPackagesButton").isDisplayed()
+  }
+
+  @Test
+  fun testCompleteProviderRegistrationButtonDisabledWhenFieldsAreIncompletePart2() {
+    composeTestRule.setContent {
+      ProviderRegistrationScreen(
+          viewModel = listProviderViewModel,
+          navigationActions = navigationActions,
+          locationViewModel = locationViewModel)
+    }
+
+    // Initially, the button should be disabled when fields are empty
+    composeTestRule.onNodeWithTag("savePreferencesButton").performClick()
+    composeTestRule.onNodeWithTag("enterPackagesButton").isNotDisplayed()
+
+    // Fill out only some of the fields
+    composeTestRule.onNodeWithTag("servicesDropDown").performClick()
+    composeTestRule.onAllNodesWithTag("servicesDropdownMenu")[0].performClick()
+
+    // Button should still be disabled as not all fields are filled
+    composeTestRule.onNodeWithTag("descriptionInputProviderRegistration").performTextInput("ABC")
+    composeTestRule
+        .onNodeWithTag("startingPriceInputProviderRegistration")
+        .performTextInput("1234567")
+
+    // Complete the rest of the fields
+    composeTestRule.onNodeWithTag("languageDropdown").performClick()
+    composeTestRule.onAllNodesWithTag("languageDropdownMenu")[0].performClick()
+
+    composeTestRule.onNodeWithTag("savePreferencesButton").performClick()
+    composeTestRule.onNodeWithTag("enterPackagesButton").isDisplayed()
   }
 
   @Test

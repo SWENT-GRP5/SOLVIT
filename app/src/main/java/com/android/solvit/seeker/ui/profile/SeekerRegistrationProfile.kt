@@ -61,6 +61,7 @@ import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.map.LocationViewModel
 import com.android.solvit.shared.ui.authentication.CustomOutlinedTextField
 import com.android.solvit.shared.ui.authentication.GoBackButton
+import com.android.solvit.shared.ui.authentication.ValidationRegex
 import com.android.solvit.shared.ui.navigation.NavigationActions
 
 /**
@@ -114,13 +115,11 @@ fun SeekerRegistrationScreen(
 
   val backgroundColor = colorScheme.background
 
-  val fullNameRegex = Regex("^[a-zA-Z]+(?:[-' ][a-zA-Z]+)* [a-zA-Z]+$")
-  val isFullNameOk = fullNameRegex.matches(fullName)
+  val isFullNameOk = ValidationRegex.FULL_NAME_REGEX.matches(fullName)
 
   val isUserNameOk = userName.isNotBlank() && userName.length > 2
 
-  val phoneRegex = Regex("^[+]?[0-9]{6,}$")
-  val isPhoneOk = phoneRegex.matches(phone)
+  val isPhoneOk = ValidationRegex.PHONE_REGEX.matches(phone)
 
   val isLocationOK = selectedLocation != null
 

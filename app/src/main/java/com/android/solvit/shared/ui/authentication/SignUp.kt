@@ -112,8 +112,7 @@ fun SignUpScreen(
           authViewModel, { navigationActions.navigateTo(Screen.SIGN_UP_CHOOSE_ROLE) }, {})
   val token = stringResource(R.string.default_web_client_id)
 
-  val emailRegex = Regex("^[\\w.-]+@[\\w.-]+\\.[a-zA-Z]{2,}$")
-  val goodFormEmail = emailRegex.matches(email)
+  val goodFormEmail = ValidationRegex.EMAIL_REGEX.matches(email)
 
   val passwordLengthComplete = password.length >= 6
   val samePassword = password == confirmPassword
@@ -124,6 +123,8 @@ fun SignUpScreen(
   val scope = rememberCoroutineScope()
   val clipboardManager = LocalClipboardManager.current
 
+  // Function to generate a password and copy it to the clipboard when the button is clicked
+  // We use a lambda function to generate the password asynchronously
   val generatePassword: () -> Unit = {
     scope.launch {
       try {
@@ -131,9 +132,9 @@ fun SignUpScreen(
             passwordApiService.createPassword(
                 includeDigits = true,
                 includeLowercase = true,
-                includeUppercase = false,
-                includeSpecialCharacters = false,
-                passwordLength = 12,
+                includeUppercase = true,
+                includeSpecialCharacters = true,
+                passwordLength = 16,
                 quantity = 1)
         val generatedPassword = response.passwords.first()
         password = generatedPassword

@@ -105,6 +105,7 @@ import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.model.utils.loadBitmapFromUri
 import com.android.solvit.shared.ui.authentication.CustomOutlinedTextField
 import com.android.solvit.shared.ui.authentication.GoBackButton
+import com.android.solvit.shared.ui.authentication.ValidationRegex
 import com.android.solvit.shared.ui.booking.PackageCard
 import com.android.solvit.shared.ui.navigation.NavigationActions
 
@@ -187,11 +188,9 @@ fun ProviderRegistrationScreen(
 
   val localContext = LocalContext.current
 
-  val fullNameRegex = Regex("^[a-zA-Z]+(?:[-' ][a-zA-Z]+)* [a-zA-Z]+$")
-  val isFullNameOk = fullNameRegex.matches(fullName)
+  val isFullNameOk = ValidationRegex.FULL_NAME_REGEX.matches(fullName)
 
-  val phoneRegex = Regex("^[+]?[0-9]{6,}$")
-  val isPhoneOk = phoneRegex.matches(phone)
+  val isPhoneOk = ValidationRegex.PHONE_REGEX.matches(phone)
 
   val isCompanyNameOk = companyName.isNotBlank() && companyName.length > 2
 
@@ -564,7 +563,7 @@ fun ProviderDetails(
       description.isNotBlank() &&
           description.length < 250 // (we assume here that a word on average is 5 character)
   val isStartingPriceOk =
-      startingPrice.isNotBlank() && startingPrice.matches(Regex("^(0|[1-9]\\d*)(\\.\\d{1,2})?\$"))
+      startingPrice.isNotBlank() && ValidationRegex.STARTING_PRICE_REGEX.matches(startingPrice)
 
   val allIsOk =
       selectedService.isNotEmpty() &&
@@ -587,7 +586,9 @@ fun ProviderDetails(
                   readOnly = true,
                   modifier = Modifier.fillMaxWidth().menuAnchor())
               ExposedDropdownMenu(
-                  expanded = servicesExpanded, onDismissRequest = { servicesExpanded = false }) {
+                  expanded = servicesExpanded,
+                  onDismissRequest = { servicesExpanded = false },
+                  modifier = Modifier.testTag("servicesDropdownMenu")) {
                     services.forEach { service ->
                       DropdownMenuItem(
                           modifier = Modifier.testTag("$service"),
@@ -651,7 +652,7 @@ fun ProviderDetails(
               DropdownMenu(
                   expanded = languagesExpanded,
                   onDismissRequest = { languagesExpanded = false },
-                  modifier = Modifier.fillMaxWidth()) {
+                  modifier = Modifier.fillMaxWidth().testTag("languageDropdownMenu")) {
                     availableLanguages.forEach { language ->
                       val isSelected = language in selectedLanguages
                       DropdownMenuItem(

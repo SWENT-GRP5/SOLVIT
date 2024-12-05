@@ -411,8 +411,8 @@ fun FormSection(
 ) {
   val isFormComplete = email.isNotBlank() && password.isNotBlank()
   val passwordLengthComplete = password.length >= 6
-  val emailRegex = Regex("^[\\w.-]+@[\\w.-]+\\.[a-zA-Z]{2,}$")
-  val goodFormEmail = emailRegex.matches(email)
+
+  val goodFormEmail = ValidationRegex.EMAIL_REGEX.matches(email)
 
   CustomOutlinedTextField(
       value = email,
@@ -908,4 +908,13 @@ fun PasswordTextField(
           modifier = Modifier.padding(start = 16.dp, top = 4.dp).testTag(testTagErrorPassword))
     }
   }
+}
+
+object ValidationRegex {
+  val PHONE_REGEX = Regex("^[+]?[0-9]{6,15}$")
+  val EMAIL_REGEX = Regex("^[\\w.-]+@[\\w.-]+\\.[a-zA-Z]{2,}$")
+  val FULL_NAME_REGEX = Regex("^[a-zA-Z]+(?:[-' ][a-zA-Z]+)* [a-zA-Z]+$")
+  val STARTING_PRICE_REGEX = Regex("^(0|[1-9]\\d*)(\\.\\d{1,2})?\$")
+  val NAME_REGEX = Regex("^[a-zA-ZÀ-ÿ '-]{2,50}$")
+  val DESCRIPTION_REGEX = Regex("^[a-zA-ZÀ-ÿ0-9 ,.!?-]{1,500}$")
 }

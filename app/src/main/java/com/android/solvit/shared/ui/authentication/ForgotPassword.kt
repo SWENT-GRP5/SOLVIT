@@ -62,8 +62,7 @@ fun ForgotPassword(navigationActions: NavigationActions) {
 
   val context = LocalContext.current
 
-  val emailRegex = Regex("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$")
-  val goodFormEmail = emailRegex.matches(email)
+  val goodFormEmail = ValidationRegex.EMAIL_REGEX.matches(email)
 
   DisposableEffect(Unit) {
     val activity = context as? ComponentActivity
