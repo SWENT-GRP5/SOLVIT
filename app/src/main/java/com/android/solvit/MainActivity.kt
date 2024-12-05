@@ -20,6 +20,7 @@ import com.android.solvit.provider.ui.calendar.ProviderCalendarScreen
 import com.android.solvit.provider.ui.map.ProviderMapScreen
 import com.android.solvit.provider.ui.profile.ModifyProviderInformationScreen
 import com.android.solvit.provider.ui.profile.ProviderProfileScreen
+import com.android.solvit.provider.ui.profile.ProviderRegistrationScreen
 import com.android.solvit.provider.ui.request.ListRequestsFeedScreen
 import com.android.solvit.provider.ui.request.RequestsDashboardScreen
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
@@ -30,7 +31,6 @@ import com.android.solvit.seeker.ui.profile.EditSeekerProfileScreen
 import com.android.solvit.seeker.ui.profile.SeekerProfileScreen
 import com.android.solvit.seeker.ui.profile.SeekerRegistrationScreen
 import com.android.solvit.seeker.ui.provider.ProviderInfoScreen
-import com.android.solvit.seeker.ui.provider.ProviderRegistrationScreen
 import com.android.solvit.seeker.ui.provider.SelectProviderScreen
 import com.android.solvit.seeker.ui.request.CreateRequestScreen
 import com.android.solvit.seeker.ui.request.EditRequestScreen
@@ -43,6 +43,7 @@ import com.android.solvit.shared.model.chat.ChatAssistantViewModel
 import com.android.solvit.shared.model.chat.ChatViewModel
 import com.android.solvit.shared.model.map.LocationViewModel
 import com.android.solvit.shared.model.packages.PackageProposalViewModel
+import com.android.solvit.shared.model.packages.PackagesAssistantViewModel
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.review.ReviewViewModel
 import com.android.solvit.shared.ui.authentication.ForgotPassword
@@ -51,6 +52,8 @@ import com.android.solvit.shared.ui.authentication.SignInScreen
 import com.android.solvit.shared.ui.authentication.SignUpChooseProfile
 import com.android.solvit.shared.ui.authentication.SignUpScreen
 import com.android.solvit.shared.ui.booking.ServiceBookingScreen
+import com.android.solvit.shared.ui.chat.AiSolverScreen
+import com.android.solvit.shared.ui.chat.AiSolverWelcomeScreen
 import com.android.solvit.shared.ui.chat.ChatScreen
 import com.android.solvit.shared.ui.chat.MessageBox
 import com.android.solvit.shared.ui.navigation.NavigationActions
@@ -92,13 +95,16 @@ fun SolvitApp() {
   val notificationViewModel =
       viewModel<NotificationsViewModel>(factory = NotificationsViewModel.Factory)
 
+  val packagesAssistantViewModel =
+      viewModel<PackagesAssistantViewModel>(factory = PackagesAssistantViewModel.Factory)
   if (!userRegistered.value) {
     SharedUI(
         authViewModel,
         listProviderViewModel,
         seekerProfileViewModel,
         locationViewModel,
-        packageProposalViewModel)
+        packageProposalViewModel,
+        packagesAssistantViewModel)
   } else {
     when (user.value!!.role) {
       "seeker" ->
@@ -132,7 +138,8 @@ fun SharedUI(
     listProviderViewModel: ListProviderViewModel,
     seekerProfileViewModel: SeekerProfileViewModel,
     locationViewModel: LocationViewModel,
-    packageProposalViewModel: PackageProposalViewModel
+    packageProposalViewModel: PackageProposalViewModel,
+    packagesAssistantViewModel: PackagesAssistantViewModel
 ) {
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
@@ -148,7 +155,8 @@ fun SharedUI(
           navigationActions,
           locationViewModel,
           authViewModel,
-          packageProposalViewModel)
+          packageProposalViewModel,
+          packagesAssistantViewModel)
     }
     composable(Screen.FORGOT_PASSWORD) { ForgotPassword(navigationActions) }
     composable(Screen.SEEKER_REGISTRATION_PROFILE) {
@@ -192,6 +200,10 @@ fun SeekerUI(
           reviewViewModel,
           serviceRequestViewModel,
           authViewModel)
+    }
+    navigation(startDestination = Screen.AI_SOLVER_WELCOME_SCREEN, Route.AI_SOLVER) {
+      composable(Screen.AI_SOLVER_WELCOME_SCREEN) { AiSolverWelcomeScreen(navigationActions) }
+      composable(Screen.AI_SOLVER_CHAT_SCREEN) { AiSolverScreen(navigationActions) }
     }
     navigation(startDestination = Screen.INBOX, route = Route.INBOX) {
       composable(Screen.INBOX) {

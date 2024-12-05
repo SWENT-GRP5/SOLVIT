@@ -561,9 +561,9 @@ fun ReviewButton(navigationActions: NavigationActions) {
 }
 
 @Composable
-fun PackageCard(packageProposal: PackageProposal) {
+fun PackageCard(packageProposal: PackageProposal, modifier: Modifier = Modifier) {
   Card(
-      modifier = Modifier.fillMaxSize(),
+      modifier = modifier.fillMaxSize(),
       shape = RoundedCornerShape(16.dp),
       elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
       colors = CardDefaults.cardColors(containerColor = colorScheme.primary)) {
