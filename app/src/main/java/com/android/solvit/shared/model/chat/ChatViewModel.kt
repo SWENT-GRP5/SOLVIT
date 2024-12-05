@@ -49,7 +49,9 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
           override fun <T : ViewModel> create(modelClass: Class<T>): T {
             return ChatViewModel(
                 ChatRepositoryFirestore(
-                    FirebaseDatabase.getInstance(), FirebaseStorage.getInstance(), FirebaseFirestore.getInstance()))
+                    FirebaseDatabase.getInstance(),
+                    FirebaseStorage.getInstance(),
+                    FirebaseFirestore.getInstance()))
                 as T
           }
         }
@@ -100,7 +102,11 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
     _receiver.value = receiver
   }
 
-  suspend fun initChat(isIaConversation: Boolean, currentUserUid: String?, requestUid: String): String? {
+  suspend fun initChat(
+      isIaConversation: Boolean,
+      currentUserUid: String?,
+      requestUid: String = ""
+  ): String? {
     // Suspend Coroutine to make sure that get conversation is not called before init chat
     return suspendCoroutine { continuation ->
       receiverUid?.let {

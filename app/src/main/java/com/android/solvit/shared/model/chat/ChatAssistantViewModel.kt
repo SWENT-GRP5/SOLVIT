@@ -147,6 +147,16 @@ class ChatAssistantViewModel : ViewModel() {
     _selectedTones.value = emptyList()
   }
 
+  private fun messageContextToPrompt(): String {
+    return messageContext.value.joinToString("\n") {
+      when (it) {
+        is ChatMessage.TextMessage -> it.senderName + ": " + it.message
+        is ChatMessage.ImageMessage -> it.senderName + ": [image]"
+        is ChatMessage.TextImageMessage -> it.senderName + ": [image]" + it.text
+      }
+    }
+  }
+
   /**
    * Build the prompt for the chat assistant
    *
@@ -163,14 +173,7 @@ class ChatAssistantViewModel : ViewModel() {
     }
     if (_messageContext.value.isNotEmpty()) {
       prompt += ", based on the following conversation:\n"
-      prompt +=
-          messageContext.value.joinToString("\n") {
-            when (it) {
-              is ChatMessage.TextMessage -> it.senderName + ": " + it.message
-              is ChatMessage.ImageMessage -> it.senderName + ": [image]"
-              is ChatMessage.TextImageMessage -> it.senderName + ": [image]" + it.text
-            }
-          }
+      prompt += messageContextToPrompt()
     }
     if (_requestContext.value != null) {
       prompt += ", based on the following service request:\n"
@@ -218,7 +221,7 @@ class ChatAssistantViewModel : ViewModel() {
     var prompt = "Provide a list without repetitions of suggestions themes for a response"
     if (_messageContext.value.isNotEmpty()) {
       prompt += ", based on the following conversation:\n"
-      prompt += messageContext.value.joinToString("\n") { it.senderName + ": " + it.message }
+      prompt += messageContextToPrompt()
     }
     if (_requestContext.value != null) {
       prompt += ", based on the following service request:\n"

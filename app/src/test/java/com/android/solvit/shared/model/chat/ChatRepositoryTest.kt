@@ -1,9 +1,8 @@
 package com.android.solvit.shared.model.chat
 
-import com.google.android.gms.tasks.OnFailureListener
-import com.google.android.gms.tasks.OnSuccessListener
 import android.net.Uri
 import com.android.solvit.shared.model.utils.uploadImageToStorage
+import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.gms.tasks.Task
 import com.google.firebase.database.DataSnapshot
@@ -19,11 +18,9 @@ import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.UploadTask
 import junit.framework.TestCase.assertEquals
-import junit.framework.TestCase.assertNotNull
-import junit.framework.TestCase.assertNull
-import kotlin.test.fail
 import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertNotNull
+import junit.framework.TestCase.assertNull
 import junit.framework.TestCase.assertTrue
 import kotlin.test.DefaultAsserter.fail
 import org.junit.Before
@@ -63,7 +60,8 @@ class ChatRepositoryTest {
     mockDocumentSnapshot = mock(DocumentSnapshot::class.java)
     mockTaskDoc = mock(Task::class.java) as Task<DocumentSnapshot>
     mockTaskVoid = mock(Task::class.java) as Task<Void>
-    chatRepository = ChatRepositoryFirestore(mockFirebaseDatabase, mockFirebaseStorage, mockFirebaseFirestore)
+    chatRepository =
+        ChatRepositoryFirestore(mockFirebaseDatabase, mockFirebaseStorage, mockFirebaseFirestore)
 
     `when`(mockFirebaseDatabase.getReference(any())).thenReturn(mockDatabaseReference)
   }
