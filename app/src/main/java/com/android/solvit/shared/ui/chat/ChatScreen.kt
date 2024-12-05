@@ -118,7 +118,7 @@ fun ChatScreen(
   val receiverPicture = getReceiverImageUrl(receiver)
 
   val user by authViewModel.user.collectAsState()
-  chatAssistantViewModel.setContext(messages, "Hassan", receiverName)
+  chatAssistantViewModel.setContext(messages, "Hassan", receiverName, request)
 
   // To send Image Messages
   var imageUri by remember { mutableStateOf<Uri?>(null) }
@@ -387,116 +387,102 @@ fun MessageInputBar(
 
   var message by remember { mutableStateOf("") }
   val current = LocalContext.current
-  Row(
-      modifier =
-          Modifier.fillMaxWidth()
-              .background(
-                  color = colorScheme.surface,
-                  shape = RoundedCornerShape(size = 28.dp),
-              )
-              .imePadding()
-              .testTag(
-                  "SendMessageBar"), // To ensure that content of scaffold appears even if keyboard
-      // is
-      // displayed
-  ) {
-    val imagePickerLauncher =
-        rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.GetContent(),
-            onResult = { uri: Uri? -> onImageSelected(uri) })
+  val imagePickerLauncher =
+      rememberLauncherForActivityResult(
+          contract = ActivityResultContracts.GetContent(),
+          onResult = { uri: Uri? -> onImageSelected(uri) })
 
-    Column {
-      AssistantSuggestions(chatAssistantViewModel) {
-        chatAssistantViewModel.updateSelectedTones(emptyList())
-        chatAssistantViewModel.generateMessage(it) { msg -> message = msg }
-      }
-      Row(
-          modifier =
-              Modifier.fillMaxWidth()
-                  .background(
-                      color = colorScheme.surface,
-                      shape = RoundedCornerShape(size = 28.dp),
-                  )
-                  .imePadding()
-                  .testTag("SendMessageBar"), // To ensure that content of scaffold appears even if
-          // keyboard
-          // is
-          // displayed
-      ) {
+  Column {
+    AssistantSuggestions(chatAssistantViewModel) {
+      chatAssistantViewModel.updateSelectedTones(emptyList())
+      chatAssistantViewModel.generateMessage(it) { msg -> message = msg }
+    }
+    Row(
+        modifier =
+            Modifier.fillMaxWidth()
+                .background(
+                    color = colorScheme.surface,
+                    shape = RoundedCornerShape(size = 28.dp),
+                )
+                .imePadding()
+                .testTag("SendMessageBar"), // To ensure that content of scaffold appears even if
+        // keyboard
+        // is
+        // displayed
+    ) {
 
-        // Input to enter message you want to send
-        TextField(
-            value = message,
-            onValueChange = { message = it },
-            modifier = Modifier.weight(1f).padding(end = 8.dp),
-            placeholder = { Text(text = "Send Message", color = colorScheme.onSurfaceVariant) },
-            colors =
-                OutlinedTextFieldDefaults.colors(
-                    unfocusedBorderColor = Color.Black,
-                    focusedBorderColor = Color.Black,
-                    focusedTextColor = Color.Black))
+      // Input to enter message you want to send
+      TextField(
+          value = message,
+          onValueChange = { message = it },
+          modifier = Modifier.weight(1f).padding(end = 8.dp),
+          placeholder = { Text(text = "Send Message", color = colorScheme.onSurfaceVariant) },
+          colors =
+              OutlinedTextFieldDefaults.colors(
+                  unfocusedBorderColor = Color.Black,
+                  focusedBorderColor = Color.Black,
+                  focusedTextColor = Color.Black))
 
-        if (!isAiSolverScreen) {
-          // State to control the visibility of the Chat Assistant Dialog
-          var showDialog by remember { mutableStateOf(false) }
+      if (!isAiSolverScreen) {
+        // State to control the visibility of the Chat Assistant Dialog
+        var showDialog by remember { mutableStateOf(false) }
 
-          // Button to Use the Chat Assistant
-          IconButton(onClick = { showDialog = true }, modifier = Modifier.size(48.dp)) {
-            Icon(
-                painter = painterResource(R.drawable.ai_message),
-                contentDescription = "chat assistant",
-                tint = colorScheme.onSurfaceVariant)
-          }
-
-          // Show the Chat Assistant Dialog if showDialog is true
-          if (showDialog) {
-            ChatAssistantDialog(
-                chatAssistantViewModel,
-                onDismiss = { showDialog = false },
-                onResponse = { message = it })
-          }
+        // Button to Use the Chat Assistant
+        IconButton(onClick = { showDialog = true }, modifier = Modifier.size(48.dp)) {
+          Icon(
+              painter = painterResource(R.drawable.ai_message),
+              contentDescription = "chat assistant",
+              tint = colorScheme.onSurfaceVariant)
         }
 
-        IconButton(
-            onClick = { imagePickerLauncher.launch("image/*") },
-            modifier = Modifier.testTag("uploadImageButton")) {
-              Icon(
-                  imageVector = Icons.Default.AddCircle,
-                  contentDescription = "upload image",
-                  tint = colorScheme.onSurfaceVariant,
-              )
-            }
-        // Button to send your message
-        IconButton(
-            onClick = {
-              val chatMessage =
-                  authViewModel.user.value?.uid?.let {
-                    ChatMessage.TextMessage(
-                        message,
-                        "Hassan", // Has to be updated once we implement a logic to link the
-                        // authenticated user to its profile (generic class for both provider
-                        // and seeker that contains common informations,
-                        it,
-                        timestamp = System.currentTimeMillis(),
-                    )
-                  }
-              if (chatMessage != null && message.isNotEmpty()) {
-                chatViewModel.sendMessage(chatMessage)
-                chatAssistantViewModel.updateMessageContext(chatMessage)
-                message = ""
-                // chatViewModel.getConversation()
-              } else {
-                Toast.makeText(current, "Failed to send message", Toast.LENGTH_LONG).show()
-              }
-            },
-            modifier = Modifier.size(48.dp)) {
-              Icon(
-                  imageVector = Icons.Default.Send,
-                  contentDescription = "send",
-                  tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                  modifier = Modifier.rotate(-45f))
-            }
+        // Show the Chat Assistant Dialog if showDialog is true
+        if (showDialog) {
+          ChatAssistantDialog(
+              chatAssistantViewModel,
+              onDismiss = { showDialog = false },
+              onResponse = { message = it })
+        }
       }
+
+      IconButton(
+          onClick = { imagePickerLauncher.launch("image/*") },
+          modifier = Modifier.testTag("uploadImageButton")) {
+            Icon(
+                imageVector = Icons.Default.AddCircle,
+                contentDescription = "upload image",
+                tint = colorScheme.onSurfaceVariant,
+            )
+          }
+      // Button to send your message
+      IconButton(
+          onClick = {
+            val chatMessage =
+                authViewModel.user.value?.uid?.let {
+                  ChatMessage.TextMessage(
+                      message,
+                      "Hassan", // Has to be updated once we implement a logic to link the
+                      // authenticated user to its profile (generic class for both provider
+                      // and seeker that contains common informations,
+                      it,
+                      timestamp = System.currentTimeMillis(),
+                  )
+                }
+            if (chatMessage != null && message.isNotEmpty()) {
+              chatViewModel.sendMessage(chatMessage)
+              chatAssistantViewModel.updateMessageContext(chatMessage)
+              message = ""
+              // chatViewModel.getConversation()
+            } else {
+              Toast.makeText(current, "Failed to send message", Toast.LENGTH_LONG).show()
+            }
+          },
+          modifier = Modifier.size(48.dp)) {
+            Icon(
+                imageVector = Icons.Default.Send,
+                contentDescription = "send",
+                tint = colorScheme.onSurfaceVariant,
+                modifier = Modifier.rotate(-45f))
+          }
     }
   }
 }
