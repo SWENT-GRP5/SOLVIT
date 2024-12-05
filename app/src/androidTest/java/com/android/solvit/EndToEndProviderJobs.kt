@@ -26,6 +26,7 @@ import com.android.solvit.shared.model.map.LocationViewModel
 import com.android.solvit.shared.model.packages.PackageProposalRepository
 import com.android.solvit.shared.model.packages.PackageProposalRepositoryFirestore
 import com.android.solvit.shared.model.packages.PackageProposalViewModel
+import com.android.solvit.shared.model.packages.PackagesAssistantViewModel
 import com.android.solvit.shared.model.provider.ProviderRepository
 import com.android.solvit.shared.model.provider.ProviderRepositoryFirestore
 import com.android.solvit.shared.model.request.ServiceRequest
@@ -70,6 +71,7 @@ class EndToEndProviderJobs {
   private lateinit var packageProposalViewModel: PackageProposalViewModel
   private lateinit var chatViewModel: ChatViewModel
   private lateinit var chatAssistantViewModel: ChatAssistantViewModel
+  private lateinit var packagesAssistantViewModel: PackagesAssistantViewModel
 
   private lateinit var chatRepository: ChatRepository
   private lateinit var notificationsViewModel: NotificationsViewModel
@@ -142,6 +144,7 @@ class EndToEndProviderJobs {
     chatViewModel = ChatViewModel(chatRepository)
     chatAssistantViewModel = ChatAssistantViewModel()
     notificationsViewModel = NotificationsViewModel(notificationsRepository)
+    packagesAssistantViewModel = PackagesAssistantViewModel()
 
     `when`(locationRepository.search(ArgumentMatchers.anyString(), anyOrNull(), anyOrNull()))
         .thenAnswer { invocation ->
@@ -183,7 +186,8 @@ class EndToEndProviderJobs {
             listProviderViewModel,
             seekerProfileViewModel,
             locationViewModel,
-            packageProposalViewModel)
+            packageProposalViewModel,
+            packagesAssistantViewModel)
       } else {
         when (user.value!!.role) {
           "seeker" ->
