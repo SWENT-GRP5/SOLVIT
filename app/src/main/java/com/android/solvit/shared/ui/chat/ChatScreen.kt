@@ -577,10 +577,9 @@ fun MessageInputBar(
     isAiSolverScreen: Boolean,
     onSendClickButton: (String, (String) -> Unit) -> Unit
 ) {
-
   var message by remember { mutableStateOf("") }
-  val current = LocalContext.current
   var imageUri by remember { mutableStateOf<Uri?>(null) }
+
   val imagePickerLauncher =
       rememberLauncherForActivityResult(
           contract = ActivityResultContracts.GetContent(),
@@ -588,97 +587,106 @@ fun MessageInputBar(
             imageUri = uri
             onImageSelected(uri)
           })
-  Column() {
-    if (imageUri != null) {
-      Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp)) {
-        AsyncImage(
-            modifier = Modifier.height(150.dp).fillMaxWidth().clip(RoundedCornerShape(8.dp)),
-            model = imageUri,
-            contentDescription = "Uploaded Image",
-            contentScale = ContentScale.Crop)
 
-        Icon(
-            imageVector = Icons.Default.Close,
-            contentDescription = "Delete Image",
+  // Control for showing the AI Assistant dialog
+  var showDialog by remember { mutableStateOf(false) }
+
+  Column(
+      modifier =
+          Modifier.background(
+                  color = MaterialTheme.colorScheme.surface,
+                  shape = RoundedCornerShape(size = 28.dp))
+              .padding(horizontal = 8.dp, vertical = 8.dp)
+              .imePadding()
+              .testTag("SendMessageBar")) {
+        // If an image is selected, display it above the text field
+        imageUri?.let { uri ->
+          Box(
+              modifier =
+                  Modifier.clip(RoundedCornerShape(12.dp))
+                      .background(Color.Transparent)
+                      .padding(bottom = 8.dp)) {
+                AsyncImage(
+                    model = uri,
+                    contentDescription = "Uploaded Image",
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.height(70.dp).clip(RoundedCornerShape(12.dp)))
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = "Delete Image",
+                    tint = Color.Red,
+                    modifier =
+                        Modifier.align(Alignment.TopEnd).padding(4.dp).clickable {
+                          imageUri = null
+                          onImageSelected(null)
+                        })
+              }
+        }
+
+        // Row containing the TextField and action buttons
+        Row(
             modifier =
-                Modifier.align(Alignment.TopEnd).padding(8.dp).clickable {
-                  onImageSelected(null)
-                  imageUri = null
-                },
-            tint = Color.Red)
+                Modifier.fillMaxWidth()
+                    .background(
+                        color = MaterialTheme.colorScheme.surface,
+                        shape = RoundedCornerShape(size = 28.dp))
+                    .padding(horizontal = 8.dp),
+            verticalAlignment = Alignment.CenterVertically) {
+              // TextField for entering the message
+              TextField(
+                  value = message,
+                  onValueChange = { message = it },
+                  modifier =
+                      Modifier.weight(1f)
+                          .height(56.dp) // Matches the height of buttons for alignment
+                          .padding(end = 8.dp),
+                  placeholder = {
+                    Text(text = "Send Message", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                  },
+                  colors =
+                      OutlinedTextFieldDefaults.colors(
+                          unfocusedBorderColor = Color.Transparent,
+                          focusedBorderColor = Color.Transparent,
+                          focusedTextColor = MaterialTheme.colorScheme.onSurface),
+                  singleLine = true)
+
+              // Optional AI Chat Assistant Button
+              if (!isAiSolverScreen) {
+                IconButton(onClick = { showDialog = true }, modifier = Modifier.size(48.dp)) {
+                  Icon(
+                      painter = painterResource(R.drawable.ai_message),
+                      contentDescription = "Chat Assistant",
+                      tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+              }
+
+              // Button to upload an image
+              IconButton(
+                  onClick = { imagePickerLauncher.launch("image/*") },
+                  modifier = Modifier.size(48.dp)) {
+                    Icon(
+                        imageVector = Icons.Default.AddCircle,
+                        contentDescription = "Upload Image",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                  }
+
+              // Button to send the message
+              IconButton(
+                  onClick = { onSendClickButton(message) { message = it } },
+                  modifier = Modifier.size(48.dp)) {
+                    Icon(
+                        imageVector = Icons.Default.Send,
+                        contentDescription = "Send",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.rotate(-45f))
+                  }
+            }
       }
-    }
-    Row(
-        modifier =
-            Modifier.fillMaxWidth()
-                .background(
-                    color = MaterialTheme.colorScheme.surface,
-                    shape = RoundedCornerShape(size = 28.dp),
-                )
-                .imePadding()
-                .testTag("SendMessageBar"), // To ensure that content of scaffold appears even if
-        // keyboard
-        // is
-        // displayed
-    ) {
 
-      // Input to enter message you want to send
-      TextField(
-          value = message,
-          onValueChange = { message = it },
-          modifier = Modifier.weight(1f).padding(end = 8.dp),
-          placeholder = {
-            Text(text = "Send Message", color = MaterialTheme.colorScheme.onSurfaceVariant)
-          },
-          colors =
-              OutlinedTextFieldDefaults.colors(
-                  unfocusedBorderColor = Color.Black,
-                  focusedBorderColor = Color.Black,
-                  focusedTextColor = Color.Black),
-          singleLine = true // Ensures the TextField stays compact
-          )
-
-      // State to control the visibility of the Chat Assistant Dialog
-      var showDialog by remember { mutableStateOf(false) }
-
-      if (!isAiSolverScreen) {
-        // Button to Use the Chat Assistant
-        IconButton(onClick = { showDialog = true }, modifier = Modifier.size(48.dp)) {
-          Icon(
-              painter = painterResource(R.drawable.ai_message),
-              contentDescription = "chat assistant",
-              tint = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-
-        // Show the Chat Assistant Dialog if showDialog is true
-        if (showDialog) {
-          ChatAssistantDialog(
-              chatAssistantViewModel,
-              onDismiss = { showDialog = false },
-              onResponse = { message = it })
-        }
-      }
-
-      IconButton(
-          onClick = { imagePickerLauncher.launch("image/*") },
-          modifier = Modifier.testTag("uploadImageButton")) {
-            Icon(
-                imageVector = Icons.Default.AddCircle,
-                contentDescription = "upload image",
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-          }
-      // Button to send your message
-      IconButton(
-          onClick = { onSendClickButton(message) { message = it } },
-          modifier = Modifier.size(48.dp)) {
-            Icon(
-                imageVector = Icons.Default.Send,
-                contentDescription = "send",
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.rotate(-45f))
-          }
-    }
+  // AI Assistant Dialog if triggered
+  if (showDialog) {
+    ChatAssistantDialog(
+        chatAssistantViewModel, onDismiss = { showDialog = false }, onResponse = { message = it })
   }
 }
 
