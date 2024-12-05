@@ -283,7 +283,9 @@ fun ProviderUI(
   NavHost(navController = navController, startDestination = Route.REQUESTS_FEED) {
     composable(Route.REQUESTS_FEED) {
       ListRequestsFeedScreen(
-          serviceRequestViewModel = serviceRequestViewModel, navigationActions = navigationActions)
+          serviceRequestViewModel = serviceRequestViewModel,
+          navigationActions = navigationActions,
+          notificationViewModel = notificationViewModel)
     }
     composable(Route.MAP_OF_SEEKERS) {
       ProviderMapScreen(
@@ -326,7 +328,7 @@ fun ProviderUI(
       ModifyProviderInformationScreen(
           listProviderViewModel, authViewModel, locationViewModel, navigationActions)
     }
-    composable(Route.NOTIFICATIONS) {
+    composable(Screen.NOTIFICATIONS) {
       user?.let { it1 -> NotificationScreen(notificationViewModel, it1.uid, navigationActions) }
     }
   }
