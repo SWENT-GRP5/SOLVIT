@@ -21,6 +21,7 @@ import com.android.solvit.provider.ui.calendar.ProviderCalendarScreen
 import com.android.solvit.provider.ui.map.ProviderMapScreen
 import com.android.solvit.provider.ui.profile.ModifyProviderInformationScreen
 import com.android.solvit.provider.ui.profile.ProviderProfileScreen
+import com.android.solvit.provider.ui.profile.ProviderRegistrationScreen
 import com.android.solvit.provider.ui.request.ListRequestsFeedScreen
 import com.android.solvit.provider.ui.request.RequestsDashboardScreen
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
@@ -44,6 +45,7 @@ import com.android.solvit.shared.model.chat.ChatAssistantViewModel
 import com.android.solvit.shared.model.chat.ChatViewModel
 import com.android.solvit.shared.model.map.LocationViewModel
 import com.android.solvit.shared.model.packages.PackageProposalViewModel
+import com.android.solvit.shared.model.packages.PackagesAssistantViewModel
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.review.ReviewViewModel
 import com.android.solvit.shared.ui.authentication.ForgotPassword
@@ -99,13 +101,16 @@ fun SolvitApp() {
   val navigationActions = NavigationActions(navController)
   val notificationViewModel =
       viewModel<NotificationsViewModel>(factory = NotificationsViewModel.Factory)
+  val packagesAssistantViewModel =
+      viewModel<PackagesAssistantViewModel>(factory = PackagesAssistantViewModel.Factory)
   if (!userRegistered.value) {
     SharedUI(
         authViewModel,
         listProviderViewModel,
         seekerProfileViewModel,
         locationViewModel,
-        packageProposalViewModel)
+        packageProposalViewModel,
+        packagesAssistantViewModel)
   } else {
     when (user.value!!.role) {
       "seeker" ->
@@ -140,7 +145,8 @@ fun SharedUI(
     listProviderViewModel: ListProviderViewModel,
     seekerProfileViewModel: SeekerProfileViewModel,
     locationViewModel: LocationViewModel,
-    packageProposalViewModel: PackageProposalViewModel
+    packageProposalViewModel: PackageProposalViewModel,
+    packagesAssistantViewModel: PackagesAssistantViewModel
 ) {
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
@@ -156,7 +162,8 @@ fun SharedUI(
           navigationActions,
           locationViewModel,
           authViewModel,
-          packageProposalViewModel)
+          packageProposalViewModel,
+          packagesAssistantViewModel)
     }
     composable(Screen.FORGOT_PASSWORD) { ForgotPassword(navigationActions) }
     composable(Screen.SEEKER_REGISTRATION_PROFILE) {
