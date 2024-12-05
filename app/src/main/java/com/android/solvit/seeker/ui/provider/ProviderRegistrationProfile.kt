@@ -557,7 +557,7 @@ fun ProviderDetails(
   val isDescriptionOk =
       description.isNotBlank() &&
           description.length < 250 // (we assume here that a word on average is 5 character)
-    val isStartingPriceOk = startingPrice.isNotBlank() && startingPrice.toDoubleOrNull() != null
+  val isStartingPriceOk = startingPrice.isNotBlank() && startingPrice.toDoubleOrNull() != null
 
   val allIsOk =
       selectedService.isNotEmpty() &&
