@@ -110,14 +110,12 @@ fun ChatScreen(
     serviceRequestViewModel.getServiceRequestById(id) { chatViewModel.setChatRequest(it) }
   }
   val request by chatViewModel.chatRequest.collectAsState()
-  Log.e("ChatScreen", "conversation: $messages")
 
   LaunchedEffect(receiver) { chatViewModel.getConversation() }
 
   val receiverName = getReceiverName(receiver)
   val receiverPicture = getReceiverImageUrl(receiver)
 
-  val user by authViewModel.user.collectAsState()
   chatAssistantViewModel.setContext(messages, "Hassan", receiverName, request)
 
   // To send Image Messages
@@ -385,6 +383,7 @@ fun MessageInputBar(
     isAiSolverScreen: Boolean
 ) {
 
+  val user by authViewModel.user.collectAsState()
   var message by remember { mutableStateOf("") }
   val current = LocalContext.current
   val imagePickerLauncher =
@@ -458,13 +457,13 @@ fun MessageInputBar(
       IconButton(
           onClick = {
             val chatMessage =
-                authViewModel.user.value?.uid?.let {
+                user?.let {
                   ChatMessage.TextMessage(
                       message,
-                      "Hassan", // Has to be updated once we implement a logic to link the
+                      it.userName, // Has to be updated once we implement a logic to link the
                       // authenticated user to its profile (generic class for both provider
                       // and seeker that contains common informations,
-                      it,
+                      it.uid,
                       timestamp = System.currentTimeMillis(),
                   )
                 }
