@@ -73,6 +73,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
@@ -253,7 +254,8 @@ fun ProviderRegistrationScreen(
                     leadingIcon = Icons.Default.Phone,
                     leadingIconDescription = "Phone Icon",
                     testTag = "phoneNumberInput",
-                    errorTestTag = "phoneNumberErrorProviderRegistration")
+                    errorTestTag = "phoneNumberErrorProviderRegistration",
+                    keyboardType = KeyboardType.Number)
 
                 Spacer(modifier = Modifier.height(10.dp))
 
@@ -539,7 +541,8 @@ fun ProviderDetails(
   val isDescriptionOk =
       description.isNotBlank() &&
           description.length < 250 // (we assume here that a word on average is 5 character)
-  val isStartingPriceOk = startingPrice.isNotBlank() && startingPrice.toDoubleOrNull() != null
+  val isStartingPriceOk =
+      startingPrice.isNotBlank() && startingPrice.matches(Regex("^(0|[1-9]\\d*)(\\.\\d{1,2})?\$"))
 
   val allIsOk =
       selectedService.isNotEmpty() &&
@@ -606,7 +609,8 @@ fun ProviderDetails(
             leadingIcon = Icons.Default.Check,
             leadingIconDescription = "Check Icon",
             testTag = "startingPriceInputProviderRegistration",
-            errorTestTag = "startingPriceErrorInputProviderRegistration")
+            errorTestTag = "startingPriceErrorInputProviderRegistration",
+            keyboardType = KeyboardType.Number)
 
         // Dropdown menu to select provider's languages
         ExposedDropdownMenuBox(

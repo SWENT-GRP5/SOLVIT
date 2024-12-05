@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -68,6 +69,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
@@ -731,7 +733,8 @@ fun CustomOutlinedTextField(
     testTag: String,
     errorTestTag: String = "errorMessage",
     maxLines: Int = 1,
-    textAlign: TextAlign = TextAlign.Unspecified
+    textAlign: TextAlign = TextAlign.Unspecified,
+    keyboardType: KeyboardType = KeyboardType.Text
 ) {
   // State to track if the field has been "visited" (focused and then unfocused)
   var hasBeenFocused by remember { mutableStateOf(false) }
@@ -782,7 +785,8 @@ fun CustomOutlinedTextField(
                       else -> colorScheme.error
                     }),
         maxLines = maxLines,
-        textStyle = TextStyle(textAlign = textAlign, color = colorScheme.onBackground))
+        textStyle = TextStyle(textAlign = textAlign, color = colorScheme.onBackground),
+        keyboardOptions = KeyboardOptions(keyboardType = keyboardType))
 
     // Display the error message if the field has been visited, input is incorrect, and focus was
     // lost after typing
