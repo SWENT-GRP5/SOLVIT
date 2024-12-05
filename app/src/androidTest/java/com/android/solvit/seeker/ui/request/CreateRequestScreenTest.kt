@@ -285,7 +285,12 @@ class CreateRequestScreenTest {
   fun aiAssistantDialog_displaysCorrectlyAndCanBeDismissed() {
     composeTestRule.setContent {
       CreateRequestScreen(
-          navigationActions, serviceRequestViewModel, locationViewModel = locationViewModel)
+          navigationActions,
+          serviceRequestViewModel,
+          locationViewModel,
+          authViewModel,
+          notificationsViewModel,
+          listProviderViewModel)
     }
 
     // Check that the AI Assistant Dialog is displayed initially
@@ -311,8 +316,13 @@ class CreateRequestScreenTest {
   @Test
   fun aiAssistantDialog_navigatesToImagePickerStep() {
     composeTestRule.setContent {
-      CreateRequestScreen(
-          navigationActions, serviceRequestViewModel, locationViewModel = locationViewModel)
+        CreateRequestScreen(
+            navigationActions,
+            serviceRequestViewModel,
+            locationViewModel,
+            authViewModel,
+            notificationsViewModel,
+            listProviderViewModel)
     }
 
     // Check that the AI Assistant Dialog is displayed initially
