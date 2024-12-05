@@ -508,6 +508,7 @@ fun ProviderRegistrationScreen(
                         }
                       }
                       viewModel.addProvider(newProviderProfile, providerImageUri)
+                      authViewModel.setUserName(fullName)
                       authViewModel.registered()
                       // navigationActions.goBack() // Navigate after saving
                     },

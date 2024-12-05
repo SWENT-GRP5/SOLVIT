@@ -331,6 +331,7 @@ fun SeekerRegistrationScreen(
                               phone = phone,
                               email = email)
                       viewModel.addUserProfile(newUserProfile)
+                      authViewModel.setUserName(userName)
                       authViewModel.registered()
                       // navigationActions.goBack() // Navigate after saving
                     },

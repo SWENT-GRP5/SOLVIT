@@ -61,6 +61,7 @@ import com.android.solvit.R
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.provider.Provider
+import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
@@ -240,7 +241,7 @@ fun ProfileHeader(
         }
 
     Column(
-        modifier = Modifier.padding(8.dp).weight(1f).wrapContentHeight(),
+        modifier = Modifier.wrapContentHeight().padding(8.dp).weight(1f),
         verticalArrangement = Arrangement.spacedBy(10.dp),
         horizontalAlignment = Alignment.Start) {
           val titleColor = colorScheme.onBackground
@@ -271,15 +272,21 @@ fun ProfileHeader(
                 overflow = TextOverflow.Ellipsis)
           }
 
-          Column(modifier = Modifier.align(Alignment.End)) {
-            Icon(
-                Icons.Default.Edit,
-                contentDescription = "Edit Profile",
-                modifier =
-                    Modifier.size(24.dp).clickable {
-                      navigationActions.navigateTo(Screen.PROVIDER_MODIFY_PROFILE)
-                    })
-          }
+          Column(
+              modifier = Modifier.align(Alignment.End),
+              horizontalAlignment = Alignment.Start,
+              verticalArrangement = Arrangement.Bottom) {
+                Box {
+                  IconButton(
+                      onClick = { navigationActions.navigateTo(Screen.PROVIDER_MODIFY_PROFILE) },
+                      modifier = Modifier.size(24.dp).testTag("editProfileButton")) {
+                        Icon(
+                            Icons.Default.Edit,
+                            contentDescription = "Edit Profile",
+                            modifier = Modifier.size(24.dp))
+                      }
+                }
+              }
 
           Spacer(modifier = Modifier.height(5.dp))
 
@@ -354,10 +361,37 @@ fun DescriptionSection(provider: Provider) {
  * @param provider The provider whose statistics are to be displayed.
  */
 @Composable
-fun StatsSection(provider: Provider) {
+fun StatsSection(
+    provider: Provider,
+    viewModel: ServiceRequestViewModel = viewModel(factory = ServiceRequestViewModel.Factory),
+    authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory)
+) {
 
   var rating by remember { mutableStateOf("") }
   var popular by remember { mutableStateOf("") }
+
+  val user by authViewModel.user.collectAsState()
+  val providerId = user?.uid ?: "-1"
+
+  val pendingTasks by viewModel.pendingRequests.collectAsState()
+  val filteredPendingTasks = pendingTasks.filter { it.providerId == providerId }
+
+  val acceptedTasks by viewModel.acceptedRequests.collectAsState()
+  val filteredAcceptedTasks = acceptedTasks.filter { it.providerId == providerId }
+
+  val scheduledTasks by viewModel.scheduledRequests.collectAsState()
+  val filteredScheduledTasks = scheduledTasks.filter { it.providerId == providerId }
+
+  val completedTasks by viewModel.completedRequests.collectAsState()
+  val filteredCompletedTasks = completedTasks.filter { it.providerId == providerId }
+
+  val canceledTasks by viewModel.cancelledRequests.collectAsState()
+  val filteredCanceledTasks = canceledTasks.filter { it.providerId == providerId }
+
+  val archivedTasks by viewModel.archivedRequests.collectAsState()
+  val filteredArchivedTasks = archivedTasks.filter { it.providerId == providerId }
+
+  val earnings = filteredCompletedTasks.sumOf { it.agreedPrice ?: 0.0 }
 
   LaunchedEffect(provider) {
     rating = provider.rating.toString()
@@ -377,8 +411,13 @@ fun StatsSection(provider: Provider) {
                 rating,
                 fontSize = 40.sp,
                 color = colorScheme.onPrimary,
-                fontWeight = FontWeight.Bold)
-            Text("Average Rating", fontSize = 15.sp, color = colorScheme.onPrimary)
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.testTag("ratingText"))
+            Text(
+                "Average Rating",
+                fontSize = 15.sp,
+                color = colorScheme.onPrimary,
+                modifier = Modifier.testTag("ratingLabel"))
           }
           Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
@@ -387,16 +426,87 @@ fun StatsSection(provider: Provider) {
                 },
                 fontSize = 40.sp,
                 color = colorScheme.onPrimary,
-                fontWeight = FontWeight.Bold)
-            Text("Popular", fontSize = 15.sp, color = colorScheme.onPrimary)
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.testTag("popularityText"))
+            Text(
+                "Popular",
+                fontSize = 15.sp,
+                color = colorScheme.onPrimary,
+                modifier = Modifier.testTag("popularityLabel"))
           }
         }
 
-        Spacer(modifier = Modifier.height(5.dp))
+        Spacer(modifier = Modifier.height(15.dp))
 
-        LanguageList(provider)
+        Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
+          Column(horizontalAlignment = Alignment.Start) {
+            Text(
+                "$earnings CHF",
+                fontSize =
+                    (if (earnings > 999999) 10
+                        else if (earnings > 999 && earnings < 999999) 20 else 40)
+                        .sp,
+                color = colorScheme.onPrimary,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.testTag("earningsText"))
+            Text(
+                "Earnings",
+                fontSize = 15.sp,
+                color = colorScheme.onPrimary,
+                modifier = Modifier.testTag("earningsLabel"))
+          }
+        }
 
-        Text("Languages", fontSize = 15.sp, color = colorScheme.onPrimary)
+        Row(horizontalArrangement = Arrangement.Start, modifier = Modifier.fillMaxWidth()) {
+          Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.Start) {
+            LanguageList(provider)
+            Text(
+                (if (provider.languages.size > 1) "Languages" else "Language"),
+                fontSize = 15.sp,
+                color = colorScheme.onPrimary,
+                modifier = Modifier.testTag("languagesLabel"))
+          }
+          Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.End) {
+            Column {
+              Text(
+                  "Pending tasks: ${filteredPendingTasks.size}",
+                  fontSize = 20.sp,
+                  color = colorScheme.onPrimary,
+                  fontWeight = FontWeight.Bold,
+                  modifier = Modifier.testTag("pendingTasksText"))
+              Text(
+                  "Accepted tasks: ${filteredAcceptedTasks.size}",
+                  fontSize = 20.sp,
+                  color = colorScheme.onPrimary,
+                  fontWeight = FontWeight.Bold,
+                  modifier = Modifier.testTag("acceptedTasksText"))
+              Text(
+                  "Scheduled tasks: ${filteredScheduledTasks.size}",
+                  fontSize = 20.sp,
+                  color = colorScheme.onPrimary,
+                  fontWeight = FontWeight.Bold,
+                  modifier = Modifier.testTag("scheduledTasksText"))
+              Text(
+                  "Completed tasks: ${filteredCompletedTasks.size}",
+                  fontSize = 20.sp,
+                  color = colorScheme.onPrimary,
+                  fontWeight = FontWeight.Bold,
+                  modifier = Modifier.testTag("completedTasksText"))
+              Text(
+                  "Canceled tasks: ${filteredCanceledTasks.size}",
+                  fontSize = 20.sp,
+                  color = colorScheme.onPrimary,
+                  fontWeight = FontWeight.Bold,
+                  modifier = Modifier.testTag("canceledTasksText"))
+              Text(
+                  "Archived tasks: ${filteredArchivedTasks.size}",
+                  fontSize = 20.sp,
+                  color = colorScheme.onPrimary,
+                  fontWeight = FontWeight.Bold,
+                  modifier = Modifier.testTag("archivedTasksText"))
+            }
+          }
+        }
       }
 }
 
@@ -438,10 +548,7 @@ fun LanguageList(provider: Provider) {
                     if (showAll) provider.languages else provider.languages.take(3)
                 items(languagesToShow) { language ->
                   Text(
-                      text =
-                          language.name.replaceFirstChar {
-                            it.uppercase()
-                          }, // Affiche le nom de l'objet
+                      text = language.name.replaceFirstChar { it.uppercase() },
                       fontSize = 40.sp,
                       color = colorScheme.onPrimary,
                       fontWeight = FontWeight.Bold,

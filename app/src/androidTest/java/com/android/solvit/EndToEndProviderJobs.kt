@@ -16,6 +16,7 @@ import com.android.solvit.shared.model.NotificationsRepositoryFirestore
 import com.android.solvit.shared.model.NotificationsViewModel
 import com.android.solvit.shared.model.authentication.AuthRepository
 import com.android.solvit.shared.model.authentication.AuthViewModel
+import com.android.solvit.shared.model.chat.AiSolverViewModel
 import com.android.solvit.shared.model.chat.ChatAssistantViewModel
 import com.android.solvit.shared.model.chat.ChatRepository
 import com.android.solvit.shared.model.chat.ChatRepositoryFirestore
@@ -72,6 +73,7 @@ class EndToEndProviderJobs {
   private lateinit var chatViewModel: ChatViewModel
   private lateinit var chatAssistantViewModel: ChatAssistantViewModel
   private lateinit var packagesAssistantViewModel: PackagesAssistantViewModel
+  private lateinit var aiSolverViewModel: AiSolverViewModel
 
   private lateinit var chatRepository: ChatRepository
   private lateinit var notificationsViewModel: NotificationsViewModel
@@ -131,7 +133,7 @@ class EndToEndProviderJobs {
     serviceRequestRepository = ServiceRequestRepositoryFirebase(firestore, storage)
     reviewRepository = ReviewRepositoryFirestore(firestore)
     packageProposalRepository = PackageProposalRepositoryFirestore(firestore)
-    chatRepository = ChatRepositoryFirestore(database)
+    chatRepository = ChatRepositoryFirestore(database, storage, firestore)
     notificationsRepository = NotificationsRepositoryFirestore(firestore)
 
     authViewModel = AuthViewModel(authRepository)
@@ -145,6 +147,7 @@ class EndToEndProviderJobs {
     chatAssistantViewModel = ChatAssistantViewModel()
     notificationsViewModel = NotificationsViewModel(notificationsRepository)
     packagesAssistantViewModel = PackagesAssistantViewModel()
+    aiSolverViewModel = AiSolverViewModel()
 
     `when`(locationRepository.search(ArgumentMatchers.anyString(), anyOrNull(), anyOrNull()))
         .thenAnswer { invocation ->
@@ -200,7 +203,9 @@ class EndToEndProviderJobs {
                   locationViewModel,
                   chatViewModel,
                   chatAssistantViewModel,
-                  notificationsViewModel)
+                  notificationsViewModel,
+                  aiSolverViewModel,
+                  packageProposalViewModel)
           "provider" ->
               ProviderUI(
                   authViewModel,
@@ -210,6 +215,7 @@ class EndToEndProviderJobs {
                   chatViewModel,
                   notificationsViewModel,
                   locationViewModel,
+                  packageProposalViewModel,
                   chatAssistantViewModel)
         }
       }

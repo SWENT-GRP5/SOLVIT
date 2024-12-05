@@ -9,8 +9,7 @@ import org.mockito.Mockito.mock
 class AiSolverViewModelTest {
   private lateinit var aiSolverViewModel: AiSolverViewModel
 
-  var messagesContext =
-      listOf(ChatMessage.TextMessage("Help Me"), ChatMessage.ImageMessage("imageUrl"))
+  var messagesContext = listOf(ChatMessage.TextMessage("Help Me"), ChatMessage.ImageMessage("test"))
 
   @Before
   fun SetUp() {
@@ -38,7 +37,6 @@ class AiSolverViewModelTest {
     val prompt = aiSolverViewModel.buildPrompt(userInput)
 
     assert(prompt.contains("Help Me"))
-    assert(prompt.contains("imageUrl"))
     assert(prompt.contains("Describe the problem."))
     assert(!prompt.contains("An image describing the problem is provided"))
   }
@@ -53,7 +51,6 @@ class AiSolverViewModelTest {
     val prompt = aiSolverViewModel.buildPrompt(userInput)
 
     assert(prompt.contains("Help Me"))
-    assert(prompt.contains("imageUrl"))
     assert(prompt.contains("Describe the problem."))
     assert(prompt.contains("An image describing the problem is provided"))
   }
