@@ -106,17 +106,6 @@ import com.android.solvit.shared.ui.navigation.NavigationActions
  * @param locationViewModel The `LocationViewModel` to fetch and manage location suggestions.
  * @param authViewModel The `AuthViewModel` to manage authentication and user data.
  * @param packageViewModel The `PackageProposalViewModel` to manage provider service packages.
- *
- * This function:
- * - Locks the screen orientation to portrait during the registration process.
- * - Guides the user through four steps:
- *     1. Entering personal details (name, phone, company, and location).
- *     2. Specifying preferences such as service type, description, and languages.
- *     3. Configuring optional service packages with names, prices, and features.
- *     4. Completing the registration and displaying a confirmation screen.
- * - Validates user input at each step to ensure data integrity.
- * - Saves the provider's profile and optional service packages to the database.
- * - Navigates to the dashboard or appropriate screen after successful registration.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint(
@@ -524,13 +513,6 @@ fun ProviderRegistrationScreen(
  * @param providerImageUri The URI of the provider's uploaded profile image.
  * @param onImageSelected A lambda function triggered when a new image is selected by the provider.
  * @param onClickButton A lambda function to handle the completion of the registration process.
- *
- * This function:
- * - Includes dropdown menus for selecting services and languages.
- * - Provides an input field for a brief provider description with validation.
- * - Allows uploading a profile image through a file picker.
- * - Ensures all fields are filled correctly before enabling the registration button.
- * - Displays a Toast message if the form is incomplete or invalid.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
