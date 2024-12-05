@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -55,6 +56,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -63,6 +66,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -82,7 +86,6 @@ import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.navigation.Screen
 import com.android.solvit.shared.ui.theme.Black
-import com.android.solvit.shared.ui.theme.LightOrange
 import com.android.solvit.shared.ui.utils.getReceiverImageUrl
 import com.android.solvit.shared.ui.utils.getReceiverName
 import com.google.firebase.auth.FirebaseAuth
@@ -209,7 +212,7 @@ fun AiSolverWelcomeScreen(
                 modifier =
                     Modifier.fillMaxSize()
                         .padding(
-                            top = screenHeight.times(0.05f), bottom = screenHeight.times(0.1f))) {
+                            top = screenHeight.times(0.05f), bottom = screenHeight.times(0.05f))) {
                   Text(
                       text =
                           buildAnnotatedString {
@@ -217,22 +220,20 @@ fun AiSolverWelcomeScreen(
                                 style =
                                     SpanStyle(
                                         color = Black,
-                                        fontSize = screenHeight.times(0.03f).value.sp)) {
+                                        fontSize = screenHeight.times(0.04f).value.sp)) {
                                   append("Meet Your Personal ")
                                 }
                             withStyle(
                                 style =
                                     SpanStyle(
-                                        color = LightOrange,
-                                        fontSize = screenHeight.times(0.03f).value.sp)) {
-                                  append("AI\n")
-                                }
-                            withStyle(
-                                style =
-                                    SpanStyle(
-                                        color = LightOrange,
-                                        fontSize = screenHeight.times(0.03f).value.sp)) {
-                                  append("Problem Solver")
+                                        brush =
+                                            Brush.linearGradient(
+                                                colors =
+                                                    listOf(Color(0xFF00B383), Color(0xFF0099FF)),
+                                                start = Offset.Zero,
+                                                end = Offset.Infinite),
+                                        fontSize = screenHeight.times(0.04f).value.sp)) {
+                                  append("AI\n\nProblem Solver")
                                 }
                           },
                       textAlign = TextAlign.Center,
@@ -244,34 +245,41 @@ fun AiSolverWelcomeScreen(
                       contentDescription = "ai logo",
                       contentScale = ContentScale.FillBounds)
 
-                  Text(
-                      text = "I'm pleased that I meet you! How can\nI help you right now?",
-                      fontSize = screenHeight.times(0.02f).value.sp,
-                      color = Color.Gray,
-                      textAlign = TextAlign.Center,
-                      modifier = Modifier.padding(horizontal = 16.dp))
-
-                  if (conversation.isEmpty()) {
-                    ButtonStartConversationWithAI(
-                        navigationActions = navigationActions,
-                        screenHeight = screenHeight,
-                        title = "Let solve a new problem",
-                        clearConversation = false,
-                        chatViewModel)
-                  } else {
-                    ButtonStartConversationWithAI(
-                        navigationActions = navigationActions,
-                        screenHeight = screenHeight,
-                        title = "Continue",
-                        clearConversation = false,
-                        chatViewModel)
-                    ButtonStartConversationWithAI(
-                        navigationActions = navigationActions,
-                        screenHeight = screenHeight,
-                        title = "Let solve a new problem",
-                        clearConversation = true,
-                        chatViewModel)
-                  }
+                  Column(
+                      horizontalAlignment = Alignment.CenterHorizontally,
+                      modifier = Modifier.fillMaxWidth()) {
+                        Text(
+                            text = "I'm pleased that I meet you! How can\nI help you right now?",
+                            fontSize = screenHeight.times(0.02f).value.sp,
+                            color = Color.Gray,
+                            textAlign = TextAlign.Center,
+                            modifier =
+                                Modifier.padding(horizontal = 16.dp)
+                                    .padding(top = screenHeight.times(0.01f)))
+                        Spacer(modifier = Modifier.height(screenHeight.times(0.05f)))
+                        if (conversation.isEmpty()) {
+                          ButtonStartConversationWithAI(
+                              navigationActions = navigationActions,
+                              screenHeight = screenHeight,
+                              title = "Let solve a new problem",
+                              clearConversation = false,
+                              chatViewModel)
+                        } else {
+                          ButtonStartConversationWithAI(
+                              navigationActions = navigationActions,
+                              screenHeight = screenHeight,
+                              title = "Continue",
+                              clearConversation = false,
+                              chatViewModel)
+                          Spacer(modifier = Modifier.height(8.dp))
+                          ButtonStartConversationWithAI(
+                              navigationActions = navigationActions,
+                              screenHeight = screenHeight,
+                              title = "Let solve a new problem",
+                              clearConversation = true,
+                              chatViewModel)
+                        }
+                      }
                 }
           }
         }
@@ -291,13 +299,31 @@ fun ButtonStartConversationWithAI(
         if (clearConversation) chatViewModel.clearConversation(true)
         navigationActions.navigateTo(Screen.AI_SOLVER_CHAT_SCREEN)
       },
-      colors = ButtonDefaults.buttonColors(containerColor = LightOrange),
+      colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
       shape = RoundedCornerShape(50),
+      contentPadding = PaddingValues(),
       modifier =
-          Modifier.fillMaxWidth(0.6f)
+          Modifier.fillMaxWidth(0.8f)
               .height(screenHeight.times(0.07f))
               .testTag("getStartedButton")) {
-        Text(text = title, fontSize = screenHeight.times(0.025f).value.sp, color = Color.White)
+        // Gradient background
+        Box(
+            modifier =
+                Modifier.fillMaxSize()
+                    .background(
+                        brush =
+                            Brush.horizontalGradient(
+                                colors = listOf(Color(0xFF00B383), Color(0xFF0099FF))),
+                        shape = RoundedCornerShape(50)),
+            contentAlignment = Alignment.Center) {
+              // Button text
+              Text(
+                  text = title,
+                  fontSize = screenHeight.times(0.025f).value.sp,
+                  color = Color.White,
+                  maxLines = 1, // Ensure text stays on one line
+                  overflow = TextOverflow.Ellipsis)
+            }
       }
 }
 
@@ -590,9 +616,8 @@ fun MessageInputBar(
                     shape = RoundedCornerShape(size = 28.dp),
                 )
                 .imePadding()
-                .testTag(
-                    "SendMessageBar"), // To ensure that content of scaffold appears even if
-                                       // keyboard
+                .testTag("SendMessageBar"), // To ensure that content of scaffold appears even if
+        // keyboard
         // is
         // displayed
     ) {

@@ -206,7 +206,7 @@ fun ShortcutsSection(
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold)
                     Image(
-                        painter = painterResource(id = R.drawable.ai_image),
+                        painter = painterResource(id = R.drawable.ai_flat_design),
                         contentDescription = "ai_logo",
                         modifier = Modifier.size(50.dp),
                     )
