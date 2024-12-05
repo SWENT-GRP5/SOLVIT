@@ -37,7 +37,6 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -64,7 +63,6 @@ import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
-import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.navigation.Screen
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
@@ -341,27 +339,27 @@ fun StatsSection(
   var rating by remember { mutableStateOf("") }
   var popular by remember { mutableStateOf("") }
 
-    val providerId = Firebase.auth.currentUser?.uid ?: "-1"
+  val providerId = Firebase.auth.currentUser?.uid ?: "-1"
 
   val pendingTasks by viewModel.pendingRequests.collectAsState()
-    val filteredPendingTasks = pendingTasks.filter { it.providerId == providerId }
+  val filteredPendingTasks = pendingTasks.filter { it.providerId == providerId }
 
   val acceptedTasks by viewModel.acceptedRequests.collectAsState()
-    val filteredAcceptedTasks = acceptedTasks.filter { it.providerId == providerId }
+  val filteredAcceptedTasks = acceptedTasks.filter { it.providerId == providerId }
 
   val scheduledTasks by viewModel.scheduledRequests.collectAsState()
-    val filteredScheduledTasks = scheduledTasks.filter { it.providerId == providerId }
+  val filteredScheduledTasks = scheduledTasks.filter { it.providerId == providerId }
 
   val completedTasks by viewModel.completedRequests.collectAsState()
-    val filteredCompletedTasks = completedTasks.filter { it.providerId == providerId }
+  val filteredCompletedTasks = completedTasks.filter { it.providerId == providerId }
 
   val canceledTasks by viewModel.cancelledRequests.collectAsState()
-    val filteredCanceledTasks = canceledTasks.filter { it.providerId == providerId }
+  val filteredCanceledTasks = canceledTasks.filter { it.providerId == providerId }
 
   val archivedTasks by viewModel.archivedRequests.collectAsState()
-    val filteredArchivedTasks = archivedTasks.filter { it.providerId == providerId }
+  val filteredArchivedTasks = archivedTasks.filter { it.providerId == providerId }
 
-    val earnings = filteredCompletedTasks.sumOf { it.agreedPrice ?: 0.0 }
+  val earnings = filteredCompletedTasks.sumOf { it.agreedPrice ?: 0.0 }
 
   LaunchedEffect(provider) {
     rating = provider.rating.toString()
@@ -396,18 +394,21 @@ fun StatsSection(
           }
         }
 
-      Spacer(modifier = Modifier.height(15.dp))
+        Spacer(modifier = Modifier.height(15.dp))
 
-      Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
+        Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
           Column(horizontalAlignment = Alignment.Start) {
-              Text(
-                  "$earnings CHF",
-                  fontSize = (if (earnings > 999999) 10 else if (earnings > 999 && earnings < 999999) 20 else 40).sp,
-                  color = colorScheme.onPrimary,
-                  fontWeight = FontWeight.Bold)
-              Text("Earnings", fontSize = 15.sp, color = colorScheme.onPrimary)
+            Text(
+                "$earnings CHF",
+                fontSize =
+                    (if (earnings > 999999) 10
+                        else if (earnings > 999 && earnings < 999999) 20 else 40)
+                        .sp,
+                color = colorScheme.onPrimary,
+                fontWeight = FontWeight.Bold)
+            Text("Earnings", fontSize = 15.sp, color = colorScheme.onPrimary)
           }
-      }
+        }
 
         Row(horizontalArrangement = Arrangement.Start, modifier = Modifier.fillMaxWidth()) {
           Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.Start) {
