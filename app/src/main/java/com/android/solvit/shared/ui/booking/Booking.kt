@@ -532,7 +532,7 @@ fun EditAndChatButton(
         contentAlignment = Alignment.Center) {
           Button(
               onClick = {
-                chatViewModel.prepareForChat(currentUserId, receiverId, receiver, requestId)
+                chatViewModel.prepareForChat(false, currentUserId, receiverId, receiver, requestId)
               },
               colors =
                   ButtonDefaults.buttonColors(

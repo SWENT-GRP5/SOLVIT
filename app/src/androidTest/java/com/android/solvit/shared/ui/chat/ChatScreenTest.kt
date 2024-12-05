@@ -1,10 +1,11 @@
 package com.android.solvit.shared.ui.chat
 
-import android.util.Log
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
 import androidx.navigation.NavController
 import com.android.solvit.shared.model.authentication.AuthRep
 import com.android.solvit.shared.model.authentication.AuthViewModel
@@ -47,8 +48,9 @@ class ChatScreenTest {
               senderId = "user_alice",
               timestamp = 1620000000000L,
               status = MESSAGE_STATUS.SENT),
-          ChatMessage.TextMessage(
-              message = "This is the second test message.",
+          ChatMessage.TextImageMessage(
+              imageUrl = "",
+              text = "This is the second test message.",
               senderName = "Bob",
               senderId = "user_bob",
               timestamp = 1620000005000L,
@@ -90,19 +92,17 @@ class ChatScreenTest {
 
     var message: ChatMessage.TextMessage? = null
 
-    `when`(chatRepository.initChat(any(), any(), any(), any())).thenAnswer {
-      val onSuccess = it.getArgument<(String) -> Unit>(1)
+    `when`(chatRepository.initChat(any(), any(), any(), any(), any())).thenAnswer {
+      val onSuccess = it.getArgument<(String) -> Unit>(2)
       onSuccess("chatId") // Simulate success
     }
     `when`(chatRepository.listenForLastMessages(any(), any(), any())).thenAnswer {
-      println("je suis rentré")
-      val onSuccess = it.getArgument<(List<ChatMessage.TextMessage>) -> Unit>(0)
+      val onSuccess = it.getArgument<(List<ChatMessage>) -> Unit>(2)
       onSuccess(listOf(testMessages[0])) // Simulate success
     }
 
-    `when`(chatRepository.listenForMessages(any(), any(), any())).thenAnswer {
-      Log.e("Test", "Je suis rentré")
-      val onSuccess = it.getArgument<(List<ChatMessage.TextMessage>) -> Unit>(1)
+    `when`(chatRepository.listenForMessages(any(), any(), any(), any())).thenAnswer {
+      val onSuccess = it.getArgument<(List<ChatMessage>) -> Unit>(2)
       onSuccess(testMessages) // Simulate success
     }
   }
@@ -120,8 +120,8 @@ class ChatScreenTest {
     }
 
     chatViewModel.setReceiverUid("1234")
-    chatViewModel.initChat("123")
-    chatViewModel.getConversation()
+    chatViewModel.initChat(false, "123")
+    chatViewModel.getConversation(false)
 
     composeTestRule.onNodeWithTag("ChatHeader").assertIsDisplayed()
     composeTestRule.onNodeWithTag("SendMessageBar").assertIsDisplayed()
@@ -129,6 +129,10 @@ class ChatScreenTest {
     composeTestRule.waitUntil(timeoutMillis = 5000) {
       composeTestRule.onAllNodesWithTag("MessageItem").fetchSemanticsNodes().isNotEmpty()
     }
+    composeTestRule.onNodeWithTag("enterText").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("enterText").performTextInput("Hello")
+    composeTestRule.onNodeWithTag("sendMessageButton").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("sendMessageButton").performClick()
 
     assertEquals(
         testMessages.size,
@@ -136,5 +140,11 @@ class ChatScreenTest {
 
     composeTestRule.onNodeWithTag("aiButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("aiSuggestions").assertIsDisplayed()
+  }
+
+  @Test
+  fun typingIndicatorTest() {
+    composeTestRule.setContent { TypingIndicator() }
+    composeTestRule.onNodeWithTag("TypingIndicator").assertIsDisplayed()
   }
 }
