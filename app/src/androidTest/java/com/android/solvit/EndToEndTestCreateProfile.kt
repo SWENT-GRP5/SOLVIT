@@ -188,7 +188,8 @@ class EndToEndTestCreateProfile {
                   chatViewModel,
                   chatAssistantViewModel,
                   notificationsViewModel,
-                  aiSolverViewModel)
+                  aiSolverViewModel,
+                  packageProposalViewModel)
           "provider" ->
               ProviderUI(
                   authViewModel,
@@ -198,6 +199,7 @@ class EndToEndTestCreateProfile {
                   chatViewModel,
                   notificationsViewModel,
                   locationViewModel,
+                  packageProposalViewModel,
                   chatAssistantViewModel)
         }
       }

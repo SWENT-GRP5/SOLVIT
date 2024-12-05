@@ -204,7 +204,8 @@ class EndToEndProviderJobs {
                   chatViewModel,
                   chatAssistantViewModel,
                   notificationsViewModel,
-                  aiSolverViewModel)
+                  aiSolverViewModel,
+                  packageProposalViewModel)
           "provider" ->
               ProviderUI(
                   authViewModel,
@@ -214,6 +215,7 @@ class EndToEndProviderJobs {
                   chatViewModel,
                   notificationsViewModel,
                   locationViewModel,
+                  packageProposalViewModel,
                   chatAssistantViewModel)
         }
       }

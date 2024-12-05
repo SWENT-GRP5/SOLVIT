@@ -4,6 +4,7 @@ import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.android.solvit.shared.model.service.Services
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.storage
@@ -38,6 +39,12 @@ open class ServiceRequestViewModel(private val repository: ServiceRequestReposit
 
   private val _archivedRequests = MutableStateFlow<List<ServiceRequest>>(emptyList())
   val archivedRequests: StateFlow<List<ServiceRequest>> = _archivedRequests
+
+  private val _selectedProviderId = MutableStateFlow<String?>(null)
+  val selectedProviderId: StateFlow<String?> = _selectedProviderId
+
+  private val _selectedProviderService = MutableStateFlow<Services?>(null)
+  val selectedProviderService: StateFlow<Services?> = _selectedProviderService
 
   init {
     repository.init { updateAllRequests() }
@@ -191,6 +198,16 @@ open class ServiceRequestViewModel(private val repository: ServiceRequestReposit
 
   fun selectRequest(serviceRequest: ServiceRequest) {
     _selectedRequest.value = serviceRequest
+  }
+
+  fun selectProvider(providerId: String, type: Services) {
+    _selectedProviderId.value = providerId
+    _selectedProviderService.value = type
+  }
+
+  fun unSelectProvider() {
+    _selectedProviderId.value = null
+    _selectedProviderService.value = null
   }
 
   fun unConfirmRequest(serviceRequest: ServiceRequest) {
