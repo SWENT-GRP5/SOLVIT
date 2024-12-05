@@ -5,6 +5,8 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
 import androidx.navigation.NavController
 import com.android.solvit.shared.model.authentication.AuthRep
 import com.android.solvit.shared.model.authentication.AuthViewModel
@@ -43,8 +45,9 @@ class ChatScreenTest {
               senderId = "user_alice",
               timestamp = 1620000000000L,
               status = MESSAGE_STATUS.SENT),
-          ChatMessage.TextMessage(
-              message = "This is the second test message.",
+          ChatMessage.TextImageMessage(
+              imageUrl = "",
+              text = "This is the second test message.",
               senderName = "Bob",
               senderId = "user_bob",
               timestamp = 1620000005000L,
@@ -118,6 +121,10 @@ class ChatScreenTest {
     composeTestRule.waitUntil(timeoutMillis = 5000) {
       composeTestRule.onAllNodesWithTag("MessageItem").fetchSemanticsNodes().isNotEmpty()
     }
+    composeTestRule.onNodeWithTag("enterText").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("enterText").performTextInput("Hello")
+    composeTestRule.onNodeWithTag("sendMessageButton").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("sendMessageButton").performClick()
 
     assertEquals(
         testMessages.size,

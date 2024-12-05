@@ -639,7 +639,8 @@ fun MessageInputBar(
                   modifier =
                       Modifier.weight(1f)
                           .height(56.dp) // Matches the height of buttons for alignment
-                          .padding(end = 8.dp),
+                          .padding(end = 8.dp)
+                          .testTag("enterText"),
                   placeholder = {
                     Text(text = "Send Message", color = MaterialTheme.colorScheme.onSurfaceVariant)
                   },
@@ -673,7 +674,7 @@ fun MessageInputBar(
               // Button to send the message
               IconButton(
                   onClick = { onSendClickButton(message) { message = it } },
-                  modifier = Modifier.size(48.dp)) {
+                  modifier = Modifier.size(48.dp).testTag("sendMessageButton")) {
                     Icon(
                         imageVector = Icons.Default.Send,
                         contentDescription = "Send",

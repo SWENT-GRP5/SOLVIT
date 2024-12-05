@@ -1,6 +1,8 @@
+import android.net.Uri
 import com.android.solvit.shared.model.chat.ChatMessage
 import com.android.solvit.shared.model.chat.ChatRepository
 import com.android.solvit.shared.model.chat.ChatViewModel
+import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.*
 import org.junit.After
@@ -99,12 +101,45 @@ class ChatViewModelTest {
 
   @Test
   fun `setReceiver updates _receiver`() {
-    // Act
     val testReceiver = "Test Receiver"
     chatViewModel.setReceiver(testReceiver)
 
-    // Assert
     val receiver = chatViewModel.receiver.value
     assert(receiver == testReceiver)
+  }
+
+  @Test
+  fun `deleteConversation call repository`() = runTest {
+    chatViewModel.setReceiverUid("receiver123")
+
+    whenever(chatRepository.initChat(eq(false), any(), any(), any(), any())).doAnswer {
+      val onSuccess = it.arguments[2] as (String) -> Unit
+      onSuccess("testChatId")
+      null
+    }
+    chatViewModel.initChat(false, "currentUserUid")
+    chatViewModel.clearConversation(false)
+    verify(chatRepository).clearConversation(any(), any(), any(), any())
+  }
+
+  @Test
+  fun `upload image to storage call repository`() = runTest {
+    val uri = mock(Uri::class.java)
+
+    doAnswer { invocation ->
+          val onSuccess = invocation.getArgument<(String?) -> Unit>(1)
+          onSuccess("https://example.com/image.jpg")
+          null
+        }
+        .whenever(chatRepository)
+        .uploadChatImagesToStorage(any(), any(), any())
+
+    val chatViewModel = ChatViewModel(chatRepository)
+
+    val result = chatViewModel.uploadImagesToStorage(uri)
+
+    verify(chatRepository).uploadChatImagesToStorage(eq(uri), any(), any())
+
+    assertEquals("https://example.com/image.jpg", result)
   }
 }

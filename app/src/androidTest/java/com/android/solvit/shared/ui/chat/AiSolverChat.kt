@@ -4,6 +4,8 @@ import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
 import androidx.navigation.NavController
 import com.android.solvit.shared.model.authentication.AuthRep
 import com.android.solvit.shared.model.authentication.AuthViewModel
@@ -61,5 +63,9 @@ class AiSolverChat {
     composeTestRule.onNodeWithTag("SendMessageBar").assertIsDisplayed()
     composeTestRule.onNodeWithTag("uploadImageButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("uploadImageButton").assertHasClickAction()
+    composeTestRule.onNodeWithTag("enterText").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("enterText").performTextInput("Hello")
+    composeTestRule.onNodeWithTag("sendMessageButton").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("sendMessageButton").performClick()
   }
 }
