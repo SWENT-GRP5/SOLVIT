@@ -64,8 +64,6 @@ import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
-import com.google.firebase.Firebase
-import com.google.firebase.auth.auth
 
 /**
  * A composable function that displays the provider's profile screen. It includes the profile header
@@ -333,13 +331,15 @@ fun DescriptionSection(provider: Provider) {
 @Composable
 fun StatsSection(
     provider: Provider,
-    viewModel: ServiceRequestViewModel = viewModel(factory = ServiceRequestViewModel.Factory)
+    viewModel: ServiceRequestViewModel = viewModel(factory = ServiceRequestViewModel.Factory),
+    authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory)
 ) {
 
   var rating by remember { mutableStateOf("") }
   var popular by remember { mutableStateOf("") }
 
-  val providerId = Firebase.auth.currentUser?.uid ?: "-1"
+  val user by authViewModel.user.collectAsState()
+  val providerId = user?.uid ?: "-1"
 
   val pendingTasks by viewModel.pendingRequests.collectAsState()
   val filteredPendingTasks = pendingTasks.filter { it.providerId == providerId }
