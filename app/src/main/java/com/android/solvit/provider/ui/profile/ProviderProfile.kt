@@ -379,8 +379,13 @@ fun StatsSection(
                 rating,
                 fontSize = 40.sp,
                 color = colorScheme.onPrimary,
-                fontWeight = FontWeight.Bold)
-            Text("Average Rating", fontSize = 15.sp, color = colorScheme.onPrimary)
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.testTag("ratingText"))
+            Text(
+                "Average Rating",
+                fontSize = 15.sp,
+                color = colorScheme.onPrimary,
+                modifier = Modifier.testTag("ratingLabel"))
           }
           Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
@@ -389,8 +394,13 @@ fun StatsSection(
                 },
                 fontSize = 40.sp,
                 color = colorScheme.onPrimary,
-                fontWeight = FontWeight.Bold)
-            Text("Popular", fontSize = 15.sp, color = colorScheme.onPrimary)
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.testTag("popularityText"))
+            Text(
+                "Popular",
+                fontSize = 15.sp,
+                color = colorScheme.onPrimary,
+                modifier = Modifier.testTag("popularityLabel"))
           }
         }
 
@@ -405,8 +415,13 @@ fun StatsSection(
                         else if (earnings > 999 && earnings < 999999) 20 else 40)
                         .sp,
                 color = colorScheme.onPrimary,
-                fontWeight = FontWeight.Bold)
-            Text("Earnings", fontSize = 15.sp, color = colorScheme.onPrimary)
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.testTag("earningsText"))
+            Text(
+                "Earnings",
+                fontSize = 15.sp,
+                color = colorScheme.onPrimary,
+                modifier = Modifier.testTag("earningsLabel"))
           }
         }
 
@@ -416,7 +431,8 @@ fun StatsSection(
             Text(
                 (if (provider.languages.size > 1) "Languages" else "Language"),
                 fontSize = 15.sp,
-                color = colorScheme.onPrimary)
+                color = colorScheme.onPrimary,
+                modifier = Modifier.testTag("languagesLabel"))
           }
           Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.End) {
             Column {
@@ -424,32 +440,38 @@ fun StatsSection(
                   "Pending tasks: ${filteredPendingTasks.size}",
                   fontSize = 20.sp,
                   color = colorScheme.onPrimary,
-                  fontWeight = FontWeight.Bold)
+                  fontWeight = FontWeight.Bold,
+                  modifier = Modifier.testTag("pendingTasksText"))
               Text(
                   "Accepted tasks: ${filteredAcceptedTasks.size}",
                   fontSize = 20.sp,
                   color = colorScheme.onPrimary,
-                  fontWeight = FontWeight.Bold)
+                  fontWeight = FontWeight.Bold,
+                  modifier = Modifier.testTag("acceptedTasksText"))
               Text(
                   "Scheduled tasks: ${filteredScheduledTasks.size}",
                   fontSize = 20.sp,
                   color = colorScheme.onPrimary,
-                  fontWeight = FontWeight.Bold)
+                  fontWeight = FontWeight.Bold,
+                  modifier = Modifier.testTag("scheduledTasksText"))
               Text(
                   "Completed tasks: ${filteredCompletedTasks.size}",
                   fontSize = 20.sp,
                   color = colorScheme.onPrimary,
-                  fontWeight = FontWeight.Bold)
+                  fontWeight = FontWeight.Bold,
+                  modifier = Modifier.testTag("completedTasksText"))
               Text(
                   "Canceled tasks: ${filteredCanceledTasks.size}",
                   fontSize = 20.sp,
                   color = colorScheme.onPrimary,
-                  fontWeight = FontWeight.Bold)
+                  fontWeight = FontWeight.Bold,
+                  modifier = Modifier.testTag("canceledTasksText"))
               Text(
                   "Archived tasks: ${filteredArchivedTasks.size}",
                   fontSize = 20.sp,
                   color = colorScheme.onPrimary,
-                  fontWeight = FontWeight.Bold)
+                  fontWeight = FontWeight.Bold,
+                  modifier = Modifier.testTag("archivedTasksText"))
             }
           }
         }
