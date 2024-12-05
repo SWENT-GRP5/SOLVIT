@@ -230,6 +230,7 @@ fun EditSeekerProfileScreen(
                               email = email,
                               phone = phone,
                               address = address))
+                      authViewModel.setUserName(username)
                     }
                     navigationActions.goBack()
                   },

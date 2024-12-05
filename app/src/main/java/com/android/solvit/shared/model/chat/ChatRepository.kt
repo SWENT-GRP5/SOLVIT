@@ -11,6 +11,15 @@ interface ChatRepository {
       receiverUid: String
   )
 
+  fun linkChatToRequest(
+      chatRoomId: String,
+      serviceRequestId: String,
+      onSuccess: () -> Unit,
+      onFailure: () -> Unit
+  )
+
+  fun getChatRequest(chatRoomId: String, onSuccess: (String) -> Unit, onFailure: () -> Unit)
+
   fun sendMessage(
       isIaMessage: Boolean,
       chatRoomId: String,

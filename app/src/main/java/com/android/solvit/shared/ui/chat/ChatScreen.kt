@@ -7,11 +7,14 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -25,20 +28,25 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CardColors
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -76,11 +84,14 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.android.solvit.R
+import com.android.solvit.seeker.ui.review.MapCard
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.chat.AiSolverViewModel
 import com.android.solvit.shared.model.chat.ChatAssistantViewModel
 import com.android.solvit.shared.model.chat.ChatMessage
 import com.android.solvit.shared.model.chat.ChatViewModel
+import com.android.solvit.shared.model.request.ServiceRequest
+import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.utils.loadBitmapFromUri
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
@@ -98,17 +109,20 @@ fun ChatScreen(
     chatViewModel: ChatViewModel,
     authViewModel: AuthViewModel,
     chatAssistantViewModel: ChatAssistantViewModel,
+    serviceRequestViewModel: ServiceRequestViewModel
 ) {
   chatAssistantViewModel.clear()
 
   val messages by chatViewModel.coMessage.collectAsState()
   val receiver by chatViewModel.receiver.collectAsState()
-  val user by authViewModel.user.collectAsState()
   val receiverName = getReceiverName(receiver)
   val receiverPicture = getReceiverImageUrl(receiver)
-
-  // TODO : sender name has to be updated (we have to add a name field in class user)
-  chatAssistantViewModel.setContext(messages, "user", receiverName)
+  val user by authViewModel.user.collectAsState()
+  chatViewModel.getChatRequest { id ->
+    serviceRequestViewModel.getServiceRequestById(id) { chatViewModel.setChatRequest(it) }
+  }
+  val request by chatViewModel.chatRequest.collectAsState()
+  chatAssistantViewModel.setContext(messages, user?.userName ?: "", receiverName, request)
 
   // To send Image Messages
   var imageUri by remember { mutableStateOf<Uri?>(null) }
@@ -134,14 +148,7 @@ fun ChatScreen(
                 // upload Image User want to send to storage
                 val imageUrl =
                     if (imageUri != null) chatViewModel.uploadImagesToStorage(imageUri!!) else null
-                val message =
-                    user?.let {
-                      buildMessage(
-                          it.uid,
-                          textMessage,
-                          imageUrl,
-                      )
-                    }
+                val message = user?.let { buildMessage(it.uid, textMessage, imageUrl, it.userName) }
                 if (message != null) {
                   chatViewModel.sendMessage(false, message)
 
@@ -154,6 +161,10 @@ fun ChatScreen(
       }) { paddingValues ->
         LazyColumn(
             modifier = Modifier.padding(paddingValues).imePadding().testTag("conversation")) {
+              if (request != null) {
+                // Display the request details
+                item { RequestDetails(request!!, serviceRequestViewModel, navigationActions) }
+              }
               items(messages) { message ->
                 if (message.senderId == FirebaseAuth.getInstance().currentUser?.uid) {
                   // Item for messages authentified user send
@@ -192,15 +203,13 @@ fun AiSolverWelcomeScreen(
                 Icon(Icons.Default.ArrowBack, contentDescription = "Back")
               }
             },
-            colors =
-                TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background))
+            colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background))
       },
   ) { innerPadding ->
     BoxWithConstraints(
         modifier =
             Modifier.fillMaxSize()
-                .background(color = MaterialTheme.colorScheme.background)
+                .background(color = colorScheme.background)
                 .padding(innerPadding)
                 .testTag("AiGetStartedScreen"),
         contentAlignment = Alignment.TopCenter) {
@@ -364,14 +373,7 @@ fun AiSolverScreen(
                 // upload Image User want to send to storage
                 val imageUrl =
                     if (imageUri != null) chatViewModel.uploadImagesToStorage(imageUri!!) else null
-                val message =
-                    user?.let {
-                      buildMessage(
-                          it.uid,
-                          textMessage,
-                          imageUrl,
-                      )
-                    }
+                val message = user?.let { buildMessage(it.uid, textMessage, imageUrl, it.userName) }
                 if (message != null) {
                   chatViewModel.sendMessage(true, message)
                   onMessageChange("")
@@ -529,8 +531,7 @@ fun SentMessage(
                             topEnd = if (isSentByUser) 0.dp else 16.dp,
                             bottomStart = 16.dp,
                             bottomEnd = 16.dp))
-                    .background(
-                        if (isSentByUser) MaterialTheme.colorScheme.primary else Color.LightGray)
+                    .background(if (isSentByUser) colorScheme.primary else Color.LightGray)
                     .padding(horizontal = 16.dp, vertical = 12.dp)) {
               constraints
 
@@ -560,8 +561,7 @@ fun SentMessage(
 
                               append(message.message.substring(lastIndex))
                             },
-                        color =
-                            if (isSentByUser) MaterialTheme.colorScheme.background else Color.Black,
+                        color = if (isSentByUser) colorScheme.background else Color.Black,
                         style = MaterialTheme.typography.bodySmall)
                 is ChatMessage.ImageMessage -> {
                   Log.e("display Image", message.imageUrl)
@@ -581,9 +581,7 @@ fun SentMessage(
                       modifier = Modifier.fillMaxWidth()) {
                         Text(
                             text = message.text,
-                            color =
-                                if (isSentByUser) MaterialTheme.colorScheme.onPrimary
-                                else Color.Black,
+                            color = if (isSentByUser) colorScheme.onPrimary else Color.Black,
                             style = MaterialTheme.typography.bodySmall)
 
                         AsyncImage(
@@ -627,12 +625,17 @@ fun MessageInputBar(
 
   Column(
       modifier =
-          Modifier.background(
-                  color = MaterialTheme.colorScheme.surface,
-                  shape = RoundedCornerShape(size = 28.dp))
+          Modifier.background(color = colorScheme.surface, shape = RoundedCornerShape(size = 28.dp))
               .padding(horizontal = 8.dp, vertical = 8.dp)
               .imePadding()
               .testTag("SendMessageBar")) {
+        if (!isAiSolverScreen) {
+          AssistantSuggestions(chatAssistantViewModel) {
+            chatAssistantViewModel.updateSelectedTones(emptyList())
+            chatAssistantViewModel.generateMessage(it) { msg -> message = msg }
+          }
+        }
+
         // If an image is selected, display it above the text field
         imageUri?.let { uri ->
           Box(
@@ -662,8 +665,7 @@ fun MessageInputBar(
             modifier =
                 Modifier.fillMaxWidth()
                     .background(
-                        color = MaterialTheme.colorScheme.surface,
-                        shape = RoundedCornerShape(size = 28.dp))
+                        color = colorScheme.surface, shape = RoundedCornerShape(size = 28.dp))
                     .padding(horizontal = 8.dp),
             verticalAlignment = Alignment.CenterVertically) {
               // TextField for entering the message
@@ -676,23 +678,25 @@ fun MessageInputBar(
                           .padding(end = 8.dp)
                           .testTag("enterText"),
                   placeholder = {
-                    Text(text = "Send Message", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(text = "Send Message", color = colorScheme.onSurfaceVariant)
                   },
                   colors =
                       OutlinedTextFieldDefaults.colors(
                           unfocusedBorderColor = Color.Transparent,
                           focusedBorderColor = Color.Transparent,
-                          focusedTextColor = MaterialTheme.colorScheme.onSurface),
+                          focusedTextColor = colorScheme.onSurface),
                   singleLine = true)
 
               // Optional AI Chat Assistant Button
               if (!isAiSolverScreen) {
-                IconButton(onClick = { showDialog = true }, modifier = Modifier.size(48.dp)) {
-                  Icon(
-                      painter = painterResource(R.drawable.ai_message),
-                      contentDescription = "Chat Assistant",
-                      tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
+                IconButton(
+                    onClick = { showDialog = true },
+                    modifier = Modifier.size(48.dp).testTag("aiButton")) {
+                      Icon(
+                          painter = painterResource(R.drawable.ai_message),
+                          contentDescription = "Chat Assistant",
+                          tint = colorScheme.onSurfaceVariant)
+                    }
               }
 
               // Button to upload an image
@@ -702,7 +706,7 @@ fun MessageInputBar(
                     Icon(
                         imageVector = Icons.Default.AddCircle,
                         contentDescription = "Upload Image",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                        tint = colorScheme.onSurfaceVariant)
                   }
 
               // Button to send the message
@@ -715,7 +719,7 @@ fun MessageInputBar(
                     Icon(
                         imageVector = Icons.Default.Send,
                         contentDescription = "Send",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        tint = colorScheme.onSurfaceVariant,
                         modifier = Modifier.rotate(-45f))
                   }
             }
@@ -729,7 +733,12 @@ fun MessageInputBar(
 }
 
 /** Handle different messages possible format a user send */
-fun buildMessage(userId: String, messageText: String?, imageUrl: String?): ChatMessage? {
+fun buildMessage(
+    userId: String,
+    messageText: String?,
+    imageUrl: String?,
+    senderName: String
+): ChatMessage? {
   return when {
     // User send both a text and an Image
     !messageText.isNullOrEmpty() && !imageUrl.isNullOrEmpty() -> {
@@ -737,7 +746,7 @@ fun buildMessage(userId: String, messageText: String?, imageUrl: String?): ChatM
           text = messageText,
           imageUrl = imageUrl,
           senderId = userId,
-          senderName = "Hassan", // To Update
+          senderName = senderName, // To Update
           timestamp = System.currentTimeMillis())
     }
     // User send only a text
@@ -757,5 +766,91 @@ fun buildMessage(userId: String, messageText: String?, imageUrl: String?): ChatM
           timestamp = System.currentTimeMillis())
     }
     else -> null
+  }
+}
+
+@Composable
+fun AssistantSuggestions(
+    chatAssistantViewModel: ChatAssistantViewModel,
+    onSuggestionSelect: (String) -> Unit
+) {
+  val suggestions by chatAssistantViewModel.suggestions.collectAsState()
+  Row(
+      modifier =
+          Modifier.fillMaxWidth()
+              .padding(horizontal = 16.dp)
+              .horizontalScroll(rememberScrollState())
+              .testTag("aiSuggestions"),
+      horizontalArrangement = Arrangement.SpaceBetween,
+      verticalAlignment = Alignment.CenterVertically) {
+        Icon(
+            painter = painterResource(R.drawable.ai_stars),
+            contentDescription = "AI suggestions",
+            Modifier.padding(horizontal = 8.dp),
+            tint = colorScheme.onSurfaceVariant)
+        if (suggestions.isEmpty()) {
+          Text("No suggestions available", color = colorScheme.onSurfaceVariant)
+        } else {
+          suggestions.forEach { suggestion ->
+            Text(
+                text = suggestion,
+                modifier =
+                    Modifier.border(1.dp, colorScheme.onSurfaceVariant, RoundedCornerShape(8.dp))
+                        .clickable { onSuggestionSelect(suggestion) }
+                        .padding(8.dp)
+                        .testTag("suggestionItem$suggestion"),
+                color = colorScheme.onSurfaceVariant)
+          }
+        }
+        IconButton(
+            onClick = {
+              chatAssistantViewModel.generateSuggestions {
+                Log.e("ChatScreen", "Suggestions generated")
+              }
+            }) {
+              Icon(
+                  Icons.Default.Refresh,
+                  contentDescription = "Generate suggestions",
+                  tint = colorScheme.onSurfaceVariant)
+            }
+      }
+}
+
+@Composable
+fun RequestDetails(
+    serviceRequest: ServiceRequest,
+    serviceRequestViewModel: ServiceRequestViewModel,
+    navigationActions: NavigationActions
+) {
+  OutlinedCard(
+      modifier =
+          Modifier.fillMaxWidth().padding(16.dp).clickable {
+            serviceRequestViewModel.selectRequest(serviceRequest)
+            navigationActions.navigateTo(Route.BOOKING_DETAILS)
+          },
+      colors =
+          CardColors(
+              colorScheme.background,
+              colorScheme.onBackground,
+              colorScheme.background,
+              colorScheme.onBackground),
+  ) {
+    Row(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min).testTag("requestCard")) {
+      Column(modifier = Modifier.fillMaxWidth(.4f).padding(8.dp)) {
+        serviceRequest.location?.let { MapCard(it) }
+      }
+      Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+        Text(
+            text = serviceRequest.title,
+            modifier = Modifier.testTag("requestTitle"),
+            fontWeight = FontWeight.ExtraBold,
+            fontSize = 20.sp)
+        Text(text = serviceRequest.description, modifier = Modifier.testTag("requestDescription"))
+        Text(
+            text = serviceRequest.type.name,
+            modifier = Modifier.testTag("requestType"),
+            fontWeight = FontWeight.Bold)
+      }
+    }
   }
 }

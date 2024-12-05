@@ -7,11 +7,14 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import com.google.firebase.storage.FirebaseStorage
 
 class ChatRepositoryFirestore(
     private val db: FirebaseDatabase,
-    private val storage: FirebaseStorage
+    private val storage: FirebaseStorage,
+    private val firestore: FirebaseFirestore
 ) : ChatRepository {
 
   // Name of collection containing messages
@@ -29,7 +32,6 @@ class ChatRepositoryFirestore(
       receiverUid: String
   ) {
     val collection = if (isIaMessage) collectionPathIA else collectionPath
-    Log.e("TEST", "$collection")
     // Check that sender (current authenticated user is not null)
     if (currentUserUid != null) {
       val databaseRef = db.getReference(collection)
@@ -87,6 +89,40 @@ class ChatRepositoryFirestore(
     } else {
       onFailure()
     }
+  }
+
+  override fun linkChatToRequest(
+      chatRoomId: String,
+      serviceRequestId: String,
+      onSuccess: () -> Unit,
+      onFailure: () -> Unit
+  ) {
+    firestore
+        .collection("chatRooms")
+        .document(chatRoomId)
+        .set(mapOf("serviceRequestId" to serviceRequestId), SetOptions.merge())
+        .addOnSuccessListener { onSuccess() }
+        .addOnFailureListener { onFailure() }
+  }
+
+  override fun getChatRequest(
+      chatRoomId: String,
+      onSuccess: (String) -> Unit,
+      onFailure: () -> Unit
+  ) {
+    firestore
+        .collection("chatRooms")
+        .document(chatRoomId)
+        .get()
+        .addOnSuccessListener { document ->
+          val serviceRequestId = document.getString("serviceRequestId")
+          if (serviceRequestId != null) {
+            onSuccess(serviceRequestId)
+          } else {
+            onFailure()
+          }
+        }
+        .addOnFailureListener { onFailure() }
   }
 
   // Send Message in a chatRoom than links 2 users

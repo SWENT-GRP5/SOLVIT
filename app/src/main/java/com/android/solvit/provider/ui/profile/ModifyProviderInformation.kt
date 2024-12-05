@@ -281,6 +281,7 @@ fun ModifyInput(
                   description = newDescription)
 
           listProviderViewModel.updateProvider(provider = updatedProvider)
+          authViewModel.setUserName(newName)
 
           navigationActions.goBack()
         } else {

@@ -123,7 +123,7 @@ class EndToEndTestCreateProfile {
     serviceRequestRepository = ServiceRequestRepositoryFirebase(firestore, storage)
     reviewRepository = ReviewRepositoryFirestore(firestore)
     packageProposalRepositoryFirestore = PackageProposalRepositoryFirestore(firestore)
-    chatRepository = ChatRepositoryFirestore(database, storage)
+    chatRepository = ChatRepositoryFirestore(database, storage, firestore)
     notificationsRepository = NotificationsRepositoryFirestore(firestore)
     packagesAssistantViewModel = PackagesAssistantViewModel()
 

@@ -96,6 +96,7 @@ fun SolvitApp() {
   val aiSolverViewModel = viewModel<AiSolverViewModel>(factory = AiSolverViewModel.Factory)
   val notificationViewModel =
       viewModel<NotificationsViewModel>(factory = NotificationsViewModel.Factory)
+
   val packagesAssistantViewModel =
       viewModel<PackagesAssistantViewModel>(factory = PackagesAssistantViewModel.Factory)
   if (!userRegistered.value) {
@@ -234,7 +235,8 @@ fun SeekerUI(
             navigationActions = navigationActions,
             chatViewModel = chatViewModel,
             authViewModel = authViewModel,
-            chatAssistantViewModel = chatAssistantViewModel)
+            chatAssistantViewModel = chatAssistantViewModel,
+            serviceRequestViewModel = serviceRequestViewModel)
       }
     }
 
@@ -340,7 +342,8 @@ fun ProviderUI(
             navigationActions = navigationActions,
             chatViewModel = chatViewModel,
             authViewModel = authViewModel,
-            chatAssistantViewModel = chatAssistantViewModel)
+            chatAssistantViewModel = chatAssistantViewModel,
+            serviceRequestViewModel = serviceRequestViewModel)
       }
     }
 

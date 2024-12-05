@@ -73,13 +73,13 @@ class ChatAssistantViewModelTest {
   }
 
   @Test
-  fun buildPromptCreatesCorrectPrompt() {
+  fun buildMessagePromptCreatesCorrectPrompt() {
     chatAssistantViewModel.setContext(messageContext, senderName, receiverName, requestContext)
     chatAssistantViewModel.updateSelectedTones(selectedTones)
     val input = "input"
-    val prompt = chatAssistantViewModel.buildPrompt(input)
+    val prompt = chatAssistantViewModel.buildMessagePrompt(input)
     val expectedPrompt =
-        "Write a single message response from sender to receiver, based on the following conversation:\n" +
+        "Write a single message response for sender to receiver, based on the following conversation:\n" +
             messageContext.joinToString("\n") { it.senderName + ": " + it.message } +
             ", based on the following service request:\n" +
             requestContext.title +
@@ -88,7 +88,24 @@ class ChatAssistantViewModelTest {
             ", with the following tones:\n" +
             selectedTones.joinToString(", ") +
             ", with the following infos provided by the sender:\n" +
-            input
+            input +
+            ". If it would not make sense to respond in the conversation, please don't respond: The message you provide should be usable right away."
+    assert(prompt == expectedPrompt)
+    chatAssistantViewModel.clear()
+  }
+
+  @Test
+  fun buildSuggestionsPromptCreatesCorrectPrompt() {
+    chatAssistantViewModel.setContext(messageContext, senderName, receiverName, requestContext)
+    val prompt = chatAssistantViewModel.buildSuggestionsPrompt()
+    val expectedPrompt =
+        "Provide a list without repetitions of suggestions themes for a response, based on the following conversation:\n" +
+            messageContext.joinToString("\n") { it.senderName + ": " + it.message } +
+            ", based on the following service request:\n" +
+            requestContext.title +
+            ": " +
+            requestContext.description +
+            ". Please make sure the suggestions are relevant to the conversation, otherwise don't provide any."
     assert(prompt == expectedPrompt)
     chatAssistantViewModel.clear()
   }

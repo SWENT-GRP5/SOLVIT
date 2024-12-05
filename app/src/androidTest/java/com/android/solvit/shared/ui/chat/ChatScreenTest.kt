@@ -14,6 +14,8 @@ import com.android.solvit.shared.model.chat.ChatMessage
 import com.android.solvit.shared.model.chat.ChatRepository
 import com.android.solvit.shared.model.chat.ChatViewModel
 import com.android.solvit.shared.model.chat.MESSAGE_STATUS
+import com.android.solvit.shared.model.request.ServiceRequestRepository
+import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.test.runTest
@@ -29,10 +31,12 @@ class ChatScreenTest {
   private lateinit var authRep: AuthRep
   private lateinit var navController: NavController
   private lateinit var navigationActions: NavigationActions
+  private lateinit var serviceRequestRepository: ServiceRequestRepository
 
   private lateinit var chatViewModel: ChatViewModel
   private lateinit var authViewModel: AuthViewModel
   private lateinit var chatAssistantViewModel: ChatAssistantViewModel
+  private lateinit var serviceRequestViewModel: ServiceRequestViewModel
   @get:Rule val composeTestRule = createComposeRule()
 
   // Create a list of TextMessage instances
@@ -77,9 +81,11 @@ class ChatScreenTest {
 
     chatRepository = mock(ChatRepository::class.java)
     authRep = mock(AuthRep::class.java)
+    serviceRequestRepository = mock(ServiceRequestRepository::class.java)
     chatViewModel = ChatViewModel(chatRepository)
     authViewModel = AuthViewModel(authRep)
     chatAssistantViewModel = ChatAssistantViewModel()
+    serviceRequestViewModel = ServiceRequestViewModel(serviceRequestRepository)
 
     navController = mock(NavController::class.java)
     navigationActions = NavigationActions(navController)
@@ -105,7 +111,12 @@ class ChatScreenTest {
   @Test
   fun AllComponentsAreDisplayed() = runTest {
     composeTestRule.setContent {
-      ChatScreen(navigationActions, chatViewModel, authViewModel, chatAssistantViewModel)
+      ChatScreen(
+          navigationActions,
+          chatViewModel,
+          authViewModel,
+          chatAssistantViewModel,
+          serviceRequestViewModel)
     }
 
     chatViewModel.setReceiverUid("1234")
@@ -126,6 +137,9 @@ class ChatScreenTest {
     assertEquals(
         testMessages.size,
         composeTestRule.onAllNodesWithTag("MessageItem").fetchSemanticsNodes().size)
+
+    composeTestRule.onNodeWithTag("aiButton").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("aiSuggestions").assertIsDisplayed()
   }
 
   @Test

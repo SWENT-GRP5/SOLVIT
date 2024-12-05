@@ -427,7 +427,8 @@ fun ServiceBookingScreen(
                         navigationActions = navigationActions,
                         chatViewModel = chatViewModel,
                         receiverId = providerId ?: "",
-                        receiver = provider)
+                        receiver = provider,
+                        requestId = request!!.uid)
                   } else {
                     EditButton(navigationActions)
                   }
@@ -439,7 +440,8 @@ fun ServiceBookingScreen(
                         navigationActions = navigationActions,
                         chatViewModel = chatViewModel,
                         receiverId = request?.userId ?: "",
-                        receiver = seekerState.value!!)
+                        receiver = seekerState.value!!,
+                        requestId = request!!.uid)
                   } else {
                     EditButton(navigationActions)
                   }
@@ -555,7 +557,8 @@ fun EditAndChatButton(
     currentUserId: String,
     chatViewModel: ChatViewModel,
     receiverId: String,
-    receiver: Any
+    receiver: Any,
+    requestId: String
 ) {
   Row(
       modifier = Modifier.fillMaxWidth().padding(top = 16.dp).testTag("edit_discuss_button"),
@@ -568,7 +571,7 @@ fun EditAndChatButton(
         contentAlignment = Alignment.Center) {
           Button(
               onClick = {
-                chatViewModel.prepareForChat(false, currentUserId, receiverId, receiver)
+                chatViewModel.prepareForChat(false, currentUserId, receiverId, receiver, requestId)
               },
               colors =
                   ButtonDefaults.buttonColors(
