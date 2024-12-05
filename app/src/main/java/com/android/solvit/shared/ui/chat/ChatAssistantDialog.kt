@@ -73,9 +73,12 @@ fun ChatAssistantDialog(
                 modifier = Modifier.testTag("modeSelectionRow").fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically) {
-                  Text("Generation")
-                  Switch(checked = translationMode, onCheckedChange = { translationMode = it })
-                  Text("Translation")
+                  Text("Generation", modifier = Modifier.testTag("generationText"))
+                  Switch(
+                      checked = translationMode,
+                      onCheckedChange = { translationMode = it },
+                      modifier = Modifier.testTag("modeSwitch"))
+                  Text("Translation", modifier = Modifier.testTag("translationText"))
                 }
 
             if (translationMode) {
@@ -192,7 +195,7 @@ fun LanguageSelection(onSelect: (String) -> Unit, label: String) {
         label = { Text(label) },
         readOnly = true,
         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-        modifier = Modifier.menuAnchor(),
+        modifier = Modifier.menuAnchor().testTag("languageSelection$label"),
         colors =
             TextFieldDefaults.colors(
                 focusedIndicatorColor = Color.Transparent,
@@ -209,6 +212,7 @@ fun LanguageSelection(onSelect: (String) -> Unit, label: String) {
               onSelect(language.name)
               expanded = false
             },
+            modifier = Modifier.testTag("languageItem${language.name}"),
             contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
         )
       }

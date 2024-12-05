@@ -393,9 +393,11 @@ fun MessageInputBar(
           onResult = { uri: Uri? -> onImageSelected(uri) })
 
   Column {
-    AssistantSuggestions(chatAssistantViewModel) {
-      chatAssistantViewModel.updateSelectedTones(emptyList())
-      chatAssistantViewModel.generateMessage(it) { msg -> message = msg }
+    if (!isAiSolverScreen) {
+      AssistantSuggestions(chatAssistantViewModel) {
+        chatAssistantViewModel.updateSelectedTones(emptyList())
+        chatAssistantViewModel.generateMessage(it) { msg -> message = msg }
+      }
     }
     Row(
         modifier =
@@ -406,9 +408,7 @@ fun MessageInputBar(
                 )
                 .imePadding()
                 .testTag("SendMessageBar"), // To ensure that content of scaffold appears even if
-        // keyboard
-        // is
-        // displayed
+        // keyboard is displayed
     ) {
 
       // Input to enter message you want to send
@@ -428,12 +428,13 @@ fun MessageInputBar(
         var showDialog by remember { mutableStateOf(false) }
 
         // Button to Use the Chat Assistant
-        IconButton(onClick = { showDialog = true }, modifier = Modifier.size(48.dp)) {
-          Icon(
-              painter = painterResource(R.drawable.ai_message),
-              contentDescription = "chat assistant",
-              tint = colorScheme.onSurfaceVariant)
-        }
+        IconButton(
+            onClick = { showDialog = true }, modifier = Modifier.size(48.dp).testTag("aiButton")) {
+              Icon(
+                  painter = painterResource(R.drawable.ai_message),
+                  contentDescription = "chat assistant",
+                  tint = colorScheme.onSurfaceVariant)
+            }
 
         // Show the Chat Assistant Dialog if showDialog is true
         if (showDialog) {
@@ -497,7 +498,8 @@ fun AssistantSuggestions(
       modifier =
           Modifier.fillMaxWidth()
               .padding(horizontal = 16.dp)
-              .horizontalScroll(rememberScrollState()),
+              .horizontalScroll(rememberScrollState())
+              .testTag("aiSuggestions"),
       horizontalArrangement = Arrangement.SpaceBetween,
       verticalAlignment = Alignment.CenterVertically) {
         Icon(

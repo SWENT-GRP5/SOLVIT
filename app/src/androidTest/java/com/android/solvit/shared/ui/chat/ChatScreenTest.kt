@@ -111,7 +111,12 @@ class ChatScreenTest {
   @Test
   fun AllComponentsAreDisplayed() = runTest {
     composeTestRule.setContent {
-      ChatScreen(navigationActions, chatViewModel, authViewModel, chatAssistantViewModel, serviceRequestViewModel)
+      ChatScreen(
+          navigationActions,
+          chatViewModel,
+          authViewModel,
+          chatAssistantViewModel,
+          serviceRequestViewModel)
     }
 
     chatViewModel.setReceiverUid("1234")
@@ -128,5 +133,8 @@ class ChatScreenTest {
     assertEquals(
         testMessages.size,
         composeTestRule.onAllNodesWithTag("MessageItem").fetchSemanticsNodes().size)
+
+    composeTestRule.onNodeWithTag("aiButton").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("aiSuggestions").assertIsDisplayed()
   }
 }
