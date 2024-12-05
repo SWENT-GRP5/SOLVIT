@@ -71,16 +71,6 @@ import com.android.solvit.shared.ui.navigation.NavigationActions
  * @param navigationActions A set of navigation actions to handle transitions between screens.
  * @param locationViewModel The `LocationViewModel` to fetch and manage location suggestions.
  * @param authViewModel The `AuthViewModel` to manage authentication and user-related data.
- *
- * This function:
- * - Locks the screen orientation to portrait mode while active.
- * - Guides the user through three steps:
- *     1. Inputting basic information such as name, username, phone, and location.
- *     2. Setting preferences for the profile.
- *     3. Displaying a confirmation screen upon completion.
- * - Validates user inputs at each step to ensure accuracy and completeness.
- * - Saves the seeker's profile data upon successful registration.
- * - Navigates to a success or dashboard screen after completing the registration.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter", "SourceLockedOrientationActivity")
@@ -358,11 +348,6 @@ fun SeekerRegistrationScreen(
  *
  * @param currentStep The current step in the registration process.
  * @param isFormComplete A boolean indicating whether the current step's form is complete.
- *
- * This function:
- * - Renders a visual indicator for each step, showing the current step and completed steps.
- * - Updates the visual appearance of steps based on their completion status.
- * - Uses the `StepCircle` composable to display individual step indicators.
  */
 @Composable
 fun Stepper(currentStep: Int, isFormComplete: Boolean) {
@@ -391,11 +376,6 @@ fun Stepper(currentStep: Int, isFormComplete: Boolean) {
  * @param stepNumber The number of the step being represented.
  * @param isCompleted A boolean indicating whether the step is completed.
  * @param label A text label describing the step.
- *
- * This function:
- * - Renders a circle with a checkmark for completed steps or the step number for incomplete steps.
- * - Displays a label below the circle describing the step.
- * - Adapts its appearance based on the completion status of the step.
  */
 @Composable
 fun StepCircle(stepNumber: Int, isCompleted: Boolean, label: String) {

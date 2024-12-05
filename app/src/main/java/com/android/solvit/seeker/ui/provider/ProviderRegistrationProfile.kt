@@ -557,7 +557,7 @@ fun ProviderDetails(
   val isDescriptionOk =
       description.isNotBlank() &&
           description.length < 250 // (we assume here that a word on average is 5 character)
-  val isStartingPriceOk = startingPrice.isNotBlank() && startingPrice.all { it.isDigit() }
+    val isStartingPriceOk = startingPrice.isNotBlank() && startingPrice.toDoubleOrNull() != null
 
   val allIsOk =
       selectedService.isNotEmpty() &&
@@ -707,12 +707,6 @@ fun ProviderDetails(
  * @param selectedImageUri The URI of the currently selected image, if any.
  * @param imageUrl A fallback URL to display an image if no local image is selected.
  * @param onImageSelected A lambda function triggered when a new image is selected by the user.
- *
- * This function:
- * - Shows a placeholder with an icon and prompt text if no image is selected or provided.
- * - Opens the system's image picker when the placeholder or current image is clicked.
- * - Displays the selected image or a fallback image URL when available.
- * - Ensures the content is styled with rounded corners and appropriate scaling.
  */
 @Composable
 fun UploadImage(selectedImageUri: Uri?, imageUrl: String?, onImageSelected: (Uri?) -> Unit) {
@@ -771,11 +765,6 @@ fun UploadImage(selectedImageUri: Uri?, imageUrl: String?, onImageSelected: (Uri
  *   nested list corresponds to the features of a specific package.
  * @param providePackages A mutable state representing whether the provider wants to offer service
  *   packages.
- *
- * This function displays:
- * - A dropdown menu for the user to indicate whether they want to offer packages.
- * - If packages are enabled, up to three `PackageInputSection` components for configuring the name,
- *   price, details, and features of each package.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

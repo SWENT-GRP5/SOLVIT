@@ -50,13 +50,6 @@ import com.android.solvit.shared.ui.navigation.NavigationActions
  * The screen includes an input field for the email address and validates the email format.
  *
  * @param navigationActions A set of navigation actions to handle transitions between screens.
- *
- * This function:
- * - Locks the screen orientation to portrait mode while the screen is active.
- * - Displays an image and a text prompt instructing the user to enter their email.
- * - Validates the email input to ensure it matches the standard email format.
- * - Provides feedback to the user through Toast messages for empty or invalid email input.
- * - Includes a button to submit the reset request (currently not implemented).
  */
 @SuppressLint(
     "SuspiciousIndentation",

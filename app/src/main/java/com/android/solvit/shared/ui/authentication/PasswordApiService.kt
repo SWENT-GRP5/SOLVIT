@@ -15,15 +15,6 @@ import retrofit2.http.Query
  * @param quantity The number of passwords to generate (default: 1).
  * @return A `PasswordResponse` object containing the generated passwords.
  * @GET("create/") Defines an HTTP GET request to the "create/" endpoint.
- *
- * The `createPassword` function:
- * - Generates one or more passwords based on the provided query parameters.
- * - Allows customization of the password characteristics, such as:
- *     - Inclusion of digits.
- *     - Use of lowercase and uppercase letters.
- *     - Use of special characters.
- *     - Length of the password(s).
- *     - Number of passwords to generate.
  */
 interface PasswordApiService {
   @GET("create/")

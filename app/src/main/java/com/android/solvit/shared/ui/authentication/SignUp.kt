@@ -299,11 +299,6 @@ fun ScreenTitle(title: String, testTag: String) {
  * @param goodFormEmail A boolean indicating if the email format is valid.
  * @param passwordLengthComplete A boolean indicating if the password meets the length requirement.
  * @param samePassword A boolean indicating if the password and confirm password match.
- *
- * This function:
- * - Validates the form fields before executing the `onClick` action.
- * - Displays appropriate Toast messages for incomplete or invalid fields.
- * - Dynamically adjusts its appearance based on validation status.
  */
 @Composable
 fun SignUpButton(
@@ -366,11 +361,6 @@ fun SignUpButton(
  * @param authViewModel The ViewModel managing authentication and user-related data.
  * @param onSuccess A lambda function executed when the Google Sign-In process succeeds.
  * @param onFailure A lambda function executed when the Google Sign-In process fails.
- *
- * This function:
- * - Launches the Google Sign-In intent and handles the result.
- * - Updates the `authViewModel` with the Google account upon success.
- * - Calls the appropriate callback (`onSuccess` or `onFailure`) based on the result.
  */
 @Composable
 fun googleRegisterLauncher(
@@ -442,10 +432,6 @@ fun AlreadyHaveAccountText(navigationActions: NavigationActions) {
  * A helper function that creates and returns a Retrofit instance for the Password API service.
  *
  * @return A `PasswordApiService` implementation for making password generation requests.
- *
- * This function:
- * - Configures Retrofit with a base URL and a Gson converter for JSON serialization.
- * - Builds the Retrofit instance and returns the `PasswordApiService` implementation.
  */
 fun createPasswordService(): PasswordApiService {
   val retrofit =

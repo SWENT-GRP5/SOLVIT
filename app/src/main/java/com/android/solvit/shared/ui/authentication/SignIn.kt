@@ -93,13 +93,6 @@ import kotlinx.coroutines.launch
  *
  * @param navigationActions A set of navigation actions to handle screen transitions.
  * @param authViewModel The ViewModel managing authentication and user-related data.
- *
- * This function:
- * - Dynamically adjusts its layout based on device orientation (portrait or landscape).
- * - Includes fields for email and password with validation and error messages.
- * - Provides a "Remember Me" checkbox and a link for forgotten passwords.
- * - Allows Google Sign-In and navigates to the appropriate screen upon success.
- * - Displays appropriate Toast messages for form validation and login status.
  */
 @SuppressLint("InvalidColorHexValue")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -195,10 +188,6 @@ fun SignInScreen(
  * multiple rapid clicks.
  *
  * @param navigationActions A set of navigation actions to handle screen transitions.
- *
- * This function:
- * - Navigates to the previous screen when clicked.
- * - Disables the button for a short duration after being clicked to prevent rapid navigation.
  */
 @Composable
 fun GoBackButton(navigationActions: NavigationActions) {
@@ -240,10 +229,6 @@ fun GoBackButton(navigationActions: NavigationActions) {
  * @param onFailure Callback invoked upon login failure.
  * @param launcher Managed activity result launcher for Google Sign-In.
  * @param token The Google Sign-In client token.
- *
- * This function:
- * - Displays the logo, email/password fields, and a sign-in button.
- * - Includes a "Sign-Up" section for new users and links for forgotten passwords.
  */
 @Composable
 fun PortraitLayout(
@@ -311,10 +296,6 @@ fun PortraitLayout(
  * @param onFailure Callback invoked upon login failure.
  * @param launcher Managed activity result launcher for Google Sign-In.
  * @param token The Google Sign-In client token.
- *
- * This function:
- * - Splits the screen into two sections: logo/sign-up on the left and form inputs on the right.
- * - Utilizes horizontal space effectively for landscape orientation.
  */
 @Composable
 fun LandscapeLayout(
@@ -407,13 +388,6 @@ fun LogoSection() {
  * @param launcher A managed activity result launcher for handling Google Sign-In.
  * @param token The Google Sign-In client token.
  * @param navigationActions A set of navigation actions to handle screen transitions.
- *
- * This function:
- * - Provides input fields for email and password with validation and error messages.
- * - Includes options for "Remember me" and "Forgot password".
- * - Displays a "Sign in" button that validates the input and attempts login.
- * - Offers a Google Sign-In button for alternative authentication.
- * - Ensures proper alignment and spacing between elements for a clean UI.
  */
 @Composable
 fun FormSection(
@@ -549,12 +523,6 @@ fun FormSection(
  * A composable function that displays a clickable "Sign-Up" section for new users.
  *
  * @param navigationActions A set of navigation actions to handle screen transitions.
- *
- * This function:
- * - Renders a text message encouraging new users to sign up.
- * - Highlights the "Sign-Up" text with an underline and a primary color for emphasis.
- * - Navigates to the sign-up screen when the "Sign-Up" text is clicked.
- * - Uses a `ClickableText` element for accessibility and interaction.
  */
 @Composable
 fun SignUpSection(navigationActions: NavigationActions) {
@@ -707,16 +675,6 @@ fun GoogleButton(
  * @param authViewModel The ViewModel managing authentication and user-related data.
  * @param onSuccess A lambda function executed when the Google Sign-In process succeeds.
  * @param onFailure A lambda function executed when the Google Sign-In process fails.
- *
- * This function:
- * - Creates a managed activity result launcher to handle the result of the Google Sign-In intent.
- * - Attempts to retrieve the Google account from the result data.
- * - On success:
- *     - Updates the `authViewModel` with the retrieved Google account.
- *     - Calls the `signInWithGoogle` method of the `authViewModel`.
- *     - Invokes the provided `onSuccess` callback.
- * - On failure:
- *     - Invokes the provided `onFailure` callback.
  */
 @Composable
 fun googleSignInLauncher(
@@ -757,10 +715,6 @@ fun googleSignInLauncher(
  * @param errorTestTag Test tag for the error message.
  * @param maxLines The maximum number of lines the text field can display.
  * @param textAlign Text alignment for the field's content.
- *
- * This function:
- * - Tracks focus changes to display error messages only after focus loss.
- * - Dynamically adjusts colors and styles based on validation status.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -855,10 +809,6 @@ fun CustomOutlinedTextField(
  *   requirement.
  * @param errorMessage The error message displayed for invalid password length.
  * @param testTagErrorPassword Test tag for the error message.
- *
- * This function:
- * - Includes a toggle icon to switch between showing and hiding the password.
- * - Displays an error message for invalid input after focus loss.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
