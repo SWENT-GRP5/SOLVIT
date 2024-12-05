@@ -44,7 +44,7 @@ class AiSolverViewModel : ViewModel() {
         object : ViewModelProvider.Factory {
           @Suppress("UNCHECKED_CAST")
           override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return ChatAssistantViewModel() as T
+            return AiSolverViewModel() as T
           }
         }
   }
@@ -72,7 +72,8 @@ class AiSolverViewModel : ViewModel() {
           "${message.senderName} : ${
                 when (message){
                     is ChatMessage.TextMessage -> message.message
-                    is ChatMessage.ImageMessage -> message.imageUrl
+                    is ChatMessage.ImageMessage -> "sent image"
+                    is ChatMessage.TextImageMessage -> message.text
                 }
              }"
         }
