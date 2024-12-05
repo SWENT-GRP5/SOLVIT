@@ -9,7 +9,6 @@ import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.MailOutline
 import androidx.compose.material.icons.outlined.Menu
-import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavController
 
@@ -77,11 +76,6 @@ object TopLevelDestinations {
   val MYJOBS =
       TopLevelDestination(
           route = Route.MY_JOBS, icon = Icons.Outlined.CheckCircle, textId = "My Jobs")
-  val NOTIFICATIONS =
-      TopLevelDestination(
-          route = Route.NOTIFICATIONS,
-          icon = Icons.Outlined.Notifications,
-          textId = "Notifications")
 
   ////////////////////////////////// SEEKER //////////////////////////////////
   val SERVICES =
@@ -118,8 +112,7 @@ val LIST_TOP_LEVEL_DESTINATION_PROVIDER =
         TopLevelDestinations.MAP_OF_SEEKERS,
         TopLevelDestinations.MESSAGES,
         TopLevelDestinations.CALENDAR,
-        TopLevelDestinations.PROVIDER_PROFILE,
-        TopLevelDestinations.NOTIFICATIONS)
+        TopLevelDestinations.PROVIDER_PROFILE)
 
 open class NavigationActions(
     private val navController: NavController,

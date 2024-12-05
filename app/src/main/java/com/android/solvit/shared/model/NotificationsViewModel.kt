@@ -86,4 +86,12 @@ class NotificationsViewModel(private val repository: NotificationsRepository) : 
           Log.e("NotificationsViewModel", "Failed to send notifications: ${exception.message}")
         })
   }
+  /**
+   * Marks a notification as read by updating the `isRead` field in Firestore.
+   *
+   * @param notification The notification to be marked as read.
+   */
+  fun markNotificationAsRead(notification: Notification) {
+    repository.updateNotificationReadStatus(notification.uid, true)
+  }
 }

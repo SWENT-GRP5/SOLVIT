@@ -2,6 +2,7 @@ package com.android.solvit.shared.model.provider
 
 import androidx.test.core.app.ApplicationProvider
 import com.android.solvit.shared.model.NotificationsRepositoryFirestore
+import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.service.Services
 import com.google.android.gms.tasks.TaskCompletionSource
@@ -43,7 +44,15 @@ class NotificationsRepositoryTest {
   private val notificationId = "notif123"
   private val serviceRequest =
       ServiceRequest(
-          "service123", "title", Services.TUTOR, "", "", "", Timestamp.now(), Timestamp.now(), null)
+          "service123",
+          "title",
+          Services.TUTOR,
+          "",
+          "",
+          "",
+          Timestamp.now(),
+          Timestamp.now(),
+          Location(0.0, 0.0, ""))
   private val provider = Provider("provider123", "john", Services.TUTOR)
 
   @Before
@@ -163,6 +172,7 @@ class NotificationsRepositoryTest {
   @Test
   fun `documentToNotif converts document snapshot to Notification`() {
     val mockDocumentSnapshot = mock(DocumentSnapshot::class.java)
+
     // Mock the DocumentSnapshot to return specific data
     `when`(mockDocumentSnapshot.id).thenReturn("notif123")
     `when`(mockDocumentSnapshot.getString("providerId")).thenReturn("provider123")
@@ -171,6 +181,22 @@ class NotificationsRepositoryTest {
         .thenReturn("A new service request has been posted.")
     `when`(mockDocumentSnapshot.getTimestamp("timestamp")).thenReturn(Timestamp.now())
     `when`(mockDocumentSnapshot.getBoolean("isRead")).thenReturn(false)
+
+    // Mock the serviceRequest map
+    val serviceRequestMap =
+        mapOf(
+            "uid" to "service123",
+            "title" to "Service Title",
+            "type" to "TUTOR",
+            "description" to "Need help with Math",
+            "userId" to "user123",
+            "providerId" to providerId,
+            "dueDate" to Timestamp.now(),
+            "meetingDate" to Timestamp.now(),
+            "location" to mapOf("latitude" to 10.0, "longitude" to 20.0, "name" to "New York"),
+            "status" to "PENDING")
+
+    `when`(mockDocumentSnapshot.get("serviceRequest")).thenReturn(serviceRequestMap)
 
     // Convert the document snapshot to a notification
     val notification = notificationsRepository.documentToNotif(mockDocumentSnapshot)
@@ -181,5 +207,30 @@ class NotificationsRepositoryTest {
     assertEquals("New Request", notification?.title)
     assertEquals("A new service request has been posted.", notification?.message)
     assertEquals(false, notification?.isRead)
+
+    // Also assert the serviceRequest fields
+    val serviceRequest = notification?.serviceRequest
+    assertEquals("service123", serviceRequest?.uid)
+    assertEquals("Service Title", serviceRequest?.title)
+    assertEquals(Services.TUTOR, serviceRequest?.type)
+    assertEquals("Need help with Math", serviceRequest?.description)
+  }
+
+  /**
+   * Tests that the `updateNotificationReadStatus` function correctly updates the `isRead` field of
+   * a notification document in Firestore.
+   */
+  @Test
+  fun `updateNotificationReadStatus updates notification isRead status in Firestore`() {
+    // Arrange
+    val notificationId = "notif123" // The ID of the notification to be updated
+    val isRead = true // The new read status to set
+
+    val mockTaskCompletionSource = TaskCompletionSource<Void>()
+    `when`(mockDocumentReference.update("isRead", isRead)).thenReturn(mockTaskCompletionSource.task)
+
+    notificationsRepository.updateNotificationReadStatus(notificationId, isRead)
+    // Assert that the Firestore update method was called with the correct arguments
+    verify(mockDocumentReference).update("isRead", isRead)
   }
 }
