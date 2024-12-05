@@ -13,7 +13,7 @@ fun getReceiverName(receiver: Any): String {
   val receiverName =
       when (receiver) {
         is Provider -> (receiver as Provider).name
-        is SeekerProfile -> (receiver as SeekerProfile).name
+        is SeekerProfile -> (receiver as SeekerProfile).username
         else -> "Unknown"
       }
   return receiverName

@@ -148,6 +148,10 @@ class AuthViewModel(private val authRepository: AuthRep) : ViewModel() {
   }
 
   fun setUserName(userName: String) {
+    if (user.value == null) {
+      Log.e("AuthViewModel", "User is null")
+      return
+    }
     authRepository.setUserName(
         userName,
         user.value!!.uid,
