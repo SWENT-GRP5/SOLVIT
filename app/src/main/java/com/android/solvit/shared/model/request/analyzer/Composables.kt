@@ -346,9 +346,13 @@ fun MultiStepDialog(
                   if (selectedImages.isNotEmpty() && !isLoading) {
                     isLoading = true
                     try {
+                      val analyzer = GeminiImageAnalyzer()
                       val (title, type, description) =
                           uploadAndAnalyze(
-                              context, selectedImages, ::loadBitmapFromUri, ::analyzeImagesGemini)
+                              context,
+                              selectedImages,
+                              ::loadBitmapFromUri,
+                              { bitmaps -> analyzer.analyzeImages(bitmaps) })
                       onAnalyzeComplete(title, type, description)
                     } catch (e: Exception) {
                       Log.e("MultiStepDialog", "Error: ${e.message}")
