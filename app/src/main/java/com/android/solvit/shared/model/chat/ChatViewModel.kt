@@ -4,7 +4,9 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.android.solvit.shared.model.request.ServiceRequest
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,22 +30,33 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
   private val _isReadyToNavigate = MutableStateFlow(false)
   val isReadyToNavigate: StateFlow<Boolean> = _isReadyToNavigate
 
+  private val _chatRequest = MutableStateFlow<ServiceRequest?>(null)
+  val chatRequest: StateFlow<ServiceRequest?> = _chatRequest
+
   // Create factory
   companion object {
     val Factory: ViewModelProvider.Factory =
         object : ViewModelProvider.Factory {
           @Suppress("UNCHECKED_CAST")
           override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return ChatViewModel(ChatRepositoryFirestore(FirebaseDatabase.getInstance())) as T
+            return ChatViewModel(
+                ChatRepositoryFirestore(
+                    FirebaseDatabase.getInstance(), FirebaseFirestore.getInstance()))
+                as T
           }
         }
   }
 
-  fun prepareForChat(currentUserUid: String?, receiverId: String, receiver: Any?) {
+  fun prepareForChat(
+      currentUserUid: String?,
+      receiverId: String,
+      receiver: Any?,
+      requestUid: String = ""
+  ) {
     viewModelScope.launch {
       _isReadyToNavigate.value = false
       setReceiverUid(receiverId)
-      initChat(currentUserUid)
+      initChat(currentUserUid, requestUid)
       receiver?.let { setReceiver(receiver) }
       _isReadyToNavigate.value = true
     }
@@ -61,7 +74,7 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
     _receiver.value = receiver
   }
 
-  suspend fun initChat(currentUserUid: String?): String? {
+  suspend fun initChat(currentUserUid: String?, requestUid: String = ""): String? {
     // Suspend Coroutine to make sure that get conversation is not called before init chat
     return suspendCoroutine { continuation ->
       receiverUid?.let {
@@ -70,12 +83,30 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
             onSuccess = { uid ->
               Log.e("initChat", "onSuccess $uid")
               chatId = uid
+              if (requestUid.isNotEmpty()) {
+                repository.linkChatToRequest(
+                    uid,
+                    requestUid,
+                    onSuccess = { Log.e("linkChatToRequest", "Success") },
+                    onFailure = { Log.e("linkChatToRequest", "Failed") })
+              }
               continuation.resume(uid)
             },
             onFailure = { continuation.resume(null) },
             it)
       }
     }
+  }
+
+  fun getChatRequest(onSuccess: (String) -> Unit) {
+    chatId?.let {
+      repository.getChatRequest(
+          it, onSuccess = onSuccess, onFailure = { Log.e("getChatRequest", "Failed") })
+    }
+  }
+
+  fun setChatRequest(serviceRequest: ServiceRequest) {
+    _chatRequest.value = serviceRequest
   }
 
   fun sendMessage(message: ChatMessage.TextMessage) {

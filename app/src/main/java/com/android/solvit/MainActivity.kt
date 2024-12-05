@@ -89,10 +89,9 @@ fun SolvitApp() {
   val chatViewModel = viewModel<ChatViewModel>(factory = ChatViewModel.Factory)
   val chatAssistantViewModel =
       viewModel<ChatAssistantViewModel>(factory = ChatAssistantViewModel.Factory)
-  val navController = rememberNavController()
-  val navigationActions = NavigationActions(navController)
   val notificationViewModel =
       viewModel<NotificationsViewModel>(factory = NotificationsViewModel.Factory)
+
   if (!userRegistered.value) {
     SharedUI(
         authViewModel,
@@ -208,7 +207,8 @@ fun SeekerUI(
             navigationActions = navigationActions,
             chatViewModel = chatViewModel,
             authViewModel = authViewModel,
-            chatAssistantViewModel = chatAssistantViewModel)
+            chatAssistantViewModel = chatAssistantViewModel,
+            serviceRequestViewModel = serviceRequestViewModel)
       }
     }
 
@@ -307,7 +307,8 @@ fun ProviderUI(
             navigationActions = navigationActions,
             chatViewModel = chatViewModel,
             authViewModel = authViewModel,
-            chatAssistantViewModel = chatAssistantViewModel)
+            chatAssistantViewModel = chatAssistantViewModel,
+            serviceRequestViewModel = serviceRequestViewModel)
       }
     }
 

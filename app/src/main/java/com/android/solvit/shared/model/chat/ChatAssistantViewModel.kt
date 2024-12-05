@@ -8,14 +8,17 @@ import com.android.solvit.BuildConfig
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.BlockThreshold
+import com.google.ai.client.generativeai.type.FunctionType
 import com.google.ai.client.generativeai.type.HarmCategory
 import com.google.ai.client.generativeai.type.SafetySetting
+import com.google.ai.client.generativeai.type.Schema
 import com.google.ai.client.generativeai.type.generationConfig
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.*
 
-class ChatAssistantViewModel() : ViewModel() {
+class ChatAssistantViewModel : ViewModel() {
 
   private val _messageContext = MutableStateFlow<List<ChatMessage.TextMessage>>(emptyList())
   val messageContext: StateFlow<List<ChatMessage.TextMessage>> = _messageContext
@@ -26,13 +29,16 @@ class ChatAssistantViewModel() : ViewModel() {
   private val _selectedTones = MutableStateFlow<List<String>>(emptyList())
   val selectedTones: StateFlow<List<String>> = _selectedTones
 
-  private val _senderName = MutableStateFlow<String>("")
+  private val _senderName = MutableStateFlow("")
   val senderName: StateFlow<String> = _senderName
 
-  private val _receiverName = MutableStateFlow<String>("")
+  private val _receiverName = MutableStateFlow("")
   val receiverName: StateFlow<String> = _receiverName
 
-  private val model =
+  private val _suggestions = MutableStateFlow<List<String>>(emptyList())
+  val suggestions: StateFlow<List<String>> = _suggestions
+
+  private val messagesModel =
       GenerativeModel(
           modelName = "gemini-1.5-flash",
           apiKey = BuildConfig.GOOGLE_AI_API_KEY,
@@ -49,6 +55,40 @@ class ChatAssistantViewModel() : ViewModel() {
                   SafetySetting(HarmCategory.HATE_SPEECH, BlockThreshold.MEDIUM_AND_ABOVE),
                   SafetySetting(HarmCategory.SEXUALLY_EXPLICIT, BlockThreshold.MEDIUM_AND_ABOVE),
                   SafetySetting(HarmCategory.DANGEROUS_CONTENT, BlockThreshold.MEDIUM_AND_ABOVE)))
+
+  private val suggestionsModel =
+      GenerativeModel(
+          modelName = "gemini-1.5-flash",
+          apiKey = BuildConfig.GOOGLE_AI_API_KEY,
+          generationConfig =
+              generationConfig {
+                temperature = 0.15f
+                topK = 32
+                topP = 1f
+                maxOutputTokens = 4096
+                responseMimeType = "application/json"
+                responseSchema =
+                    Schema(
+                        name = "suggestions",
+                        description = "Short list of suggestions for a response",
+                        type = FunctionType.ARRAY,
+                        items =
+                            Schema(
+                                name = "suggestion",
+                                description = "suggested response type",
+                                type = FunctionType.STRING,
+                                enum =
+                                    listOf(
+                                        "Confirm",
+                                        "Refute",
+                                        "Apologize",
+                                        "Thank",
+                                        "Explain",
+                                        "Ask clarifications",
+                                        "Reassure",
+                                        "Joke",
+                                        "Negotiate the price")))
+              })
 
   companion object {
     val Factory: ViewModelProvider.Factory =
@@ -113,10 +153,10 @@ class ChatAssistantViewModel() : ViewModel() {
    * @param input Additional infos to add to the prompt
    * @return The generated prompt
    */
-  fun buildPrompt(input: String): String {
+  fun buildMessagePrompt(input: String): String {
     var prompt = "Write a single message response"
     if (senderName.value.isNotEmpty()) {
-      prompt += " from " + senderName.value
+      prompt += " for " + senderName.value
     }
     if (receiverName.value.isNotEmpty()) {
       prompt += " to " + receiverName.value
@@ -137,6 +177,8 @@ class ChatAssistantViewModel() : ViewModel() {
       prompt += ", with the following infos provided by the sender:\n"
       prompt += input
     }
+    prompt +=
+        ". If it would not make sense to respond in the conversation, please don't respond: The message you provide should be usable right away."
     return prompt
   }
 
@@ -147,14 +189,83 @@ class ChatAssistantViewModel() : ViewModel() {
    * @param onResponse Callback to handle the response
    */
   fun generateMessage(input: String, onResponse: (String) -> Unit) {
-    val prompt = buildPrompt(input)
+    val prompt = buildMessagePrompt(input)
     Log.d("ChatAssistantViewModel", "model prompted")
     viewModelScope.launch {
       try {
-        val response = model.generateContent(prompt)
+        val response = messagesModel.generateContent(prompt)
         response.text?.let { onResponse(it) }
       } catch (e: Exception) {
         Log.e("ChatAssistantViewModel", "Error generating response", e)
+        onResponse("Sorry, I couldn't process that.")
+      }
+    }
+  }
+
+  /**
+   * Build the prompt for the suggestions assistant
+   *
+   * @return The generated prompt
+   */
+  fun buildSuggestionsPrompt(): String {
+    var prompt = "Provide a list without repetitions of suggestions themes for a response"
+    if (_messageContext.value.isNotEmpty()) {
+      prompt += ", based on the following conversation:\n"
+      prompt += messageContext.value.joinToString("\n") { it.senderName + ": " + it.message }
+    }
+    if (_requestContext.value != null) {
+      prompt += ", based on the following service request:\n"
+      prompt += requestContext.value!!.title + ": " + requestContext.value!!.description
+    }
+    prompt +=
+        ". Please make sure the suggestions are relevant to the conversation, otherwise don't provide any."
+    return prompt
+  }
+
+  /**
+   * Generate suggestions for a response message from the chat assistant
+   *
+   * @param onResponse Callback to handle the response
+   */
+  fun generateSuggestions(onResponse: () -> Unit) {
+    val prompt = buildSuggestionsPrompt()
+    Log.d("ChatAssistantViewModel", "model prompted")
+    viewModelScope.launch {
+      try {
+        val response = suggestionsModel.generateContent(prompt)
+        response.text?.let {
+          val suggestionsResponse = Json.decodeFromString<List<String>>(it)
+          _suggestions.value = suggestionsResponse
+        }
+      } catch (e: Exception) {
+        Log.e("ChatAssistantViewModel", "Error generating suggestions", e)
+        _suggestions.value = emptyList()
+      }
+    }
+  }
+
+  /**
+   * Generate a message translation from the chat assistant
+   *
+   * @param message The message to translate
+   * @param languageFrom The language to translate from
+   * @param languageTo The language to translate to
+   * @param onResponse Callback to handle the response
+   */
+  fun generateTranslation(
+      message: String,
+      languageFrom: String,
+      languageTo: String,
+      onResponse: (String) -> Unit
+  ) {
+    val prompt = "Translate the following message: $message, from $languageFrom to $languageTo"
+    Log.d("ChatAssistantViewModel", "model prompted")
+    viewModelScope.launch {
+      try {
+        val response = messagesModel.generateContent(prompt)
+        response.text?.let { onResponse(it) }
+      } catch (e: Exception) {
+        Log.e("ChatAssistantViewModel", "Error generating translation", e)
         onResponse("Sorry, I couldn't process that.")
       }
     }

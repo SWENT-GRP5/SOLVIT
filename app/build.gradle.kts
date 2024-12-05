@@ -273,7 +273,10 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.4.0")
 
     // ----------       Google AI     ------------
-    implementation("com.google.ai.client.generativeai:generativeai:0.7.0")
+    implementation(libs.generativeai)
+
+    // ----------       JSON     ------------
+    implementation(libs.kotlinx.serialization.json.v122)
 }
 
 tasks.withType<Test> {

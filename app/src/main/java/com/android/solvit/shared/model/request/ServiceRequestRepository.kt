@@ -47,6 +47,12 @@ interface ServiceRequestRepository {
       onFailure: (Exception) -> Unit
   )
 
+  fun getServiceRequestById(
+      id: String,
+      onSuccess: (ServiceRequest) -> Unit,
+      onFailure: (Exception) -> Unit
+  )
+
   // Add a new service request
   fun saveServiceRequest(
       serviceRequest: ServiceRequest,

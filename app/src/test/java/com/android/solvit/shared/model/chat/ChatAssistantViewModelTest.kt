@@ -77,7 +77,7 @@ class ChatAssistantViewModelTest {
     chatAssistantViewModel.setContext(messageContext, senderName, receiverName, requestContext)
     chatAssistantViewModel.updateSelectedTones(selectedTones)
     val input = "input"
-    val prompt = chatAssistantViewModel.buildPrompt(input)
+    val prompt = chatAssistantViewModel.buildMessagePrompt(input)
     val expectedPrompt =
         "Write a single message response from sender to receiver, based on the following conversation:\n" +
             messageContext.joinToString("\n") { it.senderName + ": " + it.message } +

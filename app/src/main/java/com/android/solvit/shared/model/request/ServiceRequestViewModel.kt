@@ -131,6 +131,15 @@ open class ServiceRequestViewModel(private val repository: ServiceRequestReposit
     getArchivedRequests()
   }
 
+  fun getServiceRequestById(id: String, onSuccess: (ServiceRequest) -> Unit) {
+    repository.getServiceRequestById(
+        id,
+        onSuccess = onSuccess,
+        onFailure = { exception ->
+          Log.e("ServiceRequestViewModel", "Error fetching ServiceRequest", exception)
+        })
+  }
+
   fun saveServiceRequest(serviceRequest: ServiceRequest) {
     repository.saveServiceRequest(
         serviceRequest,
