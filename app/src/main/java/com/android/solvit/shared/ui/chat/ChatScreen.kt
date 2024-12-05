@@ -90,6 +90,7 @@ import com.android.solvit.shared.ui.theme.Black
 import com.android.solvit.shared.ui.utils.getReceiverImageUrl
 import com.android.solvit.shared.ui.utils.getReceiverName
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
@@ -346,6 +347,7 @@ fun AiSolverScreen(
   val localContext = LocalContext.current
   val conversation by chatViewModel.coMessage.collectAsState()
   val user by authViewModel.user.collectAsState()
+  var isTyping by remember { mutableStateOf(false) }
   aiSolverViewModel.setMessageContext(conversation)
 
   Scaffold(
@@ -388,7 +390,9 @@ fun AiSolverScreen(
                                 timestamp = System.currentTimeMillis())
 
                         chatViewModel.sendMessage(true, aiReply)
+                        isTyping = false
                       })
+                  isTyping = true
                   imageUri = null
                   imageBitmap = null
                 }
@@ -402,6 +406,9 @@ fun AiSolverScreen(
             } else {
               SentMessage(message, false, true, "")
             }
+          }
+          if (isTyping) {
+            item { TypingIndicator() }
           }
         }
       }
@@ -430,6 +437,31 @@ fun AiSolverHeader(navigationActions: NavigationActions) {
               navigationIconContentColor = Color.Black,
               actionIconContentColor = Color.Black),
   )
+}
+
+/** Typing indicator while the IA is generating a response */
+@Composable
+fun TypingIndicator() {
+  var dots by remember { mutableStateOf("") }
+
+  LaunchedEffect(Unit) {
+    while (true) {
+      dots =
+          when (dots) {
+            "" -> "."
+            "." -> ".."
+            ".." -> "..."
+            else -> ""
+          }
+      delay(500) // Update every 500ms
+    }
+  }
+
+  Text(
+      modifier = Modifier.padding(5.dp),
+      text = "AiBot is typing$dots",
+      style = MaterialTheme.typography.bodyLarge,
+      color = Color.Gray)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
