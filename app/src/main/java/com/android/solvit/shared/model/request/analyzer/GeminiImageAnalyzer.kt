@@ -51,8 +51,7 @@ class GeminiImageAnalyzer(private val generativeModel: GenerativeModel = default
                        PLUMBER, ELECTRICIAN, TUTOR, EVENT_PLANNER, WRITER, CLEANER, CARPENTER, PHOTOGRAPHER, 
                        PERSONAL_TRAINER, HAIR_STYLIST, OTHER.
                     2. Generate a title for the issue, written in the voice of the service seeker.
-                    3. Generate a detailed description for the issue in the images, written as if the seeker is describing the problem to potential providers. Use the visual details in the photos to craft accurate and meaningful descriptions.
-                 
+                    3. Generate a meaningful description for the issue in the images, written as if the seeker is describing the problem to potential providers.                  
                     Please return the results in the following format:
                     - title : Generated Title Here
                     - type : Generated Category Here

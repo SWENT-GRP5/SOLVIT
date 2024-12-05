@@ -34,6 +34,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -62,7 +63,6 @@ import com.android.solvit.shared.model.utils.loadBitmapFromUri
 import com.android.solvit.shared.ui.theme.Background
 import com.android.solvit.shared.ui.theme.Error
 import com.android.solvit.shared.ui.theme.OnBackground
-import com.android.solvit.shared.ui.theme.OnError
 import com.android.solvit.shared.ui.theme.OnErrorContainer
 import com.android.solvit.shared.ui.theme.OnPrimary
 import com.android.solvit.shared.ui.theme.OnSecondary
@@ -140,21 +140,10 @@ fun AIAssistantDialog(onCancel: () -> Unit, onUploadPictures: () -> Unit) {
                     modifier = Modifier.padding(vertical = 16.dp).testTag("aiAssistantDescription"))
 
                 // Buttons
-                Row(
-                    horizontalArrangement = Arrangement.Center,
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.fillMaxWidth()) {
-                      Button(
-                          onClick = { onCancel() },
-                          colors =
-                              ButtonDefaults.buttonColors(
-                                  containerColor = Error, contentColor = OnError),
-                          modifier =
-                              Modifier.padding(end = 8.dp)
-                                  .testTag("cancelButton") // Space between buttons
-                          ) {
-                            Text("Cancel")
-                          }
-
+                      // Upload Pictures Button
                       Button(
                           onClick = { onUploadPictures() },
                           colors =
@@ -164,6 +153,17 @@ fun AIAssistantDialog(onCancel: () -> Unit, onUploadPictures: () -> Unit) {
                             Text("Upload Pictures")
                             Spacer(modifier = Modifier.width(4.dp))
                             Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null)
+                          }
+                      Button(
+                          onClick = { onCancel() },
+                          colors =
+                              ButtonDefaults.buttonColors(
+                                  containerColor = Primary, contentColor = OnPrimary),
+                          modifier = Modifier.testTag("cancelButton") // Space between buttons
+                          ) {
+                            Text("Enter Details Manually")
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Icon(Icons.Default.Edit, contentDescription = null)
                           }
                     }
               }
