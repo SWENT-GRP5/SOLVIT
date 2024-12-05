@@ -75,7 +75,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
-import coil.compose.AsyncImagePainter
 import com.android.solvit.R
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.chat.AiSolverViewModel
@@ -570,32 +569,11 @@ fun SentMessage(
                       modifier =
                           Modifier.fillMaxWidth().aspectRatio(1f).clip(RoundedCornerShape(8.dp)),
                       model = message.imageUrl,
-                      // placeholder = painterResource(id = R.drawable.loading),
-                      // error = painterResource(id = R.drawable.error),
+                      placeholder = painterResource(id = R.drawable.loading),
+                      error = painterResource(id = R.drawable.error),
                       contentDescription = "Image message",
                       contentScale = ContentScale.Crop,
-                      onState = { state ->
-                        if (state is AsyncImagePainter.State.Error) {
-                          val cause = state.result.throwable
-                          Log.e("AsyncImage", "Image load failed: ${cause.message}", cause)
-
-                          // Optional: Handle specific error cases
-                          when (cause) {
-                            is java.net.UnknownHostException -> {
-                              // Handle network issues
-                              Log.e("AsyncImage", "No internet connection")
-                            }
-                            is java.io.FileNotFoundException -> {
-                              // Handle 404 or file not found
-                              Log.e("AsyncImage", "Image not found")
-                            }
-                            else -> {
-                              // General error handling
-                              Log.e("AsyncImage", "Unknown error occurred")
-                            }
-                          }
-                        }
-                      })
+                  )
                 }
                 is ChatMessage.TextImageMessage -> {
                   Column(
@@ -729,7 +707,10 @@ fun MessageInputBar(
 
               // Button to send the message
               IconButton(
-                  onClick = { onSendClickButton(message) { message = it } },
+                  onClick = {
+                    imageUri = null
+                    onSendClickButton(message) { message = it }
+                  },
                   modifier = Modifier.size(48.dp).testTag("sendMessageButton")) {
                     Icon(
                         imageVector = Icons.Default.Send,
