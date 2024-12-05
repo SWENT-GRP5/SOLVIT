@@ -276,6 +276,8 @@ dependencies {
 
     // ----------       Google AI     ------------
     implementation(libs.generativeai.v070)
+    implementation(libs.generativeai)
+
 
     // ----------       Json serialization     ------------
     implementation(libs.kotlinx.serialization.json.v150)
