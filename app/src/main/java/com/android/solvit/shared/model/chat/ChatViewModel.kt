@@ -150,6 +150,7 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
             _isLoadingMessageBox.value = false
             Log.e("ChatViewModel", "Failed to get All messages")
           })
+      _isLoadingMessageBox.value = false
 
       Log.e("Chat VM is loading", "${_isLoadingMessageBox.value}")
     }

@@ -106,7 +106,8 @@ fun ChatScreen(
   val receiverName = getReceiverName(receiver)
   val receiverPicture = getReceiverImageUrl(receiver)
 
-  // chatAssistantViewModel.setContext(messages, "Hassan", receiverName)
+  // TODO : sender name has to be updated (we have to add a name field in class user)
+  chatAssistantViewModel.setContext(messages, "user", receiverName)
 
   // To send Image Messages
   var imageUri by remember { mutableStateOf<Uri?>(null) }
@@ -142,6 +143,7 @@ fun ChatScreen(
                     }
                 if (message != null) {
                   chatViewModel.sendMessage(false, message)
+
                   onMessageChange("")
                   imageUri = null
                   imageBitmap = null

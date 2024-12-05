@@ -70,7 +70,12 @@ fun MessageBox(
   val user by authViewModel.user.collectAsState()
   val isLoadingMessageBox by chatViewModel.isLoadingMessageBox.collectAsState()
 
-  LaunchedEffect(Unit) { chatViewModel.getAllLastMessages(user?.uid) }
+  LaunchedEffect(user?.uid) {
+    val currentUserUid = user?.uid
+    if (currentUserUid != null) {
+      chatViewModel.getAllLastMessages(currentUserUid)
+    }
+  }
 
   LaunchedEffect(isReadyToNavigate) {
     if (isReadyToNavigate) {
