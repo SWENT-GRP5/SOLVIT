@@ -457,7 +457,7 @@ fun TypingIndicator() {
   }
 
   Text(
-      modifier = Modifier.padding(5.dp),
+      modifier = Modifier.padding(5.dp).testTag("TypingIndicator"),
       text = "AiBot is typing$dots",
       style = MaterialTheme.typography.bodyLarge,
       color = Color.Gray)

@@ -1,6 +1,5 @@
 package com.android.solvit.shared.ui.chat
 
-import android.util.Log
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -92,13 +91,11 @@ class ChatScreenTest {
       onSuccess("chatId") // Simulate success
     }
     `when`(chatRepository.listenForLastMessages(any(), any(), any())).thenAnswer {
-      println("je suis rentré")
       val onSuccess = it.getArgument<(List<ChatMessage>) -> Unit>(2)
       onSuccess(listOf(testMessages[0])) // Simulate success
     }
 
     `when`(chatRepository.listenForMessages(any(), any(), any(), any())).thenAnswer {
-      Log.e("Test", "Je suis rentré")
       val onSuccess = it.getArgument<(List<ChatMessage>) -> Unit>(2)
       onSuccess(testMessages) // Simulate success
     }
@@ -129,5 +126,11 @@ class ChatScreenTest {
     assertEquals(
         testMessages.size,
         composeTestRule.onAllNodesWithTag("MessageItem").fetchSemanticsNodes().size)
+  }
+
+  @Test
+  fun typingIndicatorTest() {
+    composeTestRule.setContent { TypingIndicator() }
+    composeTestRule.onNodeWithTag("TypingIndicator").assertIsDisplayed()
   }
 }

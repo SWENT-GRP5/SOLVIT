@@ -127,8 +127,8 @@ class ChatAssistantViewModel() : ViewModel() {
           messageContext.value.joinToString("\n") {
             when (it) {
               is ChatMessage.TextMessage -> it.senderName + ": " + it.message
-              is ChatMessage.ImageMessage -> it.senderName + ": " + it.imageUrl
-              is ChatMessage.TextImageMessage -> it.senderName + ": " + it.text
+              is ChatMessage.ImageMessage -> it.senderName + ": [image]"
+              is ChatMessage.TextImageMessage -> it.senderName + ": [image]" + it.text
             }
           }
     }
