@@ -57,16 +57,6 @@ import com.android.solvit.shared.ui.navigation.Screen
  *
  * @param navigationActions A set of navigation actions to handle screen transitions.
  * @param authViewModel The ViewModel managing authentication and user-related data.
- *
- * This function:
- * - Locks the screen orientation to portrait mode while active.
- * - Displays an illustration and title to guide the user.
- * - Provides buttons for choosing between "Seeker" and "Provider" roles, each with its own
- *   description and action.
- * - Handles role selection and navigates to the corresponding registration profile screen based on
- *   the selected role and authentication method.
- * - Includes a "Learn More" section with a clickable link (currently not implemented) for
- *   additional guidance.
  */
 @SuppressLint("SourceLockedOrientationActivity")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -166,11 +156,6 @@ fun SignUpChooseProfile(
  * @param description A brief description of the role.
  * @param testTag A test tag for UI testing.
  * @param onClickButton A lambda function to execute when the button is clicked.
- *
- * This function:
- * - Renders a button with a gradient background and bold text.
- * - Displays a description below the button.
- * - Executes the provided `onClickButton` action when the button is clicked.
  */
 @Composable
 fun ButtonCustomerProvider(
@@ -215,11 +200,6 @@ fun ButtonCustomerProvider(
  *
  * @param text The text to display as the section title.
  * @param testTag An optional test tag for UI testing purposes.
- *
- * This function:
- * - Displays the given text in a larger font size to serve as a section header.
- * - Uses the application's color scheme for consistent styling.
- * - Optionally adds a test tag to the title for automated testing.
  */
 @Composable
 fun SectionTitle(text: String, testTag: String = "") {
