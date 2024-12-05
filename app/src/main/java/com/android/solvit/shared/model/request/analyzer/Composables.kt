@@ -1,5 +1,7 @@
 package com.android.solvit.shared.model.request.analyzer
 
+import android.content.Context
+import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -28,10 +30,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Surface
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -52,25 +55,20 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import coil.compose.AsyncImage
 import com.android.solvit.R
-import com.android.solvit.shared.model.request.ServiceRequestViewModel
+import com.android.solvit.shared.model.utils.loadBitmapFromUri
 import com.android.solvit.shared.ui.theme.Background
 import com.android.solvit.shared.ui.theme.Error
 import com.android.solvit.shared.ui.theme.OnBackground
-import com.android.solvit.shared.ui.theme.OnError
 import com.android.solvit.shared.ui.theme.OnErrorContainer
 import com.android.solvit.shared.ui.theme.OnPrimary
 import com.android.solvit.shared.ui.theme.OnSecondary
 import com.android.solvit.shared.ui.theme.Primary
 import com.android.solvit.shared.ui.theme.Secondary
 import com.android.solvit.shared.ui.theme.SurfaceVariant
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
-import kotlin.coroutines.suspendCoroutine
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -110,7 +108,7 @@ fun AIAssistantDialog(onCancel: () -> Unit, onUploadPictures: () -> Unit) {
                       // Title
                       Box(
                           modifier =
-                              Modifier.offset(x = -14.dp)
+                              Modifier.offset(x = (-14).dp)
                                   .fillMaxWidth()
                                   .background(
                                       Primary,
@@ -142,21 +140,10 @@ fun AIAssistantDialog(onCancel: () -> Unit, onUploadPictures: () -> Unit) {
                     modifier = Modifier.padding(vertical = 16.dp).testTag("aiAssistantDescription"))
 
                 // Buttons
-                Row(
-                    horizontalArrangement = Arrangement.Center,
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.fillMaxWidth()) {
-                      Button(
-                          onClick = { onCancel() },
-                          colors =
-                              ButtonDefaults.buttonColors(
-                                  containerColor = Error, contentColor = OnError),
-                          modifier =
-                              Modifier.padding(end = 8.dp)
-                                  .testTag("cancelButton") // Space between buttons
-                          ) {
-                            Text("Cancel")
-                          }
-
+                      // Upload Pictures Button
                       Button(
                           onClick = { onUploadPictures() },
                           colors =
@@ -165,7 +152,18 @@ fun AIAssistantDialog(onCancel: () -> Unit, onUploadPictures: () -> Unit) {
                           modifier = Modifier.testTag("uploadPicturesButton")) {
                             Text("Upload Pictures")
                             Spacer(modifier = Modifier.width(4.dp))
-                            Icon(Icons.Default.ArrowForward, contentDescription = null)
+                            Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null)
+                          }
+                      Button(
+                          onClick = { onCancel() },
+                          colors =
+                              ButtonDefaults.buttonColors(
+                                  containerColor = Primary, contentColor = OnPrimary),
+                          modifier = Modifier.testTag("cancelButton") // Space between buttons
+                          ) {
+                            Text("Enter Details Manually")
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Icon(Icons.Default.Edit, contentDescription = null)
                           }
                     }
               }
@@ -182,9 +180,7 @@ fun ImagePickerStep(
 ) {
   val imagePickerLauncher =
       rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris ->
-        if (uris != null) {
-          onImagesSelected(selectedImages + uris)
-        }
+        onImagesSelected(selectedImages + uris)
       }
 
   Column(
@@ -265,10 +261,19 @@ fun ImagePickerStep(
                         ButtonDefaults.buttonColors(
                             containerColor = Secondary, contentColor = OnSecondary)) {
                       Text("Analyze")
-                      Icon(Icons.Default.ArrowForward, contentDescription = null)
+                      Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null)
                     }
               }
             }
+        Spacer(modifier = Modifier.height(8.dp))
+        // Note Text
+        Text(
+            text =
+                "The initial image you select will be displayed in the service request. Feel free to update it after analysis.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onBackground,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth().padding(top = 8.dp).testTag("imagePickerNote"))
       }
 }
 
@@ -290,7 +295,7 @@ fun StepHeader(@DrawableRes iconRes: Int, title: String) {
     // Title
     Box(
         modifier =
-            Modifier.offset(x = -14.dp)
+            Modifier.offset(x = (-14).dp)
                 .fillMaxWidth()
                 .background(
                     Primary,
@@ -308,15 +313,9 @@ fun StepHeader(@DrawableRes iconRes: Int, title: String) {
   }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewAIAssistantDialog() {
-  StepHeader(R.drawable.circle_one_icon, title = "Upload Images")
-}
-
 @Composable
 fun MultiStepDialog(
-    requestViewModel: ServiceRequestViewModel,
+    context: Context,
     showDialog: Boolean,
     currentStep: Int,
     selectedImages: List<Uri>,
@@ -347,8 +346,13 @@ fun MultiStepDialog(
                   if (selectedImages.isNotEmpty() && !isLoading) {
                     isLoading = true
                     try {
+                      val analyzer = GeminiImageAnalyzer()
                       val (title, type, description) =
-                          uploadAndAnalyze(requestViewModel, selectedImages)
+                          uploadAndAnalyze(
+                              context,
+                              selectedImages,
+                              ::loadBitmapFromUri,
+                              { bitmaps -> analyzer.analyzeImages(bitmaps) })
                       onAnalyzeComplete(title, type, description)
                     } catch (e: Exception) {
                       Log.e("MultiStepDialog", "Error: ${e.message}")
@@ -395,6 +399,28 @@ fun MultiStepDialog(
                           textAlign = TextAlign.Center,
                           color = OnBackground,
                           modifier = Modifier.testTag("stepThreeMessage"))
+                      Spacer(modifier = Modifier.height(16.dp))
+                      // New Note for Address and Deadline
+                      Text(
+                          text =
+                              "Please note: You still need to manually add the address and deadline for your service request.",
+                          style = MaterialTheme.typography.bodySmall,
+                          textAlign = TextAlign.Center,
+                          color = MaterialTheme.colorScheme.onBackground,
+                          modifier = Modifier.padding(horizontal = 8.dp).testTag("completionNote"))
+                      Spacer(modifier = Modifier.height(16.dp))
+                      // New Proceed Button
+                      Button(
+                          onClick = { onClose() }, // Closes the dialog
+                          modifier =
+                              Modifier.fillMaxWidth()
+                                  .padding(horizontal = 32.dp)
+                                  .testTag("proceedButton"),
+                          colors =
+                              ButtonDefaults.buttonColors(
+                                  containerColor = Primary, contentColor = OnPrimary)) {
+                            Text("Apply Changes")
+                          }
                     }
               }
             }
@@ -404,28 +430,21 @@ fun MultiStepDialog(
 }
 
 suspend fun uploadAndAnalyze(
-    requestViewModel: ServiceRequestViewModel,
-    imageUris: List<Uri>
+    context: Context,
+    imageUris: List<Uri>,
+    loadBitmap: (Context, Uri) -> Bitmap?,
+    analyzeImages: suspend (List<Bitmap>) -> Triple<String, String, String>
 ): Triple<String, String, String> {
   return withContext(Dispatchers.IO) {
     try {
-      // Step 1: Upload images and get their URLs
-      val imageUrls =
-          suspendCoroutine<List<String>> { continuation ->
-            requestViewModel.uploadMultipleImages(
-                imageUris = imageUris,
-                onSuccess = { urls -> continuation.resume(urls) },
-                onFailure = { exception -> continuation.resumeWithException(exception) })
-          }
+      // Step 1: Convert URIs to Base64 strings
+      val bitMapImages = imageUris.mapNotNull { uri -> loadBitmap(context, uri) }
 
-      // Log uploaded image URLs
-      Log.i("uploadAndAnalyze", "Uploaded image URLs: $imageUrls")
-
-      // Step 2: Analyze uploaded images with OpenAI
-      analyzeImagesWithOkHttp(imageUrls)
+      // Step 2: Analyze images using the Gemini model
+      analyzeImages(bitMapImages)
     } catch (e: Exception) {
       Log.e("uploadAndAnalyze", "Error: ${e.message}", e)
-      throw Exception("Error during upload and analysis: ${e.message}")
+      throw Exception("Error during conversion and analysis: ${e.message}")
     }
   }
 }

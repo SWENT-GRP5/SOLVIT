@@ -29,6 +29,7 @@ import com.android.solvit.shared.model.map.LocationViewModel
 import com.android.solvit.shared.model.packages.PackageProposalRepository
 import com.android.solvit.shared.model.packages.PackageProposalRepositoryFirestore
 import com.android.solvit.shared.model.packages.PackageProposalViewModel
+import com.android.solvit.shared.model.packages.PackagesAssistantViewModel
 import com.android.solvit.shared.model.provider.ProviderRepository
 import com.android.solvit.shared.model.provider.ProviderRepositoryFirestore
 import com.android.solvit.shared.model.request.ServiceRequestRepository
@@ -70,6 +71,7 @@ class EndToEndSeekerCreateRequest {
   private lateinit var chatAssistantViewModel: ChatAssistantViewModel
   private lateinit var notificationsViewModel: NotificationsViewModel
   private lateinit var calendarViewModel: ProviderCalendarViewModel
+  private lateinit var packagesAssistantViewModel: PackagesAssistantViewModel
 
   private lateinit var authRepository: AuthRepository
   private lateinit var seekerRepository: UserRepository
@@ -113,6 +115,7 @@ class EndToEndSeekerCreateRequest {
     packageProposalRepository = PackageProposalRepositoryFirestore(firestore)
     chatRepository = ChatRepositoryFirestore(database)
     notificationsRepository = NotificationsRepositoryFirestore(firestore)
+    packagesAssistantViewModel = PackagesAssistantViewModel()
 
     authViewModel = AuthViewModel(authRepository)
     seekerProfileViewModel = SeekerProfileViewModel(seekerRepository)
@@ -171,7 +174,8 @@ class EndToEndSeekerCreateRequest {
             listProviderViewModel,
             seekerProfileViewModel,
             locationViewModel,
-            packageProposalViewModel)
+            packageProposalViewModel,
+            packagesAssistantViewModel)
       } else {
         when (user.value!!.role) {
           "seeker" ->
