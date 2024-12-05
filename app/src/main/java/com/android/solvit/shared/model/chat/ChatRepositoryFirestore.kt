@@ -106,7 +106,6 @@ class ChatRepositoryFirestore(
       if (chatMessageId != null) {
         Log.e("sendMessage", "$chatMessageId : $chatRoomId")
         chatNode.child(chatRoomId).child("chats").child(chatMessageId).setValue(message)
-
         onSuccess()
       } else {
         Log.e("Send Message", "chatMessageId is null")
@@ -241,41 +240,6 @@ class ChatRepositoryFirestore(
                 TODO("Not yet implemented")
               }
             })
-  }
-
-  /** map each type of message with its correct fields in firebase */
-  fun mapChatMessageToFirebaseFields(chatMessage: ChatMessage): Map<String, Any> {
-
-    when (chatMessage) {
-      is ChatMessage.TextMessage -> {
-        return mapOf(
-            "type" to "text",
-            "message" to chatMessage.message,
-            "senderId" to chatMessage.senderId,
-            "senderName" to chatMessage.senderName,
-            "timestamp" to chatMessage.timestamp,
-            "status" to chatMessage.status)
-      }
-      is ChatMessage.ImageMessage -> {
-        return mapOf(
-            "type" to "image",
-            "imageUrl" to chatMessage.imageUrl,
-            "senderId" to chatMessage.senderId,
-            "senderName" to chatMessage.senderName,
-            "timestamp" to chatMessage.timestamp,
-            "status" to chatMessage.status)
-      }
-      is ChatMessage.TextImageMessage -> {
-        return mapOf(
-            "type" to "textAndImage",
-            "message" to chatMessage.text,
-            "imageUrl" to chatMessage.imageUrl,
-            "senderId" to chatMessage.senderId,
-            "senderName" to chatMessage.senderName,
-            "timestamp" to chatMessage.timestamp,
-            "status" to chatMessage.status)
-      }
-    }
   }
 
   /** given Type Field retrieve the correct ChatMessage format */
