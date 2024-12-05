@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -67,13 +66,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
@@ -83,15 +81,14 @@ import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.chat.ChatAssistantViewModel
 import com.android.solvit.shared.model.chat.ChatMessage
 import com.android.solvit.shared.model.chat.ChatViewModel
-import com.android.solvit.shared.model.utils.loadBitmapFromUri
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
+import com.android.solvit.shared.model.utils.loadBitmapFromUri
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.navigation.Screen
 import com.android.solvit.shared.ui.theme.Black
 import com.android.solvit.shared.ui.theme.LightOrange
-import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.utils.getReceiverImageUrl
 import com.android.solvit.shared.ui.utils.getReceiverName
 import com.google.firebase.auth.FirebaseAuth
@@ -113,7 +110,7 @@ fun ChatScreen(
     serviceRequestViewModel.getServiceRequestById(id) { chatViewModel.setChatRequest(it) }
   }
   val request by chatViewModel.chatRequest.collectAsState()
-  Log.e("ChatScreen", "Request: $request")
+  Log.e("ChatScreen", "conversation: $messages")
 
   LaunchedEffect(receiver) { chatViewModel.getConversation() }
 
@@ -175,15 +172,13 @@ fun AiSolverWelcomeScreen(navigationActions: NavigationActions) {
                 Icon(Icons.Default.ArrowBack, contentDescription = "Back")
               }
             },
-            colors =
-                TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background))
+            colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background))
       },
   ) { innerPadding ->
     BoxWithConstraints(
         modifier =
             Modifier.fillMaxSize()
-                .background(color = MaterialTheme.colorScheme.background)
+                .background(color = colorScheme.background)
                 .padding(innerPadding)
                 .testTag("AiGetStartedScreen"),
         contentAlignment = Alignment.TopCenter) {
@@ -368,8 +363,7 @@ fun SentMessage(
                             topEnd = if (isSentByUser) 0.dp else 16.dp,
                             bottomStart = 16.dp,
                             bottomEnd = 16.dp))
-                    .background(
-                        if (isSentByUser) colorScheme.primary else Color.LightGray)
+                    .background(if (isSentByUser) colorScheme.primary else Color.LightGray)
                     .padding(horizontal = 16.dp, vertical = 12.dp)) {
               constraints
 
@@ -397,7 +391,7 @@ fun MessageInputBar(
       modifier =
           Modifier.fillMaxWidth()
               .background(
-                  color = MaterialTheme.colorScheme.surface,
+                  color = colorScheme.surface,
                   shape = RoundedCornerShape(size = 28.dp),
               )
               .imePadding()
@@ -406,131 +400,103 @@ fun MessageInputBar(
       // is
       // displayed
   ) {
+    val imagePickerLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.GetContent(),
+            onResult = { uri: Uri? -> onImageSelected(uri) })
 
-  val imagePickerLauncher =
-      rememberLauncherForActivityResult(
-          contract = ActivityResultContracts.GetContent(),
-          onResult = { uri: Uri? -> onImageSelected(uri) })
-  Row(
-      modifier =
-          Modifier.fillMaxWidth()
-              .background(
-                  color = MaterialTheme.colorScheme.surface,
-                  shape = RoundedCornerShape(size = 28.dp),
-              )
-              .imePadding()
-              .testTag(
-                  "SendMessageBar"), // To ensure that content of scaffold appears even if keyboard
-      // is
-      // displayed
-  ) {
-
-      // Input to enter message you want to send
-      TextField(
-          value = message,
-          onValueChange = { message = it },
-          modifier = Modifier.weight(1f).padding(end = 8.dp),
-          placeholder = {
-            Text(text = "Send Message", color = colorScheme.onSurfaceVariant)
-          },
-          colors =
-              OutlinedTextFieldDefaults.colors(
-                  unfocusedBorderColor = Color.Black,
-                  focusedBorderColor = Color.Black,
-                  focusedTextColor = Color.Black),
-          singleLine = true // Ensures the TextField stays compact
-          )
-
-      // State to control the visibility of the Chat Assistant Dialog
-      var showDialog by remember { mutableStateOf(false) }
-
-    if (!isAiSolverScreen) {
-      // Button to Use the Chat Assistant
-      IconButton(onClick = { showDialog = true }, modifier = Modifier.size(48.dp)) {
-        Icon(
-            painter = painterResource(R.drawable.ai_message),
-            contentDescription = "chat assistant",
-            tint = MaterialTheme.colorScheme.onSurfaceVariant)
+    Column {
+      AssistantSuggestions(chatAssistantViewModel) {
+        chatAssistantViewModel.updateSelectedTones(emptyList())
+        chatAssistantViewModel.generateMessage(it) { msg -> message = msg }
       }
-
-      // Show the Chat Assistant Dialog if showDialog is true
-      if (showDialog) {
-        ChatAssistantDialog(
-            chatAssistantViewModel,
-            onDismiss = { showDialog = false },
-            onResponse = { message = it })
-      }
-    }
-
-    IconButton(
-        onClick = { imagePickerLauncher.launch("image/*") },
-        modifier = Modifier.testTag("uploadImageButton")) {
-          Icon(
-              imageVector = Icons.Default.AddCircle,
-              contentDescription = "upload image",
-              tint = MaterialTheme.colorScheme.onSurfaceVariant,
-          )
-        }
-    // Button to send your message
-    IconButton(
-        onClick = {
-          val chatMessage =
-              authViewModel.user.value?.uid?.let {
-                ChatMessage.TextMessage(
-                    message,
-                    "Hassan", // Has to be updated once we implement a logic to link the
-                    // authenticated user to its profile (generic class for both provider
-                    // and seeker that contains common informations,
-                    it,
-                    timestamp = System.currentTimeMillis(),
-                )
-              }
-          if (chatMessage != null && message.isNotEmpty()) {
-            chatViewModel.sendMessage(chatMessage)
-            chatAssistantViewModel.updateMessageContext(chatMessage)
-            message = ""
-            // chatViewModel.getConversation()
-          } else {
-            Toast.makeText(current, "Failed to send message", Toast.LENGTH_LONG).show()
-          }
-        },
-        modifier = Modifier.size(48.dp)) {
-          Icon(
-              imageVector = Icons.Default.Send,
-              contentDescription = "send",
-              tint = MaterialTheme.colorScheme.onSurfaceVariant,
-              modifier = Modifier.rotate(-45f))
-        }
-      // Button to send your message
-      IconButton(
-          onClick = {
-            val chatMessage =
-                authViewModel.user.value?.uid?.let {
-                  ChatMessage.TextMessage(
-                      message,
-                      "Hassan", // Has to be updated once we implement a logic to link the
-                      // authenticated user to its profile (generic class for both provider
-                      // and seeker that contains common informations,
-                      it,
-                      timestamp = System.currentTimeMillis(),
+      Row(
+          modifier =
+              Modifier.fillMaxWidth()
+                  .background(
+                      color = colorScheme.surface,
+                      shape = RoundedCornerShape(size = 28.dp),
                   )
-                }
-            if (chatMessage != null && message.isNotEmpty()) {
-              chatViewModel.sendMessage(chatMessage)
-              chatAssistantViewModel.updateMessageContext(chatMessage)
-              message = ""
-              // chatViewModel.getConversation()
-            } else {
-              Toast.makeText(current, "Failed to send message", Toast.LENGTH_LONG).show()
-            }
-          },
-          modifier = Modifier.size(48.dp)) {
+                  .imePadding()
+                  .testTag("SendMessageBar"), // To ensure that content of scaffold appears even if
+          // keyboard
+          // is
+          // displayed
+      ) {
+
+        // Input to enter message you want to send
+        TextField(
+            value = message,
+            onValueChange = { message = it },
+            modifier = Modifier.weight(1f).padding(end = 8.dp),
+            placeholder = { Text(text = "Send Message", color = colorScheme.onSurfaceVariant) },
+            colors =
+                OutlinedTextFieldDefaults.colors(
+                    unfocusedBorderColor = Color.Black,
+                    focusedBorderColor = Color.Black,
+                    focusedTextColor = Color.Black))
+
+        if (!isAiSolverScreen) {
+          // State to control the visibility of the Chat Assistant Dialog
+          var showDialog by remember { mutableStateOf(false) }
+
+          // Button to Use the Chat Assistant
+          IconButton(onClick = { showDialog = true }, modifier = Modifier.size(48.dp)) {
             Icon(
-                imageVector = Icons.Default.Send,
-                contentDescription = "send",
-                tint = colorScheme.onSurfaceVariant,
-                modifier = Modifier.rotate(-45f))
+                painter = painterResource(R.drawable.ai_message),
+                contentDescription = "chat assistant",
+                tint = colorScheme.onSurfaceVariant)
           }
+
+          // Show the Chat Assistant Dialog if showDialog is true
+          if (showDialog) {
+            ChatAssistantDialog(
+                chatAssistantViewModel,
+                onDismiss = { showDialog = false },
+                onResponse = { message = it })
+          }
+        }
+
+        IconButton(
+            onClick = { imagePickerLauncher.launch("image/*") },
+            modifier = Modifier.testTag("uploadImageButton")) {
+              Icon(
+                  imageVector = Icons.Default.AddCircle,
+                  contentDescription = "upload image",
+                  tint = colorScheme.onSurfaceVariant,
+              )
+            }
+        // Button to send your message
+        IconButton(
+            onClick = {
+              val chatMessage =
+                  authViewModel.user.value?.uid?.let {
+                    ChatMessage.TextMessage(
+                        message,
+                        "Hassan", // Has to be updated once we implement a logic to link the
+                        // authenticated user to its profile (generic class for both provider
+                        // and seeker that contains common informations,
+                        it,
+                        timestamp = System.currentTimeMillis(),
+                    )
+                  }
+              if (chatMessage != null && message.isNotEmpty()) {
+                chatViewModel.sendMessage(chatMessage)
+                chatAssistantViewModel.updateMessageContext(chatMessage)
+                message = ""
+                // chatViewModel.getConversation()
+              } else {
+                Toast.makeText(current, "Failed to send message", Toast.LENGTH_LONG).show()
+              }
+            },
+            modifier = Modifier.size(48.dp)) {
+              Icon(
+                  imageVector = Icons.Default.Send,
+                  contentDescription = "send",
+                  tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                  modifier = Modifier.rotate(-45f))
+            }
+      }
     }
   }
 }
@@ -542,24 +508,29 @@ fun AssistantSuggestions(
 ) {
   val suggestions by chatAssistantViewModel.suggestions.collectAsState()
   Row(
-      modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(16.dp),
+      modifier =
+          Modifier.fillMaxWidth()
+              .padding(horizontal = 16.dp)
+              .horizontalScroll(rememberScrollState()),
       horizontalArrangement = Arrangement.SpaceBetween,
       verticalAlignment = Alignment.CenterVertically) {
         Icon(
             painter = painterResource(R.drawable.ai_stars),
             contentDescription = "AI suggestions",
-            Modifier.padding(horizontal = 8.dp))
+            Modifier.padding(horizontal = 8.dp),
+            tint = colorScheme.onSurfaceVariant)
         if (suggestions.isEmpty()) {
-          Text("No suggestions available")
+          Text("No suggestions available", color = colorScheme.onSurfaceVariant)
         } else {
           suggestions.forEach { suggestion ->
             Text(
                 text = suggestion,
                 modifier =
-                    Modifier.border(1.dp, colorScheme.onBackground, RoundedCornerShape(8.dp))
+                    Modifier.border(1.dp, colorScheme.onSurfaceVariant, RoundedCornerShape(8.dp))
                         .clickable { onSuggestionSelect(suggestion) }
                         .padding(8.dp)
-                        .testTag("suggestionItem$suggestion"))
+                        .testTag("suggestionItem$suggestion"),
+                color = colorScheme.onSurfaceVariant)
           }
         }
         IconButton(
@@ -568,7 +539,10 @@ fun AssistantSuggestions(
                 Log.e("ChatScreen", "Suggestions generated")
               }
             }) {
-              Icon(Icons.Default.Refresh, contentDescription = "Generate suggestions")
+              Icon(
+                  Icons.Default.Refresh,
+                  contentDescription = "Generate suggestions",
+                  tint = colorScheme.onSurfaceVariant)
             }
       }
 }
