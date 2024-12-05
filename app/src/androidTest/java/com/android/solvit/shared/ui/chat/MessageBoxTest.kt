@@ -1,6 +1,7 @@
 package com.android.solvit.shared.ui.chat
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
@@ -18,6 +19,7 @@ import com.android.solvit.shared.model.chat.MESSAGE_STATUS
 import com.android.solvit.shared.model.provider.ProviderRepository
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import junit.framework.TestCase.assertEquals
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -97,27 +99,37 @@ class MessageBoxTest {
 
     var message: ChatMessage.TextMessage? = null
 
-    `when`(chatRepository.initChat(any(), any(), any(), any())).thenAnswer {
-      val onSuccess = it.getArgument<(String) -> Unit>(1)
+    `when`(chatRepository.initChat(any(), any(), any(), any(), any())).thenAnswer {
+      val onSuccess = it.getArgument<(String) -> Unit>(2)
       onSuccess("chatId") // Simulate success
     }
   }
 
   @Test
-  fun emptyMessageListDisplaysNoMessagesScreen() {
-
+  fun emptyMessageListDisplaysNoMessagesScreen() = runTest {
     `when`(chatRepository.listenForLastMessages(any(), any(), any())).thenAnswer {
-      val onSuccess = it.getArgument<(Map<String, ChatMessage.TextMessage>) -> Unit>(1)
-      onSuccess(emptyMap()) // Simulate success
+      val onSuccess = it.arguments[1] as (Map<String, ChatMessage>) -> Unit
+      onSuccess(emptyMap()) // Simulate successful response
+      null
     }
+
+    // Act
+    //
+    // advanceUntilIdle()
+
+    // Set up the UI with the ViewModel
     composeTestRule.setContent {
-      // Set an empty list of messages
       MessageBox(
           chatViewModel,
           navigationActions,
           authViewModel,
           listProviderViewModel,
           seekerProfileViewModel)
+    }
+    chatViewModel.getAllLastMessages("currentUserUid")
+    composeTestRule.waitForIdle()
+    composeTestRule.waitUntil(timeoutMillis = 5000) {
+      composeTestRule.onNodeWithTag("InboxTopAppBar").isDisplayed()
     }
 
     composeTestRule.onNodeWithTag("InboxTopAppBar").assertIsDisplayed()
@@ -130,10 +142,10 @@ class MessageBoxTest {
   fun messagesAreDisplayedCorrectly() {
 
     `when`(chatRepository.listenForLastMessages(any(), any(), any())).thenAnswer {
-      val onSuccess = it.getArgument<(Map<String, ChatMessage.TextMessage>) -> Unit>(1)
+      val onSuccess = it.getArgument<(Map<String, ChatMessage>) -> Unit>(1)
       onSuccess(testMessages) // Simulate success
     }
-    chatViewModel.getAllLastMessages("currentUserId")
+
     composeTestRule.setContent {
       MessageBox(
           chatViewModel,
@@ -142,6 +154,7 @@ class MessageBoxTest {
           listProviderViewModel,
           seekerProfileViewModel)
     }
+    chatViewModel.getAllLastMessages("currentUserId")
 
     composeTestRule.onNodeWithTag("InboxTopAppBar").assertIsDisplayed()
     assertEquals(

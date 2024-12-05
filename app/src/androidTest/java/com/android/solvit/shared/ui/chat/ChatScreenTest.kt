@@ -84,19 +84,19 @@ class ChatScreenTest {
 
     var message: ChatMessage.TextMessage? = null
 
-    `when`(chatRepository.initChat(any(), any(), any(), any())).thenAnswer {
-      val onSuccess = it.getArgument<(String) -> Unit>(1)
+    `when`(chatRepository.initChat(any(), any(), any(), any(), any())).thenAnswer {
+      val onSuccess = it.getArgument<(String) -> Unit>(2)
       onSuccess("chatId") // Simulate success
     }
     `when`(chatRepository.listenForLastMessages(any(), any(), any())).thenAnswer {
       println("je suis rentré")
-      val onSuccess = it.getArgument<(List<ChatMessage.TextMessage>) -> Unit>(0)
+      val onSuccess = it.getArgument<(List<ChatMessage>) -> Unit>(2)
       onSuccess(listOf(testMessages[0])) // Simulate success
     }
 
-    `when`(chatRepository.listenForMessages(any(), any(), any())).thenAnswer {
+    `when`(chatRepository.listenForMessages(any(), any(), any(), any())).thenAnswer {
       Log.e("Test", "Je suis rentré")
-      val onSuccess = it.getArgument<(List<ChatMessage.TextMessage>) -> Unit>(1)
+      val onSuccess = it.getArgument<(List<ChatMessage>) -> Unit>(2)
       onSuccess(testMessages) // Simulate success
     }
   }
@@ -109,8 +109,8 @@ class ChatScreenTest {
     }
 
     chatViewModel.setReceiverUid("1234")
-    chatViewModel.initChat("123")
-    chatViewModel.getConversation()
+    chatViewModel.initChat(false, "123")
+    chatViewModel.getConversation(false)
 
     composeTestRule.onNodeWithTag("ChatHeader").assertIsDisplayed()
     composeTestRule.onNodeWithTag("SendMessageBar").assertIsDisplayed()

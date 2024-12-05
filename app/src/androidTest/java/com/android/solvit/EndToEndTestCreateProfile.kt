@@ -23,6 +23,7 @@ import com.android.solvit.shared.model.authentication.AuthRep
 import com.android.solvit.shared.model.authentication.AuthRepository
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.authentication.User
+import com.android.solvit.shared.model.chat.AiSolverViewModel
 import com.android.solvit.shared.model.chat.ChatAssistantViewModel
 import com.android.solvit.shared.model.chat.ChatRepository
 import com.android.solvit.shared.model.chat.ChatRepositoryFirestore
@@ -76,6 +77,7 @@ class EndToEndTestCreateProfile {
   private lateinit var packageProposalViewModel: PackageProposalViewModel
   private lateinit var chatAssistantViewModel: ChatAssistantViewModel
   private lateinit var notificationsViewModel: NotificationsViewModel
+  private lateinit var aiSolverViewModel: AiSolverViewModel
 
   private lateinit var authRepository: AuthRepository
   private lateinit var authRepository2: AuthRep
@@ -118,7 +120,7 @@ class EndToEndTestCreateProfile {
     serviceRequestRepository = ServiceRequestRepositoryFirebase(firestore, storage)
     reviewRepository = ReviewRepositoryFirestore(firestore)
     packageProposalRepositoryFirestore = PackageProposalRepositoryFirestore(firestore)
-    chatRepository = ChatRepositoryFirestore(database)
+    chatRepository = ChatRepositoryFirestore(database, storage)
     notificationsRepository = NotificationsRepositoryFirestore(firestore)
 
     authViewModel = AuthViewModel(authRepository)
@@ -131,6 +133,7 @@ class EndToEndTestCreateProfile {
     chatViewModel = ChatViewModel(chatRepository)
     chatAssistantViewModel = ChatAssistantViewModel()
     notificationsViewModel = NotificationsViewModel(notificationsRepository)
+    aiSolverViewModel = AiSolverViewModel()
 
     `when`(locationRepository.search(ArgumentMatchers.anyString(), anyOrNull(), anyOrNull()))
         .thenAnswer { invocation ->
@@ -179,7 +182,8 @@ class EndToEndTestCreateProfile {
                   locationViewModel,
                   chatViewModel,
                   chatAssistantViewModel,
-                  notificationsViewModel)
+                  notificationsViewModel,
+                  aiSolverViewModel)
           "provider" ->
               ProviderUI(
                   authViewModel,

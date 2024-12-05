@@ -663,7 +663,7 @@ fun MessageInputBar(
               // Button to upload an image
               IconButton(
                   onClick = { imagePickerLauncher.launch("image/*") },
-                  modifier = Modifier.size(48.dp)) {
+                  modifier = Modifier.size(48.dp).testTag("uploadImageButton")) {
                     Icon(
                         imageVector = Icons.Default.AddCircle,
                         contentDescription = "Upload Image",
