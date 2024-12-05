@@ -1,4 +1,4 @@
-package com.android.solvit.provider.ui.calendar.utils
+package com.android.solvit.provider.ui.calendar.components.utils
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box

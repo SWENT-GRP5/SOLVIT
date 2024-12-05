@@ -1,4 +1,4 @@
-package com.android.solvit.provider.ui.calendar.utils
+package com.android.solvit.provider.ui.calendar.components.timeslot
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.android.solvit.provider.model.CalendarView
+import com.android.solvit.provider.ui.calendar.components.utils.StatusIndicator
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestStatus
 import java.time.Duration

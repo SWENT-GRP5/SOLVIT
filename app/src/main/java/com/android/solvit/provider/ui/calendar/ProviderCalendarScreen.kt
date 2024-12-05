@@ -20,16 +20,15 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.solvit.provider.model.CalendarView
 import com.android.solvit.provider.model.ProviderCalendarViewModel
+import com.android.solvit.provider.ui.calendar.components.container.SwipeableCalendarContainer
 import com.android.solvit.provider.ui.calendar.components.dialog.DatePickerDialog
-import com.android.solvit.provider.ui.calendar.components.header.grid.container.DayView
-import com.android.solvit.provider.ui.calendar.components.header.grid.container.MonthView
-import com.android.solvit.provider.ui.calendar.components.header.grid.container.SwipeableCalendarContainer
-import com.android.solvit.provider.ui.calendar.components.header.grid.container.WeekView
 import com.android.solvit.provider.ui.calendar.components.navigation.CalendarViewToggle
 import com.android.solvit.provider.ui.calendar.components.timeslot.BottomSheetTimeSlots
+import com.android.solvit.provider.ui.calendar.views.day.DayView
+import com.android.solvit.provider.ui.calendar.views.month.MonthView
+import com.android.solvit.provider.ui.calendar.views.week.WeekView
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
-import java.time.*
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 

@@ -1,4 +1,4 @@
-package com.android.solvit.provider.ui.calendar.components.header.grid.container
+package com.android.solvit.provider.ui.calendar.components.container
 
 import androidx.compose.animation.*
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures

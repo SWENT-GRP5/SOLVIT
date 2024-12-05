@@ -1,4 +1,4 @@
-package com.android.solvit.provider.ui.calendar.components.header.grid.container
+package com.android.solvit.provider.ui.calendar.components.grid
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background

@@ -1,4 +1,4 @@
-package com.android.solvit.provider.ui.calendar.utils
+package com.android.solvit.provider.ui.calendar.views.month
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.android.solvit.provider.ui.calendar.components.utils.StatusIndicator
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestStatus
 import java.time.LocalDate

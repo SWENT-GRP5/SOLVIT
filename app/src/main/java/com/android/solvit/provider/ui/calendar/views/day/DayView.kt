@@ -1,4 +1,4 @@
-package com.android.solvit.provider.ui.calendar.components.header.grid.container
+package com.android.solvit.provider.ui.calendar.views.day
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -10,7 +10,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.android.solvit.provider.model.CalendarView
-import com.android.solvit.provider.ui.calendar.utils.ServiceRequestTimeSlot
+import com.android.solvit.provider.ui.calendar.components.grid.TimeGrid
+import com.android.solvit.provider.ui.calendar.components.timeslot.ServiceRequestTimeSlot
 import com.android.solvit.shared.model.request.ServiceRequest
 import java.time.LocalDate
 import java.time.LocalTime

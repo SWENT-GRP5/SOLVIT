@@ -1,4 +1,4 @@
-package com.android.solvit.provider.ui.calendar.components.header.grid.container
+package com.android.solvit.provider.ui.calendar.components.header
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme

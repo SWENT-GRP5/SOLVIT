@@ -1,4 +1,4 @@
-package com.android.solvit.provider.ui.calendar.components.header.grid.container
+package com.android.solvit.provider.ui.calendar.views.week
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -11,7 +11,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.android.solvit.provider.model.CalendarView
-import com.android.solvit.provider.ui.calendar.utils.ServiceRequestTimeSlot
+import com.android.solvit.provider.ui.calendar.components.grid.TimeGrid
+import com.android.solvit.provider.ui.calendar.components.header.WeekDayHeader
+import com.android.solvit.provider.ui.calendar.components.timeslot.ServiceRequestTimeSlot
 import com.android.solvit.shared.model.request.ServiceRequest
 import java.time.DayOfWeek
 import java.time.LocalDate
