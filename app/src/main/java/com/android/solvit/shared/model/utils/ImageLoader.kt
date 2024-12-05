@@ -36,9 +36,6 @@ fun uploadImageToStorage(
         imageRef.downloadUrl
             .addOnSuccessListener { uri -> onSuccess((uri.toString())) }
             .addOnFailureListener { exception -> onFailure(exception) }
-        /*val cleanUrl =
-            "https://firebasestorage.googleapis.com/v0/b/${storage.app.options.storageBucket}/o/${Uri.encode("$path$uniqueFileName")}"
-        onSuccess(cleanUrl)*/
       }
       .addOnFailureListener { exception -> onFailure(exception) }
 }
