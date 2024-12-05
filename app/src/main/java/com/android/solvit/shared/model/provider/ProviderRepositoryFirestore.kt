@@ -39,9 +39,6 @@ class ProviderRepositoryFirestore(
       val languages = (doc.get("languages") as List<*>).map { Language.valueOf(it as String) }
       val companyName = doc.getString("companyName") ?: ""
       val phone = doc.getString("phone") ?: ""
-      val taskCompleted = doc.getLong("tasksCompleted") ?: 0
-      val earnings = taskCompleted * price
-      val pendingTasks = (doc.getLong("pendingTasks") ?: 0).toInt()
       return Provider(
           doc.id,
           name,
@@ -55,10 +52,7 @@ class ProviderRepositoryFirestore(
           rating,
           price,
           deliveryTime,
-          languages,
-          earnings,
-          pendingTasks,
-          taskCompleted)
+          languages)
     } catch (e: Exception) {
       Log.e("ProviderRepositoryFirestore", "failed to convert doc $e")
       return null

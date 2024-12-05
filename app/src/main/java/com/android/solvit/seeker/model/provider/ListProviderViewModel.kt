@@ -7,7 +7,6 @@ import androidx.lifecycle.ViewModelProvider
 import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.provider.ProviderRepository
 import com.android.solvit.shared.model.provider.ProviderRepositoryFirestore
-import com.android.solvit.shared.model.provider.TaskRepository
 import com.android.solvit.shared.model.service.Services
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
@@ -29,8 +28,6 @@ class ListProviderViewModel(private val repository: ProviderRepository) : ViewMo
 
   private val filters = listOf("Price", "Languages", "Rating")
   private val activeFilters = mutableMapOf<String, (Provider) -> Boolean>()
-
-  private val taskRepository = TaskRepository(FirebaseFirestore.getInstance())
 
   companion object {
     val Factory: ViewModelProvider.Factory =
@@ -83,20 +80,8 @@ class ListProviderViewModel(private val repository: ProviderRepository) : ViewMo
     repository.getProviders(
         _selectedService.value,
         onSuccess = { providers ->
-          taskRepository.getTasks(
-              onSuccess = { tasks ->
-                val taskCountByProvider =
-                    tasks.groupBy { it.providerId }.mapValues { it.value.size }
-
-                val updatedProviders =
-                    providers.map { provider ->
-                      provider.copy(pendingTasks = taskCountByProvider[provider.uid] ?: 0)
-                    }
-
-                _providersList.value = updatedProviders
-                _providersListFiltered.value = updatedProviders
-              },
-              onFailure = { Log.e("getTasks", "failed to get tasks") })
+          _providersList.value = providers
+          _providersListFiltered.value = providers
         },
         onFailure = { Log.e("getProviders", "failed to get Providers") })
   }

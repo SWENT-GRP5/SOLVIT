@@ -99,7 +99,7 @@ object TopLevelDestinations {
   val PROFILE =
       TopLevelDestination(
           route = Route.PROFILE, icon = Icons.Outlined.AccountCircle, textId = "Profile")
-  val PROFESSIONAL_PROFILE =
+  val PROVIDER_PROFILE =
       TopLevelDestination(
           route = Screen.PROVIDER_PROFILE, icon = Icons.Outlined.AccountCircle, textId = "Profile")
 }
@@ -118,7 +118,7 @@ val LIST_TOP_LEVEL_DESTINATION_PROVIDER =
         TopLevelDestinations.MAP_OF_SEEKERS,
         TopLevelDestinations.MESSAGES,
         TopLevelDestinations.CALENDAR,
-        TopLevelDestinations.PROFESSIONAL_PROFILE,
+        TopLevelDestinations.PROVIDER_PROFILE,
         TopLevelDestinations.NOTIFICATIONS)
 
 open class NavigationActions(

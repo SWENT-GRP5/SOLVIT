@@ -38,7 +38,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -62,9 +61,13 @@ import com.android.solvit.R
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.provider.Provider
+import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.navigation.Screen
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 
 /**
  * A composable function that displays the provider's profile screen. It includes the profile header
@@ -330,18 +333,39 @@ fun DescriptionSection(provider: Provider) {
  * @param provider The provider whose statistics are to be displayed.
  */
 @Composable
-fun StatsSection(provider: Provider) {
+fun StatsSection(
+    provider: Provider,
+    viewModel: ServiceRequestViewModel = viewModel(factory = ServiceRequestViewModel.Factory)
+) {
 
   var rating by remember { mutableStateOf("") }
   var popular by remember { mutableStateOf("") }
-  var earnings by remember { mutableDoubleStateOf(0.0) }
-  var pendingTasks by remember { mutableIntStateOf(0) }
+
+    val providerId = Firebase.auth.currentUser?.uid ?: "-1"
+
+  val pendingTasks by viewModel.pendingRequests.collectAsState()
+    val filteredPendingTasks = pendingTasks.filter { it.providerId == providerId }
+
+  val acceptedTasks by viewModel.acceptedRequests.collectAsState()
+    val filteredAcceptedTasks = acceptedTasks.filter { it.providerId == providerId }
+
+  val scheduledTasks by viewModel.scheduledRequests.collectAsState()
+    val filteredScheduledTasks = scheduledTasks.filter { it.providerId == providerId }
+
+  val completedTasks by viewModel.completedRequests.collectAsState()
+    val filteredCompletedTasks = completedTasks.filter { it.providerId == providerId }
+
+  val canceledTasks by viewModel.cancelledRequests.collectAsState()
+    val filteredCanceledTasks = canceledTasks.filter { it.providerId == providerId }
+
+  val archivedTasks by viewModel.archivedRequests.collectAsState()
+    val filteredArchivedTasks = archivedTasks.filter { it.providerId == providerId }
+
+    val earnings = filteredCompletedTasks.sumOf { it.agreedPrice ?: 0.0 }
 
   LaunchedEffect(provider) {
     rating = provider.rating.toString()
     popular = provider.popular.toString()
-    earnings = provider.earnings
-    pendingTasks = provider.pendingTasks
   }
   Column(
       modifier =
@@ -372,35 +396,62 @@ fun StatsSection(provider: Provider) {
           }
         }
 
-        Spacer(modifier = Modifier.height(5.dp))
+      Spacer(modifier = Modifier.height(15.dp))
 
-        Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
+      Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
           Column(horizontalAlignment = Alignment.Start) {
-            Text(
-                "$earnings CHF",
-                fontSize = 40.sp,
-                color = colorScheme.onPrimary,
-                fontWeight = FontWeight.Bold)
-            Text("Earnings", fontSize = 15.sp, color = colorScheme.onPrimary)
+              Text(
+                  "$earnings CHF",
+                  fontSize = (if (earnings > 999999) 10 else if (earnings > 999 && earnings < 999999) 20 else 40).sp,
+                  color = colorScheme.onPrimary,
+                  fontWeight = FontWeight.Bold)
+              Text("Earnings", fontSize = 15.sp, color = colorScheme.onPrimary)
           }
-          Column(horizontalAlignment = Alignment.CenterHorizontally) {
+      }
+
+        Row(horizontalArrangement = Arrangement.Start, modifier = Modifier.fillMaxWidth()) {
+          Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.Start) {
+            LanguageList(provider)
             Text(
-                pendingTasks.toString(),
-                fontSize = 40.sp,
-                color = colorScheme.onPrimary,
-                fontWeight = FontWeight.Bold)
-            Text("Pending Tasks", fontSize = 15.sp, color = colorScheme.onPrimary)
+                (if (provider.languages.size > 1) "Languages" else "Language"),
+                fontSize = 15.sp,
+                color = colorScheme.onPrimary)
+          }
+          Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.End) {
+            Column {
+              Text(
+                  "Pending tasks: ${filteredPendingTasks.size}",
+                  fontSize = 20.sp,
+                  color = colorScheme.onPrimary,
+                  fontWeight = FontWeight.Bold)
+              Text(
+                  "Accepted tasks: ${filteredAcceptedTasks.size}",
+                  fontSize = 20.sp,
+                  color = colorScheme.onPrimary,
+                  fontWeight = FontWeight.Bold)
+              Text(
+                  "Scheduled tasks: ${filteredScheduledTasks.size}",
+                  fontSize = 20.sp,
+                  color = colorScheme.onPrimary,
+                  fontWeight = FontWeight.Bold)
+              Text(
+                  "Completed tasks: ${filteredCompletedTasks.size}",
+                  fontSize = 20.sp,
+                  color = colorScheme.onPrimary,
+                  fontWeight = FontWeight.Bold)
+              Text(
+                  "Canceled tasks: ${filteredCanceledTasks.size}",
+                  fontSize = 20.sp,
+                  color = colorScheme.onPrimary,
+                  fontWeight = FontWeight.Bold)
+              Text(
+                  "Archived tasks: ${filteredArchivedTasks.size}",
+                  fontSize = 20.sp,
+                  color = colorScheme.onPrimary,
+                  fontWeight = FontWeight.Bold)
+            }
           }
         }
-
-        Spacer(modifier = Modifier.height(5.dp))
-
-        LanguageList(provider)
-
-        Text(
-            (if (provider.languages.size > 1) "Languages" else "Language"),
-            fontSize = 15.sp,
-            color = colorScheme.onPrimary)
       }
 }
 
