@@ -54,7 +54,7 @@ fun MonthDayItem(
               .background(backgroundColor, RoundedCornerShape(8.dp))
               .clickable { onDateSelected(date) }
               .padding(4.dp)
-              .testTag("monthDayColumn_${date}"),
+              .testTag("monthDayItem_${date}"),
       horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = date.dayOfMonth.toString(),

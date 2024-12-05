@@ -49,7 +49,7 @@ fun DayView(
         }
 
     TimeGrid(
-        modifier = Modifier.weight(1f),
+        modifier = Modifier.weight(1f).testTag("dayViewTimeGrid"),
         hourHeight = 60.dp,
         currentTime = if (date == today) LocalTime.now() else null,
         showCurrentTimeLine = date == today,

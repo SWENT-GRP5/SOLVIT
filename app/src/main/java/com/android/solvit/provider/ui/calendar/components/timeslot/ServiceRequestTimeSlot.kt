@@ -56,8 +56,7 @@ fun ServiceRequestTimeSlot(
               .border(1.dp, statusColor, RoundedCornerShape(8.dp))
               .clickable { onClick(request) }
               .padding(4.dp)
-              .zIndex(1f)
-              .testTag("serviceRequest_${request.uid}")) {
+              .zIndex(1f)) {
         when (calendarView) {
           CalendarView.WEEK -> {
             Text(
