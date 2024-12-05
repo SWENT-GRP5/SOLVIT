@@ -17,8 +17,8 @@ import kotlinx.coroutines.launch
 
 class ChatAssistantViewModel() : ViewModel() {
 
-  private val _messageContext = MutableStateFlow<List<ChatMessage.TextMessage>>(emptyList())
-  val messageContext: StateFlow<List<ChatMessage.TextMessage>> = _messageContext
+  private val _messageContext = MutableStateFlow<List<ChatMessage>>(emptyList())
+  val messageContext: StateFlow<List<ChatMessage>> = _messageContext
 
   private val _requestContext = MutableStateFlow<ServiceRequest?>(null)
   val requestContext: StateFlow<ServiceRequest?> = _requestContext
@@ -69,7 +69,7 @@ class ChatAssistantViewModel() : ViewModel() {
    * @param requestContext (Optional) The concerned service request
    */
   fun setContext(
-      messageContext: List<ChatMessage.TextMessage>,
+      messageContext: List<ChatMessage>,
       senderName: String,
       receiverName: String,
       requestContext: ServiceRequest? = null
@@ -85,7 +85,7 @@ class ChatAssistantViewModel() : ViewModel() {
    *
    * @param message The new message to add
    */
-  fun updateMessageContext(message: ChatMessage.TextMessage) {
+  fun updateMessageContext(message: ChatMessage) {
     _messageContext.value += message
   }
 
@@ -123,7 +123,14 @@ class ChatAssistantViewModel() : ViewModel() {
     }
     if (_messageContext.value.isNotEmpty()) {
       prompt += ", based on the following conversation:\n"
-      prompt += messageContext.value.joinToString("\n") { it.senderName + ": " + it.message }
+      prompt +=
+          messageContext.value.joinToString("\n") {
+            when (it) {
+              is ChatMessage.TextMessage -> it.senderName + ": " + it.message
+              is ChatMessage.ImageMessage -> it.senderName + ": [image]"
+              is ChatMessage.TextImageMessage -> it.senderName + ": [image]" + it.text
+            }
+          }
     }
     if (_requestContext.value != null) {
       prompt += ", based on the following service request:\n"

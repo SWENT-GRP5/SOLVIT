@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -64,13 +65,17 @@ fun MessageBox(
     listProviderViewModel: ListProviderViewModel,
     seekerProfileViewModel: SeekerProfileViewModel
 ) {
-
   val allMessages by chatViewModel.allMessages.collectAsState()
-
   val isReadyToNavigate by chatViewModel.isReadyToNavigate.collectAsState()
-
   val user by authViewModel.user.collectAsState()
-  chatViewModel.getAllLastMessages(user?.uid)
+  val isLoadingMessageBox by chatViewModel.isLoadingMessageBox.collectAsState()
+
+  LaunchedEffect(user?.uid) {
+    val currentUserUid = user?.uid
+    if (currentUserUid != null) {
+      chatViewModel.getAllLastMessages(currentUserUid)
+    }
+  }
 
   LaunchedEffect(isReadyToNavigate) {
     if (isReadyToNavigate) {
@@ -79,29 +84,36 @@ fun MessageBox(
     }
   }
 
-  Scaffold(
-      topBar = { ChatListTopBar(navigationActions, chatViewModel, authViewModel) },
-      bottomBar = {}) { paddingValues ->
-        if (allMessages.isNotEmpty()) {
-          LazyColumn(
-              modifier = Modifier.padding(paddingValues).fillMaxSize(),
-              contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)) {
-                items(allMessages.entries.toList()) { message ->
-                  ChatListItem(
-                      message = message.value,
-                      currentUserId = user?.uid ?: "",
-                      receiverId = message.key ?: "",
-                      role = authViewModel.user.value?.role ?: "",
-                      listProviderViewModel = listProviderViewModel,
-                      seekerProfileViewModel = seekerProfileViewModel,
-                      navigationActions = navigationActions,
-                      chatViewModel = chatViewModel)
+  if (isLoadingMessageBox) {
+    // Display loading indicator
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+      CircularProgressIndicator()
+    }
+  } else {
+    Scaffold(
+        topBar = { ChatListTopBar(navigationActions, chatViewModel, authViewModel) },
+        bottomBar = {}) { paddingValues ->
+          if (allMessages.isNotEmpty()) {
+            LazyColumn(
+                modifier = Modifier.padding(paddingValues).fillMaxSize(),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)) {
+                  items(allMessages.entries.toList()) { message ->
+                    ChatListItem(
+                        message = message.value,
+                        currentUserId = user?.uid ?: "",
+                        receiverId = message.key ?: "",
+                        role = authViewModel.user.value?.role ?: "",
+                        listProviderViewModel = listProviderViewModel,
+                        seekerProfileViewModel = seekerProfileViewModel,
+                        navigationActions = navigationActions,
+                        chatViewModel = chatViewModel)
+                  }
                 }
-              }
-        } else {
-          NoMessagesSent(modifier = Modifier.padding(paddingValues))
+          } else {
+            NoMessagesSent(modifier = Modifier.padding(paddingValues))
+          }
         }
-      }
+  }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -149,7 +161,7 @@ fun ChatListTopBar(
 
 @Composable
 fun ChatListItem(
-    message: ChatMessage.TextMessage,
+    message: ChatMessage,
     currentUserId: String,
     receiverId: String,
     role: String,
@@ -185,7 +197,7 @@ fun ChatListItem(
       modifier =
           Modifier.fillMaxWidth().padding(vertical = 8.dp).testTag("ChatListItem").clickable {
             if (receiver != null) {
-              chatViewModel.prepareForChat(currentUserId, receiverId, receiver)
+              chatViewModel.prepareForChat(false, currentUserId, receiverId, receiver)
             }
           },
       verticalAlignment = Alignment.CenterVertically) {
@@ -205,7 +217,12 @@ fun ChatListItem(
               style = MaterialTheme.typography.titleMedium,
               fontWeight = FontWeight.Bold)
           Text(
-              text = message.message,
+              text =
+                  when (message) {
+                    is ChatMessage.TextMessage -> message.message
+                    is ChatMessage.ImageMessage -> "image"
+                    is ChatMessage.TextImageMessage -> message.text
+                  },
               style = MaterialTheme.typography.bodyLarge,
               color = Color.Gray,
               maxLines = 1,

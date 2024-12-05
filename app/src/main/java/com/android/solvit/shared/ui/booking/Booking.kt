@@ -528,7 +528,9 @@ fun EditAndChatButton(
         modifier = Modifier.weight(1f).padding(horizontal = 8.dp).testTag("chat_button"),
         contentAlignment = Alignment.Center) {
           Button(
-              onClick = { chatViewModel.prepareForChat(currentUserId, receiverId, receiver) },
+              onClick = {
+                chatViewModel.prepareForChat(false, currentUserId, receiverId, receiver)
+              },
               colors =
                   ButtonDefaults.buttonColors(
                       containerColor = colorScheme.primary, contentColor = colorScheme.onPrimary),
