@@ -65,6 +65,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
@@ -506,7 +507,28 @@ fun SentMessage(
               when (message) {
                 is ChatMessage.TextMessage ->
                     Text(
-                        text = message.message,
+                        text =
+                            buildAnnotatedString {
+                              // To convert in bold some part of IA generated messages
+                              val boldRegex = Regex("\\*\\*(.*?)\\*\\*")
+                              var lastIndex = 0
+
+                              boldRegex.findAll(message.message).forEach { matchResult ->
+                                val start = matchResult.range.first
+                                val end = matchResult.range.last
+                                val boldText = matchResult.groupValues[1]
+
+                                append(message.message.substring(lastIndex, start))
+
+                                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                  append(boldText)
+                                }
+
+                                lastIndex = end + 1
+                              }
+
+                              append(message.message.substring(lastIndex))
+                            },
                         color =
                             if (isSentByUser) MaterialTheme.colorScheme.background else Color.Black,
                         style = MaterialTheme.typography.bodySmall)
