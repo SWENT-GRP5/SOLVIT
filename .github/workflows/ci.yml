@@ -17,6 +17,13 @@ jobs:
     name: CI
     # Execute the CI on the course's runners
     runs-on: ubuntu-latest
+    timeout-minutes: 60
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1]  # Split tests into 2 shards for parallel execution
+      max-parallel: 2  # Ensure we don't overload the runner
 
     steps:
       # First step : Checkout the repository on the runner
@@ -104,21 +111,8 @@ jobs:
           target: google_apis
           arch: x86_64
           force-avd-creation: false
-          emulator-options: >-
-            -no-window
-            -gpu swiftshader_indirect
-            -noaudio
-            -no-boot-anim
-            -no-snapshot
-            -no-snapshot-save
-            -camera-back none
-            -memory 2048
-            -skin 1080x1920
-            -ranchu
-            -netfast
-            -accel on
-            -qemu -m 2048
-          disable-animations: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: true
           script: echo "Generated AVD snapshot for caching."
 
       - name: Install Firebase CLI
@@ -136,59 +130,34 @@ jobs:
       # Check formatting
       - name: KTFmt Check
         run: |
-          ./gradlew ktfmtCheck
+          ./gradlew ktfmtCheck -Dorg.gradle.workers.max=2 -Dorg.gradle.jvmargs="-Xmx6g -XX:MaxMetaspaceSize=1024m -XX:+UseParallelGC"
 
       # This step runs gradle commands to build the application
       - name: Assemble
         run: |
           # To run the CI with debug information, add --info
-          ./gradlew assemble lint --parallel --build-cache
+          ./gradlew assemble lint --parallel --build-cache -Dorg.gradle.workers.max=2 -Dorg.gradle.jvmargs="-Xmx6g -XX:MaxMetaspaceSize=1024m -XX:+UseParallelGC"
 
       # Run Unit tests
       - name: Run tests
         run: |
           # To run the CI with debug information, add --info
-          ./gradlew check --parallel --build-cache
+          ./gradlew check --parallel --build-cache -Dorg.gradle.workers.max=2 -Dorg.gradle.jvmargs="-Xmx6g -XX:MaxMetaspaceSize=1024m -XX:+UseParallelGC"
 
-      # Run instrumentation tests on the emulator
+      # Run instrumentation tests on the emulator with sharding
       - name: Run instrumentation tests
         uses: reactivecircus/android-emulator-runner@v2
+        timeout-minutes: 45
         with:
           api-level: 34
           target: google_apis
           arch: x86_64
           avd-name: github
           force-avd-creation: true
-          emulator-options: >-
-            -no-window
-            -gpu swiftshader_indirect
-            -noaudio
-            -no-boot-anim
-            -no-snapshot
-            -no-snapshot-save
-            -camera-back none
-            -memory 2048
-            -skin 1080x1920
-            -ranchu
-            -netfast
-            -accel on
-            -qemu -m 2048
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-snapshot-save
           disable-animations: true
-          script: |
-            adb wait-for-device
-            echo "Waiting for system boot..."
-            start_time=`date +%s`; while true; do boot_status=`adb shell getprop sys.boot_completed 2>/dev/null || echo error`; current_time=`date +%s`; elapsed=$((current_time - start_time)); if [ "$boot_status" = "1" ]; then echo "System boot completed"; break; fi; if [ $elapsed -gt 300 ]; then echo "ERROR: Timeout waiting for system boot"; exit 1; fi; sleep 5; done
-            
-            echo "Waiting for package manager..."
-            start_time=`date +%s`; while true; do pm_count=`adb shell pm path android 2>/dev/null | grep -c package: || echo 0`; current_time=`date +%s`; elapsed=$((current_time - start_time)); if [ "$pm_count" -gt "0" ]; then echo "Package manager is ready"; break; fi; if [ $elapsed -gt 120 ]; then echo "ERROR: Timeout waiting for package manager"; exit 1; fi; sleep 5; done
-            
-            echo "Optimizing emulator settings..."
-            adb shell settings put global window_animation_scale 0 || true
-            adb shell settings put global transition_animation_scale 0 || true
-            adb shell settings put global animator_duration_scale 0 || true
-            
-            echo "Running instrumentation tests..."
-            ./gradlew connectedCheck -Pandroid.testInstrumentationRunnerArguments.timeout_msec=60000 --no-daemon --max-workers=2 -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=512m -XX:+HeapDumpOnOutOfMemoryError"
+          script: ./gradlew connectedCheck -Pandroid.testInstrumentationRunnerArguments.numShards=2 -Pandroid.testInstrumentationRunnerArguments.shardIndex=${{ matrix.shard }} -Pandroid.testInstrumentationRunnerArguments.timeout_msec=60000 --no-daemon -Dorg.gradle.workers.max=2 -Dorg.gradle.jvmargs="-Xmx6g -XX:MaxMetaspaceSize=1024m -XX:+UseParallelGC"
+
 
       # Upload test results
       - name: Upload test results
@@ -196,12 +165,16 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: test-results
-          path: app/build/reports/androidTests/connected/
+          path: |
+            app/build/reports/androidTests/connected/
+            app/build/outputs/androidTest-results/
+            app/build/reports/tests/
+            app/build/test-results/
 
       # This step generates the coverage report which will be uploaded to sonar
       - name: Generate Coverage Report
         run: |
-          ./gradlew jacocoTestReport
+          ./gradlew jacocoTestReport --parallel --build-cache -Dorg.gradle.workers.max=2 -Dorg.gradle.jvmargs="-Xmx6g -XX:MaxMetaspaceSize=1024m -XX:+UseParallelGC"
 
       - name: Upload coverage
         uses: actions/upload-artifact@v4
@@ -216,4 +189,4 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_ORGANIZATION : ${{ secrets.SONAR_ORGANIZATION}}
           SONAR_PROJECT_KEY : ${{ secrets.SONAR_PROJECT_KEY}}
-        run: ./gradlew sonar --parallel --build-cache
+        run: ./gradlew sonar --parallel --build-cache -Dorg.gradle.workers.max=2 -Dorg.gradle.jvmargs="-Xmx6g -XX:MaxMetaspaceSize=1024m -XX:+UseParallelGC"
