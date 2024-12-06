@@ -9,6 +9,7 @@ import com.android.solvit.shared.model.authentication.AuthRep
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.authentication.User
 import com.android.solvit.shared.model.map.Location
+import com.android.solvit.shared.model.provider.ProviderRepository
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestRepository
 import com.android.solvit.shared.model.request.ServiceRequestStatus
@@ -45,6 +46,7 @@ class ProviderCalendarScreenTest {
   private lateinit var authRep: AuthRep
   private lateinit var serviceRequestRepository: ServiceRequestRepository
   private lateinit var serviceRequestViewModel: ServiceRequestViewModel
+  private lateinit var providerRepository: ProviderRepository
 
   private val testUserId = "test_provider_id"
   private val testLocation = Location(37.7749, -122.4194, "San Francisco")
@@ -59,6 +61,7 @@ class ProviderCalendarScreenTest {
     serviceRequestRepository = mock(ServiceRequestRepository::class.java)
     navigationActions = mock(NavigationActions::class.java)
     authRep = mock(AuthRep::class.java)
+    providerRepository = mock(ProviderRepository::class.java)
 
     // Set up test data
     val testUser =
@@ -148,7 +151,8 @@ class ProviderCalendarScreenTest {
     serviceRequestViewModel = spy(ServiceRequestViewModel(serviceRequestRepository))
 
     // Initialize calendar view model
-    viewModel = ProviderCalendarViewModel(authViewModel, serviceRequestViewModel)
+    viewModel =
+        ProviderCalendarViewModel(providerRepository, authViewModel, serviceRequestViewModel)
   }
 
   private fun setupScreen() {

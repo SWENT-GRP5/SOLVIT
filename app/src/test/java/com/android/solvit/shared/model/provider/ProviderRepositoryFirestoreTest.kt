@@ -6,6 +6,7 @@ import com.android.solvit.shared.model.service.Services
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
+import com.google.android.gms.tasks.Tasks.forResult
 import com.google.firebase.FirebaseApp
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.CollectionReference
@@ -80,6 +81,7 @@ class ProviderRepositoryFirestoreTest {
     `when`(mockCollectionReference.document(any())).thenReturn(mockDocumentReference)
     `when`(mockCollectionReference.document()).thenReturn(mockDocumentReference)
     `when`(mockDocumentReference.get()).thenReturn(mockTaskDoc)
+    `when`(mockDocumentReference.set(any())).thenReturn(Tasks.forResult(null))
 
     // Handle task completion
     Mockito.doAnswer { invocation ->
@@ -177,7 +179,7 @@ class ProviderRepositoryFirestoreTest {
                                 "startMinute" to 0L,
                                 "endHour" to 18L,
                                 "endMinute" to 0L))),
-            "_exceptions" to
+            "exceptions" to
                 listOf(
                     mapOf(
                         "timestamp" to Timestamp.now(),
@@ -187,7 +189,8 @@ class ProviderRepositoryFirestoreTest {
                                     "startHour" to 9L,
                                     "startMinute" to 0L,
                                     "endHour" to 12L,
-                                    "endMinute" to 0L)))))
+                                    "endMinute" to 0L)),
+                        "type" to "OFF_TIME")))
     `when`(mockDocumentSnapshot.get("schedule")).thenReturn(scheduleMap)
 
     var capturedProvider: Provider? = null
@@ -245,7 +248,7 @@ class ProviderRepositoryFirestoreTest {
                                 "startMinute" to 0L,
                                 "endHour" to 17L,
                                 "endMinute" to 0L))),
-            "_exceptions" to listOf<Map<String, Any>>())
+            "exceptions" to listOf<Map<String, Any>>())
     `when`(mockDocumentSnapshot.get("schedule")).thenReturn(scheduleMap)
 
     var capturedProvider: Provider? = null
@@ -257,6 +260,281 @@ class ProviderRepositoryFirestoreTest {
     assertNotNull(capturedProvider)
     val schedule = capturedProvider!!.schedule
     assertTrue(schedule.regularHours["MONDAY"]?.isEmpty() ?: true)
+  }
+
+  @Test
+  fun `test schedule initialization with null fields`() {
+    setupBasicProviderFields()
+
+    // Setup schedule with null fields
+    val scheduleMap = mapOf("regularHours" to null, "exceptions" to null)
+    `when`(mockDocumentSnapshot.get("schedule")).thenReturn(scheduleMap)
+
+    var capturedProvider: Provider? = null
+    providerRepositoryFirestore.getProvider(
+        "test-id",
+        onSuccess = { provider -> capturedProvider = provider },
+        onFailure = { fail("Should not fail") })
+
+    assertNotNull(capturedProvider)
+    val schedule = capturedProvider!!.schedule
+    assertTrue(schedule.regularHours.isEmpty())
+    assertTrue(schedule.exceptions.isEmpty())
+  }
+
+  @Test
+  fun `test schedule initialization with malformed exception data`() {
+    setupBasicProviderFields()
+
+    // Setup schedule with malformed exception data
+    val scheduleMap =
+        mapOf(
+            "regularHours" to emptyMap<String, List<Map<String, Any>>>(),
+            "exceptions" to
+                listOf(
+                    mapOf(
+                        "timestamp" to "invalid-timestamp", // Invalid timestamp format
+                        "timeSlots" to
+                            listOf(
+                                mapOf(
+                                    "startHour" to 9L,
+                                    "startMinute" to 0L,
+                                    "endHour" to 12L,
+                                    "endMinute" to 0L)))))
+    `when`(mockDocumentSnapshot.get("schedule")).thenReturn(scheduleMap)
+
+    var capturedProvider: Provider? = null
+    providerRepositoryFirestore.getProvider(
+        "test-id",
+        onSuccess = { provider -> capturedProvider = provider },
+        onFailure = { fail("Should not fail") })
+
+    assertNotNull(capturedProvider)
+    val schedule = capturedProvider!!.schedule
+    assertTrue(schedule.exceptions.isEmpty()) // Should ignore malformed exception
+  }
+
+  @Test
+  fun `test conversion of invalid time slots`() {
+    setupBasicProviderFields()
+
+    // Setup schedule with invalid time slot values
+    val scheduleMap =
+        mapOf(
+            "regularHours" to
+                mapOf(
+                    "MONDAY" to
+                        listOf(
+                            mapOf(
+                                "startHour" to -1L, // Invalid hour
+                                "startMinute" to 60L, // Invalid minute
+                                "endHour" to 24L, // Invalid hour
+                                "endMinute" to -30L // Invalid minute
+                                ))))
+    `when`(mockDocumentSnapshot.get("schedule")).thenReturn(scheduleMap)
+
+    var capturedProvider: Provider? = null
+    providerRepositoryFirestore.getProvider(
+        "test-id",
+        onSuccess = { provider -> capturedProvider = provider },
+        onFailure = { fail("Should not fail") })
+
+    assertNotNull(capturedProvider)
+    val schedule = capturedProvider!!.schedule
+    assertTrue(schedule.regularHours["MONDAY"]?.isEmpty() ?: true)
+  }
+
+  @Test
+  fun `test schedule exception validation`() {
+    // Setup basic provider fields
+    setupBasicProviderFields()
+
+    // Setup schedule with overlapping exceptions
+    val overlappingScheduleMap =
+        mapOf(
+            "regularHours" to mapOf("MONDAY" to listOf(createMockTimeSlot(9, 0, 17, 0))),
+            "exceptions" to
+                listOf(
+                    mapOf(
+                        "timestamp" to Timestamp.now(),
+                        "timeSlots" to
+                            listOf(
+                                createMockTimeSlot(10, 0, 12, 0),
+                                createMockTimeSlot(11, 0, 13, 0) // Overlapping slot
+                                ),
+                        "type" to "EXTRA_TIME")))
+    `when`(mockDocumentSnapshot.get("schedule")).thenReturn(overlappingScheduleMap)
+
+    var capturedProvider: Provider? = null
+    providerRepositoryFirestore.getProvider(
+        "test-id",
+        onSuccess = { p -> capturedProvider = p },
+        onFailure = { fail("Should not fail") })
+
+    assertNotNull(capturedProvider)
+    // Verify that overlapping slots are handled gracefully
+    assertEquals(1, capturedProvider!!.schedule.exceptions.size)
+    assertEquals(2, capturedProvider!!.schedule.exceptions[0].timeSlots.size)
+  }
+
+  @Test
+  fun `test schedule initialization with invalid time slot format`() {
+    setupBasicProviderFields()
+
+    // Setup schedule with invalid time slot values
+    val scheduleMap =
+        mapOf(
+            "regularHours" to
+                mapOf(
+                    "MONDAY" to
+                        listOf(
+                            mapOf(
+                                "startHour" to "invalid",
+                                "startMinute" to 0,
+                                "endHour" to 17,
+                                "endMinute" to 0))),
+            "exceptions" to emptyList<Map<String, Any>>())
+    `when`(mockDocumentSnapshot.get("schedule")).thenReturn(scheduleMap)
+
+    // Get provider
+    var provider: Provider? = null
+    providerRepositoryFirestore.getProvider(
+        "test-id", onSuccess = { p -> provider = p }, onFailure = { fail("Should not fail") })
+
+    assertNotNull(provider)
+    assertTrue(provider!!.schedule.regularHours["MONDAY"]?.isEmpty() ?: true)
+  }
+
+  @Test
+  fun `test schedule initialization with invalid exception data`() {
+    setupBasicProviderFields()
+
+    // Setup schedule with invalid exception data
+    val scheduleMap =
+        mapOf(
+            "regularHours" to emptyMap<String, Any>(),
+            "exceptions" to
+                listOf(
+                    mapOf(
+                        "timestamp" to "invalid",
+                        "timeSlots" to
+                            listOf(
+                                mapOf(
+                                    "startHour" to 9,
+                                    "startMinute" to 0,
+                                    "endHour" to 17,
+                                    "endMinute" to 0)),
+                        "type" to "OFF_TIME")))
+    `when`(mockDocumentSnapshot.get("schedule")).thenReturn(scheduleMap)
+
+    // Get provider
+    var provider: Provider? = null
+    providerRepositoryFirestore.getProvider(
+        "test-id", onSuccess = { p -> provider = p }, onFailure = { fail("Should not fail") })
+
+    assertNotNull(provider)
+    assertTrue(provider!!.schedule.exceptions.isEmpty())
+  }
+
+  @Test
+  fun `test schedule initialization with invalid exception type`() {
+    setupBasicProviderFields()
+
+    // Setup schedule with invalid exception type
+    val scheduleMap =
+        mapOf(
+            "regularHours" to emptyMap<String, Any>(),
+            "exceptions" to
+                listOf(
+                    mapOf(
+                        "timestamp" to Timestamp.now(),
+                        "timeSlots" to
+                            listOf(
+                                mapOf(
+                                    "startHour" to 9,
+                                    "startMinute" to 0,
+                                    "endHour" to 17,
+                                    "endMinute" to 0)),
+                        "type" to "INVALID_TYPE")))
+    `when`(mockDocumentSnapshot.get("schedule")).thenReturn(scheduleMap)
+
+    // Get provider
+    var provider: Provider? = null
+    providerRepositoryFirestore.getProvider(
+        "test-id", onSuccess = { p -> provider = p }, onFailure = { fail("Should not fail") })
+
+    assertNotNull(provider)
+    assertTrue(provider!!.schedule.exceptions.isEmpty())
+  }
+
+  @Test
+  fun `test schedule initialization with missing fields`() {
+    setupBasicProviderFields()
+
+    // Setup schedule with missing fields
+    val scheduleMap =
+        mapOf(
+            "regularHours" to
+                mapOf(
+                    "MONDAY" to
+                        listOf(
+                            mapOf(
+                                "startHour" to 9, "startMinute" to 0
+                                // Missing endHour and endMinute
+                                ))),
+            "exceptions" to emptyList<Map<String, Any>>())
+    `when`(mockDocumentSnapshot.get("schedule")).thenReturn(scheduleMap)
+
+    // Get provider
+    var provider: Provider? = null
+    providerRepositoryFirestore.getProvider(
+        "test-id", onSuccess = { p -> provider = p }, onFailure = { fail("Should not fail") })
+
+    assertNotNull(provider)
+    assertTrue(provider!!.schedule.regularHours["MONDAY"]?.isEmpty() ?: true)
+  }
+
+  @Test
+  fun `test schedule initialization with invalid day name`() {
+    setupBasicProviderFields()
+
+    // Setup schedule with invalid day name
+    val scheduleMap =
+        mapOf(
+            "regularHours" to
+                mapOf(
+                    "INVALID_DAY" to
+                        listOf(
+                            mapOf(
+                                "startHour" to 9,
+                                "startMinute" to 0,
+                                "endHour" to 17,
+                                "endMinute" to 0))),
+            "exceptions" to emptyList<Map<String, Any>>())
+    `when`(mockDocumentSnapshot.get("schedule")).thenReturn(scheduleMap)
+
+    // Get provider
+    var provider: Provider? = null
+    providerRepositoryFirestore.getProvider(
+        "test-id", onSuccess = { p -> provider = p }, onFailure = { fail("Should not fail") })
+
+    assertNotNull(provider)
+    assertTrue(provider!!.schedule.regularHours.isEmpty())
+  }
+
+  @Test
+  fun `test schedule initialization with null schedule data`() {
+    setupBasicProviderFields()
+    `when`(mockDocumentSnapshot.get("schedule")).thenReturn(null)
+
+    // Get provider
+    var provider: Provider? = null
+    providerRepositoryFirestore.getProvider(
+        "test-id", onSuccess = { p -> provider = p }, onFailure = { fail("Should not fail") })
+
+    assertNotNull(provider)
+    assertTrue(provider!!.schedule.regularHours.isEmpty())
+    assertTrue(provider!!.schedule.exceptions.isEmpty())
   }
 
   @Test
@@ -311,5 +589,18 @@ class ProviderRepositoryFirestoreTest {
     `when`(mockDocumentSnapshot.getDouble("price")).thenReturn(100.0)
     `when`(mockDocumentSnapshot.getTimestamp("deliveryTime")).thenReturn(Timestamp.now())
     `when`(mockDocumentSnapshot.get("languages")).thenReturn(listOf("ENGLISH", "FRENCH"))
+  }
+
+  private fun createMockTimeSlot(
+      startHour: Long,
+      startMinute: Long,
+      endHour: Long,
+      endMinute: Long
+  ): Map<String, Long> {
+    return mapOf(
+        "startHour" to startHour,
+        "startMinute" to startMinute,
+        "endHour" to endHour,
+        "endMinute" to endMinute)
   }
 }
