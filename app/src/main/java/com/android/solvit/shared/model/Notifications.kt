@@ -1,5 +1,6 @@
 package com.android.solvit.shared.model
 
+import com.android.solvit.shared.model.request.ServiceRequest
 import com.google.firebase.Timestamp
 
 data class Notification(
@@ -10,7 +11,8 @@ data class Notification(
     val timestamp: Timestamp =
         Timestamp
             .now(), // The timestamp when the notification was created; defaults to current time
-    val isRead: Boolean =
+    val serviceRequest: ServiceRequest, // The related service request
+    var isRead: Boolean =
         false // Flag indicating if the notification has been read by the provider, defaults to
     // `false`
 )

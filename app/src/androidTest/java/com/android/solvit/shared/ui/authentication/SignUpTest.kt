@@ -49,6 +49,7 @@ class SignUpScreenTest {
     composeTestRule.onNodeWithTag("confirmPasswordInputField").assertIsDisplayed()
     composeTestRule.onNodeWithTag("signUpButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("logInLink").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("generatePasswordButton").assertIsDisplayed()
   }
 
   @Test

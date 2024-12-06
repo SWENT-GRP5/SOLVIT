@@ -3,7 +3,6 @@ package com.android.solvit.shared.ui.authentication
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.ActivityInfo
-import android.util.Patterns
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.ManagedActivityResultLauncher
@@ -48,10 +47,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -70,7 +71,24 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import kotlinx.coroutines.launch
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
+/**
+ * A composable function that displays the Sign-Up screen for user registration.
+ *
+ * @param navigationActions A set of navigation actions to handle screen transitions.
+ * @param authViewModel The ViewModel managing authentication and user-related data.
+ *
+ * This function:
+ * - Locks the screen orientation to portrait mode while active.
+ * - Provides a form for users to input their email, password, and confirm their password.
+ * - Includes validation for email format, password length, and password matching.
+ * - Offers a "Sign up with Google" option using Google Sign-In.
+ * - Provides a button to generate a secure password via an API, copying it to the clipboard.
+ * - Navigates to the role selection screen upon successful registration.
+ * - Displays error messages for invalid or incomplete form fields.
+ */
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "SourceLockedOrientationActivity")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -94,15 +112,44 @@ fun SignUpScreen(
           authViewModel, { navigationActions.navigateTo(Screen.SIGN_UP_CHOOSE_ROLE) }, {})
   val token = stringResource(R.string.default_web_client_id)
 
-  val goodFormEmail =
-      email.isNotBlank() &&
-          Patterns.EMAIL_ADDRESS.matcher(email).matches() &&
-          email.contains(".") &&
-          email.contains("@")
+  val goodFormEmail = ValidationRegex.EMAIL_REGEX.matches(email)
+
   val passwordLengthComplete = password.length >= 6
   val samePassword = password == confirmPassword
 
   val isFormComplete = goodFormEmail && passwordLengthComplete && samePassword
+
+  val passwordApiService = createPasswordService()
+  val scope = rememberCoroutineScope()
+  val clipboardManager = LocalClipboardManager.current
+
+  // Function to generate a password and copy it to the clipboard when the button is clicked
+  // We use a lambda function to generate the password asynchronously
+  val generatePassword: () -> Unit = {
+    scope.launch {
+      try {
+        val response =
+            passwordApiService.createPassword(
+                includeDigits = true,
+                includeLowercase = true,
+                includeUppercase = true,
+                includeSpecialCharacters = true,
+                passwordLength = 16,
+                quantity = 1)
+        val generatedPassword = response.passwords.first()
+        password = generatedPassword
+        confirmPassword = generatedPassword
+
+        val annotatedString = AnnotatedString(generatedPassword)
+        clipboardManager.setText(annotatedString)
+        Toast.makeText(
+                context, "Password copied to clipboard : $annotatedString", Toast.LENGTH_SHORT)
+            .show()
+      } catch (e: Exception) {
+        Toast.makeText(context, "Error generating password", Toast.LENGTH_SHORT).show()
+      }
+    }
+  }
 
   Scaffold(
       topBar = {
@@ -202,6 +249,21 @@ fun SignUpScreen(
                   style = TextStyle(fontSize = 12.sp, lineHeight = 16.sp),
                   modifier = Modifier.padding(top = 4.dp).fillMaxWidth())
 
+              Button(
+                  onClick = generatePassword,
+                  modifier =
+                      Modifier.align(Alignment.End)
+                          .padding(top = 16.dp)
+                          .height(50.dp)
+                          .testTag("generatePasswordButton"),
+                  shape = RoundedCornerShape(25.dp),
+                  colors =
+                      ButtonDefaults.buttonColors(
+                          containerColor = colorScheme.primary,
+                          contentColor = colorScheme.background)) {
+                    Text("Generate a password")
+                  }
+
               Spacer(modifier = Modifier.height(20.dp))
 
               SignUpButton(
@@ -230,6 +292,15 @@ fun ScreenTitle(title: String, testTag: String) {
       modifier = Modifier.testTag(testTag))
 }
 
+/**
+ * A composable function that displays the "Sign Up" button with validation and error handling.
+ *
+ * @param onClick A lambda function to execute upon successful validation and button click.
+ * @param isComplete A boolean indicating if all form fields are valid and complete.
+ * @param goodFormEmail A boolean indicating if the email format is valid.
+ * @param passwordLengthComplete A boolean indicating if the password meets the length requirement.
+ * @param samePassword A boolean indicating if the password and confirm password match.
+ */
 @Composable
 fun SignUpButton(
     onClick: () -> Unit,
@@ -285,6 +356,13 @@ fun SignUpButton(
       }
 }
 
+/**
+ * A composable function that returns a launcher for Google Sign-In registration.
+ *
+ * @param authViewModel The ViewModel managing authentication and user-related data.
+ * @param onSuccess A lambda function executed when the Google Sign-In process succeeds.
+ * @param onFailure A lambda function executed when the Google Sign-In process fails.
+ */
 @Composable
 fun googleRegisterLauncher(
     authViewModel: AuthViewModel,
@@ -307,6 +385,15 @@ fun googleRegisterLauncher(
   }
 }
 
+/**
+ * A composable function that displays a clickable text for navigating to the "Log In" screen.
+ *
+ * @param navigationActions A set of navigation actions to handle screen transitions.
+ *
+ * This function:
+ * - Displays an annotated and styled text with a clickable "Log-In here!" link.
+ * - Navigates to the "Log In" screen when the link is clicked.
+ */
 @Composable
 fun AlreadyHaveAccountText(navigationActions: NavigationActions) {
   Row(verticalAlignment = Alignment.CenterVertically) {
@@ -340,4 +427,19 @@ fun AlreadyHaveAccountText(navigationActions: NavigationActions) {
           modifier = Modifier.fillMaxWidth().testTag("logInLink"))
     }
   }
+}
+
+/**
+ * A helper function that creates and returns a Retrofit instance for the Password API service.
+ *
+ * @return A `PasswordApiService` implementation for making password generation requests.
+ */
+fun createPasswordService(): PasswordApiService {
+  val retrofit =
+      Retrofit.Builder()
+          .baseUrl("https://api.motdepasse.xyz/")
+          .addConverterFactory(GsonConverterFactory.create())
+          .build()
+
+  return retrofit.create(PasswordApiService::class.java)
 }
