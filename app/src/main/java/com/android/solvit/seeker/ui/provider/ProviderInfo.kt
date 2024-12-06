@@ -811,6 +811,19 @@ fun SelectRequestDialog(
                       }
                     }
 
+                TextButton(
+                    onClick = {
+                      requestViewModel.selectProvider(providerId, providerType)
+                      navigationActions.navigateTo(Route.CREATE_REQUEST)
+                    },
+                    modifier = Modifier.testTag("clear_selection_button")) {
+                      Text(
+                          textAlign = TextAlign.Center,
+                          text = "Create a new request with this provider assigned",
+                          style = typography.bodyMedium,
+                          color = colorScheme.primary)
+                    }
+
                 // Action Buttons
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(top = 16.dp),

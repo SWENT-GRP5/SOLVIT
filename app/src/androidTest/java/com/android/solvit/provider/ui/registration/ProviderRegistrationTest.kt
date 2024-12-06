@@ -1,8 +1,6 @@
 package com.android.solvit.provider.ui.registration
 
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertIsEnabled
-import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.isNotDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -117,29 +115,55 @@ class ProviderRegistrationTest {
           navigationActions = navigationActions,
           locationViewModel = locationViewModel)
     }
+
     // Initially, the button should be disabled when fields are empty
-    composeTestRule.onNodeWithTag("completeRegistrationButton").assertIsNotEnabled()
+    composeTestRule.onNodeWithTag("completeRegistrationButton").performClick()
+    composeTestRule.onNodeWithTag("savePreferencesButton").isNotDisplayed()
 
     // Fill out only some of the fields
     composeTestRule.onNodeWithTag("fullNameInput").performTextInput("John Doe")
     composeTestRule.onNodeWithTag("phoneNumberInput").performTextInput("123456789")
 
     // Button should still be disabled as not all fields are filled
-    composeTestRule.onNodeWithTag("completeRegistrationButton").assertIsNotEnabled()
+    composeTestRule.onNodeWithTag("completeRegistrationButton").performClick()
+    composeTestRule.onNodeWithTag("savePreferencesButton").isNotDisplayed()
 
     // Complete the rest of the fields
     composeTestRule.onNodeWithTag("companyNameInput").performTextInput("Company")
     composeTestRule.onNodeWithTag("inputRequestAddress").performTextInput("123 Main St")
 
-    // Now the button should be enabled
-    composeTestRule.onNodeWithTag("completeRegistrationButton").assertIsNotEnabled()
+    // Not enable because the location is not selected
+    composeTestRule.onNodeWithTag("completeRegistrationButton").performClick()
+    composeTestRule.onNodeWithTag("savePreferencesButton").isNotDisplayed()
 
     composeTestRule.onNodeWithTag("inputRequestAddress").performTextClearance()
     composeTestRule.onNodeWithTag("inputRequestAddress").performTextInput("USA")
     composeTestRule.waitUntil { locationViewModel.locationSuggestions.value.isNotEmpty() }
     composeTestRule.onAllNodesWithTag("locationResult")[0].performClick()
 
-    composeTestRule.onNodeWithTag("completeRegistrationButton").assertIsEnabled()
+    composeTestRule.onNodeWithTag("completeRegistrationButton").performClick()
+    composeTestRule.onNodeWithTag("savePreferencesButton").isDisplayed()
+
+    // Initially, the button should be disabled when fields are empty
+    composeTestRule.onNodeWithTag("savePreferencesButton").performClick()
+    composeTestRule.onNodeWithTag("enterPackagesButton").isNotDisplayed()
+
+    // Fill out only some of the fields
+    composeTestRule.onNodeWithTag("servicesDropDown").performClick()
+    composeTestRule.onAllNodesWithTag("servicesDropdownMenu")[0].performClick()
+
+    // Button should still be disabled as not all fields are filled
+    composeTestRule.onNodeWithTag("descriptionInputProviderRegistration").performTextInput("ABC")
+    composeTestRule
+        .onNodeWithTag("startingPriceInputProviderRegistration")
+        .performTextInput("1234567")
+
+    // Complete the rest of the fields
+    composeTestRule.onNodeWithTag("languageDropdown").performClick()
+    composeTestRule.onAllNodesWithTag("languageDropdownMenu")[0].performClick()
+
+    composeTestRule.onNodeWithTag("savePreferencesButton").performClick()
+    composeTestRule.onNodeWithTag("enterPackagesButton").isDisplayed()
   }
 
   @Test

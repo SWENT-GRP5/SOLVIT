@@ -12,8 +12,8 @@ fun getReceiverName(receiver: Any): String {
 
   val receiverName =
       when (receiver) {
-        is Provider -> (receiver as Provider).name
-        is SeekerProfile -> (receiver as SeekerProfile).name
+        is Provider -> receiver.name
+        is SeekerProfile -> receiver.username
         else -> "Unknown"
       }
   return receiverName
@@ -22,8 +22,8 @@ fun getReceiverName(receiver: Any): String {
 fun getReceiverImageUrl(receiver: Any): String {
   val receiverPicture =
       when (receiver) {
-        is Provider -> (receiver as Provider).imageUrl
-        is SeekerProfile -> (receiver as SeekerProfile).imageUrl
+        is Provider -> receiver.imageUrl
+        is SeekerProfile -> receiver.imageUrl
         else -> "Unknown"
       }
 

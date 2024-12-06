@@ -119,14 +119,16 @@ class ProviderCalendarViewModel(
   }
 
   companion object {
-    val Factory: ViewModelProvider.Factory =
-        object : ViewModelProvider.Factory {
-          @Suppress("UNCHECKED_CAST")
-          override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return ProviderCalendarViewModel(
-                AuthViewModel.Factory.create(AuthViewModel::class.java),
-                ServiceRequestViewModel.Factory.create(ServiceRequestViewModel::class.java))
-                as T
+    val Factory: (AuthViewModel, ServiceRequestViewModel) -> ViewModelProvider.Factory =
+        { auth, service ->
+          object : ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+              if (modelClass.isAssignableFrom(ProviderCalendarViewModel::class.java)) {
+                return ProviderCalendarViewModel(auth, service) as T
+              }
+              throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
+            }
           }
         }
   }
