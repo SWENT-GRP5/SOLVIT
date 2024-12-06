@@ -147,6 +147,18 @@ class AuthViewModel(private val authRepository: AuthRep) : ViewModel() {
     }
   }
 
+  fun setUserName(userName: String) {
+    if (user.value == null) {
+      Log.e("AuthViewModel", "User is null")
+      return
+    }
+    authRepository.setUserName(
+        userName,
+        user.value!!.uid,
+        { _user.value = user.value!!.copy(userName = userName) },
+        { Log.e("AuthViewModel", "Error setting user name", it) })
+  }
+
   fun addUserLocation(location: Location, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
     val userLocations = user.value?.locations ?: emptyList()
     if (userLocations.contains(location)) {

@@ -9,14 +9,10 @@ import com.android.solvit.shared.model.provider.ExceptionType
 import com.android.solvit.shared.model.provider.ExceptionUpdateResult
 import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.provider.ProviderRepository
-import com.android.solvit.shared.model.provider.ProviderRepositoryFirestore
 import com.android.solvit.shared.model.provider.ScheduleException
 import com.android.solvit.shared.model.provider.TimeSlot
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
-import com.google.firebase.Firebase
-import com.google.firebase.firestore.firestore
-import com.google.firebase.storage.storage
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -468,16 +464,17 @@ class ProviderCalendarViewModel(
   data class ConflictResult(val hasConflict: Boolean, val reason: String)
 
   companion object {
-    /** Factory for creating instances of ProviderCalendarViewModel. */
-    val Factory: ViewModelProvider.Factory =
-        object : ViewModelProvider.Factory {
-          @Suppress("UNCHECKED_CAST")
-          override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return ProviderCalendarViewModel(
-                ProviderRepositoryFirestore(Firebase.firestore, Firebase.storage),
-                AuthViewModel.Factory.create(AuthViewModel::class.java),
-                ServiceRequestViewModel.Factory.create(ServiceRequestViewModel::class.java))
-                as T
+    val Factory:
+        (ProviderRepository, AuthViewModel, ServiceRequestViewModel) -> ViewModelProvider.Factory =
+        { providerList, auth, service ->
+          object : ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+              if (modelClass.isAssignableFrom(ProviderCalendarViewModel::class.java)) {
+                return ProviderCalendarViewModel(providerList, auth, service) as T
+              }
+              throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
+            }
           }
         }
   }

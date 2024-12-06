@@ -119,7 +119,7 @@ fun BottomNavigationMenu(
               onTabSelect(
                   if (tabList == LIST_TOP_LEVEL_DESTINATION_SEEKER)
                       TopLevelDestinations.CREATE_REQUEST
-                  else TopLevelDestinations.MYJOBS)
+                  else TopLevelDestinations.MY_JOBS)
             },
             modifier =
                 Modifier.size(height * 0.85f)
