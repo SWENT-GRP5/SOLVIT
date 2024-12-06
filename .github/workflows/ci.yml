@@ -106,36 +106,61 @@ jobs:
             -gpu swiftshader_indirect
             -noaudio
             -no-boot-anim
+            -no-snapshot
+            -no-snapshot-save
             -camera-back none
-            -memory 4096
+            -memory 2048
             -skin 1080x1920
+            -ranchu
+            -netfast
+            -accel on
+            -qemu -m 2048
           disable-animations: true
           script: |
-            # Wait for emulator to fully boot and stabilize
+            #!/bin/bash
+            set -e
+            
+            echo "Waiting for ADB and emulator..."
             adb wait-for-device
-            echo "Waiting for system boot to complete..."
             
-            # Wait for system boot to complete
-            while [ "`adb shell getprop sys.boot_completed 2>/dev/null`" != "1" ] ; do
-              sleep 2
+            echo "Waiting for system boot..."
+            timeout=300
+            start_time=$(date +%s)
+            while true; do
+              if adb shell getprop sys.boot_completed | grep -q '^1'; then
+                echo "System boot completed"
+                break
+              fi
+              current_time=$(date +%s)
+              if [ $((current_time - start_time)) -gt $timeout ]; then
+                echo "Timeout waiting for system boot"
+                exit 1
+              fi
+              sleep 5
             done
             
-            # Ensure package manager is ready
             echo "Waiting for package manager..."
-            while [ "`adb shell pm path android 2>/dev/null | grep -c package:`" -eq "0" ] ; do
-              sleep 2
+            timeout=120
+            start_time=$(date +%s)
+            while true; do
+              if adb shell pm path android | grep -q '^package:'; then
+                echo "Package manager is ready"
+                break
+              fi
+              current_time=$(date +%s)
+              if [ $((current_time - start_time)) -gt $timeout ]; then
+                echo "Timeout waiting for package manager"
+                exit 1
+              fi
+              sleep 5
             done
             
-            echo "System is ready, optimizing settings..."
+            echo "Optimizing emulator settings..."
+            adb shell settings put global window_animation_scale 0 || true
+            adb shell settings put global transition_animation_scale 0 || true
+            adb shell settings put global animator_duration_scale 0 || true
             
-            # Additional system optimizations
-            adb shell settings put global window_animation_scale 0
-            adb shell settings put global transition_animation_scale 0
-            adb shell settings put global animator_duration_scale 0
-            
-            echo "Running tests with increased timeouts..."
-            
-            # Run tests with increased timeout and memory
+            echo "Running instrumentation tests..."
             ./gradlew connectedCheck \
               -Pandroid.testInstrumentationRunnerArguments.timeout_msec=60000 \
               --no-daemon \
