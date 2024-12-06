@@ -19,10 +19,16 @@ jobs:
     runs-on: ubuntu-latest
     
     strategy:
-      fail-fast: false
+      fail-fast: false  # Continue with other shards if one fails
       matrix:
-        shard: [0, 1]  # Split tests into 2 shards for parallel execution
-      max-parallel: 2  # Ensure we don't overload the runner
+        include:
+          - shard: 0
+            shard-count: 2
+            shard-index: 0
+          - shard: 1
+            shard-count: 2
+            shard-index: 1
+      max-parallel: 2  # Run shards in parallel
 
     steps:
       # First step : Checkout the repository on the runner
@@ -150,23 +156,11 @@ jobs:
           api-level: 34
           target: google_apis
           arch: x86_64
-          avd-name: github
+          avd-name: github-${{ matrix.shard }}
           force-avd-creation: false
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
-          script: ./gradlew connectedCheck -Pandroid.testInstrumentationRunnerArguments.numShards=2 -Pandroid.testInstrumentationRunnerArguments.shardIndex=${{ matrix.shard }} -Dorg.gradle.jvmargs="-Xmx6g -XX:MaxMetaspaceSize=1024m -XX:+UseParallelGC"
-
-      # Upload test results
-      - name: Upload test results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-results
-          path: |
-            app/build/reports/androidTests/connected/
-            app/build/outputs/androidTest-results/
-            app/build/reports/tests/
-            app/build/test-results/
+          script: ./gradlew connectedCheck -Pandroid.testInstrumentationRunnerArguments.numShards=${{ matrix.shard-count }} -Pandroid.testInstrumentationRunnerArguments.shardIndex=${{ matrix.shard-index }} -Dorg.gradle.jvmargs="-Xmx6g -XX:MaxMetaspaceSize=1024m -XX:+UseParallelGC"
 
       # This step generates the coverage report which will be uploaded to sonar
       - name: Generate Coverage Report
