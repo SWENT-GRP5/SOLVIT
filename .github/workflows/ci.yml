@@ -17,7 +17,6 @@ jobs:
     name: CI
     # Execute the CI on the course's runners
     runs-on: ubuntu-latest
-    timeout-minutes: 60
     
     strategy:
       fail-fast: false
@@ -130,34 +129,32 @@ jobs:
       # Check formatting
       - name: KTFmt Check
         run: |
-          ./gradlew ktfmtCheck -Dorg.gradle.workers.max=2 -Dorg.gradle.jvmargs="-Xmx6g -XX:MaxMetaspaceSize=1024m -XX:+UseParallelGC"
+          ./gradlew ktfmtCheck --build-cache -Dorg.gradle.jvmargs="-Xmx6g -XX:MaxMetaspaceSize=1024m -XX:+UseParallelGC"
 
       # This step runs gradle commands to build the application
       - name: Assemble
         run: |
           # To run the CI with debug information, add --info
-          ./gradlew assemble lint --parallel --build-cache -Dorg.gradle.workers.max=2 -Dorg.gradle.jvmargs="-Xmx6g -XX:MaxMetaspaceSize=1024m -XX:+UseParallelGC"
+          ./gradlew assemble lint --parallel --build-cache -Dorg.gradle.jvmargs="-Xmx6g -XX:MaxMetaspaceSize=1024m -XX:+UseParallelGC"
 
       # Run Unit tests
       - name: Run tests
         run: |
           # To run the CI with debug information, add --info
-          ./gradlew check --parallel --build-cache -Dorg.gradle.workers.max=2 -Dorg.gradle.jvmargs="-Xmx6g -XX:MaxMetaspaceSize=1024m -XX:+UseParallelGC"
+          ./gradlew test --parallel --build-cache -Dorg.gradle.jvmargs="-Xmx6g -XX:MaxMetaspaceSize=1024m -XX:+UseParallelGC"
 
       # Run instrumentation tests on the emulator with sharding
       - name: Run instrumentation tests
         uses: reactivecircus/android-emulator-runner@v2
-        timeout-minutes: 45
         with:
           api-level: 34
           target: google_apis
           arch: x86_64
           avd-name: github
-          force-avd-creation: true
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-snapshot-save
+          force-avd-creation: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
-          script: ./gradlew connectedCheck -Pandroid.testInstrumentationRunnerArguments.numShards=2 -Pandroid.testInstrumentationRunnerArguments.shardIndex=${{ matrix.shard }} -Pandroid.testInstrumentationRunnerArguments.timeout_msec=60000 --no-daemon -Dorg.gradle.workers.max=2 -Dorg.gradle.jvmargs="-Xmx6g -XX:MaxMetaspaceSize=1024m -XX:+UseParallelGC"
-
+          script: ./gradlew connectedCheck -Pandroid.testInstrumentationRunnerArguments.numShards=2 -Pandroid.testInstrumentationRunnerArguments.shardIndex=${{ matrix.shard }} -Dorg.gradle.jvmargs="-Xmx6g -XX:MaxMetaspaceSize=1024m -XX:+UseParallelGC"
 
       # Upload test results
       - name: Upload test results
@@ -174,7 +171,7 @@ jobs:
       # This step generates the coverage report which will be uploaded to sonar
       - name: Generate Coverage Report
         run: |
-          ./gradlew jacocoTestReport --parallel --build-cache -Dorg.gradle.workers.max=2 -Dorg.gradle.jvmargs="-Xmx6g -XX:MaxMetaspaceSize=1024m -XX:+UseParallelGC"
+          ./gradlew jacocoTestReport --parallel --build-cache -Dorg.gradle.jvmargs="-Xmx6g -XX:MaxMetaspaceSize=1024m -XX:+UseParallelGC"
 
       - name: Upload coverage
         uses: actions/upload-artifact@v4
@@ -189,4 +186,4 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_ORGANIZATION : ${{ secrets.SONAR_ORGANIZATION}}
           SONAR_PROJECT_KEY : ${{ secrets.SONAR_PROJECT_KEY}}
-        run: ./gradlew sonar --parallel --build-cache -Dorg.gradle.workers.max=2 -Dorg.gradle.jvmargs="-Xmx6g -XX:MaxMetaspaceSize=1024m -XX:+UseParallelGC"
+        run: ./gradlew sonar --parallel --build-cache -Dorg.gradle.jvmargs="-Xmx6g -XX:MaxMetaspaceSize=1024m -XX:+UseParallelGC"
