@@ -746,7 +746,7 @@ fun buildMessage(
           text = messageText,
           imageUrl = imageUrl,
           senderId = userId,
-          senderName = senderName, // To Update
+          senderName = senderName,
           timestamp = System.currentTimeMillis())
     }
     // User send only a text
@@ -754,7 +754,7 @@ fun buildMessage(
       ChatMessage.TextMessage(
           message = messageText,
           senderId = userId,
-          senderName = "Hassan", // To Update
+          senderName = senderName,
           timestamp = System.currentTimeMillis())
     }
     // User send only a message
@@ -762,7 +762,7 @@ fun buildMessage(
       ChatMessage.ImageMessage(
           imageUrl = imageUrl,
           senderId = userId,
-          senderName = "Hassan", // To Update
+          senderName = senderName,
           timestamp = System.currentTimeMillis())
     }
     else -> null
