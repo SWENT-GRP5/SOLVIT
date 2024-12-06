@@ -48,6 +48,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -60,8 +61,19 @@ import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.map.LocationViewModel
 import com.android.solvit.shared.ui.authentication.CustomOutlinedTextField
 import com.android.solvit.shared.ui.authentication.GoBackButton
+import com.android.solvit.shared.ui.authentication.ValidationRegex
 import com.android.solvit.shared.ui.navigation.NavigationActions
 
+/**
+ * A composable function that provides a multi-step screen for registering a seeker profile. The
+ * registration process includes steps for inputting personal information, setting preferences, and
+ * confirming the registration.
+ *
+ * @param viewModel The `SeekerProfileViewModel` to manage the seeker profile data.
+ * @param navigationActions A set of navigation actions to handle transitions between screens.
+ * @param locationViewModel The `LocationViewModel` to fetch and manage location suggestions.
+ * @param authViewModel The `AuthViewModel` to manage authentication and user-related data.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter", "SourceLockedOrientationActivity")
 @Composable
@@ -103,13 +115,11 @@ fun SeekerRegistrationScreen(
 
   val backgroundColor = colorScheme.background
 
-  val fullNameRegex = Regex("^[a-zA-Z]+ [a-zA-Z]+\$")
-  val isFullNameOk = fullNameRegex.matches(fullName)
+  val isFullNameOk = ValidationRegex.FULL_NAME_REGEX.matches(fullName)
 
   val isUserNameOk = userName.isNotBlank() && userName.length > 2
 
-  val phoneRegex = Regex("^[+]?[0-9]{6,}$")
-  val isPhoneOk = phoneRegex.matches(phone)
+  val isPhoneOk = ValidationRegex.PHONE_REGEX.matches(phone)
 
   val isLocationOK = selectedLocation != null
 
@@ -177,7 +187,7 @@ fun SeekerRegistrationScreen(
                     label = "User Name",
                     placeholder = "Enter your user name",
                     isValueOk = isUserNameOk,
-                    errorMessage = "Your user name must be at least 3 characters",
+                    errorMessage = "Enter a valid first and last name",
                     leadingIcon = Icons.Default.Person,
                     leadingIconDescription = "Person Icon",
                     testTag = "userNameInput",
@@ -191,11 +201,12 @@ fun SeekerRegistrationScreen(
                     label = "Phone Number",
                     placeholder = "Enter your phone number",
                     isValueOk = isPhoneOk,
-                    errorMessage = "Your phone number must be at least 7 digits",
+                    errorMessage = "Your phone number must be at least 6 digits",
                     leadingIcon = Icons.Default.Phone,
                     leadingIconDescription = "Phone Icon",
                     testTag = "phoneNumberInput",
-                    errorTestTag = "phoneNumberErrorSeekerRegistration")
+                    errorTestTag = "phoneNumberErrorSeekerRegistration",
+                    keyboardType = KeyboardType.Number)
 
                 Spacer(modifier = Modifier.height(10.dp))
 
@@ -334,6 +345,12 @@ fun SeekerRegistrationScreen(
       })
 }
 
+/**
+ * A composable function that displays a step indicator for a multi-step registration process.
+ *
+ * @param currentStep The current step in the registration process.
+ * @param isFormComplete A boolean indicating whether the current step's form is complete.
+ */
 @Composable
 fun Stepper(currentStep: Int, isFormComplete: Boolean) {
   val stepLabels = listOf("Information", "Details", "All Done")
@@ -355,6 +372,13 @@ fun Stepper(currentStep: Int, isFormComplete: Boolean) {
       }
 }
 
+/**
+ * A composable function that displays a visual indicator for a single step in a stepper component.
+ *
+ * @param stepNumber The number of the step being represented.
+ * @param isCompleted A boolean indicating whether the step is completed.
+ * @param label A text label describing the step.
+ */
 @Composable
 fun StepCircle(stepNumber: Int, isCompleted: Boolean, label: String) {
   val testTag = "stepCircle-$stepNumber-${if (isCompleted) "completed" else "incomplete"}"

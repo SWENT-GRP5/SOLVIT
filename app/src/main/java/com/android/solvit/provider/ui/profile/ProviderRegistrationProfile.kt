@@ -5,6 +5,7 @@ import android.content.pm.ActivityInfo
 import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -80,9 +81,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.android.solvit.R
@@ -101,6 +105,7 @@ import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.model.utils.loadBitmapFromUri
 import com.android.solvit.shared.ui.authentication.CustomOutlinedTextField
 import com.android.solvit.shared.ui.authentication.GoBackButton
+import com.android.solvit.shared.ui.authentication.ValidationRegex
 import com.android.solvit.shared.ui.booking.PackageCard
 import com.android.solvit.shared.ui.navigation.NavigationActions
 
@@ -183,11 +188,9 @@ fun ProviderRegistrationScreen(
 
   val localContext = LocalContext.current
 
-  val fullNameRegex = Regex("^[A-Za-z]{3,}\\s[A-Za-z]{3,}$")
-  val isFullNameOk = fullNameRegex.matches(fullName)
+  val isFullNameOk = ValidationRegex.FULL_NAME_REGEX.matches(fullName)
 
-  val phoneRegex = Regex("^[+]?[0-9]{6,}$")
-  val isPhoneOk = phoneRegex.matches(phone)
+  val isPhoneOk = ValidationRegex.PHONE_REGEX.matches(phone)
 
   val isCompanyNameOk = companyName.isNotBlank() && companyName.length > 2
 
@@ -243,7 +246,7 @@ fun ProviderRegistrationScreen(
                     label = "Full Name",
                     placeholder = "Enter your full name",
                     isValueOk = isFullNameOk,
-                    errorMessage = "Your name and surname each must be at least 3 characters",
+                    errorMessage = "Enter a valid first and last name",
                     leadingIcon = Icons.Default.Person,
                     leadingIconDescription = "Person Icon",
                     testTag = "fullNameInput",
@@ -258,11 +261,12 @@ fun ProviderRegistrationScreen(
                     label = "Phone Number",
                     placeholder = "Enter your phone number",
                     isValueOk = isPhoneOk,
-                    errorMessage = "Your phone number must be at least 7 digits",
+                    errorMessage = "Your phone number must be at least 6 digits",
                     leadingIcon = Icons.Default.Phone,
                     leadingIconDescription = "Phone Icon",
                     testTag = "phoneNumberInput",
-                    errorTestTag = "phoneNumberErrorProviderRegistration")
+                    errorTestTag = "phoneNumberErrorProviderRegistration",
+                    keyboardType = KeyboardType.Number)
 
                 Spacer(modifier = Modifier.height(10.dp))
 
@@ -296,15 +300,35 @@ fun ProviderRegistrationScreen(
 
                 Button(
                     onClick = {
-                      // Move to next step (Step 2: Preferences)
-                      currentStep = 2
+                      if (isFormComplete) {
+                        // Move to next step (Step 2: Preferences)
+                        currentStep = 2
+                      } else {
+                        Toast.makeText(
+                                context,
+                                "Please fill in all the correct information",
+                                Toast.LENGTH_SHORT)
+                            .show()
+                      }
                     },
                     modifier =
-                        Modifier.fillMaxWidth().height(60.dp).testTag("completeRegistrationButton"),
-                    enabled = isFormComplete,
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(colorScheme.secondary) // Green button
-                    ) {
+                        Modifier.fillMaxWidth()
+                            .height(60.dp)
+                            .testTag("completeRegistrationButton")
+                            .background(
+                                if (isFormComplete) {
+                                  colorScheme.secondary
+                                } else {
+                                  colorScheme.onSurfaceVariant
+                                },
+                                shape =
+                                    RoundedCornerShape(
+                                        25.dp,
+                                    )),
+                    colors =
+                        ButtonDefaults.buttonColors(
+                            containerColor = Color.Transparent)) // Green button
+                {
                       Text("Complete registration", color = colorScheme.onSecondary)
                     }
               }
@@ -346,14 +370,8 @@ fun ProviderRegistrationScreen(
                           onImageSelected = { uri: Uri? ->
                             providerImageUri = uri
                             uri?.let { providerImageBitmap = loadBitmapFromUri(localContext, it) }
-                          })
-                      Spacer(modifier = Modifier.height(30.dp))
-                      Button(
-                          onClick = { currentStep = 3 },
-                          modifier = Modifier.fillMaxWidth().testTag("savePreferencesButton"),
-                          colors = ButtonDefaults.buttonColors(colorScheme.secondary)) {
-                            Text("Complete Registration", color = colorScheme.onSecondary)
-                          }
+                          },
+                          onClickButton = { currentStep = 3 })
                       Spacer(modifier = Modifier.height(15.dp))
                       Text(
                           text =
@@ -505,17 +523,20 @@ fun ProviderRegistrationScreen(
 }
 
 /**
- * Composable function to enter the provider's details.
+ * A composable function that displays a detailed form for provider registration. The form allows
+ * the user to input essential details about their services, personal description, starting price,
+ * languages, and upload a profile image.
  *
- * @param selectedService the selected service by the provider
- * @param onSelectedServiceChange the callback to change the selected service
- * @param description the description of the provider
- * @param onDescriptionChange the callback to change the description
- * @param startingPrice the starting price of the provider
- * @param onStartingPriceChange the callback to change the starting price
- * @param selectedLanguages the selected languages by the provider
- * @param providerImageUri the image URI of the provider
- * @param onImageSelected the callback to select the image
+ * @param selectedService The currently selected service offered by the provider.
+ * @param onSelectedServiceChange A lambda function to handle changes in the selected service.
+ * @param description A brief description provided by the provider about their skills and services.
+ * @param onDescriptionChange A lambda function to handle changes in the description.
+ * @param startingPrice The minimum price at which the provider offers their services.
+ * @param onStartingPriceChange A lambda function to handle changes in the starting price.
+ * @param selectedLanguages A mutable list of languages selected by the provider.
+ * @param providerImageUri The URI of the provider's uploaded profile image.
+ * @param onImageSelected A lambda function triggered when a new image is selected by the provider.
+ * @param onClickButton A lambda function to handle the completion of the registration process.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -528,8 +549,10 @@ fun ProviderDetails(
     onStartingPriceChange: (String) -> Unit,
     selectedLanguages: MutableList<String>,
     providerImageUri: Uri?,
-    onImageSelected: (Uri?) -> Unit
+    onImageSelected: (Uri?) -> Unit,
+    onClickButton: () -> Unit
 ) {
+  val context = LocalContext.current
 
   var servicesExpanded by remember { mutableStateOf(false) }
   var languagesExpanded by remember { mutableStateOf(false) }
@@ -540,7 +563,14 @@ fun ProviderDetails(
   val isDescriptionOk =
       description.isNotBlank() &&
           description.length < 250 // (we assume here that a word on average is 5 character)
-  val isStartingPriceOk = startingPrice.isNotBlank() && startingPrice.all { it.isDigit() }
+  val isStartingPriceOk =
+      startingPrice.isNotBlank() && ValidationRegex.STARTING_PRICE_REGEX.matches(startingPrice)
+
+  val allIsOk =
+      selectedService.isNotEmpty() &&
+          isDescriptionOk &&
+          isStartingPriceOk &&
+          selectedLanguages.isNotEmpty()
 
   Column(
       modifier = Modifier.fillMaxSize().padding(16.dp),
@@ -557,7 +587,9 @@ fun ProviderDetails(
                   readOnly = true,
                   modifier = Modifier.fillMaxWidth().menuAnchor())
               ExposedDropdownMenu(
-                  expanded = servicesExpanded, onDismissRequest = { servicesExpanded = false }) {
+                  expanded = servicesExpanded,
+                  onDismissRequest = { servicesExpanded = false },
+                  modifier = Modifier.testTag("servicesDropdownMenu")) {
                     services.forEach { service ->
                       DropdownMenuItem(
                           modifier = Modifier.testTag("$service"),
@@ -601,7 +633,8 @@ fun ProviderDetails(
             leadingIcon = Icons.Default.Check,
             leadingIconDescription = "Check Icon",
             testTag = "startingPriceInputProviderRegistration",
-            errorTestTag = "startingPriceErrorInputProviderRegistration")
+            errorTestTag = "startingPriceErrorInputProviderRegistration",
+            keyboardType = KeyboardType.Number)
 
         // Dropdown menu to select provider's languages
         ExposedDropdownMenuBox(
@@ -620,7 +653,7 @@ fun ProviderDetails(
               DropdownMenu(
                   expanded = languagesExpanded,
                   onDismissRequest = { languagesExpanded = false },
-                  modifier = Modifier.fillMaxWidth()) {
+                  modifier = Modifier.fillMaxWidth().testTag("languageDropdownMenu")) {
                     availableLanguages.forEach { language ->
                       val isSelected = language in selectedLanguages
                       DropdownMenuItem(
@@ -644,6 +677,35 @@ fun ProviderDetails(
                           })
                     }
                   }
+            }
+        Spacer(modifier = Modifier.height(30.dp))
+        Button(
+            onClick = {
+              if (allIsOk) {
+                onClickButton()
+              } else {
+                Toast.makeText(
+                        context, "Please fill in all the correct information", Toast.LENGTH_SHORT)
+                    .show()
+              }
+            },
+            modifier =
+                Modifier.fillMaxWidth()
+                    .testTag("savePreferencesButton")
+                    .background(
+                        if (allIsOk) {
+                          colorScheme.secondary
+                        } else {
+                          colorScheme.onSurfaceVariant
+                        },
+                        shape = RoundedCornerShape(25.dp)),
+            colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)) {
+              Text(
+                  "Complete Registration",
+                  color = colorScheme.onPrimary,
+                  fontWeight = FontWeight.Bold,
+                  fontSize = 16.sp,
+                  modifier = Modifier.testTag("saveButton"))
             }
       }
 }
@@ -969,7 +1031,9 @@ fun PackageProposalDialog(
 
   // Dialog to generate packages with AI
   AlertDialog(
-      modifier = Modifier.testTag("packageProposalDialog"),
+      modifier =
+          Modifier.border(1.dp, colorScheme.onBackground, RoundedCornerShape(30.dp))
+              .testTag("packageProposalDialog"),
       containerColor = colorScheme.background,
       textContentColor = colorScheme.onBackground,
       onDismissRequest = onDismiss,

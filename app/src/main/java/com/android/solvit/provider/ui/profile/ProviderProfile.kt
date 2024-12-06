@@ -26,6 +26,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -128,6 +129,8 @@ fun ProfileHeader(
   var phone by remember { mutableStateOf("") }
   var location by remember { mutableStateOf("") }
 
+  var showLogoutDialog by remember { mutableStateOf(false) }
+
   LaunchedEffect(provider) {
     fullName = provider.name
     companyName = provider.companyName
@@ -197,7 +200,7 @@ fun ProfileHeader(
           Spacer(modifier = Modifier.height(50.dp))
 
           Button(
-              onClick = { authViewModel.logout {} },
+              onClick = { showLogoutDialog = true },
               modifier = Modifier.testTag("logoutButton"),
               colors =
                   ButtonDefaults.buttonColors(
@@ -205,6 +208,35 @@ fun ProfileHeader(
               border = BorderStroke(1.dp, colorScheme.error),
           ) {
             Text("Logout")
+          }
+
+          if (showLogoutDialog) {
+            AlertDialog(
+                onDismissRequest = { showLogoutDialog = false },
+                title = { Text("Log out", modifier = Modifier.testTag("LogoutDialogTitle")) },
+                text = {
+                  Text(
+                      "Are you sure you want to log out?",
+                      modifier = Modifier.testTag("LogoutDialogText"))
+                },
+                confirmButton = {
+                  Button(
+                      onClick = {
+                        authViewModel.logout {}
+                        showLogoutDialog = false
+                      },
+                      modifier = Modifier.testTag("LogoutDialogConfirmButton")) {
+                        Text("Log out")
+                      }
+                },
+                dismissButton = {
+                  Button(
+                      onClick = { showLogoutDialog = false },
+                      modifier = Modifier.testTag("LogoutDialogDismissButton")) {
+                        Text("Cancel")
+                      }
+                },
+                modifier = Modifier.testTag("LogoutDialog"))
           }
         }
 

@@ -73,7 +73,7 @@ object TopLevelDestinations {
   val CALENDAR =
       TopLevelDestination(
           route = Route.CALENDAR, icon = Icons.Outlined.DateRange, textId = "Professional Calendar")
-  val MYJOBS =
+  val MY_JOBS =
       TopLevelDestination(
           route = Route.MY_JOBS, icon = Icons.Outlined.CheckCircle, textId = "My Jobs")
 

@@ -40,12 +40,12 @@ fun CreateRequestScreen(
     navigationActions: NavigationActions,
     requestViewModel: ServiceRequestViewModel =
         viewModel(factory = ServiceRequestViewModel.Factory),
+    locationViewModel: LocationViewModel = viewModel(factory = LocationViewModel.Factory),
     authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory),
     notificationViewModel: NotificationsViewModel =
         viewModel(factory = NotificationsViewModel.Factory),
     listProviderViewModel: ListProviderViewModel =
-        viewModel(factory = ListProviderViewModel.Factory),
-    locationViewModel: LocationViewModel = viewModel(factory = LocationViewModel.Factory)
+        viewModel(factory = ListProviderViewModel.Factory)
 ) {
   // Lock Orientation to Portrait
   val context = LocalContext.current

@@ -244,10 +244,10 @@ fun SeekerUI(
       CreateRequestScreen(
           navigationActions,
           serviceRequestViewModel,
+          locationViewModel,
           authViewModel,
           notificationViewModel,
-          listProviderViewModel,
-          locationViewModel)
+          listProviderViewModel)
     }
     composable(Route.REQUESTS_OVERVIEW) {
       RequestsOverviewScreen(navigationActions, serviceRequestViewModel, authViewModel)
