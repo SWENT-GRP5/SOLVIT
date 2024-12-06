@@ -188,11 +188,7 @@ jobs:
             adb shell settings put global animator_duration_scale 0 || true
             
             echo "Running instrumentation tests..."
-            ./gradlew connectedCheck \
-              -Pandroid.testInstrumentationRunnerArguments.timeout_msec=60000 \
-              --no-daemon \
-              --max-workers=2 \
-              -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=512m -XX:+HeapDumpOnOutOfMemoryError"
+            ./gradlew connectedCheck -Pandroid.testInstrumentationRunnerArguments.timeout_msec=60000 --no-daemon --max-workers=2 -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=512m -XX:+HeapDumpOnOutOfMemoryError"
 
       # Upload test results
       - name: Upload test results
