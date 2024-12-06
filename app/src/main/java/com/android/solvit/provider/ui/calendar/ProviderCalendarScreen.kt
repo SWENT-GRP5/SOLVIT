@@ -1,6 +1,5 @@
 package com.android.solvit.provider.ui.calendar
 
-import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -53,18 +52,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
 import com.android.solvit.provider.model.ProviderCalendarViewModel
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestStatus
@@ -84,7 +79,7 @@ import kotlin.math.abs
 @Composable
 fun ProviderCalendarScreen(
     navigationActions: NavigationActions,
-    viewModel: ProviderCalendarViewModel = viewModel(factory = ProviderCalendarViewModel.Factory)
+    viewModel: ProviderCalendarViewModel
 ) {
   val serviceRequests by
       viewModel.serviceRequests.collectAsStateWithLifecycle(initialValue = emptyList())
@@ -681,16 +676,6 @@ enum class CalendarView {
   MONTH,
   WEEK,
   DAY
-}
-
-@Preview(showBackground = true)
-@Composable
-fun ProviderCalendarScreenPreview() {
-  ProviderCalendarScreen(NavigationActions(FakeNavController(LocalContext.current)))
-}
-
-class FakeNavController(context: Context) : NavController(context) {
-  override fun popBackStack(): Boolean = true
 }
 
 fun calculateDayStatus(requests: List<ServiceRequest>): List<ServiceRequestStatus> {

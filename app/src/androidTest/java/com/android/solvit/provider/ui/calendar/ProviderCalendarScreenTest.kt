@@ -63,7 +63,7 @@ class ProviderCalendarScreenTest {
     // Mock auth repository to return test user
     whenever(authRep.init(any())).thenAnswer { invocation ->
       val callback = invocation.arguments[0] as (User?) -> Unit
-      callback(User(testUserId, "test@example.com", "Provider", emptyList()))
+      callback(User(testUserId, "test@example.com", "Provider"))
     }
 
     // Mock service request repository to return test request
