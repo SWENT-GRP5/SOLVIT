@@ -23,7 +23,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
@@ -178,7 +180,7 @@ fun PackageCard(
     packageProposal: PackageProposal,
     isSelected: Boolean,
     modifier: Modifier,
-    selectedPackage: MutableState<PackageProposal?>
+    selectedPackage: MutableState<PackageProposal?> = remember { mutableStateOf(null) }
 ) {
   Card(
       modifier = modifier.fillMaxHeight(),
@@ -189,7 +191,11 @@ fun PackageCard(
               containerColor = if (!isSelected) colorScheme.surface else colorScheme.secondary,
           )) {
         Column(
-            modifier = Modifier.padding(20.dp).fillMaxHeight().testTag("PackageContent"),
+            modifier =
+                Modifier.padding(20.dp)
+                    .fillMaxHeight()
+                    .verticalScroll(rememberScrollState())
+                    .testTag("PackageContent"),
             horizontalAlignment = Alignment.Start) {
               // Price of the Package
               Row(verticalAlignment = Alignment.CenterVertically) {

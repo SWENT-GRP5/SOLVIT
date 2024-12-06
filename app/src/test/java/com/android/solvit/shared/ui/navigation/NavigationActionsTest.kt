@@ -5,11 +5,14 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavOptionsBuilder
 import org.hamcrest.CoreMatchers
 import org.hamcrest.MatcherAssert
+import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito
+import org.mockito.Mockito.`when`
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.verify
 
 class NavigationActionsTest {
 
@@ -28,23 +31,22 @@ class NavigationActionsTest {
   fun navigateToCallsController1() {
 
     navigationActions.navigateTo(TopLevelDestinations.SERVICES)
-    Mockito.verify(navHostController)
-        .navigate(eq(Route.SERVICES), any<NavOptionsBuilder.() -> Unit>())
+    verify(navHostController).navigate(eq(Route.SERVICES), any<NavOptionsBuilder.() -> Unit>())
 
     navigationActions.navigateTo(Route.REQUESTS_OVERVIEW)
-    Mockito.verify(navHostController).navigate(Route.REQUESTS_OVERVIEW)
+    verify(navHostController).navigate(Route.REQUESTS_OVERVIEW)
   }
 
   @Test
   fun goBackCallsController1() {
     navigationActions.goBack()
-    Mockito.verify(navHostController).popBackStack()
+    verify(navHostController).popBackStack()
   }
 
   @Test
   fun currentRouteWorksWithDestination1() {
-    Mockito.`when`(navHostController.currentDestination).thenReturn(navigationDestination)
-    Mockito.`when`(navigationDestination.route).thenReturn(Route.CREATE_REQUEST)
+    `when`(navHostController.currentDestination).thenReturn(navigationDestination)
+    `when`(navigationDestination.route).thenReturn(Route.CREATE_REQUEST)
 
     MatcherAssert.assertThat(
         navigationActions.currentRoute(), CoreMatchers.`is`(Route.CREATE_REQUEST))
@@ -54,34 +56,37 @@ class NavigationActionsTest {
   fun navigateToCallsController() {
 
     navigationActions.navigateTo(TopLevelDestinations.SERVICES)
-    Mockito.verify(navHostController)
-        .navigate(eq(Route.SERVICES), any<NavOptionsBuilder.() -> Unit>())
+    verify(navHostController).navigate(eq(Route.SERVICES), any<NavOptionsBuilder.() -> Unit>())
 
     navigationActions.navigateTo(TopLevelDestinations.CREATE_REQUEST)
-    Mockito.verify(navHostController)
+    verify(navHostController)
         .navigate(eq(Route.CREATE_REQUEST), any<NavOptionsBuilder.() -> Unit>())
 
     navigationActions.navigateTo(TopLevelDestinations.MESSAGES)
-    Mockito.verify(navHostController).navigate(eq(Route.INBOX), any<NavOptionsBuilder.() -> Unit>())
+    verify(navHostController).navigate(eq(Route.INBOX), any<NavOptionsBuilder.() -> Unit>())
 
     navigationActions.navigateTo(TopLevelDestinations.PROFILE)
-    Mockito.verify(navHostController)
-        .navigate(eq(Route.PROFILE), any<NavOptionsBuilder.() -> Unit>())
+    verify(navHostController).navigate(eq(Route.PROFILE), any<NavOptionsBuilder.() -> Unit>())
   }
 
   @Test
   fun goBackCallsController() {
     navigationActions.goBack()
-    Mockito.verify(navHostController).popBackStack()
+    verify(navHostController).popBackStack()
   }
 
   @Test
   fun currentRouteWorksWithDestination() {
     val navDestination = Mockito.mock(NavDestination::class.java)
-    Mockito.`when`(navHostController.currentDestination).thenReturn(navDestination)
-    Mockito.`when`(navDestination.route).thenReturn(Route.CREATE_REQUEST)
+    `when`(navHostController.currentDestination).thenReturn(navDestination)
+    `when`(navDestination.route).thenReturn(Route.CREATE_REQUEST)
 
-    MatcherAssert.assertThat(
-        navigationActions.currentRoute(), CoreMatchers.`is`(Route.CREATE_REQUEST))
+    assertThat(navigationActions.currentRoute(), CoreMatchers.`is`(Route.CREATE_REQUEST))
+  }
+
+  @Test
+  fun goBackToCallsController() {
+    navigationActions.goBackTo(Route.CREATE_REQUEST)
+    Mockito.verify(navHostController).popBackStack(Route.CREATE_REQUEST, false)
   }
 }

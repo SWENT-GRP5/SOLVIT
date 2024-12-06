@@ -3,6 +3,7 @@ package com.android.solvit.provider.model
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.provider.ExceptionType
 import com.android.solvit.shared.model.provider.ExceptionUpdateResult
@@ -16,10 +17,19 @@ import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.storage
+import java.time.DayOfWeek
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+import java.time.temporal.TemporalAdjusters
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
+
+enum class CalendarView {
+  DAY,
+  WEEK,
+  MONTH
+}
 
 /**
  * ViewModel responsible for managing provider calendar operations and schedule management. Handles
@@ -35,54 +45,119 @@ class ProviderCalendarViewModel(
     private val serviceRequestViewModel: ServiceRequestViewModel
 ) : ViewModel() {
 
-  private lateinit var currentProvider: Provider
+  private val _currentViewDate = MutableStateFlow(LocalDate.now())
+  val currentViewDate: StateFlow<LocalDate> = _currentViewDate.asStateFlow()
+
+  private val _selectedDate = MutableStateFlow(LocalDate.now())
+  val selectedDate: StateFlow<LocalDate> = _selectedDate.asStateFlow()
+
+  private val _calendarView = MutableStateFlow(CalendarView.WEEK)
+  val calendarView: StateFlow<CalendarView> = _calendarView.asStateFlow()
+
+  private val _timeSlots = MutableStateFlow<Map<LocalDate, List<ServiceRequest>>>(emptyMap())
+  val timeSlots: StateFlow<Map<LocalDate, List<ServiceRequest>>> = _timeSlots.asStateFlow()
+
+  private val _isLoading = MutableStateFlow(false)
+  val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
+  private val _currentProvider = MutableStateFlow(Provider())
+  val currentProvider: StateFlow<Provider> = _currentProvider.asStateFlow()
 
   /** Initializes the view model by loading the current provider and service requests. */
   init {
-    loadProvider()
+    // Initialize service requests
     serviceRequestViewModel.getServiceRequests()
-  }
 
-  /**
-   * Loads the current provider from the repository. Handles cases where the user is not logged in
-   * or the provider is not found.
-   */
-  private fun loadProvider() {
-    val currentUserId =
-        authViewModel.user.value?.uid
-            ?: run {
-              Log.e("ProviderCalendarViewModel", "No user logged in")
-              return
+    // Observe changes in service requests, user, calendar view, and current view date
+    viewModelScope.launch {
+      combine(
+              serviceRequestViewModel.requests,
+              authViewModel.user,
+              _calendarView,
+              _currentViewDate) { requests, user, view, date ->
+                Pair(requests, user)
+              }
+          .collect { (requests, user) ->
+            _isLoading.value = true
+            try {
+              val userId = user!!.uid // User is guaranteed to be non-null
+
+              providerRepository.getProvider(
+                  userId,
+                  onSuccess = { provider ->
+                    if (provider != null) {
+                      _currentProvider.value = provider
+                    } else {
+                      Log.e("ProviderCalendarViewModel", "Failed to find provider")
+                    }
+                  },
+                  onFailure = { e ->
+                    Log.e("ProviderCalendarViewModel", "Failed to load provider", e)
+                  })
+
+              val startDate =
+                  when (_calendarView.value) {
+                    CalendarView.MONTH -> _currentViewDate.value.withDayOfMonth(1)
+                    CalendarView.WEEK ->
+                        _currentViewDate.value.with(
+                            TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+                    CalendarView.DAY -> _currentViewDate.value
+                  }
+              val endDate =
+                  when (_calendarView.value) {
+                    CalendarView.MONTH -> startDate.plusMonths(1).minusDays(1)
+                    CalendarView.WEEK -> startDate.plusWeeks(1).minusDays(1)
+                    CalendarView.DAY -> startDate
+                  }
+
+              // Filter and group requests
+              val filteredRequests =
+                  requests
+                      .filter { it.providerId == userId }
+                      .filter { request ->
+                        val requestDate =
+                            request.meetingDate
+                                ?.toInstant()
+                                ?.atZone(ZoneId.systemDefault())
+                                ?.toLocalDate() ?: return@filter false
+                        !requestDate.isBefore(startDate) && !requestDate.isAfter(endDate)
+                      }
+              // Group by date and sort by time
+              val groupedRequests =
+                  filteredRequests
+                      .groupBy {
+                        it.meetingDate!!.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+                      }
+                      .mapValues { (_, requests) ->
+                        requests.sortedBy { it.meetingDate!!.toInstant() }
+                      }
+
+              _timeSlots.value = groupedRequests
+            } catch (e: Exception) {
+              Log.e("ProviderCalendarViewModel", "Error processing service requests", e)
+            } finally {
+              _isLoading.value = false
             }
-
-    providerRepository.getProvider(
-        currentUserId,
-        onSuccess = { provider ->
-          if (provider != null) {
-            currentProvider = provider
-          } else {
-            Log.e("ProviderCalendarViewModel", "Failed to find provider")
           }
-        },
-        onFailure = { e -> Log.e("ProviderCalendarViewModel", "Failed to load provider", e) })
+    }
   }
 
-  /**
-   * Flow of service requests assigned to the current provider. Filters requests with a meeting date
-   * and assigned to the current provider.
-   */
-  val serviceRequests: Flow<List<ServiceRequest>> =
-      serviceRequestViewModel.requests.map { requests ->
-        requests.filter { request ->
-          try {
-            // Filter requests that have a meeting date and are assigned to this provider
-            request.meetingDate != null && request.providerId == currentProvider.uid
-          } catch (e: Exception) {
-            Log.e("ProviderCalendarViewModel", "Error processing service request", e)
-            false
-          }
-        }
-      }
+  fun onDateSelected(date: LocalDate) {
+    _selectedDate.value = date
+    _currentViewDate.value = date
+  }
+
+  fun onViewDateChanged(date: LocalDate) {
+    _currentViewDate.value = date
+  }
+
+  fun onCalendarViewChanged(view: CalendarView) {
+    _calendarView.value = view
+  }
+
+  fun onServiceRequestClick(request: ServiceRequest) {
+    serviceRequestViewModel.selectRequest(request)
+  }
 
   /**
    * Checks if the provider is available at a specific date and time.
@@ -91,7 +166,7 @@ class ProviderCalendarViewModel(
    * @return True if available, false otherwise
    */
   fun isAvailable(dateTime: LocalDateTime): Boolean {
-    return currentProvider.schedule.isAvailable(dateTime)
+    return currentProvider.value.schedule.isAvailable(dateTime)
   }
 
   /**
@@ -104,7 +179,7 @@ class ProviderCalendarViewModel(
    */
   fun setRegularHours(dayOfWeek: String, timeSlots: List<TimeSlot>, onComplete: (Boolean) -> Unit) {
     try {
-      currentProvider.schedule.setRegularHours(dayOfWeek, timeSlots)
+      currentProvider.value.schedule.setRegularHours(dayOfWeek, timeSlots)
       updateProviderSchedule(onComplete)
     } catch (e: Exception) {
       Log.e("ProviderCalendarViewModel", "Failed to set regular hours", e)
@@ -120,7 +195,7 @@ class ProviderCalendarViewModel(
    */
   fun clearRegularHours(dayOfWeek: String, onComplete: (Boolean) -> Unit) {
     try {
-      currentProvider.schedule.clearRegularHours(dayOfWeek)
+      currentProvider.value.schedule.clearRegularHours(dayOfWeek)
       updateProviderSchedule(onComplete)
     } catch (e: Exception) {
       Log.e("ProviderCalendarViewModel", "Failed to clear regular hours", e)
@@ -142,7 +217,8 @@ class ProviderCalendarViewModel(
       onComplete: (Boolean, String) -> Unit
   ) {
     try {
-      val result = currentProvider.schedule.addException(date, timeSlots, ExceptionType.OFF_TIME)
+      val result =
+          currentProvider.value.schedule.addException(date, timeSlots, ExceptionType.OFF_TIME)
       val feedback = buildFeedbackMessage(result)
       updateProviderSchedule { success ->
         onComplete(success, if (success) feedback else "Failed to update schedule")
@@ -167,7 +243,8 @@ class ProviderCalendarViewModel(
       onComplete: (Boolean, String) -> Unit
   ) {
     try {
-      val result = currentProvider.schedule.addException(date, timeSlots, ExceptionType.EXTRA_TIME)
+      val result =
+          currentProvider.value.schedule.addException(date, timeSlots, ExceptionType.EXTRA_TIME)
       val feedback = buildFeedbackMessage(result)
       updateProviderSchedule { success ->
         onComplete(success, if (success) feedback else "Failed to update schedule")
@@ -193,7 +270,7 @@ class ProviderCalendarViewModel(
       onComplete: (Boolean, String) -> Unit
   ) {
     try {
-      val result = currentProvider.schedule.updateException(date, timeSlots, type)
+      val result = currentProvider.value.schedule.updateException(date, timeSlots, type)
       val feedback = buildFeedbackMessage(result)
       updateProviderSchedule { success ->
         onComplete(success, if (success) feedback else "Failed to update schedule")
@@ -218,7 +295,7 @@ class ProviderCalendarViewModel(
       endDate: LocalDateTime,
       type: ExceptionType? = null
   ): List<ScheduleException> {
-    return currentProvider.schedule.getExceptions(startDate, endDate, type)
+    return currentProvider.value.schedule.getExceptions(startDate, endDate, type)
   }
 
   /**
@@ -244,7 +321,7 @@ class ProviderCalendarViewModel(
    */
   private fun updateProviderSchedule(onComplete: (Boolean) -> Unit) {
     providerRepository.updateProvider(
-        currentProvider,
+        currentProvider.value,
         onSuccess = { onComplete(true) },
         onFailure = { e ->
           Log.e("ProviderCalendarViewModel", "Failed to update provider schedule", e)
@@ -273,7 +350,7 @@ class ProviderCalendarViewModel(
         return
       }
 
-      val result = currentProvider.schedule.addException(date, timeSlots, type)
+      val result = currentProvider.value.schedule.addException(date, timeSlots, type)
       updateProviderSchedule { success ->
         val feedback = if (success) buildFeedbackMessage(result) else "Failed to update schedule"
         onComplete(success, feedback)
@@ -297,10 +374,6 @@ class ProviderCalendarViewModel(
    * @return ConflictResult containing whether there's a conflict and the reason
    */
   fun checkServiceRequestConflict(serviceRequest: ServiceRequest): ConflictResult {
-    if (!::currentProvider.isInitialized) {
-      return ConflictResult(true, "Provider data not loaded")
-    }
-
     val meetingTimestamp =
         serviceRequest.meetingDate ?: return ConflictResult(true, "Meeting date not set")
     val meetingDate =
@@ -316,21 +389,29 @@ class ProviderCalendarViewModel(
 
     val dayOfWeek = meetingDate.dayOfWeek.name
 
+    println("Checking conflict for date: $meetingDate ($dayOfWeek)")
+    println("Time slot: $timeSlot")
+
     // Check if it's during regular hours
-    val regularHours = currentProvider.schedule.regularHours[dayOfWeek] ?: emptyList()
+    val regularHours = currentProvider.value.schedule.regularHours[dayOfWeek] ?: emptyList()
+    println("Regular hours for $dayOfWeek: $regularHours")
+
     val duringRegularHours =
         regularHours.any { slot -> timeSlot.start >= slot.start && timeSlot.end <= slot.end }
+    println("During regular hours: $duringRegularHours")
 
     // Check exceptions
     val exceptions =
-        currentProvider.schedule.exceptions.filter {
+        currentProvider.value.schedule.exceptions.filter {
           it.date.toLocalDate() == meetingDate.toLocalDate()
         }
+    println("Relevant exceptions: $exceptions")
 
     val hasOffTimeConflict =
         exceptions
             .filter { it.type == ExceptionType.OFF_TIME }
             .any { exception -> exception.timeSlots.any { it.overlaps(timeSlot) } }
+    println("Has off-time conflict: $hasOffTimeConflict")
 
     // If outside regular hours, check for EXTRA_TIME exception
     val hasExtraTimeException =
@@ -343,9 +424,12 @@ class ProviderCalendarViewModel(
                 }
               }
         } else true // During regular hours, so no need for EXTRA_TIME
+    println("Has extra time exception: $hasExtraTimeException")
 
     // Check other service requests
     val acceptedRequests = serviceRequestViewModel.acceptedRequests.value
+    println("Accepted requests: $acceptedRequests")
+
     val hasServiceRequestConflict =
         acceptedRequests
             .filter { request ->
@@ -362,6 +446,7 @@ class ProviderCalendarViewModel(
               }
             }
             .any { it.overlaps(timeSlot) }
+    println("Has service request conflict: $hasServiceRequestConflict")
 
     return when {
       hasOffTimeConflict ->

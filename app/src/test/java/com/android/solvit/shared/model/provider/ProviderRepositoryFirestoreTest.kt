@@ -17,8 +17,10 @@ import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.storage.FirebaseStorage
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNotNull
+import junit.framework.TestCase.assertNull
 import junit.framework.TestCase.assertTrue
 import junit.framework.TestCase.fail
+import kotlinx.coroutines.test.runTest
 import org.hamcrest.CoreMatchers
 import org.hamcrest.MatcherAssert
 import org.junit.Before
@@ -533,6 +535,41 @@ class ProviderRepositoryFirestoreTest {
     assertNotNull(provider)
     assertTrue(provider!!.schedule.regularHours.isEmpty())
     assertTrue(provider!!.schedule.exceptions.isEmpty())
+  }
+
+  @Test
+  fun `returnProvider returns valid Provider on success`() = runTest {
+    // Mock Firestore to return a successful DocumentSnapshot
+    val uid = "test"
+    `when`(mockDocumentReference.get()).thenReturn(Tasks.forResult(mockDocumentSnapshot))
+
+    // Setup all the necessary fields using our helper
+    setupBasicProviderFields()
+
+    // Call the suspend function
+    val result = providerRepositoryFirestore.returnProvider(uid)
+
+    // Validate the result
+    assertNotNull(result)
+    assertEquals("test-id", result!!.uid)
+    assertEquals("Test Provider", result.name)
+    assertEquals("PLUMBER", result.service.toString())
+  }
+
+  @Test
+  fun `returnProvider returns null when document does not exist`() = runTest {
+    // Mock Firestore to return a DocumentSnapshot without necessary data
+    val uid = "nonexistent"
+    `when`(mockDocumentReference.get()).thenReturn(Tasks.forResult(mockDocumentSnapshot))
+
+    // Mock the document as missing fields
+    `when`(mockDocumentSnapshot.getString("name")).thenReturn(null)
+
+    // Call the suspend function
+    val result = providerRepositoryFirestore.returnProvider(uid)
+
+    // Validate the result is null
+    assertNull(result)
   }
 
   private fun setupBasicProviderFields() {

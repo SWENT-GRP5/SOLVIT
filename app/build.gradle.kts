@@ -13,6 +13,7 @@ plugins {
     alias(libs.plugins.sonar)
     //id("org.sonarqube") version "5.1.0.4882"
     alias(libs.plugins.gms)
+    kotlin("plugin.serialization") version "2.1.0"
 }
 
 android {
@@ -27,6 +28,8 @@ android {
     }
 
     val mapsApiKey: String = localProperties.getProperty("MAPS_API_KEY") ?: ""
+    val openaiApiKey: String = localProperties.getProperty("OPENAI_API_KEY") ?: ""
+    val googleAiApiKey: String = localProperties.getProperty("GOOGLE_AI_API_KEY") ?: ""
 
     defaultConfig {
         applicationId = "com.android.solvit"
@@ -35,6 +38,8 @@ android {
         versionCode = 1
         versionName = "1.0"
         manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
+        buildConfigField("String", "OPENAI_API_KEY", "\"$openaiApiKey\"")
+        buildConfigField("String", "GOOGLE_AI_API_KEY", "\"$googleAiApiKey\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -182,6 +187,7 @@ dependencies {
     implementation(libs.firebase.storage.ktx)
     implementation(libs.play.services.location)
     implementation(libs.androidx.navigation.testing)
+    implementation(libs.androidx.uiautomator)
     testImplementation(libs.testng)
 
 
@@ -255,11 +261,26 @@ dependencies {
     globalTestImplementation(libs.kaspresso.compose.support)
     androidTestImplementation(libs.kaspresso.allure.support)
 
+    // --------- Coroutines ----------
+    implementation(libs.okhttp)
+    implementation(libs.okhttp.v4100)
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+
     // ----------       Robolectric     ------------
     testImplementation(libs.robolectric)
 
     // ----------       Load Images from URL     ------------
-    implementation("io.coil-kt:coil-compose:2.4.0")
+    implementation(libs.coil.compose)
+
+    // ----------       Google AI     ------------
+    implementation(libs.generativeai.v070)
+    implementation(libs.generativeai)
+
+
+    // ----------       Json serialization     ------------
+    implementation(libs.kotlinx.serialization.json.v150)
 }
 
 tasks.withType<Test> {

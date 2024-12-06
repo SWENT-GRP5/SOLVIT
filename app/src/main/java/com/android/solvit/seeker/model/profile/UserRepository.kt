@@ -57,4 +57,6 @@ interface UserRepository {
       onSuccess: (List<String>) -> Unit,
       onFailure: (Exception) -> Unit
   )
+
+  suspend fun returnSeekerById(uid: String): SeekerProfile?
 }

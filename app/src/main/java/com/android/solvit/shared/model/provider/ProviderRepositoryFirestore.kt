@@ -13,6 +13,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import java.time.LocalTime
 import java.time.ZoneId
+import kotlinx.coroutines.tasks.await
 
 class ProviderRepositoryFirestore(
     private val db: FirebaseFirestore,
@@ -38,14 +39,7 @@ class ProviderRepositoryFirestore(
       val popular = doc.getBoolean("popular") ?: return null
       val price = doc.getDouble("price") ?: return null
       val deliveryTime = doc.getTimestamp("deliveryTime") ?: return null
-      val languages =
-          (doc.get("languages") as? List<*>)?.mapNotNull {
-            try {
-              Language.valueOf(it as String)
-            } catch (e: Exception) {
-              null
-            }
-          } ?: emptyList()
+      val languages = (doc.get("languages") as List<*>).map { Language.valueOf(it as String) }
       val companyName = doc.getString("companyName") ?: ""
       val phone = doc.getString("phone") ?: ""
 
@@ -70,13 +64,29 @@ class ProviderRepositoryFirestore(
           languages,
           schedule)
     } catch (e: Exception) {
-      Log.e("ProviderRepositoryFirestore", "failed to convert doc: ${e.message}")
+      Log.e("ProviderRepositoryFirestore", "failed to convert doc $e")
       return null
     }
   }
 
   override fun init(onSuccess: () -> Unit) {
     FirebaseAuth.getInstance().addAuthStateListener { onSuccess() }
+  }
+
+  override fun addListenerOnProviders(
+      onSuccess: (List<Provider>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    db.collection(collectionPath).addSnapshotListener { value, error ->
+      if (error != null) {
+        onFailure(error)
+        return@addSnapshotListener
+      }
+      if (value != null) {
+        val providers = value.mapNotNull { convertDoc(it) }
+        onSuccess(providers)
+      }
+    }
   }
 
   override fun getNewUid(): String {
@@ -159,16 +169,30 @@ class ProviderRepositoryFirestore(
       onSuccess: (Provider?) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    val collectionRef =
-        db.collection(collectionPath).document(userId).get().addOnCompleteListener { task ->
-          if (task.isSuccessful) {
-            val doc = task.result
-            val provider = convertDoc(doc)
-            onSuccess(provider)
-          } else {
-            task.exception?.let { onFailure(it) }
-          }
-        }
+    Log.e("Get Provider", "Debut $userId")
+    db.collection(collectionPath).document(userId).get().addOnCompleteListener { task ->
+      if (task.isSuccessful) {
+        val doc = task.result
+        val provider = convertDoc(doc)
+        Log.e("Let's go", "$provider")
+
+        onSuccess(provider)
+      } else {
+        task.exception?.let { onFailure(it) }
+      }
+    }
+  }
+
+  override suspend fun returnProvider(uid: String): Provider? {
+    return try {
+      val doc = db.collection(collectionPath).document(uid).get().await()
+      val provider = convertDoc(doc)
+      Log.e("Get Provider", "Success: $provider")
+      provider
+    } catch (e: Exception) {
+      Log.e("Get Provider", "Failed to get provider: $e")
+      null
+    }
   }
 
   private fun performFirestoreOperation(
