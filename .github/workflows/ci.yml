@@ -117,45 +117,55 @@ jobs:
             -qemu -m 2048
           disable-animations: true
           script: |
-            #!/bin/bash
-            set -e
-            
-            echo "Waiting for ADB and emulator..."
+            # Use POSIX-compliant shell
             adb wait-for-device
-            
             echo "Waiting for system boot..."
-            timeout=300
-            start_time=$(date +%s)
-            while true; do
-              if adb shell getprop sys.boot_completed | grep -q '^1'; then
+            
+            # Wait for system boot with timeout (300 seconds)
+            boot_start=$(date +%s)
+            while :; do
+              boot_status=$(adb shell getprop sys.boot_completed 2>/dev/null || echo "error")
+              current_time=$(date +%s)
+              elapsed=$((current_time - boot_start))
+              
+              if [ "$boot_status" = "1" ]; then
                 echo "System boot completed"
                 break
               fi
-              current_time=$(date +%s)
-              if [ $((current_time - start_time)) -gt $timeout ]; then
-                echo "Timeout waiting for system boot"
+              
+              if [ $elapsed -gt 300 ]; then
+                echo "ERROR: Timeout waiting for system boot"
                 exit 1
               fi
+              
               sleep 5
             done
             
             echo "Waiting for package manager..."
-            timeout=120
-            start_time=$(date +%s)
-            while true; do
-              if adb shell pm path android | grep -q '^package:'; then
+            
+            # Wait for package manager with timeout (120 seconds)
+            pm_start=$(date +%s)
+            while :; do
+              pm_count=$(adb shell pm path android 2>/dev/null | grep -c package: || echo "0")
+              current_time=$(date +%s)
+              elapsed=$((current_time - pm_start))
+              
+              if [ "$pm_count" -gt "0" ]; then
                 echo "Package manager is ready"
                 break
               fi
-              current_time=$(date +%s)
-              if [ $((current_time - start_time)) -gt $timeout ]; then
-                echo "Timeout waiting for package manager"
+              
+              if [ $elapsed -gt 120 ]; then
+                echo "ERROR: Timeout waiting for package manager"
                 exit 1
               fi
+              
               sleep 5
             done
             
             echo "Optimizing emulator settings..."
+            
+            # Disable animations (ignore errors)
             adb shell settings put global window_animation_scale 0 || true
             adb shell settings put global transition_animation_scale 0 || true
             adb shell settings put global animator_duration_scale 0 || true
