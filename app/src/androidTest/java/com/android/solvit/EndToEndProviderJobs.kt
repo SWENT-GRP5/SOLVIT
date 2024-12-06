@@ -163,8 +163,7 @@ class EndToEndProviderJobs {
     val firestore = FirebaseFirestore.getInstance()
     firestore.firestoreSettings =
         FirebaseFirestoreSettings.Builder()
-            .setPersistenceEnabled(
-                true) // Set to true or false as needed for your production environment
+            .setPersistenceEnabled(false) // Disable persistence for tests
             .build()
 
     // Reinitialize FirebaseAuth without the emulator
