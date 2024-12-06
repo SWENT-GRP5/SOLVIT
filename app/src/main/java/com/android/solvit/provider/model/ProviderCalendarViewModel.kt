@@ -4,15 +4,23 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.android.solvit.shared.model.authentication.AuthRepository
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.provider.ExceptionType
 import com.android.solvit.shared.model.provider.ExceptionUpdateResult
 import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.provider.ProviderRepository
+import com.android.solvit.shared.model.provider.ProviderRepositoryFirestore
 import com.android.solvit.shared.model.provider.ScheduleException
 import com.android.solvit.shared.model.provider.TimeSlot
 import com.android.solvit.shared.model.request.ServiceRequest
+import com.android.solvit.shared.model.request.ServiceRequestRepositoryFirebase
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.ktx.storage
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -463,19 +471,19 @@ class ProviderCalendarViewModel(
    */
   data class ConflictResult(val hasConflict: Boolean, val reason: String)
 
-  companion object {
-    val Factory:
-        (ProviderRepository, AuthViewModel, ServiceRequestViewModel) -> ViewModelProvider.Factory =
-        { providerList, auth, service ->
-          object : ViewModelProvider.Factory {
-            @Suppress("UNCHECKED_CAST")
-            override fun <T : ViewModel> create(modelClass: Class<T>): T {
-              if (modelClass.isAssignableFrom(ProviderCalendarViewModel::class.java)) {
-                return ProviderCalendarViewModel(providerList, auth, service) as T
-              }
-              throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
-            }
-          }
-        }
+  companion object Factory : ViewModelProvider.Factory {
+    @Suppress("UNCHECKED_CAST")
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+      // Creates dependencies inline during ViewModel instantiation
+      val providerRepository =
+          ProviderRepositoryFirestore(Firebase.firestore, FirebaseStorage.getInstance())
+      val authViewModel = AuthViewModel(AuthRepository(Firebase.auth, Firebase.firestore))
+      val serviceRequestViewModel =
+          ServiceRequestViewModel(
+              ServiceRequestRepositoryFirebase(Firebase.firestore, Firebase.storage))
+
+      return ProviderCalendarViewModel(providerRepository, authViewModel, serviceRequestViewModel)
+          as T
+    }
   }
 }
