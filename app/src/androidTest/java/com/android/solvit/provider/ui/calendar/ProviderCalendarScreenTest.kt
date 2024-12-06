@@ -382,9 +382,6 @@ class ProviderCalendarScreenTest {
     // Verify date picker dialog appears
     composeTestRule.onNodeWithTag("datePickerDialog").assertExists()
 
-    // Print the dialog's node tree for debugging
-    composeTestRule.onAllNodes(isRoot()).get(1).printToLog("DatePickerDialog")
-
     // Select a date using the date picker
     val targetDate = testDate.toLocalDate().withDayOfMonth(15)
     val dateText =
