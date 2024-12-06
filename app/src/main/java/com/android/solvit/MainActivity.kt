@@ -15,6 +15,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navigation
+import com.android.solvit.provider.model.ProviderCalendarViewModel
 import com.android.solvit.provider.ui.NotificationScreen
 import com.android.solvit.provider.ui.calendar.ProviderCalendarScreen
 import com.android.solvit.provider.ui.map.ProviderMapScreen
@@ -93,6 +94,11 @@ fun SolvitApp() {
   val chatViewModel = viewModel<ChatViewModel>(factory = ChatViewModel.Factory)
   val chatAssistantViewModel =
       viewModel<ChatAssistantViewModel>(factory = ChatAssistantViewModel.Factory)
+  val calendarViewModel = viewModel {
+    ProviderCalendarViewModel(authViewModel, serviceRequestViewModel)
+  }
+  val navController = rememberNavController()
+  val navigationActions = NavigationActions(navController)
   val aiSolverViewModel = viewModel<AiSolverViewModel>(factory = AiSolverViewModel.Factory)
   val notificationViewModel =
       viewModel<NotificationsViewModel>(factory = NotificationsViewModel.Factory)
@@ -132,7 +138,8 @@ fun SolvitApp() {
               notificationViewModel,
               locationViewModel,
               packageProposalViewModel,
-              chatAssistantViewModel)
+              chatAssistantViewModel,
+              calendarViewModel)
     }
   }
 }
@@ -294,7 +301,8 @@ fun ProviderUI(
     notificationViewModel: NotificationsViewModel,
     locationViewModel: LocationViewModel,
     packageViewModel: PackageProposalViewModel,
-    chatAssistantViewModel: ChatAssistantViewModel
+    chatAssistantViewModel: ChatAssistantViewModel,
+    calendarViewModel: ProviderCalendarViewModel
 ) {
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
@@ -311,7 +319,9 @@ fun ProviderUI(
       ProviderMapScreen(
           serviceRequestViewModel = serviceRequestViewModel, navigationActions = navigationActions)
     }
-    composable(Screen.CALENDAR) { ProviderCalendarScreen(navigationActions = navigationActions) }
+    composable(Screen.CALENDAR) {
+      ProviderCalendarScreen(navigationActions = navigationActions, viewModel = calendarViewModel)
+    }
     composable(Screen.MY_JOBS) {
       RequestsDashboardScreen(navigationActions, serviceRequestViewModel)
     }

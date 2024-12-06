@@ -12,6 +12,7 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.navigation.compose.rememberNavController
 import androidx.test.core.app.ApplicationProvider
+import com.android.solvit.provider.model.ProviderCalendarViewModel
 import com.android.solvit.provider.ui.profile.ProviderRegistrationScreen
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.seeker.model.profile.UserRepository
@@ -79,6 +80,7 @@ class EndToEndTestCreateProfile {
   private lateinit var packageProposalViewModel: PackageProposalViewModel
   private lateinit var chatAssistantViewModel: ChatAssistantViewModel
   private lateinit var notificationsViewModel: NotificationsViewModel
+  private lateinit var calendarViewModel: ProviderCalendarViewModel
   private lateinit var aiSolverViewModel: AiSolverViewModel
   private lateinit var packagesAssistantViewModel: PackagesAssistantViewModel
 
@@ -137,6 +139,7 @@ class EndToEndTestCreateProfile {
     chatViewModel = ChatViewModel(chatRepository)
     chatAssistantViewModel = ChatAssistantViewModel()
     notificationsViewModel = NotificationsViewModel(notificationsRepository)
+    calendarViewModel = ProviderCalendarViewModel(authViewModel, serviceRequestViewModel)
     aiSolverViewModel = AiSolverViewModel()
 
     `when`(locationRepository.search(ArgumentMatchers.anyString(), anyOrNull(), anyOrNull()))
@@ -200,7 +203,8 @@ class EndToEndTestCreateProfile {
                   notificationsViewModel,
                   locationViewModel,
                   packageProposalViewModel,
-                  chatAssistantViewModel)
+                  chatAssistantViewModel,
+                  calendarViewModel)
         }
       }
     }

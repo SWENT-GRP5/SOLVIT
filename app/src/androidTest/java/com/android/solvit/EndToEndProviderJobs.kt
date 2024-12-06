@@ -7,6 +7,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.test.core.app.ApplicationProvider
+import com.android.solvit.provider.model.ProviderCalendarViewModel
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.seeker.model.profile.UserRepository
 import com.android.solvit.seeker.model.profile.UserRepositoryFirestore
@@ -72,6 +73,7 @@ class EndToEndProviderJobs {
   private lateinit var packageProposalViewModel: PackageProposalViewModel
   private lateinit var chatViewModel: ChatViewModel
   private lateinit var chatAssistantViewModel: ChatAssistantViewModel
+  private lateinit var calendarViewModel: ProviderCalendarViewModel
   private lateinit var packagesAssistantViewModel: PackagesAssistantViewModel
   private lateinit var aiSolverViewModel: AiSolverViewModel
 
@@ -146,6 +148,7 @@ class EndToEndProviderJobs {
     chatViewModel = ChatViewModel(chatRepository)
     chatAssistantViewModel = ChatAssistantViewModel()
     notificationsViewModel = NotificationsViewModel(notificationsRepository)
+    calendarViewModel = ProviderCalendarViewModel(authViewModel, serviceRequestViewModel)
     packagesAssistantViewModel = PackagesAssistantViewModel()
     aiSolverViewModel = AiSolverViewModel()
 
@@ -216,7 +219,8 @@ class EndToEndProviderJobs {
                   notificationsViewModel,
                   locationViewModel,
                   packageProposalViewModel,
-                  chatAssistantViewModel)
+                  chatAssistantViewModel,
+                  calendarViewModel)
         }
       }
     }

@@ -1,6 +1,5 @@
 package com.android.solvit.provider.ui.calendar
 
-import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -33,6 +32,7 @@ import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
@@ -52,19 +52,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.android.solvit.provider.model.ProviderCalendarViewModel
+import com.android.solvit.shared.model.request.ServiceRequest
+import com.android.solvit.shared.model.request.ServiceRequestStatus
 import com.android.solvit.shared.ui.navigation.NavigationActions
-import com.android.solvit.shared.ui.theme.Available
-import com.android.solvit.shared.ui.theme.Busy
-import com.android.solvit.shared.ui.theme.Unavailable
 import java.time.DayOfWeek
 import java.time.Instant
 import java.time.LocalDate
@@ -78,15 +77,24 @@ import kotlin.math.abs
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProviderCalendarScreen(navigationActions: NavigationActions) {
+fun ProviderCalendarScreen(
+    navigationActions: NavigationActions,
+    viewModel: ProviderCalendarViewModel
+) {
+  val serviceRequests by
+      viewModel.serviceRequests.collectAsStateWithLifecycle(initialValue = emptyList())
+
   var selectedDate by remember { mutableStateOf(LocalDate.now()) }
   var currentViewDate by remember { mutableStateOf(LocalDate.now()) }
   var calendarView by remember { mutableStateOf(CalendarView.MONTH) }
   var showBottomSheet by remember { mutableStateOf(false) }
   var showDatePicker by remember { mutableStateOf(false) }
 
-  // Lift the time slots state to this level
-  var timeSlots by remember { mutableStateOf(generateInitialTimeSlots()) }
+  val timeSlotsByDate =
+      serviceRequests.groupBy { request ->
+        val date = request.meetingDate?.toInstant() ?: request.dueDate.toInstant()
+        date.atZone(ZoneId.systemDefault()).toLocalDate()
+      }
 
   Scaffold(
       topBar = {
@@ -140,7 +148,8 @@ fun ProviderCalendarScreen(navigationActions: NavigationActions) {
                     },
                     onViewDateChanged = { currentViewDate = it },
                     onHeaderClick = { showDatePicker = true },
-                    timeSlots = timeSlots)
+                    timeSlots = timeSlotsByDate,
+                    calendarView = calendarView)
             CalendarView.WEEK ->
                 WeekView(
                     currentViewDate = currentViewDate,
@@ -151,19 +160,15 @@ fun ProviderCalendarScreen(navigationActions: NavigationActions) {
                     },
                     onViewDateChanged = { currentViewDate = it },
                     onHeaderClick = { showDatePicker = true },
-                    timeSlots = timeSlots,
-                    onTimeSlotsChanged = { date, newTimeSlots ->
-                      timeSlots = timeSlots.toMutableMap().apply { put(date, newTimeSlots) }
-                    })
+                    timeSlots = timeSlotsByDate,
+                    calendarView = calendarView)
             CalendarView.DAY ->
                 DayView(
                     currentViewDate = currentViewDate,
                     onViewDateChanged = { currentViewDate = it },
                     onHeaderClick = { showDatePicker = true },
-                    timeSlots = timeSlots,
-                    onTimeSlotsChanged = { date, newTimeSlots ->
-                      timeSlots = timeSlots.toMutableMap().apply { put(date, newTimeSlots) }
-                    })
+                    timeSlots = timeSlotsByDate,
+                    calendarView = calendarView)
           }
         }
       }
@@ -179,10 +184,8 @@ fun ProviderCalendarScreen(navigationActions: NavigationActions) {
               currentViewDate = selectedDate,
               onViewDateChanged = { currentViewDate = it },
               onHeaderClick = { showDatePicker = true },
-              timeSlots = timeSlots,
-              onTimeSlotsChanged = { date, newTimeSlots ->
-                timeSlots = timeSlots.toMutableMap().apply { put(date, newTimeSlots) }
-              })
+              timeSlots = timeSlotsByDate,
+              calendarView = calendarView)
         }
   }
 
@@ -266,7 +269,8 @@ fun MonthView(
     onDateSelected: (LocalDate) -> Unit,
     onViewDateChanged: (LocalDate) -> Unit,
     onHeaderClick: () -> Unit,
-    timeSlots: Map<LocalDate, List<TimeSlot>>
+    timeSlots: Map<LocalDate, List<ServiceRequest>>,
+    calendarView: CalendarView
 ) {
   var offsetX by remember { mutableFloatStateOf(0f) }
   var currentMonth by remember(currentViewDate) { mutableStateOf(YearMonth.from(currentViewDate)) }
@@ -333,24 +337,28 @@ fun MonthView(
 
               items(currentMonth.lengthOfMonth()) { dayOfMonth ->
                 val date = currentMonth.atDay(dayOfMonth + 1)
-                DayItem(
+                MonthDayItem(
                     date = date,
                     isSelected = date == selectedDate,
                     isCurrentDay = date == LocalDate.now(),
+                    isCurrentMonth = YearMonth.from(date) == currentMonth,
                     onDateSelected = onDateSelected,
-                    dayStatus = calculateDayStatus(timeSlots[date] ?: emptyList()))
+                    timeSlots = timeSlots[date] ?: emptyList(),
+                    calendarView = calendarView)
               }
             }
       }
 }
 
 @Composable
-fun DayItem(
+fun MonthDayItem(
     date: LocalDate,
     isSelected: Boolean,
     isCurrentDay: Boolean,
+    isCurrentMonth: Boolean,
     onDateSelected: (LocalDate) -> Unit,
-    dayStatus: List<TimeSlotStatus>
+    timeSlots: List<ServiceRequest>,
+    calendarView: CalendarView
 ) {
   val backgroundColor =
       when {
@@ -378,24 +386,18 @@ fun DayItem(
             }
         Spacer(modifier = Modifier.height(4.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-          dayStatus.forEach { status -> StatusIndicator(status) }
+          calculateDayStatus(timeSlots).forEach { status -> StatusIndicator(status) }
         }
       }
 }
 
 @Composable
-fun StatusIndicator(status: TimeSlotStatus) {
+fun StatusIndicator(status: ServiceRequestStatus) {
   Box(
       modifier =
           Modifier.size(8.dp)
               .background(
-                  color =
-                      when (status) {
-                        TimeSlotStatus.AVAILABLE -> Available
-                        TimeSlotStatus.UNAVAILABLE -> Unavailable
-                        TimeSlotStatus.BUSY -> Busy
-                      },
-                  shape = CircleShape)) {
+                  color = ServiceRequestStatus.getStatusColor(status), shape = CircleShape)) {
         Box(
             modifier =
                 Modifier.size(4.dp)
@@ -409,8 +411,8 @@ fun DayView(
     currentViewDate: LocalDate,
     onViewDateChanged: (LocalDate) -> Unit,
     onHeaderClick: () -> Unit,
-    timeSlots: Map<LocalDate, List<TimeSlot>>,
-    onTimeSlotsChanged: (LocalDate, List<TimeSlot>) -> Unit
+    timeSlots: Map<LocalDate, List<ServiceRequest>>,
+    calendarView: CalendarView
 ) {
   var offsetX by remember { mutableFloatStateOf(0f) }
   var currentDay by remember(currentViewDate) { mutableStateOf(currentViewDate) }
@@ -459,7 +461,7 @@ fun DayView(
             timeSlots = timeSlots[currentDay] ?: emptyList(),
             textColor = colorScheme.onSurface,
             showDescription = true,
-            onTimeSlotsChanged = { newTimeSlots -> onTimeSlotsChanged(currentDay, newTimeSlots) })
+            currentView = calendarView)
       }
 }
 
@@ -470,8 +472,8 @@ fun WeekView(
     onDateSelected: (LocalDate) -> Unit,
     onViewDateChanged: (LocalDate) -> Unit,
     onHeaderClick: () -> Unit,
-    timeSlots: Map<LocalDate, List<TimeSlot>>,
-    onTimeSlotsChanged: (LocalDate, List<TimeSlot>) -> Unit
+    timeSlots: Map<LocalDate, List<ServiceRequest>>,
+    calendarView: CalendarView
 ) {
   var offsetX by remember { mutableFloatStateOf(0f) }
   var currentWeekStart by
@@ -529,7 +531,7 @@ fun WeekView(
                 isCurrentDay = date == LocalDate.now(),
                 onDateSelected = onDateSelected,
                 timeSlots = timeSlots[date] ?: emptyList(),
-                onTimeSlotsChanged = { newTimeSlots -> onTimeSlotsChanged(date, newTimeSlots) })
+                calendarView = calendarView)
           }
         }
       }
@@ -541,8 +543,8 @@ fun WeekDayItem(
     isSelected: Boolean,
     isCurrentDay: Boolean,
     onDateSelected: (LocalDate) -> Unit,
-    timeSlots: List<TimeSlot>,
-    onTimeSlotsChanged: (List<TimeSlot>) -> Unit
+    timeSlots: List<ServiceRequest>,
+    calendarView: CalendarView
 ) {
   val borderColor =
       when {
@@ -580,7 +582,7 @@ fun WeekDayItem(
                         fontWeight = FontWeight.Bold,
                         color = dayDigitColor)
                   }
-              Spacer(modifier = Modifier.width(8.dp))
+              Spacer(Modifier.width(8.dp))
               Text(
                   text = date.format(DateTimeFormatter.ofPattern("EEEE")),
                   fontWeight = FontWeight.Bold,
@@ -590,119 +592,85 @@ fun WeekDayItem(
             timeSlots = timeSlots,
             textColor = colorScheme.onSurface,
             showDescription = false,
-            onTimeSlotsChanged = onTimeSlotsChanged)
+            currentView = calendarView)
       }
 }
 
 @Composable
 fun TimeSlots(
-    timeSlots: List<TimeSlot>,
+    timeSlots: List<ServiceRequest>,
     textColor: Color = colorScheme.onSurface,
     showDescription: Boolean = true,
-    onTimeSlotsChanged: (List<TimeSlot>) -> Unit
+    currentView: CalendarView
 ) {
-  Column {
-    timeSlots.forEachIndexed { index, slot ->
-      TimeSlotItem(
-          slot = slot,
-          textColor = textColor,
-          showDescription = showDescription,
-          onTimeSlotClick = { newStatus ->
-            val updatedTimeSlots = timeSlots.toMutableList()
-            updatedTimeSlots[index] =
-                when (newStatus) {
-                  "Available" ->
-                      slot.copy(
-                          status = "Available",
-                          name = "Available",
-                          description = "Nothing planned yet...")
-                  "Unavailable" ->
-                      slot.copy(
-                          status = "Unavailable",
-                          name = "Unavailable",
-                          description = "You are not available")
-                  else -> slot
-                }
-            onTimeSlotsChanged(updatedTimeSlots)
-          })
-    }
+  Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+    timeSlots
+        .sortedBy { request ->
+          val date = request.meetingDate?.toInstant() ?: request.dueDate.toInstant()
+          date
+        }
+        .forEach { request -> TimeSlotItem(request, textColor, showDescription, currentView) }
   }
 }
 
 @Composable
 fun TimeSlotItem(
-    slot: TimeSlot,
+    request: ServiceRequest,
     textColor: Color,
     showDescription: Boolean,
-    onTimeSlotClick: (String) -> Unit
+    currentView: CalendarView
 ) {
-  val backgroundColor =
-      when (slot.status) {
-        "Available" -> Available.copy(alpha = 0.1f)
-        "Unavailable" -> Unavailable.copy(alpha = 0.1f)
-        "Busy" -> Busy.copy(alpha = 0.1f)
-        else -> colorScheme.surfaceVariant.copy(alpha = 0.1f)
-      }
-
-  val statusColor =
-      when (slot.status) {
-        "Available" -> Available
-        "Unavailable" -> Unavailable
-        "Busy" -> Busy
-        else -> colorScheme.surfaceVariant
-      }
+  val backgroundColor = ServiceRequestStatus.getStatusColor(request.status).copy(alpha = 0.1f)
+  val statusColor = ServiceRequestStatus.getStatusColor(request.status)
+  val meetingTime =
+      request.meetingDate?.toInstant()?.atZone(ZoneId.systemDefault())?.toLocalTime()
+          ?: request.dueDate.toInstant().atZone(ZoneId.systemDefault()).toLocalTime()
 
   Column(
       modifier =
           Modifier.fillMaxWidth()
               .padding(vertical = 4.dp, horizontal = 8.dp)
               .background(backgroundColor, RoundedCornerShape(8.dp))
-              .clickable {
-                when (slot.status) {
-                  "Available" -> onTimeSlotClick("Unavailable")
-                  "Unavailable" -> onTimeSlotClick("Available")
-                  else -> {} // Do nothing for "Busy" status
+              .border(1.dp, statusColor, RoundedCornerShape(8.dp))
+              .padding(8.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically) {
+              Column(modifier = Modifier.weight(1f)) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                      StatusIndicator(request.status)
+                      Text(
+                          text = meetingTime.format(DateTimeFormatter.ofPattern("HH:mm")),
+                          color = textColor,
+                          style =
+                              MaterialTheme.typography.bodyMedium.copy(
+                                  fontWeight = FontWeight.Bold))
+                      Text(
+                          text = request.title,
+                          color = textColor,
+                          style =
+                              MaterialTheme.typography.bodyMedium.copy(
+                                  fontWeight = FontWeight.Bold),
+                          maxLines = 1,
+                          overflow = TextOverflow.Ellipsis)
+                    }
+                if ((showDescription || currentView == CalendarView.DAY) &&
+                    request.description.isNotEmpty()) {
+                  Spacer(modifier = Modifier.height(4.dp))
+                  Text(
+                      text = request.description,
+                      color = textColor,
+                      style = MaterialTheme.typography.bodySmall,
+                      maxLines = 2,
+                      overflow = TextOverflow.Ellipsis)
                 }
               }
-              .padding(12.dp)
-              .testTag("timeSlotItem_${slot.time}")) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-          Box(modifier = Modifier.size(12.dp).background(color = statusColor, shape = CircleShape))
-          Spacer(Modifier.width(8.dp))
-          Text(
-              text = slot.time,
-              fontSize = 12.sp,
-              fontWeight = FontWeight.Medium,
-              color = textColor.copy(alpha = 0.7f),
-              lineHeight = 14.sp)
-        }
-        Spacer(Modifier.height(4.dp))
-        Text(
-            text = slot.name,
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Bold,
-            color = textColor,
-            lineHeight = 16.sp,
-            letterSpacing = 0.5.sp)
-        if (showDescription) {
-          Spacer(Modifier.height(4.dp))
-          Text(
-              text = slot.description,
-              fontSize = 12.sp,
-              color = textColor.copy(alpha = 0.7f),
-              lineHeight = 14.sp,
-              letterSpacing = 0.25.sp)
-        }
-        Spacer(Modifier.height(4.dp))
+            }
       }
 }
-
-data class TimeSlot(
-    val time: String,
-    val status: String,
-    val name: String,
-    val description: String
-)
 
 enum class CalendarView {
   MONTH,
@@ -710,67 +678,9 @@ enum class CalendarView {
   DAY
 }
 
-@Preview(showBackground = true)
-@Composable
-fun ProviderCalendarScreenPreview() {
-  val context = LocalContext.current
-  ProviderCalendarScreen(NavigationActions(FakeNavController(context)))
-}
-
-class FakeNavController(context: Context) : NavController(context) {
-  override fun popBackStack(): Boolean = true
-}
-
-fun calculateDayStatus(timeSlots: List<TimeSlot>): List<TimeSlotStatus> {
-  return timeSlots
-      .map { slot ->
-        when (slot.status) {
-          "Available" -> TimeSlotStatus.AVAILABLE
-          "Unavailable" -> TimeSlotStatus.UNAVAILABLE
-          "Busy" -> TimeSlotStatus.BUSY
-          else -> TimeSlotStatus.AVAILABLE
-        }
-      }
+fun calculateDayStatus(requests: List<ServiceRequest>): List<ServiceRequestStatus> {
+  return requests
+      .sortedBy { request -> request.meetingDate?.toInstant() ?: request.dueDate.toInstant() }
+      .map { it.status }
       .take(4) // Limit to 4 status indicators
-}
-
-enum class TimeSlotStatus {
-  AVAILABLE,
-  UNAVAILABLE,
-  BUSY
-}
-
-fun generateInitialTimeSlots(): Map<LocalDate, List<TimeSlot>> {
-  val startDate = LocalDate.of(2000, 1, 1) // A date far in the past
-  val endDate = LocalDate.of(2100, 12, 31) // A date far in the future
-  val today = LocalDate.now()
-
-  val result = mutableMapOf<LocalDate, List<TimeSlot>>()
-  var currentDate = startDate
-  while (!currentDate.isAfter(endDate)) {
-    result[currentDate] =
-        if (currentDate == today) {
-          listOf(
-              TimeSlot("08:00-10:00", "Unavailable", "Unavailable", "You are not available"),
-              TimeSlot("10:00-12:00", "Available", "Available", "Nothing planned yet..."),
-              TimeSlot(
-                  "13:00-15:00",
-                  "Busy",
-                  "Sink Repair",
-                  "Sink detached from wall and needs to be repaired"),
-              TimeSlot(
-                  "15:00-17:00",
-                  "Busy",
-                  "Shower Installation",
-                  "Shower needs to be installed in the master bedroom"))
-        } else {
-          listOf(
-              TimeSlot("08:00-10:00", "Available", "Available", "Nothing planned yet..."),
-              TimeSlot("10:00-12:00", "Available", "Available", "Nothing planned yet..."),
-              TimeSlot("13:00-15:00", "Available", "Available", "Nothing planned yet..."),
-              TimeSlot("15:00-17:00", "Available", "Available", "Nothing planned yet..."))
-        }
-    currentDate = currentDate.plusDays(1)
-  }
-  return result
 }
