@@ -188,7 +188,10 @@ jobs:
             adb shell settings put global animator_duration_scale 0 || true
             
             echo "Running instrumentation tests..."
-            ./gradlew connectedCheck -Pandroid.testInstrumentationRunnerArguments.timeout_msec=60000 --no-daemon --max-workers=2 -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=512m -XX:+HeapDumpOnOutOfMemoryError"
+            adb logcat -c;
+            adb logcat > logcat.txt & LOGCAT_PID=$!;
+            ./gradlew connectedCheck -Pandroid.testInstrumentationRunnerArguments.timeout_msec=60000 -Pandroid.testInstrumentationRunnerArguments.numRetries=2 --no-daemon --max-workers=2 -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=512m -XX:+HeapDumpOnOutOfMemoryError" -Dorg.gradle.parallel=true -Dorg.gradle.caching=true -Dkotlin.incremental=false;
+            kill $LOGCAT_PID || true;
 
       # Upload test results
       - name: Upload test results
@@ -196,13 +199,45 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: test-results
-          path: app/build/reports/androidTests/connected/
+          path: |
+            app/build/reports/androidTests/connected/
+            app/build/outputs/androidTest-results/
+            app/build/reports/tests/
+            app/build/test-results/
+
+      # Upload logcat on failure
+      - name: Upload logcat output
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: logcat
+          path: logcat.txt
+
+      # Upload heap dump on OOM
+      - name: Upload heap dump
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: heap-dump
+          path: '*.hprof'
+
+      # Cache the build outputs
+      - name: Cache build outputs
+        uses: actions/cache@v4
+        with:
+          path: |
+            app/build/intermediates
+            app/build/tmp
+          key: ${{ runner.os }}-build-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-build-
 
       # This step generates the coverage report which will be uploaded to sonar
       - name: Generate Coverage Report
         run: |
           ./gradlew jacocoTestReport
 
+      # Upload coverage
       - name: Upload coverage
         uses: actions/upload-artifact@v4
         with:
