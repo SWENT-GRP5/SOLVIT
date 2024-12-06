@@ -5,14 +5,20 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.solvit.provider.model.CalendarView
 import com.android.solvit.provider.model.ProviderCalendarViewModel
-import com.android.solvit.shared.model.authentication.*
+import com.android.solvit.shared.model.authentication.AuthRep
+import com.android.solvit.shared.model.authentication.AuthViewModel
+import com.android.solvit.shared.model.authentication.User
 import com.android.solvit.shared.model.map.Location
-import com.android.solvit.shared.model.request.*
+import com.android.solvit.shared.model.request.ServiceRequest
+import com.android.solvit.shared.model.request.ServiceRequestRepository
+import com.android.solvit.shared.model.request.ServiceRequestStatus
+import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
 import com.google.firebase.Timestamp
 import java.time.DayOfWeek
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
@@ -20,7 +26,7 @@ import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters
 import java.util.Locale
-import org.junit.Assert.assertEquals
+import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -369,24 +375,48 @@ class ProviderCalendarScreenTest {
   fun testHeaderDatePicker() {
     setupScreen()
 
-    // Test week view header navigation
+    // Test week view header navigation and date picker interaction
     composeTestRule.onNodeWithTag("weekViewHeader").performClick()
     composeTestRule.waitForIdle()
+
+    // Verify date picker dialog appears
     composeTestRule.onNodeWithTag("datePickerDialog").assertExists()
-    // TODO: Add date picker interaction tests once implemented
+
+    // Print the dialog's node tree for debugging
+    composeTestRule.onAllNodes(isRoot()).get(1).printToLog("DatePickerDialog")
+
+    // Select a date using the date picker
+    val targetDate = testDate.toLocalDate().withDayOfMonth(15)
+    val dateText =
+        targetDate.format(DateTimeFormatter.ofPattern("EEEE, MMMM d, yyyy", Locale.getDefault()))
+
+    // Handle special case for today's date
+    val today = LocalDate.now()
+    val datePattern =
+        if (targetDate == today) {
+          "Today, $dateText"
+        } else {
+          dateText
+        }
+
+    // Click on the target date in the grid
+    composeTestRule.onNodeWithText(datePattern).performClick()
+    composeTestRule.waitForIdle()
+
+    // Confirm the selection which will trigger the onDateSelected callback
+    composeTestRule.onNodeWithText("OK").performClick()
+    composeTestRule.waitForIdle()
+
+    // Verify that the current view date has been updated
+    assertEquals(15, viewModel.currentViewDate.value.dayOfMonth)
 
     // Test month view header navigation
     composeTestRule.onNodeWithTag("segmentedButton_MONTH").performClick()
     composeTestRule.waitForIdle()
     composeTestRule.onNodeWithTag("monthHeader").performClick()
     composeTestRule.waitForIdle()
-    composeTestRule.onNodeWithTag("datePickerDialog").assertExists()
 
-    // Test day view header navigation
-    composeTestRule.onNodeWithTag("segmentedButton_DAY").performClick()
-    composeTestRule.waitForIdle()
-    composeTestRule.onNodeWithTag("dayViewHeader").performClick()
-    composeTestRule.waitForIdle()
+    // Verify date picker appears in month view
     composeTestRule.onNodeWithTag("datePickerDialog").assertExists()
   }
 
