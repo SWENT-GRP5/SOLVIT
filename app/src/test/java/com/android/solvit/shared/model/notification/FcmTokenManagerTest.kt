@@ -90,6 +90,22 @@ class FcmTokenManagerTest {
   }
 
   @Test
+  fun `getUserFcmToken returns null when token field is empty`() = runTest {
+    // Arrange
+    whenever(mockTokenDoc.get()).thenReturn(Tasks.forResult(mockSnapshot))
+    whenever(mockSnapshot.exists()).thenReturn(true)
+    whenever(mockSnapshot.getString("token")).thenReturn("")
+
+    // Act
+    val result = fcmTokenManager.getUserFcmToken(testUserId)
+
+    // Assert
+    assertNull(result)
+    verify(mockTokenDoc).get()
+    verify(mockSnapshot).getString("token")
+  }
+
+  @Test
   fun `updateUserFcmToken updates token successfully`() {
     // Arrange
     val setTask = Tasks.forResult<Void>(null)
@@ -151,5 +167,64 @@ class FcmTokenManagerTest {
     // Assert
     assertTrue(resultTask.isComplete)
     assertTrue(resultTask.isCanceled || resultTask.exception == exception)
+  }
+
+  @Test
+  fun `getInstance returns same instance`() {
+    // Act
+    val instance1 = FcmTokenManager.getInstance(mockFirestore)
+    val instance2 = FcmTokenManager.getInstance(mockFirestore)
+
+    // Assert
+    assertSame(instance1, instance2)
+  }
+
+  @Test
+  fun `getInstance creates new instance after clearInstance`() {
+    // Arrange
+    val instance1 = FcmTokenManager.getInstance(mockFirestore)
+
+    // Act
+    FcmTokenManager.clearInstance()
+    val instance2 = FcmTokenManager.getInstance(mockFirestore)
+
+    // Assert
+    assertNotSame(instance1, instance2)
+  }
+
+  @Test
+  fun `getInstance is thread safe`() {
+    // Arrange
+    FcmTokenManager.clearInstance()
+    val threads = List(10) { Thread { FcmTokenManager.getInstance(mockFirestore) } }
+
+    // Act
+    threads.forEach { it.start() }
+    threads.forEach { it.join() }
+
+    // Assert
+    val instances = threads.map { FcmTokenManager.getInstance(mockFirestore) }
+    instances.forEach { instance -> assertSame(instances.first(), instance) }
+  }
+
+  @Test
+  fun `updateUserFcmToken includes timestamp`() {
+    // Arrange
+    val setTask = Tasks.forResult<Void>(null)
+    whenever(mockTokenDoc.set(any())).thenReturn(setTask)
+    val beforeTime = System.currentTimeMillis()
+
+    // Act
+    fcmTokenManager.updateUserFcmToken(testUserId, testToken)
+
+    // Assert
+    verify(mockTokenDoc)
+        .set(
+            check { data: Map<String, Any> ->
+              val timestamp = data["updatedAt"] as Long
+              assertTrue(timestamp >= beforeTime)
+              assertTrue(timestamp <= System.currentTimeMillis())
+              true
+            })
   }
 }
