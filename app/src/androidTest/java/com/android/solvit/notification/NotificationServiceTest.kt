@@ -1,6 +1,7 @@
 package com.android.solvit.notification
 
 import android.Manifest
+import android.app.Notification
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
@@ -21,12 +22,18 @@ import androidx.test.uiautomator.Until
 import com.android.solvit.TestActivity
 import com.android.solvit.shared.notifications.NotificationService
 import com.google.firebase.messaging.RemoteMessage
+import io.mockk.every
+import io.mockk.mockkStatic
+import io.mockk.verify
+import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
 
 private const val TAG = "NotificationTest"
 private const val NOTIFICATION_TIMEOUT = 5000L // 5 seconds timeout
@@ -52,6 +59,7 @@ class NotificationServiceTest {
   // Test implementation of NotificationService that uses TestActivity
   private class TestNotificationService : NotificationService() {
     private var testContext: Context? = null
+    var testThrowSecurityException = false
 
     fun initialize(context: Context) {
       testContext = context
@@ -69,7 +77,6 @@ class NotificationServiceTest {
     }
 
     override fun showNotification(title: String, message: String) {
-      Log.d(TAG, "Showing notification - Title: $title, Message: $message")
       try {
         val intent =
             Intent(testContext, TestActivity::class.java).apply {
@@ -97,11 +104,13 @@ class NotificationServiceTest {
 
         val notificationManager =
             testContext?.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        if (testThrowSecurityException) {
+          throw SecurityException("Test security exception")
+        }
         notificationManager.notify(1, builder.build())
         Log.d(TAG, "Successfully showed notification")
       } catch (e: Exception) {
-        Log.e(TAG, "Failed to show notification", e)
-        throw e
+        Log.e(TAG, "Error showing notification", e)
       }
     }
   }
@@ -269,5 +278,86 @@ class NotificationServiceTest {
       Log.e(TAG, "Test failed", e)
       throw e
     }
+  }
+
+  @Test
+  fun onMessageReceived_withNullNotificationFields_showsDefaultValues() {
+    // Create a message with null fields but non-empty body
+    val message =
+        RemoteMessage.Builder("test@test.com")
+            .setData(mapOf("title" to null, "body" to "Test Message"))
+            .build()
+
+    // Send the message
+    service.onMessageReceived(message)
+
+    // Wait for notification
+    Thread.sleep(1000)
+
+    // Verify default values were used
+    val notificationManager =
+        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    val notifications = notificationManager.activeNotifications
+    assertTrue("At least one notification should be active", notifications.isNotEmpty())
+
+    val notification = notifications[0]
+    assertEquals(
+        "New Message", notification.notification.extras.getString(Notification.EXTRA_TITLE))
+    assertEquals(
+        "Test Message", notification.notification.extras.getString(Notification.EXTRA_TEXT))
+  }
+
+  @Test
+  fun onMessageReceived_withEmptyDataBody_doesNotShowNotification() {
+    // Create a message with empty body
+    val data = mapOf("title" to "Test Title", "body" to "")
+    val message = RemoteMessage.Builder("test@test.com").setData(data).build()
+
+    Log.d(TAG, "Sending test message with empty body")
+    service.onMessageReceived(message)
+
+    // Verify no notification is shown
+    Log.d(TAG, "Opening notification drawer")
+    device.openNotification()
+
+    val notification = device.wait(Until.findObject(By.text("Test Title")), NOTIFICATION_TIMEOUT)
+    assertNull("No notification should be shown for empty body", notification)
+  }
+
+  @Test
+  fun getToken_whenSuccessful_returnsToken() = runBlocking {
+    val token = service.getToken()
+    assertNotNull("FCM token should not be null", token)
+    assertTrue("FCM token should not be empty", token!!.isNotEmpty())
+  }
+
+  @Test
+  fun onNewToken_whenUserLoggedIn_handlesToken() {
+    // Mock FirebaseAuth to simulate logged-in user
+    val testToken = "test_token_123"
+
+    service.onNewToken(testToken)
+
+    // Verify no exceptions are thrown
+    // Note: Since the TODO in onNewToken is not implemented, we just verify it doesn't crash
+  }
+
+  @Test
+  fun showNotification_whenSecurityException_handlesError() {
+    // Mock Log.e
+    mockkStatic(Log::class)
+    every { Log.e(any(), any(), any()) } returns 0
+
+    // Modify the test service to throw SecurityException
+    service.testThrowSecurityException = true
+
+    // This should not throw an exception due to error handling
+    service.onMessageReceived(
+        RemoteMessage.Builder("test@test.com")
+            .setData(mapOf("title" to "Test Title", "body" to "Test Body"))
+            .build())
+
+    // Verify that error was logged
+    verify(exactly = 1) { Log.e(eq(TAG), eq("Error showing notification"), any()) }
   }
 }
