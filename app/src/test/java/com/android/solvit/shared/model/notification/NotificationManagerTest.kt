@@ -170,4 +170,62 @@ class NotificationManagerTest {
     assertTrue(result.exceptionOrNull() is IllegalArgumentException)
     verify(mockTokenManager, never()).getUserFcmToken(any())
   }
+
+  @Test
+  fun `sendNotification handles blank FCM token`() = runTest {
+    // Arrange
+    whenever(mockTokenManager.getUserFcmToken(testRecipientId)).thenReturn("")
+    val title = "Test Title"
+    val body = "Test Body"
+
+    // Act
+    val result = notificationManager.sendNotification(testRecipientId, title, body)
+
+    // Assert
+    assertTrue(result.isFailure)
+    assertTrue(result.exceptionOrNull() is IllegalStateException)
+    assertEquals("Invalid recipient FCM token", result.exceptionOrNull()?.message)
+    verify(mockTokenManager).getUserFcmToken(testRecipientId)
+    verify(mockCallable, never()).call(any())
+  }
+
+  @Test
+  fun `sendNotification handles custom data map`() = runTest {
+    // Arrange
+    val title = "Test Title"
+    val body = "Test Body"
+    val customData = mapOf("key1" to "value1", "key2" to "value2")
+    val expectedData =
+        mapOf(
+            "recipientToken" to testToken,
+            "notification" to mapOf("title" to title, "body" to body),
+            "data" to
+                (customData + mapOf("senderId" to testUserId, "recipientId" to testRecipientId)))
+
+    // Act
+    val result = notificationManager.sendNotification(testRecipientId, title, body, customData)
+
+    // Assert
+    assertTrue(result.isSuccess)
+    verify(mockTokenManager).getUserFcmToken(testRecipientId)
+    verify(mockCallable).call(expectedData)
+  }
+
+  @Test
+  fun `sendNotification handles cloud function exception`() = runTest {
+    // Arrange
+    val title = "Test Title"
+    val body = "Test Body"
+    val exception = RuntimeException("Cloud function error")
+    whenever(mockCallable.call(any())).thenReturn(Tasks.forException(exception))
+
+    // Act
+    val result = notificationManager.sendNotification(testRecipientId, title, body)
+
+    // Assert
+    assertTrue(result.isFailure)
+    assertEquals(exception, result.exceptionOrNull())
+    verify(mockTokenManager).getUserFcmToken(testRecipientId)
+    verify(mockCallable).call(any())
+  }
 }
