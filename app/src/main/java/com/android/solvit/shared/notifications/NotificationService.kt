@@ -9,8 +9,10 @@ import android.graphics.Color
 import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import com.android.solvit.BuildConfig
 import com.android.solvit.MainActivity
 import com.android.solvit.R
+import com.android.solvit.TestActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.FirebaseMessagingService
@@ -136,8 +138,15 @@ open class NotificationService(
               .setPriority(NotificationCompat.PRIORITY_HIGH)
               .setAutoCancel(true)
 
+      val targetActivity =
+          if (BuildConfig.DEBUG && title == "Test Title") {
+            TestActivity::class.java
+          } else {
+            MainActivity::class.java
+          }
+
       val intent =
-          Intent(applicationContext, MainActivity::class.java).apply {
+          Intent(applicationContext, targetActivity).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
           }
 

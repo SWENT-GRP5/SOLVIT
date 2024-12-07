@@ -36,6 +36,11 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".TestActivity"
+            android:exported="true"
+            android:theme="@style/Theme.SampleApp" />
+
         <service
             android:name=".shared.notifications.NotificationService"
             android:exported="false">

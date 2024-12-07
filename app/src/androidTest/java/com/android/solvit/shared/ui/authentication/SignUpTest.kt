@@ -14,6 +14,7 @@ import androidx.test.espresso.intent.Intents
 import androidx.test.espresso.intent.matcher.IntentMatchers
 import androidx.test.espresso.intent.rule.IntentsRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
 import io.mockk.every
@@ -35,10 +36,11 @@ class SignUpScreenTest {
   @get:Rule val intentsTestRule = IntentsRule()
 
   private val mockNavigationActions = mock(NavigationActions::class.java)
+  private val mockAuthViewModel = mockk<AuthViewModel>(relaxed = true)
 
   @Test
   fun signUp_testAllTheTest() {
-    composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
+    composeTestRule.setContent { SignUpScreen(mockNavigationActions, mockAuthViewModel) }
 
     composeTestRule.onNodeWithTag("goBackButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("signUpIllustration").assertIsDisplayed()
@@ -53,7 +55,7 @@ class SignUpScreenTest {
 
   @Test
   fun signUp_testAllPerformClick() {
-    composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
+    composeTestRule.setContent { SignUpScreen(mockNavigationActions, mockAuthViewModel) }
 
     composeTestRule.onNodeWithTag("goBackButton").performClick()
     composeTestRule.onNodeWithTag("passwordInputField").performClick()
@@ -65,7 +67,7 @@ class SignUpScreenTest {
 
   @Test
   fun signUp_emailAndPasswordInput() {
-    composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
+    composeTestRule.setContent { SignUpScreen(mockNavigationActions, mockAuthViewModel) }
 
     // Test email input
     composeTestRule.onNodeWithTag("emailInputField").performTextInput("test@example.com")
@@ -74,7 +76,7 @@ class SignUpScreenTest {
 
   @Test
   fun signUp_errorShowInEmailField() {
-    composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
+    composeTestRule.setContent { SignUpScreen(mockNavigationActions, mockAuthViewModel) }
 
     composeTestRule.onNodeWithTag("emailErrorMessage").isNotDisplayed()
     composeTestRule.onNodeWithTag("emailInputField").performTextInput("test@example")
@@ -86,7 +88,7 @@ class SignUpScreenTest {
 
   @Test
   fun signUp_errorShowInPasswordField() {
-    composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
+    composeTestRule.setContent { SignUpScreen(mockNavigationActions, mockAuthViewModel) }
 
     composeTestRule.onNodeWithTag("passwordErrorMessage").isNotDisplayed()
     composeTestRule.onNodeWithTag("passwordInputField").performTextInput("12345")
@@ -98,7 +100,7 @@ class SignUpScreenTest {
 
   @Test
   fun signUp_errorShowInConfirmPasswordField() {
-    composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
+    composeTestRule.setContent { SignUpScreen(mockNavigationActions, mockAuthViewModel) }
 
     composeTestRule.onNodeWithTag("confirmPasswordErrorMessage").isNotDisplayed()
     composeTestRule.onNodeWithTag("confirmPasswordInputField").performTextInput("12345")
@@ -110,7 +112,7 @@ class SignUpScreenTest {
 
   @Test
   fun signUp_emailInput() {
-    composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
+    composeTestRule.setContent { SignUpScreen(mockNavigationActions, mockAuthViewModel) }
 
     // Test email input
     composeTestRule.onNodeWithTag("emailInputField").performTextInput("test@example.com")
@@ -118,7 +120,7 @@ class SignUpScreenTest {
 
   @Test
   fun signUp_googleSignInReturnsValidActivityResult() {
-    composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
+    composeTestRule.setContent { SignUpScreen(mockNavigationActions, mockAuthViewModel) }
     composeTestRule.onNodeWithTag("googleSignUpButton").performClick()
     // assert that an Intent resolving to Google Mobile Services has been sent (for sign-in)
     Intents.intended(IntentMatchers.toPackage("com.google.android.gms"))
@@ -127,7 +129,7 @@ class SignUpScreenTest {
   @Test
   fun signUp_formCompleteEnablesButton() {
     runBlocking {
-      composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
+      composeTestRule.setContent { SignUpScreen(mockNavigationActions, mockAuthViewModel) }
       composeTestRule.onNodeWithTag("emailInputField").performTextInput("test@test.com")
       composeTestRule.onNodeWithTag("passwordInputField").performTextInput("password")
       composeTestRule.onNodeWithTag("confirmPasswordInputField").performTextInput("password")
@@ -138,7 +140,7 @@ class SignUpScreenTest {
 
   @Test
   fun signUp_signUpButtonNavigatesToChooseRoleScreen() {
-    composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
+    composeTestRule.setContent { SignUpScreen(mockNavigationActions, mockAuthViewModel) }
     composeTestRule.onNodeWithTag("emailInputField").performTextInput("test@test.com")
     composeTestRule.onNodeWithTag("passwordInputField").performTextInput("password")
     composeTestRule.onNodeWithTag("confirmPasswordInputField").performTextInput("password")
