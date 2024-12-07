@@ -56,6 +56,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -107,7 +108,7 @@ fun SpTopAppBar(
     navigationActions: NavigationActions,
     selectedService: Services?,
     onClickAction: () -> Unit,
-    seekerProfileViewModel: SeekerProfileViewModel
+    seekerProfileViewModel: SeekerProfileViewModel,
 ) {
 
   val location by seekerProfileViewModel.locationSearched.collectAsState()
@@ -916,19 +917,19 @@ fun SelectProviderScreen(
 ) {
   // Lock Orientation to Portrait
   val context = LocalContext.current
+
   DisposableEffect(Unit) {
     val activity = context as? ComponentActivity
     activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
     onDispose {
       locationViewModel.clear()
+
       activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
     }
   }
 
   val selectedService by listProviderViewModel.selectedService.collectAsState()
-  if (selectedService != null)
-      listProviderViewModel.filterProviders(
-          filter = { provider -> provider.service == selectedService }, "Service")
+  LaunchedEffect(selectedService) { listProviderViewModel.getProviders() }
   val providers by listProviderViewModel.providersListFiltered.collectAsState()
 
   var displayFilters by remember { mutableStateOf(false) }

@@ -2,6 +2,7 @@ package com.android.solvit.seeker.ui.service
 
 import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
@@ -38,6 +39,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -71,8 +73,18 @@ fun ServicesScreen(
     navigationActions: NavigationActions,
     listProviderViewModel: ListProviderViewModel
 ) {
+
+  val lpvm by listProviderViewModel.providersList.collectAsState()
   // Lock Orientation to Portrait
   val localContext = LocalContext.current
+  LaunchedEffect(navigationActions.currentRoute()) {
+    // Clear the selected service when this screen is entered
+    if (navigationActions.currentRoute() == Route.SERVICES) {
+      listProviderViewModel.clearSelectedService()
+      listProviderViewModel.refreshFilters()
+      Log.e("LPVM ", "$lpvm")
+    }
+  }
   DisposableEffect(Unit) {
     val activity = localContext as? ComponentActivity
     activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
@@ -80,6 +92,8 @@ fun ServicesScreen(
   }
 
   val searchViewModel = SearchServicesViewModel()
+  val selectedService by listProviderViewModel.selectedService.collectAsState()
+  Log.e("LPVM", "${selectedService}")
 
   Scaffold(
       modifier = Modifier.testTag("servicesScreen"),
@@ -92,7 +106,7 @@ fun ServicesScreen(
         Column(modifier = Modifier.fillMaxSize()) {
           TopSection(searchViewModel, listProviderViewModel, navigationActions)
           LazyColumn(modifier = Modifier.fillMaxSize()) {
-            item { ShortcutsSection(navigationActions, listProviderViewModel) }
+            item { ShortcutsSection(navigationActions) }
             item { CategoriesSection(searchViewModel, listProviderViewModel, navigationActions) }
             item { PerformersSection(listProviderViewModel, navigationActions) }
             item { Spacer(Modifier.size(80.dp)) }
@@ -172,6 +186,7 @@ fun TopSection(
                           modifier =
                               Modifier.clickable {
                                 listProviderViewModel.selectService(searchResults[index].service)
+                                Log.e("LPVM", "${listProviderViewModel.selectedService}")
                                 navigationActions.navigateTo(Route.PROVIDERS)
                               })
                     }
@@ -184,7 +199,6 @@ fun TopSection(
 @Composable
 fun ShortcutsSection(
     navigationActions: NavigationActions,
-    listProviderViewModel: ListProviderViewModel
 ) {
   Column(
       modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("servicesScreenShortcuts"),

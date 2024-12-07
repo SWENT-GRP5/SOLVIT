@@ -26,8 +26,7 @@ class ListProviderViewModel(private val repository: ProviderRepository) : ViewMo
   private val _providersListFiltered = MutableStateFlow<List<Provider>>(emptyList())
   val providersListFiltered: StateFlow<List<Provider>> = _providersListFiltered
 
-  private val filters = listOf("Price", "Languages", "Rating")
-  private val activeFilters = mutableMapOf<String, (Provider) -> Boolean>()
+  private var activeFilters = mutableMapOf<String, (Provider) -> Boolean>()
 
   companion object {
     val Factory: ViewModelProvider.Factory =
@@ -46,7 +45,10 @@ class ListProviderViewModel(private val repository: ProviderRepository) : ViewMo
   init {
     repository.init { getProviders() }
     repository.addListenerOnProviders(
-        onSuccess = { _providersList.value = it },
+        onSuccess = {
+          _providersList.value = it
+          _providersListFiltered.value = it
+        },
         onFailure = { exception ->
           Log.e("ListProviderViewModel", "Error listening List of Providers", exception)
         })
@@ -115,5 +117,10 @@ class ListProviderViewModel(private val repository: ProviderRepository) : ViewMo
 
   fun refreshFilters() {
     getProviders()
+    activeFilters.clear()
+  }
+
+  fun clearSelectedService() {
+    _selectedService.value = null
   }
 }
