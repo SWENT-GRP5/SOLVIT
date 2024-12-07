@@ -56,6 +56,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -71,6 +72,7 @@ import com.android.solvit.R
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.packages.PackageProposal
+import com.android.solvit.shared.model.packages.PackageProposalViewModel
 import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
@@ -87,7 +89,9 @@ fun ProviderInfoScreen(
     reviewsViewModel: ReviewViewModel = viewModel(factory = ReviewViewModel.Factory),
     requestViewModel: ServiceRequestViewModel =
         viewModel(factory = ServiceRequestViewModel.Factory),
-    authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory)
+    authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory),
+    packageProposalViewModel: PackageProposalViewModel =
+        viewModel(factory = PackageProposalViewModel.Factory)
 ) {
   val provider = providerViewModel.selectedProvider.collectAsState().value ?: return
   val reviews =
@@ -97,47 +101,17 @@ fun ProviderInfoScreen(
   val selectedPackage = remember { mutableStateOf<PackageProposal?>(null) }
   val showDialog = remember { mutableStateOf(false) }
 
+  val packagesProposal by packageProposalViewModel.proposal.collectAsState()
   val user = authViewModel.user.collectAsState()
   val userId = user.value?.uid ?: "-1"
 
-  // Since We still don't give the possibility to provider to add packages (for the moment we're use
-  // a default list of packages for all providers)
-  val packages =
-      listOf(
-          PackageProposal(
-              uid = "1",
-              title = "Basic Maintenance",
-              description = "Ideal for minor repairs and maintenance tasks.",
-              price = 49.99,
-              bulletPoints =
-                  listOf(
-                      "Fix leaky faucets", "Unclog drains", "Inspect plumbing for minor issues")),
-          PackageProposal(
-              uid = "2",
-              title = "Standard Service",
-              description = "Comprehensive service for common plumbing needs.",
-              price = 89.99,
-              bulletPoints =
-                  listOf(
-                      "Repair leaks and clogs",
-                      "Replace faucets and fixtures",
-                      "Inspect and clear drain pipes")),
-          PackageProposal(
-              uid = "3",
-              title = "Premium Installation",
-              description = "For extensive plumbing work, including installations.",
-              price = 149.99,
-              bulletPoints =
-                  listOf(
-                      "Install new water heater",
-                      "Full pipe installation or replacement",
-                      "Advanced leak detection and repair")))
+  val packages = packagesProposal.filter { it.providerId == provider.uid }
 
   Scaffold(
       containerColor = colorScheme.surface,
       topBar = { ProviderTopBar(onBackClick = { navigationActions.goBack() }) },
       content = { padding ->
-        Column(modifier = Modifier.background(colorScheme.surface).padding(padding)) {
+        Column(modifier = Modifier.background(colorScheme.surface).fillMaxSize().padding(padding)) {
           ProviderHeader(provider)
           ProviderTabs(selectedTab = selectedTab) { newTab -> selectedTab = newTab }
           // Display content based on the selected tab
@@ -168,7 +142,8 @@ fun ProviderInfoScreen(
                     showDialog,
                     requestViewModel,
                     userId,
-                    navigationActions)
+                    navigationActions,
+                )
           }
         }
       },
@@ -178,92 +153,108 @@ fun ProviderInfoScreen(
 @Composable
 fun PackageCard(
     packageProposal: PackageProposal,
-    isSelected: Boolean,
+    selectedIndex: Boolean,
+    onIsSelectedChange: () -> Unit,
     modifier: Modifier,
     selectedPackage: MutableState<PackageProposal?> = remember { mutableStateOf(null) }
 ) {
+  val screenHeight = LocalConfiguration.current.screenHeightDp.dp
+  val dynamicBottomPadding = screenHeight * 0.1f
+
+  val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+  val dynamicHorizontalPadding = (screenWidth * 0.05f)
   Card(
-      modifier = modifier.fillMaxHeight(),
+      modifier = modifier,
       shape = RoundedCornerShape(16.dp),
       elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
       colors =
           CardDefaults.cardColors(
-              containerColor = if (!isSelected) colorScheme.surface else colorScheme.secondary,
+              containerColor = if (!selectedIndex) colorScheme.surface else colorScheme.secondary,
           )) {
-        Column(
-            modifier =
-                Modifier.padding(20.dp)
-                    .fillMaxHeight()
-                    .verticalScroll(rememberScrollState())
-                    .testTag("PackageContent"),
-            horizontalAlignment = Alignment.Start) {
-              // Price of the Package
-              Row(verticalAlignment = Alignment.CenterVertically) {
+        Box(modifier = Modifier.fillMaxSize()) {
+          Column(
+              modifier =
+                  Modifier.padding(
+                          start = 20.dp, end = 20.dp, top = 20.dp, bottom = dynamicBottomPadding)
+                      .fillMaxHeight()
+                      .verticalScroll(rememberScrollState())
+                      .testTag("PackageContent"),
+              horizontalAlignment = Alignment.Start) {
+                // Price of the Package
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                  Text(
+                      modifier = Modifier.testTag("price"),
+                      text = "CHF${packageProposal.price}",
+                      style = typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                      color =
+                          if (!selectedIndex) colorScheme.onPrimaryContainer
+                          else colorScheme.onPrimary)
+                  Spacer(modifier = Modifier.width(8.dp)) // Increased space between price and unit
+                  Text(
+                      text = "/hour",
+                      style = typography.bodySmall,
+                      color =
+                          if (!selectedIndex) colorScheme.onPrimaryContainer
+                          else colorScheme.onPrimary)
+                }
+                // Title of the Package
                 Text(
-                    modifier = Modifier.testTag("price"),
-                    text = "$${packageProposal.price}",
-                    style = typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                    text = packageProposal.title,
+                    style = typography.titleMedium,
                     color =
-                        if (!isSelected) colorScheme.onPrimaryContainer else colorScheme.onPrimary)
-                Spacer(modifier = Modifier.width(8.dp)) // Increased space between price and unit
+                        if (!selectedIndex) colorScheme.onPrimaryContainer
+                        else colorScheme.onPrimary)
+                Spacer(
+                    modifier =
+                        Modifier.height(12.dp)) // Increased space between title and description
+                // Description of the Package
                 Text(
-                    text = "/hour",
-                    style = typography.bodySmall,
-                    color =
-                        if (!isSelected) colorScheme.onPrimaryContainer else colorScheme.onPrimary)
-              }
-              // Title of the Package
-              Text(
-                  text = packageProposal.title,
-                  style = typography.titleMedium,
-                  color =
-                      if (!isSelected) colorScheme.onPrimaryContainer else colorScheme.onPrimary)
-              Spacer(
-                  modifier =
-                      Modifier.height(12.dp)) // Increased space between title and description
-              // Description of the Package
-              Text(
-                  text = packageProposal.description,
-                  style = typography.bodyMedium,
-                  color = if (!isSelected) colorScheme.onSurface else colorScheme.onPrimary)
-              Spacer(
-                  modifier =
-                      Modifier.height(12.dp)) // Increased space between description and features
-              // Important infos about the package
-              Column {
-                packageProposal.bulletPoints.forEach { feature ->
-                  Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Default.CheckCircle,
-                        contentDescription = null,
-                        tint = colorScheme.primary,
-                        modifier =
-                            Modifier.size(18.dp)) // Slightly bigger icon for better visibility
-                    Spacer(modifier = Modifier.width(8.dp)) // Increased space between icon and text
-                    Text(
-                        text = feature,
-                        style = typography.bodyMedium,
-                        color = if (!isSelected) colorScheme.onSurface else colorScheme.onPrimary)
+                    text = packageProposal.description,
+                    style = typography.bodyMedium,
+                    color = if (!selectedIndex) colorScheme.onSurface else colorScheme.onPrimary)
+                Spacer(
+                    modifier =
+                        Modifier.height(12.dp)) // Increased space between description and features
+                // Important infos about the package
+                Column {
+                  packageProposal.bulletPoints.forEach { feature ->
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                      Icon(
+                          imageVector = Icons.Default.CheckCircle,
+                          contentDescription = null,
+                          tint = colorScheme.primary,
+                          modifier =
+                              Modifier.size(18.dp)) // Slightly bigger icon for better visibility
+                      Spacer(
+                          modifier = Modifier.width(8.dp)) // Increased space between icon and text
+                      Text(
+                          text = feature,
+                          style = typography.bodyMedium,
+                          color =
+                              if (!selectedIndex) colorScheme.onSurface else colorScheme.onPrimary)
+                    }
                   }
                 }
+                Spacer(modifier = Modifier.weight(1f)) // Pushes the button to the bottom
+          }
+          Button(
+              onClick = {
+                // Toggle the selected package: if already selected, unselect it
+                selectedPackage.value =
+                    if (selectedPackage.value == packageProposal) null else packageProposal
+                onIsSelectedChange()
+              },
+              colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
+              modifier =
+                  Modifier.align(Alignment.BottomCenter)
+                      .padding(start = dynamicHorizontalPadding, end = dynamicHorizontalPadding)) {
+                // Update the button text based on the selection state
+                Text(
+                    text =
+                        if (selectedPackage.value == packageProposal) "Unselect package"
+                        else "Choose package")
               }
-              Spacer(modifier = Modifier.weight(1f)) // Pushes the button to the bottom
-              Button(
-                  enabled = isSelected,
-                  onClick = {
-                    // Toggle the selected package: if already selected, unselect it
-                    selectedPackage.value =
-                        if (selectedPackage.value == packageProposal) null else packageProposal
-                  },
-                  colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
-                  modifier = Modifier.align(Alignment.CenterHorizontally)) {
-                    // Update the button text based on the selection state
-                    Text(
-                        text =
-                            if (selectedPackage.value == packageProposal) "Unselect package"
-                            else "Choose package")
-                  }
-            }
+        }
       }
 }
 
@@ -291,19 +282,20 @@ fun ProviderPackages(
         ) {
           items(packages.size) { index ->
             // If package is selected, we display it bigger
-            val isSelected = selectedIndex == index
             val size by
                 animateDpAsState(
-                    targetValue = if (isSelected) 350.dp else 320.dp, label = "PackageCardSize")
+                    targetValue = if (selectedIndex == index) 350.dp else 320.dp,
+                    label = "PackageCardSize")
             PackageCard(
                 packageProposal = packages[index],
-                isSelected = isSelected,
+                selectedIndex = (selectedIndex == index),
                 modifier =
                     Modifier.width(260.dp) // Slightly wider for better touch targets
                         .height(size)
-                        .clickable { selectedIndex = if (isSelected) -1 else index }
+                        .clickable {}
                         .testTag("PackageCard"),
-                selectedPackage = selectedPackage)
+                selectedPackage = selectedPackage,
+                onIsSelectedChange = { selectedIndex = if (selectedIndex == index) -1 else index })
           }
         }
         if (showDialog.value) {
@@ -388,9 +380,9 @@ fun ProviderHeader(provider: Provider) {
                       modifier = Modifier.testTag("providerName"),
                       color = colorScheme.onBackground)
                   Text(
-                      text = provider.companyName,
+                      text = provider.service.toString().lowercase(),
                       color = colorScheme.onSurfaceVariant,
-                      modifier = Modifier.testTag("providerCompanyName"))
+                      modifier = Modifier.testTag("providerService"))
                 }
               }
 
@@ -411,6 +403,8 @@ fun ProviderHeader(provider: Provider) {
 
 @Composable
 fun ProviderTabs(selectedTab: ProviderTab, onTabSelected: (ProviderTab) -> Unit) {
+  val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+  val dynamicFontSize = (screenWidth.value * 0.03).sp
   TabRow(
       selectedTabIndex = selectedTab.ordinal,
       modifier = Modifier.fillMaxWidth().testTag("providerTabs"),
@@ -423,6 +417,8 @@ fun ProviderTabs(selectedTab: ProviderTab, onTabSelected: (ProviderTab) -> Unit)
           text = {
             Text(
                 text = tab.title,
+                style = typography.titleMedium.copy(fontSize = dynamicFontSize),
+                maxLines = 1,
                 modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
                 color =
                     if (selectedTab == tab) colorScheme.onPrimary
@@ -449,14 +445,15 @@ fun ProviderDetails(
     showDialog: MutableState<Boolean>,
     requestViewModel: ServiceRequestViewModel,
     userId: String,
-    navigationActions: NavigationActions
+    navigationActions: NavigationActions,
 ) {
   Column(
       modifier =
           Modifier.padding(16.dp)
               .fillMaxWidth()
               .background(color = colorScheme.surface, shape = RoundedCornerShape(16.dp))
-              .testTag("providerDetails")) {
+              .testTag("providerDetails")
+              .verticalScroll(rememberScrollState())) {
         Rubric(modifier = Modifier.testTag("detailsSection")) {
           Row(
               verticalAlignment = Alignment.CenterVertically,
@@ -468,7 +465,7 @@ fun ProviderDetails(
                     color = colorScheme.onSurfaceVariant,
                     modifier = Modifier.testTag("reviewsCount"))
                 Text(
-                    text = "15 Jobs", // Replace with actual job count
+                    text = "${provider.jobsCompleted} jobs",
                     color = colorScheme.onSurfaceVariant,
                     modifier = Modifier.testTag("jobsCount"))
               }
@@ -476,10 +473,11 @@ fun ProviderDetails(
           Spacer(modifier = Modifier.height(8.dp))
 
           Text(
-              "Refrigerator repair",
+              provider.companyName,
               fontSize = 18.sp,
               fontWeight = FontWeight.Bold,
-              color = colorScheme.onBackground)
+              color = colorScheme.onBackground,
+              modifier = Modifier.testTag("providerCompanyName"))
           Text(
               text = "CHF ${provider.price}/hour",
               fontSize = 16.sp,
@@ -568,14 +566,15 @@ fun ProviderReviews(
     showDialog: MutableState<Boolean>,
     requestViewModel: ServiceRequestViewModel,
     userId: String,
-    navigationActions: NavigationActions
+    navigationActions: NavigationActions,
 ) {
   Column(
       modifier =
           Modifier.padding(16.dp)
               .fillMaxWidth()
               .background(color = colorScheme.surface, shape = RoundedCornerShape(16.dp))
-              .testTag("providerReviews")) {
+              .testTag("providerReviews")
+              .verticalScroll(rememberScrollState())) {
         Column(
             Modifier.fillMaxWidth()
                 .background(color = colorScheme.background, shape = RoundedCornerShape(16.dp))
@@ -621,17 +620,13 @@ fun ProviderReviews(
             color = colorScheme.onBackground)
 
         Spacer(modifier = Modifier.height(8.dp))
-
-        LazyColumn {
-          if (reviews.isEmpty()) {
-            item {
-              Text(
-                  "No reviews yet",
-                  modifier = Modifier.padding(16.dp),
-                  color = colorScheme.onSurfaceVariant)
-            }
-          }
-          items(reviews) { review -> ReviewRow(review) }
+        if (reviews.isEmpty()) {
+          Text(
+              "No reviews yet",
+              modifier = Modifier.padding(16.dp),
+              color = colorScheme.onSurfaceVariant)
+        } else {
+          reviews.forEach { ReviewRow(it) }
         }
 
         if (showDialog.value) {

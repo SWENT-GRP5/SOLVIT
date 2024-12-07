@@ -18,5 +18,6 @@ data class Provider(
     val price: Double = 0.0,
     val deliveryTime: Timestamp = Timestamp.now(),
     val languages: List<Language> = emptyList(),
-    val schedule: Schedule = Schedule()
+    val schedule: Schedule = Schedule(),
+    val jobsCompleted: Int = 0
 )
