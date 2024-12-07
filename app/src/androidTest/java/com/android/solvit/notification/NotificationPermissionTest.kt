@@ -3,70 +3,164 @@ package com.android.solvit.notification
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
+import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.uiautomator.By
+import androidx.test.uiautomator.UiObject2
 import androidx.test.uiautomator.Until
 import com.android.solvit.MainActivity
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
 import org.junit.Assume.assumeTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
+private const val TAG = "NotificationPermissionTest"
+
 @RunWith(AndroidJUnit4::class)
 class NotificationPermissionTest : NotificationBaseTest() {
 
   companion object {
-    private const val PERMISSION_ALLOW_BUTTON_ID =
-        "com.android.permissioncontroller:id/permission_allow_button"
-    private const val PERMISSION_DENY_BUTTON_ID =
-        "com.android.permissioncontroller:id/permission_deny_button"
+    private val PERMISSION_ALLOW_BUTTON_IDS =
+        arrayOf(
+            "com.android.permissioncontroller:id/permission_allow_button",
+            "com.android.packageinstaller:id/permission_allow_button",
+            "android:id/button1")
+    private val PERMISSION_DENY_BUTTON_IDS =
+        arrayOf(
+            "com.android.permissioncontroller:id/permission_deny_button",
+            "com.android.packageinstaller:id/permission_deny_button",
+            "android:id/button2")
+    private const val PERMISSION_DIALOG_TIMEOUT = 10000L
+    private const val BUTTON_RETRY_COUNT = 3
+    private const val BUTTON_RETRY_DELAY = 1000L
+    private const val IDLE_TIMEOUT = 2000L
+  }
+
+  private fun logPermissionState(prefix: String = "") {
+    val permissionStatus =
+        ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
+    val statusStr =
+        if (permissionStatus == PackageManager.PERMISSION_GRANTED) "GRANTED" else "DENIED"
+    Log.i(TAG, "$prefix Current notification permission status: $statusStr")
+  }
+
+  private fun waitForIdle() {
+    try {
+      Log.d(TAG, "Waiting for device to be idle...")
+      device.waitForIdle(IDLE_TIMEOUT)
+    } catch (e: Exception) {
+      Log.w(TAG, "Exception while waiting for idle: ${e.message}")
+    }
+  }
+
+  private fun findButton(buttonIds: Array<String>, buttonType: String): UiObject2? {
+    Log.i(TAG, "Attempting to find $buttonType button...")
+    waitForIdle()
+
+    for (attempt in 1..BUTTON_RETRY_COUNT) {
+      Log.d(TAG, "Attempt $attempt to find $buttonType button")
+
+      for (buttonId in buttonIds) {
+        try {
+          Log.d(TAG, "Looking for $buttonType button with ID: $buttonId")
+          val button = device.wait(Until.findObject(By.res(buttonId)), PERMISSION_DIALOG_TIMEOUT)
+          if (button != null && button.isEnabled) {
+            Log.i(TAG, "Found enabled $buttonType button with ID: $buttonId")
+            return button
+          }
+        } catch (e: Exception) {
+          Log.w(TAG, "Exception while finding button: ${e.message}")
+        }
+      }
+
+      if (attempt < BUTTON_RETRY_COUNT) {
+        Log.d(TAG, "Button not found, waiting ${BUTTON_RETRY_DELAY}ms before retry")
+        Thread.sleep(BUTTON_RETRY_DELAY)
+      }
+    }
+
+    Log.w(TAG, "No enabled $buttonType button found after $BUTTON_RETRY_COUNT attempts")
+    return null
+  }
+
+  private fun waitForPermissionDialog(): Boolean {
+    Log.i(TAG, "Waiting for permission dialog to appear...")
+    waitForIdle()
+
+    for (attempt in 1..BUTTON_RETRY_COUNT) {
+      for (buttonId in PERMISSION_ALLOW_BUTTON_IDS + PERMISSION_DENY_BUTTON_IDS) {
+        try {
+          val button = device.wait(Until.findObject(By.res(buttonId)), PERMISSION_DIALOG_TIMEOUT)
+          if (button != null && button.isEnabled) {
+            Log.i(TAG, "Permission dialog found with enabled button ID: $buttonId")
+            return true
+          }
+        } catch (e: Exception) {
+          Log.w(TAG, "Exception while finding dialog: ${e.message}")
+        }
+      }
+
+      if (attempt < BUTTON_RETRY_COUNT) {
+        Log.d(TAG, "Dialog not found, waiting ${BUTTON_RETRY_DELAY}ms before retry")
+        Thread.sleep(BUTTON_RETRY_DELAY)
+      }
+    }
+
+    Log.w(TAG, "Permission dialog not found after $BUTTON_RETRY_COUNT attempts")
+    return false
   }
 
   @Before
   override fun setUp() {
     super.setUp()
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+      Log.i(TAG, "Setting up test - revoking notification permission")
       revokeNotificationPermission()
+      logPermissionState("After revoke: ")
     }
-    device.waitForIdle()
+    waitForIdle()
   }
 
   @Test
   fun whenBelowAndroid13_noPermissionDialogShown() {
-    // Skip test if running on Android 13+
     assumeTrue(
         "Test only runs below Android 13", Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU)
+    Log.i(TAG, "Running test for Android version below 13")
 
-    // Launch activity
     currentActivity = ActivityScenario.launch(MainActivity::class.java)
-    device.waitForIdle()
+    waitForIdle()
 
-    // Verify no permission dialog is shown
-    val permissionDialog = device.wait(Until.findObject(By.res(PERMISSION_ALLOW_BUTTON_ID)), 1000)
-    assertEquals(null, permissionDialog)
+    val dialogFound = waitForPermissionDialog()
+    assertEquals("No permission dialog should be shown", false, dialogFound)
   }
 
   @Test
   fun whenPermissionDenied_permissionRemainsRevoked() {
-    // Skip test if not running on Android 13+
     assumeTrue(
         "Test only runs on Android 13+", Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+    Log.i(TAG, "Running permission denial test on Android 13+")
+    logPermissionState("Initial state: ")
 
-    // Launch activity
     currentActivity = ActivityScenario.launch(MainActivity::class.java)
-    device.waitForIdle()
+    waitForIdle()
+    Log.i(TAG, "Activity launched, waiting for permission dialog")
 
-    // Wait for permission dialog and click deny
-    val denyButton = device.wait(Until.findObject(By.res(PERMISSION_DENY_BUTTON_ID)), 2000)
+    val dialogFound = waitForPermissionDialog()
+    assertTrue("Permission dialog should be shown", dialogFound)
+
+    val denyButton = findButton(PERMISSION_DENY_BUTTON_IDS, "deny")
     assertNotNull("Permission deny button should be present", denyButton)
-    denyButton.click()
-    device.waitForIdle()
 
-    // Verify permission remains denied
+    Log.i(TAG, "Clicking deny button")
+    denyButton?.click()
+    waitForIdle()
+
+    logPermissionState("After denial: ")
     val permissionStatus =
         ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
     assertEquals(PackageManager.PERMISSION_DENIED, permissionStatus)
@@ -74,22 +168,26 @@ class NotificationPermissionTest : NotificationBaseTest() {
 
   @Test
   fun whenPermissionGranted_permissionIsApproved() {
-    // Skip test if not running on Android 13+
     assumeTrue(
         "Test only runs on Android 13+", Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+    Log.i(TAG, "Running permission grant test on Android 13+")
+    logPermissionState("Initial state: ")
 
-    // Launch activity
     currentActivity = ActivityScenario.launch(MainActivity::class.java)
-    device.waitForIdle()
+    waitForIdle()
+    Log.i(TAG, "Activity launched, waiting for permission dialog")
 
-    // Wait for permission dialog and click allow
-    val allowButton = device.wait(Until.findObject(By.res(PERMISSION_ALLOW_BUTTON_ID)), 2000)
+    val dialogFound = waitForPermissionDialog()
+    assertTrue("Permission dialog should be shown", dialogFound)
+
+    val allowButton = findButton(PERMISSION_ALLOW_BUTTON_IDS, "allow")
     assertNotNull("Permission allow button should be present", allowButton)
-    allowButton.click()
-    device.waitForIdle()
-    Thread.sleep(500) // Give extra time for permission to be granted
 
-    // Verify permission is granted
+    Log.i(TAG, "Clicking allow button")
+    allowButton?.click()
+    waitForIdle()
+
+    logPermissionState("After granting: ")
     val permissionStatus =
         ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
     assertEquals(
