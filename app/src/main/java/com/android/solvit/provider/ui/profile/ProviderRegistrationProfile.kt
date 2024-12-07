@@ -1,10 +1,11 @@
-package com.android.solvit.seeker.ui.provider
+package com.android.solvit.provider.ui.profile
 
 import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
 import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -15,6 +16,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,6 +25,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -35,13 +39,16 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -49,6 +56,9 @@ import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -71,9 +81,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.android.solvit.R
@@ -85,14 +98,27 @@ import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.map.LocationViewModel
 import com.android.solvit.shared.model.packages.PackageProposal
 import com.android.solvit.shared.model.packages.PackageProposalViewModel
+import com.android.solvit.shared.model.packages.PackagesAssistantViewModel
 import com.android.solvit.shared.model.provider.Language
 import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.model.utils.loadBitmapFromUri
 import com.android.solvit.shared.ui.authentication.CustomOutlinedTextField
 import com.android.solvit.shared.ui.authentication.GoBackButton
+import com.android.solvit.shared.ui.authentication.ValidationRegex
+import com.android.solvit.shared.ui.booking.PackageCard
 import com.android.solvit.shared.ui.navigation.NavigationActions
 
+/**
+ * Composable function to display the provider registration screen.
+ *
+ * @param viewModel the [ListProviderViewModel] to handle the provider registration
+ * @param navigationActions the navigation actions to navigate between screens
+ * @param locationViewModel the [LocationViewModel] to handle the location suggestions
+ * @param authViewModel the [AuthViewModel] to handle the authentication
+ * @param packageViewModel the [PackageProposalViewModel] to handle the package proposals
+ * @param assistantViewModel the [PackagesAssistantViewModel] to handle generate packages
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint(
     "UnusedMaterialScaffoldPaddingParameter",
@@ -105,7 +131,9 @@ fun ProviderRegistrationScreen(
     locationViewModel: LocationViewModel = viewModel(factory = LocationViewModel.Factory),
     authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory),
     packageViewModel: PackageProposalViewModel =
-        viewModel(factory = PackageProposalViewModel.Factory)
+        viewModel(factory = PackageProposalViewModel.Factory),
+    assistantViewModel: PackagesAssistantViewModel =
+        viewModel(factory = PackagesAssistantViewModel.Factory)
 ) {
   // Lock Orientation to Portrait
   val context = LocalContext.current
@@ -160,11 +188,9 @@ fun ProviderRegistrationScreen(
 
   val localContext = LocalContext.current
 
-  val fullNameRegex = Regex("^[a-zA-Z]+ [a-zA-Z]+\$")
-  val isFullNameOk = fullNameRegex.matches(fullName)
+  val isFullNameOk = ValidationRegex.FULL_NAME_REGEX.matches(fullName)
 
-  val phoneRegex = Regex("^[+]?[0-9]{6,}$")
-  val isPhoneOk = phoneRegex.matches(phone)
+  val isPhoneOk = ValidationRegex.PHONE_REGEX.matches(phone)
 
   val isCompanyNameOk = companyName.isNotBlank() && companyName.length > 2
 
@@ -220,7 +246,7 @@ fun ProviderRegistrationScreen(
                     label = "Full Name",
                     placeholder = "Enter your full name",
                     isValueOk = isFullNameOk,
-                    errorMessage = "Your full name must be at least 3 characters",
+                    errorMessage = "Enter a valid first and last name",
                     leadingIcon = Icons.Default.Person,
                     leadingIconDescription = "Person Icon",
                     testTag = "fullNameInput",
@@ -235,11 +261,12 @@ fun ProviderRegistrationScreen(
                     label = "Phone Number",
                     placeholder = "Enter your phone number",
                     isValueOk = isPhoneOk,
-                    errorMessage = "Your phone number must be at least 7 digits",
+                    errorMessage = "Your phone number must be at least 6 digits",
                     leadingIcon = Icons.Default.Phone,
                     leadingIconDescription = "Phone Icon",
                     testTag = "phoneNumberInput",
-                    errorTestTag = "phoneNumberErrorProviderRegistration")
+                    errorTestTag = "phoneNumberErrorProviderRegistration",
+                    keyboardType = KeyboardType.Number)
 
                 Spacer(modifier = Modifier.height(10.dp))
 
@@ -273,15 +300,35 @@ fun ProviderRegistrationScreen(
 
                 Button(
                     onClick = {
-                      // Move to next step (Step 2: Preferences)
-                      currentStep = 2
+                      if (isFormComplete) {
+                        // Move to next step (Step 2: Preferences)
+                        currentStep = 2
+                      } else {
+                        Toast.makeText(
+                                context,
+                                "Please fill in all the correct information",
+                                Toast.LENGTH_SHORT)
+                            .show()
+                      }
                     },
                     modifier =
-                        Modifier.fillMaxWidth().height(60.dp).testTag("completeRegistrationButton"),
-                    enabled = isFormComplete,
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(colorScheme.secondary) // Green button
-                    ) {
+                        Modifier.fillMaxWidth()
+                            .height(60.dp)
+                            .testTag("completeRegistrationButton")
+                            .background(
+                                if (isFormComplete) {
+                                  colorScheme.secondary
+                                } else {
+                                  colorScheme.onSurfaceVariant
+                                },
+                                shape =
+                                    RoundedCornerShape(
+                                        25.dp,
+                                    )),
+                    colors =
+                        ButtonDefaults.buttonColors(
+                            containerColor = Color.Transparent)) // Green button
+                {
                       Text("Complete registration", color = colorScheme.onSecondary)
                     }
               }
@@ -323,14 +370,8 @@ fun ProviderRegistrationScreen(
                           onImageSelected = { uri: Uri? ->
                             providerImageUri = uri
                             uri?.let { providerImageBitmap = loadBitmapFromUri(localContext, it) }
-                          })
-                      Spacer(modifier = Modifier.height(30.dp))
-                      Button(
-                          onClick = { currentStep = 3 },
-                          modifier = Modifier.fillMaxWidth().testTag("savePreferencesButton"),
-                          colors = ButtonDefaults.buttonColors(colorScheme.secondary)) {
-                            Text("Complete Registration", color = colorScheme.onSecondary)
-                          }
+                          },
+                          onClickButton = { currentStep = 3 })
                       Spacer(modifier = Modifier.height(15.dp))
                       Text(
                           text =
@@ -360,15 +401,24 @@ fun ProviderRegistrationScreen(
                           textAlign = TextAlign.Center // Center the text
                           )
                       Spacer(modifier = Modifier.height(16.dp))
-                      ProviderPackages(
-                          packagesNames = packagesNames,
-                          packagePrices = packagesPrices,
-                          packagesDetails = packagesDetails,
-                          packagesFeatures = packagesFeatures,
-                          providePackages = offerPackages)
+                      user?.let {
+                        ProviderPackages(
+                            packagesNames = packagesNames,
+                            packagePrices = packagesPrices,
+                            packagesDetails = packagesDetails,
+                            packagesFeatures = packagesFeatures,
+                            providePackages = offerPackages,
+                            assistantViewModel = assistantViewModel,
+                            packageViewModel = packageViewModel,
+                            providerId = it.uid,
+                            type = Services.valueOf(selectedService.uppercase().replace(" ", "_")))
+                      }
                       Spacer(modifier = Modifier.height(30.dp))
                       Button(
-                          onClick = { currentStep = 4 },
+                          onClick = {
+                            assistantViewModel.clearPackageProposals()
+                            currentStep = 4
+                          },
                           modifier = Modifier.fillMaxWidth().testTag("savePreferences2Button"),
                           colors = ButtonDefaults.buttonColors(colorScheme.secondary)) {
                             Text("Complete Registration", color = colorScheme.onSecondary)
@@ -429,7 +479,8 @@ fun ProviderRegistrationScreen(
                               name = fullName,
                               phone = phone,
                               companyName = companyName,
-                              service = Services.valueOf(selectedService),
+                              service =
+                                  Services.valueOf(selectedService.uppercase().replace(" ", "_")),
                               description = description,
                               price = startingPrice.toDouble(),
                               languages = selectedLanguages.map { Language.valueOf(it) },
@@ -457,6 +508,7 @@ fun ProviderRegistrationScreen(
                         }
                       }
                       viewModel.addProvider(newProviderProfile, providerImageUri)
+                      authViewModel.setUserName(fullName)
                       authViewModel.registered()
                       // navigationActions.goBack() // Navigate after saving
                     },
@@ -470,6 +522,22 @@ fun ProviderRegistrationScreen(
       })
 }
 
+/**
+ * A composable function that displays a detailed form for provider registration. The form allows
+ * the user to input essential details about their services, personal description, starting price,
+ * languages, and upload a profile image.
+ *
+ * @param selectedService The currently selected service offered by the provider.
+ * @param onSelectedServiceChange A lambda function to handle changes in the selected service.
+ * @param description A brief description provided by the provider about their skills and services.
+ * @param onDescriptionChange A lambda function to handle changes in the description.
+ * @param startingPrice The minimum price at which the provider offers their services.
+ * @param onStartingPriceChange A lambda function to handle changes in the starting price.
+ * @param selectedLanguages A mutable list of languages selected by the provider.
+ * @param providerImageUri The URI of the provider's uploaded profile image.
+ * @param onImageSelected A lambda function triggered when a new image is selected by the provider.
+ * @param onClickButton A lambda function to handle the completion of the registration process.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProviderDetails(
@@ -481,8 +549,10 @@ fun ProviderDetails(
     onStartingPriceChange: (String) -> Unit,
     selectedLanguages: MutableList<String>,
     providerImageUri: Uri?,
-    onImageSelected: (Uri?) -> Unit
+    onImageSelected: (Uri?) -> Unit,
+    onClickButton: () -> Unit
 ) {
+  val context = LocalContext.current
 
   var servicesExpanded by remember { mutableStateOf(false) }
   var languagesExpanded by remember { mutableStateOf(false) }
@@ -493,7 +563,14 @@ fun ProviderDetails(
   val isDescriptionOk =
       description.isNotBlank() &&
           description.length < 250 // (we assume here that a word on average is 5 character)
-  val isStartingPriceOk = startingPrice.isNotBlank() && startingPrice.all { it.isDigit() }
+  val isStartingPriceOk =
+      startingPrice.isNotBlank() && ValidationRegex.STARTING_PRICE_REGEX.matches(startingPrice)
+
+  val allIsOk =
+      selectedService.isNotEmpty() &&
+          isDescriptionOk &&
+          isStartingPriceOk &&
+          selectedLanguages.isNotEmpty()
 
   Column(
       modifier = Modifier.fillMaxSize().padding(16.dp),
@@ -510,13 +587,15 @@ fun ProviderDetails(
                   readOnly = true,
                   modifier = Modifier.fillMaxWidth().menuAnchor())
               ExposedDropdownMenu(
-                  expanded = servicesExpanded, onDismissRequest = { servicesExpanded = false }) {
+                  expanded = servicesExpanded,
+                  onDismissRequest = { servicesExpanded = false },
+                  modifier = Modifier.testTag("servicesDropdownMenu")) {
                     services.forEach { service ->
                       DropdownMenuItem(
                           modifier = Modifier.testTag("$service"),
-                          text = { Text(text = service.toString()) },
+                          text = { Text(text = Services.format(service)) },
                           onClick = {
-                            onSelectedServiceChange(service.toString())
+                            onSelectedServiceChange(Services.format(service))
                             servicesExpanded = false
                           })
                     }
@@ -554,7 +633,8 @@ fun ProviderDetails(
             leadingIcon = Icons.Default.Check,
             leadingIconDescription = "Check Icon",
             testTag = "startingPriceInputProviderRegistration",
-            errorTestTag = "startingPriceErrorInputProviderRegistration")
+            errorTestTag = "startingPriceErrorInputProviderRegistration",
+            keyboardType = KeyboardType.Number)
 
         // Dropdown menu to select provider's languages
         ExposedDropdownMenuBox(
@@ -573,7 +653,7 @@ fun ProviderDetails(
               DropdownMenu(
                   expanded = languagesExpanded,
                   onDismissRequest = { languagesExpanded = false },
-                  modifier = Modifier.fillMaxWidth()) {
+                  modifier = Modifier.fillMaxWidth().testTag("languageDropdownMenu")) {
                     availableLanguages.forEach { language ->
                       val isSelected = language in selectedLanguages
                       DropdownMenuItem(
@@ -598,9 +678,45 @@ fun ProviderDetails(
                     }
                   }
             }
+        Spacer(modifier = Modifier.height(30.dp))
+        Button(
+            onClick = {
+              if (allIsOk) {
+                onClickButton()
+              } else {
+                Toast.makeText(
+                        context, "Please fill in all the correct information", Toast.LENGTH_SHORT)
+                    .show()
+              }
+            },
+            modifier =
+                Modifier.fillMaxWidth()
+                    .testTag("savePreferencesButton")
+                    .background(
+                        if (allIsOk) {
+                          colorScheme.secondary
+                        } else {
+                          colorScheme.onSurfaceVariant
+                        },
+                        shape = RoundedCornerShape(25.dp)),
+            colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)) {
+              Text(
+                  "Complete Registration",
+                  color = colorScheme.onPrimary,
+                  fontWeight = FontWeight.Bold,
+                  fontSize = 16.sp,
+                  modifier = Modifier.testTag("saveButton"))
+            }
       }
 }
 
+/**
+ * Composable function to upload an image.
+ *
+ * @param selectedImageUri the selected image URI
+ * @param imageUrl the image URL
+ * @param onImageSelected the callback to select the image
+ */
 @Composable
 fun UploadImage(selectedImageUri: Uri?, imageUrl: String?, onImageSelected: (Uri?) -> Unit) {
   // Manage the interaction to upload an image from user's gallery
@@ -646,6 +762,19 @@ fun UploadImage(selectedImageUri: Uri?, imageUrl: String?, onImageSelected: (Uri
       }
 }
 
+/**
+ * Composable function to enter the provider's packages.
+ *
+ * @param packagesNames the names of the packages
+ * @param packagePrices the prices of the packages
+ * @param packagesDetails the details of the packages
+ * @param packagesFeatures the features of the packages
+ * @param providePackages the state to provide packages
+ * @param assistantViewModel the [PackagesAssistantViewModel] to generate packages
+ * @param packageViewModel the [PackageProposalViewModel] to handle the package proposals
+ * @param providerId the provider ID
+ * @param type the service type
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProviderPackages(
@@ -653,11 +782,18 @@ fun ProviderPackages(
     packagePrices: MutableList<String>,
     packagesDetails: MutableList<String>,
     packagesFeatures: SnapshotStateList<SnapshotStateList<String>>,
-    providePackages: MutableState<Boolean>
+    providePackages: MutableState<Boolean>,
+    assistantViewModel: PackagesAssistantViewModel,
+    packageViewModel: PackageProposalViewModel,
+    providerId: String,
+    type: Services
 ) {
-
+  // States to manage the menus and dialogs
   var expanded by remember { mutableStateOf(false) }
+  var showDialog by remember { mutableStateOf(false) }
+  var showForm by remember { mutableStateOf(false) }
   val packagesVisibilityStates = remember { mutableStateMapOf<Int, Boolean>() }
+  val assistantPackages = assistantViewModel.packageProposals.collectAsState()
   Column(
       modifier = Modifier.fillMaxWidth().padding(16.dp),
       verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -694,27 +830,92 @@ fun ProviderPackages(
             }
 
         if (providePackages.value) {
+          // Generate packages with AI
+          Button(
+              onClick = { showDialog = true },
+              modifier = Modifier.fillMaxWidth().height(60.dp).testTag("generatePackagesButton"),
+              shape = RoundedCornerShape(12.dp),
+              colors = ButtonDefaults.buttonColors(colorScheme.secondary) // Green button
+              ) {
+                Text("Generate packages with AI", color = colorScheme.onSecondary)
+              }
+          if (showDialog) {
+            // Show dialog
+            PackageProposalDialog(
+                onDismiss = { showDialog = false },
+                assistantViewModel = assistantViewModel,
+                packageViewModel = packageViewModel,
+                providerId = providerId,
+                type = type)
+          }
+          assistantPackages.value.let {
+            if (it.isNotEmpty()) {
+              Text(
+                  text = "Here are the packages we generated for you:",
+                  style = MaterialTheme.typography.bodyLarge,
+                  modifier = Modifier.testTag("generatedPackagesTitle"))
+              // Display the generated packages
+              LazyRow(
+                  contentPadding = PaddingValues(horizontal = 16.dp),
+                  horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    items(it) { packageProposal ->
+                      PackageCard(
+                          packageProposal = packageProposal,
+                          modifier =
+                              Modifier.width(260.dp)
+                                  .height(320.dp)
+                                  .verticalScroll(rememberScrollState())
+                                  .testTag("PackageCard"))
+                    }
+                  }
+            }
+          }
           // Display the 3 packages to fill
-          for (i in 1..3) {
-            PackageInputSection(
-                i,
-                expanded = packagesVisibilityStates[i - 1] ?: true,
-                onToggleVisibility = { isExpanded: Boolean ->
-                  packagesVisibilityStates[i - 1] = isExpanded
-                },
-                packageName = packagesNames[i - 1],
-                onPackageNameChange = { packagesNames[i - 1] = it },
-                packagePrice = packagePrices[i - 1],
-                onPackagePriceChange = { packagePrices[i - 1] = it },
-                packageDetails = packagesDetails[i - 1],
-                onPackageDetailsChange = { packagesDetails[i - 1] = it },
-                packageFeatures = packagesFeatures,
-            )
+          Button(
+              onClick = { showForm = true },
+              modifier = Modifier.fillMaxWidth().height(60.dp).testTag("enterPackagesButton"),
+              shape = RoundedCornerShape(12.dp),
+              colors = ButtonDefaults.buttonColors(colorScheme.secondary) // Green button
+              ) {
+                Text("Enter the packages manually", color = colorScheme.onSecondary)
+              }
+          if (showForm) {
+            // Show packages form
+            for (i in 1..3) {
+              PackageInputSection(
+                  i,
+                  expanded = packagesVisibilityStates[i - 1] ?: true,
+                  onToggleVisibility = { isExpanded: Boolean ->
+                    packagesVisibilityStates[i - 1] = isExpanded
+                  },
+                  packageName = packagesNames[i - 1],
+                  onPackageNameChange = { packagesNames[i - 1] = it },
+                  packagePrice = packagePrices[i - 1],
+                  onPackagePriceChange = { packagePrices[i - 1] = it },
+                  packageDetails = packagesDetails[i - 1],
+                  onPackageDetailsChange = { packagesDetails[i - 1] = it },
+                  packageFeatures = packagesFeatures,
+              )
+            }
           }
         }
       }
 }
 
+/**
+ * Composable function to enter the package details.
+ *
+ * @param packageNumber the package number
+ * @param expanded the state to expand the package
+ * @param onToggleVisibility the callback to toggle the visibility
+ * @param packageName the package name
+ * @param onPackageNameChange the callback to change the package name
+ * @param packagePrice the package price
+ * @param onPackagePriceChange the callback to change the package price
+ * @param packageDetails the package details
+ * @param onPackageDetailsChange the callback to change the package details
+ * @param packageFeatures the package features
+ */
 @Composable
 fun PackageInputSection(
     packageNumber: Int,
@@ -749,7 +950,6 @@ fun PackageInputSection(
         }
     if (expanded) {
       // Package Inputs
-
       Text("Package Name", style = MaterialTheme.typography.bodyLarge)
       Spacer(modifier = Modifier.height(8.dp))
       CustomOutlinedTextField(
@@ -802,4 +1002,149 @@ fun PackageInputSection(
       }
     }
   }
+}
+
+/**
+ * Composable function to display the package AI generation dialog.
+ *
+ * @param onDismiss the callback to dismiss the dialog
+ * @param providerId the provider ID
+ * @param type the service type
+ * @param assistantViewModel the [PackagesAssistantViewModel] to generate packages
+ * @param packageViewModel the [PackageProposalViewModel] to handle the package proposals
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PackageProposalDialog(
+    onDismiss: () -> Unit,
+    providerId: String,
+    type: Services,
+    assistantViewModel: PackagesAssistantViewModel,
+    packageViewModel: PackageProposalViewModel
+) {
+  // States to manage the dialog
+  var numberOfPackages by remember { mutableIntStateOf(0) }
+  var expanded by remember { mutableStateOf(false) }
+  val assistantPackages = assistantViewModel.packageProposals.collectAsState()
+  val isLoading = assistantViewModel.isLoading.collectAsState()
+  val query = remember { mutableStateOf("") }
+
+  // Dialog to generate packages with AI
+  AlertDialog(
+      modifier =
+          Modifier.border(1.dp, colorScheme.onBackground, RoundedCornerShape(30.dp))
+              .testTag("packageProposalDialog"),
+      containerColor = colorScheme.background,
+      textContentColor = colorScheme.onBackground,
+      onDismissRequest = onDismiss,
+      title = {
+        // Dialog Title
+        Text(
+            modifier = Modifier.testTag("packageProposalDialogTitle"),
+            text = "Generate Packages with AI",
+            style = MaterialTheme.typography.titleLarge,
+            textAlign = TextAlign.Center)
+      },
+      text = {
+        Column(
+            modifier =
+                Modifier.fillMaxWidth()
+                    .padding(16.dp)
+                    .verticalScroll(rememberScrollState())
+                    .background(colorScheme.background),
+            verticalArrangement = Arrangement.spacedBy(16.dp)) {
+              if (isLoading.value) {
+                // Show loading indicator while fetching packages
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.CenterHorizontally).padding(top = 16.dp))
+              } else if (assistantPackages.value.isNotEmpty()) {
+                // Display the generated packages
+                LazyRow(
+                    modifier = Modifier.fillMaxWidth().testTag("packagesScrollableList"),
+                    horizontalArrangement = Arrangement.spacedBy(20.dp),
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 40.dp)) {
+                      items(assistantPackages.value) { packageProposal ->
+                        PackageCard(
+                            packageProposal = packageProposal,
+                            modifier =
+                                Modifier.width(260.dp)
+                                    .height(320.dp)
+                                    .verticalScroll(rememberScrollState())
+                                    .testTag("PackageCard"))
+                      }
+                    }
+              }
+              // Allow users to provide more context or information to generate packages
+              TextField(
+                  value = query.value,
+                  onValueChange = { query.value = it },
+                  label = { Text("Additional Information") },
+                  placeholder = { Text("Provide more details for package generation...") },
+                  colors =
+                      TextFieldDefaults.textFieldColors(containerColor = colorScheme.background),
+                  modifier =
+                      Modifier.fillMaxWidth().padding(top = 16.dp).testTag("additionalInfoInput"))
+              // Select the number of packages
+              ExposedDropdownMenuBox(
+                  modifier = Modifier.testTag("numberOfPackagesDropDown"),
+                  expanded = expanded,
+                  onExpandedChange = { expanded = !expanded }) {
+                    TextField(
+                        value = numberOfPackages.toString(),
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("Packages number") },
+                        trailingIcon = {
+                          ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+                        },
+                        colors =
+                            TextFieldDefaults.textFieldColors(
+                                containerColor = colorScheme.background),
+                        modifier = Modifier.menuAnchor().fillMaxWidth())
+                    ExposedDropdownMenu(
+                        modifier = Modifier.background(colorScheme.background),
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }) {
+                          (1..3).forEach { number ->
+                            DropdownMenuItem(
+                                text = { Text(text = "$number") },
+                                onClick = {
+                                  numberOfPackages = number
+                                  expanded = false
+                                })
+                          }
+                        }
+                  }
+              // Button to generate packages
+              Button(
+                  onClick = {
+                    assistantViewModel.fetchPackageProposals(
+                        type = type,
+                        numberOfPackages = numberOfPackages,
+                        providerId = providerId,
+                        viewModel = packageViewModel,
+                        providerQuery = query.value)
+                  },
+                  modifier = Modifier.fillMaxWidth().testTag("generateButton"),
+              ) {
+                Text("Generate")
+              }
+            }
+      },
+      // Confirm button to accept the generated packages, save them and dismiss the dialog
+      confirmButton = {
+        TextButton(
+            modifier = Modifier.testTag("acceptSuggestionsButton"),
+            onClick = {
+              assistantPackages.value.forEach { packageProposal ->
+                packageViewModel.addPackageProposal(packageProposal)
+              }
+              onDismiss()
+            }) {
+              Text("Accept suggestions")
+            }
+      },
+      dismissButton = {
+        TextButton(onClick = onDismiss, Modifier.testTag("cancelButton")) { Text("Cancel") }
+      })
 }

@@ -57,8 +57,19 @@ import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.authentication.CustomOutlinedTextField
 import com.android.solvit.shared.ui.authentication.GoBackButton
+import com.android.solvit.shared.ui.authentication.ValidationRegex
 import com.android.solvit.shared.ui.navigation.NavigationActions
 
+/**
+ * A composable function that displays the screen for modifying a provider's profile information. It
+ * includes a form to update details such as name, company name, service, phone number, location,
+ * languages, and description.
+ *
+ * @param listProviderViewModel The ViewModel used to manage and update the list of providers.
+ * @param authViewModel The ViewModel managing authentication and user-related data.
+ * @param locationViewModel The ViewModel used to fetch and manage location suggestions.
+ * @param navigationActions A set of navigation actions to handle screen transitions.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint(
     "SourceLockedOrientationActivity",
@@ -120,6 +131,18 @@ fun ModifyProviderInformationScreen(
       })
 }
 
+/**
+ * A composable function that provides an interface to modify a provider's details. The form
+ * includes fields for updating the provider's name, company name, service, phone number, location,
+ * languages, and description. Each field includes validation and dynamic suggestions where
+ * applicable.
+ *
+ * @param provider The current provider whose details are being modified.
+ * @param locationViewModel The ViewModel used to fetch and manage location suggestions.
+ * @param listProviderViewModel The ViewModel used to update the provider's details.
+ * @param authViewModel The ViewModel managing authentication and user-related data.
+ * @param navigationActions A set of navigation actions to handle screen transitions.
+ */
 @Composable
 fun ModifyInput(
     provider: Provider,
@@ -132,8 +155,7 @@ fun ModifyInput(
   val context = LocalContext.current
 
   var newName by remember { mutableStateOf(provider.name) }
-  val nameRegex = Regex("^[a-zA-ZÀ-ÿ '-]{2,50}$")
-  val okNewName = nameRegex.matches(newName)
+  val okNewName = ValidationRegex.NAME_REGEX.matches(newName)
 
   var newCompanyName by remember { mutableStateOf(provider.companyName) }
   val okNewCompanyName = newCompanyName.length >= 2 && newCompanyName.isNotBlank()
@@ -141,8 +163,8 @@ fun ModifyInput(
   var newService by remember { mutableStateOf(provider.service) }
 
   var newPhoneNumber by remember { mutableStateOf(provider.phone) }
-  val phoneRegex = Regex("^\\+?[0-9]{6,15}$")
-  val okNewPhoneNumber = phoneRegex.matches(newPhoneNumber)
+
+  val okNewPhoneNumber = ValidationRegex.PHONE_REGEX.matches(newPhoneNumber)
 
   val newLocation by remember { mutableStateOf(provider.location.name) }
 
@@ -158,8 +180,8 @@ fun ModifyInput(
   var newLanguage by remember { mutableStateOf(provider.languages) }
 
   var newDescription by remember { mutableStateOf(provider.description) }
-  val regexDescription = Regex("^[a-zA-ZÀ-ÿ0-9 ,.!?-]{1,500}$")
-  val okNewDescription = regexDescription.matches(newDescription)
+
+  val okNewDescription = ValidationRegex.DESCRIPTION_REGEX.matches(newDescription)
 
   val allIsGood =
       okNewName && okNewCompanyName && okNewPhoneNumber && okNewLocation && okNewDescription
@@ -281,6 +303,7 @@ fun ModifyInput(
                   description = newDescription)
 
           listProviderViewModel.updateProvider(provider = updatedProvider)
+          authViewModel.setUserName(newName)
 
           navigationActions.goBack()
         } else {
@@ -309,7 +332,6 @@ fun ModifyInput(
                           25.dp,
                       )),
       colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)) {
-        Icons.Default.AccountCircle
         Text(
             "Save !",
             color = colorScheme.onPrimary,

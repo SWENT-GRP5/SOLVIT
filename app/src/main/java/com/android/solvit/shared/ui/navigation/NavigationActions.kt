@@ -9,7 +9,6 @@ import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.MailOutline
 import androidx.compose.material.icons.outlined.Menu
-import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavController
 
@@ -30,6 +29,7 @@ object Route {
   const val MY_JOBS = "My Jobs"
   const val BOOKING_DETAILS = "Booking Details"
   const val NOTIFICATIONS = "Notifications Screen"
+  const val AI_SOLVER = "Ai Solver Screen"
 }
 
 object Screen {
@@ -51,6 +51,8 @@ object Screen {
   const val REVIEW_SCREEN = "Review Screen"
   const val EDIT_PREFERENCES = "Edit Preferences"
   const val NOTIFICATIONS = "Notifications Screen"
+  const val AI_SOLVER_WELCOME_SCREEN = "Ai Get Started Screen"
+  const val AI_SOLVER_CHAT_SCREEN = "AI Solver Chat Screen"
 }
 
 data class TopLevelDestination(val route: String, val icon: ImageVector, val textId: String)
@@ -71,14 +73,9 @@ object TopLevelDestinations {
   val CALENDAR =
       TopLevelDestination(
           route = Route.CALENDAR, icon = Icons.Outlined.DateRange, textId = "Professional Calendar")
-  val MYJOBS =
+  val MY_JOBS =
       TopLevelDestination(
           route = Route.MY_JOBS, icon = Icons.Outlined.CheckCircle, textId = "My Jobs")
-  val NOTIFICATIONS =
-      TopLevelDestination(
-          route = Route.NOTIFICATIONS,
-          icon = Icons.Outlined.Notifications,
-          textId = "Notifications")
 
   ////////////////////////////////// SEEKER //////////////////////////////////
   val SERVICES =
@@ -96,7 +93,7 @@ object TopLevelDestinations {
   val PROFILE =
       TopLevelDestination(
           route = Route.PROFILE, icon = Icons.Outlined.AccountCircle, textId = "Profile")
-  val PROFESSIONAL_PROFILE =
+  val PROVIDER_PROFILE =
       TopLevelDestination(
           route = Screen.PROVIDER_PROFILE, icon = Icons.Outlined.AccountCircle, textId = "Profile")
 }
@@ -115,8 +112,7 @@ val LIST_TOP_LEVEL_DESTINATION_PROVIDER =
         TopLevelDestinations.MAP_OF_SEEKERS,
         TopLevelDestinations.MESSAGES,
         TopLevelDestinations.CALENDAR,
-        TopLevelDestinations.PROFESSIONAL_PROFILE,
-        TopLevelDestinations.NOTIFICATIONS)
+        TopLevelDestinations.PROVIDER_PROFILE)
 
 open class NavigationActions(
     private val navController: NavController,

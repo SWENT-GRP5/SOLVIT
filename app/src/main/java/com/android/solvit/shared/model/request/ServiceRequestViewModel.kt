@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.android.solvit.shared.model.authentication.AuthViewModel
+import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.notifications.FcmTokenManager
 import com.android.solvit.shared.notifications.NotificationManager
 import com.google.firebase.Firebase
@@ -50,6 +51,12 @@ open class ServiceRequestViewModel(
 
   private val _archivedRequests = MutableStateFlow<List<ServiceRequest>>(emptyList())
   val archivedRequests: StateFlow<List<ServiceRequest>> = _archivedRequests
+
+  private val _selectedProviderId = MutableStateFlow<String?>(null)
+  val selectedProviderId: StateFlow<String?> = _selectedProviderId
+
+  private val _selectedProviderService = MutableStateFlow<Services?>(null)
+  val selectedProviderService: StateFlow<Services?> = _selectedProviderService
 
   init {
     repository.init { updateAllRequests() }
@@ -161,6 +168,15 @@ open class ServiceRequestViewModel(
     getArchivedRequests()
   }
 
+  fun getServiceRequestById(id: String, onSuccess: (ServiceRequest) -> Unit) {
+    repository.getServiceRequestById(
+        id,
+        onSuccess = onSuccess,
+        onFailure = { exception ->
+          Log.e("ServiceRequestViewModel", "Error fetching ServiceRequest", exception)
+        })
+  }
+
   fun saveServiceRequest(serviceRequest: ServiceRequest) {
     repository.saveServiceRequest(
         serviceRequest,
@@ -221,6 +237,16 @@ open class ServiceRequestViewModel(
 
   fun selectRequest(serviceRequest: ServiceRequest) {
     _selectedRequest.value = serviceRequest
+  }
+
+  fun selectProvider(providerId: String, type: Services) {
+    _selectedProviderId.value = providerId
+    _selectedProviderService.value = type
+  }
+
+  fun unSelectProvider() {
+    _selectedProviderId.value = null
+    _selectedProviderService.value = null
   }
 
   fun unConfirmRequest(serviceRequest: ServiceRequest) {

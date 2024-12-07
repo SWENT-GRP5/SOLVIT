@@ -1,29 +1,56 @@
 package com.android.solvit.shared.model.chat
 
+import android.net.Uri
+
 interface ChatRepository {
   fun initChat(
+      isIaMessage: Boolean,
       currentUserUid: String?,
       onSuccess: (String) -> Unit,
       onFailure: () -> Unit,
       receiverUid: String
   )
 
-  fun sendMessage(
+  fun linkChatToRequest(
       chatRoomId: String,
-      message: ChatMessage.TextMessage,
+      serviceRequestId: String,
+      onSuccess: () -> Unit,
+      onFailure: () -> Unit
+  )
+
+  fun getChatRequest(chatRoomId: String, onSuccess: (String) -> Unit, onFailure: () -> Unit)
+
+  fun sendMessage(
+      isIaMessage: Boolean,
+      chatRoomId: String,
+      message: ChatMessage,
       onSuccess: () -> Unit,
       onFailure: () -> Unit
   )
 
   fun listenForMessages(
+      isIaConversation: Boolean,
       chatRoomId: String,
-      onSuccess: (List<ChatMessage.TextMessage>) -> Unit,
+      onSuccess: (List<ChatMessage>) -> Unit,
       onFailure: () -> Unit
   )
 
   fun listenForLastMessages(
       currentUserUid: String?,
-      onSuccess: (Map<String?, ChatMessage.TextMessage>) -> Unit,
+      onSuccess: (Map<String?, ChatMessage>) -> Unit,
       onFailure: () -> Unit
+  )
+
+  fun clearConversation(
+      isIaConversation: Boolean,
+      chatRoomId: String,
+      onSuccess: () -> Unit,
+      onFailure: () -> Unit
+  )
+
+  fun uploadChatImagesToStorage(
+      imageUri: Uri,
+      onSuccess: (String) -> Unit,
+      onFailure: (Exception) -> Unit
   )
 }

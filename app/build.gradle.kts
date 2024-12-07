@@ -13,6 +13,7 @@ plugins {
     alias(libs.plugins.sonar)
     //id("org.sonarqube") version "5.1.0.4882"
     alias(libs.plugins.gms)
+    kotlin("plugin.serialization") version "2.1.0"
 }
 
 android {
@@ -186,6 +187,7 @@ dependencies {
     implementation(libs.firebase.storage.ktx)
     implementation(libs.play.services.location)
     implementation(libs.androidx.navigation.testing)
+    implementation(libs.androidx.uiautomator)
     testImplementation(libs.testng)
 
 
@@ -281,10 +283,15 @@ dependencies {
     testImplementation(libs.robolectric)
 
     // ----------       Load Images from URL     ------------
-    implementation("io.coil-kt:coil-compose:2.4.0")
+    implementation(libs.coil.compose)
 
     // ----------       Google AI     ------------
-    implementation("com.google.ai.client.generativeai:generativeai:0.7.0")
+    implementation(libs.generativeai.v070)
+    implementation(libs.generativeai)
+
+
+    // ----------       Json serialization     ------------
+    implementation(libs.kotlinx.serialization.json.v150)
 
     // Add Firebase Functions dependency
     implementation(platform("com.google.firebase:firebase-bom:32.6.0"))

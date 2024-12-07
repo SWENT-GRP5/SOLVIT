@@ -98,7 +98,10 @@ fun RequestScreen(
             title = { Text(screenTitle, Modifier.testTag("screenTitle")) },
             navigationIcon = {
               IconButton(
-                  onClick = { navigationActions.goBack() },
+                  onClick = {
+                    navigationActions.goBack()
+                    requestViewModel.unSelectProvider()
+                  },
                   modifier = Modifier.testTag("goBackButton")) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
