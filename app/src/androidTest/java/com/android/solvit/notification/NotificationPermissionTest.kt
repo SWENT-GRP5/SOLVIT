@@ -35,10 +35,10 @@ class NotificationPermissionTest : NotificationBaseTest() {
             "com.android.permissioncontroller:id/permission_deny_button",
             "com.android.packageinstaller:id/permission_deny_button",
             "android:id/button2")
-    private const val PERMISSION_DIALOG_TIMEOUT = 10000L
-    private const val BUTTON_RETRY_COUNT = 3
-    private const val BUTTON_RETRY_DELAY = 1000L
-    private const val IDLE_TIMEOUT = 2000L
+    private const val PERMISSION_DIALOG_TIMEOUT = 20000L
+    private const val BUTTON_RETRY_COUNT = 5
+    private const val BUTTON_RETRY_DELAY = 2000L
+    private const val IDLE_TIMEOUT = 5000L
   }
 
   private fun logPermissionState(prefix: String = "") {
@@ -53,6 +53,7 @@ class NotificationPermissionTest : NotificationBaseTest() {
     try {
       Log.d(TAG, "Waiting for device to be idle...")
       device.waitForIdle(IDLE_TIMEOUT)
+      Thread.sleep(1000)
     } catch (e: Exception) {
       Log.w(TAG, "Exception while waiting for idle: ${e.message}")
     }
@@ -134,24 +135,15 @@ class NotificationPermissionTest : NotificationBaseTest() {
     super.setUp()
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
       Log.i(TAG, "Setting up test - revoking notification permission")
-      // Try multiple times to revoke permission
-      var attempts = 0
-      val maxAttempts = 3
-      while (attempts < maxAttempts) {
-        revokeNotificationPermission()
-        logPermissionState("After revoke attempt ${attempts + 1}: ")
-        val permissionStatus =
-            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
-        if (permissionStatus == PackageManager.PERMISSION_DENIED) {
-          break
-        }
-        attempts++
-        if (attempts < maxAttempts) {
-          Thread.sleep(1000) // Wait a bit before retrying
-        }
-      }
+      revokeNotificationPermission()
+      waitForIdle()
+
+      val permissionStatus =
+          ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
+      assertTrue(
+          "Permission should be initially denied",
+          permissionStatus == PackageManager.PERMISSION_DENIED)
     }
-    waitForIdle()
   }
 
   @Test
@@ -174,28 +166,44 @@ class NotificationPermissionTest : NotificationBaseTest() {
     Log.i(TAG, "Running permission denial test on Android 13+")
     logPermissionState("Initial state: ")
 
+    // Launch activity and wait for it to be stable
+    Log.i(TAG, "Launching activity...")
     currentActivity = ActivityScenario.launch(MainActivity::class.java)
     waitForIdle()
-    Log.i(TAG, "Activity launched, waiting for permission dialog")
+    Thread.sleep(2000) // Give extra time for activity to settle
+    Log.i(TAG, "Activity launched and stable")
 
-    // Check initial permission state
+    // Verify initial permission state
     val initialPermissionStatus =
         ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
+    Log.i(
+        TAG,
+        "Initial permission status: ${if (initialPermissionStatus == PackageManager.PERMISSION_GRANTED) "GRANTED" else "DENIED"}")
     assertTrue(
         "Permission should be initially denied",
         initialPermissionStatus == PackageManager.PERMISSION_DENIED)
 
+    // Wait and check for dialog
+    Log.i(TAG, "Waiting for permission dialog...")
     val dialogFound = waitForPermissionDialog()
+    Log.i(TAG, "Dialog found: $dialogFound")
     assertTrue("Permission dialog should be shown", dialogFound)
-    assertTrue("Permission dialog should be visible", isPermissionDialogShown())
 
+    // Verify dialog is visible
+    val dialogVisible = isPermissionDialogShown()
+    Log.i(TAG, "Dialog visible: $dialogVisible")
+    assertTrue("Permission dialog should be visible", dialogVisible)
+
+    // Find and click deny button
     val denyButton = findButton(PERMISSION_DENY_BUTTON_IDS, "deny")
+    Log.i(TAG, "Deny button found: ${denyButton != null}")
     assertNotNull("Permission deny button should be present", denyButton)
 
     Log.i(TAG, "Clicking deny button")
     denyButton?.click()
     waitForIdle()
 
+    // Verify final state
     logPermissionState("After denial: ")
     val permissionStatus =
         ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
@@ -213,7 +221,6 @@ class NotificationPermissionTest : NotificationBaseTest() {
     waitForIdle()
     Log.i(TAG, "Activity launched, waiting for permission dialog")
 
-    // Check initial permission state
     val initialPermissionStatus =
         ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
     assertTrue(
