@@ -235,6 +235,8 @@ dependencies {
 
     // Testing Unit
     testImplementation(libs.junit)
+    testImplementation(libs.mockk)
+    testImplementation(libs.mockk.agent)
     androidTestImplementation(libs.mockk)
     androidTestImplementation(libs.mockk.android)
     androidTestImplementation(libs.mockk.agent)

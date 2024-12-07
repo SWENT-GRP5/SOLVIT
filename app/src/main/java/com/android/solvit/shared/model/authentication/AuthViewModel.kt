@@ -133,6 +133,7 @@ class AuthViewModel(
   fun signInWithGoogle(onSuccess: () -> Unit, onFailure: () -> Unit) {
     if (googleAccount.value == null) {
       onFailure()
+      return
     }
     authRepository.signInWithGoogle(
         googleAccount.value!!,
@@ -167,6 +168,7 @@ class AuthViewModel(
   fun registerWithGoogle(onSuccess: () -> Unit, onFailure: () -> Unit) {
     if (googleAccount.value == null) {
       onFailure()
+      return
     }
     authRepository.registerWithGoogle(
         googleAccount.value!!,
