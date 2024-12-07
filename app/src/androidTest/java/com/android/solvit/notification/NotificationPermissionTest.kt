@@ -115,13 +115,41 @@ class NotificationPermissionTest : NotificationBaseTest() {
     return false
   }
 
+  private fun isPermissionDialogShown(): Boolean {
+    for (buttonId in PERMISSION_ALLOW_BUTTON_IDS + PERMISSION_DENY_BUTTON_IDS) {
+      try {
+        val button = device.findObject(By.res(buttonId))
+        if (button != null && button.isEnabled) {
+          return true
+        }
+      } catch (e: Exception) {
+        Log.w(TAG, "Exception while checking dialog: ${e.message}")
+      }
+    }
+    return false
+  }
+
   @Before
   override fun setUp() {
     super.setUp()
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
       Log.i(TAG, "Setting up test - revoking notification permission")
-      revokeNotificationPermission()
-      logPermissionState("After revoke: ")
+      // Try multiple times to revoke permission
+      var attempts = 0
+      val maxAttempts = 3
+      while (attempts < maxAttempts) {
+        revokeNotificationPermission()
+        logPermissionState("After revoke attempt ${attempts + 1}: ")
+        val permissionStatus =
+            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
+        if (permissionStatus == PackageManager.PERMISSION_DENIED) {
+          break
+        }
+        attempts++
+        if (attempts < maxAttempts) {
+          Thread.sleep(1000) // Wait a bit before retrying
+        }
+      }
     }
     waitForIdle()
   }
@@ -150,8 +178,16 @@ class NotificationPermissionTest : NotificationBaseTest() {
     waitForIdle()
     Log.i(TAG, "Activity launched, waiting for permission dialog")
 
+    // Check initial permission state
+    val initialPermissionStatus =
+        ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
+    assertTrue(
+        "Permission should be initially denied",
+        initialPermissionStatus == PackageManager.PERMISSION_DENIED)
+
     val dialogFound = waitForPermissionDialog()
     assertTrue("Permission dialog should be shown", dialogFound)
+    assertTrue("Permission dialog should be visible", isPermissionDialogShown())
 
     val denyButton = findButton(PERMISSION_DENY_BUTTON_IDS, "deny")
     assertNotNull("Permission deny button should be present", denyButton)
@@ -177,8 +213,16 @@ class NotificationPermissionTest : NotificationBaseTest() {
     waitForIdle()
     Log.i(TAG, "Activity launched, waiting for permission dialog")
 
+    // Check initial permission state
+    val initialPermissionStatus =
+        ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
+    assertTrue(
+        "Permission should be initially denied",
+        initialPermissionStatus == PackageManager.PERMISSION_DENIED)
+
     val dialogFound = waitForPermissionDialog()
     assertTrue("Permission dialog should be shown", dialogFound)
+    assertTrue("Permission dialog should be visible", isPermissionDialogShown())
 
     val allowButton = findButton(PERMISSION_ALLOW_BUTTON_IDS, "allow")
     assertNotNull("Permission allow button should be present", allowButton)
