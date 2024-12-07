@@ -37,7 +37,12 @@ class ServiceRequestViewModelTest {
   @Before
   fun setUp() {
     serviceRequestRepository = mock(ServiceRequestRepository::class.java)
-    serviceRequestViewModel = ServiceRequestViewModel(serviceRequestRepository)
+    serviceRequestViewModel =
+        ServiceRequestViewModel(
+            repository = serviceRequestRepository,
+            notificationManager = null,
+            authViewModel = null,
+            fcmTokenManager = null)
   }
 
   @Test
@@ -152,7 +157,7 @@ class ServiceRequestViewModelTest {
 
   @Test
   fun confirmRequest_callsRepository() {
-    serviceRequestViewModel.confirmRequest(serviceRequest)
+    serviceRequestViewModel.confirmRequest(serviceRequest, providerName = "Test Provider")
     verify(serviceRequestRepository)
         .saveServiceRequest(
             eq(serviceRequest.copy(status = ServiceRequestStatus.ACCEPTED)), any(), any())
