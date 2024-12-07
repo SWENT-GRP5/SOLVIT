@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.notifications.FcmTokenManager
-import com.android.solvit.shared.notifications.NotificationService
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
@@ -81,7 +80,19 @@ class AuthViewModel(
 
   private suspend fun onAuthenticationSuccess() {
     // Store FCM token after successful authentication
-    fcmTokenManager?.let { NotificationService.storeCurrentToken() }
+    fcmTokenManager?.let { manager ->
+      try {
+        val userId = authRepository.getUserId()
+        if (userId.isNotEmpty()) {
+          val token = FirebaseMessaging.getInstance().token.await()
+          manager.updateUserFcmToken(userId, token)
+        } else {
+          Log.w("AuthViewModel", "Empty user ID, cannot update FCM token")
+        }
+      } catch (e: Exception) {
+        Log.e("AuthViewModel", "Error updating FCM token", e)
+      }
+    }
   }
 
   fun setRole(role: String) {

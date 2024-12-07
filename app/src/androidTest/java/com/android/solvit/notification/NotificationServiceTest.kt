@@ -1,7 +1,6 @@
 package com.android.solvit.notification
 
 import android.Manifest
-import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
@@ -69,28 +68,6 @@ class NotificationServiceTest {
       super.onMessageReceived(message)
     }
 
-    override fun createNotificationChannel() {
-      Log.d(TAG, "Creating notification channel")
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        try {
-          val channel =
-              NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_HIGH)
-                  .apply {
-                    description = CHANNEL_DESCRIPTION
-                    enableLights(true)
-                    enableVibration(true)
-                  }
-
-          val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-          manager.createNotificationChannel(channel)
-          Log.d(TAG, "Successfully created notification channel")
-        } catch (e: Exception) {
-          Log.e(TAG, "Failed to create notification channel", e)
-          throw e
-        }
-      }
-    }
-
     override fun showNotification(title: String, message: String) {
       Log.d(TAG, "Showing notification - Title: $title, Message: $message")
       try {
@@ -110,7 +87,7 @@ class NotificationServiceTest {
                 PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
 
         val builder =
-            NotificationCompat.Builder(testContext!!, CHANNEL_ID)
+            NotificationCompat.Builder(testContext!!, "default")
                 .setSmallIcon(android.R.drawable.ic_dialog_info)
                 .setContentTitle(title)
                 .setContentText(message)
@@ -192,14 +169,12 @@ class NotificationServiceTest {
   fun notificationChannel_isCreatedWithCorrectSettings() {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
       Log.d(TAG, "Checking notification channel settings")
-      val channel = notificationManager.getNotificationChannel(NotificationService.CHANNEL_ID)
+      val channel = notificationManager.getNotificationChannel("default")
 
       assertNotNull("Notification channel should be created", channel)
-      assertEquals("Channel name should match", NotificationService.CHANNEL_NAME, channel?.name)
+      assertEquals("Channel name should match", "Default", channel?.name)
       assertEquals(
-          "Channel description should match",
-          NotificationService.CHANNEL_DESCRIPTION,
-          channel?.description)
+          "Channel description should match", "Default notification channel", channel?.description)
       assertEquals(
           "Channel importance should be high",
           NotificationManager.IMPORTANCE_HIGH,
