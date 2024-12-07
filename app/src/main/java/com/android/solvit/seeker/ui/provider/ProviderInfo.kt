@@ -244,7 +244,11 @@ fun PackageCard(
                     if (selectedPackage.value == packageProposal) null else packageProposal
                 onIsSelectedChange()
               },
-              colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
+              colors =
+                  if (!selectedIndex)
+                      ButtonDefaults.buttonColors(
+                          containerColor = colorScheme.primary.copy(alpha = 0.6f))
+                  else ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
               modifier =
                   Modifier.align(Alignment.BottomCenter)
                       .padding(start = dynamicHorizontalPadding, end = dynamicHorizontalPadding)) {
@@ -252,7 +256,8 @@ fun PackageCard(
                 Text(
                     text =
                         if (selectedPackage.value == packageProposal) "Unselect package"
-                        else "Choose package")
+                        else "Choose package",
+                )
               }
         }
       }
@@ -380,7 +385,12 @@ fun ProviderHeader(provider: Provider) {
                       modifier = Modifier.testTag("providerName"),
                       color = colorScheme.onBackground)
                   Text(
-                      text = provider.service.toString().lowercase(),
+                      text =
+                          provider.service
+                              .toString()
+                              .lowercase()
+                              .replaceFirstChar { it.titlecaseChar() }
+                              .replace('_', ' '),
                       color = colorScheme.onSurfaceVariant,
                       modifier = Modifier.testTag("providerService"))
                 }
