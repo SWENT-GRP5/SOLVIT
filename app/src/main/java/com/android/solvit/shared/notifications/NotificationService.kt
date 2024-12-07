@@ -98,8 +98,10 @@ open class NotificationService : FirebaseMessagingService() {
       builder.setContentIntent(pendingIntent)
 
       with(NotificationManagerCompat.from(applicationContext)) {
-        notify(System.currentTimeMillis().toInt(), builder.build())
+        @Suppress("MissingPermission") notify(System.currentTimeMillis().toInt(), builder.build())
       }
+    } catch (e: SecurityException) {
+      Log.e(TAG, "Security exception when showing notification", e)
     } catch (e: Exception) {
       Log.e(TAG, "Error showing notification", e)
     }
