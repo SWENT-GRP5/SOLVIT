@@ -234,6 +234,7 @@ fun ServiceBookingScreen(
                     Box(
                         modifier =
                             Modifier.weight(1f) // Equal space
+                                .testTag("profile_box")
                                 .fillMaxHeight()
                                 .background(colorScheme.secondary, RoundedCornerShape(16.dp))
                                 .clickable(
