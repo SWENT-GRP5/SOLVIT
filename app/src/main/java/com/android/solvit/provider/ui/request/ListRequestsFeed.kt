@@ -372,20 +372,21 @@ fun ProposePackageDialog(
               ) {
                 items(packages.size) { index ->
                   // If package is selected, we display it bigger
-                  val isSelected = selectedIndex == index
                   val size by
                       animateDpAsState(
-                          targetValue = if (isSelected) 350.dp else 320.dp,
+                          targetValue = if (selectedIndex == index) 350.dp else 320.dp,
                           label = "PackageCardSize")
                   PackageCard(
                       packageProposal = packages[index],
-                      isSelected = isSelected,
+                      selectedIndex = selectedIndex == index,
                       modifier =
                           Modifier.width(260.dp) // Slightly wider for better touch targets
                               .height(size)
-                              .clickable { selectedIndex = if (isSelected) -1 else index }
                               .testTag("PackageCard"),
-                      selectedPackage = selectedPackage)
+                      selectedPackage = selectedPackage,
+                      onIsSelectedChange = {
+                        selectedIndex = if (selectedIndex == index) -1 else index
+                      })
                 }
               }
               Spacer(modifier = Modifier.height(16.dp)) // Add space between LazyRow and Button
