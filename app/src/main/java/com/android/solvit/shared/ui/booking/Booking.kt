@@ -147,7 +147,7 @@ fun ServiceBookingScreen(
       if (providerId.isNullOrEmpty()) null
       else
           providerViewModel.providersList.collectAsState().value.firstOrNull {
-            it.uid == request!!.providerId
+            it.uid == providerId
           }
 
   LaunchedEffect(request) {
@@ -158,14 +158,16 @@ fun ServiceBookingScreen(
   val packageId = request!!.packageId
   val packageProposal =
       if (packageId.isNullOrEmpty()) null
-      else
-          packageViewModel.proposal.collectAsState().value.firstOrNull {
-            it.uid == request!!.packageId
-          }
+      else packageViewModel.proposal.collectAsState().value.firstOrNull { it.uid == packageId }
 
-  val acceptedOrScheduled =
-      request!!.status == ServiceRequestStatus.ACCEPTED ||
-          request!!.status == ServiceRequestStatus.SCHEDULED
+  val isSeeker = role == "seeker"
+
+  val isPending = request!!.status == ServiceRequestStatus.PENDING
+  val isAccepted = request!!.status == ServiceRequestStatus.ACCEPTED
+  val isScheduled = request!!.status == ServiceRequestStatus.SCHEDULED
+  val isCompleted = request!!.status == ServiceRequestStatus.COMPLETED
+  val acceptedOrScheduled = isAccepted || isScheduled
+  val pendingOrAcceptedOrScheduled = isPending || acceptedOrScheduled
   // Scaffold provides the basic structure for the screen with a top bar and content
   Scaffold(
       modifier = Modifier.testTag("service_booking_screen"),
@@ -213,39 +215,11 @@ fun ServiceBookingScreen(
                     .padding(innerPadding) // Additional padding to respect Scaffold's inner padding
                     .verticalScroll(rememberScrollState()) // Make the content scrollable
             ) {
-              // Problem description section
               Text(
-                  text = "Problem Description", // Title for the problem description
+                  text = "Details", // Title for the provider details
                   fontSize = 20.sp,
                   fontWeight = FontWeight.Bold,
-                  modifier = Modifier.padding(bottom = 8.dp).testTag("problem_description_label"))
-
-              Card(
-                  modifier = Modifier.fillMaxWidth(),
-                  shape = RoundedCornerShape(16.dp),
-                  colors = CardDefaults.cardColors(containerColor = colorScheme.background),
-                  border = BorderStroke(1.dp, colorScheme.onSurface.copy(alpha = 0.12f)),
-                  elevation = CardDefaults.cardElevation(0.dp) // No shadow
-                  ) {
-                    Column(modifier = Modifier.padding(8.dp)) {
-                      Text(
-                          text = request!!.description,
-                          fontSize = 16.sp,
-                          fontWeight = FontWeight.Bold,
-                          color = colorScheme.onSurface,
-                          modifier = Modifier.testTag("problem_description"))
-                    }
-                  }
-
-              if (packageProposal != null) {
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = "Your chosen Package",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(bottom = 8.dp).testTag("package_label"))
-                PackageCard(packageProposal)
-              }
+                  modifier = Modifier.padding(bottom = 8.dp).testTag("details_label"))
 
               // A row containing two parallel sections: Profile/Rating and Price/Appointment
               Row(
@@ -256,42 +230,34 @@ fun ServiceBookingScreen(
                               vertical = 16.dp), // Padding between the row and other components
                   horizontalArrangement = Arrangement.SpaceBetween // Space between the boxes
                   ) {
-                    // Left box: Profile and rating section
-                    if (provider != null) {
-                      ProviderCard(provider, providerViewModel, navigationActions)
-                    } else {
-                      Box(
-                          modifier =
-                              Modifier.weight(1f)
-                                  .fillMaxHeight()
-                                  .background(colorScheme.secondary, RoundedCornerShape(16.dp))
-                                  .padding(16.dp)
-                                  .testTag("profile_box")
-                                  .clickable(
-                                      onClick = {
-                                        if (role == "seeker") {
-                                          providerViewModel.selectService(request!!.type)
-                                          navigationActions.navigateTo(Route.PROVIDERS)
-                                        }
-                                      })) {
+                    // Left box: Provider card
+                    Box(
+                        modifier =
+                            Modifier.weight(1f) // Equal space
+                                .fillMaxHeight()
+                                .background(colorScheme.secondary, RoundedCornerShape(16.dp))
+                                .clickable(
+                                    onClick = {
+                                      if (isSeeker) {
+                                        providerViewModel.selectService(request!!.type)
+                                        navigationActions.navigateTo(Route.PROVIDERS)
+                                      }
+                                    })) {
+                          if (provider != null) {
+                            ProviderCard(provider, providerViewModel, navigationActions)
+                          } else {
                             Column(
-                                horizontalAlignment =
-                                    Alignment
-                                        .CenterHorizontally, // Center the text inside the column
-                                modifier =
-                                    Modifier
-                                        .fillMaxWidth() // Ensure the column takes up the full width
-                                ) {
-                                  // Placeholder text for the missing provider information
+                                modifier = Modifier.align(Alignment.Center),
+                                horizontalAlignment = Alignment.CenterHorizontally) {
                                   Text(
-                                      text =
-                                          if (role == "seeker") "Select a provider"
-                                          else "No provider",
-                                      color = colorScheme.onPrimary,
+                                      text = if (isSeeker) "Select\na\nprovider" else "No provider",
+                                      color = colorScheme.onSecondary,
+                                      fontSize = 20.sp,
+                                      fontWeight = FontWeight.Bold,
                                       textAlign = TextAlign.Center)
                                 }
                           }
-                    }
+                        }
 
                     Spacer(modifier = Modifier.width(16.dp)) // Space between the two boxes
 
@@ -303,10 +269,11 @@ fun ServiceBookingScreen(
                                 .background(colorScheme.primary, RoundedCornerShape(16.dp))
                                 .padding(16.dp)
                                 .testTag("price_appointment_box")) {
-                          if (request!!.status == ServiceRequestStatus.PENDING) {
+                          if (isPending && request!!.agreedPrice == null) {
                             Text(
                                 text = "We are waiting for the provider to accept the request",
                                 fontWeight = FontWeight.Bold,
+                                fontSize = 20.sp,
                                 color = colorScheme.onPrimary,
                                 modifier = Modifier.align(Alignment.Center).testTag("pending_text"),
                                 textAlign = TextAlign.Center)
@@ -335,7 +302,7 @@ fun ServiceBookingScreen(
                                         modifier =
                                             if (acceptedOrScheduled) Modifier.weight(1f)
                                             else Modifier)
-                                    if (acceptedOrScheduled && role == "seeker") {
+                                    if (acceptedOrScheduled && isSeeker) {
                                       // Edit button for the price
                                       EditPriceDialog(request!!, requestViewModel)
                                     }
@@ -369,7 +336,7 @@ fun ServiceBookingScreen(
                                           Text(
                                               text = date,
                                               fontWeight = FontWeight.Bold,
-                                              fontSize = 20.sp,
+                                              fontSize = 18.sp,
                                               color = colorScheme.onPrimary)
                                           Text(
                                               text = time,
@@ -377,7 +344,7 @@ fun ServiceBookingScreen(
                                               fontSize = 15.sp,
                                               color = colorScheme.onPrimary)
                                         }
-                                    if (acceptedOrScheduled && role == "seeker") {
+                                    if (acceptedOrScheduled && isSeeker) {
                                       DateAndTimePickers(request!!, requestViewModel)
                                     }
                                   }
@@ -385,6 +352,65 @@ fun ServiceBookingScreen(
                           }
                         }
                   }
+              // Problem description section
+              Spacer(modifier = Modifier.height(16.dp))
+              Text(
+                  text = "Problem Description", // Title for the problem description
+                  fontSize = 20.sp,
+                  fontWeight = FontWeight.Bold,
+                  modifier = Modifier.padding(bottom = 8.dp).testTag("problem_description_label"))
+
+              Card(
+                  modifier = Modifier.fillMaxWidth(),
+                  shape = RoundedCornerShape(16.dp),
+                  colors = CardDefaults.cardColors(containerColor = colorScheme.background),
+                  border = BorderStroke(2.dp, colorScheme.onBackground.copy(alpha = 0.12f)),
+                  elevation = CardDefaults.cardElevation(0.dp) // No shadow
+                  ) {
+                    Column(modifier = Modifier.padding(8.dp)) {
+                      Text(
+                          text = request!!.description,
+                          fontSize = 16.sp,
+                          fontWeight = FontWeight.Bold,
+                          color = colorScheme.onSurface,
+                          modifier = Modifier.testTag("problem_description"))
+                    }
+                  }
+
+              if (!request!!.imageUrl.isNullOrEmpty()) {
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = "Provided Image", // Title for the image display
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(bottom = 8.dp).testTag("problem_image_label"))
+
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = colorScheme.background),
+                    border = BorderStroke(1.dp, colorScheme.onSurface.copy(alpha = 0.12f)),
+                    elevation = CardDefaults.cardElevation(0.dp) // No shadow
+                    ) {
+                      AsyncImage(
+                          modifier = Modifier.fillMaxSize(),
+                          model = request!!.imageUrl,
+                          placeholder = painterResource(id = R.drawable.loading),
+                          error = painterResource(id = R.drawable.error),
+                          contentDescription = "problem_image",
+                          contentScale = ContentScale.Crop)
+                    }
+              }
+
+              if (packageProposal != null) {
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = "Your chosen Package",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(bottom = 8.dp).testTag("package_label"))
+                PackageCard(packageProposal)
+              }
 
               // Address and map section
               Text(
@@ -418,19 +444,21 @@ fun ServiceBookingScreen(
                                 .clip(RoundedCornerShape(16.dp))) // Display the map
               }
 
-              if (request!!.status == ServiceRequestStatus.PENDING) {
+              if (pendingOrAcceptedOrScheduled) {
                 // If on Seeker View, Init a chat with as receiver the provider
-                if (role == "seeker") {
-                  if (provider != null) {
+                if (isSeeker) {
+                  if (provider != null && providerId != null) {
                     EditAndChatButton(
                         currentUserId = user?.uid ?: "",
                         navigationActions = navigationActions,
                         chatViewModel = chatViewModel,
-                        receiverId = providerId ?: "",
+                        receiverId = providerId,
                         receiver = provider,
-                        requestId = request!!.uid)
+                        requestId = request!!.uid,
+                        isPending = isPending,
+                        isSeeker = true)
                   } else {
-                    EditButton(navigationActions)
+                    EditButton(navigationActions, isPending, true)
                   }
                   // Else Init Chat with as receiver Seeker
                 } else {
@@ -441,13 +469,13 @@ fun ServiceBookingScreen(
                         chatViewModel = chatViewModel,
                         receiverId = request?.userId ?: "",
                         receiver = seekerState.value!!,
-                        requestId = request!!.uid)
-                  } else {
-                    EditButton(navigationActions)
+                        requestId = request!!.uid,
+                        isPending = isPending,
+                        isSeeker = false)
                   }
                 }
               }
-              if (request!!.status == ServiceRequestStatus.COMPLETED) {
+              if (isSeeker && isCompleted) {
                 ReviewButton(navigationActions)
               }
             }
@@ -469,7 +497,7 @@ fun ProviderCard(
 ) {
   Card(
       modifier =
-          Modifier.width(141.dp).height(172.dp).testTag("provider_card").clickable {
+          Modifier.testTag("provider_card").clickable {
             providerViewModel.selectProvider(provider)
             navigationActions.navigateTo(Route.PROVIDER_PROFILE)
           },
@@ -524,21 +552,21 @@ fun ProviderCard(
  * @param navigationActions The navigation actions to navigate to the edit request screen.
  */
 @Composable
-fun EditButton(
-    navigationActions: NavigationActions,
-) {
-  Box(
-      modifier = Modifier.padding(horizontal = 8.dp).testTag("edit_button"),
-      contentAlignment = Alignment.Center) {
-        Button(
-            onClick = { navigationActions.navigateTo(Route.EDIT_REQUEST) },
-            colors =
-                ButtonDefaults.buttonColors(
-                    containerColor = colorScheme.primary, contentColor = colorScheme.onPrimary),
-            shape = RoundedCornerShape(8.dp)) {
-              Text(text = "Edit details", style = typography.labelLarge)
-            }
-      }
+fun EditButton(navigationActions: NavigationActions, isPending: Boolean, isSeeker: Boolean) {
+  if (isPending && isSeeker) {
+    Box(
+        modifier = Modifier.padding(horizontal = 8.dp).testTag("edit_button"),
+        contentAlignment = Alignment.Center) {
+          Button(
+              onClick = { navigationActions.navigateTo(Route.EDIT_REQUEST) },
+              colors =
+                  ButtonDefaults.buttonColors(
+                      containerColor = colorScheme.primary, contentColor = colorScheme.onPrimary),
+              shape = RoundedCornerShape(8.dp)) {
+                Text(text = "Edit details", style = typography.labelLarge)
+              }
+        }
+  }
 }
 
 /**
@@ -558,14 +586,16 @@ fun EditAndChatButton(
     chatViewModel: ChatViewModel,
     receiverId: String,
     receiver: Any,
-    requestId: String
+    requestId: String,
+    isPending: Boolean,
+    isSeeker: Boolean
 ) {
   Row(
       modifier = Modifier.fillMaxWidth().padding(top = 16.dp).testTag("edit_discuss_button"),
       horizontalArrangement = Arrangement.SpaceEvenly,
       verticalAlignment = Alignment.CenterVertically,
   ) {
-    EditButton(navigationActions)
+    EditButton(navigationActions, isPending, isSeeker)
     Box(
         modifier = Modifier.weight(1f).padding(horizontal = 8.dp).testTag("chat_button"),
         contentAlignment = Alignment.Center) {
@@ -695,8 +725,9 @@ fun DateAndTimePickers(request: ServiceRequest, requestViewModel: ServiceRequest
       rememberDatePickerState(
           initialSelectedDateMillis = currentTime.timeInMillis,
           initialDisplayedMonthMillis = currentTime.timeInMillis,
-          selectableDates = DatePickerDefaults.AllDates // To be modified with provider availability
-          )
+          selectableDates =
+              DatePickerDefaults.AllDates, // To be modified with provider availability
+      )
   val timePickerState =
       rememberTimePickerState(
           initialHour = currentTime.get(Calendar.HOUR_OF_DAY),
