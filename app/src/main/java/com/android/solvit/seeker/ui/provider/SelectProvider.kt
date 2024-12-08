@@ -6,7 +6,6 @@ import android.content.pm.ActivityInfo
 import android.location.Address
 import android.location.Geocoder
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -31,6 +30,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
@@ -59,12 +59,14 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -164,58 +166,76 @@ fun SpTopAppBar(
   }
 }
 
+/**
+ * Top Filter Bar displayed in the screen
+ *
+ * @param listProviderViewModel
+ */
 @Composable
 fun SpFilterBar(display: () -> Unit, listProviderViewModel: ListProviderViewModel) {
-  val context = LocalContext.current
+
   val filters = listOf("Top Rates", "Top Prices", "Time")
+
+  val isSelected = remember { mutableStateListOf(-1, -1, -1) }
+  Log.e("Debug", "$isSelected")
 
   Row(
       modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("filterBar"),
       horizontalArrangement = Arrangement.SpaceBetween,
       verticalAlignment = Alignment.CenterVertically) {
-        Row(modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-          filters.forEach { filter ->
-            Card(
-                modifier =
-                    Modifier.wrapContentSize()
-                        .clickable {
-                          Toast.makeText(context, "Not Yet Implemented", Toast.LENGTH_LONG).show()
-                        }
-                        .testTag("filterIcon"),
-                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-                colors = CardDefaults.cardColors(containerColor = colorScheme.background),
-                border = BorderStroke(1.dp, colorScheme.primary),
-                shape = RoundedCornerShape(50)) {
-                  Text(
-                      text = filter,
-                      fontSize = MaterialTheme.typography.bodySmall.fontSize,
-                      lineHeight = 34.sp,
-                      fontFamily = FontFamily(Font(R.font.roboto)),
-                      fontWeight = FontWeight(400),
-                      color = colorScheme.primary,
-                      modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp))
-                }
-          }
-        }
+        Row(
+            modifier = Modifier.fillMaxWidth().weight(1f),
+            horizontalArrangement = Arrangement.SpaceEvenly) {
+              filters.forEach { filter ->
+                Card(
+                    modifier =
+                        Modifier.wrapContentSize()
+                            .clickable {
+                              val index = filters.indexOf(filter)
+                              isSelected[index] = if (isSelected[index] == index) -1 else index
+                              listProviderViewModel.sortProviders(
+                                  filter, isSelected[index] == index)
+                            }
+                            .shadow(
+                                elevation = 8.dp,
+                                shape = RoundedCornerShape(16.dp),
+                                ambientColor = Color.Yellow,
+                                spotColor = Color(0xFF6D29F6))
+                            .testTag("filterIcon"),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                    colors = CardDefaults.cardColors(containerColor = colorScheme.background),
+                    shape = RoundedCornerShape(16.dp),
+                    border =
+                        if (isSelected[filters.indexOf(filter)] == filters.indexOf(filter))
+                            BorderStroke(1.dp, colorScheme.primary)
+                        else null) {
+                      Text(
+                          text = filter,
+                          fontSize = MaterialTheme.typography.bodySmall.fontSize,
+                          lineHeight = 34.sp,
+                          fontFamily = FontFamily(Font(R.font.roboto)),
+                          fontWeight = FontWeight(400),
+                          color = colorScheme.primary,
+                          modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp))
+                    }
+              }
+            }
 
         Spacer(modifier = Modifier.width(16.dp))
 
-        Card(
+        Icon(
+            painter = painterResource(id = R.drawable.tune),
+            contentDescription = "filter options",
             modifier =
-                Modifier.clickable {
+                Modifier.padding(8.dp)
+                    .size(32.dp)
+                    .shadow(12.dp, shape = CircleShape)
+                    .testTag("filterIcon")
+                    .clickable {
                       listProviderViewModel.refreshFilters()
                       display()
-                    }
-                    .testTag("filterOption"),
-            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-            colors = CardDefaults.cardColors(containerColor = colorScheme.background)) {
-              Icon(
-                  painter =
-                      painterResource(id = R.drawable.tune), // Make sure to use your SVG resource
-                  contentDescription = "filter options",
-                  modifier = Modifier.padding(8.dp).size(32.dp).testTag("filterIcon"),
-                  tint = colorScheme.onBackground)
-            }
+                    },
+            tint = colorScheme.onBackground)
       }
 }
 
@@ -336,10 +356,13 @@ fun ListProviders(
     navigationActions: NavigationActions
 ) {
   LazyColumn(
-      modifier = Modifier.fillMaxWidth().testTag("providersList"),
+      modifier = Modifier.fillMaxSize().testTag("providersList"),
       verticalArrangement = Arrangement.spacedBy(16.dp),
       userScrollEnabled = true,
   ) {
+    item { Title("Popular") }
+    item { DisplayPopularProviders(providers, listProviderViewModel, navigationActions) }
+    item { Title("See All") }
     items(providers) { provider ->
       Row(
           modifier = Modifier.fillMaxWidth(),
@@ -947,9 +970,6 @@ fun SelectProviderScreen(
       }) { paddingValues ->
         Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
           SpFilterBar(display = { displayFilters = true }, listProviderViewModel)
-          Title("Popular")
-          DisplayPopularProviders(providers, listProviderViewModel, navigationActions)
-          Title("See All")
           ListProviders(providers, listProviderViewModel, navigationActions)
         }
         if (displayFilters) {

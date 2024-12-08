@@ -2,7 +2,6 @@ package com.android.solvit.shared.model.provider
 
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.service.Services
-import com.google.firebase.Timestamp
 
 data class Provider(
     val uid: String = "",
@@ -16,7 +15,7 @@ data class Provider(
     val popular: Boolean = false,
     val rating: Double = 1.0,
     val price: Double = 0.0,
-    val deliveryTime: Timestamp = Timestamp.now(),
+    val deliveryTime: Double = 60.0,
     val languages: List<Language> = emptyList(),
     val schedule: Schedule = Schedule(),
     val jobsCompleted: Int = 0

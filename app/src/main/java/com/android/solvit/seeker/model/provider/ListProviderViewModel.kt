@@ -10,6 +10,7 @@ import com.android.solvit.shared.model.provider.ProviderRepositoryFirestore
 import com.android.solvit.shared.model.service.Services
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
+import kotlin.random.Random
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -122,5 +123,34 @@ class ListProviderViewModel(private val repository: ProviderRepository) : ViewMo
 
   fun clearSelectedService() {
     _selectedService.value = null
+  }
+
+  /** Sort the list of providers given three Fields (Top Rates, Top Prices, Time) */
+  fun sortProviders(field: String, isSelected: Boolean) {
+    Log.e("sortProviders", "field : $field isSelected : $isSelected")
+    Log.e("listSorted", "${_providersListFiltered.value}")
+    when (field) {
+      "Top Rates" ->
+          _providersListFiltered.value =
+              if (isSelected) _providersListFiltered.value.sortedByDescending { it.rating }
+              else
+                  _providersListFiltered.value.sortedByDescending {
+                    it.rating + Random.nextDouble(1.0, 5.0)
+                  } // We use here hash code to randomize if field is unselected
+      "Top Prices" ->
+          _providersListFiltered.value =
+              if (isSelected) _providersListFiltered.value.sortedBy { it.price }
+              else
+                  _providersListFiltered.value.sortedBy {
+                    it.price + Random.nextDouble(1.0, 1000.0)
+                  }
+      "Time" ->
+          _providersListFiltered.value =
+              if (isSelected) _providersListFiltered.value.sortedBy { it.deliveryTime }
+              else
+                  _providersListFiltered.value.sortedBy {
+                    it.deliveryTime + Random.nextDouble(1.0, 100000.0)
+                  }
+    }
   }
 }
