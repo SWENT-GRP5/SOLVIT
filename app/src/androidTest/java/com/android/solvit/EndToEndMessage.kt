@@ -178,11 +178,6 @@ class EndToEndMessage {
     authViewModel.setRole("seeker")
     authViewModel.registerWithEmailAndPassword(
         onSuccess = { authViewModel.logout {} }, onFailure = {})
-    serviceRequestRepository.getServiceRequests(
-        onSuccess = { requests ->
-          requests.forEach { serviceRequestViewModel.deleteServiceRequestById(it.uid) }
-        },
-        onFailure = {})
   }
 
   @After
@@ -201,7 +196,7 @@ class EndToEndMessage {
   }
 
   @Test
-  fun createServiceRequest() {
+  fun initializeMessagingSessionWithProvider() {
     composeTestRule.setContent {
       val user = authViewModel.user.collectAsState()
       val userRegistered = authViewModel.userRegistered.collectAsState()
