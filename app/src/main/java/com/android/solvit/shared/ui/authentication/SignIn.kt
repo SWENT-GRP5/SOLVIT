@@ -446,47 +446,7 @@ fun FormSection(
       style = TextStyle(fontSize = 12.sp, lineHeight = 16.sp),
       modifier = Modifier.padding(top = 4.dp).fillMaxWidth())
 
-  Spacer(modifier = Modifier.height(8.dp))
-
-  // Remember me & Forgot password
-  Row(modifier = Modifier.fillMaxWidth()) {
-    // Section Remember Me
-    Row(modifier = Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
-      Checkbox(
-          checked = isChecked,
-          onCheckedChange = onCheckedChange,
-          modifier = Modifier.size(24.dp),
-          colors =
-              CheckboxDefaults.colors(
-                  checkmarkColor = colorScheme.onSecondary,
-                  uncheckedColor = colorScheme.onSurfaceVariant,
-                  checkedColor = colorScheme.secondary))
-      Spacer(modifier = Modifier.width(4.dp))
-      Text(
-          text = "Remember me",
-          modifier = Modifier.testTag("rememberMeCheckbox"),
-          color = colorScheme.onSurfaceVariant,
-          fontSize = 16.sp)
-    }
-
-    // Section Forgot Password
-    Row(
-        modifier = Modifier.weight(1f),
-        horizontalArrangement = Arrangement.End,
-        verticalAlignment = Alignment.CenterVertically) {
-          Text(
-              text = "Forgot password?",
-              color = colorScheme.onSurfaceVariant,
-              fontSize = 16.sp,
-              textDecoration = TextDecoration.Underline,
-              modifier =
-                  Modifier.clickable { navigationActions.navigateTo(Screen.FORGOT_PASSWORD) }
-                      .testTag("forgotPasswordLink"),
-              textAlign = TextAlign.End)
-        }
-  }
-
-  Spacer(modifier = Modifier.height(16.dp))
+  Spacer(modifier = Modifier.height(20.dp))
 
   // Sign in button
   SignInButton(

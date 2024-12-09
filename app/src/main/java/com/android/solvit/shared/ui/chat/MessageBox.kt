@@ -139,17 +139,6 @@ fun ChatListTopBar(
           Icon(Icons.Default.ArrowBack, contentDescription = "Back")
         }
       },
-      actions = {
-        IconButton(
-            onClick = {
-              // Toast.makeText(context, "Not Yet Implemented", Toast.LENGTH_LONG).show()
-            }) {
-              Image(
-                  painter = painterResource(id = R.drawable.new_message),
-                  contentDescription = "Action",
-                  modifier = Modifier.size(24.dp))
-            }
-      },
       colors =
           TopAppBarDefaults.topAppBarColors(
               containerColor = Color.White,

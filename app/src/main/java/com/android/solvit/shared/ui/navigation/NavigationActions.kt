@@ -38,7 +38,6 @@ object Screen {
   const val SIGN_IN = "Sign In"
   const val SIGN_UP = "Sign Up"
   const val SIGN_UP_CHOOSE_ROLE = "Choose Role Screen"
-  const val FORGOT_PASSWORD = "Forgot Password"
   const val SEEKER_REGISTRATION_PROFILE = "Seeker registration"
   const val PROVIDER_REGISTRATION_PROFILE = "Provider registration"
   const val CALENDAR = "Calendar"
