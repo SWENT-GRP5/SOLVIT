@@ -3,7 +3,6 @@ package com.android.solvit.seeker.model.profile
 import android.util.Log
 import com.android.solvit.shared.model.map.Location
 import com.google.android.gms.tasks.Task
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
@@ -13,7 +12,7 @@ open class UserRepositoryFirestore(private val db: FirebaseFirestore) : UserRepo
   private val collectionPath = "user"
 
   override fun init(onSuccess: () -> Unit) {
-    FirebaseAuth.getInstance().addAuthStateListener { onSuccess() }
+    onSuccess()
   }
 
   override fun getNewUid(): String {
