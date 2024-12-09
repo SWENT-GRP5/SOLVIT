@@ -24,6 +24,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Edit
@@ -183,12 +184,12 @@ fun ServiceBookingScreen(
                     actionIconContentColor = colorScheme.onBackground,
                 ),
             title = {
-              // Centered title within the AppBar
-              Box(
-                  modifier = Modifier.fillMaxWidth().testTag("booking_title"),
-              ) {
-                Text("Your booking", color = colorScheme.onBackground, fontWeight = FontWeight.Bold)
-              }
+              Text(
+                  text = "Your booking",
+                  modifier = Modifier.testTag("booking_title"),
+                  color = colorScheme.onBackground,
+                  textAlign = TextAlign.Center,
+                  fontWeight = FontWeight.Bold)
             },
             navigationIcon = {
               // Navigation icon to go back to the previous screen (currently unhandled)
@@ -196,7 +197,7 @@ fun ServiceBookingScreen(
                   onClick = { navigationActions.goBack() },
                   modifier = Modifier.testTag("goBackButton")) {
                     Icon(
-                        Icons.AutoMirrored.Filled.ArrowBack,
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Back",
                         tint = colorScheme.onBackground)
                   }
@@ -226,8 +227,8 @@ fun ServiceBookingScreen(
                   modifier =
                       Modifier.fillMaxWidth() // Occupies full width of the screen
                           .height(220.dp) // Fixed height for uniformity
-                          .padding(
-                              vertical = 16.dp), // Padding between the row and other components
+                          // Padding between the row and other components
+                          .padding(vertical = 16.dp),
                   horizontalArrangement = Arrangement.SpaceBetween // Space between the boxes
                   ) {
                     // Left box: Provider card
@@ -236,7 +237,9 @@ fun ServiceBookingScreen(
                             Modifier.weight(1f) // Equal space
                                 .testTag("profile_box")
                                 .fillMaxHeight()
-                                .background(colorScheme.secondary, RoundedCornerShape(16.dp))
+                                .background(
+                                    colorScheme.onSurface.copy(alpha = 0.8f),
+                                    RoundedCornerShape(16.dp))
                                 .clickable(
                                     onClick = {
                                       if (isSeeker) {
@@ -245,21 +248,33 @@ fun ServiceBookingScreen(
                                       }
                                     })) {
                           if (provider != null) {
+                            // Render provider card when provider is selected
                             ProviderCard(provider, providerViewModel, navigationActions)
                           } else {
+                            // Render placeholder when no provider is selected
                             Column(
-                                modifier = Modifier.align(Alignment.Center),
-                                horizontalAlignment = Alignment.CenterHorizontally) {
+                                modifier = Modifier.fillMaxSize(),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center) {
+                                  Icon(
+                                      imageVector =
+                                          Icons.Default.AccountCircle, // Use an outline person icon
+                                      contentDescription = null,
+                                      tint = colorScheme.onPrimary,
+                                      modifier = Modifier.size(64.dp) // Larger icon for visibility
+                                      )
+                                  Spacer(modifier = Modifier.height(8.dp))
                                   Text(
-                                      text = if (isSeeker) "Select\na\nprovider" else "No provider",
-                                      color = colorScheme.onSecondary,
-                                      fontSize = 20.sp,
+                                      text =
+                                          if (isSeeker) "Select a Provider"
+                                          else "No Provider Assigned",
                                       fontWeight = FontWeight.Bold,
+                                      fontSize = 20.sp,
+                                      color = colorScheme.onPrimary,
                                       textAlign = TextAlign.Center)
                                 }
                           }
                         }
-
                     Spacer(modifier = Modifier.width(16.dp)) // Space between the two boxes
 
                     // Right box: Price and appointment information
@@ -270,87 +285,76 @@ fun ServiceBookingScreen(
                                 .background(colorScheme.primary, RoundedCornerShape(16.dp))
                                 .padding(16.dp)
                                 .testTag("price_appointment_box")) {
-                          if (isPending && request!!.agreedPrice == null) {
-                            Text(
-                                text = "We are waiting for the provider to accept the request",
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 20.sp,
-                                color = colorScheme.onPrimary,
-                                modifier = Modifier.align(Alignment.Center).testTag("pending_text"),
-                                textAlign = TextAlign.Center)
-                          } else {
-                            Column(
-                                horizontalAlignment =
-                                    Alignment
-                                        .CenterHorizontally, // Center the text inside the column
-                                modifier =
-                                    Modifier
-                                        .fillMaxWidth() // Ensure the column takes up the full width
-                                ) {
-                                  var price = "Not set"
-                                  request!!.agreedPrice?.let { price = "$it $" }
-                                  // Price agreed upon
+                          Column(
+                              // Center the text inside the column
+                              horizontalAlignment = Alignment.CenterHorizontally,
+                              // Ensure the column takes up the full width
+                              modifier = Modifier.fillMaxWidth()) {
+                                var price = "Not set"
+                                request!!.agreedPrice?.let { price = "$it CHF" }
+                                // Price agreed upon
+                                Text(
+                                    text = "Price agreed on:",
+                                    fontWeight = FontWeight.Medium,
+                                    color = colorScheme.secondaryContainer)
+                                Row(verticalAlignment = Alignment.CenterVertically) {
                                   Text(
-                                      text = "Price agreed on:",
-                                      fontWeight = FontWeight.Medium,
-                                      color = colorScheme.secondaryContainer)
-                                  Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Text(
-                                        text = price,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 20.sp,
-                                        color = colorScheme.onPrimary,
-                                        modifier =
-                                            if (acceptedOrScheduled) Modifier.weight(1f)
-                                            else Modifier)
-                                    if (acceptedOrScheduled && isSeeker) {
-                                      // Edit button for the price
-                                      EditPriceDialog(request!!, requestViewModel)
-                                    }
-                                  }
-
-                                  val dateFormat =
-                                      SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-                                  val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
-                                  var date = "Not set"
-                                  var time = "Not set"
-                                  request!!.meetingDate.let {
-                                    if (it != null) {
-                                      date = dateFormat.format(it.toDate())
-                                      time = timeFormat.format(it.toDate())
-                                    }
-                                  }
-                                  // Appointment date and time
-                                  Text(
-                                      modifier = Modifier.testTag("appointment_date"),
-                                      text = "Your appointment:",
-                                      fontWeight = FontWeight.Medium,
-                                      color = colorScheme.secondaryContainer)
-                                  Spacer(
+                                      text = price,
+                                      fontWeight = FontWeight.Bold,
+                                      fontSize = 20.sp,
+                                      textAlign = TextAlign.Center,
+                                      color = colorScheme.onPrimary,
                                       modifier =
-                                          Modifier.height(8.dp)) // Space between the text and date
-                                  Row {
-                                    Column(
-                                        modifier =
-                                            if (acceptedOrScheduled) Modifier.weight(1f)
-                                            else Modifier) {
-                                          Text(
-                                              text = date,
-                                              fontWeight = FontWeight.Bold,
-                                              fontSize = 18.sp,
-                                              color = colorScheme.onPrimary)
-                                          Text(
-                                              text = time,
-                                              fontWeight = FontWeight.Bold,
-                                              fontSize = 15.sp,
-                                              color = colorScheme.onPrimary)
-                                        }
-                                    if (acceptedOrScheduled && isSeeker) {
-                                      DateAndTimePickers(request!!, requestViewModel)
-                                    }
+                                          if (acceptedOrScheduled) Modifier.weight(1f)
+                                          else Modifier)
+                                  if (acceptedOrScheduled && !isSeeker) {
+                                    // Edit button for the price
+                                    EditPriceDialog(request!!, requestViewModel)
                                   }
                                 }
-                          }
+
+                                val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                                val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+                                var date = "Not set"
+                                var time = "Not set"
+                                request!!.meetingDate.let {
+                                  if (it != null) {
+                                    date = dateFormat.format(it.toDate())
+                                    time = timeFormat.format(it.toDate())
+                                  }
+                                }
+                                // Appointment date and time
+                                Text(
+                                    modifier = Modifier.testTag("appointment_date"),
+                                    text = "Your appointment:",
+                                    fontWeight = FontWeight.Medium,
+                                    color = colorScheme.secondaryContainer)
+                                Spacer(
+                                    modifier =
+                                        Modifier.height(8.dp)) // Space between the text and date
+                                Row {
+                                  Column(
+                                      modifier =
+                                          if (acceptedOrScheduled) Modifier.weight(1f)
+                                          else Modifier) {
+                                        Text(
+                                            text = date,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 18.sp,
+                                            textAlign = TextAlign.Center,
+                                            color = colorScheme.onPrimary)
+                                        Text(
+                                            text = time,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 15.sp,
+                                            textAlign = TextAlign.Center,
+                                            color = colorScheme.onPrimary)
+                                      }
+                                  if (acceptedOrScheduled && isSeeker) {
+                                    DateAndTimePickers(request!!, requestViewModel)
+                                  }
+                                }
+                              }
                         }
                   }
               // Problem description section
@@ -457,7 +461,8 @@ fun ServiceBookingScreen(
                         receiver = provider,
                         requestId = request!!.uid,
                         isPending = isPending,
-                        isSeeker = true)
+                        isSeeker = true,
+                        modifier = Modifier.weight(1f))
                   } else {
                     EditButton(navigationActions, isPending, true)
                   }
@@ -472,7 +477,8 @@ fun ServiceBookingScreen(
                         receiver = seekerState.value!!,
                         requestId = request!!.uid,
                         isPending = isPending,
-                        isSeeker = false)
+                        isSeeker = false,
+                        modifier = Modifier.weight(1f))
                   }
                 }
               }
@@ -551,12 +557,19 @@ fun ProviderCard(
  * A composable function that displays an edit button to edit the service request details.
  *
  * @param navigationActions The navigation actions to navigate to the edit request screen.
+ * @param isPending Indicates if the request is pending.
+ * @param isSeeker Indicates if the current user is the service seeker.
  */
 @Composable
-fun EditButton(navigationActions: NavigationActions, isPending: Boolean, isSeeker: Boolean) {
+fun EditButton(
+    navigationActions: NavigationActions,
+    isPending: Boolean,
+    isSeeker: Boolean,
+    modifier: Modifier = Modifier
+) {
   if (isPending && isSeeker) {
     Box(
-        modifier = Modifier.padding(horizontal = 8.dp).testTag("edit_button"),
+        modifier = modifier.fillMaxWidth().padding(top = 8.dp).testTag("edit_button"),
         contentAlignment = Alignment.Center) {
           Button(
               onClick = { navigationActions.navigateTo(Route.EDIT_REQUEST) },
@@ -568,6 +581,31 @@ fun EditButton(navigationActions: NavigationActions, isPending: Boolean, isSeeke
               }
         }
   }
+}
+
+@Composable
+fun ChatButton(
+    chatViewModel: ChatViewModel,
+    currentUserId: String,
+    receiverId: String,
+    receiver: Any,
+    requestId: String,
+    modifier: Modifier = Modifier
+) {
+  Box(
+      modifier = modifier.fillMaxWidth().padding(top = 8.dp).testTag("chat_button"),
+      contentAlignment = Alignment.Center) {
+        Button(
+            onClick = {
+              chatViewModel.prepareForChat(false, currentUserId, receiverId, receiver, requestId)
+            },
+            colors =
+                ButtonDefaults.buttonColors(
+                    containerColor = colorScheme.primary, contentColor = colorScheme.onPrimary),
+            shape = RoundedCornerShape(8.dp)) {
+              Text(text = "Discuss", style = typography.labelLarge)
+            }
+      }
 }
 
 /**
@@ -589,28 +627,16 @@ fun EditAndChatButton(
     receiver: Any,
     requestId: String,
     isPending: Boolean,
-    isSeeker: Boolean
+    isSeeker: Boolean,
+    modifier: Modifier
 ) {
   Row(
       modifier = Modifier.fillMaxWidth().padding(top = 16.dp).testTag("edit_discuss_button"),
       horizontalArrangement = Arrangement.SpaceEvenly,
       verticalAlignment = Alignment.CenterVertically,
   ) {
-    EditButton(navigationActions, isPending, isSeeker)
-    Box(
-        modifier = Modifier.weight(1f).padding(horizontal = 8.dp).testTag("chat_button"),
-        contentAlignment = Alignment.Center) {
-          Button(
-              onClick = {
-                chatViewModel.prepareForChat(false, currentUserId, receiverId, receiver, requestId)
-              },
-              colors =
-                  ButtonDefaults.buttonColors(
-                      containerColor = colorScheme.primary, contentColor = colorScheme.onPrimary),
-              shape = RoundedCornerShape(8.dp)) {
-                Text(text = "Discuss", style = typography.labelLarge)
-              }
-        }
+    EditButton(navigationActions, isPending, isSeeker, modifier)
+    ChatButton(chatViewModel, currentUserId, receiverId, receiver, requestId, modifier)
   }
 }
 
@@ -894,7 +920,7 @@ fun EditPriceDialog(
                   }
                 },
                 label = { Text("Price") },
-                leadingIcon = { Text("$") },
+                leadingIcon = { Text("CHF") },
                 keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
                 singleLine = true,
                 isError = (!isPriceValid && price.isNotEmpty()) || containsInvalidChars,

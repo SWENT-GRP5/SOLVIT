@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -46,6 +47,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -174,10 +176,10 @@ fun JobSectionContent(
   when (selectedTab) {
     0 -> PendingJobsSection(serviceRequestViewModel, navigationActions)
     1 -> AcceptedJobSection(serviceRequestViewModel, navigationActions)
-    2 -> ScheduledJobsSection(serviceRequestViewModel)
-    3 -> CompletedJobsSection(serviceRequestViewModel)
-    4 -> CanceledJobsSection(serviceRequestViewModel)
-    5 -> ArchivedJobsSection(serviceRequestViewModel)
+    2 -> ScheduledJobsSection(serviceRequestViewModel, navigationActions)
+    3 -> CompletedJobsSection(serviceRequestViewModel, navigationActions)
+    4 -> CanceledJobsSection(serviceRequestViewModel, navigationActions)
+    5 -> ArchivedJobsSection(serviceRequestViewModel, navigationActions)
   }
 }
 
@@ -299,7 +301,7 @@ fun AcceptedJobSection(viewModel: ServiceRequestViewModel, navigationActions: Na
  * @param viewModel ViewModel for managing service requests.
  */
 @Composable
-fun ScheduledJobsSection(viewModel: ServiceRequestViewModel) {
+fun ScheduledJobsSection(viewModel: ServiceRequestViewModel, navigationActions: NavigationActions) {
   val context = LocalContext.current
   val scheduledRequests by viewModel.scheduledRequests.collectAsState()
 
@@ -326,6 +328,10 @@ fun ScheduledJobsSection(viewModel: ServiceRequestViewModel) {
         title = "Scheduled",
         requests = scheduledRequests,
         emptyMessage = "No scheduled jobs",
+        onLearnMore = {
+          viewModel.selectRequest(it)
+          navigationActions.navigateTo(Route.BOOKING_DETAILS)
+        },
         onNavigateToJob = { request ->
           request.location?.let { navigateToSingleJob(context, it.latitude, it.longitude) }
         },
@@ -344,7 +350,7 @@ fun ScheduledJobsSection(viewModel: ServiceRequestViewModel) {
  * @param viewModel ViewModel for managing service requests.
  */
 @Composable
-fun CompletedJobsSection(viewModel: ServiceRequestViewModel) {
+fun CompletedJobsSection(viewModel: ServiceRequestViewModel, navigationActions: NavigationActions) {
   val context = LocalContext.current
   val completedRequests by viewModel.completedRequests.collectAsState()
 
@@ -352,6 +358,10 @@ fun CompletedJobsSection(viewModel: ServiceRequestViewModel) {
       title = "Completed",
       requests = completedRequests,
       emptyMessage = "No completed jobs",
+      onLearnMore = {
+        viewModel.selectRequest(it)
+        navigationActions.navigateTo(Route.BOOKING_DETAILS)
+      },
       onContactCustomer = {
         Toast.makeText(context, "Contact Not yet Implemented", Toast.LENGTH_SHORT).show()
       },
@@ -365,7 +375,7 @@ fun CompletedJobsSection(viewModel: ServiceRequestViewModel) {
  * @param viewModel ViewModel for managing service requests.
  */
 @Composable
-fun CanceledJobsSection(viewModel: ServiceRequestViewModel) {
+fun CanceledJobsSection(viewModel: ServiceRequestViewModel, navigationActions: NavigationActions) {
   val context = LocalContext.current
   val canceledRequests by viewModel.cancelledRequests.collectAsState()
 
@@ -374,6 +384,10 @@ fun CanceledJobsSection(viewModel: ServiceRequestViewModel) {
       requests = canceledRequests,
       emptyMessage = "No canceled jobs",
       onChat = { Toast.makeText(context, "Chat Not yet Implemented", Toast.LENGTH_SHORT).show() },
+      onLearnMore = {
+        viewModel.selectRequest(it)
+        navigationActions.navigateTo(Route.BOOKING_DETAILS)
+      },
       onContactCustomer = {
         Toast.makeText(context, "Contact Not yet Implemented", Toast.LENGTH_SHORT).show()
       },
@@ -386,7 +400,7 @@ fun CanceledJobsSection(viewModel: ServiceRequestViewModel) {
  * @param viewModel ViewModel for managing service requests.
  */
 @Composable
-fun ArchivedJobsSection(viewModel: ServiceRequestViewModel) {
+fun ArchivedJobsSection(viewModel: ServiceRequestViewModel, navigationActions: NavigationActions) {
   val context = LocalContext.current
   val archivedRequests by viewModel.archivedRequests.collectAsState()
 
@@ -394,6 +408,10 @@ fun ArchivedJobsSection(viewModel: ServiceRequestViewModel) {
       title = "Archived",
       requests = archivedRequests,
       emptyMessage = "No archived jobs",
+      onLearnMore = {
+        viewModel.selectRequest(it)
+        navigationActions.navigateTo(Route.BOOKING_DETAILS)
+      },
       onChat = { Toast.makeText(context, "Chat Not yet Implemented", Toast.LENGTH_SHORT).show() },
       onContactCustomer = {
         Toast.makeText(context, "Contact Not yet Implemented", Toast.LENGTH_SHORT).show()
@@ -436,27 +454,24 @@ fun JobItem(
       colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
       shape = RoundedCornerShape(12.dp)) {
         Column(modifier = Modifier.padding(16.dp)) {
-          // Title and Navigate Button
+          // Learn More and Navigate Button
           Row(
               modifier = Modifier.fillMaxWidth(),
-              horizontalArrangement = Arrangement.SpaceBetween,
+              horizontalArrangement = Arrangement.SpaceBetween, // Distribute space between children
               verticalAlignment = Alignment.CenterVertically) {
-                // Job Title
-                Text(
-                    request.title, style = typography.titleMedium, color = colorScheme.onBackground)
-
-                // See more button
-                if (status == ServiceRequestStatus.PENDING ||
-                    status == ServiceRequestStatus.ACCEPTED) {
-                  onLearnMore?.let {
-                    Button(
-                        onClick = it,
-                        colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
-                        modifier = Modifier.testTag("LearnMoreButton_${request.uid}")) {
-                          Text("Learn More", color = colorScheme.onPrimary)
-                        }
-                  }
+                // See More Button
+                onLearnMore?.let {
+                  Button(
+                      onClick = it,
+                      colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
+                      modifier =
+                          Modifier.wrapContentWidth().testTag("LearnMoreButton_${request.uid}")) {
+                        Text("Learn More", color = colorScheme.onPrimary)
+                      }
                 }
+
+                Spacer(modifier = Modifier.weight(1f)) // Fills the space in between the two buttons
+
                 // Navigate Button for Scheduled Jobs
                 if (status == ServiceRequestStatus.SCHEDULED) {
                   onNavigateToJob?.let {
@@ -469,6 +484,13 @@ fun JobItem(
                   }
                 }
               }
+          // Job Title
+          Text(
+              text = request.title,
+              style = typography.titleMedium,
+              color = colorScheme.onBackground,
+              maxLines = 1,
+              overflow = TextOverflow.Ellipsis)
           // Job  Description
           Text(
               request.description,
@@ -488,7 +510,7 @@ fun JobItem(
                 contentDescription = "Scheduled Time",
                 tint = colorScheme.onSurfaceVariant)
             Text(
-                "Scheduled: $date at $time",
+                if (request.meetingDate == null) "Deadline: $date" else "Scheduled: $date at $time",
                 style = typography.bodySmall,
                 color = colorScheme.onSurfaceVariant)
           }
