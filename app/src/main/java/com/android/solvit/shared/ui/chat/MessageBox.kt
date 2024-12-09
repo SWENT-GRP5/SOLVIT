@@ -48,9 +48,11 @@ import coil.compose.AsyncImage
 import com.android.solvit.R
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
+import com.android.solvit.seeker.ui.navigation.BottomNavigationMenu
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.chat.ChatMessage
 import com.android.solvit.shared.model.chat.ChatViewModel
+import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_PROVIDER
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
 import com.android.solvit.shared.ui.utils.formatTimestamp
@@ -92,7 +94,12 @@ fun MessageBox(
   } else {
     Scaffold(
         topBar = { ChatListTopBar(navigationActions, chatViewModel, authViewModel) },
-        bottomBar = {}) { paddingValues ->
+        bottomBar = {
+            BottomNavigationMenu(
+                onTabSelect = { navigationActions.navigateTo(it.route) },
+                tabList = LIST_TOP_LEVEL_DESTINATION_PROVIDER,
+                selectedItem = navigationActions.currentRoute())
+        }) { paddingValues ->
           if (allMessages.isNotEmpty()) {
             LazyColumn(
                 modifier = Modifier.padding(paddingValues).fillMaxSize(),
@@ -133,11 +140,6 @@ fun ChatListTopBar(
             contentAlignment = Alignment.Center) {
               Text(text = "Inbox", style = MaterialTheme.typography.headlineLarge)
             }
-      },
-      navigationIcon = {
-        IconButton(onClick = { navigationActions.goBack() }) {
-          Icon(Icons.Default.ArrowBack, contentDescription = "Back")
-        }
       },
       actions = {
         IconButton(
