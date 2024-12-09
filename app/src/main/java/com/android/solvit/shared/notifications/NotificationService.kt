@@ -132,7 +132,14 @@ open class NotificationService : FirebaseMessagingService() {
       try {
         val currentUser = FirebaseAuth.getInstance().currentUser
         if (currentUser != null) {
-          // TODO: Send token to server
+          FcmTokenManager.getInstance()
+              .updateUserFcmToken(currentUser.uid, token)
+              .addOnSuccessListener {
+                Log.d(TAG, "Successfully updated FCM token for user: ${currentUser.uid}")
+              }
+              .addOnFailureListener { e ->
+                Log.e(TAG, "Failed to update FCM token for user: ${currentUser.uid}", e)
+              }
         }
       } catch (e: Exception) {
         Log.e(TAG, "Error handling new token", e)
