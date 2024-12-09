@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.outlined.MailOutline
 import androidx.compose.material.icons.outlined.Phone
@@ -49,12 +48,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.android.solvit.seeker.ui.navigation.BottomNavigationMenu
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestStatus
 import com.android.solvit.shared.model.request.ServiceRequestStatus.Companion.format
 import com.android.solvit.shared.model.request.ServiceRequestStatus.Companion.getStatusColor
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.utils.isInternetAvailable
+import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_PROVIDER
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
 import com.google.firebase.Firebase
@@ -79,8 +80,12 @@ fun RequestsDashboardScreen(
   val statusTabs = ServiceRequestStatus.entries.toTypedArray()
 
   Scaffold(
-      topBar = {
-        RequestsTopBar(title = "Job Dashboard", onBackClicked = { navigationActions.goBack() })
+      topBar = { RequestsTopBar(title = "Job Dashboard") },
+      bottomBar = {
+        BottomNavigationMenu(
+            onTabSelect = { navigationActions.navigateTo(it.route) },
+            tabList = LIST_TOP_LEVEL_DESTINATION_PROVIDER,
+            selectedItem = navigationActions.currentRoute())
       },
       content = { innerPadding ->
         Column(
@@ -102,11 +107,10 @@ fun RequestsDashboardScreen(
  * Composable function that displays the top app bar for the Requests Dashboard screen.
  *
  * @param title Title of the screen.
- * @param onBackClicked Callback to handle back button click.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RequestsTopBar(title: String, onBackClicked: () -> Unit) {
+fun RequestsTopBar(title: String) {
   TopAppBar(
       title = {
         Text(
@@ -114,11 +118,6 @@ fun RequestsTopBar(title: String, onBackClicked: () -> Unit) {
             style = typography.titleLarge,
             color = colorScheme.onBackground,
             modifier = Modifier.testTag("JobDashboardTitle"))
-      },
-      navigationIcon = {
-        IconButton(onClick = onBackClicked, modifier = Modifier.testTag("JobDashboardBackButton")) {
-          Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Go back")
-        }
       },
       colors =
           TopAppBarDefaults.centerAlignedTopAppBarColors(
