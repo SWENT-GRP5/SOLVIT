@@ -2,20 +2,17 @@ package com.android.solvit.shared.model.review
 
 import android.util.Log
 import com.google.android.gms.tasks.Task
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 
 class ReviewRepositoryFirestore(private val db: FirebaseFirestore) : ReviewRepository {
   private val collectionPath = "reviews"
-  private val auth = FirebaseAuth.getInstance()
 
   override fun getNewUid(): String = db.collection(collectionPath).document().id
 
   override fun init(onSuccess: () -> Unit) {
-    // Add an authentication state listener to call onSuccess when the user is authenticated
-    auth.addAuthStateListener { it.currentUser?.let { onSuccess() } }
+    onSuccess()
   }
 
   override fun addReview(review: Review, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {

@@ -60,8 +60,6 @@ import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.utils.isInternetAvailable
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
-import com.google.firebase.Firebase
-import com.google.firebase.auth.auth
 import java.text.SimpleDateFormat
 import java.util.Locale
 import kotlinx.coroutines.CoroutineScope
@@ -83,6 +81,7 @@ fun RequestsDashboardScreen(
     listProviderViewModel: ListProviderViewModel =
         viewModel(factory = ListProviderViewModel.Factory)
 ) {
+  val user by authViewModel.user.collectAsState()
   // Selected tab index
   var selectedTab by remember { mutableIntStateOf(2) }
   val statusTabs = ServiceRequestStatus.entries.toTypedArray()
@@ -101,10 +100,11 @@ fun RequestsDashboardScreen(
                   onTabSelected = { selectedTab = it })
               JobSectionContent(
                   selectedTab = selectedTab,
+                  providerId = user?.uid ?: "-1",
                   serviceRequestViewModel = serviceRequestViewModel,
                   navigationActions = navigationActions,
                   listProviderViewModel = listProviderViewModel,
-                  authViewModel = authViewModel)
+              )
             }
       })
 }
@@ -173,24 +173,27 @@ fun StatusTabs(selectedTab: Int, tabs: Array<ServiceRequestStatus>, onTabSelecte
  * Composable function that displays the content of the selected tab in the Requests Dashboard
  * screen.
  *
+ * @param providerId ID of the current provider.
  * @param selectedTab Index of the selected tab.
+ * @param listProviderViewModel ViewModel to fetch the provider given his id
  * @param serviceRequestViewModel ViewModel for managing service requests.
+ * @param navigationActions Actions for navigation.
  */
 @Composable
 fun JobSectionContent(
     selectedTab: Int,
-    authViewModel: AuthViewModel,
     listProviderViewModel: ListProviderViewModel,
+    providerId: String,
     serviceRequestViewModel: ServiceRequestViewModel,
     navigationActions: NavigationActions
 ) {
   when (selectedTab) {
-    0 -> PendingJobsSection(serviceRequestViewModel, navigationActions)
-    1 -> AcceptedJobSection(serviceRequestViewModel, navigationActions)
-    2 -> ScheduledJobsSection(serviceRequestViewModel, authViewModel, listProviderViewModel)
-    3 -> CompletedJobsSection(serviceRequestViewModel)
-    4 -> CanceledJobsSection(serviceRequestViewModel)
-    5 -> ArchivedJobsSection(serviceRequestViewModel)
+    0 -> PendingJobsSection(providerId, serviceRequestViewModel, navigationActions)
+    1 -> AcceptedJobSection(providerId, serviceRequestViewModel, navigationActions)
+    2 -> ScheduledJobsSection(providerId, serviceRequestViewModel, listProviderViewModel)
+    3 -> CompletedJobsSection(providerId, serviceRequestViewModel)
+    4 -> CanceledJobsSection(providerId, serviceRequestViewModel)
+    5 -> ArchivedJobsSection(providerId, serviceRequestViewModel)
   }
 }
 
@@ -211,6 +214,7 @@ fun JobSectionContent(
 @Composable
 fun JobListSection(
     title: String,
+    providerId: String,
     requests: List<ServiceRequest>,
     emptyMessage: String,
     onLearnMore: ((ServiceRequest) -> Unit)? = null,
@@ -223,7 +227,6 @@ fun JobListSection(
     onChat: ((ServiceRequest) -> Unit)? = null
 ) {
   // Filter requests based on the current user's ID
-  val providerId = Firebase.auth.currentUser?.uid ?: "-1"
   val filteredRequests = requests.filter { it.providerId == providerId }
   LazyColumn(
       modifier = Modifier.fillMaxSize().padding(16.dp).testTag("${title}Section"),
@@ -260,15 +263,21 @@ fun JobListSection(
 /**
  * Composable functions for displaying the pending requests on the Requests Dashboard screen.
  *
+ * @param providerId ID of the current provider.
  * @param viewModel ViewModel for managing service requests.
  */
 @Composable
-fun PendingJobsSection(viewModel: ServiceRequestViewModel, navigationActions: NavigationActions) {
+fun PendingJobsSection(
+    providerId: String,
+    viewModel: ServiceRequestViewModel,
+    navigationActions: NavigationActions
+) {
   val context = LocalContext.current
   val pendingRequests by viewModel.pendingRequests.collectAsState()
 
   JobListSection(
       title = "Pending",
+      providerId = providerId,
       requests = pendingRequests,
       emptyMessage = "No pending jobs",
       onLearnMore = {
@@ -285,15 +294,21 @@ fun PendingJobsSection(viewModel: ServiceRequestViewModel, navigationActions: Na
 /**
  * Composable functions for displaying the accepted requests on the Requests Dashboard screen.
  *
+ * @param providerId ID of the current provider.
  * @param viewModel ViewModel for managing service requests.
  */
 @Composable
-fun AcceptedJobSection(viewModel: ServiceRequestViewModel, navigationActions: NavigationActions) {
+fun AcceptedJobSection(
+    providerId: String,
+    viewModel: ServiceRequestViewModel,
+    navigationActions: NavigationActions
+) {
   val context = LocalContext.current
   val acceptedRequests by viewModel.acceptedRequests.collectAsState()
 
   JobListSection(
       title = "Accepted",
+      providerId = providerId,
       requests = acceptedRequests,
       emptyMessage = "No accepted jobs",
       onLearnMore = {
@@ -309,17 +324,18 @@ fun AcceptedJobSection(viewModel: ServiceRequestViewModel, navigationActions: Na
 /**
  * Composable functions for displaying the scheduled requests on the Requests Dashboard screen.
  *
+ * @param providerId ID of the current provider.
  * @param viewModel ViewModel for managing service requests.
+ * @param listProviderViewModel ViewModel
  */
 @Composable
 fun ScheduledJobsSection(
+    providerId: String,
     viewModel: ServiceRequestViewModel,
-    authViewModel: AuthViewModel,
     listProviderViewModel: ListProviderViewModel
 ) {
   val context = LocalContext.current
   val scheduledRequests by viewModel.scheduledRequests.collectAsState()
-  val user by authViewModel.user.collectAsState()
 
   Column(Modifier.fillMaxSize().padding(16.dp)) {
     // "Navigate to All Jobs of the Day" button
@@ -342,6 +358,7 @@ fun ScheduledJobsSection(
 
     JobListSection(
         title = "Scheduled",
+        providerId = providerId,
         requests = scheduledRequests,
         emptyMessage = "No scheduled jobs",
         onNavigateToJob = { request ->
@@ -353,7 +370,7 @@ fun ScheduledJobsSection(
         onMarkAsCompleted = { request ->
           CoroutineScope(Dispatchers.Main).launch {
             viewModel.completeRequest(request)
-            val provider = user?.uid?.let { listProviderViewModel.fetchProviderById(it) }
+            val provider = listProviderViewModel.fetchProviderById(providerId)
             // Update nbr of jobs completed of provider
             if (provider != null) {
               listProviderViewModel.updateProvider(
@@ -371,15 +388,17 @@ fun ScheduledJobsSection(
 /**
  * Composable functions for displaying the completed requests on the Requests Dashboard screen.
  *
+ * @param providerId ID of the current provider.
  * @param viewModel ViewModel for managing service requests.
  */
 @Composable
-fun CompletedJobsSection(viewModel: ServiceRequestViewModel) {
+fun CompletedJobsSection(providerId: String, viewModel: ServiceRequestViewModel) {
   val context = LocalContext.current
   val completedRequests by viewModel.completedRequests.collectAsState()
 
   JobListSection(
       title = "Completed",
+      providerId = providerId,
       requests = completedRequests,
       emptyMessage = "No completed jobs",
       onContactCustomer = {
@@ -392,15 +411,17 @@ fun CompletedJobsSection(viewModel: ServiceRequestViewModel) {
 /**
  * Composable functions for displaying the canceled requests on the Requests Dashboard screen.
  *
+ * @param providerId ID of the current provider.
  * @param viewModel ViewModel for managing service requests.
  */
 @Composable
-fun CanceledJobsSection(viewModel: ServiceRequestViewModel) {
+fun CanceledJobsSection(providerId: String, viewModel: ServiceRequestViewModel) {
   val context = LocalContext.current
   val canceledRequests by viewModel.cancelledRequests.collectAsState()
 
   JobListSection(
       title = "Canceled",
+      providerId = providerId,
       requests = canceledRequests,
       emptyMessage = "No canceled jobs",
       onChat = { Toast.makeText(context, "Chat Not yet Implemented", Toast.LENGTH_SHORT).show() },
@@ -413,15 +434,17 @@ fun CanceledJobsSection(viewModel: ServiceRequestViewModel) {
 /**
  * Composable functions for displaying the archived requests on the Requests Dashboard screen.
  *
+ * @param providerId ID of the current provider.
  * @param viewModel ViewModel for managing service requests.
  */
 @Composable
-fun ArchivedJobsSection(viewModel: ServiceRequestViewModel) {
+fun ArchivedJobsSection(providerId: String, viewModel: ServiceRequestViewModel) {
   val context = LocalContext.current
   val archivedRequests by viewModel.archivedRequests.collectAsState()
 
   JobListSection(
       title = "Archived",
+      providerId = providerId,
       requests = archivedRequests,
       emptyMessage = "No archived jobs",
       onChat = { Toast.makeText(context, "Chat Not yet Implemented", Toast.LENGTH_SHORT).show() },

@@ -14,7 +14,6 @@ import com.google.firebase.firestore.QuerySnapshot
 import junit.framework.TestCase.assertNotNull
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
 import org.junit.Before
@@ -62,13 +61,11 @@ class ReviewRepositoryFirestoreTest {
   }
 
   @Test
-  fun init_doesNotCallOnSuccessWhenUserIsNotAuthenticated() {
-    `when`(mockAuth.currentUser).thenReturn(null)
-
+  fun init_CallOnSuccess() {
     var onSuccessCalled = false
     reviewRepositoryFirestore.init { onSuccessCalled = true }
 
-    assertFalse(onSuccessCalled)
+    assertTrue(onSuccessCalled)
   }
 
   @Test
