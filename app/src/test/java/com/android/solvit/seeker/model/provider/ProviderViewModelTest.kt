@@ -6,7 +6,6 @@ import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.provider.ProviderRepository
 import com.android.solvit.shared.model.service.Services
-import com.google.firebase.Timestamp
 import junit.framework.TestCase.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -35,7 +34,7 @@ class ProviderViewModelTest {
           false,
           0.0,
           0.0,
-          Timestamp.now(),
+          20.0,
           emptyList())
 
   @Before

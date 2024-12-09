@@ -12,6 +12,7 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
 import junit.framework.TestCase.assertNotNull
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -442,7 +443,7 @@ class ReviewRepositoryFirestoreTest {
   }
 
   @Test
-  fun calculateAverageRating_multipleReviews_returnsCorrectAverage() {
+  fun calculateAverageRating_multipleReviews_returnsCorrectAverage() = runTest {
     val mockDocumentSnapshotList = listOf(mockDocumentSnapshot, mockDocumentSnapshot)
     `when`(mockQuerySnapshot.documents).thenReturn(mockDocumentSnapshotList)
     `when`(mockCollectionReference.whereEqualTo("field", "value"))
@@ -455,7 +456,7 @@ class ReviewRepositoryFirestoreTest {
   }
 
   @Test
-  fun calculateAverageRating_successfulResult_executesAndReturnsCorrectAverage() {
+  fun calculateAverageRating_successfulResult_executesAndReturnsCorrectAverage() = runTest {
     val mockDocumentSnapshotList = listOf(mockDocumentSnapshot, mockDocumentSnapshot)
     `when`(mockQuerySnapshot.documents).thenReturn(mockDocumentSnapshotList)
 
@@ -470,7 +471,7 @@ class ReviewRepositoryFirestoreTest {
   }
 
   @Test
-  fun getAverageRating_returnsCorrectResult() {
+  fun getAverageRating_returnsCorrectResult() = runTest {
     val mockDocumentSnapshotList = listOf(mockDocumentSnapshot, mockDocumentSnapshot)
     `when`(mockQuerySnapshot.documents).thenReturn(mockDocumentSnapshotList)
 
@@ -485,7 +486,7 @@ class ReviewRepositoryFirestoreTest {
   }
 
   @Test
-  fun getAverageRatingByProvider_returnsCorrectResult() {
+  fun getAverageRatingByProvider_returnsCorrectResult() = runTest {
     val mockDocumentSnapshotList = listOf(mockDocumentSnapshot, mockDocumentSnapshot)
     `when`(mockQuerySnapshot.documents).thenReturn(mockDocumentSnapshotList)
 
@@ -500,7 +501,7 @@ class ReviewRepositoryFirestoreTest {
   }
 
   @Test
-  fun getAverageRatingByUser_returnsCorrectResult() {
+  fun getAverageRatingByUser_returnsCorrectResult() = runTest {
     val mockDocumentSnapshotList = listOf(mockDocumentSnapshot, mockDocumentSnapshot)
     `when`(mockQuerySnapshot.documents).thenReturn(mockDocumentSnapshotList)
 

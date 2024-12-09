@@ -36,7 +36,7 @@ class ProviderRepositoryFirestore(
       val rating = doc.getDouble("rating") ?: return null
       val popular = doc.getBoolean("popular") ?: return null
       val price = doc.getDouble("price") ?: return null
-      val deliveryTime = doc.getDouble("deliveryTime") ?: return null
+      val nbrOfJobs = doc.getDouble("nbrOfJobs") ?: return null
       val languages = (doc.get("languages") as List<*>).map { Language.valueOf(it as String) }
       val companyName = doc.getString("companyName") ?: ""
       val phone = doc.getString("phone") ?: ""
@@ -57,7 +57,7 @@ class ProviderRepositoryFirestore(
           popular,
           rating,
           price,
-          deliveryTime,
+          nbrOfJobs = nbrOfJobs,
           languages,
           schedule)
     } catch (e: Exception) {

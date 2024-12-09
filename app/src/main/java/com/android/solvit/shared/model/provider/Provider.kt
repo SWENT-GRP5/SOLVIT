@@ -15,8 +15,7 @@ data class Provider(
     val popular: Boolean = false,
     val rating: Double = 1.0,
     val price: Double = 0.0,
-    val deliveryTime: Double = 60.0,
+    val nbrOfJobs: Double = 0.0,
     val languages: List<Language> = emptyList(),
     val schedule: Schedule = Schedule(),
-    val jobsCompleted: Int = 0
 )

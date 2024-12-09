@@ -19,7 +19,6 @@ import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.provider.ProviderRepository
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
-import com.google.firebase.Timestamp
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -57,8 +56,7 @@ class ListProviderScreenTest {
           true,
           5.0,
           25.0,
-          Timestamp.now(),
-          listOf(Language.FRENCH, Language.ENGLISH, Language.ARABIC, Language.SPANISH))
+          languages = listOf(Language.FRENCH, Language.ENGLISH, Language.ARABIC, Language.SPANISH))
 
   private val provider2 =
       Provider(
@@ -73,8 +71,7 @@ class ListProviderScreenTest {
           true,
           5.0,
           25.0,
-          Timestamp.now(),
-          listOf(Language.SPANISH))
+          languages = listOf(Language.SPANISH))
 
   @Before
   fun setUp() {

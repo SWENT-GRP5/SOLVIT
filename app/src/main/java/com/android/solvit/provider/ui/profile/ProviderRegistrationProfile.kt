@@ -746,7 +746,10 @@ fun UploadImage(selectedImageUri: Uri?, imageUrl: String?, onImageSelected: (Uri
             Text(
                 "Click to upload a picture of you",
                 color = colorScheme.onSurfaceVariant,
-                modifier = Modifier.clickable { imagePickerLauncher.launch("image/*") },
+                modifier =
+                    Modifier.testTag("uploadImage").clickable {
+                      imagePickerLauncher.launch("image/*")
+                    },
                 style =
                     MaterialTheme.typography.bodyLarge.copy(
                         textDecoration = TextDecoration.Underline))

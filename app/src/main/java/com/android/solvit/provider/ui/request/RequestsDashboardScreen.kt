@@ -1,5 +1,6 @@
 package com.android.solvit.provider.ui.request
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -49,6 +50,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.android.solvit.seeker.model.provider.ListProviderViewModel
+import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestStatus
 import com.android.solvit.shared.model.request.ServiceRequestStatus.Companion.format
@@ -61,6 +64,9 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import java.text.SimpleDateFormat
 import java.util.Locale
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 /**
  * Composable function that displays the Requests Dashboard screen.
@@ -72,7 +78,10 @@ import java.util.Locale
 fun RequestsDashboardScreen(
     navigationActions: NavigationActions,
     serviceRequestViewModel: ServiceRequestViewModel =
-        viewModel(factory = ServiceRequestViewModel.Factory)
+        viewModel(factory = ServiceRequestViewModel.Factory),
+    authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory),
+    listProviderViewModel: ListProviderViewModel =
+        viewModel(factory = ListProviderViewModel.Factory)
 ) {
   // Selected tab index
   var selectedTab by remember { mutableIntStateOf(2) }
@@ -93,7 +102,9 @@ fun RequestsDashboardScreen(
               JobSectionContent(
                   selectedTab = selectedTab,
                   serviceRequestViewModel = serviceRequestViewModel,
-                  navigationActions = navigationActions)
+                  navigationActions = navigationActions,
+                  listProviderViewModel = listProviderViewModel,
+                  authViewModel = authViewModel)
             }
       })
 }
@@ -168,13 +179,15 @@ fun StatusTabs(selectedTab: Int, tabs: Array<ServiceRequestStatus>, onTabSelecte
 @Composable
 fun JobSectionContent(
     selectedTab: Int,
+    authViewModel: AuthViewModel,
+    listProviderViewModel: ListProviderViewModel,
     serviceRequestViewModel: ServiceRequestViewModel,
     navigationActions: NavigationActions
 ) {
   when (selectedTab) {
     0 -> PendingJobsSection(serviceRequestViewModel, navigationActions)
     1 -> AcceptedJobSection(serviceRequestViewModel, navigationActions)
-    2 -> ScheduledJobsSection(serviceRequestViewModel)
+    2 -> ScheduledJobsSection(serviceRequestViewModel, authViewModel, listProviderViewModel)
     3 -> CompletedJobsSection(serviceRequestViewModel)
     4 -> CanceledJobsSection(serviceRequestViewModel)
     5 -> ArchivedJobsSection(serviceRequestViewModel)
@@ -299,9 +312,14 @@ fun AcceptedJobSection(viewModel: ServiceRequestViewModel, navigationActions: Na
  * @param viewModel ViewModel for managing service requests.
  */
 @Composable
-fun ScheduledJobsSection(viewModel: ServiceRequestViewModel) {
+fun ScheduledJobsSection(
+    viewModel: ServiceRequestViewModel,
+    authViewModel: AuthViewModel,
+    listProviderViewModel: ListProviderViewModel
+) {
   val context = LocalContext.current
   val scheduledRequests by viewModel.scheduledRequests.collectAsState()
+  val user by authViewModel.user.collectAsState()
 
   Column(Modifier.fillMaxSize().padding(16.dp)) {
     // "Navigate to All Jobs of the Day" button
@@ -332,7 +350,19 @@ fun ScheduledJobsSection(viewModel: ServiceRequestViewModel) {
         onContactCustomer = {
           Toast.makeText(context, "Contact Not yet Implemented", Toast.LENGTH_SHORT).show()
         },
-        onMarkAsCompleted = { request -> viewModel.completeRequest(request) },
+        onMarkAsCompleted = { request ->
+          CoroutineScope(Dispatchers.Main).launch {
+            viewModel.completeRequest(request)
+            val provider = user?.uid?.let { listProviderViewModel.fetchProviderById(it) }
+            // Update nbr of jobs completed of provider
+            if (provider != null) {
+              listProviderViewModel.updateProvider(
+                  provider.copy(nbrOfJobs = provider.nbrOfJobs + 1))
+            } else {
+              Log.e("JobsSection", "Failed to fetch provider")
+            }
+          }
+        },
         onCancelRequest = { request -> viewModel.cancelRequest(request) },
         onChat = { Toast.makeText(context, "Chat Not yet Implemented", Toast.LENGTH_SHORT).show() })
   }

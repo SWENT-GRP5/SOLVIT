@@ -144,13 +144,10 @@ class ListProviderViewModel(private val repository: ProviderRepository) : ViewMo
                   _providersListFiltered.value.sortedBy {
                     it.price + Random.nextDouble(1.0, 1000.0)
                   }
-      "Time" ->
+      "Highest Activity" ->
           _providersListFiltered.value =
-              if (isSelected) _providersListFiltered.value.sortedBy { it.deliveryTime }
-              else
-                  _providersListFiltered.value.sortedBy {
-                    it.deliveryTime + Random.nextDouble(1.0, 100000.0)
-                  }
+              if (isSelected) _providersListFiltered.value.sortedBy { it.nbrOfJobs }
+              else _providersListFiltered.value.sortedBy { it.nbrOfJobs }
     }
   }
 }

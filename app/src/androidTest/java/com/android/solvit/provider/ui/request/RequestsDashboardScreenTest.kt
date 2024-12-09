@@ -7,7 +7,11 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.solvit.seeker.model.provider.ListProviderViewModel
+import com.android.solvit.shared.model.authentication.AuthRep
+import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.map.Location
+import com.android.solvit.shared.model.provider.ProviderRepository
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestRepository
 import com.android.solvit.shared.model.request.ServiceRequestStatus
@@ -32,6 +36,10 @@ class RequestsDashboardScreenTest {
   private lateinit var viewModel: ServiceRequestViewModel
   private lateinit var navigationActions: NavigationActions
   private lateinit var serviceRequestRepository: ServiceRequestRepository
+  private lateinit var authRep: AuthRep
+  private lateinit var providerRepository: ProviderRepository
+  private lateinit var authViewModel: AuthViewModel
+  private lateinit var providerViewModel: ListProviderViewModel
 
   private val request =
       ServiceRequest(
@@ -53,13 +61,21 @@ class RequestsDashboardScreenTest {
   fun setup() {
     serviceRequestRepository = mock(ServiceRequestRepository::class.java)
     navigationActions = mock(NavigationActions::class.java)
+    authRep = mock(AuthRep::class.java)
+    providerRepository = mock(ProviderRepository::class.java)
+    authViewModel = AuthViewModel(authRep)
+    providerViewModel = ListProviderViewModel(providerRepository)
     viewModel = ServiceRequestViewModel(serviceRequestRepository)
   }
 
   @Test
   fun testInitialTabIsCurrent() {
     composeTestRule.setContent {
-      RequestsDashboardScreen(navigationActions, serviceRequestViewModel = viewModel)
+      RequestsDashboardScreen(
+          navigationActions,
+          serviceRequestViewModel = viewModel,
+          authViewModel = authViewModel,
+          listProviderViewModel = providerViewModel)
     }
 
     // Verify that the "Current" tab is selected by default

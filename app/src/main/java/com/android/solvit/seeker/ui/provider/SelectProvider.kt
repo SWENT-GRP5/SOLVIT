@@ -174,7 +174,7 @@ fun SpTopAppBar(
 @Composable
 fun SpFilterBar(display: () -> Unit, listProviderViewModel: ListProviderViewModel) {
 
-  val filters = listOf("Top Rates", "Top Prices", "Time")
+  val filters = listOf("Top Rates", "Top Prices", "Highest Activity")
 
   val isSelected = remember { mutableStateListOf(-1, -1, -1) }
   Log.e("Debug", "$isSelected")
@@ -194,7 +194,9 @@ fun SpFilterBar(display: () -> Unit, listProviderViewModel: ListProviderViewMode
                               val index = filters.indexOf(filter)
                               isSelected[index] = if (isSelected[index] == index) -1 else index
                               listProviderViewModel.sortProviders(
-                                  filter, isSelected[index] == index)
+                                  filter,
+                                  isSelected[index] == index,
+                              )
                             }
                             .shadow(
                                 elevation = 8.dp,
