@@ -28,7 +28,6 @@ class SignUpChooseProfileTest {
     composeTestRule.onNodeWithTag("signUpAsTitle").assertIsDisplayed()
     composeTestRule.onNodeWithTag("seekerButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("providerButton").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("learnMoreLink").assertIsDisplayed()
   }
 
   @Test
@@ -38,7 +37,6 @@ class SignUpChooseProfileTest {
     composeTestRule.onNodeWithTag("goBackButton").performClick()
     composeTestRule.onNodeWithTag("seekerButton").performClick()
     composeTestRule.onNodeWithTag("providerButton").performClick()
-    composeTestRule.onNodeWithTag("learnMoreLink").performClick()
 
     verify(mockNavigationActions).goBack()
   }

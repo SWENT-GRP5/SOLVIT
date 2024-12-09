@@ -48,7 +48,6 @@ import com.android.solvit.shared.model.packages.PackageProposalViewModel
 import com.android.solvit.shared.model.packages.PackagesAssistantViewModel
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.review.ReviewViewModel
-import com.android.solvit.shared.ui.authentication.ForgotPassword
 import com.android.solvit.shared.ui.authentication.OpeningScreen
 import com.android.solvit.shared.ui.authentication.SignInScreen
 import com.android.solvit.shared.ui.authentication.SignUpChooseProfile
@@ -176,7 +175,6 @@ fun SharedUI(
           packageProposalViewModel,
           packagesAssistantViewModel)
     }
-    composable(Screen.FORGOT_PASSWORD) { ForgotPassword(navigationActions) }
     composable(Screen.SEEKER_REGISTRATION_PROFILE) {
       SeekerRegistrationScreen(
           seekerProfileViewModel, navigationActions, locationViewModel, authViewModel)
