@@ -25,7 +25,6 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito.anyString
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.verify
 
@@ -236,6 +235,6 @@ class SignUpButtonTest {
     }
     composeTestRule.onNodeWithTag("signUpButton").performClick()
 
-    verify(exactly = 0) { Toast.makeText(any(), anyString(), any()) }
+    verify(exactly = 0) { Toast.makeText(any(), any<String>(), any()) }
   }
 }
