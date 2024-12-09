@@ -243,7 +243,7 @@ fun ProviderRegistrationScreen(
                 CustomOutlinedTextField(
                     value = fullName,
                     onValueChange = { fullName = it },
-                    label = "Full Name",
+                    label = "Full/Last Name",
                     placeholder = "Enter your full name",
                     isValueOk = isFullNameOk,
                     errorMessage = "Enter a valid first and last name",
@@ -570,7 +570,8 @@ fun ProviderDetails(
       selectedService.isNotEmpty() &&
           isDescriptionOk &&
           isStartingPriceOk &&
-          selectedLanguages.isNotEmpty()
+          selectedLanguages.isNotEmpty() &&
+          providerImageUri != null
 
   Column(
       modifier = Modifier.fillMaxSize().padding(16.dp),
@@ -751,13 +752,23 @@ fun UploadImage(selectedImageUri: Uri?, imageUrl: String?, onImageSelected: (Uri
                         textDecoration = TextDecoration.Underline))
           }
         } else {
-          AsyncImage(
-              model =
-                  selectedImageUri?.toString()
-                      ?: imageUrl, // Show selected image URI or fallback URL
-              contentDescription = "Uploaded Image",
-              contentScale = ContentScale.Crop,
-              modifier = Modifier.fillMaxSize())
+          Box(modifier = Modifier.fillMaxSize()) {
+            AsyncImage(
+                model =
+                    selectedImageUri?.toString()
+                        ?: imageUrl, // Show selected image URI or fallback URL
+                contentDescription = "Uploaded Image",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize())
+            Image(
+                painter = painterResource(id = R.drawable.close_icon),
+                contentDescription = "Delete Image",
+                contentScale = ContentScale.Fit,
+                modifier =
+                    Modifier.align(Alignment.TopEnd).size(32.dp).padding(4.dp).clickable {
+                      onImageSelected(null)
+                    })
+          }
         }
       }
 }

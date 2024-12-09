@@ -83,7 +83,7 @@ class AuthRepository(private val auth: FirebaseAuth, private val db: FirebaseFir
     auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener {
       if (it.isSuccessful) {
         Log.d("AuthRepository", "Registration successful")
-        val user = User(it.result!!.user!!.uid, role, email)
+        val user = User(uid = it.result!!.user!!.uid, role = role, email = email)
         createUserDocument(user, { onSuccess(user) }, onFailure)
       } else {
         Log.w("AuthRepository", "Registration failed", it.exception)
@@ -102,7 +102,7 @@ class AuthRepository(private val auth: FirebaseAuth, private val db: FirebaseFir
     auth.signInWithCredential(credential).addOnCompleteListener {
       if (it.isSuccessful) {
         Log.d("AuthRepository", "Google sign-in successful")
-        val user = User(it.result!!.user!!.uid, role, it.result!!.user!!.email!!)
+        val user = User(it.result!!.user!!.uid, role, email = it.result!!.user!!.email!!)
         createUserDocument(user, { onSuccess(user) }, onFailure)
       } else {
         Log.w("AuthRepository", "Google sign-in failed", it.exception)
