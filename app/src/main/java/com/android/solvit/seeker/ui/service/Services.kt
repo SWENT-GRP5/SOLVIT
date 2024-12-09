@@ -133,7 +133,7 @@ fun TopSection(
                   contentDescription = "profile picture",
                   Modifier.size(40.dp)
                       .clip(CircleShape)
-                      .clickable { navigationActions.navigateTo(Route.PROFILE) }
+                      .clickable { navigationActions.navigateTo(Route.SEEKER_PROFILE) }
                       .testTag("servicesScreenProfileImage"))
               Column(
                   modifier = Modifier.width(135.dp).testTag("servicesScreenCurrentLocation"),

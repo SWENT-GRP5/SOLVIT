@@ -56,7 +56,7 @@ class ServicesScreenTest {
   @Test
   fun profileImageNavigatesToProfileScreen() {
     composeTestRule.onNodeWithTag("servicesScreenProfileImage").performClick()
-    verify(navigationActions).navigateTo(Route.PROFILE)
+    verify(navigationActions).navigateTo(Route.SEEKER_PROFILE)
   }
 
   @Test

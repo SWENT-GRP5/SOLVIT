@@ -20,7 +20,7 @@ object Route {
   const val EDIT_REQUEST = "Edit request"
   const val REQUESTS_OVERVIEW = "Requests"
   const val INBOX = "Messages"
-  const val PROFILE = "Profile"
+  const val SEEKER_PROFILE = "Profile"
   const val PROVIDERS = "Providers"
   const val MAP = "Map"
   const val MAP_OF_SEEKERS = "Seekers Map"
@@ -92,7 +92,7 @@ object TopLevelDestinations {
           route = Route.REQUESTS_OVERVIEW, icon = Icons.Outlined.Menu, textId = "Overview")
   val SEEKER_PROFILE =
       TopLevelDestination(
-          route = Route.PROFILE, icon = Icons.Outlined.AccountCircle, textId = "Profile")
+          route = Route.SEEKER_PROFILE, icon = Icons.Outlined.AccountCircle, textId = "Profile")
   val PROVIDER_PROFILE =
       TopLevelDestination(
           route = Screen.PROVIDER_PROFILE, icon = Icons.Outlined.AccountCircle, textId = "Profile")

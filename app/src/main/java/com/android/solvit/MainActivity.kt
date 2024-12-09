@@ -273,7 +273,7 @@ fun SeekerUI(
       EditRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
     }
     composable(Route.MAP) { SeekerMapScreen(listProviderViewModel, navigationActions) }
-    navigation(startDestination = Screen.PROFILE, route = Route.PROFILE) {
+    navigation(startDestination = Screen.PROFILE, route = Route.SEEKER_PROFILE) {
       composable(Screen.PROFILE) {
         SeekerProfileScreen(seekerProfileViewModel, navigationActions, authViewModel)
       }

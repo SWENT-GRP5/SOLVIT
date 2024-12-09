@@ -127,7 +127,6 @@ fun ChatListTopBar(
     chatViewModel: ChatViewModel,
     authViewModel: AuthViewModel
 ) {
-
   TopAppBar(
       modifier = Modifier.testTag("InboxTopAppBar"),
       title = {

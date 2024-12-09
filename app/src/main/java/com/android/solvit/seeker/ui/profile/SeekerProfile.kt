@@ -66,7 +66,9 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.solvit.R
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
+import com.android.solvit.seeker.ui.navigation.BottomNavigationMenu
 import com.android.solvit.shared.model.authentication.AuthViewModel
+import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_PROVIDER
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
 
@@ -112,13 +114,6 @@ fun SeekerProfileScreen(
                   fontWeight = FontWeight.Bold,
               )
             },
-            navigationIcon = {
-              IconButton(
-                  onClick = { navigationActions.goBack() },
-                  modifier = Modifier.testTag("BackButton")) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                  }
-            },
             actions = {
               IconButton(
                   onClick = { showLogoutDialog = true },
@@ -132,9 +127,14 @@ fun SeekerProfileScreen(
                     containerColor = colorScheme.background,
                     navigationIconContentColor = colorScheme.onBackground,
                     titleContentColor = colorScheme.onBackground,
-                    actionIconContentColor = colorScheme.onBackground))
+                    actionIconContentColor = colorScheme.onBackground))},
+          bottomBar = {
+              BottomNavigationMenu(
+                  onTabSelect = { navigationActions.navigateTo(it.route) },
+                  tabList = LIST_TOP_LEVEL_DESTINATION_PROVIDER,
+                  selectedItem = navigationActions.currentRoute())
+
       },
-      bottomBar = {},
       containerColor = Color.Transparent,
   ) { paddingValues ->
     LazyColumn(
