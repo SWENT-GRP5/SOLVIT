@@ -46,7 +46,11 @@ class AuthViewModel(private val authRepository: AuthRep) : ViewModel() {
     authRepository.init {
       _user.value = it
       if (it != null) {
-        _userRegistered.value = true
+        _email.value = it.email
+        _role.value = it.role
+        if (it.registrationCompleted) {
+          _userRegistered.value = true
+        }
       }
     }
   }
@@ -88,6 +92,7 @@ class AuthViewModel(private val authRepository: AuthRep) : ViewModel() {
   fun signInWithGoogle(onSuccess: () -> Unit, onFailure: () -> Unit) {
     if (googleAccount.value == null) {
       onFailure()
+      return
     }
     authRepository.signInWithGoogle(
         googleAccount.value!!,
@@ -120,6 +125,7 @@ class AuthViewModel(private val authRepository: AuthRep) : ViewModel() {
   fun registerWithGoogle(onSuccess: () -> Unit, onFailure: () -> Unit) {
     if (googleAccount.value == null) {
       onFailure()
+      return
     }
     authRepository.registerWithGoogle(
         googleAccount.value!!,
@@ -160,7 +166,12 @@ class AuthViewModel(private val authRepository: AuthRep) : ViewModel() {
   }
 
   fun addUserLocation(location: Location, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
-    val userLocations = user.value?.locations ?: emptyList()
+    if (user.value == null) {
+      Log.e("AuthViewModel", "User is null")
+      onFailure(Exception("User is null"))
+      return
+    }
+    val userLocations = user.value!!.locations
     if (userLocations.contains(location)) {
       Log.d("AuthViewModel", "User already has this location")
       onSuccess()
@@ -168,6 +179,7 @@ class AuthViewModel(private val authRepository: AuthRep) : ViewModel() {
     }
     val updatedLocations = (listOf(location) + userLocations).take(maxLocationsSize)
     authRepository.updateUserLocations(
+        user.value!!.uid,
         updatedLocations,
         {
           _user.value = user.value?.copy(locations = updatedLocations)
@@ -185,7 +197,12 @@ class AuthViewModel(private val authRepository: AuthRep) : ViewModel() {
       onSuccess: () -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    val userLocations = user.value?.locations ?: emptyList()
+    if (user.value == null) {
+      Log.e("AuthViewModel", "User is null")
+      onFailure(Exception("User is null"))
+      return
+    }
+    val userLocations = user.value!!.locations
     if (!userLocations.contains(location)) {
       Log.d("AuthViewModel", "User does not have this location")
       onSuccess()
@@ -193,6 +210,7 @@ class AuthViewModel(private val authRepository: AuthRep) : ViewModel() {
     }
     val updatedLocations = userLocations.filter { it != location }
     authRepository.updateUserLocations(
+        user.value!!.uid,
         updatedLocations,
         {
           _user.value = user.value?.copy(locations = updatedLocations)
@@ -203,5 +221,20 @@ class AuthViewModel(private val authRepository: AuthRep) : ViewModel() {
           Log.e("AuthViewModel", "Error updating user locations", it)
           onFailure(it)
         })
+  }
+
+  fun completeRegistration(onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+    if (user.value == null) {
+      Log.e("AuthViewModel", "User is null")
+      onFailure(Exception("User is null"))
+      return
+    }
+    authRepository.completeRegistration(
+        user.value!!.uid,
+        {
+          _user.value = user.value!!.copy(registrationCompleted = true)
+          onSuccess()
+        },
+        { Log.e("AuthViewModel", "Error completing registration", it) })
   }
 }

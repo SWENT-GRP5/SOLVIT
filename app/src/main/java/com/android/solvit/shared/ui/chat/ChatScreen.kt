@@ -99,7 +99,6 @@ import com.android.solvit.shared.ui.navigation.Screen
 import com.android.solvit.shared.ui.theme.Black
 import com.android.solvit.shared.ui.utils.getReceiverImageUrl
 import com.android.solvit.shared.ui.utils.getReceiverName
-import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -166,7 +165,7 @@ fun ChatScreen(
                 item { RequestDetails(request!!, serviceRequestViewModel, navigationActions) }
               }
               items(messages) { message ->
-                if (message.senderId == FirebaseAuth.getInstance().currentUser?.uid) {
+                if (message.senderId == user?.uid) {
                   // Item for messages authentified user send
                   SentMessage(message, true)
                 } else {
@@ -402,7 +401,7 @@ fun AiSolverScreen(
       }) { paddingValues ->
         LazyColumn(modifier = Modifier.padding(paddingValues).imePadding().testTag("chat")) {
           items(conversation) { message ->
-            if (message.senderId == FirebaseAuth.getInstance().currentUser?.uid) {
+            if (message.senderId == user?.uid) {
               SentMessage(message, true)
             } else {
               SentMessage(message, false, true, "")
@@ -746,7 +745,7 @@ fun buildMessage(
           text = messageText,
           imageUrl = imageUrl,
           senderId = userId,
-          senderName = senderName, // To Update
+          senderName = senderName,
           timestamp = System.currentTimeMillis())
     }
     // User send only a text
@@ -754,7 +753,7 @@ fun buildMessage(
       ChatMessage.TextMessage(
           message = messageText,
           senderId = userId,
-          senderName = "Hassan", // To Update
+          senderName = senderName,
           timestamp = System.currentTimeMillis())
     }
     // User send only a message
@@ -762,7 +761,7 @@ fun buildMessage(
       ChatMessage.ImageMessage(
           imageUrl = imageUrl,
           senderId = userId,
-          senderName = "Hassan", // To Update
+          senderName = senderName,
           timestamp = System.currentTimeMillis())
     }
     else -> null

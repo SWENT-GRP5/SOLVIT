@@ -156,8 +156,14 @@ fun SharedUI(
 ) {
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
+  val user by authViewModel.user.collectAsState()
 
-  NavHost(navController = navController, startDestination = Route.AUTH) {
+  val startDestination =
+      if (user == null) Route.AUTH
+      else if (user!!.role == "seeker") Screen.SEEKER_REGISTRATION_PROFILE
+      else Screen.PROVIDER_REGISTRATION_PROFILE
+
+  NavHost(navController = navController, startDestination = startDestination) {
     composable(Route.AUTH) { OpeningScreen(navigationActions) }
     composable(Screen.SIGN_IN) { SignInScreen(navigationActions, authViewModel) }
     composable(Screen.SIGN_UP) { SignUpScreen(navigationActions, authViewModel) }
@@ -315,7 +321,8 @@ fun ProviderUI(
       ListRequestsFeedScreen(
           serviceRequestViewModel = serviceRequestViewModel,
           navigationActions = navigationActions,
-          notificationViewModel = notificationViewModel)
+          notificationViewModel = notificationViewModel,
+          authViewModel = authViewModel)
     }
     composable(Route.MAP_OF_SEEKERS) {
       ProviderMapScreen(
@@ -323,9 +330,6 @@ fun ProviderUI(
     }
     composable(Screen.CALENDAR) {
       ProviderCalendarScreen(navigationActions = navigationActions, viewModel = calendarViewModel)
-    }
-    composable(Screen.MY_JOBS) {
-      RequestsDashboardScreen(navigationActions, serviceRequestViewModel)
     }
     composable(Route.BOOKING_DETAILS) {
       ServiceBookingScreen(
@@ -365,8 +369,16 @@ fun ProviderUI(
             serviceRequestViewModel = serviceRequestViewModel)
       }
     }
-
-    composable(Screen.MY_JOBS) { RequestsDashboardScreen(navigationActions = navigationActions) }
+    composable(Screen.MY_JOBS) {
+      RequestsDashboardScreen(
+          navigationActions = navigationActions,
+          serviceRequestViewModel = serviceRequestViewModel,
+          authViewModel = authViewModel)
+    }
+    composable(Screen.PROVIDER_MODIFY_PROFILE) {
+      ModifyProviderInformationScreen(
+          providerViewModel, authViewModel, locationViewModel, navigationActions)
+    }
     composable(Screen.NOTIFICATIONS) {
       user?.let { it1 -> NotificationScreen(notificationViewModel, it1.uid, navigationActions) }
     }
