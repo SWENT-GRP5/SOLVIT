@@ -8,7 +8,6 @@ import com.android.solvit.shared.model.service.Services
 import com.google.android.gms.tasks.TaskCompletionSource
 import com.google.firebase.FirebaseApp
 import com.google.firebase.Timestamp
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot

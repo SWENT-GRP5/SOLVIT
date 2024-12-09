@@ -155,8 +155,14 @@ fun SharedUI(
 ) {
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
+  val user by authViewModel.user.collectAsState()
 
-  NavHost(navController = navController, startDestination = Route.AUTH) {
+  val startDestination =
+      if (user == null) Route.AUTH
+      else if (user!!.role == "seeker") Screen.SEEKER_REGISTRATION_PROFILE
+      else Screen.PROVIDER_REGISTRATION_PROFILE
+
+  NavHost(navController = navController, startDestination = startDestination) {
     composable(Route.AUTH) { OpeningScreen(navigationActions) }
     composable(Screen.SIGN_IN) { SignInScreen(navigationActions, authViewModel) }
     composable(Screen.SIGN_UP) { SignUpScreen(navigationActions, authViewModel) }
