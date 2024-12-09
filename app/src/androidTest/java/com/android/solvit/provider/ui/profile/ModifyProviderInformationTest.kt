@@ -9,7 +9,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.navigation.NavController
-import com.android.solvit.seeker.model.provider.ListProviderViewModel
+import com.android.solvit.provider.model.profile.ProviderViewModel
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.map.LocationRepository
 import com.android.solvit.shared.model.map.LocationViewModel
@@ -28,7 +28,7 @@ import org.mockito.kotlin.anyOrNull
 class ProfessionalProfileScreenTest {
 
   private lateinit var providerRepository: ProviderRepository
-  private lateinit var listProviderViewModel: ListProviderViewModel
+  private lateinit var providerViewModel: ProviderViewModel
 
   private lateinit var navController: NavController
   private lateinit var navigationActions: NavigationActions
@@ -59,7 +59,7 @@ class ProfessionalProfileScreenTest {
   @Before
   fun setUp() {
     providerRepository = mock(ProviderRepository::class.java)
-    listProviderViewModel = ListProviderViewModel(providerRepository)
+    providerViewModel = ProviderViewModel(providerRepository)
 
     navController = mock(NavController::class.java)
     navigationActions = NavigationActions(navController)
@@ -79,7 +79,7 @@ class ProfessionalProfileScreenTest {
 
     composeTestRule.setContent {
       ModifyProviderInformationScreen(
-          listProviderViewModel = listProviderViewModel,
+          providerViewModel = providerViewModel,
           locationViewModel = locationViewModel,
           navigationActions = navigationActions)
     }
