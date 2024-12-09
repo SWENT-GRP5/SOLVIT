@@ -398,7 +398,7 @@ fun ServiceBookingScreen(
                     elevation = CardDefaults.cardElevation(0.dp) // No shadow
                     ) {
                       AsyncImage(
-                          modifier = Modifier.fillMaxSize(),
+                          modifier = Modifier.fillMaxSize().height(200.dp),
                           model = request!!.imageUrl,
                           placeholder = painterResource(id = R.drawable.loading),
                           error = painterResource(id = R.drawable.error),
