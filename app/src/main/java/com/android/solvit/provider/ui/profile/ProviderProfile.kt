@@ -32,6 +32,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.colorScheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -59,10 +60,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.android.solvit.R
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
+import com.android.solvit.seeker.ui.navigation.BottomNavigationMenu
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.service.Services
+import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_PROVIDER
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
 
@@ -75,7 +78,7 @@ import com.android.solvit.shared.ui.navigation.Screen
  * @param authViewModel The ViewModel managing authentication.
  * @param navigationActions Actions for navigating between screens.
  */
-@SuppressLint("SourceLockedOrientationActivity")
+@SuppressLint("SourceLockedOrientationActivity", "UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun ProviderProfileScreen(
     listProviderViewModel: ListProviderViewModel =
@@ -95,16 +98,22 @@ fun ProviderProfileScreen(
   val providers = listProviderViewModel.providersList.collectAsState()
   val provider by remember { mutableStateOf(providers.value.firstOrNull { it.uid == userId }) }
 
-  // Log.d("ProviderProfileScreen", "Provider: $provider")
-
-  Column(
-      modifier =
-          Modifier.fillMaxSize()
-              .background(colorScheme.background)
-              .verticalScroll(rememberScrollState())) {
-        ProfileHeader(navigationActions, provider!!, authViewModel)
-        DescriptionSection(provider = provider!!)
-        StatsSection(provider = provider!!)
+  Scaffold(
+      bottomBar = {
+        BottomNavigationMenu(
+            onTabSelect = { navigationActions.navigateTo(it.route) },
+            tabList = LIST_TOP_LEVEL_DESTINATION_PROVIDER,
+            selectedItem = navigationActions.currentRoute())
+      }) {
+        Column(
+            modifier =
+                Modifier.fillMaxSize()
+                    .background(colorScheme.background)
+                    .verticalScroll(rememberScrollState())) {
+              ProfileHeader(navigationActions, provider!!, authViewModel)
+              DescriptionSection(provider = provider!!)
+              StatsSection(provider = provider!!)
+            }
       }
 }
 
@@ -148,22 +157,6 @@ fun ProfileHeader(
                 .weight(1f),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top) {
-          Column(
-              modifier = Modifier.align(Alignment.Start),
-              horizontalAlignment = Alignment.Start,
-              verticalArrangement = Arrangement.Bottom) {
-                Box {
-                  IconButton(
-                      onClick = { navigationActions.goBack() },
-                      modifier = Modifier.testTag("backButton")) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "GoBackButton",
-                            modifier = Modifier.size(24.dp),
-                            tint = colorScheme.error)
-                      }
-                }
-              }
 
           Spacer(modifier = Modifier.height(20.dp))
 

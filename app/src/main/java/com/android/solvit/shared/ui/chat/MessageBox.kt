@@ -17,11 +17,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -95,10 +92,10 @@ fun MessageBox(
     Scaffold(
         topBar = { ChatListTopBar(navigationActions, chatViewModel, authViewModel) },
         bottomBar = {
-            BottomNavigationMenu(
-                onTabSelect = { navigationActions.navigateTo(it.route) },
-                tabList = LIST_TOP_LEVEL_DESTINATION_PROVIDER,
-                selectedItem = navigationActions.currentRoute())
+          BottomNavigationMenu(
+              onTabSelect = { navigationActions.navigateTo(it.route) },
+              tabList = LIST_TOP_LEVEL_DESTINATION_PROVIDER,
+              selectedItem = if (isReadyToNavigate) Screen.CHAT else Screen.INBOX)
         }) { paddingValues ->
           if (allMessages.isNotEmpty()) {
             LazyColumn(

@@ -22,7 +22,6 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -123,10 +122,10 @@ fun ProviderCalendarScreen(
             colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background))
       },
       bottomBar = {
-          BottomNavigationMenu(
-              onTabSelect = { navigationActions.navigateTo(it.route) },
-              tabList = LIST_TOP_LEVEL_DESTINATION_PROVIDER,
-              selectedItem = navigationActions.currentRoute())
+        BottomNavigationMenu(
+            onTabSelect = { navigationActions.navigateTo(it.route) },
+            tabList = LIST_TOP_LEVEL_DESTINATION_PROVIDER,
+            selectedItem = navigationActions.currentRoute())
       },
       containerColor = colorScheme.background) { paddingValues ->
         Column(modifier = Modifier.fillMaxSize().padding(paddingValues).testTag("calendarColumn")) {

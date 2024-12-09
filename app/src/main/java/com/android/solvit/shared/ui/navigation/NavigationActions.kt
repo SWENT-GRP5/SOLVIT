@@ -90,7 +90,7 @@ object TopLevelDestinations {
   val REQUESTS_OVERVIEW =
       TopLevelDestination(
           route = Route.REQUESTS_OVERVIEW, icon = Icons.Outlined.Menu, textId = "Overview")
-  val PROFILE =
+  val SEEKER_PROFILE =
       TopLevelDestination(
           route = Route.PROFILE, icon = Icons.Outlined.AccountCircle, textId = "Profile")
   val PROVIDER_PROFILE =
@@ -104,7 +104,7 @@ val LIST_TOP_LEVEL_DESTINATION_SEEKER =
         TopLevelDestinations.MAP_OF_PROVIDERS,
         TopLevelDestinations.MESSAGES,
         TopLevelDestinations.REQUESTS_OVERVIEW,
-        TopLevelDestinations.PROFILE)
+        TopLevelDestinations.SEEKER_PROFILE)
 
 val LIST_TOP_LEVEL_DESTINATION_PROVIDER =
     listOf(
