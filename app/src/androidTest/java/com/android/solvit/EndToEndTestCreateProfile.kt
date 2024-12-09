@@ -12,6 +12,7 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.navigation.compose.rememberNavController
 import androidx.test.core.app.ApplicationProvider
+import com.android.solvit.provider.model.ProviderCalendarViewModel
 import com.android.solvit.provider.ui.profile.ProviderRegistrationScreen
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.seeker.model.profile.UserRepository
@@ -24,6 +25,7 @@ import com.android.solvit.shared.model.authentication.AuthRep
 import com.android.solvit.shared.model.authentication.AuthRepository
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.authentication.User
+import com.android.solvit.shared.model.chat.AiSolverViewModel
 import com.android.solvit.shared.model.chat.ChatAssistantViewModel
 import com.android.solvit.shared.model.chat.ChatRepository
 import com.android.solvit.shared.model.chat.ChatRepositoryFirestore
@@ -78,6 +80,8 @@ class EndToEndTestCreateProfile {
   private lateinit var packageProposalViewModel: PackageProposalViewModel
   private lateinit var chatAssistantViewModel: ChatAssistantViewModel
   private lateinit var notificationsViewModel: NotificationsViewModel
+  private lateinit var calendarViewModel: ProviderCalendarViewModel
+  private lateinit var aiSolverViewModel: AiSolverViewModel
   private lateinit var packagesAssistantViewModel: PackagesAssistantViewModel
 
   private lateinit var authRepository: AuthRepository
@@ -121,7 +125,7 @@ class EndToEndTestCreateProfile {
     serviceRequestRepository = ServiceRequestRepositoryFirebase(firestore, storage)
     reviewRepository = ReviewRepositoryFirestore(firestore)
     packageProposalRepositoryFirestore = PackageProposalRepositoryFirestore(firestore)
-    chatRepository = ChatRepositoryFirestore(database)
+    chatRepository = ChatRepositoryFirestore(database, storage, firestore)
     notificationsRepository = NotificationsRepositoryFirestore(firestore)
     packagesAssistantViewModel = PackagesAssistantViewModel()
 
@@ -135,6 +139,8 @@ class EndToEndTestCreateProfile {
     chatViewModel = ChatViewModel(chatRepository)
     chatAssistantViewModel = ChatAssistantViewModel()
     notificationsViewModel = NotificationsViewModel(notificationsRepository)
+    calendarViewModel = ProviderCalendarViewModel(authViewModel, serviceRequestViewModel)
+    aiSolverViewModel = AiSolverViewModel()
 
     `when`(locationRepository.search(ArgumentMatchers.anyString(), anyOrNull(), anyOrNull()))
         .thenAnswer { invocation ->
@@ -184,7 +190,9 @@ class EndToEndTestCreateProfile {
                   locationViewModel,
                   chatViewModel,
                   chatAssistantViewModel,
-                  notificationsViewModel)
+                  notificationsViewModel,
+                  aiSolverViewModel,
+                  packageProposalViewModel)
           "provider" ->
               ProviderUI(
                   authViewModel,
@@ -194,7 +202,9 @@ class EndToEndTestCreateProfile {
                   chatViewModel,
                   notificationsViewModel,
                   locationViewModel,
-                  chatAssistantViewModel)
+                  packageProposalViewModel,
+                  chatAssistantViewModel,
+                  calendarViewModel)
         }
       }
     }

@@ -9,6 +9,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.test.core.app.ApplicationProvider
+import com.android.solvit.provider.model.ProviderCalendarViewModel
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.seeker.model.profile.UserRepository
 import com.android.solvit.seeker.model.profile.UserRepositoryFirestore
@@ -18,6 +19,7 @@ import com.android.solvit.shared.model.NotificationsRepositoryFirestore
 import com.android.solvit.shared.model.NotificationsViewModel
 import com.android.solvit.shared.model.authentication.AuthRepository
 import com.android.solvit.shared.model.authentication.AuthViewModel
+import com.android.solvit.shared.model.chat.AiSolverViewModel
 import com.android.solvit.shared.model.chat.ChatAssistantViewModel
 import com.android.solvit.shared.model.chat.ChatRepository
 import com.android.solvit.shared.model.chat.ChatRepositoryFirestore
@@ -69,6 +71,8 @@ class EndToEndSeekerCreateRequest {
   private lateinit var packageProposalViewModel: PackageProposalViewModel
   private lateinit var chatAssistantViewModel: ChatAssistantViewModel
   private lateinit var notificationsViewModel: NotificationsViewModel
+  private lateinit var calendarViewModel: ProviderCalendarViewModel
+  private lateinit var aiSolverViewModel: AiSolverViewModel
   private lateinit var packagesAssistantViewModel: PackagesAssistantViewModel
 
   private lateinit var authRepository: AuthRepository
@@ -111,7 +115,7 @@ class EndToEndSeekerCreateRequest {
     serviceRequestRepository = ServiceRequestRepositoryFirebase(firestore, storage)
     reviewRepository = ReviewRepositoryFirestore(firestore)
     packageProposalRepository = PackageProposalRepositoryFirestore(firestore)
-    chatRepository = ChatRepositoryFirestore(database)
+    chatRepository = ChatRepositoryFirestore(database, storage, firestore)
     notificationsRepository = NotificationsRepositoryFirestore(firestore)
     packagesAssistantViewModel = PackagesAssistantViewModel()
 
@@ -125,6 +129,8 @@ class EndToEndSeekerCreateRequest {
     chatViewModel = ChatViewModel(chatRepository)
     chatAssistantViewModel = ChatAssistantViewModel()
     notificationsViewModel = NotificationsViewModel(notificationsRepository)
+    calendarViewModel = ProviderCalendarViewModel(authViewModel, serviceRequestViewModel)
+    aiSolverViewModel = AiSolverViewModel()
 
     `when`(locationRepository.search(ArgumentMatchers.anyString(), anyOrNull(), anyOrNull()))
         .thenAnswer { invocation ->
@@ -185,7 +191,9 @@ class EndToEndSeekerCreateRequest {
                   locationViewModel,
                   chatViewModel,
                   chatAssistantViewModel,
-                  notificationsViewModel)
+                  notificationsViewModel,
+                  aiSolverViewModel,
+                  packageProposalViewModel)
           "provider" ->
               ProviderUI(
                   authViewModel,
@@ -195,7 +203,9 @@ class EndToEndSeekerCreateRequest {
                   chatViewModel,
                   notificationsViewModel,
                   locationViewModel,
-                  chatAssistantViewModel)
+                  packageProposalViewModel,
+                  chatAssistantViewModel,
+                  calendarViewModel)
         }
       }
     }
@@ -252,14 +262,11 @@ class EndToEndSeekerCreateRequest {
 
     // Assert the requests to be displayed
     composeTestRule.waitUntil(timeoutMillis = 10000) {
-      composeTestRule.onNodeWithTag("requestsList").isDisplayed()
+      composeTestRule.onNodeWithTag("service_booking_screen").isDisplayed()
     }
+    composeTestRule.onNodeWithTag("service_booking_screen").assertIsDisplayed()
 
     // Delete the request
-    composeTestRule.onNodeWithTag("requestListItem").performClick()
-    composeTestRule.waitUntil(timeoutMillis = 10000) {
-      composeTestRule.onNodeWithTag("edit_button").isDisplayed()
-    }
     composeTestRule.onNodeWithTag("edit_button").performClick()
     composeTestRule.waitUntil(timeoutMillis = 10000) {
       composeTestRule.onNodeWithTag("requestScreen").isDisplayed()

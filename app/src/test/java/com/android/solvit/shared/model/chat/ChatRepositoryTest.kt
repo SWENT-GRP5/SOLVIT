@@ -1,12 +1,28 @@
 package com.android.solvit.shared.model.chat
 
+import android.net.Uri
+import com.android.solvit.shared.model.utils.uploadImageToStorage
+import com.google.android.gms.tasks.OnFailureListener
+import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.gms.tasks.Task
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.Query
 import com.google.firebase.database.ValueEventListener
+import com.google.firebase.firestore.CollectionReference
+import com.google.firebase.firestore.DocumentReference
+import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
+import com.google.firebase.storage.UploadTask
 import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.assertFalse
+import junit.framework.TestCase.assertNotNull
+import junit.framework.TestCase.assertNull
+import junit.framework.TestCase.assertTrue
+import kotlin.test.DefaultAsserter.fail
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito.doNothing
@@ -15,21 +31,37 @@ import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 
 class ChatRepositoryTest {
   private lateinit var mockFirebaseDatabase: FirebaseDatabase
+  private lateinit var mockFirebaseFirestore: FirebaseFirestore
   private lateinit var chatRepository: ChatRepository
   private lateinit var mockDatabaseReference: DatabaseReference
   private lateinit var mockDataSnapshot: DataSnapshot
+  private lateinit var mockFirebaseStorage: FirebaseStorage
+  private lateinit var mockCollectionRef: CollectionReference
+  private lateinit var mockDocumentRef: DocumentReference
+  private lateinit var mockDocumentSnapshot: DocumentSnapshot
+  private lateinit var mockTaskDoc: Task<DocumentSnapshot>
+  private lateinit var mockTaskVoid: Task<Void>
 
   @Before
   fun setUp() {
     MockitoAnnotations.openMocks(this)
     mockFirebaseDatabase = mock(FirebaseDatabase::class.java)
+    mockFirebaseStorage = mock(FirebaseStorage::class.java)
+    mockFirebaseFirestore = mock(FirebaseFirestore::class.java)
     mockDatabaseReference = mock(DatabaseReference::class.java)
     mockDataSnapshot = mock(DataSnapshot::class.java)
-    chatRepository = ChatRepositoryFirestore(mockFirebaseDatabase)
+    mockCollectionRef = mock(CollectionReference::class.java)
+    mockDocumentRef = mock(DocumentReference::class.java)
+    mockDocumentSnapshot = mock(DocumentSnapshot::class.java)
+    mockTaskDoc = mock(Task::class.java) as Task<DocumentSnapshot>
+    mockTaskVoid = mock(Task::class.java) as Task<Void>
+    chatRepository =
+        ChatRepositoryFirestore(mockFirebaseDatabase, mockFirebaseStorage, mockFirebaseFirestore)
 
     `when`(mockFirebaseDatabase.getReference(any())).thenReturn(mockDatabaseReference)
   }
@@ -70,6 +102,7 @@ class ChatRepositoryTest {
     var resultChatId: String? = null
 
     chatRepository.initChat(
+        false,
         "currentUserUid",
         onSuccess = { chatid -> resultChatId = chatid },
         onFailure = {},
@@ -109,6 +142,7 @@ class ChatRepositoryTest {
     var resultChatId: String? = null
 
     chatRepository.initChat(
+        false,
         "currentUserUid",
         onSuccess = { chatid -> resultChatId = chatid },
         onFailure = {},
@@ -126,7 +160,7 @@ class ChatRepositoryTest {
     val chatRoomId = "testChatRoom"
     val message =
         ChatMessage.TextMessage(
-            "Test message", "senderName", "senderId", System.currentTimeMillis())
+            "Test message", "senderName", "senderId", timestamp = System.currentTimeMillis())
 
     val mockPushReference = mock(DatabaseReference::class.java)
     `when`(mockDatabaseReference.child(chatRoomId)).thenReturn(mockPushReference)
@@ -142,6 +176,7 @@ class ChatRepositoryTest {
     var isFailureCalled = false
 
     chatRepository.sendMessage(
+        false,
         chatRoomId,
         message,
         onSuccess = { isSuccessCalled = true },
@@ -159,10 +194,23 @@ class ChatRepositoryTest {
     val mockMessageSnapshot1 = mock(DataSnapshot::class.java)
     val mockMessageSnapshot2 = mock(DataSnapshot::class.java)
     val message1 =
-        ChatMessage.TextMessage("Message 1", "senderName", "Hello", System.currentTimeMillis())
+        ChatMessage.TextMessage(
+            "Message 1", "text", "senderName", "Hello", timestamp = System.currentTimeMillis())
     val message2 =
         ChatMessage.TextMessage(
-            "Message 2", "senderName", "How Are you", System.currentTimeMillis())
+            "Message 2",
+            "text",
+            "senderName",
+            "How Are you",
+            timestamp = System.currentTimeMillis())
+
+    val mockChildType1 = mock(DataSnapshot::class.java)
+    val mockChildType2 = mock(DataSnapshot::class.java)
+    `when`(mockMessageSnapshot1.child("type")).thenReturn(mockChildType1)
+    `when`(mockChildType1.value).thenReturn("text")
+
+    `when`(mockMessageSnapshot2.child("type")).thenReturn(mockChildType2)
+    `when`(mockChildType2.value).thenReturn("text")
 
     `when`(mockMessageSnapshot1.getValue(ChatMessage.TextMessage::class.java)).thenReturn(message1)
     `when`(mockMessageSnapshot2.getValue(ChatMessage.TextMessage::class.java)).thenReturn(message2)
@@ -177,7 +225,7 @@ class ChatRepositoryTest {
 
     var receivedMessages: List<ChatMessage>? = null
     chatRepository.listenForMessages(
-        chatRoomId, onSuccess = { messages -> receivedMessages = messages }, onFailure = {})
+        false, chatRoomId, onSuccess = { messages -> receivedMessages = messages }, onFailure = {})
 
     // Capture and trigger the ValueEventListener
     verify(mockDatabaseReference).addValueEventListener(valueEventListenerCaptor.capture())
@@ -274,7 +322,7 @@ class ChatRepositoryTest {
         .addListenerForSingleValueEvent(chatsValueEventListenerCaptor2.capture())
 
     // Prepare the result variables
-    var receivedMessages: Map<String?, ChatMessage.TextMessage>? = null
+    var receivedMessages: Map<String?, ChatMessage>? = null
     var onFailureCalled = false
 
     // Call the method under test
@@ -289,9 +337,11 @@ class ChatRepositoryTest {
 
     // Simulate the last messages for each chat room
     val lastMessage1 =
-        ChatMessage.TextMessage("Message from chatRoomId1", "senderName", "senderId1", 2000L)
+        ChatMessage.TextMessage(
+            "Message from chatRoomId1", "text", "senderName", "senderId1", 2000L)
     val lastMessage2 =
-        ChatMessage.TextMessage("Message from chatRoomId2", "senderName", "senderId2", 3000L)
+        ChatMessage.TextMessage(
+            "Message from chatRoomId2", "text", "senderName", "senderId2", 3000L)
 
     // Mock DataSnapshots for last messages
     val mockLastMessageSnapshot1 = mock(DataSnapshot::class.java)
@@ -313,6 +363,14 @@ class ChatRepositoryTest {
     `when`(mockMessageDataSnapshot2.getValue(ChatMessage.TextMessage::class.java))
         .thenReturn(lastMessage2)
 
+    val mockChildType1 = mock(DataSnapshot::class.java)
+    val mockChildType2 = mock(DataSnapshot::class.java)
+    `when`(mockMessageDataSnapshot1.child("type")).thenReturn(mockChildType1)
+    `when`(mockChildType1.value).thenReturn("text")
+
+    `when`(mockMessageDataSnapshot2.child("type")).thenReturn(mockChildType2)
+    `when`(mockChildType2.value).thenReturn("text")
+
     // Simulate the onDataChange for the chats queries
     chatsValueEventListenerCaptor1.firstValue.onDataChange(mockLastMessageSnapshot1)
     chatsValueEventListenerCaptor2.firstValue.onDataChange(mockLastMessageSnapshot2)
@@ -324,5 +382,179 @@ class ChatRepositoryTest {
             "user2Uid" to lastMessage2) // Sorted by timestamp descending
     assertEquals(expectedMessages, receivedMessages)
     assertEquals(false, onFailureCalled)
+  }
+
+  @Test
+  fun uploadImageToStorageTest() {
+    // Mock dependencies
+    val mockImageUri = mock(Uri::class.java)
+    val mockFirebaseStorage = mock(FirebaseStorage::class.java)
+    val mockStorageReference = mock(StorageReference::class.java)
+    val mockUploadTask = mock(UploadTask::class.java)
+    val mockDownloadTask = mock(Task::class.java) as Task<Uri>
+
+    // Stubbing Firebase Storage reference behavior
+    `when`(mockFirebaseStorage.reference).thenReturn(mockStorageReference)
+    `when`(mockStorageReference.child(any())).thenReturn(mockStorageReference)
+    `when`(mockStorageReference.putFile(eq(mockImageUri))).thenReturn(mockUploadTask)
+
+    // Stubbing success behavior of putFile
+    `when`(mockUploadTask.addOnSuccessListener(any())).thenAnswer { invocation ->
+      val onSuccessListener = invocation.arguments[0] as OnSuccessListener<UploadTask.TaskSnapshot>
+      onSuccessListener.onSuccess(mock(UploadTask.TaskSnapshot::class.java))
+      mockUploadTask
+    }
+
+    // Stubbing success behavior of downloadUrl
+    `when`(mockStorageReference.downloadUrl).thenReturn(mockDownloadTask)
+    `when`(mockDownloadTask.addOnSuccessListener(any())).thenAnswer { invocation ->
+      val onSuccessListener = invocation.arguments[0] as OnSuccessListener<Uri>
+      onSuccessListener.onSuccess(mock(Uri::class.java))
+      mockDownloadTask
+    }
+
+    // Verify the behavior of the tested function
+    var wasSuccessCalled = false
+    uploadImageToStorage(
+        storage = mockFirebaseStorage,
+        path = "testPath/",
+        imageUri = mockImageUri,
+        onSuccess = { url ->
+          wasSuccessCalled = true
+          assertNotNull(url)
+        },
+        onFailure = { fail("onFailure should not be called") })
+
+    // Verify interactions
+    verify(mockFirebaseStorage.reference).child(any())
+    verify(mockStorageReference).putFile(eq(mockImageUri))
+    verify(mockStorageReference).downloadUrl
+
+    // Assert success callback was called
+    assertTrue(wasSuccessCalled)
+  }
+
+  @Test
+  fun clearConversation_callsCorrectReferenceAndHandlesSuccess() {
+
+    val mockDatabaseReference = mock(DatabaseReference::class.java)
+    val mockRemoveTask = mock(Task::class.java) as Task<Void>
+
+    val isIaConversation = false
+    val chatRoomId = "testChatRoomId"
+
+    `when`(mockFirebaseDatabase.getReference(any())).thenReturn(mockDatabaseReference)
+    `when`(mockDatabaseReference.child(any())).thenReturn(mockDatabaseReference)
+    // `when`(mockDatabaseReference.child("chats")).thenReturn(mockDatabaseReference)
+    `when`(mockDatabaseReference.removeValue()).thenReturn(mockRemoveTask)
+
+    `when`(mockRemoveTask.addOnSuccessListener(any())).thenAnswer { invocation ->
+      val onSuccessListener = invocation.arguments[0] as OnSuccessListener<Void>
+      onSuccessListener.onSuccess(null)
+      mockRemoveTask
+    }
+
+    var successCalled = false
+    var failureCalled = false
+
+    chatRepository.clearConversation(
+        isIaConversation = isIaConversation,
+        chatRoomId = chatRoomId,
+        onSuccess = { successCalled = true },
+        onFailure = { failureCalled = true })
+
+    assertTrue(successCalled)
+    assertFalse(failureCalled)
+  }
+
+  @Test
+  fun `linkChatToRequest should link chat room to service request`() {
+    val chatRoomId = "testChatRoomId"
+    val serviceRequestId = "testServiceRequestId"
+
+    `when`(mockFirebaseFirestore.collection("chatRooms")).thenReturn(mockCollectionRef)
+    `when`(mockCollectionRef.document(chatRoomId)).thenReturn(mockDocumentRef)
+    `when`(mockDocumentRef.set(eq(mapOf("serviceRequestId" to serviceRequestId)), any()))
+        .thenReturn(mockTaskVoid)
+    `when`(mockTaskVoid.addOnSuccessListener(any())).thenReturn(mockTaskVoid)
+    `when`(mockTaskVoid.addOnFailureListener(any())).thenReturn(mockTaskVoid)
+
+    chatRepository.linkChatToRequest(chatRoomId, serviceRequestId, {}, {})
+
+    verify(mockDocumentRef).set(eq(mapOf("serviceRequestId" to serviceRequestId)), any())
+  }
+
+  @Test
+  fun `getChatRequest should return serviceRequestId on success`() {
+    val chatRoomId = "testChatRoomId"
+    val serviceRequestId = "testServiceRequestId"
+
+    `when`(mockDocumentSnapshot.getString("serviceRequestId")).thenReturn(serviceRequestId)
+    `when`(mockFirebaseFirestore.collection("chatRooms")).thenReturn(mockCollectionRef)
+    `when`(mockCollectionRef.document(chatRoomId)).thenReturn(mockDocumentRef)
+    `when`(mockTaskDoc.isSuccessful).thenReturn(true)
+    `when`(mockTaskDoc.result).thenReturn(mockDocumentSnapshot)
+    `when`(mockDocumentRef.get()).thenReturn(mockTaskDoc)
+    `when`(mockTaskDoc.addOnSuccessListener(any())).thenAnswer {
+      val listener = it.arguments[0] as OnSuccessListener<DocumentSnapshot>
+      listener.onSuccess(mockDocumentSnapshot)
+      mockTaskDoc
+    }
+    `when`(mockTaskDoc.addOnFailureListener(any())).thenReturn(mockTaskDoc)
+
+    var result: String? = null
+    chatRepository.getChatRequest(
+        chatRoomId, { result = it }, { fail("onFailure should not be called") })
+
+    assertNotNull(result)
+    assertEquals(serviceRequestId, result)
+  }
+
+  @Test
+  fun `getChatRequest should call onFailure when serviceRequestId is null`() {
+    val chatRoomId = "testChatRoomId"
+
+    `when`(mockDocumentSnapshot.getString("serviceRequestId")).thenReturn(null)
+    `when`(mockFirebaseFirestore.collection("chatRooms")).thenReturn(mockCollectionRef)
+    `when`(mockCollectionRef.document(chatRoomId)).thenReturn(mockDocumentRef)
+    `when`(mockTaskDoc.isSuccessful).thenReturn(true)
+    `when`(mockTaskDoc.result).thenReturn(mockDocumentSnapshot)
+    `when`(mockDocumentRef.get()).thenReturn(mockTaskDoc)
+    `when`(mockTaskDoc.addOnSuccessListener(any())).thenAnswer {
+      val listener = it.arguments[0] as OnSuccessListener<DocumentSnapshot>
+      listener.onSuccess(mockDocumentSnapshot)
+      mockTaskDoc
+    }
+    `when`(mockTaskDoc.addOnFailureListener(any())).thenReturn(mockTaskDoc)
+
+    var result: String? = null
+    var failureCalled = false
+    chatRepository.getChatRequest(chatRoomId, { result = it }, { failureCalled = true })
+
+    assertNull(result)
+    assert(failureCalled)
+  }
+
+  @Test
+  fun `getChatRequest should call onFailure on error`() {
+    val chatRoomId = "testChatRoomId"
+
+    `when`(mockFirebaseFirestore.collection("chatRooms")).thenReturn(mockCollectionRef)
+    `when`(mockCollectionRef.document(chatRoomId)).thenReturn(mockDocumentRef)
+    `when`(mockTaskDoc.isSuccessful).thenReturn(false)
+    `when`(mockDocumentRef.get()).thenReturn(mockTaskDoc)
+    `when`(mockTaskDoc.addOnSuccessListener(any())).thenReturn(mockTaskDoc)
+    `when`(mockTaskDoc.addOnFailureListener(any())).thenAnswer {
+      val listener = it.arguments[0] as OnFailureListener
+      listener.onFailure(Exception())
+      mockTaskDoc
+    }
+
+    var result: String? = null
+    var failureCalled = false
+    chatRepository.getChatRequest(chatRoomId, { result = it }, { failureCalled = true })
+
+    assertNull(result)
+    assert(failureCalled)
   }
 }

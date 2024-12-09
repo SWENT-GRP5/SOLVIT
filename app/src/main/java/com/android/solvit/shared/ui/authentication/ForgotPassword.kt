@@ -2,7 +2,6 @@ package com.android.solvit.shared.ui.authentication
 
 import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
-import android.util.Patterns
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
@@ -26,6 +25,7 @@ import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -45,6 +45,12 @@ import coil.compose.rememberAsyncImagePainter
 import com.android.solvit.R
 import com.android.solvit.shared.ui.navigation.NavigationActions
 
+/**
+ * A composable function that provides a "Forgot Password" screen for users to reset their password.
+ * The screen includes an input field for the email address and validates the email format.
+ *
+ * @param navigationActions A set of navigation actions to handle transitions between screens.
+ */
 @SuppressLint(
     "SuspiciousIndentation",
     "UnusedMaterial3ScaffoldPaddingParameter",
@@ -56,11 +62,7 @@ fun ForgotPassword(navigationActions: NavigationActions) {
 
   val context = LocalContext.current
 
-  val goodFormEmail =
-      email.isNotBlank() &&
-          Patterns.EMAIL_ADDRESS.matcher(email).matches() &&
-          email.contains(".") &&
-          email.contains("@")
+  val goodFormEmail = ValidationRegex.EMAIL_REGEX.matches(email)
 
   DisposableEffect(Unit) {
     val activity = context as? ComponentActivity
@@ -73,7 +75,8 @@ fun ForgotPassword(navigationActions: NavigationActions) {
         TopAppBar(
             title = { Text("") },
             navigationIcon = { GoBackButton(navigationActions) },
-            modifier = Modifier.testTag("topAppBar"))
+            modifier = Modifier.testTag("topAppBar"),
+            colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background))
       },
       content = {
         Column(

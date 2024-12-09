@@ -108,7 +108,7 @@ class CreateRequestScreenTest {
 
     `when`(serviceRequestRepository.getNewUid()).thenAnswer { "1" }
 
-    `when`(authRepository.updateUserLocations(any(), any(), any())).thenAnswer {
+    `when`(authRepository.updateUserLocations(any(), any(), any(), any())).thenAnswer {
       val onSuccess = it.getArgument<() -> Unit>(1)
       onSuccess()
     }
@@ -128,10 +128,10 @@ class CreateRequestScreenTest {
       CreateRequestScreen(
           navigationActions,
           serviceRequestViewModel,
+          locationViewModel,
           authViewModel,
           notificationsViewModel,
-          listProviderViewModel,
-          locationViewModel)
+          listProviderViewModel)
     }
 
     composeTestRule.onNodeWithTag("screenTitle").assertIsDisplayed()
@@ -155,10 +155,10 @@ class CreateRequestScreenTest {
       CreateRequestScreen(
           navigationActions,
           serviceRequestViewModel,
+          locationViewModel,
           authViewModel,
           notificationsViewModel,
-          listProviderViewModel,
-          locationViewModel)
+          listProviderViewModel)
     }
 
     composeTestRule.onNodeWithTag("inputRequestDate").performTextClearance()
@@ -174,10 +174,10 @@ class CreateRequestScreenTest {
       CreateRequestScreen(
           navigationActions,
           serviceRequestViewModel,
+          locationViewModel,
           authViewModel,
           notificationsViewModel,
-          listProviderViewModel,
-          locationViewModel)
+          listProviderViewModel)
     }
 
     composeTestRule.onNodeWithTag("inputRequestAddress").performTextInput("USA")
@@ -194,10 +194,10 @@ class CreateRequestScreenTest {
       CreateRequestScreen(
           navigationActions,
           serviceRequestViewModel,
+          locationViewModel,
           authViewModel,
           notificationsViewModel,
-          listProviderViewModel,
-          locationViewModel)
+          listProviderViewModel)
     }
 
     composeTestRule.onNodeWithTag("inputRequestAddress").performTextInput("USA")
@@ -214,10 +214,10 @@ class CreateRequestScreenTest {
       CreateRequestScreen(
           navigationActions,
           serviceRequestViewModel,
+          locationViewModel,
           authViewModel,
           notificationsViewModel,
-          listProviderViewModel,
-          locationViewModel)
+          listProviderViewModel)
     }
 
     composeTestRule.onNodeWithTag("inputServiceType").performTextInput("Plumber")
@@ -231,10 +231,10 @@ class CreateRequestScreenTest {
       CreateRequestScreen(
           navigationActions,
           serviceRequestViewModel,
+          locationViewModel,
           authViewModel,
           notificationsViewModel,
-          listProviderViewModel,
-          locationViewModel)
+          listProviderViewModel)
     }
 
     composeTestRule.onNodeWithTag("inputServiceType").performTextInput("Plumber")
@@ -248,10 +248,11 @@ class CreateRequestScreenTest {
       CreateRequestScreen(
           navigationActions,
           serviceRequestViewModel,
+          locationViewModel,
           authViewModel,
           notificationsViewModel,
           listProviderViewModel,
-          locationViewModel)
+      )
     }
 
     composeTestRule.onNodeWithTag("inputServiceType").performTextInput("NonExistentType")
@@ -264,10 +265,11 @@ class CreateRequestScreenTest {
       CreateRequestScreen(
           navigationActions,
           serviceRequestViewModel,
+          locationViewModel,
           authViewModel,
           notificationsViewModel,
           listProviderViewModel,
-          locationViewModel)
+      )
     }
 
     composeTestRule.onNodeWithTag("inputServiceType").performTextInput("Plumbing")
@@ -281,10 +283,10 @@ class CreateRequestScreenTest {
       CreateRequestScreen(
           navigationActions,
           serviceRequestViewModel,
+          locationViewModel,
           authViewModel,
           notificationsViewModel,
-          listProviderViewModel,
-          locationViewModel)
+          listProviderViewModel)
     }
 
     composeTestRule.onNodeWithTag("inputRequestTitle").performTextClearance()
@@ -299,10 +301,10 @@ class CreateRequestScreenTest {
       CreateRequestScreen(
           navigationActions,
           serviceRequestViewModel,
+          locationViewModel,
           authViewModel,
           notificationsViewModel,
-          listProviderViewModel,
-          locationViewModel)
+          listProviderViewModel)
     }
 
     // Check that the AI Assistant Dialog is displayed initially
@@ -331,10 +333,10 @@ class CreateRequestScreenTest {
       CreateRequestScreen(
           navigationActions,
           serviceRequestViewModel,
+          locationViewModel,
           authViewModel,
           notificationsViewModel,
-          listProviderViewModel,
-          locationViewModel)
+          listProviderViewModel)
     }
 
     // Check that the AI Assistant Dialog is displayed initially

@@ -1,12 +1,10 @@
+package com.android.solvit.provider.ui.profile
+
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
-import com.android.solvit.provider.ui.profile.DescriptionSection
-import com.android.solvit.provider.ui.profile.LanguageList
-import com.android.solvit.provider.ui.profile.ProfileHeader
-import com.android.solvit.provider.ui.profile.StatsSection
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.provider.Language
@@ -97,6 +95,20 @@ class ProviderProfileScreenTest {
 
     composeTestRule.setContent { StatsSection(provider) }
     composeTestRule.onNodeWithTag("statsSection").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("ratingText").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("ratingLabel").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("popularityText").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("popularityLabel").assertIsDisplayed()
+
+    composeTestRule.onNodeWithTag("earningsText").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("earningsLabel").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("languagesLabel").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("pendingTasksText").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("acceptedTasksText").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("scheduledTasksText").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("completedTasksText").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("canceledTasksText").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("archivedTasksText").assertIsDisplayed()
   }
 
   @Test

@@ -6,9 +6,7 @@ import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.model.utils.uploadImageToStorage
 import com.google.android.gms.tasks.Task
-import com.google.firebase.Firebase
 import com.google.firebase.Timestamp
-import com.google.firebase.auth.auth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
@@ -26,11 +24,7 @@ class ServiceRequestRepositoryFirebase(
   }
 
   override fun init(onSuccess: () -> Unit) {
-    Firebase.auth.addAuthStateListener {
-      if (it.currentUser != null) {
-        onSuccess()
-      }
-    }
+    onSuccess()
   }
 
   override fun addListenerOnServiceRequests(
@@ -106,6 +100,26 @@ class ServiceRequestRepositoryFirebase(
       onFailure: (Exception) -> Unit
   ) {
     getServiceRequestsByStatus(ServiceRequestStatus.ARCHIVED, onSuccess, onFailure)
+  }
+
+  override fun getServiceRequestById(
+      id: String,
+      onSuccess: (ServiceRequest) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    db.collection(collectionPath).document(id).get().addOnCompleteListener { result ->
+      if (result.isSuccessful) {
+        val serviceRequest = documentToServiceRequest(result.result!!)
+        if (serviceRequest != null) {
+          onSuccess(serviceRequest)
+        } else {
+          onFailure(Exception("Service request not found"))
+        }
+      } else {
+        val exception = result.exception ?: Exception("Unknown error")
+        onFailure(exception)
+      }
+    }
   }
 
   override fun saveServiceRequest(

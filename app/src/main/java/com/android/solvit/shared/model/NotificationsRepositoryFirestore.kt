@@ -1,12 +1,13 @@
 package com.android.solvit.shared.model
 
 import android.util.Log
+import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.request.ServiceRequest
+import com.android.solvit.shared.model.request.ServiceRequestStatus
+import com.android.solvit.shared.model.service.Services
 import com.google.android.gms.tasks.Task
-import com.google.firebase.Firebase
 import com.google.firebase.Timestamp
-import com.google.firebase.auth.auth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -33,17 +34,12 @@ class NotificationsRepositoryFirestore(private val db: FirebaseFirestore) :
   }
 
   /**
-   * Initializes the repository by adding an authentication state listener to Firebase Auth. When
-   * the user is authenticated, the provided `onSuccess` callback is triggered.
+   * Initializes the repository
    *
-   * @param onSuccess Callback to execute when a user is authenticated.
+   * @param onSuccess Callback to execute
    */
   override fun init(onSuccess: () -> Unit) {
-    Firebase.auth.addAuthStateListener {
-      if (it.currentUser != null) {
-        onSuccess()
-      }
-    }
+    onSuccess()
   }
 
   /**
@@ -92,6 +88,33 @@ class NotificationsRepositoryFirestore(private val db: FirebaseFirestore) :
       val message = document.getString("message") ?: return null
       val timestamp = document.getTimestamp("timestamp") ?: return null
       val isRead = document.getBoolean("isRead") ?: false
+      // Get ServiceRequest fields
+      val serviceRequestMap = document.get("serviceRequest") as? Map<String, Any> ?: return null
+      val locationMap = serviceRequestMap["location"] as? Map<String, Any>
+      val location =
+          if (locationMap != null) {
+            Location(
+                latitude = locationMap["latitude"] as? Double ?: 0.0,
+                longitude = locationMap["longitude"] as? Double ?: 0.0,
+                name = locationMap["name"] as? String ?: "")
+          } else {
+            null
+          }
+      val serviceRequest =
+          ServiceRequest(
+              uid = serviceRequestMap["uid"] as String,
+              title = serviceRequestMap["title"] as String,
+              type = Services.valueOf(serviceRequestMap["type"] as String),
+              description = serviceRequestMap["description"] as String,
+              userId = serviceRequestMap["userId"] as String,
+              providerId = serviceRequestMap["providerId"] as? String,
+              dueDate = serviceRequestMap["dueDate"] as Timestamp,
+              meetingDate = serviceRequestMap["meetingDate"] as? Timestamp,
+              location = location,
+              imageUrl = serviceRequestMap["imageUrl"] as? String,
+              packageId = serviceRequestMap["packageId"] as? String,
+              agreedPrice = serviceRequestMap["agreedPrice"] as? Double,
+              status = ServiceRequestStatus.valueOf(serviceRequestMap["status"] as String))
 
       Notification(
           uid = id,
@@ -99,6 +122,7 @@ class NotificationsRepositoryFirestore(private val db: FirebaseFirestore) :
           title = title,
           message = message,
           timestamp = timestamp,
+          serviceRequest = serviceRequest,
           isRead = isRead)
     } catch (e: Exception) {
       Log.e("NotificationsRepositoryFirestore", "Error converting document to Notification", e)
@@ -157,10 +181,11 @@ class NotificationsRepositoryFirestore(private val db: FirebaseFirestore) :
             Notification(
                 uid = getNewUid(),
                 providerId = provider.uid,
-                title = "New Service Request for ${serviceRequest.type}",
+                title = "New Service Request Available!",
                 message =
-                    "A new service request for ${serviceRequest.title} has been posted. Check it out!",
+                    "A new service request has been posted. Tap here to view the details and get started!",
                 timestamp = Timestamp.now(),
+                serviceRequest = serviceRequest,
                 isRead = false)
 
         // Save the notification for the provider
@@ -176,5 +201,21 @@ class NotificationsRepositoryFirestore(private val db: FirebaseFirestore) :
       // Notify failure in case of error
       onFailure(exception)
     }
+  }
+
+  /**
+   * Updates the read status of a notification in the Firestore database.
+   *
+   * @param notificationId The unique identifier of the notification to be updated.
+   * @param isRead The read status to set (true for read, false for unread).
+   */
+  override fun updateNotificationReadStatus(notificationId: String, isRead: Boolean) {
+    db.collection(collectionPath)
+        .document(notificationId)
+        .update("isRead", isRead)
+        .addOnSuccessListener { Log.d("NotificationsRepository", "Notification marked as read") }
+        .addOnFailureListener { e ->
+          Log.e("NotificationsRepository", "Error updating notification: $e")
+        }
   }
 }

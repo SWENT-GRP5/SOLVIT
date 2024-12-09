@@ -42,6 +42,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -61,7 +62,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -70,6 +70,8 @@ import coil.compose.AsyncImage
 import com.android.solvit.R
 import com.android.solvit.seeker.ui.navigation.BottomNavigationMenu
 import com.android.solvit.seeker.ui.provider.PackageCard
+import com.android.solvit.shared.model.NotificationsViewModel
+import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.packages.PackageProposal
 import com.android.solvit.shared.model.packages.PackageProposalViewModel
@@ -80,17 +82,24 @@ import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.map.GetDirectionsBubble
 import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_PROVIDER
 import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.android.solvit.shared.ui.navigation.Screen
 import com.android.solvit.shared.ui.theme.Orange
-import com.google.firebase.Firebase
-import com.google.firebase.auth.auth
 import java.text.SimpleDateFormat
 import java.util.Locale
 
 /** Composable function that displays the top bar of the requests feed screen. */
-@Preview
 @Composable
-fun RequestsTopBar() {
+fun RequestsTopBar(
+    navigationActions: NavigationActions,
+    notificationsViewModel: NotificationsViewModel,
+    providerId: String
+) {
   val context = LocalContext.current
+  // Fetch notifications and check for unread ones
+  LaunchedEffect(providerId) { notificationsViewModel.init(providerId) }
+  val notifications by notificationsViewModel.notifications.collectAsState()
+  val hasUnreadNotifications = notifications.any { !it.isRead }
+
   Row(
       modifier =
           Modifier.fillMaxWidth().background(colorScheme.background).testTag("RequestsTopBar"),
@@ -124,12 +133,12 @@ fun RequestsTopBar() {
                       color = colorScheme.secondary))
         }
 
-        IconButton(
-            onClick = {
-              Toast.makeText(context, "Not Yet Implemented", Toast.LENGTH_LONG).show()
-            }) {
-              Icon(imageVector = Icons.Default.Notifications, contentDescription = "Notifications")
-            }
+        IconButton(onClick = { navigationActions.navigateTo(Screen.NOTIFICATIONS) }) {
+          Icon(
+              imageVector = Icons.Default.Notifications,
+              tint = if (hasUnreadNotifications) Color.Red else colorScheme.onSurface,
+              contentDescription = "Notifications")
+        }
       }
 }
 
@@ -651,7 +660,10 @@ fun ListRequestsFeedScreen(
         viewModel(factory = ServiceRequestViewModel.Factory),
     packageProposalViewModel: PackageProposalViewModel =
         viewModel(factory = PackageProposalViewModel.Factory),
-    navigationActions: NavigationActions
+    navigationActions: NavigationActions,
+    notificationViewModel: NotificationsViewModel =
+        viewModel<NotificationsViewModel>(factory = NotificationsViewModel.Factory),
+    authViewModel: AuthViewModel = viewModel<AuthViewModel>(factory = AuthViewModel.Factory)
 ) {
   val allRequests by serviceRequestViewModel.requests.collectAsState()
   val requests = allRequests.filter { it.status == ServiceRequestStatus.PENDING }
@@ -660,11 +672,12 @@ fun ListRequestsFeedScreen(
   var selectedService by remember { mutableStateOf("Service") }
   val searchQuery = remember { mutableStateOf("") }
   val showDialog = remember { mutableStateOf(false) }
-  val providerId = Firebase.auth.currentUser?.uid ?: "-1"
+  val user by authViewModel.user.collectAsState()
+  val providerId = user?.uid ?: "-1"
   val packages = packageProposalViewModel.proposal.collectAsState()
 
   Scaffold(
-      topBar = { RequestsTopBar() },
+      topBar = { RequestsTopBar(navigationActions, notificationViewModel, providerId) },
       bottomBar = {
         BottomNavigationMenu(
             onTabSelect = { navigationActions.navigateTo(it.route) },
