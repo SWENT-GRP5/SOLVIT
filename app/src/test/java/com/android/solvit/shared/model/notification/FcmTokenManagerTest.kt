@@ -106,6 +106,16 @@ class FcmTokenManagerTest {
   }
 
   @Test
+  fun `getUserFcmToken with blank userId throws IllegalArgumentException`() = runTest {
+    try {
+      fcmTokenManager.getUserFcmToken("")
+      fail("Expected IllegalArgumentException")
+    } catch (e: IllegalArgumentException) {
+      assertEquals("User ID cannot be empty", e.message)
+    }
+  }
+
+  @Test
   fun `updateUserFcmToken updates token successfully`() {
     // Arrange
     val setTask = Tasks.forResult<Void>(null)

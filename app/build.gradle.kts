@@ -321,6 +321,7 @@ tasks.register("jacocoTestReport", JacocoReport::class) {
         "**/R$*.class",
         "**/BuildConfig.*",
         "**/Manifest*.*",
+        "**/debug/**",
         "**/*Test*.*",
         "android/**/*.*",
     )

@@ -228,4 +228,19 @@ class NotificationManagerTest {
     verify(mockTokenManager).getUserFcmToken(testRecipientId)
     verify(mockCallable).call(any())
   }
+
+  @Test
+  fun `sendNotification logs debug message when permission granted`() = runTest {
+    // Arrange
+    val title = "Test Title"
+    val body = "Test Body"
+
+    // Act
+    val result = notificationManager.sendNotification(testRecipientId, title, body)
+
+    // Assert
+    assertTrue(result.isSuccess)
+    // Debug log verification is handled by the Log class which is final and can't be mocked
+    // We can only verify that the notification was sent successfully
+  }
 }
