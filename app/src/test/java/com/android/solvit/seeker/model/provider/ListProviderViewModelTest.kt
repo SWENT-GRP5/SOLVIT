@@ -5,7 +5,6 @@ import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.provider.ProviderRepository
 import com.android.solvit.shared.model.service.Services
-import com.google.firebase.Timestamp
 import kotlinx.coroutines.runBlocking
 import org.hamcrest.CoreMatchers
 import org.hamcrest.MatcherAssert
@@ -39,7 +38,7 @@ class ListProviderViewModelTest {
             false,
             0.0,
             0.0,
-            Timestamp.now(),
+            20.0,
             emptyList())
   }
 

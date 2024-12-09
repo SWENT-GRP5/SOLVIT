@@ -83,7 +83,12 @@ class AuthRepository(private val auth: FirebaseAuth, private val db: FirebaseFir
     auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener {
       if (it.isSuccessful) {
         Log.d("AuthRepository", "Registration successful")
-        val user = User(it.result!!.user!!.uid, role, email = email, registrationCompleted = false)
+        val user =
+            User(
+                uid = it.result!!.user!!.uid,
+                role = role,
+                email = email,
+                registrationCompleted = false)
         createUserDocument(user, { onSuccess(user) }, onFailure)
       } else {
         Log.w("AuthRepository", "Registration failed", it.exception)
