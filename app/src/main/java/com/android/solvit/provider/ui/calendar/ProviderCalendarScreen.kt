@@ -122,10 +122,11 @@ fun ProviderCalendarScreen(
             colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background))
       },
       bottomBar = {
+          val currentRoute = navigationActions.currentRoute() ?: "default_route"
         BottomNavigationMenu(
             onTabSelect = { navigationActions.navigateTo(it.route) },
             tabList = LIST_TOP_LEVEL_DESTINATION_PROVIDER,
-            selectedItem = navigationActions.currentRoute())
+            selectedItem = currentRoute)
       },
       containerColor = colorScheme.background) { paddingValues ->
         Column(modifier = Modifier.fillMaxSize().padding(paddingValues).testTag("calendarColumn")) {

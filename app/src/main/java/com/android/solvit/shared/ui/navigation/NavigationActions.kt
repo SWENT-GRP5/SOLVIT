@@ -1,5 +1,6 @@
 package com.android.solvit.shared.ui.navigation
 
+import android.util.Log
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.Add
@@ -169,6 +170,8 @@ open class NavigationActions(
    * @return The current route
    */
   open fun currentRoute(): String {
-    return navController.currentDestination?.route ?: ""
+      val currentRoute = navController.currentDestination?.route
+      Log.e("NavigationActions", "currentRoute: $currentRoute")
+      return currentRoute ?: ""
   }
 }
