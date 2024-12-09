@@ -45,8 +45,12 @@ class AuthViewModel(private val authRepository: AuthRep) : ViewModel() {
   init {
     authRepository.init {
       _user.value = it
-      if (it != null && it.registrationCompleted) {
-        _userRegistered.value = true
+      if (it != null) {
+        _email.value = it.email
+        _role.value = it.role
+        if (it.registrationCompleted) {
+          _userRegistered.value = true
+        }
       }
     }
   }

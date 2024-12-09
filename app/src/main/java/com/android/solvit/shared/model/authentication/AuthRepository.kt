@@ -192,7 +192,7 @@ class AuthRepository(private val auth: FirebaseAuth, private val db: FirebaseFir
   ) {
     db.collection(collectionPath)
         .document(userId)
-        .update("username", userName)
+        .update("userName", userName)
         .addOnSuccessListener { onSuccess() }
         .addOnFailureListener { e ->
           Log.w("AuthRepository", "Failed to update user name", e)
