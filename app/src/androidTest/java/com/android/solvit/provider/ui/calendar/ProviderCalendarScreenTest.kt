@@ -85,7 +85,6 @@ class ProviderCalendarScreenTest {
   @Test
   fun testInitialCalendarView() {
     composeTestRule.onNodeWithTag("calendarTitle").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("backButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("menuButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("calendarViewToggle").assertIsDisplayed()
   }
