@@ -5,6 +5,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
@@ -293,11 +294,10 @@ class EndToEndMessage {
     composeTestRule.onNodeWithTag("sendMessageButton").performClick()
 
     // Assert the message to be displayed
-    // composeTestRule.onNodeWithText("Hello, how are you?").performScrollTo()
-    // composeTestRule.onNodeWithText("Hello, how are you?").isDisplayed()
+    composeTestRule.onNodeWithText("Hello, how are you?").performScrollTo()
+    composeTestRule.onNodeWithText("Hello, how are you?").isDisplayed()
 
     // Clean up
-    chatViewModel.clearConversation(false)
     listProviderViewModel.deleteProvider("1")
     serviceRequestViewModel.deleteServiceRequestById("1")
   }
