@@ -177,7 +177,6 @@ fun SpFilterBar(display: () -> Unit, listProviderViewModel: ListProviderViewMode
   val filters = listOf("Top Rates", "Top Prices", "Highest Activity")
 
   val isSelected = remember { mutableStateListOf(-1, -1, -1) }
-  Log.e("Debug", "$isSelected")
 
   Row(
       modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("filterBar"),
@@ -203,7 +202,7 @@ fun SpFilterBar(display: () -> Unit, listProviderViewModel: ListProviderViewMode
                                 shape = RoundedCornerShape(16.dp),
                                 ambientColor = Color.Yellow,
                                 spotColor = Color(0xFF6D29F6))
-                            .testTag("filterIcon"),
+                            .testTag("filterOption"),
                     elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
                     colors = CardDefaults.cardColors(containerColor = colorScheme.background),
                     shape = RoundedCornerShape(16.dp),
