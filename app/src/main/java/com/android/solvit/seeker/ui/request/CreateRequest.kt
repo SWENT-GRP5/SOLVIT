@@ -120,6 +120,7 @@ fun CreateRequestScreen(
         onAnalyzeComplete = { generatedTitle, generatedType, generatedDescription ->
           title = generatedTitle
           typeQuery = generatedType
+          selectedServiceType = Services.valueOf(generatedType)
           description = generatedDescription
           currentStep = 3 // Move to the analysis complete step
         },
