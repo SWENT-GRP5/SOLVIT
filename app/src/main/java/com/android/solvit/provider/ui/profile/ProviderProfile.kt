@@ -11,11 +11,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -47,7 +44,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -178,6 +174,15 @@ fun ProviderProfileScreen(
   }
 }
 
+/**
+ * A composable function that displays an item with an icon and text.
+ *
+ * @param icon The icon to display.
+ * @param drawable The drawable to display.
+ * @param text The text to display.
+ * @param tag The tag for the item.
+ * @param maxLines The maximum number of lines for the text.
+ */
 @Composable
 fun ProviderItem(
     icon: ImageVector,
@@ -186,6 +191,7 @@ fun ProviderItem(
     tag: String = "",
     maxLines: Int = 1
 ) {
+  var expanded by remember { mutableStateOf(false) }
   Row(
       verticalAlignment = Alignment.CenterVertically,
       horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -206,12 +212,19 @@ fun ProviderItem(
         Text(
             text = text,
             color = colorScheme.onBackground,
-            maxLines = maxLines,
+            maxLines = if (expanded) Int.MAX_VALUE else maxLines,
             overflow = TextOverflow.Ellipsis,
-        )
+            modifier = Modifier.clickable { expanded = !expanded })
       }
 }
 
+/**
+ * A composable function that displays the insights card for the provider. It includes the
+ * provider's rating, popularity, earnings, and the number of tasks in each status.
+ *
+ * @param provider The provider whose insights are displayed.
+ * @param serviceRequestViewModel The ViewModel managing service requests.
+ */
 @Composable
 fun InsightsCard(provider: Provider, serviceRequestViewModel: ServiceRequestViewModel) {
   val pendingTasks by serviceRequestViewModel.pendingRequests.collectAsState()
@@ -246,7 +259,7 @@ fun InsightsCard(provider: Provider, serviceRequestViewModel: ServiceRequestView
                   modifier = Modifier.fillMaxWidth()) {
                     Column(
                         modifier = Modifier.fillMaxWidth(0.5f),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        verticalArrangement = Arrangement.spacedBy(16.dp)) {
                           Row(
                               verticalAlignment = Alignment.CenterVertically,
                               horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -260,7 +273,7 @@ fun InsightsCard(provider: Provider, serviceRequestViewModel: ServiceRequestView
                                     color = colorScheme.onBackground,
                                 )
                               }
-                          Column {
+                          Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             Text(
                                 text = "Popular",
                                 color = colorScheme.primary,
@@ -304,72 +317,5 @@ fun InsightsCard(provider: Provider, serviceRequestViewModel: ServiceRequestView
                         }
                   }
             }
-      }
-}
-
-/**
- * A composable function that displays a list of languages for a provider. It shows either all
- * languages or only the first three, with an option to toggle between them.
- *
- * @param provider The provider whose languages are to be displayed.
- */
-@Composable
-fun LanguageList(provider: Provider) {
-
-  var showAll by remember {
-    mutableStateOf(false)
-  } // State to toggle between showing 3 items or all
-
-  Column(
-      horizontalAlignment = Alignment.Start,
-      modifier = Modifier.testTag("languageListColumn") // Test tag for the whole section
-      ) {
-        if (provider.languages.isEmpty()) {
-          Text(
-              "Not provided",
-              color = colorScheme.error,
-              modifier = Modifier.testTag("noLanguagesText") // Tag for "Not provided" text
-              )
-        } else {
-          LazyColumn(
-              modifier =
-                  Modifier.fillMaxWidth()
-                      .heightIn(
-                          max =
-                              if (!showAll && provider.languages.size > 3) 200.dp
-                              else Dp.Unspecified)
-                      .testTag("languagesLazyColumn"), // Tag for the LazyColumn
-              verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                // Show either all items or just the first 3 based on showAll
-                val languagesToShow =
-                    if (showAll) provider.languages else provider.languages.take(3)
-                items(languagesToShow) { language ->
-                  Text(
-                      text = language.name.replaceFirstChar { it.uppercase() },
-                      fontSize = 40.sp,
-                      color = colorScheme.onPrimary,
-                      fontWeight = FontWeight.Bold,
-                      modifier =
-                          Modifier.testTag(
-                              "languageItem_${language.name}") // Tag for each language item
-                      )
-                }
-                if (!showAll && provider.languages.size > 3) {
-                  item {
-                    Text(
-                        "View more...",
-                        fontSize = 16.sp,
-                        color = colorScheme.secondary,
-                        fontWeight = FontWeight.Medium,
-                        modifier =
-                            Modifier.clickable {
-                                  showAll = true // Updates state to show all items
-                                }
-                                .testTag("viewMoreButton") // Tag for the "View more" button
-                        )
-                  }
-                }
-              }
-        }
       }
 }
