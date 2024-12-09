@@ -55,7 +55,12 @@ object Screen {
   const val AI_SOLVER_CHAT_SCREEN = "AI Solver Chat Screen"
 }
 
-data class TopLevelDestination(val route: String, val icon: ImageVector, val textId: String)
+data class TopLevelDestination(
+    val route: String,
+    val icon: ImageVector,
+    val textId: String,
+    val testTag: String = ""
+)
 
 object TopLevelDestinations {
 
@@ -75,7 +80,10 @@ object TopLevelDestinations {
           route = Route.CALENDAR, icon = Icons.Outlined.DateRange, textId = "Professional Calendar")
   val MY_JOBS =
       TopLevelDestination(
-          route = Route.MY_JOBS, icon = Icons.Outlined.CheckCircle, textId = "My Jobs")
+          route = Route.MY_JOBS,
+          icon = Icons.Outlined.CheckCircle,
+          textId = "My Jobs",
+          testTag = "MyJobsTestTag")
 
   ////////////////////////////////// SEEKER //////////////////////////////////
   val SERVICES =

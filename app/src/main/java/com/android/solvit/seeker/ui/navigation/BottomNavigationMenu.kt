@@ -135,7 +135,11 @@ fun BottomNavigationMenu(
                   contentDescription =
                       if (tabList == LIST_TOP_LEVEL_DESTINATION_SEEKER) "Add" else "Myjobs",
                   tint = colorScheme.onPrimary,
-                  modifier = Modifier.size(30.dp))
+                  modifier =
+                      Modifier.size(30.dp)
+                          .testTag(
+                              if (tabList == LIST_TOP_LEVEL_DESTINATION_SEEKER) "AddTestTag"
+                              else "MyJobsTestTag"))
             }
       }
 }
