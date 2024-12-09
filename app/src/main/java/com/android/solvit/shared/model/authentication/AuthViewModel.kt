@@ -92,6 +92,7 @@ class AuthViewModel(private val authRepository: AuthRep) : ViewModel() {
   fun signInWithGoogle(onSuccess: () -> Unit, onFailure: () -> Unit) {
     if (googleAccount.value == null) {
       onFailure()
+      return
     }
     authRepository.signInWithGoogle(
         googleAccount.value!!,
@@ -124,6 +125,7 @@ class AuthViewModel(private val authRepository: AuthRep) : ViewModel() {
   fun registerWithGoogle(onSuccess: () -> Unit, onFailure: () -> Unit) {
     if (googleAccount.value == null) {
       onFailure()
+      return
     }
     authRepository.registerWithGoogle(
         googleAccount.value!!,
@@ -167,6 +169,7 @@ class AuthViewModel(private val authRepository: AuthRep) : ViewModel() {
     if (user.value == null) {
       Log.e("AuthViewModel", "User is null")
       onFailure(Exception("User is null"))
+      return
     }
     val userLocations = user.value!!.locations
     if (userLocations.contains(location)) {
@@ -197,6 +200,7 @@ class AuthViewModel(private val authRepository: AuthRep) : ViewModel() {
     if (user.value == null) {
       Log.e("AuthViewModel", "User is null")
       onFailure(Exception("User is null"))
+      return
     }
     val userLocations = user.value!!.locations
     if (!userLocations.contains(location)) {
@@ -223,6 +227,7 @@ class AuthViewModel(private val authRepository: AuthRep) : ViewModel() {
     if (user.value == null) {
       Log.e("AuthViewModel", "User is null")
       onFailure(Exception("User is null"))
+      return
     }
     authRepository.completeRegistration(
         user.value!!.uid,
