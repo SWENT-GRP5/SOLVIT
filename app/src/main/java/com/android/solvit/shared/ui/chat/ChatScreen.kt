@@ -130,6 +130,7 @@ fun ChatScreen(
   val localContext = LocalContext.current
 
   Scaffold(
+      modifier = Modifier.testTag("ChatScreen"),
       topBar = {
         ChatHeader(
             name = receiverName, picture = receiverPicture, navigationActions = navigationActions)
