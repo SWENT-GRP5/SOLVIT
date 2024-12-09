@@ -17,6 +17,7 @@ import java.time.ZoneId
 import kotlin.test.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.*
 import org.junit.After
@@ -24,7 +25,7 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.kotlin.*
 
-@OptIn(ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 class ProviderCalendarViewModelTest {
   private val testUserId = "test_user_id"
   private val testLocation = Location(37.7749, -122.4194, "San Francisco")
@@ -624,5 +625,144 @@ class ProviderCalendarViewModelTest {
     assertEquals(CalendarView.WEEK, calendarViewModel.calendarView.value)
     assertTrue(calendarViewModel.timeSlots.value.isEmpty())
     assertFalse(calendarViewModel.isLoading.value)
+  }
+
+  @Test
+  fun testLogMessages() {
+    // Test log messages for various error scenarios
+    var successResult = false
+    var feedbackMessage = ""
+
+    // Test invalid time slots
+    calendarViewModel.addException(testDateTime, emptyList(), ExceptionType.OFF_TIME) {
+        success,
+        feedback ->
+      successResult = success
+      feedbackMessage = feedback
+    }
+    assertFalse(successResult)
+    assertEquals("No time slots provided", feedbackMessage)
+
+    // Test repository failure
+    doAnswer {
+          val onFailure = it.getArgument<(Exception) -> Unit>(2)
+          onFailure(Exception("Test failure"))
+          Unit
+        }
+        .`when`(providerRepository)
+        .updateProvider(any(), any(), any())
+
+    calendarViewModel.addException(
+        testDateTime, listOf(TimeSlot(10, 0, 11, 0)), ExceptionType.OFF_TIME) { success, feedback ->
+          successResult = success
+          feedbackMessage = feedback
+        }
+    assertFalse(successResult)
+    assertEquals("Failed to update schedule", feedbackMessage)
+  }
+
+  @Test
+  fun testCheckServiceRequestConflictComprehensive() {
+    // Test missing meeting date
+    val requestWithoutDate = assignedRequest.copy(meetingDate = null)
+    val resultNoDate = calendarViewModel.checkServiceRequestConflict(requestWithoutDate)
+    assertTrue(resultNoDate.hasConflict)
+    assertEquals("Meeting date not set", resultNoDate.reason)
+
+    // Test request during regular hours
+    val regularHoursRequest =
+        assignedRequest.copy(
+            meetingDate =
+                Timestamp(
+                    LocalDateTime.of(2024, 1, 1, 10, 0)
+                        .atZone(ZoneId.systemDefault())
+                        .toInstant()
+                        .epochSecond,
+                    0))
+    val resultRegularHours = calendarViewModel.checkServiceRequestConflict(regularHoursRequest)
+    assertFalse(resultRegularHours.hasConflict)
+    assertEquals("No conflicts", resultRegularHours.reason)
+
+    // Test request with off-time conflict
+    val offTimeSlot = TimeSlot(10, 0, 12, 0)
+    testProvider.schedule.addException(
+        LocalDateTime.of(2024, 1, 1, 0, 0), listOf(offTimeSlot), ExceptionType.OFF_TIME)
+    val resultOffTime = calendarViewModel.checkServiceRequestConflict(regularHoursRequest)
+    assertTrue(resultOffTime.hasConflict)
+    assertEquals("This time slot conflicts with your off-time schedule", resultOffTime.reason)
+
+    // Test request outside regular hours with extra time exception
+    val outsideHoursRequest =
+        assignedRequest.copy(
+            meetingDate =
+                Timestamp(
+                    LocalDateTime.of(2024, 1, 1, 18, 0)
+                        .atZone(ZoneId.systemDefault())
+                        .toInstant()
+                        .epochSecond,
+                    0))
+
+    // First test without extra time exception
+    val resultOutsideHours = calendarViewModel.checkServiceRequestConflict(outsideHoursRequest)
+    assertTrue(resultOutsideHours.hasConflict)
+    assertEquals("This time slot is outside your regular working hours", resultOutsideHours.reason)
+
+    // Add extra time exception and test again
+    testProvider.schedule.addException(
+        LocalDateTime.of(2024, 1, 1, 0, 0),
+        listOf(TimeSlot(18, 0, 20, 0)),
+        ExceptionType.EXTRA_TIME)
+    val resultWithExtraTime = calendarViewModel.checkServiceRequestConflict(outsideHoursRequest)
+    assertFalse(resultWithExtraTime.hasConflict)
+    assertEquals("No conflicts", resultWithExtraTime.reason)
+
+    // Test conflict with another accepted request
+    val conflictingTime = LocalDateTime.of(2024, 1, 1, 18, 0)
+    val acceptedRequest =
+        regularHoursRequest.copy(
+            uid = "request1",
+            meetingDate =
+                Timestamp(
+                    conflictingTime.atZone(ZoneId.systemDefault()).toInstant().epochSecond, 0))
+    val acceptedRequestsFlow = MutableStateFlow(listOf(acceptedRequest))
+    whenever(serviceRequestViewModel.acceptedRequests).thenReturn(acceptedRequestsFlow)
+    val conflictingRequest = outsideHoursRequest.copy(uid = "conflicting_request")
+    val resultConflict = calendarViewModel.checkServiceRequestConflict(conflictingRequest)
+    assertTrue(resultConflict.hasConflict)
+    assertEquals(
+        "This time slot conflicts with another accepted service request", resultConflict.reason)
+  }
+
+  @Test
+  fun testAddExceptionValidation() {
+    var successResult = false
+    var feedbackMessage = ""
+
+    // Test empty time slots
+    calendarViewModel.addException(testDateTime, emptyList(), ExceptionType.OFF_TIME) {
+        success,
+        feedback ->
+      successResult = success
+      feedbackMessage = feedback
+    }
+    assertFalse(successResult)
+    assertEquals("No time slots provided", feedbackMessage)
+
+    // Test successful addition
+    doAnswer {
+          val onSuccess = it.getArgument<() -> Unit>(1)
+          onSuccess()
+          Unit
+        }
+        .`when`(providerRepository)
+        .updateProvider(any(), any(), any())
+
+    calendarViewModel.addException(
+        testDateTime, listOf(TimeSlot(10, 0, 11, 0)), ExceptionType.OFF_TIME) { success, feedback ->
+          successResult = success
+          feedbackMessage = feedback
+        }
+    assertTrue(successResult)
+    assertEquals("Exception added successfully", feedbackMessage)
   }
 }
