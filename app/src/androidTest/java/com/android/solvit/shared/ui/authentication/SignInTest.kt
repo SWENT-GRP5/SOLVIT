@@ -96,7 +96,7 @@ class SignInScreenTest {
     composeTestRule.setContent { SignInScreen(mockNavigationActions) }
 
     // Test that the checkbox is clickable and can toggle between states
-      composeTestRule.onNodeWithTag("signInButton").performClick()
+    composeTestRule.onNodeWithTag("signInButton").performClick()
     composeTestRule.onNodeWithTag("googleSignInButton").performClick()
   }
 
