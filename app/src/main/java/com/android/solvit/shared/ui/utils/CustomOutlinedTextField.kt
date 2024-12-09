@@ -71,69 +71,68 @@ fun CustomOutlinedTextField(
     textAlign: TextAlign = TextAlign.Unspecified,
     keyboardType: KeyboardType = KeyboardType.Text
 ) {
-    // State to track if the field has been "visited" (focused and then unfocused)
-    var hasBeenFocused by remember { mutableStateOf(false) }
-    var hasLostFocusAfterTyping by remember { mutableStateOf(false) }
+  // State to track if the field has been "visited" (focused and then unfocused)
+  var hasBeenFocused by remember { mutableStateOf(false) }
+  var hasLostFocusAfterTyping by remember { mutableStateOf(false) }
 
-    Column(modifier = modifier.fillMaxWidth()) {
-        // Text field with focus management
-        OutlinedTextField(
-            value = value,
-            onValueChange = {
-                onValueChange(it)
-                // Reset the focus-loss tracking when the user starts typing
-                if (it.isNotEmpty()) {
-                    hasLostFocusAfterTyping = false
-                }
-            },
-            label = { if (label != null) Text(label, color = colorScheme.onBackground) },
-            placeholder = { Text(placeholder) },
-            leadingIcon = {
-                if (leadingIcon != null) {
-                    Icon(
-                        leadingIcon,
-                        contentDescription = leadingIconDescription,
-                        tint = if (isValueOk) colorScheme.secondary else colorScheme.onSurfaceVariant)
-                }
-            },
-            modifier =
+  Column(modifier = modifier.fillMaxWidth()) {
+    // Text field with focus management
+    OutlinedTextField(
+        value = value,
+        onValueChange = {
+          onValueChange(it)
+          // Reset the focus-loss tracking when the user starts typing
+          if (it.isNotEmpty()) {
+            hasLostFocusAfterTyping = false
+          }
+        },
+        label = { if (label != null) Text(label, color = colorScheme.onBackground) },
+        placeholder = { Text(placeholder) },
+        leadingIcon = {
+          if (leadingIcon != null) {
+            Icon(
+                leadingIcon,
+                contentDescription = leadingIconDescription,
+                tint = if (isValueOk) colorScheme.secondary else colorScheme.onSurfaceVariant)
+          }
+        },
+        modifier =
             Modifier.fillMaxWidth().testTag(testTag).wrapContentHeight().onFocusChanged { focusState
-                ->
-                // Mark the field as "visited" as soon as it loses focus after an entry
-                if (!focusState.isFocused && value.isNotBlank()) {
-                    hasBeenFocused = true
-                    hasLostFocusAfterTyping = true
-                }
+              ->
+              // Mark the field as "visited" as soon as it loses focus after an entry
+              if (!focusState.isFocused && value.isNotBlank()) {
+                hasBeenFocused = true
+                hasLostFocusAfterTyping = true
+              }
             },
-            shape = RoundedCornerShape(12.dp),
-            colors =
+        shape = RoundedCornerShape(12.dp),
+        colors =
             TextFieldDefaults.outlinedTextFieldColors(
                 focusedTextColor = colorScheme.onBackground,
                 unfocusedTextColor =
-                if (value.isEmpty()) colorScheme.onSurfaceVariant
-                else if (!isValueOk) colorScheme.error else colorScheme.onBackground,
+                    if (value.isEmpty()) colorScheme.onSurfaceVariant
+                    else if (!isValueOk) colorScheme.error else colorScheme.onBackground,
                 focusedBorderColor = if (isValueOk) colorScheme.secondary else colorScheme.primary,
                 unfocusedBorderColor =
-                when {
-                    value.isEmpty() -> colorScheme.onSurfaceVariant
-                    isValueOk -> colorScheme.secondary
-                    else -> colorScheme.error
-                }),
-            maxLines = maxLines,
-            textStyle = TextStyle(textAlign = textAlign, color = colorScheme.onBackground),
-            keyboardOptions = KeyboardOptions(keyboardType = keyboardType)
-        )
+                    when {
+                      value.isEmpty() -> colorScheme.onSurfaceVariant
+                      isValueOk -> colorScheme.secondary
+                      else -> colorScheme.error
+                    }),
+        maxLines = maxLines,
+        textStyle = TextStyle(textAlign = textAlign, color = colorScheme.onBackground),
+        keyboardOptions = KeyboardOptions(keyboardType = keyboardType))
 
-        // Display the error message if the field has been visited, input is incorrect, and focus was
-        // lost after typing
-        if (!isValueOk && hasBeenFocused && hasLostFocusAfterTyping) {
-            Text(
-                text = errorMessage,
-                color = colorScheme.error,
-                fontSize = 15.sp, // Error text size
-                modifier = Modifier.padding(start = 16.dp, top = 4.dp).testTag(errorTestTag))
-        }
+    // Display the error message if the field has been visited, input is incorrect, and focus was
+    // lost after typing
+    if (!isValueOk && hasBeenFocused && hasLostFocusAfterTyping) {
+      Text(
+          text = errorMessage,
+          color = colorScheme.error,
+          fontSize = 15.sp, // Error text size
+          modifier = Modifier.padding(start = 16.dp, top = 4.dp).testTag(errorTestTag))
     }
+  }
 }
 
 /**
@@ -163,85 +162,85 @@ fun PasswordTextField(
     errorMessage: String = "Password is too short",
     testTagErrorPassword: String = "passwordErrorMessage"
 ) {
-    var passwordVisible by remember { mutableStateOf(false) }
+  var passwordVisible by remember { mutableStateOf(false) }
 
-    // State to track if the field has been focused and then unfocused
-    var hasBeenFocused by remember { mutableStateOf(false) }
-    var hasLostFocusAfterTyping by remember { mutableStateOf(false) }
+  // State to track if the field has been focused and then unfocused
+  var hasBeenFocused by remember { mutableStateOf(false) }
+  var hasLostFocusAfterTyping by remember { mutableStateOf(false) }
 
-    Column(modifier = Modifier.fillMaxWidth()) {
-        OutlinedTextField(
-            value = value,
-            onValueChange = {
-                onValueChange(it)
-                // Reset focus-loss tracking when the user starts typing
-                if (it.isNotEmpty()) {
-                    hasLostFocusAfterTyping = false
-                }
-            },
-            label = { Text(label, color = colorScheme.onBackground) },
-            singleLine = true,
-            placeholder = { Text(placeholder) },
-            modifier =
+  Column(modifier = Modifier.fillMaxWidth()) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = {
+          onValueChange(it)
+          // Reset focus-loss tracking when the user starts typing
+          if (it.isNotEmpty()) {
+            hasLostFocusAfterTyping = false
+          }
+        },
+        label = { Text(label, color = colorScheme.onBackground) },
+        singleLine = true,
+        placeholder = { Text(placeholder) },
+        modifier =
             Modifier.fillMaxWidth().testTag(testTag).onFocusChanged { focusState ->
-                // Mark the field as "visited" if it loses focus after an entry
-                if (!focusState.isFocused && value.isNotBlank()) {
-                    hasBeenFocused = true
-                    hasLostFocusAfterTyping = true
-                }
+              // Mark the field as "visited" if it loses focus after an entry
+              if (!focusState.isFocused && value.isNotBlank()) {
+                hasBeenFocused = true
+                hasLostFocusAfterTyping = true
+              }
             },
-            enabled = true,
-            shape = RoundedCornerShape(12.dp),
-            visualTransformation =
+        enabled = true,
+        shape = RoundedCornerShape(12.dp),
+        visualTransformation =
             if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Filled.Lock,
-                    contentDescription = contentDescription,
-                    tint =
+        leadingIcon = {
+          Icon(
+              imageVector = Icons.Filled.Lock,
+              contentDescription = contentDescription,
+              tint =
+                  if (passwordLengthComplete) colorScheme.secondary
+                  else colorScheme.onSurfaceVariant,
+              modifier = Modifier.size(25.dp))
+        },
+        trailingIcon = {
+          val image =
+              if (passwordVisible) painterResource(id = android.R.drawable.ic_menu_view)
+              else painterResource(id = android.R.drawable.ic_secure)
+
+          IconButton(onClick = { passwordVisible = !passwordVisible }) {
+            Icon(
+                painter = image,
+                contentDescription = null,
+                tint =
                     if (passwordLengthComplete) colorScheme.secondary
                     else colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(25.dp))
-            },
-            trailingIcon = {
-                val image =
-                    if (passwordVisible) painterResource(id = android.R.drawable.ic_menu_view)
-                    else painterResource(id = android.R.drawable.ic_secure)
-
-                IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                    Icon(
-                        painter = image,
-                        contentDescription = null,
-                        tint =
-                        if (passwordLengthComplete) colorScheme.secondary
-                        else colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(24.dp))
-                }
-            },
-            colors =
+                modifier = Modifier.size(24.dp))
+          }
+        },
+        colors =
             TextFieldDefaults.outlinedTextFieldColors(
                 focusedTextColor = colorScheme.onBackground,
                 unfocusedTextColor =
-                if (value.isEmpty()) colorScheme.onSurfaceVariant
-                else if (!passwordLengthComplete) colorScheme.error
-                else colorScheme.onBackground,
+                    if (value.isEmpty()) colorScheme.onSurfaceVariant
+                    else if (!passwordLengthComplete) colorScheme.error
+                    else colorScheme.onBackground,
                 focusedBorderColor =
-                if (passwordLengthComplete) colorScheme.secondary else colorScheme.primary,
+                    if (passwordLengthComplete) colorScheme.secondary else colorScheme.primary,
                 unfocusedBorderColor =
-                when {
-                    value.isEmpty() -> colorScheme.onSurfaceVariant
-                    passwordLengthComplete -> colorScheme.secondary
-                    else -> colorScheme.error
-                }))
+                    when {
+                      value.isEmpty() -> colorScheme.onSurfaceVariant
+                      passwordLengthComplete -> colorScheme.secondary
+                      else -> colorScheme.error
+                    }))
 
-        // Display the error message if the field has been visited, input is incorrect, and focus was
-        // lost after typing
-        if (!passwordLengthComplete && hasBeenFocused && hasLostFocusAfterTyping) {
-            Text(
-                text = errorMessage,
-                color = colorScheme.error,
-                fontSize = 15.sp, // Error text size
-                modifier = Modifier.padding(start = 16.dp, top = 4.dp).testTag(testTagErrorPassword))
-        }
+    // Display the error message if the field has been visited, input is incorrect, and focus was
+    // lost after typing
+    if (!passwordLengthComplete && hasBeenFocused && hasLostFocusAfterTyping) {
+      Text(
+          text = errorMessage,
+          color = colorScheme.error,
+          fontSize = 15.sp, // Error text size
+          modifier = Modifier.padding(start = 16.dp, top = 4.dp).testTag(testTagErrorPassword))
     }
+  }
 }
