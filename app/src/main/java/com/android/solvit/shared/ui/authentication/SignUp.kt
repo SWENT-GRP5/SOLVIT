@@ -68,6 +68,7 @@ import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
 import com.android.solvit.shared.ui.utils.CustomOutlinedTextField
+import com.android.solvit.shared.ui.utils.GoBackButton
 import com.android.solvit.shared.ui.utils.PasswordTextField
 import com.android.solvit.shared.ui.utils.ValidationRegex
 import com.google.android.gms.auth.api.signin.GoogleSignIn
