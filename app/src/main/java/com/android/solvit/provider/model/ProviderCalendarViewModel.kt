@@ -310,10 +310,10 @@ class ProviderCalendarViewModel(
    * @return Formatted feedback message
    */
   private fun buildFeedbackMessage(result: ExceptionUpdateResult): String {
-    return if (result.mergedWith.isEmpty()) {
-      "Exception added successfully"
-    } else {
-      "Exception merged with existing ${result.exception.type.toString().lowercase().replace('_', ' ')} exception"
+    return when {
+      result.isUpdate -> "Exception updated successfully"
+      result.mergedWith.isEmpty() -> "Exception added successfully"
+      else -> "Exception added and merged"
     }
   }
 

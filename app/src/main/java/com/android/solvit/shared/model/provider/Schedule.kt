@@ -117,7 +117,8 @@ enum class ExceptionType {
 /** Result of adding or updating an exception, including feedback for the user */
 data class ExceptionUpdateResult(
     val exception: ScheduleException,
-    val mergedWith: List<ScheduleException> = emptyList()
+    val mergedWith: List<ScheduleException> = emptyList(),
+    val isUpdate: Boolean = false
 )
 
 /** Represents the working schedule of a provider */
@@ -207,7 +208,8 @@ data class Schedule(
     val newException = ScheduleException(date, timeSlots, type)
     exceptions.add(newException)
 
-    return ExceptionUpdateResult(newException, listOfNotNull(existingException))
+    return ExceptionUpdateResult(
+        newException, listOfNotNull(existingException), existingException != null)
   }
 
   /** Merges overlapping time slots in a list */

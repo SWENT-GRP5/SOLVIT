@@ -18,7 +18,6 @@ import kotlin.test.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.*
 import org.junit.After
 import org.junit.Before
@@ -101,52 +100,43 @@ class ProviderCalendarViewModelTest {
   fun setUp() {
     Dispatchers.setMain(testDispatcher)
 
-    // Set up mocks
-    authRepository = mock()
+    // Initialize all mocks first
+    authViewModel = mock()
     providerRepository = mock()
-    mockUser = mock()
     serviceRequestViewModel = mock()
 
-    // Configure mock user
-    whenever(mockUser.uid).thenReturn(testUserId)
+    // Mock user data
+    val mockUser =
+        User(
+            uid = testUserId, // Use the class-level testUserId
+            role = "provider",
+            userName = "Test User",
+            email = "test@test.com",
+            locations = listOf(Location(0.0, 0.0, "")))
+    val mockUserFlow = MutableStateFlow<User?>(mockUser)
+    whenever(authViewModel.user).thenReturn(mockUserFlow)
 
-    // Set up user flow before initializing AuthViewModel
-    whenever(authRepository.init(any())).then {
-      val callback = it.getArgument<(User?) -> Unit>(0)
-      callback(mockUser)
+    // Mock provider data
+    whenever(providerRepository.getProvider(eq(testUserId), any(), any())).thenAnswer { invocation
+      ->
+      val successCallback = invocation.getArgument<(Provider?) -> Unit>(1)
+      successCallback(testProvider) // Use the class-level testProvider
       Unit
     }
 
-    // Configure auth view model with mock user
-    authViewModel = AuthViewModel(authRepository)
-
-    // Configure service request view model with test data
-    requestsFlow = MutableStateFlow(emptyList())
+    // Mock service request data
+    requestsFlow = MutableStateFlow(listOf(assignedRequest))
     acceptedRequestsFlow = MutableStateFlow(emptyList())
 
-    whenever(serviceRequestViewModel.requests)
-        .thenReturn(requestsFlow as StateFlow<List<ServiceRequest>>)
-    whenever(serviceRequestViewModel.acceptedRequests)
-        .thenReturn(acceptedRequestsFlow as StateFlow<List<ServiceRequest>>)
+    whenever(serviceRequestViewModel.requests).thenReturn(requestsFlow)
+    whenever(serviceRequestViewModel.acceptedRequests).thenReturn(acceptedRequestsFlow)
 
-    doAnswer {
-          requestsFlow.value = listOf(assignedRequest, unassignedRequest, otherProviderRequest)
-          acceptedRequestsFlow.value = listOf(assignedRequest)
-          Unit
-        }
-        .whenever(serviceRequestViewModel)
-        .getServiceRequests()
-
-    // Configure provider repository mock
-    whenever(providerRepository.getProvider(eq(testUserId), any(), any())).then {
-      val onSuccess = it.getArgument<(Provider?) -> Unit>(1)
-      onSuccess(testProvider)
-      Unit
-    }
-
-    // Initialize view model with mocked dependencies
+    // Initialize view model
     calendarViewModel =
-        ProviderCalendarViewModel(providerRepository, authViewModel, serviceRequestViewModel)
+        ProviderCalendarViewModel(
+            providerRepository = providerRepository,
+            authViewModel = authViewModel,
+            serviceRequestViewModel = serviceRequestViewModel)
 
     // Wait for initialization
     testDispatcher.scheduler.advanceUntilIdle()
@@ -181,11 +171,13 @@ class ProviderCalendarViewModelTest {
     var feedbackMessage = ""
 
     // Mock provider repository update to succeed
-    whenever(providerRepository.updateProvider(any(), any(), any())).then {
-      val onSuccess = it.getArgument<() -> Unit>(1)
-      onSuccess()
-      Unit
-    }
+    doAnswer {
+          val onSuccess = it.getArgument<() -> Unit>(1)
+          onSuccess()
+          Unit
+        }
+        .`when`(providerRepository)
+        .updateProvider(any<Provider>(), any<() -> Unit>(), any<(Exception) -> Unit>())
 
     // When
     calendarViewModel.addExtraTimeException(date, listOf(extraTimeSlot)) { success, feedback ->
@@ -227,7 +219,10 @@ class ProviderCalendarViewModelTest {
 
     // Recreate view model with clean state
     calendarViewModel =
-        ProviderCalendarViewModel(providerRepository, authViewModel, serviceRequestViewModel)
+        ProviderCalendarViewModel(
+            providerRepository = providerRepository,
+            authViewModel = authViewModel,
+            serviceRequestViewModel = serviceRequestViewModel)
     testDispatcher.scheduler.advanceUntilIdle()
 
     // Create a request during regular hours
@@ -285,7 +280,10 @@ class ProviderCalendarViewModelTest {
 
     // Create view model and wait for initialization
     calendarViewModel =
-        ProviderCalendarViewModel(providerRepository, authViewModel, serviceRequestViewModel)
+        ProviderCalendarViewModel(
+            providerRepository = providerRepository,
+            authViewModel = authViewModel,
+            serviceRequestViewModel = serviceRequestViewModel)
     testDispatcher.scheduler.advanceUntilIdle()
 
     // Set the view to the test date
@@ -334,11 +332,13 @@ class ProviderCalendarViewModelTest {
     var feedbackMessage = ""
 
     // Mock provider repository update to succeed
-    whenever(providerRepository.updateProvider(any(), any(), any())).then {
-      val onSuccess = it.getArgument<() -> Unit>(1)
-      onSuccess()
-      Unit
-    }
+    doAnswer {
+          val onSuccess = it.getArgument<() -> Unit>(1)
+          onSuccess()
+          Unit
+        }
+        .`when`(providerRepository)
+        .updateProvider(any<Provider>(), any<() -> Unit>(), any<(Exception) -> Unit>())
 
     // When
     calendarViewModel.addOffTimeException(date, listOf(offTimeSlot)) { success, feedback ->
@@ -359,11 +359,13 @@ class ProviderCalendarViewModelTest {
     var feedbackMessage = ""
 
     // Test successful update
-    whenever(providerRepository.updateProvider(any(), any(), any())).then {
-      val onSuccess = it.getArgument<() -> Unit>(1)
-      onSuccess()
-      Unit
-    }
+    doAnswer {
+          val onSuccess = it.getArgument<() -> Unit>(1)
+          onSuccess()
+          Unit
+        }
+        .`when`(providerRepository)
+        .updateProvider(any<Provider>(), any<() -> Unit>(), any<(Exception) -> Unit>())
 
     calendarViewModel.addExtraTimeException(
         LocalDateTime.of(2024, 1, 15, 0, 0), listOf(TimeSlot(17, 0, 19, 0))) { success, feedback ->
@@ -375,11 +377,13 @@ class ProviderCalendarViewModelTest {
     assertEquals("Exception added successfully", feedbackMessage)
 
     // Test failed update
-    whenever(providerRepository.updateProvider(any(), any(), any())).then {
-      val onFailure = it.getArgument<(Exception) -> Unit>(2)
-      onFailure(Exception("Update failed"))
-      Unit
-    }
+    doAnswer {
+          val onFailure = it.getArgument<(Exception) -> Unit>(2)
+          onFailure(Exception("Update failed"))
+          Unit
+        }
+        .`when`(providerRepository)
+        .updateProvider(any<Provider>(), any<() -> Unit>(), any<(Exception) -> Unit>())
 
     calendarViewModel.addOffTimeException(
         LocalDateTime.of(2024, 1, 15, 0, 0), listOf(TimeSlot(9, 0, 17, 0))) { success, feedback ->
@@ -389,5 +393,236 @@ class ProviderCalendarViewModelTest {
     testDispatcher.scheduler.advanceUntilIdle()
     assertFalse(successResult)
     assertEquals("Failed to update schedule", feedbackMessage)
+  }
+
+  @Test
+  fun testSetAndClearRegularHours() = runTest {
+    // Given
+    val dayOfWeek = DayOfWeek.TUESDAY.name
+    val timeSlots = listOf(TimeSlot(9, 0, 17, 0))
+    var successResult = false
+
+    // Mock successful provider update
+    doAnswer { invocation ->
+          val provider = invocation.getArgument<Provider>(0)
+          val onSuccess = invocation.getArgument<() -> Unit>(1)
+          onSuccess()
+          Unit
+        }
+        .`when`(providerRepository)
+        .updateProvider(any(), any(), any())
+
+    // Test setting regular hours
+    calendarViewModel.setRegularHours(dayOfWeek, timeSlots) { success -> successResult = success }
+    testDispatcher.scheduler.advanceUntilIdle()
+    assertTrue(successResult)
+
+    // Test clearing regular hours
+    successResult = false
+    calendarViewModel.clearRegularHours(dayOfWeek) { success -> successResult = success }
+    testDispatcher.scheduler.advanceUntilIdle()
+    assertTrue(successResult)
+    assertTrue(
+        calendarViewModel.currentProvider.value.schedule.regularHours[dayOfWeek].isNullOrEmpty())
+
+    // Test failure case
+    doAnswer {
+          val onFailure = it.getArgument<(Exception) -> Unit>(2)
+          onFailure(Exception("Update failed"))
+          Unit
+        }
+        .`when`(providerRepository)
+        .updateProvider(any<Provider>(), any<() -> Unit>(), any<(Exception) -> Unit>())
+
+    successResult = true
+    calendarViewModel.setRegularHours(dayOfWeek, timeSlots) { success -> successResult = success }
+    testDispatcher.scheduler.advanceUntilIdle()
+    assertFalse(successResult)
+  }
+
+  @Test
+  fun testUpdateException() = runTest {
+    // Given
+    val date = LocalDateTime.of(2024, 1, 15, 0, 0)
+    val timeSlots = listOf(TimeSlot(14, 0, 18, 0))
+    var successResult = false
+    var feedbackMessage = ""
+
+    // Add an existing exception to update
+    val existingException =
+        ScheduleException(date, listOf(TimeSlot(9, 0, 12, 0)), ExceptionType.EXTRA_TIME)
+    calendarViewModel.currentProvider.value.schedule.exceptions.add(existingException)
+
+    // Mock successful provider update
+    doAnswer { invocation ->
+          val provider = invocation.getArgument<Provider>(0)
+          val onSuccess = invocation.getArgument<() -> Unit>(1)
+          onSuccess()
+          Unit
+        }
+        .`when`(providerRepository)
+        .updateProvider(any(), any(), any())
+
+    // When
+    calendarViewModel.updateException(date, timeSlots, ExceptionType.EXTRA_TIME) { success, feedback
+      ->
+      successResult = success
+      feedbackMessage = feedback
+    }
+    testDispatcher.scheduler.advanceUntilIdle()
+
+    // Then
+    assertTrue(successResult)
+    assertEquals("Exception updated successfully", feedbackMessage)
+
+    // Test failure case
+    doAnswer {
+          val onFailure = it.getArgument<(Exception) -> Unit>(2)
+          onFailure(Exception("Update failed"))
+          Unit
+        }
+        .`when`(providerRepository)
+        .updateProvider(any<Provider>(), any<() -> Unit>(), any<(Exception) -> Unit>())
+
+    calendarViewModel.updateException(date, timeSlots, ExceptionType.EXTRA_TIME) { success, feedback
+      ->
+      successResult = success
+      feedbackMessage = feedback
+    }
+    testDispatcher.scheduler.advanceUntilIdle()
+    assertFalse(successResult)
+    assertEquals("Failed to update schedule", feedbackMessage)
+  }
+
+  @Test
+  fun testGetExceptions() = runTest {
+    // Given
+    val startDate = LocalDateTime.of(2024, 1, 1, 0, 0)
+    val endDate = LocalDateTime.of(2024, 1, 31, 23, 59)
+
+    // Test getting all exceptions
+    val allExceptions = calendarViewModel.getExceptions(startDate, endDate)
+    assertEquals(1, allExceptions.size)
+    assertEquals(ExceptionType.EXTRA_TIME, allExceptions[0].type)
+
+    // Test filtering by type
+    val extraTimeExceptions =
+        calendarViewModel.getExceptions(startDate, endDate, ExceptionType.EXTRA_TIME)
+    assertEquals(1, extraTimeExceptions.size)
+    assertEquals(ExceptionType.EXTRA_TIME, extraTimeExceptions[0].type)
+
+    val offTimeExceptions =
+        calendarViewModel.getExceptions(startDate, endDate, ExceptionType.OFF_TIME)
+    assertTrue(offTimeExceptions.isEmpty())
+
+    // Test date range filtering
+    val futureExceptions =
+        calendarViewModel.getExceptions(
+            LocalDateTime.of(2025, 1, 1, 0, 0), LocalDateTime.of(2025, 12, 31, 23, 59))
+    assertTrue(futureExceptions.isEmpty())
+  }
+
+  @Test
+  fun testOnServiceRequestClick() = runTest {
+    // Given
+    val request = assignedRequest
+
+    // When
+    calendarViewModel.onServiceRequestClick(request)
+
+    // Then
+    verify(serviceRequestViewModel).selectRequest(request)
+  }
+
+  @Test
+  fun testAddExceptionFeedback() = runTest {
+    // Given
+    val date = LocalDateTime.of(2024, 1, 15, 0, 0)
+    val timeSlots = listOf(TimeSlot(14, 0, 18, 0))
+    var feedbackMessage = ""
+
+    // Mock successful provider update
+    doAnswer { invocation ->
+          val provider = invocation.getArgument<Provider>(0)
+          val onSuccess = invocation.getArgument<() -> Unit>(1)
+          onSuccess()
+          Unit
+        }
+        .`when`(providerRepository)
+        .updateProvider(any(), any(), any())
+
+    // Test add without merging
+    calendarViewModel.addExtraTimeException(date, timeSlots) { _, feedback ->
+      feedbackMessage = feedback
+    }
+    testDispatcher.scheduler.advanceUntilIdle()
+    assertEquals("Exception added successfully", feedbackMessage)
+
+    // Test add with merging
+    val existingException = ScheduleException(date, timeSlots, ExceptionType.EXTRA_TIME)
+    calendarViewModel.currentProvider.value.schedule.exceptions.add(existingException)
+
+    calendarViewModel.addExtraTimeException(date, timeSlots) { _, feedback ->
+      feedbackMessage = feedback
+    }
+    testDispatcher.scheduler.advanceUntilIdle()
+    assertTrue(feedbackMessage.contains("Exception added and merged"))
+
+    // Test failed operation
+    doAnswer {
+          val onFailure = it.getArgument<(Exception) -> Unit>(2)
+          onFailure(Exception("Update failed"))
+          Unit
+        }
+        .`when`(providerRepository)
+        .updateProvider(any<Provider>(), any<() -> Unit>(), any<(Exception) -> Unit>())
+
+    calendarViewModel.addExtraTimeException(date, timeSlots) { _, feedback ->
+      feedbackMessage = feedback
+    }
+    testDispatcher.scheduler.advanceUntilIdle()
+    assertEquals("Failed to update schedule", feedbackMessage)
+  }
+
+  @Test
+  fun testDateSelection() = runTest {
+    // Given
+    val testDate = LocalDate.of(2024, 2, 1)
+
+    // When
+    calendarViewModel.onDateSelected(testDate)
+
+    // Then
+    assertEquals(testDate, calendarViewModel.selectedDate.value)
+    assertEquals(testDate, calendarViewModel.currentViewDate.value)
+  }
+
+  @Test
+  fun testViewDateChange() = runTest {
+    // Given
+    val initialDate = LocalDate.of(2024, 1, 1)
+    val newDate = LocalDate.of(2024, 2, 1)
+
+    // When - Set initial date
+    calendarViewModel.onViewDateChanged(initialDate)
+    assertEquals(initialDate, calendarViewModel.currentViewDate.value)
+
+    // When - Change view date
+    calendarViewModel.onViewDateChanged(newDate)
+
+    // Then
+    assertEquals(newDate, calendarViewModel.currentViewDate.value)
+    // Selected date should remain unchanged
+    assertNotEquals(newDate, calendarViewModel.selectedDate.value)
+  }
+
+  @Test
+  fun testInitialState() = runTest {
+    // Verify initial state
+    assertEquals(LocalDate.now(), calendarViewModel.selectedDate.value)
+    assertEquals(LocalDate.now(), calendarViewModel.currentViewDate.value)
+    assertEquals(CalendarView.WEEK, calendarViewModel.calendarView.value)
+    assertTrue(calendarViewModel.timeSlots.value.isEmpty())
+    assertFalse(calendarViewModel.isLoading.value)
   }
 }
