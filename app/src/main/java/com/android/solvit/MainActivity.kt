@@ -329,9 +329,6 @@ fun ProviderUI(
     composable(Screen.CALENDAR) {
       ProviderCalendarScreen(navigationActions = navigationActions, viewModel = calendarViewModel)
     }
-    composable(Screen.MY_JOBS) {
-      RequestsDashboardScreen(navigationActions, serviceRequestViewModel, authViewModel)
-    }
     composable(Route.BOOKING_DETAILS) {
       ServiceBookingScreen(
           navigationActions,
@@ -363,7 +360,6 @@ fun ProviderUI(
             serviceRequestViewModel = serviceRequestViewModel)
       }
     }
-
     composable(Screen.MY_JOBS) {
       RequestsDashboardScreen(
           navigationActions = navigationActions,
