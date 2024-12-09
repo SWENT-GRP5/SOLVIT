@@ -60,6 +60,7 @@ import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.request.ServiceRequestStatus
 import com.android.solvit.shared.model.request.ServiceRequestStatus.Companion.getStatusColor
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
+import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_PROVIDER
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
@@ -133,7 +134,7 @@ fun ProviderProfileScreen(
                     modifier = Modifier.padding(16.dp)) {
                       ProviderItem(
                           icon = Icons.Default.Build,
-                          text = provider?.service?.name ?: "",
+                          text = if (provider == null) "" else Services.format(provider!!.service),
                           tag = "ServiceItem")
                       ProviderItem(
                           icon = Icons.Default.LocationOn,
@@ -147,7 +148,10 @@ fun ProviderProfileScreen(
                       ProviderItem(
                           icon = Icons.Default.ThumbUp,
                           drawable = R.drawable.language_icon,
-                          text = provider?.languages?.joinToString { it.name.lowercase() } ?: "",
+                          text =
+                              provider?.languages?.joinToString { lng ->
+                                lng.name.lowercase().replaceFirstChar { it.uppercase() }
+                              } ?: "",
                           tag = "LanguagesItem")
                     }
               }
