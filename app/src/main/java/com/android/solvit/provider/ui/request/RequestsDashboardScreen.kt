@@ -1,5 +1,6 @@
 package com.android.solvit.provider.ui.request
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -83,10 +84,13 @@ fun RequestsDashboardScreen(
   Scaffold(
       topBar = { RequestsTopBar(title = "Job Dashboard") },
       bottomBar = {
+        val currentRoute = navigationActions.currentRoute() ?: "default_route"
+        Log.e(
+            "ProviderCalendarScreen", "Current route passed to BottomNavigationMenu: $currentRoute")
         BottomNavigationMenu(
             onTabSelect = { navigationActions.navigateTo(it.route) },
             tabList = LIST_TOP_LEVEL_DESTINATION_PROVIDER,
-            selectedItem = navigationActions.currentRoute())
+            selectedItem = currentRoute)
       },
       content = { innerPadding ->
         Column(
