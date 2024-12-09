@@ -170,8 +170,8 @@ open class NavigationActions(
    * @return The current route
    */
   open fun currentRoute(): String {
-      val currentRoute = navController.currentDestination?.route
-      Log.e("NavigationActions", "currentRoute: $currentRoute")
-      return currentRoute ?: ""
+    val currentRoute = navController.currentDestination?.route
+    Log.e("NavigationActions", "currentRoute: $currentRoute")
+    return currentRoute ?: ""
   }
 }
