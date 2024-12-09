@@ -102,6 +102,26 @@ class ServiceRequestRepositoryFirebase(
     getServiceRequestsByStatus(ServiceRequestStatus.ARCHIVED, onSuccess, onFailure)
   }
 
+  override fun getServiceRequestById(
+      id: String,
+      onSuccess: (ServiceRequest) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    db.collection(collectionPath).document(id).get().addOnCompleteListener { result ->
+      if (result.isSuccessful) {
+        val serviceRequest = documentToServiceRequest(result.result!!)
+        if (serviceRequest != null) {
+          onSuccess(serviceRequest)
+        } else {
+          onFailure(Exception("Service request not found"))
+        }
+      } else {
+        val exception = result.exception ?: Exception("Unknown error")
+        onFailure(exception)
+      }
+    }
+  }
+
   override fun saveServiceRequest(
       serviceRequest: ServiceRequest,
       onSuccess: () -> Unit,

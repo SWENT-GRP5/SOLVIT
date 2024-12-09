@@ -104,10 +104,26 @@ class NotificationViewModelTest {
         title = "New Service Request",
         message = "You have a new service request for tutoring",
         timestamp = Timestamp.now(),
+        serviceRequest = serviceRequest,
         isRead = false)
   }
 
   private fun mockProvider(): Provider {
     return Provider(uid = "provider123", name = "John Doe", service = Services.TUTOR)
+  }
+
+  /**
+   * Tests that the markNotificationAsRead function calls the repository to update the notification
+   * status correctly.
+   */
+  @Test
+  fun markNotificationAsRead_updatesNotificationReadStatus() {
+    val notification = mockNotification()
+
+    // Act: Mark the notification as read
+    notificationsViewModel.markNotificationAsRead(notification)
+
+    // Verify that the repository's updateNotificationReadStatus was called with correct parameters
+    verify(notificationsRepository).updateNotificationReadStatus(notification.uid, true)
   }
 }

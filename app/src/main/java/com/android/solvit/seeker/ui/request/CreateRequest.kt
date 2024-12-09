@@ -6,11 +6,11 @@ import android.icu.util.GregorianCalendar
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -30,6 +30,8 @@ import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.model.utils.isInternetAvailable
 import com.android.solvit.shared.model.utils.loadBitmapFromUri
 import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.android.solvit.shared.ui.navigation.Route
+import com.google.firebase.Firebase
 import com.google.firebase.Timestamp
 
 @Composable
@@ -41,8 +43,7 @@ fun CreateRequestScreen(
     notificationViewModel: NotificationsViewModel =
         viewModel(factory = NotificationsViewModel.Factory),
     listProviderViewModel: ListProviderViewModel =
-        viewModel(factory = ListProviderViewModel.Factory),
-    locationViewModel: LocationViewModel = viewModel(factory = LocationViewModel.Factory)
+        viewModel(factory = ListProviderViewModel.Factory)
 ) {
   // Lock Orientation to Portrait
   val context = LocalContext.current
@@ -54,6 +55,9 @@ fun CreateRequestScreen(
       activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
     }
   }
+
+  val selectedProviderId = requestViewModel.selectedProviderId.collectAsState()
+  val selectedProviderService = requestViewModel.selectedProviderService.collectAsState()
 
   var title by remember { mutableStateOf("") }
   var description by remember { mutableStateOf("") }
@@ -71,12 +75,13 @@ fun CreateRequestScreen(
   val filteredServiceTypes =
       Services.entries.filter { it.name.contains(typeQuery, ignoreCase = true) }
   var selectedServiceType by remember { mutableStateOf(Services.OTHER) }
+  selectedProviderService.value?.let { selectedServiceType = it }
   val localContext = LocalContext.current
   val userId = user?.uid ?: "-1"
 
   var showAIAssistantDialog by remember { mutableStateOf(true) }
   var showMultiStepDialog by remember { mutableStateOf(false) }
-  var currentStep by remember { mutableStateOf(1) }
+  var currentStep by remember { mutableIntStateOf(1) }
   var selectedImages by remember { mutableStateOf<List<Uri>>(emptyList()) }
 
   // AI Assistant Dialog
@@ -92,12 +97,26 @@ fun CreateRequestScreen(
   // Multi-Step Dialog
   if (showMultiStepDialog) {
     MultiStepDialog(
-        requestViewModel = requestViewModel,
+        context = localContext,
         showDialog = showMultiStepDialog,
         currentStep = currentStep,
         selectedImages = selectedImages,
-        onImagesSelected = { images -> selectedImages = images },
-        onRemoveImage = { uri -> selectedImages = selectedImages.filter { it != uri } },
+        onImagesSelected = { images ->
+          selectedImages = images
+          if (selectedImages.isNotEmpty()) {
+            val uri = selectedImages[0]
+            selectedImageUri = uri
+          }
+        },
+        onRemoveImage = { uri ->
+          selectedImages = selectedImages.filter { it != uri }
+          if (selectedImages.isEmpty()) {
+            selectedImageUri = null
+          } else {
+            val uri = selectedImages[0]
+            selectedImageUri = uri
+          }
+        },
         onStartAnalyzing = {
           currentStep = 2 // Move to the analyzing step
         },
@@ -120,7 +139,10 @@ fun CreateRequestScreen(
       onTitleChange = { title = it },
       description = description,
       onDescriptionChange = { description = it },
-      typeQuery = typeQuery,
+      typeQuery =
+          if (selectedProviderService.value != null)
+              Services.format(selectedProviderService.value!!)
+          else typeQuery,
       onTypeQueryChange = { typeQuery = it },
       showDropdownType = showDropdownType,
       onShowDropdownTypeChange = { showDropdownType = it },
@@ -160,6 +182,7 @@ fun CreateRequestScreen(
                 ServiceRequest(
                     title = title,
                     description = description,
+                    providerId = selectedProviderId.value,
                     userId = userId,
                     dueDate = Timestamp(calendar.time),
                     location = selectedLocation,
@@ -179,9 +202,11 @@ fun CreateRequestScreen(
             } else {
               requestViewModel.saveServiceRequest(serviceRequest)
             }
+            requestViewModel.unSelectProvider()
             notificationViewModel.sendNotifications(
                 serviceRequest, listProviderViewModel.providersList.value)
-            navigationActions.goBack()
+            requestViewModel.selectRequest(serviceRequest)
+            navigationActions.navigateTo(Route.BOOKING_DETAILS)
             return@RequestScreen
           } catch (_: NumberFormatException) {}
         }

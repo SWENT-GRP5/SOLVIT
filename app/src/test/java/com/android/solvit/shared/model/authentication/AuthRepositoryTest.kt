@@ -42,7 +42,7 @@ class AuthRepositoryTest {
   private lateinit var authRepository: AuthRepository
   private val uid = "testUid"
   private val collectionPath = "users"
-  private val user = User("testUid", "testRole", "test@test.com")
+  private val user = User("testUid", "testRole", email = "test@test.com")
   private val exception = Exception("test exception")
   private val idToken = "testIdToken"
 
@@ -63,6 +63,7 @@ class AuthRepositoryTest {
     `when`(mockFirestore.collection(collectionPath)).thenReturn(mockCollection)
     `when`(mockCollection.document(uid)).thenReturn(mockDocumentReference)
     `when`(mockDocumentReference.get()).thenReturn(mockTaskDoc)
+    `when`(mockDocumentReference.update(anyString(), any())).thenReturn(mockTask)
     `when`(mockDocumentReference.set(any())).thenReturn(mockTask)
     `when`(mockTaskDoc.result).thenReturn(mockDocumentSnapshot)
     `when`(mockDocumentSnapshot.getString("uid")).thenReturn("testUid")
@@ -365,11 +366,13 @@ class AuthRepositoryTest {
     `when`(mockDocumentSnapshot.getString("uid")).thenReturn("testUid")
     `when`(mockDocumentSnapshot.getString("role")).thenReturn("testRole")
     `when`(mockDocumentSnapshot.getString("email")).thenReturn("test@example.com")
+    `when`(mockDocumentSnapshot.getString("userName")).thenReturn("testName")
 
     val user = method.invoke(authRepository, mockDocumentSnapshot) as User?
     assertNotNull(user)
     assertEquals("testUid", user?.uid)
     assertEquals("testRole", user?.role)
     assertEquals("test@example.com", user?.email)
+    assertEquals("testName", user?.userName)
   }
 }

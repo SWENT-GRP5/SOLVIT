@@ -5,17 +5,19 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.navigation.compose.rememberNavController
 import androidx.test.core.app.ApplicationProvider
+import com.android.solvit.provider.model.ProviderCalendarViewModel
+import com.android.solvit.provider.ui.profile.ProviderRegistrationScreen
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.seeker.model.profile.UserRepository
 import com.android.solvit.seeker.model.profile.UserRepositoryFirestore
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
-import com.android.solvit.seeker.ui.provider.ProviderRegistrationScreen
 import com.android.solvit.shared.model.NotificationsRepository
 import com.android.solvit.shared.model.NotificationsRepositoryFirestore
 import com.android.solvit.shared.model.NotificationsViewModel
@@ -23,6 +25,7 @@ import com.android.solvit.shared.model.authentication.AuthRep
 import com.android.solvit.shared.model.authentication.AuthRepository
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.authentication.User
+import com.android.solvit.shared.model.chat.AiSolverViewModel
 import com.android.solvit.shared.model.chat.ChatAssistantViewModel
 import com.android.solvit.shared.model.chat.ChatRepository
 import com.android.solvit.shared.model.chat.ChatRepositoryFirestore
@@ -33,6 +36,7 @@ import com.android.solvit.shared.model.map.LocationViewModel
 import com.android.solvit.shared.model.packages.PackageProposalRepository
 import com.android.solvit.shared.model.packages.PackageProposalRepositoryFirestore
 import com.android.solvit.shared.model.packages.PackageProposalViewModel
+import com.android.solvit.shared.model.packages.PackagesAssistantViewModel
 import com.android.solvit.shared.model.provider.ProviderRepository
 import com.android.solvit.shared.model.provider.ProviderRepositoryFirestore
 import com.android.solvit.shared.model.request.ServiceRequestRepository
@@ -76,6 +80,9 @@ class EndToEndTestCreateProfile {
   private lateinit var packageProposalViewModel: PackageProposalViewModel
   private lateinit var chatAssistantViewModel: ChatAssistantViewModel
   private lateinit var notificationsViewModel: NotificationsViewModel
+  private lateinit var calendarViewModel: ProviderCalendarViewModel
+  private lateinit var aiSolverViewModel: AiSolverViewModel
+  private lateinit var packagesAssistantViewModel: PackagesAssistantViewModel
 
   private lateinit var authRepository: AuthRepository
   private lateinit var authRepository2: AuthRep
@@ -118,8 +125,9 @@ class EndToEndTestCreateProfile {
     serviceRequestRepository = ServiceRequestRepositoryFirebase(firestore, storage)
     reviewRepository = ReviewRepositoryFirestore(firestore)
     packageProposalRepositoryFirestore = PackageProposalRepositoryFirestore(firestore)
-    chatRepository = ChatRepositoryFirestore(database)
+    chatRepository = ChatRepositoryFirestore(database, storage, firestore)
     notificationsRepository = NotificationsRepositoryFirestore(firestore)
+    packagesAssistantViewModel = PackagesAssistantViewModel()
 
     authViewModel = AuthViewModel(authRepository)
     seekerProfileViewModel = SeekerProfileViewModel(seekerRepository)
@@ -131,6 +139,8 @@ class EndToEndTestCreateProfile {
     chatViewModel = ChatViewModel(chatRepository)
     chatAssistantViewModel = ChatAssistantViewModel()
     notificationsViewModel = NotificationsViewModel(notificationsRepository)
+    calendarViewModel = ProviderCalendarViewModel(authViewModel, serviceRequestViewModel)
+    aiSolverViewModel = AiSolverViewModel()
 
     `when`(locationRepository.search(ArgumentMatchers.anyString(), anyOrNull(), anyOrNull()))
         .thenAnswer { invocation ->
@@ -155,7 +165,7 @@ class EndToEndTestCreateProfile {
   }
 
   @Test
-  fun CreateSeekerProfile() {
+  fun createSeekerProfile() {
     composeTestRule.setContent {
       val userRegistered = authViewModel.userRegistered.collectAsState()
       val user = authViewModel.user.collectAsState()
@@ -166,7 +176,8 @@ class EndToEndTestCreateProfile {
             listProviderViewModel,
             seekerProfileViewModel,
             locationViewModel,
-            packageProposalViewModel)
+            packageProposalViewModel,
+            packagesAssistantViewModel)
       } else {
         when (user.value!!.role) {
           "seeker" ->
@@ -179,7 +190,9 @@ class EndToEndTestCreateProfile {
                   locationViewModel,
                   chatViewModel,
                   chatAssistantViewModel,
-                  notificationsViewModel)
+                  notificationsViewModel,
+                  aiSolverViewModel,
+                  packageProposalViewModel)
           "provider" ->
               ProviderUI(
                   authViewModel,
@@ -189,7 +202,9 @@ class EndToEndTestCreateProfile {
                   chatViewModel,
                   notificationsViewModel,
                   locationViewModel,
-                  chatAssistantViewModel)
+                  packageProposalViewModel,
+                  chatAssistantViewModel,
+                  calendarViewModel)
         }
       }
     }
@@ -300,6 +315,21 @@ class EndToEndTestCreateProfile {
     composeTestRule.onNodeWithTag("offerPackagesDropDown").assertIsDisplayed()
     composeTestRule.onNodeWithTag("offerPackagesDropDown").performClick()
     composeTestRule.onNodeWithTag("Yes").performClick() // Choose to offer packages services
+    composeTestRule.onNodeWithTag("generatePackagesButton").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("generatePackagesButton").performClick()
+    composeTestRule.onNodeWithTag("packageProposalDialog").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("packageProposalDialogTitle").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("additionalInfoInput").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("additionalInfoInput").performTextInput("Additional info")
+    composeTestRule.onNodeWithTag("numberOfPackagesDropDown").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("numberOfPackagesDropDown").performClick()
+    composeTestRule.onAllNodesWithText("3")[0].performClick()
+    composeTestRule.onNodeWithTag("generateButton").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("acceptSuggestionsButton").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("cancelButton").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("cancelButton").performClick()
+    composeTestRule.onNodeWithTag("enterPackagesButton").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("enterPackagesButton").performClick()
     composeTestRule.onNodeWithTag("package1").assertIsDisplayed()
     composeTestRule.onNodeWithTag("packageName1").assertIsDisplayed()
     composeTestRule.onNodeWithTag("packageName1").performTextInput("Basic")
@@ -307,10 +337,13 @@ class EndToEndTestCreateProfile {
     composeTestRule.onNodeWithTag("packagePrice1").performTextInput("50")
     composeTestRule.onNodeWithTag("packageDetails1").assertIsDisplayed()
     composeTestRule.onNodeWithTag("packageDetails1").performTextInput("Basic plumber services")
+    composeTestRule.onNodeWithTag("packageFeatures10").performScrollTo()
     composeTestRule.onNodeWithTag("packageFeatures10").assertIsDisplayed()
     composeTestRule.onNodeWithTag("packageFeatures10").performTextInput("a")
+    composeTestRule.onNodeWithTag("packageFeatures11").performScrollTo()
     composeTestRule.onNodeWithTag("packageFeatures11").assertIsDisplayed()
     composeTestRule.onNodeWithTag("packageFeatures11").performTextInput("a")
+    composeTestRule.onNodeWithTag("packageFeatures12").performScrollTo()
     composeTestRule.onNodeWithTag("packageFeatures12").assertIsDisplayed()
     composeTestRule.onNodeWithTag("packageFeatures12").performTextInput("a")
 

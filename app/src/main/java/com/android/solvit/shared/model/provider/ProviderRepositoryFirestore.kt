@@ -6,6 +6,7 @@ import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.model.utils.uploadImageToStorage
 import com.google.android.gms.tasks.Task
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
@@ -39,6 +40,11 @@ class ProviderRepositoryFirestore(
       val languages = (doc.get("languages") as List<*>).map { Language.valueOf(it as String) }
       val companyName = doc.getString("companyName") ?: ""
       val phone = doc.getString("phone") ?: ""
+
+      // Convert schedule
+      val scheduleDoc = doc.get("schedule") as? Map<*, *>
+      val schedule = convertSchedule(scheduleDoc)
+
       return Provider(
           doc.id,
           name,
@@ -52,11 +58,54 @@ class ProviderRepositoryFirestore(
           rating,
           price,
           deliveryTime,
-          languages)
+          languages,
+          schedule)
     } catch (e: Exception) {
       Log.e("ProviderRepositoryFirestore", "failed to convert doc $e")
       return null
     }
+  }
+
+  /**
+   * Converts a Firestore document map into a Schedule object.
+   *
+   * @param scheduleDoc The map containing schedule data from Firestore, with the following
+   *   structure:
+   *     - "regularHours": Map<String, List<Map>> where each entry is a day mapped to a list of time
+   *       slots
+   *     - "_exceptions": List<Map> where each map contains a timestamp and list of time slots for
+   *       special dates
+   *
+   * @return A Schedule object containing the regular hours and exceptions. Returns an empty
+   *   Schedule if input is null.
+   */
+  private fun convertSchedule(scheduleDoc: Map<*, *>?): Schedule {
+    if (scheduleDoc == null) return Schedule()
+
+    // Convert regular hours
+    val regularHours =
+        (scheduleDoc["regularHours"] as? Map<*, *>)
+            ?.mapNotNull { (day, slots) ->
+              val dayStr = (day as? String) ?: return@mapNotNull null
+              val convertedSlots = convertTimeSlots(slots as? List<*>).toSet().toMutableList()
+              dayStr to convertedSlots
+            }
+            ?.toMap()
+            ?.toMutableMap() ?: mutableMapOf()
+
+    // Convert exceptions
+    val exceptions =
+        (scheduleDoc["_exceptions"] as? List<*>)
+            ?.mapNotNull { exception ->
+              (exception as? Map<*, *>)?.let { exMap ->
+                val timestamp = exMap["timestamp"] as? Timestamp ?: return@mapNotNull null
+                val timeSlots = convertTimeSlots(exMap["timeSlots"] as? List<*>)
+                ScheduleException(timestamp, timeSlots.toMutableList())
+              }
+            }
+            ?.toMutableList() ?: mutableListOf()
+
+    return Schedule(regularHours, exceptions)
   }
 
   override fun init(onSuccess: () -> Unit) {
@@ -119,7 +168,6 @@ class ProviderRepositoryFirestore(
   }
 
   override fun filterProviders(filter: () -> Unit) {
-    // TODO("Not yet implemented")
     filter()
   }
 
@@ -128,7 +176,6 @@ class ProviderRepositoryFirestore(
       onSuccess: (List<Provider>) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-
     if (service != null) {
       val collectionRef = db.collection(collectionPath).whereEqualTo("service", service.toString())
       collectionRef.get().addOnCompleteListener { task ->
@@ -202,5 +249,28 @@ class ProviderRepositoryFirestore(
         }
       }
     }
+  }
+
+  /**
+   * Converts a list of time slot maps from Firestore into a list of TimeSlot objects.
+   *
+   * @param slots A list of maps, where each map contains:
+   *     - "startHour": Long - The hour when the time slot starts (0-23)
+   *     - "startMinute": Long - The minute when the time slot starts (0-59)
+   *     - "endHour": Long - The hour when the time slot ends (0-23)
+   *     - "endMinute": Long - The minute when the time slot ends (0-59)
+   *
+   * @return A list of TimeSlot objects. Returns an empty list if input is null or conversion fails.
+   */
+  private fun convertTimeSlots(slots: List<*>?): List<TimeSlot> {
+    return slots?.mapNotNull { slot ->
+      (slot as? Map<*, *>)?.let { slotMap ->
+        val startHour = (slotMap["startHour"] as? Long)?.toInt() ?: return@mapNotNull null
+        val startMinute = (slotMap["startMinute"] as? Long)?.toInt() ?: return@mapNotNull null
+        val endHour = (slotMap["endHour"] as? Long)?.toInt() ?: return@mapNotNull null
+        val endMinute = (slotMap["endMinute"] as? Long)?.toInt() ?: return@mapNotNull null
+        TimeSlot(startHour, startMinute, endHour, endMinute)
+      }
+    } ?: emptyList()
   }
 }

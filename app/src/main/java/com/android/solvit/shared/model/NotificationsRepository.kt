@@ -20,4 +20,6 @@ interface NotificationsRepository {
       onSuccess: () -> Unit,
       onFailure: (Exception) -> Unit
   )
+
+  fun updateNotificationReadStatus(notificationId: String, isRead: Boolean)
 }
