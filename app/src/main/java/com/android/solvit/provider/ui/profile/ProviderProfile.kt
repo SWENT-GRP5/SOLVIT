@@ -62,7 +62,6 @@ import com.android.solvit.shared.model.request.ServiceRequestStatus.Companion.ge
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_PROVIDER
 import com.android.solvit.shared.ui.navigation.NavigationActions
-import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.navigation.Screen
 
 /**
@@ -103,7 +102,7 @@ fun ProviderProfileScreen(
         BottomNavigationMenu(
             onTabSelect = { navigationActions.navigateTo(it.route) },
             tabList = LIST_TOP_LEVEL_DESTINATION_PROVIDER,
-            selectedItem = Route.PROVIDER_PROFILE)
+            selectedItem = Screen.PROVIDER_PROFILE)
       },
       containerColor = Color.Transparent,
   ) { paddingValues ->
@@ -149,7 +148,7 @@ fun ProviderProfileScreen(
                           icon = Icons.Default.ThumbUp,
                           drawable = R.drawable.language_icon,
                           text = provider?.languages?.joinToString { it.name.lowercase() } ?: "",
-                          tag = "LanguagesOption")
+                          tag = "LanguagesItem")
                     }
               }
 
@@ -262,7 +261,8 @@ fun InsightsCard(provider: Provider, serviceRequestViewModel: ServiceRequestView
                         verticalArrangement = Arrangement.spacedBy(16.dp)) {
                           Row(
                               verticalAlignment = Alignment.CenterVertically,
-                              horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                              horizontalArrangement = Arrangement.spacedBy(8.dp),
+                              modifier = Modifier.testTag("RatingItem")) {
                                 Icon(
                                     imageVector = Icons.Default.Star,
                                     contentDescription = "Rating",
@@ -273,25 +273,29 @@ fun InsightsCard(provider: Provider, serviceRequestViewModel: ServiceRequestView
                                     color = colorScheme.onBackground,
                                 )
                               }
-                          Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Text(
-                                text = "Popular",
-                                color = colorScheme.primary,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 18.sp)
-                            Text(text = "${provider.popular}", color = colorScheme.onBackground)
-                          }
-                          Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Icon(
-                                painter = painterResource(R.drawable.money_icon),
-                                contentDescription = "Earnings",
-                                tint = colorScheme.primary,
-                                modifier = Modifier.size(32.dp))
-                            Text(text = "$earnings CHF", color = colorScheme.onBackground)
-                          }
+                          Row(
+                              horizontalArrangement = Arrangement.spacedBy(8.dp),
+                              modifier = Modifier.testTag("PopularityItem")) {
+                                Text(
+                                    text = "Popular",
+                                    color = colorScheme.primary,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 18.sp)
+                                Text(text = "${provider.popular}", color = colorScheme.onBackground)
+                              }
+                          Row(
+                              horizontalArrangement = Arrangement.spacedBy(8.dp),
+                              modifier = Modifier.testTag("EarningsItem")) {
+                                Icon(
+                                    painter = painterResource(R.drawable.money_icon),
+                                    contentDescription = "Earnings",
+                                    tint = colorScheme.primary,
+                                    modifier = Modifier.size(32.dp))
+                                Text(text = "$earnings CHF", color = colorScheme.onBackground)
+                              }
                         }
                     Column(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth().testTag("TasksColumn"),
                         horizontalAlignment = Alignment.CenterHorizontally) {
                           Text(
                               text = "Jobs",
@@ -311,7 +315,8 @@ fun InsightsCard(provider: Provider, serviceRequestViewModel: ServiceRequestView
                                   }
                               Text(
                                   text = "$size ${status.name.lowercase()}",
-                                  color = getStatusColor(status))
+                                  color = getStatusColor(status),
+                                  modifier = Modifier.testTag("${status.name}Tasks"))
                             }
                           }
                         }
