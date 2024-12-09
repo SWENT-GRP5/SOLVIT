@@ -5,7 +5,6 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
@@ -66,238 +65,240 @@ import org.mockito.Mockito.`when`
 import org.mockito.kotlin.anyOrNull
 
 class EndToEndMessage {
-    private lateinit var authViewModel: AuthViewModel
-    private lateinit var listProviderViewModel: ListProviderViewModel
-    private lateinit var seekerProfileViewModel: SeekerProfileViewModel
-    private lateinit var serviceRequestViewModel: ServiceRequestViewModel
-    private lateinit var locationViewModel: LocationViewModel
-    private lateinit var reviewViewModel: ReviewViewModel
-    private lateinit var chatViewModel: ChatViewModel
-    private lateinit var packageProposalViewModel: PackageProposalViewModel
-    private lateinit var chatAssistantViewModel: ChatAssistantViewModel
-    private lateinit var notificationsViewModel: NotificationsViewModel
-    private lateinit var calendarViewModel: ProviderCalendarViewModel
-    private lateinit var aiSolverViewModel: AiSolverViewModel
-    private lateinit var packagesAssistantViewModel: PackagesAssistantViewModel
+  private lateinit var authViewModel: AuthViewModel
+  private lateinit var listProviderViewModel: ListProviderViewModel
+  private lateinit var seekerProfileViewModel: SeekerProfileViewModel
+  private lateinit var serviceRequestViewModel: ServiceRequestViewModel
+  private lateinit var locationViewModel: LocationViewModel
+  private lateinit var reviewViewModel: ReviewViewModel
+  private lateinit var chatViewModel: ChatViewModel
+  private lateinit var packageProposalViewModel: PackageProposalViewModel
+  private lateinit var chatAssistantViewModel: ChatAssistantViewModel
+  private lateinit var notificationsViewModel: NotificationsViewModel
+  private lateinit var calendarViewModel: ProviderCalendarViewModel
+  private lateinit var aiSolverViewModel: AiSolverViewModel
+  private lateinit var packagesAssistantViewModel: PackagesAssistantViewModel
 
-    private lateinit var authRepository: AuthRepository
-    private lateinit var seekerRepository: UserRepository
-    private lateinit var providerRepository: ProviderRepository
-    private lateinit var locationRepository: LocationRepository
-    private lateinit var serviceRequestRepository: ServiceRequestRepository
-    private lateinit var reviewRepository: ReviewRepository
-    private lateinit var packageProposalRepository: PackageProposalRepository
-    private lateinit var chatRepository: ChatRepository
-    private lateinit var notificationsRepository: NotificationsRepository
+  private lateinit var authRepository: AuthRepository
+  private lateinit var seekerRepository: UserRepository
+  private lateinit var providerRepository: ProviderRepository
+  private lateinit var locationRepository: LocationRepository
+  private lateinit var serviceRequestRepository: ServiceRequestRepository
+  private lateinit var reviewRepository: ReviewRepository
+  private lateinit var packageProposalRepository: PackageProposalRepository
+  private lateinit var chatRepository: ChatRepository
+  private lateinit var notificationsRepository: NotificationsRepository
 
-    private val email = "test@test.ch"
-    private val password = "password"
+  private val email = "test@test.ch"
+  private val password = "password"
 
-    private val locations = listOf(Location(37.7749, -122.4194, "San Francisco"))
-    private val provider = Provider(
-            "1",
-            "Paul",
-            Services.PLUMBER,
-            "",
-            "Plumber & Co",
-            "1234567890",
-            Location(0.0, 0.0, "EPFL"),
-            "Very good provider",
-            true,
-            5.0,
-            100.0,
-            Timestamp.now(),
-            emptyList())
-    private val request = ServiceRequest(
-            uid = "1",
-            title = "Test Request",
-            description = "Test Description",
-            userId = "1",
-            providerId = "1",
-            dueDate = Timestamp.now(),
-            meetingDate = Timestamp.now(),
-            location = Location(name = "EPFL", latitude = 0.0, longitude = 0.0),
-            imageUrl = null,
-            packageId = "1",
-            agreedPrice = 200.15,
-            type = Services.PLUMBER,
-            status = ServiceRequestStatus.PENDING)
+  private val locations = listOf(Location(37.7749, -122.4194, "San Francisco"))
+  private val provider =
+      Provider(
+          "1",
+          "Paul",
+          Services.PLUMBER,
+          "",
+          "Plumber & Co",
+          "1234567890",
+          Location(0.0, 0.0, "EPFL"),
+          "Very good provider",
+          true,
+          5.0,
+          100.0,
+          Timestamp.now(),
+          emptyList())
+  private val request =
+      ServiceRequest(
+          uid = "1",
+          title = "Test Request",
+          description = "Test Description",
+          userId = "1",
+          providerId = "1",
+          dueDate = Timestamp.now(),
+          meetingDate = Timestamp.now(),
+          location = Location(name = "EPFL", latitude = 0.0, longitude = 0.0),
+          imageUrl = null,
+          packageId = "1",
+          agreedPrice = 200.15,
+          type = Services.PLUMBER,
+          status = ServiceRequestStatus.PENDING)
 
+  @get:Rule val composeTestRule = createComposeRule()
 
-    @get:Rule val composeTestRule = createComposeRule()
+  @Before
+  fun setUp() {
+    val database = Firebase.database
+    database.useEmulator("10.0.2.2", 9000)
 
-    @Before
-    fun setUp() {
-        val database = Firebase.database
-        database.useEmulator("10.0.2.2", 9000)
+    val auth = Firebase.auth
+    auth.useEmulator("10.0.2.2", 9099)
 
-        val auth = Firebase.auth
-        auth.useEmulator("10.0.2.2", 9099)
+    val firestore = Firebase.firestore
+    firestore.useEmulator("10.0.2.2", 8080)
 
-        val firestore = Firebase.firestore
-        firestore.useEmulator("10.0.2.2", 8080)
+    firestore.firestoreSettings = firestoreSettings { isPersistenceEnabled = false }
 
-        firestore.firestoreSettings = firestoreSettings { isPersistenceEnabled = false }
+    val storage = Firebase.storage
+    storage.useEmulator("10.0.2.2", 9199)
 
-        val storage = Firebase.storage
-        storage.useEmulator("10.0.2.2", 9199)
+    authRepository = AuthRepository(Firebase.auth, firestore)
+    seekerRepository = UserRepositoryFirestore(firestore)
+    providerRepository = ProviderRepositoryFirestore(firestore, storage)
+    locationRepository = mock(LocationRepository::class.java)
+    serviceRequestRepository = ServiceRequestRepositoryFirebase(firestore, storage)
+    reviewRepository = ReviewRepositoryFirestore(firestore)
+    packageProposalRepository = PackageProposalRepositoryFirestore(firestore)
+    chatRepository = ChatRepositoryFirestore(database, storage, firestore)
+    notificationsRepository = NotificationsRepositoryFirestore(firestore)
+    packagesAssistantViewModel = PackagesAssistantViewModel()
 
-        authRepository = AuthRepository(Firebase.auth, firestore)
-        seekerRepository = UserRepositoryFirestore(firestore)
-        providerRepository = ProviderRepositoryFirestore(firestore, storage)
-        locationRepository = mock(LocationRepository::class.java)
-        serviceRequestRepository = ServiceRequestRepositoryFirebase(firestore, storage)
-        reviewRepository = ReviewRepositoryFirestore(firestore)
-        packageProposalRepository = PackageProposalRepositoryFirestore(firestore)
-        chatRepository = ChatRepositoryFirestore(database, storage, firestore)
-        notificationsRepository = NotificationsRepositoryFirestore(firestore)
-        packagesAssistantViewModel = PackagesAssistantViewModel()
+    authViewModel = AuthViewModel(authRepository)
+    seekerProfileViewModel = SeekerProfileViewModel(seekerRepository)
+    listProviderViewModel = ListProviderViewModel(providerRepository)
+    locationViewModel = LocationViewModel(locationRepository)
+    serviceRequestViewModel = ServiceRequestViewModel(serviceRequestRepository)
+    reviewViewModel = ReviewViewModel(reviewRepository)
+    packageProposalViewModel = PackageProposalViewModel(packageProposalRepository)
+    chatViewModel = ChatViewModel(chatRepository)
+    chatAssistantViewModel = ChatAssistantViewModel()
+    notificationsViewModel = NotificationsViewModel(notificationsRepository)
+    calendarViewModel = ProviderCalendarViewModel(authViewModel, serviceRequestViewModel)
+    aiSolverViewModel = AiSolverViewModel()
 
-        authViewModel = AuthViewModel(authRepository)
-        seekerProfileViewModel = SeekerProfileViewModel(seekerRepository)
-        listProviderViewModel = ListProviderViewModel(providerRepository)
-        locationViewModel = LocationViewModel(locationRepository)
-        serviceRequestViewModel = ServiceRequestViewModel(serviceRequestRepository)
-        reviewViewModel = ReviewViewModel(reviewRepository)
-        packageProposalViewModel = PackageProposalViewModel(packageProposalRepository)
-        chatViewModel = ChatViewModel(chatRepository)
-        chatAssistantViewModel = ChatAssistantViewModel()
-        notificationsViewModel = NotificationsViewModel(notificationsRepository)
-        calendarViewModel = ProviderCalendarViewModel(authViewModel, serviceRequestViewModel)
-        aiSolverViewModel = AiSolverViewModel()
+    `when`(locationRepository.search(ArgumentMatchers.anyString(), anyOrNull(), anyOrNull()))
+        .thenAnswer { invocation ->
+          val onSuccess = invocation.getArgument<(List<Location>) -> Unit>(1)
+          onSuccess(locations)
+        }
 
-        `when`(locationRepository.search(ArgumentMatchers.anyString(), anyOrNull(), anyOrNull()))
-            .thenAnswer { invocation ->
-                val onSuccess = invocation.getArgument<(List<Location>) -> Unit>(1)
-                onSuccess(locations)
-            }
+    authViewModel.setEmail(email)
+    authViewModel.setPassword(password)
+    authViewModel.setRole("seeker")
+    authViewModel.registerWithEmailAndPassword(
+        onSuccess = { authViewModel.logout {} }, onFailure = {})
+    serviceRequestRepository.getServiceRequests(
+        onSuccess = { requests ->
+          requests.forEach { serviceRequestViewModel.deleteServiceRequestById(it.uid) }
+        },
+        onFailure = {})
+  }
 
-        authViewModel.setEmail(email)
-        authViewModel.setPassword(password)
-        authViewModel.setRole("seeker")
-        authViewModel.registerWithEmailAndPassword(
-            onSuccess = { authViewModel.logout {} }, onFailure = {})
-        serviceRequestRepository.getServiceRequests(
-            onSuccess = { requests ->
-                requests.forEach { serviceRequestViewModel.deleteServiceRequestById(it.uid) }
-            },
-            onFailure = {})
+  @After
+  fun tearDown() {
+    FirebaseApp.clearInstancesForTest()
+    FirebaseApp.initializeApp(ApplicationProvider.getApplicationContext())
+    val firestore = FirebaseFirestore.getInstance()
+    firestore.firestoreSettings =
+        FirebaseFirestoreSettings.Builder()
+            .setPersistenceEnabled(
+                true) // Set to true or false as needed for your production environment
+            .build()
+
+    // Reinitialize FirebaseAuth without the emulator
+    FirebaseAuth.getInstance().signOut()
+  }
+
+  @Test
+  fun createServiceRequest() {
+    composeTestRule.setContent {
+      val user = authViewModel.user.collectAsState()
+      val userRegistered = authViewModel.userRegistered.collectAsState()
+
+      if (!userRegistered.value) {
+        SharedUI(
+            authViewModel,
+            listProviderViewModel,
+            seekerProfileViewModel,
+            locationViewModel,
+            packageProposalViewModel,
+            packagesAssistantViewModel)
+      } else {
+        when (user.value!!.role) {
+          "seeker" ->
+              SeekerUI(
+                  authViewModel,
+                  listProviderViewModel,
+                  seekerProfileViewModel,
+                  serviceRequestViewModel,
+                  reviewViewModel,
+                  locationViewModel,
+                  chatViewModel,
+                  chatAssistantViewModel,
+                  notificationsViewModel,
+                  aiSolverViewModel,
+                  packageProposalViewModel)
+          "provider" ->
+              ProviderUI(
+                  authViewModel,
+                  listProviderViewModel,
+                  serviceRequestViewModel,
+                  seekerProfileViewModel,
+                  chatViewModel,
+                  notificationsViewModel,
+                  locationViewModel,
+                  packageProposalViewModel,
+                  chatAssistantViewModel,
+                  calendarViewModel)
+        }
+      }
     }
 
-    @After
-    fun tearDown() {
-        FirebaseApp.clearInstancesForTest()
-        FirebaseApp.initializeApp(ApplicationProvider.getApplicationContext())
-        val firestore = FirebaseFirestore.getInstance()
-        firestore.firestoreSettings =
-            FirebaseFirestoreSettings.Builder()
-                .setPersistenceEnabled(
-                    true) // Set to true or false as needed for your production environment
-                .build()
+    // Login
+    composeTestRule.onNodeWithTag("ctaButtonPortrait").performClick()
 
-        // Reinitialize FirebaseAuth without the emulator
-        FirebaseAuth.getInstance().signOut()
+    composeTestRule.waitUntil(timeoutMillis = 10000) {
+      composeTestRule.onNodeWithTag("loginImage").isDisplayed()
     }
 
-    @Test
-    fun createServiceRequest() {
-        composeTestRule.setContent {
-            val user = authViewModel.user.collectAsState()
-            val userRegistered = authViewModel.userRegistered.collectAsState()
+    composeTestRule.onNodeWithTag("emailInput").performTextInput(email)
+    composeTestRule.onNodeWithTag("passwordInput").performTextInput(password)
+    composeTestRule.onNodeWithTag("signInButton").performClick()
 
-            if (!userRegistered.value) {
-                SharedUI(
-                    authViewModel,
-                    listProviderViewModel,
-                    seekerProfileViewModel,
-                    locationViewModel,
-                    packageProposalViewModel,
-                    packagesAssistantViewModel)
-            } else {
-                when (user.value!!.role) {
-                    "seeker" ->
-                        SeekerUI(
-                            authViewModel,
-                            listProviderViewModel,
-                            seekerProfileViewModel,
-                            serviceRequestViewModel,
-                            reviewViewModel,
-                            locationViewModel,
-                            chatViewModel,
-                            chatAssistantViewModel,
-                            notificationsViewModel,
-                            aiSolverViewModel,
-                            packageProposalViewModel)
-                    "provider" ->
-                        ProviderUI(
-                            authViewModel,
-                            listProviderViewModel,
-                            serviceRequestViewModel,
-                            seekerProfileViewModel,
-                            chatViewModel,
-                            notificationsViewModel,
-                            locationViewModel,
-                            packageProposalViewModel,
-                            chatAssistantViewModel,
-                            calendarViewModel)
-                }
-            }
-        }
-
-        // Login
-        composeTestRule.onNodeWithTag("ctaButtonPortrait").performClick()
-
-        composeTestRule.waitUntil(timeoutMillis = 10000) {
-            composeTestRule.onNodeWithTag("loginImage").isDisplayed()
-        }
-
-        composeTestRule.onNodeWithTag("emailInput").performTextInput(email)
-        composeTestRule.onNodeWithTag("passwordInput").performTextInput(password)
-        composeTestRule.onNodeWithTag("signInButton").performClick()
-
-        // Wait for the services screen to be displayed
-        composeTestRule.waitUntil(timeoutMillis = 10000) {
-            composeTestRule.onNodeWithTag("servicesScreen").isDisplayed()
-        }
-
-        authViewModel.user.value?.locations?.forEach { authViewModel.removeUserLocation(it, {}, {}) }
-
-        listProviderViewModel.addProvider(provider, null)
-        serviceRequestViewModel.saveServiceRequest(request.copy(userId = authViewModel.user.value!!.uid))
-
-        // Navigate to the requests overview screen
-        composeTestRule.onNodeWithTag(TopLevelDestinations.REQUESTS_OVERVIEW.textId).performClick()
-        composeTestRule.waitUntil {
-            composeTestRule.onNodeWithTag("requestsOverviewScreen").isDisplayed()
-        }
-
-        composeTestRule.onNodeWithTag("requestListItem").performClick()
-
-        // Assert the requests to be displayed
-        composeTestRule.waitUntil(timeoutMillis = 10000) {
-            composeTestRule.onNodeWithTag("service_booking_screen").isDisplayed()
-        }
-        composeTestRule.onNodeWithTag("service_booking_screen").assertIsDisplayed()
-
-        // Initialize the chat with the provider
-        composeTestRule.onNodeWithTag("chat_button").performScrollTo()
-        composeTestRule.onNodeWithTag("chat_button").performClick()
-
-        composeTestRule.waitUntil(timeoutMillis = 10000) {
-            composeTestRule.onNodeWithTag("ChatScreen").isDisplayed()
-        }
-
-        // Send a message to the provider
-        composeTestRule.onNodeWithTag("enterText").performTextInput("Hello, how are you?")
-        composeTestRule.onNodeWithTag("sendMessageButton").performClick()
-
-        // Assert the message to be displayed
-        //composeTestRule.onNodeWithText("Hello, how are you?").performScrollTo()
-        //composeTestRule.onNodeWithText("Hello, how are you?").isDisplayed()
-
-        // Clean up
-        chatViewModel.clearConversation(false)
-        listProviderViewModel.deleteProvider("1")
-        serviceRequestViewModel.deleteServiceRequestById("1")
+    // Wait for the services screen to be displayed
+    composeTestRule.waitUntil(timeoutMillis = 10000) {
+      composeTestRule.onNodeWithTag("servicesScreen").isDisplayed()
     }
+
+    authViewModel.user.value?.locations?.forEach { authViewModel.removeUserLocation(it, {}, {}) }
+
+    listProviderViewModel.addProvider(provider, null)
+    serviceRequestViewModel.saveServiceRequest(
+        request.copy(userId = authViewModel.user.value!!.uid))
+
+    // Navigate to the requests overview screen
+    composeTestRule.onNodeWithTag(TopLevelDestinations.REQUESTS_OVERVIEW.textId).performClick()
+    composeTestRule.waitUntil {
+      composeTestRule.onNodeWithTag("requestsOverviewScreen").isDisplayed()
+    }
+
+    composeTestRule.onNodeWithTag("requestListItem").performClick()
+
+    // Assert the requests to be displayed
+    composeTestRule.waitUntil(timeoutMillis = 10000) {
+      composeTestRule.onNodeWithTag("service_booking_screen").isDisplayed()
+    }
+    composeTestRule.onNodeWithTag("service_booking_screen").assertIsDisplayed()
+
+    // Initialize the chat with the provider
+    composeTestRule.onNodeWithTag("chat_button").performScrollTo()
+    composeTestRule.onNodeWithTag("chat_button").performClick()
+
+    composeTestRule.waitUntil(timeoutMillis = 10000) {
+      composeTestRule.onNodeWithTag("ChatScreen").isDisplayed()
+    }
+
+    // Send a message to the provider
+    composeTestRule.onNodeWithTag("enterText").performTextInput("Hello, how are you?")
+    composeTestRule.onNodeWithTag("sendMessageButton").performClick()
+
+    // Assert the message to be displayed
+    // composeTestRule.onNodeWithText("Hello, how are you?").performScrollTo()
+    // composeTestRule.onNodeWithText("Hello, how are you?").isDisplayed()
+
+    // Clean up
+    chatViewModel.clearConversation(false)
+    listProviderViewModel.deleteProvider("1")
+    serviceRequestViewModel.deleteServiceRequestById("1")
+  }
 }
