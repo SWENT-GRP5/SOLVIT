@@ -61,8 +61,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.solvit.provider.model.ProviderCalendarViewModel
+import com.android.solvit.seeker.ui.navigation.BottomNavigationMenu
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestStatus
+import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_PROVIDER
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import java.time.DayOfWeek
 import java.time.Instant
@@ -110,16 +112,6 @@ fun ProviderCalendarScreen(
                   color = colorScheme.onBackground,
                   modifier = Modifier.testTag("calendarTitle"))
             },
-            navigationIcon = {
-              IconButton(
-                  onClick = { navigationActions.goBack() },
-                  modifier = Modifier.testTag("backButton")) {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back",
-                        tint = colorScheme.onBackground)
-                  }
-            },
             actions = {
               IconButton(
                   onClick = { /* TODO: Implement menu action */},
@@ -129,6 +121,12 @@ fun ProviderCalendarScreen(
                   }
             },
             colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background))
+      },
+      bottomBar = {
+          BottomNavigationMenu(
+              onTabSelect = { navigationActions.navigateTo(it.route) },
+              tabList = LIST_TOP_LEVEL_DESTINATION_PROVIDER,
+              selectedItem = navigationActions.currentRoute())
       },
       containerColor = colorScheme.background) { paddingValues ->
         Column(modifier = Modifier.fillMaxSize().padding(paddingValues).testTag("calendarColumn")) {
