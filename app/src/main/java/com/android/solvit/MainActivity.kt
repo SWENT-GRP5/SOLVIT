@@ -313,7 +313,8 @@ fun ProviderUI(
       ListRequestsFeedScreen(
           serviceRequestViewModel = serviceRequestViewModel,
           navigationActions = navigationActions,
-          notificationViewModel = notificationViewModel)
+          notificationViewModel = notificationViewModel,
+          authViewModel = authViewModel)
     }
     composable(Route.MAP_OF_SEEKERS) {
       ProviderMapScreen(
@@ -323,7 +324,7 @@ fun ProviderUI(
       ProviderCalendarScreen(navigationActions = navigationActions, viewModel = calendarViewModel)
     }
     composable(Screen.MY_JOBS) {
-      RequestsDashboardScreen(navigationActions, serviceRequestViewModel)
+      RequestsDashboardScreen(navigationActions, serviceRequestViewModel, authViewModel)
     }
     composable(Route.BOOKING_DETAILS) {
       ServiceBookingScreen(
@@ -357,7 +358,12 @@ fun ProviderUI(
       }
     }
 
-    composable(Screen.MY_JOBS) { RequestsDashboardScreen(navigationActions = navigationActions) }
+    composable(Screen.MY_JOBS) {
+      RequestsDashboardScreen(
+          navigationActions = navigationActions,
+          serviceRequestViewModel = serviceRequestViewModel,
+          authViewModel = authViewModel)
+    }
     composable(Screen.PROVIDER_MODIFY_PROFILE) {
       ModifyProviderInformationScreen(
           listProviderViewModel, authViewModel, locationViewModel, navigationActions)

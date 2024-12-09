@@ -71,6 +71,7 @@ import com.android.solvit.R
 import com.android.solvit.seeker.ui.navigation.BottomNavigationMenu
 import com.android.solvit.seeker.ui.provider.PackageCard
 import com.android.solvit.shared.model.NotificationsViewModel
+import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.packages.PackageProposal
 import com.android.solvit.shared.model.packages.PackageProposalViewModel
@@ -83,8 +84,6 @@ import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_PROVID
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
 import com.android.solvit.shared.ui.theme.Orange
-import com.google.firebase.Firebase
-import com.google.firebase.auth.auth
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -663,7 +662,8 @@ fun ListRequestsFeedScreen(
         viewModel(factory = PackageProposalViewModel.Factory),
     navigationActions: NavigationActions,
     notificationViewModel: NotificationsViewModel =
-        viewModel<NotificationsViewModel>(factory = NotificationsViewModel.Factory)
+        viewModel<NotificationsViewModel>(factory = NotificationsViewModel.Factory),
+    authViewModel: AuthViewModel = viewModel<AuthViewModel>(factory = AuthViewModel.Factory)
 ) {
   val allRequests by serviceRequestViewModel.requests.collectAsState()
   val requests = allRequests.filter { it.status == ServiceRequestStatus.PENDING }
@@ -672,7 +672,8 @@ fun ListRequestsFeedScreen(
   var selectedService by remember { mutableStateOf("Service") }
   val searchQuery = remember { mutableStateOf("") }
   val showDialog = remember { mutableStateOf(false) }
-  val providerId = Firebase.auth.currentUser?.uid ?: "-1"
+  val user by authViewModel.user.collectAsState()
+  val providerId = user?.uid ?: "-1"
   val packages = packageProposalViewModel.proposal.collectAsState()
 
   Scaffold(

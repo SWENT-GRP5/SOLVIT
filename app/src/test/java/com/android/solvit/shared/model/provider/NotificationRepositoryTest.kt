@@ -34,10 +34,8 @@ import org.robolectric.RobolectricTestRunner
 class NotificationsRepositoryTest {
 
   @Mock private lateinit var mockFirestore: FirebaseFirestore
-  @Mock private lateinit var mockAuth: FirebaseAuth
   @Mock private lateinit var mockDocumentReference: DocumentReference
   @Mock private lateinit var mockCollectionReference: CollectionReference
-  @Mock private lateinit var mockQuerySnapshot: QuerySnapshot
   private lateinit var notificationsRepository: NotificationsRepositoryFirestore
 
   private val providerId = "provider123"
@@ -72,13 +70,11 @@ class NotificationsRepositoryTest {
   }
 
   @Test
-  fun init_doesNotCallOnSuccessWhenUserIsNotAuthenticated() {
-    `when`(mockAuth.currentUser).thenReturn(null)
-
+  fun init_callOnSuccess() {
     var onSuccessCalled = false
     notificationsRepository.init { onSuccessCalled = true }
 
-    Assert.assertFalse(onSuccessCalled)
+    Assert.assertTrue(onSuccessCalled)
   }
 
   @Test
