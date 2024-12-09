@@ -133,12 +133,22 @@ fun SignUpChooseProfile(
                     authViewModel.setRole("provider")
                     if (authViewModel.googleAccount.value == null) {
                       authViewModel.registerWithEmailAndPassword(
-                          { navigationActions.navigateTo(Screen.PROVIDER_REGISTRATION_PROFILE) },
-                          {})
+                          {
+                            Toast.makeText(context, "You are Signed up!", Toast.LENGTH_SHORT).show()
+                            navigationActions.navigateTo(Screen.PROVIDER_REGISTRATION_PROFILE)
+                          },
+                          {
+                            Toast.makeText(context, "Failed to register", Toast.LENGTH_SHORT).show()
+                          })
                     } else {
                       authViewModel.registerWithGoogle(
-                          { navigationActions.navigateTo(Screen.PROVIDER_REGISTRATION_PROFILE) },
-                          {})
+                          {
+                            Toast.makeText(context, "You are Signed up!", Toast.LENGTH_SHORT).show()
+                            navigationActions.navigateTo(Screen.PROVIDER_REGISTRATION_PROFILE)
+                          },
+                          {
+                            Toast.makeText(context, "Failed to register", Toast.LENGTH_SHORT).show()
+                          })
                     }
                   })
 

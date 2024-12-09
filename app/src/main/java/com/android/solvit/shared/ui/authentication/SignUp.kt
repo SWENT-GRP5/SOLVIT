@@ -331,8 +331,6 @@ fun SignUpButton(
           Toast.makeText(
                   context, "Your password must have at least 6 characters", Toast.LENGTH_SHORT)
               .show()
-        } else {
-          Toast.makeText(context, "You are Signed up!", Toast.LENGTH_SHORT).show()
         }
       },
       modifier =

@@ -2,6 +2,7 @@ package com.android.solvit.seeker.ui.profile
 
 import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -217,7 +218,10 @@ fun SeekerRegistrationScreen(
                     onShowDropdownLocationChange = { showDropdown = it },
                     locationSuggestions = locationSuggestions.filterNotNull(),
                     userLocations = user?.locations ?: emptyList(),
-                    onLocationSelected = { selectedLocation = it },
+                    onLocationSelected = {
+                      selectedLocation = it
+                      authViewModel.addUserLocation(it, {}, {})
+                    },
                     requestLocation = null,
                     backgroundColor = colorScheme.background,
                     isValueOk = isLocationOK)
@@ -333,6 +337,19 @@ fun SeekerRegistrationScreen(
                       viewModel.addUserProfile(newUserProfile)
                       authViewModel.setUserName(userName)
                       authViewModel.registered()
+                      authViewModel.completeRegistration(
+                          {
+                            Toast.makeText(
+                                    context,
+                                    "Registration Successfully Completed",
+                                    Toast.LENGTH_SHORT)
+                                .show()
+                          },
+                          {
+                            Toast.makeText(
+                                    context, "Failed to complete registration", Toast.LENGTH_SHORT)
+                                .show()
+                          })
                       // navigationActions.goBack() // Navigate after saving
                     },
                     modifier = Modifier.fillMaxWidth().testTag("exploreServicesButton"),
