@@ -257,9 +257,9 @@ class EndToEndMessage {
       composeTestRule.onNodeWithTag("requestsOverviewScreen").isDisplayed()
     }
 
-      composeTestRule.waitUntil(timeoutMillis = 10000) {
-          composeTestRule.onNodeWithTag("requestListItem").isDisplayed()
-      }
+    composeTestRule.waitUntil(timeoutMillis = 10000) {
+      composeTestRule.onNodeWithTag("requestListItem").isDisplayed()
+    }
     composeTestRule.onNodeWithTag("requestListItem").performClick()
 
     // Assert the requests to be displayed
