@@ -251,12 +251,12 @@ fun PackageCard(
                       ButtonDefaults.buttonColors(
                           containerColor = colorScheme.primary.copy(alpha = 0.6f))
                   else ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
-              modifier = Modifier.align(Alignment.BottomCenter)) {
+              modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 16.dp)) {
                 // Update the button text based on the selection state
                 Text(
                     text =
                         if (selectedPackage.value == packageProposal) "Unselect package"
-                        else "Choose package",
+                        else "Select package",
                 )
               }
         }
@@ -304,7 +304,6 @@ fun ProviderPackages(
                 modifier =
                     Modifier.width(260.dp)
                         .height(size.dp) // Slightly wider for better touch targets
-                        .clickable {}
                         .testTag("PackageCard")
                         .offset(y = offset)
                         .shadow(
@@ -384,12 +383,7 @@ fun ProviderHeader(provider: Provider) {
                       modifier = Modifier.testTag("providerName"),
                       color = colorScheme.onBackground)
                   Text(
-                      text =
-                          provider.service
-                              .toString()
-                              .lowercase()
-                              .replaceFirstChar { it.titlecaseChar() }
-                              .replace('_', ' '),
+                      text = Services.format(provider.service),
                       color = colorScheme.onSurfaceVariant,
                       modifier = Modifier.testTag("providerService"))
                 }

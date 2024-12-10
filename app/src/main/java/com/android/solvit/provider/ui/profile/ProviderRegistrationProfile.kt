@@ -243,7 +243,7 @@ fun ProviderRegistrationScreen(
                 CustomOutlinedTextField(
                     value = fullName,
                     onValueChange = { fullName = it },
-                    label = "Full/Last Name",
+                    label = "First/Last Name",
                     placeholder = "Enter your full name",
                     isValueOk = isFullNameOk,
                     errorMessage = "Enter a valid first and last name",

@@ -56,7 +56,6 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -953,7 +952,7 @@ fun SelectProviderScreen(
   }
 
   val selectedService by listProviderViewModel.selectedService.collectAsState()
-  LaunchedEffect(selectedService) { listProviderViewModel.getProviders() }
+  listProviderViewModel.getProviders()
   val providers by listProviderViewModel.providersListFiltered.collectAsState()
 
   var displayFilters by remember { mutableStateOf(false) }

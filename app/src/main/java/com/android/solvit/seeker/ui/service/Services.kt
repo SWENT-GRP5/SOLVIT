@@ -74,7 +74,6 @@ fun ServicesScreen(
     listProviderViewModel: ListProviderViewModel
 ) {
 
-  val lpvm by listProviderViewModel.providersList.collectAsState()
   // Lock Orientation to Portrait
   val localContext = LocalContext.current
   LaunchedEffect(navigationActions.currentRoute()) {
@@ -82,7 +81,6 @@ fun ServicesScreen(
     if (navigationActions.currentRoute() == Route.SERVICES) {
       listProviderViewModel.clearSelectedService()
       listProviderViewModel.refreshFilters()
-      Log.e("LPVM ", "$lpvm")
     }
   }
   DisposableEffect(Unit) {
@@ -92,8 +90,6 @@ fun ServicesScreen(
   }
 
   val searchViewModel = SearchServicesViewModel()
-  val selectedService by listProviderViewModel.selectedService.collectAsState()
-  Log.e("LPVM", "${selectedService}")
 
   Scaffold(
       modifier = Modifier.testTag("servicesScreen"),

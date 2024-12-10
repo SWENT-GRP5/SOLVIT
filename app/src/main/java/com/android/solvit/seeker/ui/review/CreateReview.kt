@@ -1,7 +1,6 @@
 package com.android.solvit.seeker.ui.review
 
 import android.content.pm.ActivityInfo
-import android.util.Log
 import android.view.MotionEvent
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -105,10 +104,9 @@ fun CreateReviewScreen(
   LaunchedEffect(navigationActions.currentRoute()) {
     if (requestState.value != null &&
         (requestState.value!!.status == ServiceRequestStatus.COMPLETED ||
-            requestState.value!!.status == ServiceRequestStatus.COMPLETED)) {
+            requestState.value!!.status == ServiceRequestStatus.ARCHIVED)) {
       providerState.value =
           requestState.value!!.providerId?.let { listProviderViewModel.fetchProviderById(it) }
-      Log.e("ProviderToReview", "${providerState.value}")
     }
   }
   Scaffold(topBar = { TopSection(navigationActions) }) { paddingValues ->
