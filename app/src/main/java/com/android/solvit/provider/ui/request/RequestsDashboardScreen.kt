@@ -68,6 +68,7 @@ import java.util.Locale
  *
  * @param navigationActions Actions for navigation.
  * @param serviceRequestViewModel ViewModel for managing service requests.
+ * @param authViewModel ViewModel for managing authentication.
  */
 @Composable
 fun RequestsDashboardScreen(
@@ -192,8 +193,10 @@ fun JobSectionContent(
  * Composable function that displays a list of jobs based on the status.
  *
  * @param title Title of the section.
+ * @param providerId ID of the current provider.
  * @param requests List of ServiceRequest objects.
  * @param emptyMessage Message to display when the list is empty.
+ * @param onLearnMore Optional callback to learn more about a job.
  * @param onNavigateToJob Optional callback to navigate to the job's location.
  * @param onContactCustomer Optional callback to contact the customer.
  * @param onMarkAsCompleted Optional callback to mark the job as completed.
@@ -256,6 +259,7 @@ fun JobListSection(
  *
  * @param providerId ID of the current provider.
  * @param viewModel ViewModel for managing service requests.
+ * @param navigationActions Actions for navigation.
  */
 @Composable
 fun PendingJobsSection(
@@ -287,6 +291,7 @@ fun PendingJobsSection(
  *
  * @param providerId ID of the current provider.
  * @param viewModel ViewModel for managing service requests.
+ * @param navigationActions Actions for navigation.
  */
 @Composable
 fun AcceptedJobSection(
@@ -317,9 +322,14 @@ fun AcceptedJobSection(
  *
  * @param providerId ID of the current provider.
  * @param viewModel ViewModel for managing service requests.
+ * @param navigationActions Actions for navigation.
  */
 @Composable
-fun ScheduledJobsSection(providerId: String, viewModel: ServiceRequestViewModel, navigationActions: NavigationActions) {
+fun ScheduledJobsSection(
+    providerId: String,
+    viewModel: ServiceRequestViewModel,
+    navigationActions: NavigationActions
+) {
   val context = LocalContext.current
   val scheduledRequests by viewModel.scheduledRequests.collectAsState()
 
@@ -368,9 +378,14 @@ fun ScheduledJobsSection(providerId: String, viewModel: ServiceRequestViewModel,
  *
  * @param providerId ID of the current provider.
  * @param viewModel ViewModel for managing service requests.
+ * @param navigationActions Actions for navigation.
  */
 @Composable
-fun CompletedJobsSection(providerId: String, viewModel: ServiceRequestViewModel, navigationActions: NavigationActions) {
+fun CompletedJobsSection(
+    providerId: String,
+    viewModel: ServiceRequestViewModel,
+    navigationActions: NavigationActions
+) {
   val context = LocalContext.current
   val completedRequests by viewModel.completedRequests.collectAsState()
 
@@ -395,9 +410,14 @@ fun CompletedJobsSection(providerId: String, viewModel: ServiceRequestViewModel,
  *
  * @param providerId ID of the current provider.
  * @param viewModel ViewModel for managing service requests.
+ * @param navigationActions Actions for navigation.
  */
 @Composable
-fun CanceledJobsSection(providerId: String, viewModel: ServiceRequestViewModel, navigationActions: NavigationActions) {
+fun CanceledJobsSection(
+    providerId: String,
+    viewModel: ServiceRequestViewModel,
+    navigationActions: NavigationActions
+) {
   val context = LocalContext.current
   val canceledRequests by viewModel.cancelledRequests.collectAsState()
 
@@ -422,9 +442,14 @@ fun CanceledJobsSection(providerId: String, viewModel: ServiceRequestViewModel, 
  *
  * @param providerId ID of the current provider.
  * @param viewModel ViewModel for managing service requests.
+ * @param navigationActions Actions for navigation.
  */
 @Composable
-fun ArchivedJobsSection(providerId: String, viewModel: ServiceRequestViewModel, navigationActions: NavigationActions) {
+fun ArchivedJobsSection(
+    providerId: String,
+    viewModel: ServiceRequestViewModel,
+    navigationActions: NavigationActions
+) {
   val context = LocalContext.current
   val archivedRequests by viewModel.archivedRequests.collectAsState()
 
@@ -449,11 +474,13 @@ fun ArchivedJobsSection(providerId: String, viewModel: ServiceRequestViewModel, 
  * Accepted, Scheduled, Completed, Canceled, or Archived.
  *
  * @param request ServiceRequest object containing job details.
+ * @param onLearnMore Optional callback to learn more about a job.
  * @param onNavigateToJob Optional callback to navigate to the job's location.
  * @param onContactCustomer Optional callback to contact the customer.
  * @param onMarkAsCompleted Optional callback to mark the job as completed.
  * @param onConfirmRequest Optional callback to confirm a job request (for pending jobs).
  * @param onCancelRequest Optional callback to cancel the job.
+ * @param onArchiveRequest Optional callback to archive the job.
  * @param onChat Optional callback to initiate a chat with the customer.
  */
 @Composable
