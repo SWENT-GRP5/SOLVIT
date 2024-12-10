@@ -29,7 +29,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
-import org.mockito.Mockito.`when`
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.verify
@@ -73,7 +72,6 @@ class RequestsDashboardScreenTest {
     authViewModel = AuthViewModel(authRep)
     providerViewModel = ListProviderViewModel(providerRepository)
     viewModel = ServiceRequestViewModel(serviceRequestRepository)
-
   }
 
   @Test
