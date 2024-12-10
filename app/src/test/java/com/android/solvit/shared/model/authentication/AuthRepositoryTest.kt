@@ -97,7 +97,7 @@ class AuthRepositoryTest {
     var result: User? = null
     authRepository.init { user -> result = user }
 
-    assert(result == user)
+    assert(result == user.copy(registrationCompleted = false))
     verify(mockDocumentReference).get()
     verify(mockTaskDoc).addOnSuccessListener(any())
   }
@@ -153,7 +153,7 @@ class AuthRepositoryTest {
     authRepository.loginWithEmailAndPassword(
         "test@example.com", "password", { result = it }, onFailure)
 
-    assert(result == user)
+    assert(result == user.copy(registrationCompleted = false))
     verify(mockAuth).signInWithEmailAndPassword("test@example.com", "password")
     verify(mockDocumentReference).get()
     verify(mockTaskDoc).addOnSuccessListener(any())
@@ -210,7 +210,7 @@ class AuthRepositoryTest {
     val onFailure: (Exception) -> Unit = mock()
     authRepository.signInWithGoogle(mockGoogleSignInAccount, { result = it }, onFailure)
 
-    assert(result == user)
+    assert(result == user.copy(registrationCompleted = false))
     verify(mockAuth).signInWithCredential(any())
     verify(mockDocumentReference).get()
     verify(mockTaskDoc).addOnSuccessListener(any())
