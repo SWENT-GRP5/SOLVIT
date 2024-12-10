@@ -139,7 +139,6 @@ class ServiceRequestRepositoryFirebase(
       onFailure: (Exception) -> Unit
   ) {
     if (imageUri != null) {
-      saveServiceRequest(serviceRequest, onSuccess, onFailure)
       uploadImageToStorage(
           storage,
           imageFolderPath,
@@ -147,7 +146,10 @@ class ServiceRequestRepositoryFirebase(
           { imageUrl ->
             // Set image URL in the service request
             val requestWithImage = serviceRequest.copy(imageUrl = imageUrl)
-            saveServiceRequest(requestWithImage, onSuccess, onFailure)
+            saveServiceRequest(requestWithImage) {
+              // Only call onSuccess after both the image is uploaded and request is saved
+              onSuccess()
+            }
           },
           onFailure)
     } else {
