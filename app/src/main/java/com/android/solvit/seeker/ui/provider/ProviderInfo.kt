@@ -450,12 +450,7 @@ fun ProviderDetails(
     userId: String,
     navigationActions: NavigationActions,
 ) {
-  val nbrOfJobs =
-      requestViewModel.completedRequests
-          .collectAsState()
-          .value
-          .filter { it.providerId == provider.uid }
-          .size
+  val nbrOfJobs = provider.nbrOfJobs.toInt()
   Column(
       modifier =
           Modifier.padding(16.dp)

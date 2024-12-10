@@ -11,6 +11,7 @@ import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.shared.model.authentication.AuthRep
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.map.Location
+import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.provider.ProviderRepository
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestRepository
@@ -22,11 +23,17 @@ import com.google.firebase.Timestamp
 import java.text.SimpleDateFormat
 import java.util.GregorianCalendar
 import java.util.Locale
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.`when`
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argThat
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 
 @RunWith(AndroidJUnit4::class)
 class RequestsDashboardScreenTest {
@@ -66,6 +73,7 @@ class RequestsDashboardScreenTest {
     authViewModel = AuthViewModel(authRep)
     providerViewModel = ListProviderViewModel(providerRepository)
     viewModel = ServiceRequestViewModel(serviceRequestRepository)
+
   }
 
   @Test
@@ -419,5 +427,56 @@ class RequestsDashboardScreenTest {
     }
     composeTestRule.onNodeWithTag("CallButton_1").performClick()
     assert(clicked)
+  }
+
+  @Test
+  fun testOnMarkAsCompleteInvokesExpectedMethods() = runTest {
+    val testProvider =
+        Provider(
+            uid = "testProviderId",
+            name = "Test Provider",
+            nbrOfJobs = 5.0,
+        )
+
+    val scheduledRequests =
+        listOf(
+            ServiceRequest(
+                uid = "test_scheduled_id",
+                title = "Scheduled Job",
+                providerId = "testProviderId",
+                description = "Job Description",
+                status = ServiceRequestStatus.SCHEDULED))
+
+    whenever(serviceRequestRepository.getScheduledServiceRequests(any(), any())).thenAnswer {
+      val onSuccess = it.getArgument<(List<ServiceRequest>) -> Unit>(0)
+      onSuccess(scheduledRequests)
+    }
+
+    whenever(providerViewModel.fetchProviderById("testProviderId")).thenReturn(testProvider)
+    viewModel.getScheduledRequests()
+
+    composeTestRule.setContent {
+      ScheduledJobsSection(
+          providerId = "testProviderId",
+          viewModel = viewModel,
+          listProviderViewModel = providerViewModel)
+    }
+
+    composeTestRule.waitForIdle()
+
+    composeTestRule.waitUntil(timeoutMillis = 5000) {
+      composeTestRule.onNodeWithTag("CompleteButton_test_scheduled_id").isDisplayed()
+    }
+
+    // Click the Complete button
+    composeTestRule.onNodeWithTag("CompleteButton_test_scheduled_id").performClick()
+
+    // Verify that completeRequest was called with the correct request
+    verify(serviceRequestRepository).saveServiceRequest(any(), any(), any())
+
+    // Verify that the provider was fetched and updated after job completion
+    verify(providerRepository).returnProvider("testProviderId")
+    verify(providerRepository)
+        .updateProvider(argThat { nbrOfJobs == testProvider.nbrOfJobs + 1 }, any(), any())
   }
 }
