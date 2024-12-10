@@ -5,10 +5,12 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.test.core.app.ApplicationProvider
+import androidx.test.espresso.Espresso
 import com.android.solvit.provider.model.ProviderCalendarViewModel
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.seeker.model.profile.UserRepository
@@ -177,8 +179,12 @@ class EndToEndMessage {
     firestore.firestoreSettings =
         FirebaseFirestoreSettings.Builder()
             .setPersistenceEnabled(
-                true) // Set to true or false as needed for your production environment
+                false) // Set to true or false as needed for your production environment
             .build()
+
+    val database = Firebase.database
+    database.useEmulator("10.0.2.2", 9000)
+    database.getReference("messages").removeValue()
 
     // Reinitialize FirebaseAuth without the emulator
     FirebaseAuth.getInstance().signOut()
@@ -279,6 +285,13 @@ class EndToEndMessage {
     // Send a message to the provider
     composeTestRule.onNodeWithTag("enterText").performTextInput("Hello, how are you?")
     composeTestRule.onNodeWithTag("sendMessageButton").performClick()
+
+    Espresso.closeSoftKeyboard()
+
+    composeTestRule.waitUntil(timeoutMillis = 10000) {
+      composeTestRule.onNodeWithText("Hello, how are you?").isDisplayed()
+    }
+    composeTestRule.onNodeWithText("Hello, how are you?").assertIsDisplayed()
 
     // Clean up
     listProviderViewModel.deleteProvider("1")
