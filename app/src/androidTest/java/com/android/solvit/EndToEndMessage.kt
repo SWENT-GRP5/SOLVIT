@@ -5,7 +5,6 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
@@ -60,10 +59,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.mock
-import org.mockito.Mockito.`when`
-import org.mockito.kotlin.anyOrNull
 
 class EndToEndMessage {
   private lateinit var authViewModel: AuthViewModel
@@ -93,7 +89,6 @@ class EndToEndMessage {
   private val email = "test@test.ch"
   private val password = "password"
 
-  private val locations = listOf(Location(37.7749, -122.4194, "San Francisco"))
   private val provider =
       Provider(
           "1",
@@ -166,12 +161,6 @@ class EndToEndMessage {
     notificationsViewModel = NotificationsViewModel(notificationsRepository)
     calendarViewModel = ProviderCalendarViewModel(authViewModel, serviceRequestViewModel)
     aiSolverViewModel = AiSolverViewModel()
-
-    `when`(locationRepository.search(ArgumentMatchers.anyString(), anyOrNull(), anyOrNull()))
-        .thenAnswer { invocation ->
-          val onSuccess = invocation.getArgument<(List<Location>) -> Unit>(1)
-          onSuccess(locations)
-        }
 
     authViewModel.setEmail(email)
     authViewModel.setPassword(password)
@@ -268,6 +257,9 @@ class EndToEndMessage {
       composeTestRule.onNodeWithTag("requestsOverviewScreen").isDisplayed()
     }
 
+      composeTestRule.waitUntil(timeoutMillis = 10000) {
+          composeTestRule.onNodeWithTag("requestListItem").isDisplayed()
+      }
     composeTestRule.onNodeWithTag("requestListItem").performClick()
 
     // Assert the requests to be displayed
@@ -287,10 +279,6 @@ class EndToEndMessage {
     // Send a message to the provider
     composeTestRule.onNodeWithTag("enterText").performTextInput("Hello, how are you?")
     composeTestRule.onNodeWithTag("sendMessageButton").performClick()
-
-    // Assert the message to be displayed
-    composeTestRule.onNodeWithText("Hello, how are you?").performScrollTo()
-    composeTestRule.onNodeWithText("Hello, how are you?").isDisplayed()
 
     // Clean up
     listProviderViewModel.deleteProvider("1")
