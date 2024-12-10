@@ -56,8 +56,12 @@ class AuthViewModel(
     authRepository.init { user ->
       _user.value = user
       if (user != null) {
-        _userRegistered.value = true
-        fcmTokenManager?.let { updateFcmToken() }
+        _email.value = user.email
+        _role.value = user.role
+        if (user.registrationCompleted) {
+          _userRegistered.value = true
+          fcmTokenManager?.let { updateFcmToken() }
+        }
       }
     }
   }
@@ -210,7 +214,12 @@ class AuthViewModel(
   }
 
   fun addUserLocation(location: Location, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
-    val userLocations = user.value?.locations ?: emptyList()
+    if (user.value == null) {
+      Log.e("AuthViewModel", "User is null")
+      onFailure(Exception("User is null"))
+      return
+    }
+    val userLocations = user.value!!.locations
     if (userLocations.contains(location)) {
       Log.d("AuthViewModel", "User already has this location")
       onSuccess()
@@ -218,6 +227,7 @@ class AuthViewModel(
     }
     val updatedLocations = (listOf(location) + userLocations).take(maxLocationsSize)
     authRepository.updateUserLocations(
+        user.value!!.uid,
         updatedLocations,
         {
           _user.value = user.value?.copy(locations = updatedLocations)
@@ -235,7 +245,12 @@ class AuthViewModel(
       onSuccess: () -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    val userLocations = user.value?.locations ?: emptyList()
+    if (user.value == null) {
+      Log.e("AuthViewModel", "User is null")
+      onFailure(Exception("User is null"))
+      return
+    }
+    val userLocations = user.value!!.locations
     if (!userLocations.contains(location)) {
       Log.d("AuthViewModel", "User does not have this location")
       onSuccess()
@@ -243,6 +258,7 @@ class AuthViewModel(
     }
     val updatedLocations = userLocations.filter { it != location }
     authRepository.updateUserLocations(
+        user.value!!.uid,
         updatedLocations,
         {
           _user.value = user.value?.copy(locations = updatedLocations)
@@ -253,5 +269,20 @@ class AuthViewModel(
           Log.e("AuthViewModel", "Error updating user locations", it)
           onFailure(it)
         })
+  }
+
+  fun completeRegistration(onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+    if (user.value == null) {
+      Log.e("AuthViewModel", "User is null")
+      onFailure(Exception("User is null"))
+      return
+    }
+    authRepository.completeRegistration(
+        user.value!!.uid,
+        {
+          _user.value = user.value!!.copy(registrationCompleted = true)
+          onSuccess()
+        },
+        { Log.e("AuthViewModel", "Error completing registration", it) })
   }
 }

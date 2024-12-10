@@ -291,7 +291,10 @@ fun ProviderRegistrationScreen(
                     onShowDropdownLocationChange = { showDropdown = it },
                     locationSuggestions = locationSuggestions.filterNotNull(),
                     userLocations = user?.locations ?: emptyList(),
-                    onLocationSelected = { selectedLocation = it },
+                    onLocationSelected = {
+                      selectedLocation = it
+                      authViewModel.addUserLocation(it, {}, {})
+                    },
                     requestLocation = null,
                     backgroundColor = colorScheme.background,
                     isValueOk = isLocationOK)
@@ -510,6 +513,19 @@ fun ProviderRegistrationScreen(
                       viewModel.addProvider(newProviderProfile, providerImageUri)
                       authViewModel.setUserName(fullName)
                       authViewModel.registered()
+                      authViewModel.completeRegistration(
+                          {
+                            Toast.makeText(
+                                    context,
+                                    "Registration Successfully Completed",
+                                    Toast.LENGTH_SHORT)
+                                .show()
+                          },
+                          {
+                            Toast.makeText(
+                                    context, "Failed to complete registration", Toast.LENGTH_SHORT)
+                                .show()
+                          })
                       // navigationActions.goBack() // Navigate after saving
                     },
                     modifier = Modifier.fillMaxWidth().testTag("continueDashboardButton"),

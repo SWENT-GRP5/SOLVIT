@@ -250,7 +250,7 @@ class SignUpButtonTest {
   }
 
   @Test
-  fun signUpButton_testShowToastForSuccessfulSignUp() {
+  fun signUpButton_testNoToastForSuccessfulSignUp() {
     composeTestRule.setContent {
       SignUpButton(
           onClick = {},
@@ -262,6 +262,6 @@ class SignUpButtonTest {
     composeTestRule.waitForIdle()
     composeTestRule.onNodeWithTag("signUpButton").performClick()
 
-    verify { Toast.makeText(any(), "You are Signed up!", Toast.LENGTH_SHORT) }
+    verify(exactly = 0) { Toast.makeText(any(), any<String>(), any()) }
   }
 }
