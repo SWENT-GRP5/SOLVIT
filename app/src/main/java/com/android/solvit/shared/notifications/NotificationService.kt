@@ -6,20 +6,16 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
-import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.android.solvit.BuildConfig
 import com.android.solvit.MainActivity
-import com.android.solvit.R
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
@@ -32,24 +28,28 @@ open class NotificationService : FirebaseMessagingService() {
     private const val CHANNEL_NAME = "Default"
   }
 
+  private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
   override fun onCreate() {
     super.onCreate()
     createNotificationChannel()
   }
 
+  override fun onDestroy() {
+    super.onDestroy()
+    serviceScope.cancel() // Clean up coroutines when service is destroyed
+  }
+
   /** Creates the default notification channel for the app */
   private fun createNotificationChannel() {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-      val channel =
-          NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_HIGH)
-      channel.description = "Default notification channel"
-      channel.enableLights(true)
-      channel.lightColor = Color.RED
-      channel.enableVibration(true)
+    val channel = NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_HIGH)
+    channel.description = "Default notification channel"
+    channel.enableLights(true)
+    channel.lightColor = Color.RED
+    channel.enableVibration(true)
 
-      val notificationManager = applicationContext.getSystemService(NotificationManager::class.java)
-      notificationManager.createNotificationChannel(channel)
-    }
+    val notificationManager = applicationContext.getSystemService(NotificationManager::class.java)
+    notificationManager.createNotificationChannel(channel)
   }
 
   private fun getPendingIntent(title: String): PendingIntent? {
@@ -127,22 +127,31 @@ open class NotificationService : FirebaseMessagingService() {
 
   override fun onNewToken(token: String) {
     super.onNewToken(token)
-    // Handle token refresh
-    CoroutineScope(Dispatchers.IO).launch {
+
+    // Just log the token receipt - actual update happens when user logs in
+    Log.d(TAG, "Received new FCM token")
+  }
+
+  /**
+   * Updates the FCM token for the current user. This should be called when:
+   * 1. A user logs in
+   * 2. The app receives a new FCM token while a user is logged in
+   */
+  fun updateCurrentUserToken(token: String? = null) {
+    serviceScope.launch {
       try {
         val currentUser = FirebaseAuth.getInstance().currentUser
         if (currentUser != null) {
-          FcmTokenManager.getInstance()
-              .updateUserFcmToken(currentUser.uid, token)
-              .addOnSuccessListener {
-                Log.d(TAG, "Successfully updated FCM token for user: ${currentUser.uid}")
-              }
-              .addOnFailureListener { e ->
-                Log.e(TAG, "Failed to update FCM token for user: ${currentUser.uid}", e)
-              }
+          val fcmToken = token ?: FirebaseMessaging.getInstance().token.await()
+          try {
+            FcmTokenManager.getInstance().updateUserFcmToken(currentUser.uid, fcmToken).await()
+            Log.d(TAG, "Successfully updated FCM token for user: ${currentUser.uid}")
+          } catch (e: Exception) {
+            Log.e(TAG, "Failed to update FCM token for user: ${currentUser.uid}", e)
+          }
         }
       } catch (e: Exception) {
-        Log.e(TAG, "Error handling new token", e)
+        Log.e(TAG, "Error updating user token", e)
       }
     }
   }

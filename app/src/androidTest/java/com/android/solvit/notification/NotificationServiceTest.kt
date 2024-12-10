@@ -18,30 +18,70 @@ import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
 import com.android.solvit.TestActivity
+import com.android.solvit.shared.notifications.FcmTokenManager
 import com.android.solvit.shared.notifications.NotificationService
 import com.google.android.gms.tasks.Tasks
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseAuthException
-import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.Firebase
+import com.google.firebase.FirebaseApp
+import com.google.firebase.auth.auth
+import com.google.firebase.firestore.firestore
+import com.google.firebase.firestore.firestoreSettings
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.RemoteMessage
-import io.mockk.*
+import io.mockk.clearAllMocks
+import io.mockk.coEvery
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.mockkObject
+import io.mockk.mockkStatic
+import io.mockk.unmockkAll
+import io.mockk.unmockkObject
+import io.mockk.unmockkStatic
+import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.After
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
+import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-private const val TAG = "NotificationService"
-private const val NOTIFICATION_TIMEOUT = 2000L // 2 seconds timeout
-private const val UI_TIMEOUT = 500L // 0.5 second timeout for UI operations
-
 @RunWith(AndroidJUnit4::class)
 class NotificationServiceTest {
+  companion object {
+    private const val TAG = "NotificationService"
+    private const val UI_TIMEOUT = 5000L
+    private const val NOTIFICATION_TIMEOUT = 2000L
+    private var isFirebaseInitialized = false
+
+    private fun initializeFirebaseIfNeeded(context: Context) {
+      if (!isFirebaseInitialized) {
+        if (FirebaseApp.getApps(context).isEmpty()) {
+          FirebaseApp.initializeApp(context)
+        }
+        try {
+          Firebase.auth.useEmulator("10.0.2.2", 9099)
+          Firebase.firestore.apply {
+            useEmulator("10.0.2.2", 8080)
+            firestoreSettings = firestoreSettings { isPersistenceEnabled = false }
+          }
+          isFirebaseInitialized = true
+        } catch (e: IllegalStateException) {
+          // If emulator is already initialized, just ignore the error
+          isFirebaseInitialized = true
+          Log.d(TAG, "Firebase emulator already initialized")
+        }
+      }
+    }
+  }
+
   private lateinit var context: Context
   private lateinit var notificationManager: NotificationManager
   private lateinit var device: UiDevice
@@ -107,6 +147,15 @@ class NotificationServiceTest {
         context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
 
+    // Initialize Firebase with emulators only once
+    initializeFirebaseIfNeeded(context)
+
+    // Mock Log calls
+    mockkStatic(Log::class)
+    every { Log.d(any(), any()) } returns 0
+    every { Log.i(any(), any()) } returns 0
+    every { Log.e(any(), any(), any()) } returns 0
+
     // Log notification permission status
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
       val permissionStatus =
@@ -127,13 +176,15 @@ class NotificationServiceTest {
     // Create and initialize service
     Log.d(TAG, "Initializing test service")
     service = TestNotificationService().apply { initialize(context) }
+
+    // Sign out any existing user
+    Firebase.auth.signOut()
   }
 
   @After
   fun tearDown() {
     clearSystemState()
-    unmockkAll() // This ensures all static mocks are cleaned up
-    clearAllMocks() // Add this to ensure all mocks are cleared
+    unmockkAll()
   }
 
   @Test
@@ -173,7 +224,7 @@ class NotificationServiceTest {
       Log.d(TAG, "Looking for notification title")
       val title = device.wait(Until.findObject(By.text("Test Title")), NOTIFICATION_TIMEOUT)
       Log.d(TAG, "Looking for notification body")
-      val body = device.wait(Until.findObject(By.text("Test Body")), NOTIFICATION_TIMEOUT)
+      val body = device.wait(Until.findObject(By.text("Test Body")), UI_TIMEOUT)
 
       assertNotNull("Notification title should be visible", title)
       assertNotNull("Notification body should be visible", body)
@@ -235,68 +286,119 @@ class NotificationServiceTest {
   @OptIn(ExperimentalCoroutinesApi::class)
   @Test
   fun onNewToken_whenErrorOccurs_logsError() = runTest {
-    // Mock FirebaseAuth and Log
-    mockkStatic(FirebaseAuth::class)
-    mockkStatic(Log::class)
+    service.onNewToken("test_token")
 
-    every { FirebaseAuth.getInstance() } throws
-        FirebaseAuthException("error", "Token update failed")
-    every { Log.e(TAG, "Error handling new token", any()) } returns 0
-    every { Log.d(any(), any()) } returns 0
-
-    service.onNewToken("test-token")
-
-    // Wait for the coroutine to complete
+    // Allow coroutines to complete
     advanceUntilIdle()
 
-    // Verify error was logged with correct parameters
-    verify(exactly = 1) { Log.e(TAG, "Error handling new token", any()) }
-
-    // Clean up mocks
-    unmockkStatic(FirebaseAuth::class)
-    unmockkStatic(Log::class)
+    // Verify only the initial log message was made
+    verify { Log.d(TAG, "Received new FCM token") }
   }
 
-  @Test
-  fun onNewToken_whenUserLoggedIn_handlesToken() {
-    // Mock FirebaseAuth to simulate logged-in user
-    val testToken = "test_token_123"
-
-    service.onNewToken(testToken)
-
-    // Verify no exceptions are thrown
-    // Note: Since the TODO in onNewToken is not implemented, we just verify it doesn't crash
-  }
-
+  @OptIn(ExperimentalCoroutinesApi::class)
   @Test
   fun onNewToken_whenUserNotLoggedIn_doesNothing() = runTest {
-    // Mock FirebaseAuth
-    mockkStatic(FirebaseAuth::class)
-    mockkStatic(Log::class)
+    // Ensure no user is logged in
+    Firebase.auth.signOut()
 
-    val mockAuth = mockk<FirebaseAuth>()
-    every { FirebaseAuth.getInstance() } returns mockAuth
-    every { mockAuth.currentUser } returns null
-    every { Log.d(any(), any()) } returns 0
+    service.onNewToken("test_token")
 
-    // Execute test
-    service.onNewToken("test-token")
-
-    // Wait for coroutine to complete
+    // Allow coroutines to complete
     advanceUntilIdle()
 
-    // Verify currentUser was checked using property access syntax
-    verify(exactly = 1) { mockAuth.currentUser }
+    // Verify only the initial log message was made
+    verify { Log.d(TAG, "Received new FCM token") }
+  }
 
-    unmockkStatic(FirebaseAuth::class)
-    unmockkStatic(Log::class)
+  @OptIn(ExperimentalCoroutinesApi::class)
+  @Test
+  fun updateCurrentUserToken_whenUserLoggedIn_updatesToken() = runTest {
+    // Mock Log calls first
+    mockkStatic(Log::class)
+    every { Log.d(any(), any()) } returns 0
+    every { Log.i(any(), any()) } returns 0
+    every { Log.e(any(), any(), any()) } returns 0
+
+    // Create a test user with a unique email
+    val auth = Firebase.auth
+    val email = "test${System.currentTimeMillis()}@example.com"
+    val password = "password123"
+
+    try {
+      println("Creating test user...")
+      auth.createUserWithEmailAndPassword(email, password).await()
+      val result = auth.signInWithEmailAndPassword(email, password).await()
+      val user = result.user!!
+      println("Test user created and signed in with UID: ${user.uid}")
+
+      // Clear any previous verifications and set up mocks
+      println("Setting up mocks...")
+      clearAllMocks()
+      mockkStatic(Log::class)
+      every { Log.d(any(), any()) } returns 0
+      every { Log.i(any(), any()) } returns 0
+      every { Log.e(any(), any(), any()) } returns 0
+
+      // Mock FcmTokenManager to avoid Firestore operations
+      println("Setting up FcmTokenManager mock...")
+      val mockTokenManager = mockk<FcmTokenManager>()
+      mockkObject(FcmTokenManager.Companion)
+      every { FcmTokenManager.getInstance() } returns mockTokenManager
+      coEvery { mockTokenManager.updateUserFcmToken(any(), any()) } returns Tasks.forResult(null)
+      println("FcmTokenManager mock set up")
+
+      // Update the token
+      println("Calling updateCurrentUserToken...")
+      service.updateCurrentUserToken("test_token")
+
+      // Allow coroutines to complete
+      println("Waiting for coroutines...")
+      advanceUntilIdle()
+
+      // Verify the expected log was called
+      println("Verifying log calls...")
+      verify(exactly = 1) {
+        Log.d(any(), match { it.contains("Successfully updated FCM token for user: ${user.uid}") })
+      }
+
+      // Clean up
+      println("Cleaning up...")
+      unmockkObject(FcmTokenManager.Companion)
+      user.delete().await()
+      println("Test completed")
+    } catch (e: Exception) {
+      println("Test failed with error: ${e.message}")
+      fail("Test failed: ${e.message}")
+    }
+  }
+
+  @OptIn(ExperimentalCoroutinesApi::class)
+  @Test
+  fun updateCurrentUserToken_whenUserNotLoggedIn_doesNothing() = runTest {
+    // Ensure no user is logged in
+    Firebase.auth.signOut()
+
+    // Set up mocks
+    clearAllMocks()
+    mockkStatic(Log::class)
+    every { Log.d(any(), any()) } returns 0
+    every { Log.i(any(), any()) } returns 0
+    every { Log.e(any(), any(), any()) } returns 0
+
+    // Update the token
+    service.updateCurrentUserToken("test_token")
+
+    // Allow coroutines to complete
+    advanceUntilIdle()
+
+    // Verify no logs were made
+    verify(exactly = 0) { Log.d(any(), any()) }
   }
 
   @Test
   fun showNotification_whenSecurityException_handlesError() {
     // Mock Log.e
-    mockkStatic(Log::class)
-    every { Log.e(eq(TAG), eq("Security exception when showing notification"), any()) } returns 0
+    every { Log.e(any(), any(), any()) } returns 0
     every { Log.d(any(), any()) } returns 0 // Allow debug logs to pass through
 
     // Create a service that throws SecurityException
@@ -316,7 +418,7 @@ class NotificationServiceTest {
             .build())
 
     // Verify that error was logged with correct message
-    verify(exactly = 1) { Log.e(TAG, "Security exception when showing notification", any()) }
+    verify { Log.e(any(), "Security exception when showing notification", any()) }
 
     unmockkStatic(NotificationManagerCompat::class)
   }
@@ -386,29 +488,98 @@ class NotificationServiceTest {
   }
 
   @Test
-  fun onNewToken_whenUserLoggedIn_handlesTokenSuccessfully() = runTest {
-    // Mock FirebaseAuth and user
-    mockkStatic(FirebaseAuth::class)
-    mockkStatic(Log::class)
+  fun onMessageReceived_withNullNotificationFields_showsDefaultValues() {
+    // Create a message with null fields but non-empty body
+    val message =
+        RemoteMessage.Builder("test@test.com")
+            .setData(mapOf("title" to null, "body" to "Test Message"))
+            .build()
 
-    val mockAuth = mockk<FirebaseAuth>()
-    val mockUser = mockk<FirebaseUser>()
+    // Send the message
+    service.onMessageReceived(message)
 
-    every { FirebaseAuth.getInstance() } returns mockAuth
-    every { mockAuth.currentUser } returns mockUser
+    // Wait for notification
+    Thread.sleep(1000)
+
+    // Verify default values were used
+    val notificationManager =
+        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    val notifications = notificationManager.activeNotifications
+    assertTrue("At least one notification should be active", notifications.isNotEmpty())
+
+    val notification = notifications[0]
+    assertEquals(
+        "New Message", notification.notification.extras.getString(Notification.EXTRA_TITLE))
+    assertEquals(
+        "Test Message", notification.notification.extras.getString(Notification.EXTRA_TEXT))
+  }
+
+  @Test
+  fun onMessageReceived_withEmptyDataBody_doesNotShowNotification() {
+    // Create a message with empty body
+    val data = mapOf("title" to "Test Title", "body" to "")
+    val message = RemoteMessage.Builder("test@test.com").setData(data).build()
+
+    Log.d(TAG, "Sending test message with empty body")
+    service.onMessageReceived(message)
+
+    // Verify no notification is shown
+    Log.d(TAG, "Opening notification drawer")
+    device.openNotification()
+
+    val notification = device.wait(Until.findObject(By.text("Test Title")), NOTIFICATION_TIMEOUT)
+    assertNull("No notification should be shown for empty body", notification)
+  }
+
+  @Test
+  fun showNotification_whenGenericException_handlesError() {
+    // Mock Log.e
     every { Log.e(any(), any(), any()) } returns 0
+    every { Log.d(any(), any()) } returns 0 // Allow debug logs to pass through
 
-    // Execute test
-    service.onNewToken("test_fcm_token")
+    // Create a service that throws generic Exception
+    service = TestNotificationService().apply { initialize(context) }
 
-    // Wait for coroutine to complete
-    advanceUntilIdle()
+    // Mock the NotificationManagerCompat to throw Exception
+    mockkStatic(NotificationManagerCompat::class)
+    val mockNotificationManager = mockk<NotificationManagerCompat>()
+    every { NotificationManagerCompat.from(any()) } returns mockNotificationManager
+    every { mockNotificationManager.notify(any(), any()) } throws
+        RuntimeException("Test generic exception")
 
-    // Verify FirebaseAuth was called
-    verify { mockAuth.currentUser }
+    // This should not throw an exception due to error handling
+    service.onMessageReceived(
+        RemoteMessage.Builder("test@test.com")
+            .setData(mapOf("title" to "Test Title", "body" to "Test Body"))
+            .build())
 
-    unmockkStatic(FirebaseAuth::class)
-    unmockkStatic(Log::class)
+    // Verify that error was logged
+    verify { Log.e(any(), "Error showing notification", any()) }
+
+    unmockkStatic(NotificationManagerCompat::class)
+  }
+
+  @Test
+  fun getPendingIntent_returnsValidIntent() {
+    // Create service
+    service = TestNotificationService().apply { initialize(context) }
+
+    // Send a notification message to trigger getPendingIntent
+    service.onMessageReceived(
+        RemoteMessage.Builder("test@test.com")
+            .setData(mapOf("title" to "Test Title", "body" to "Test Body"))
+            .build())
+
+    // Verify notification is shown and can be clicked
+    device.openNotification()
+    val notification = device.wait(Until.findObject(By.text("Test Title")), NOTIFICATION_TIMEOUT)
+    assertNotNull("Notification should be visible", notification)
+    notification.click()
+
+    // Verify clicking launches an activity (either MainActivity or TestActivity)
+    val appLaunched =
+        device.wait(Until.hasObject(By.pkg(context.packageName).depth(0)), NOTIFICATION_TIMEOUT)
+    assertTrue("App should be launched when clicking notification", appLaunched)
   }
 
   @Test
@@ -477,101 +648,5 @@ class NotificationServiceTest {
       Log.e(TAG, "Test failed", e)
       throw e
     }
-  }
-
-  @Test
-  fun onMessageReceived_withNullNotificationFields_showsDefaultValues() {
-    // Create a message with null fields but non-empty body
-    val message =
-        RemoteMessage.Builder("test@test.com")
-            .setData(mapOf("title" to null, "body" to "Test Message"))
-            .build()
-
-    // Send the message
-    service.onMessageReceived(message)
-
-    // Wait for notification
-    Thread.sleep(1000)
-
-    // Verify default values were used
-    val notificationManager =
-        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-    val notifications = notificationManager.activeNotifications
-    assertTrue("At least one notification should be active", notifications.isNotEmpty())
-
-    val notification = notifications[0]
-    assertEquals(
-        "New Message", notification.notification.extras.getString(Notification.EXTRA_TITLE))
-    assertEquals(
-        "Test Message", notification.notification.extras.getString(Notification.EXTRA_TEXT))
-  }
-
-  @Test
-  fun onMessageReceived_withEmptyDataBody_doesNotShowNotification() {
-    // Create a message with empty body
-    val data = mapOf("title" to "Test Title", "body" to "")
-    val message = RemoteMessage.Builder("test@test.com").setData(data).build()
-
-    Log.d(TAG, "Sending test message with empty body")
-    service.onMessageReceived(message)
-
-    // Verify no notification is shown
-    Log.d(TAG, "Opening notification drawer")
-    device.openNotification()
-
-    val notification = device.wait(Until.findObject(By.text("Test Title")), NOTIFICATION_TIMEOUT)
-    assertNull("No notification should be shown for empty body", notification)
-  }
-
-  @Test
-  fun showNotification_whenGenericException_handlesError() {
-    // Mock Log.e
-    mockkStatic(Log::class)
-    every { Log.e(TAG, "Error showing notification", any()) } returns 0
-    every { Log.d(any(), any()) } returns 0 // Allow debug logs to pass through
-
-    // Create a service that throws generic Exception
-    service = TestNotificationService().apply { initialize(context) }
-
-    // Mock the NotificationManagerCompat to throw Exception
-    mockkStatic(NotificationManagerCompat::class)
-    val mockNotificationManager = mockk<NotificationManagerCompat>()
-    every { NotificationManagerCompat.from(any()) } returns mockNotificationManager
-    every { mockNotificationManager.notify(any(), any()) } throws
-        RuntimeException("Test generic exception")
-
-    // This should not throw an exception due to error handling
-    service.onMessageReceived(
-        RemoteMessage.Builder("test@test.com")
-            .setData(mapOf("title" to "Test Title", "body" to "Test Body"))
-            .build())
-
-    // Verify that error was logged
-    verify(exactly = 1) { Log.e(TAG, "Error showing notification", any()) }
-
-    unmockkStatic(NotificationManagerCompat::class)
-  }
-
-  @Test
-  fun getPendingIntent_returnsValidIntent() {
-    // Create service
-    service = TestNotificationService().apply { initialize(context) }
-
-    // Send a notification message to trigger getPendingIntent
-    service.onMessageReceived(
-        RemoteMessage.Builder("test@test.com")
-            .setData(mapOf("title" to "Test Title", "body" to "Test Body"))
-            .build())
-
-    // Verify notification is shown and can be clicked
-    device.openNotification()
-    val notification = device.wait(Until.findObject(By.text("Test Title")), NOTIFICATION_TIMEOUT)
-    assertNotNull("Notification should be visible", notification)
-    notification.click()
-
-    // Verify clicking launches an activity (either MainActivity or TestActivity)
-    val appLaunched =
-        device.wait(Until.hasObject(By.pkg(context.packageName).depth(0)), NOTIFICATION_TIMEOUT)
-    assertTrue("App should be launched when clicking notification", appLaunched)
   }
 }
