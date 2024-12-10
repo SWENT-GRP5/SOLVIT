@@ -94,6 +94,8 @@ class RequestsDashboardScreenTest {
       composeTestRule.onNodeWithTag("ConfirmButton_${request.uid}").assertExists()
       composeTestRule.onNodeWithTag("CallButton_${request.uid}").assertExists()
       composeTestRule.onNodeWithTag("CallButton_${request.uid}").performClick()
+      composeTestRule.onNodeWithTag("LearnMoreButton_${request.uid}").assertExists()
+      composeTestRule.onNodeWithTag("LearnMoreButton_${request.uid}").performClick()
     }
   }
 
@@ -115,6 +117,8 @@ class RequestsDashboardScreenTest {
       composeTestRule.onNodeWithTag("CallButton_${request.uid}").assertExists()
       composeTestRule.onNodeWithTag("CallButton_${request.uid}").performClick()
       composeTestRule.onNodeWithTag("StatusText_${request.uid}").assertExists()
+      composeTestRule.onNodeWithTag("LearnMoreButton_${request.uid}").assertExists()
+      composeTestRule.onNodeWithTag("LearnMoreButton_${request.uid}").performClick()
     }
   }
 
@@ -135,6 +139,8 @@ class RequestsDashboardScreenTest {
       composeTestRule.onNodeWithTag("CompleteButton_${request.uid}").assertExists()
       composeTestRule.onNodeWithTag("CallButton_${request.uid}").performClick()
       composeTestRule.onNodeWithTag("CallButton_${request.uid}").assertExists()
+      composeTestRule.onNodeWithTag("LearnMoreButton_${request.uid}").assertExists()
+      composeTestRule.onNodeWithTag("LearnMoreButton_${request.uid}").performClick()
     }
   }
 
@@ -156,6 +162,8 @@ class RequestsDashboardScreenTest {
       composeTestRule.onNodeWithTag("CallButton_${request.uid}").assertExists()
       composeTestRule.onNodeWithTag("CallButton_${request.uid}").performClick()
       composeTestRule.onNodeWithTag("StatusText_${request.uid}").assertExists()
+      composeTestRule.onNodeWithTag("LearnMoreButton_${request.uid}").assertExists()
+      composeTestRule.onNodeWithTag("LearnMoreButton_${request.uid}").performClick()
     }
   }
 
@@ -177,6 +185,8 @@ class RequestsDashboardScreenTest {
       composeTestRule.onNodeWithTag("CallButton_${request.uid}").assertExists()
       composeTestRule.onNodeWithTag("CallButton_${request.uid}").performClick()
       composeTestRule.onNodeWithTag("StatusText_${request.uid}").assertExists()
+      composeTestRule.onNodeWithTag("LearnMoreButton_${request.uid}").assertExists()
+      composeTestRule.onNodeWithTag("LearnMoreButton_${request.uid}").performClick()
     }
   }
 
@@ -200,6 +210,8 @@ class RequestsDashboardScreenTest {
       composeTestRule.onNodeWithTag("CallButton_${request.uid}").assertExists()
       composeTestRule.onNodeWithTag("CallButton_${request.uid}").performClick()
       composeTestRule.onNodeWithTag("StatusText_${request.uid}").assertExists()
+      composeTestRule.onNodeWithTag("LearnMoreButton_${request.uid}").assertExists()
+      composeTestRule.onNodeWithTag("LearnMoreButton_${request.uid}").performClick()
     }
   }
 
