@@ -198,16 +198,13 @@ fun CreateRequestScreen(
                         Toast.LENGTH_SHORT)
                     .show()
               }
-              requestViewModel.saveServiceRequestWithImage(
-                  serviceRequest,
-                  selectedImageUri!!,
-                  onSuccess = {
-                    // Get the updated service request with the image URL
-                    requestViewModel.getServiceRequestById(serviceRequest.uid) { updatedRequest ->
-                      requestViewModel.selectRequest(updatedRequest)
-                      navigationActions.navigateTo(Route.BOOKING_DETAILS)
-                    }
-                  })
+              requestViewModel.saveServiceRequestWithImage(serviceRequest, selectedImageUri!!) {
+                // Get the updated service request with the image URL
+                requestViewModel.getServiceRequestById(serviceRequest.uid) { updatedRequest ->
+                  requestViewModel.selectRequest(updatedRequest)
+                  navigationActions.navigateTo(Route.BOOKING_DETAILS)
+                }
+              }
             } else {
               requestViewModel.saveServiceRequest(serviceRequest)
               requestViewModel.selectRequest(serviceRequest)
