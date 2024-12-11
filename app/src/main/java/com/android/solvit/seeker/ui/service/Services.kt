@@ -85,14 +85,14 @@ fun ServicesScreen(
       modifier = Modifier.testTag("servicesScreen"),
       bottomBar = {
         BottomNavigationMenu(
-            { navigationActions.navigateTo(it.route) },
+            { navigationActions.navigateTo(it) },
             LIST_TOP_LEVEL_DESTINATION_SEEKER,
             Route.SEEKER_OVERVIEW)
       }) {
         Column(modifier = Modifier.fillMaxSize()) {
           TopSection(searchViewModel, listProviderViewModel, navigationActions)
           LazyColumn(modifier = Modifier.fillMaxSize()) {
-            item { ShortcutsSection(navigationActions, listProviderViewModel) }
+            item { ShortcutsSection(navigationActions) }
             item { CategoriesSection(searchViewModel, listProviderViewModel, navigationActions) }
             item { PerformersSection(listProviderViewModel, navigationActions) }
             item { Spacer(Modifier.size(80.dp)) }
@@ -182,10 +182,7 @@ fun TopSection(
 }
 
 @Composable
-fun ShortcutsSection(
-    navigationActions: NavigationActions,
-    listProviderViewModel: ListProviderViewModel
-) {
+fun ShortcutsSection(navigationActions: NavigationActions) {
   Column(
       modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("servicesScreenShortcuts"),
       verticalArrangement = Arrangement.spacedBy(10.dp),
