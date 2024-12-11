@@ -88,7 +88,7 @@ fun TitleInput(title: String, onTitleChange: (String) -> Unit) {
           OutlinedTextFieldDefaults.colors(
               unfocusedContainerColor = Color.Transparent,
               focusedBorderColor = colorScheme.secondary,
-              unfocusedBorderColor = colorScheme.onSurfaceVariant))
+              unfocusedBorderColor = colorScheme.surfaceVariant))
 }
 
 @Composable
@@ -104,7 +104,7 @@ fun DescriptionInput(description: String, onDescriptionChange: (String) -> Unit)
           OutlinedTextFieldDefaults.colors(
               unfocusedContainerColor = Color.Transparent,
               focusedBorderColor = colorScheme.secondary,
-              unfocusedBorderColor = colorScheme.onSurfaceVariant))
+              unfocusedBorderColor = colorScheme.surfaceVariant))
 }
 
 @Composable
@@ -117,7 +117,7 @@ fun ServiceTypeDropdown(
     onServiceTypeSelected: (Services) -> Unit,
     readOnly: Boolean = false
 ) {
-  Box(modifier = Modifier.fillMaxWidth()) {
+  Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp)) {
     OutlinedTextField(
         value =
             typeQuery.replace("_", " ").lowercase(Locale.getDefault()).replaceFirstChar {
@@ -140,7 +140,7 @@ fun ServiceTypeDropdown(
             OutlinedTextFieldDefaults.colors(
                 unfocusedContainerColor = Color.Transparent,
                 focusedBorderColor = colorScheme.secondary,
-                unfocusedBorderColor = colorScheme.onSurfaceVariant))
+                unfocusedBorderColor = colorScheme.surfaceVariant))
 
     DropdownMenu(
         expanded = showDropdownType,
@@ -216,7 +216,7 @@ fun LocationDropdown(
   var hasBeenFocused by remember { mutableStateOf(false) }
   var hasLostFocusAfterTyping by remember { mutableStateOf(false) }
 
-  Box(modifier = Modifier.fillMaxWidth()) {
+  Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp)) {
     OutlinedTextField(
         value = localQuery,
         onValueChange = { query ->
@@ -266,7 +266,7 @@ fun LocationDropdown(
                 focusedBorderColor = if (isValueOk) colorScheme.secondary else colorScheme.primary,
                 unfocusedBorderColor =
                     when {
-                      locationQuery.isEmpty() -> colorScheme.onSurfaceVariant
+                      locationQuery.isEmpty() -> colorScheme.surfaceVariant
                       isValueOk -> colorScheme.secondary
                       else -> colorScheme.error
                     },
@@ -382,7 +382,9 @@ fun DatePickerFieldToModal(
       trailingIcon = { Icon(Icons.Default.DateRange, contentDescription = "Select date") },
       shape = RoundedCornerShape(12.dp),
       modifier =
-          modifier.fillMaxWidth().testTag("inputRequestDate").pointerInput(selectedDate) {
+          modifier.fillMaxWidth()
+              .padding(horizontal = 20.dp)
+              .testTag("inputRequestDate").pointerInput(selectedDate) {
             awaitEachGesture {
               awaitFirstDown(pass = PointerEventPass.Initial)
               val upEvent = waitForUpOrCancellation(pass = PointerEventPass.Initial)
@@ -395,7 +397,7 @@ fun DatePickerFieldToModal(
           OutlinedTextFieldDefaults.colors(
               unfocusedContainerColor = Color.Transparent,
               focusedBorderColor = colorScheme.secondary,
-              unfocusedBorderColor = colorScheme.onSurfaceVariant))
+              unfocusedBorderColor = colorScheme.surfaceVariant))
 
   if (showModal) {
     DatePickerModal(
@@ -431,7 +433,7 @@ fun ImagePicker(
       modifier =
           Modifier.fillMaxWidth()
               .height(150.dp)
-              .border(1.dp, colorScheme.onSurfaceVariant, shape = RoundedCornerShape(12.dp))
+              .border(1.dp, colorScheme.surfaceVariant, shape = RoundedCornerShape(12.dp))
               .clip(RoundedCornerShape(12.dp))
               .background(Color.Transparent)
               .clickable { imagePickerLauncher.launch("image/*") }
