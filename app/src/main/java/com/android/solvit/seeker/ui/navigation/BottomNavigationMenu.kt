@@ -119,7 +119,7 @@ fun BottomNavigationMenu(
               onTabSelect(
                   if (tabList == LIST_TOP_LEVEL_DESTINATION_SEEKER)
                       TopLevelDestinations.CREATE_REQUEST
-                  else TopLevelDestinations.MY_JOBS)
+                  else TopLevelDestinations.JOBS)
             },
             modifier =
                 Modifier.size(height * 0.85f)
@@ -150,6 +150,6 @@ fun PreviewSeekerBottomNavigationMenu() {
   BottomNavigationMenu(
       onTabSelect = {}, // No action needed for preview
       tabList = tabList,
-      selectedItem = Route.SERVICES // Default to SERVICES (Home)
+      selectedItem = Route.SEEKER_OVERVIEW // Default to SEEKER_OVERVIEW (Home)
       )
 }

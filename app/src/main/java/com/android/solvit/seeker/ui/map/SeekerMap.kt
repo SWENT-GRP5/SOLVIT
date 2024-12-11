@@ -73,7 +73,7 @@ fun SeekerMapScreen(
               image = imageBitmap,
               onClick = {
                 providerViewModel.selectProvider(provider)
-                navigationActions.navigateTo(Route.PROVIDER_PROFILE)
+                navigationActions.navigateTo(Route.PROVIDER_INFO)
               })
         }
     providerMarkers.value = markers
@@ -85,7 +85,7 @@ fun SeekerMapScreen(
       markers = providerMarkers.value,
       bottomBar = {
         BottomNavigationMenu(
-            onTabSelect = { navigationActions.navigateTo(it.route) },
+            onTabSelect = { navigationActions.navigateTo(it) },
             tabList = LIST_TOP_LEVEL_DESTINATION_SEEKER,
             selectedItem = Route.MAP)
       })

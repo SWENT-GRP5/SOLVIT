@@ -186,6 +186,7 @@ class BookingScreenTest {
     composeTestRule.setContent {
       ProviderCard(
           provider = provider,
+          isSeeker = true,
           providerViewModel = providerViewModel,
           navigationActions = navigationActions)
     }

@@ -109,7 +109,7 @@ fun SignUpScreen(
 
   val launcher =
       googleRegisterLauncher(
-          authViewModel, { navigationActions.navigateTo(Screen.SIGN_UP_CHOOSE_ROLE) }, {})
+          authViewModel, { navigationActions.navigateTo(Screen.CHOOSE_ROLE) }, {})
   val token = stringResource(R.string.default_web_client_id)
 
   val goodFormEmail = ValidationRegex.EMAIL_REGEX.matches(email)
@@ -270,7 +270,7 @@ fun SignUpScreen(
                   {
                     authViewModel.setEmail(email)
                     authViewModel.setPassword(password)
-                    navigationActions.navigateTo(Screen.SIGN_UP_CHOOSE_ROLE)
+                    navigationActions.navigateTo(Screen.CHOOSE_ROLE)
                   },
                   isFormComplete,
                   goodFormEmail,

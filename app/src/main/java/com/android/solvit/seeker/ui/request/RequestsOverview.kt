@@ -89,7 +89,7 @@ fun RequestsOverviewScreen(
       modifier = Modifier.testTag("requestsOverviewScreen"),
       bottomBar = {
         BottomNavigationMenu(
-            onTabSelect = { navigationActions.navigateTo(it.route) },
+            onTabSelect = { navigationActions.navigateTo(it) },
             tabList = LIST_TOP_LEVEL_DESTINATION_SEEKER,
             selectedItem = Route.REQUESTS_OVERVIEW)
       }) {

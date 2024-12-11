@@ -30,7 +30,7 @@ class ServicesScreenTest {
     navController = Mockito.mock(NavController::class.java)
     navigationActions = Mockito.mock(NavigationActions::class.java)
     listProviderViewModel = ListProviderViewModel(repository)
-    `when`(navigationActions.currentRoute()).thenReturn(Route.SERVICES)
+    `when`(navigationActions.currentRoute()).thenReturn(Route.SEEKER_OVERVIEW)
     composeTestRule.setContent { ServicesScreen(navigationActions, listProviderViewModel) }
   }
 
@@ -110,7 +110,7 @@ class ServicesScreenTest {
     val service = SERVICES_LIST[0]
     composeTestRule.onNodeWithTag(service.service.toString() + "Item").performClick()
     assert(service.service == listProviderViewModel.selectedService.value)
-    verify(navigationActions).navigateTo(Route.PROVIDERS)
+    verify(navigationActions).navigateTo(Route.PROVIDERS_LIST)
   }
 
   @Test

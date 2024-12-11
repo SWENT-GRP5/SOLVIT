@@ -202,13 +202,15 @@ fun CreateRequestScreen(
                 // Get the updated service request with the image URL
                 requestViewModel.getServiceRequestById(serviceRequest.uid) { updatedRequest ->
                   requestViewModel.selectRequest(updatedRequest)
-                  navigationActions.navigateTo(Route.BOOKING_DETAILS)
+                  navigationActions.navigateAndSetBackStack(
+                      Route.BOOKING_DETAILS, listOf(Route.REQUESTS_OVERVIEW))
                 }
               }
             } else {
               requestViewModel.saveServiceRequest(serviceRequest)
               requestViewModel.selectRequest(serviceRequest)
-              navigationActions.navigateTo(Route.BOOKING_DETAILS)
+              navigationActions.navigateAndSetBackStack(
+                  Route.BOOKING_DETAILS, listOf(Route.REQUESTS_OVERVIEW))
             }
             requestViewModel.unSelectProvider()
             notificationViewModel.sendNotifications(

@@ -82,7 +82,7 @@ import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.map.GetDirectionsBubble
 import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_PROVIDER
 import com.android.solvit.shared.ui.navigation.NavigationActions
-import com.android.solvit.shared.ui.navigation.Screen
+import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.theme.Orange
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -133,7 +133,7 @@ fun RequestsTopBar(
                       color = colorScheme.secondary))
         }
 
-        IconButton(onClick = { navigationActions.navigateTo(Screen.NOTIFICATIONS) }) {
+        IconButton(onClick = { navigationActions.navigateTo(Route.NOTIFICATIONS) }) {
           Icon(
               imageVector = Icons.Default.Notifications,
               tint = if (hasUnreadNotifications) Color.Red else colorScheme.onSurface,
@@ -681,7 +681,7 @@ fun ListRequestsFeedScreen(
       topBar = { RequestsTopBar(navigationActions, notificationViewModel, providerId) },
       bottomBar = {
         BottomNavigationMenu(
-            onTabSelect = { navigationActions.navigateTo(it.route) },
+            onTabSelect = { navigationActions.navigateTo(it) },
             tabList = LIST_TOP_LEVEL_DESTINATION_PROVIDER,
             selectedItem = navigationActions.currentRoute())
       }) { paddingValues ->

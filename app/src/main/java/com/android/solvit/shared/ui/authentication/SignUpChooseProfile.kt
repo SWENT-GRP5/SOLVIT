@@ -48,7 +48,7 @@ import com.android.solvit.R
 import com.android.solvit.seeker.ui.profile.Stepper
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
-import com.android.solvit.shared.ui.navigation.Screen
+import com.android.solvit.shared.ui.navigation.Route
 
 /**
  * A composable function that displays the "Choose Your Profile" screen during the sign-up process.
@@ -111,10 +111,10 @@ fun SignUpChooseProfile(
                     authViewModel.setRole("seeker")
                     if (authViewModel.googleAccount.value == null) {
                       authViewModel.registerWithEmailAndPassword(
-                          { navigationActions.navigateTo(Screen.SEEKER_REGISTRATION_PROFILE) }, {})
+                          { navigationActions.navigateTo(Route.SEEKER_REGISTRATION) }, {})
                     } else {
                       authViewModel.registerWithGoogle(
-                          { navigationActions.navigateTo(Screen.SEEKER_REGISTRATION_PROFILE) }, {})
+                          { navigationActions.navigateTo(Route.SEEKER_REGISTRATION) }, {})
                     }
                   })
 
@@ -134,7 +134,7 @@ fun SignUpChooseProfile(
                       authViewModel.registerWithEmailAndPassword(
                           {
                             Toast.makeText(context, "You are Signed up!", Toast.LENGTH_SHORT).show()
-                            navigationActions.navigateTo(Screen.PROVIDER_REGISTRATION_PROFILE)
+                            navigationActions.navigateTo(Route.PROVIDER_REGISTRATION)
                           },
                           {
                             Toast.makeText(context, "Failed to register", Toast.LENGTH_SHORT).show()
@@ -143,7 +143,7 @@ fun SignUpChooseProfile(
                       authViewModel.registerWithGoogle(
                           {
                             Toast.makeText(context, "You are Signed up!", Toast.LENGTH_SHORT).show()
-                            navigationActions.navigateTo(Screen.PROVIDER_REGISTRATION_PROFILE)
+                            navigationActions.navigateTo(Route.PROVIDER_REGISTRATION)
                           },
                           {
                             Toast.makeText(context, "Failed to register", Toast.LENGTH_SHORT).show()
