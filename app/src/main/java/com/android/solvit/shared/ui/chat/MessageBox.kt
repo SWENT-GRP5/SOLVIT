@@ -17,11 +17,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -48,9 +45,11 @@ import coil.compose.AsyncImage
 import com.android.solvit.R
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
+import com.android.solvit.seeker.ui.navigation.BottomNavigationMenu
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.chat.ChatMessage
 import com.android.solvit.shared.model.chat.ChatViewModel
+import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_PROVIDER
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
 import com.android.solvit.shared.ui.utils.formatTimestamp
@@ -92,7 +91,12 @@ fun MessageBox(
   } else {
     Scaffold(
         topBar = { ChatListTopBar(navigationActions, chatViewModel, authViewModel) },
-        bottomBar = {}) { paddingValues ->
+        bottomBar = {
+          BottomNavigationMenu(
+              onTabSelect = { navigationActions.navigateTo(it.route) },
+              tabList = LIST_TOP_LEVEL_DESTINATION_PROVIDER,
+              selectedItem = if (isReadyToNavigate) Screen.CHAT else Screen.INBOX)
+        }) { paddingValues ->
           if (allMessages.isNotEmpty()) {
             LazyColumn(
                 modifier = Modifier.padding(paddingValues).fillMaxSize(),
@@ -123,7 +127,6 @@ fun ChatListTopBar(
     chatViewModel: ChatViewModel,
     authViewModel: AuthViewModel
 ) {
-
   TopAppBar(
       modifier = Modifier.testTag("InboxTopAppBar"),
       title = {
@@ -133,11 +136,6 @@ fun ChatListTopBar(
             contentAlignment = Alignment.Center) {
               Text(text = "Inbox", style = MaterialTheme.typography.headlineLarge)
             }
-      },
-      navigationIcon = {
-        IconButton(onClick = { navigationActions.goBack() }) {
-          Icon(Icons.Default.ArrowBack, contentDescription = "Back")
-        }
       },
       actions = {
         IconButton(

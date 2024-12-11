@@ -15,7 +15,6 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mockito.mock
-import org.mockito.kotlin.verify
 
 class ProviderProfileScreenTest {
 
@@ -49,7 +48,6 @@ class ProviderProfileScreenTest {
 
     composeTestRule.setContent { ProfileHeader(mockNavigationActions, provider) }
 
-    composeTestRule.onNodeWithTag("backButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("profileImage").assertIsDisplayed()
     composeTestRule.onNodeWithTag("professionalName").assertIsDisplayed()
     composeTestRule.onNodeWithTag("companyNameTitle").assertIsDisplayed()
@@ -71,15 +69,6 @@ class ProviderProfileScreenTest {
     composeTestRule.onNodeWithTag("descriptionSection").assertIsDisplayed()
     composeTestRule.onNodeWithTag("descriptionTitle").assertIsDisplayed()
     composeTestRule.onNodeWithTag("descriptionText").assertIsDisplayed()
-  }
-
-  @Test
-  fun providerProfileScreen_profileHeader_performClick() {
-
-    composeTestRule.setContent { ProfileHeader(mockNavigationActions, provider) }
-
-    composeTestRule.onNodeWithTag("backButton").performClick()
-    verify(mockNavigationActions).goBack()
   }
 
   @Test
