@@ -14,6 +14,7 @@ import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.UploadTask
@@ -556,5 +557,90 @@ class ChatRepositoryTest {
 
     assertNull(result)
     assert(failureCalled)
+  }
+
+  @Test
+  fun `seekerShouldCreateRequest successfully sets the flag`() {
+    val chatRoomId = "testChatRoomId"
+    val shouldCreateRequest = true
+
+    `when`(mockFirebaseFirestore.collection("chatRooms")).thenReturn(mockCollectionRef)
+    `when`(mockCollectionRef.document(chatRoomId)).thenReturn(mockDocumentRef)
+    `when`(
+            mockDocumentRef.set(
+                eq(mapOf("shouldCreateRequest" to shouldCreateRequest)), eq(SetOptions.merge())))
+        .thenReturn(mockTaskVoid)
+    `when`(mockTaskVoid.addOnSuccessListener(any())).thenAnswer {
+      val listener = it.arguments[0] as OnSuccessListener<Void>
+      listener.onSuccess(null)
+      mockTaskVoid
+    }
+
+    var successCalled = false
+    var failureCalled = false
+
+    chatRepository.seekerShouldCreateRequest(
+        chatRoomId,
+        shouldCreateRequest,
+        onSuccess = { successCalled = true },
+        onFailure = { failureCalled = true })
+
+    verify(mockDocumentRef)
+        .set(eq(mapOf("shouldCreateRequest" to shouldCreateRequest)), eq(SetOptions.merge()))
+    assertTrue(successCalled)
+    assertFalse(failureCalled)
+  }
+
+  @Test
+  fun `getShouldCreateRequest successfully retrieves the flag`() {
+    val chatRoomId = "testChatRoomId"
+    val shouldCreateRequest = true
+
+    `when`(mockFirebaseFirestore.collection("chatRooms")).thenReturn(mockCollectionRef)
+    `when`(mockCollectionRef.document(chatRoomId)).thenReturn(mockDocumentRef)
+    `when`(mockTaskDoc.isSuccessful).thenReturn(true)
+    `when`(mockTaskDoc.result).thenReturn(mockDocumentSnapshot)
+    `when`(mockDocumentSnapshot.get("shouldCreateRequest")).thenReturn(shouldCreateRequest)
+    `when`(mockDocumentRef.get()).thenReturn(mockTaskDoc)
+    `when`(mockTaskDoc.addOnSuccessListener(any())).thenAnswer {
+      val listener = it.arguments[0] as OnSuccessListener<DocumentSnapshot>
+      listener.onSuccess(mockDocumentSnapshot)
+      mockTaskDoc
+    }
+
+    var result: Boolean? = null
+    chatRepository.getShouldCreateRequest(
+        chatRoomId,
+        onSuccess = { result = it },
+        onFailure = { fail("onFailure should not be called") })
+
+    assertNotNull(result)
+    assertEquals(shouldCreateRequest, result)
+  }
+
+  @Test
+  fun `getShouldCreateRequest fails when flag is not set`() {
+    val chatRoomId = "testChatRoomId"
+
+    `when`(mockFirebaseFirestore.collection("chatRooms")).thenReturn(mockCollectionRef)
+    `when`(mockCollectionRef.document(chatRoomId)).thenReturn(mockDocumentRef)
+    `when`(mockTaskDoc.isSuccessful).thenReturn(true)
+    `when`(mockTaskDoc.result).thenReturn(mockDocumentSnapshot)
+    `when`(mockDocumentSnapshot.get("shouldCreateRequest")).thenReturn(null)
+    `when`(mockDocumentRef.get()).thenReturn(mockTaskDoc)
+    `when`(mockTaskDoc.addOnSuccessListener(any())).thenAnswer {
+      val listener = it.arguments[0] as OnSuccessListener<DocumentSnapshot>
+      listener.onSuccess(mockDocumentSnapshot)
+      mockTaskDoc
+    }
+
+    var successCalled = false
+    var failureCalled = false
+
+    chatRepository.getShouldCreateRequest(
+        chatRoomId, onSuccess = { successCalled = true }, onFailure = { failureCalled = true })
+
+    assertFalse(successCalled)
+    assertTrue(failureCalled)
   }
 }

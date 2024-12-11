@@ -142,4 +142,32 @@ class ChatViewModelTest {
 
     assertEquals("https://example.com/image.jpg", result)
   }
+
+  @Test
+  fun `setShouldCreateRequest call repository`() = runTest {
+    chatViewModel.setReceiverUid("receiver123")
+
+    whenever(chatRepository.initChat(eq(false), any(), any(), any(), any())).doAnswer {
+      val onSuccess = it.arguments[2] as (String) -> Unit
+      onSuccess("testChatId")
+      null
+    }
+    chatViewModel.initChat(false, "currentUserUid")
+    chatViewModel.setShouldCreateRequest(true)
+    verify(chatRepository).seekerShouldCreateRequest(any(), eq(true), any(), any())
+  }
+
+  @Test
+  fun `getShouldCreateRequest call repository`() = runTest {
+    chatViewModel.setReceiverUid("receiver123")
+
+    whenever(chatRepository.initChat(eq(false), any(), any(), any(), any())).doAnswer {
+      val onSuccess = it.arguments[2] as (String) -> Unit
+      onSuccess("testChatId")
+      null
+    }
+    chatViewModel.initChat(false, "currentUserUid")
+    chatViewModel.getShouldCreateRequest()
+    verify(chatRepository).getShouldCreateRequest(any(), any(), any())
+  }
 }
