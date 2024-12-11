@@ -60,6 +60,15 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
         }
   }
 
+  /**
+   * Prepares the ViewModel for a chat conversation.
+   *
+   * @param isIaConversation Indicates if the conversation is AI-based.
+   * @param currentUserUid The current user's unique identifier.
+   * @param receiverId The unique identifier of the chat receiver.
+   * @param receiver determine whether the receiver is a seeker or a provider.
+   * @param requestUid Optional request ID to link the chat to a service request.
+   */
   fun prepareForChat(
       isIaConversation: Boolean,
       currentUserUid: String?,
@@ -77,6 +86,14 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
     }
   }
 
+  /**
+   * Prepares the ViewModel for an AI chat conversation.
+   *
+   * @param isIaConversation Indicates if the conversation is AI-based.
+   * @param currentUserUid The current user's unique identifier.
+   * @param receiverId The unique identifier of the chat receiver.
+   * @param receiver will be by default the chat Bot
+   */
   fun prepareForIaChat(
       isIaConversation: Boolean,
       currentUserUid: String?,
@@ -94,18 +111,37 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
     }
   }
 
+  /**
+   * Sets the receiver's unique identifier.
+   *
+   * @param uid The unique identifier of the receiver.
+   */
   fun setReceiverUid(uid: String) {
     receiverUid = uid
   }
 
+  /** Resets the readiness flag for navigation. */
   fun resetIsReadyToNavigate() {
     _isReadyToNavigate.value = false
   }
 
+  /**
+   * Sets the receiver object.
+   *
+   * @param receiver The receiver object to set.
+   */
   fun setReceiver(receiver: Any) {
     _receiver.value = receiver
   }
 
+  /**
+   * Initializes a chat conversation.
+   *
+   * @param isIaConversation Indicates if the conversation is AI-based.
+   * @param currentUserUid The current user's unique identifier.
+   * @param requestUid Optional request ID to link the chat to a service request.
+   * @return The unique identifier of the chat, or null if initialization fails.
+   */
   suspend fun initChat(
       isIaConversation: Boolean,
       currentUserUid: String?,
@@ -135,6 +171,11 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
     }
   }
 
+  /**
+   * Fetches the service request associated with the current chat.
+   *
+   * @param onSuccess Callback invoked with the service request ID on success.
+   */
   fun getChatRequest(onSuccess: (String) -> Unit) {
     chatId?.let {
       repository.getChatRequest(
@@ -142,6 +183,11 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
     }
   }
 
+  /**
+   * Sets the current service request for the chat.
+   *
+   * @param serviceRequest The service request to set.
+   */
   fun setChatRequest(serviceRequest: ServiceRequest) {
     _chatRequest.value = serviceRequest
   }
@@ -171,6 +217,12 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
     }
   }
 
+  /**
+   * Sends a chat message.
+   *
+   * @param isIaConversation Indicates if the conversation is AI-based.
+   * @param message The message to send.
+   */
   fun sendMessage(isIaConversation: Boolean, message: ChatMessage) {
     Log.e("sendMessage", "$chatId")
     chatId?.let {
@@ -181,12 +233,17 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
           message,
           onSuccess = {
             Log.e("send Message", "Message \"${message}\" is succesfully sent")
-            getShouldCreateRequest()
+            if (isIaConversation) getShouldCreateRequest()
           },
           onFailure = { Log.e("send Message", "Failed") })
     }
   }
 
+  /**
+   * Retrieves the conversation messages for the current chat.
+   *
+   * @param isIaConversation Indicates if the conversation is AI-based.
+   */
   fun getConversation(isIaConversation: Boolean) {
 
     chatId?.let {
@@ -195,6 +252,11 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
     }
   }
 
+  /**
+   * Retrieves all last messages for the current user.
+   *
+   * @param currentUserUid The unique identifier of the current user.
+   */
   fun getAllLastMessages(currentUserUid: String?) {
 
     viewModelScope.launch {
@@ -218,6 +280,11 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
     }
   }
 
+  /**
+   * Clears the conversation for the current chat.
+   *
+   * @param isIaConversation Indicates if the conversation is AI-based.
+   */
   fun clearConversation(isIaConversation: Boolean) {
     Log.e("clear", "$chatId")
     chatId?.let {
@@ -231,6 +298,12 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
     }
   }
 
+  /**
+   * Uploads an image to Firebase Storage.
+   *
+   * @param imageUri The URI of the image to upload.
+   * @return The download URL of the uploaded image, or null if the upload fails.
+   */
   suspend fun uploadImagesToStorage(imageUri: Uri): String? {
     return suspendCoroutine { continuation ->
       repository.uploadChatImagesToStorage(

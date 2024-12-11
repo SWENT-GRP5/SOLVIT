@@ -87,7 +87,6 @@ class ChatRepositoryFirestore(
 
               override fun onCancelled(p0: DatabaseError) {
                 onFailure()
-                TODO("Not yet implemented")
               }
             })
       } catch (e: Exception) {

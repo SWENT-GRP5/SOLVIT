@@ -30,6 +30,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -62,6 +63,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -179,11 +181,12 @@ fun ChatScreen(
               }
               items(messages) { message ->
                 if (message.senderId == user?.uid) {
-                  // Item for messages authentified user send
+                  // Item for messages authenticated user send
                   SentMessage(message, true)
                 } else {
-                  // Item for messages authentified user receive
-                  SentMessage(message, false, true, receiverPicture)
+                  // Item for messages authenticated user receive
+                  SentMessage(
+                      message, isSentByUser = false, showProfilePicture = true, receiverPicture)
                 }
               }
             }
@@ -377,71 +380,85 @@ fun AiSolverScreen(
   val user by authViewModel.user.collectAsState()
   var isTyping by remember { mutableStateOf(false) }
   // Boolean indicating if given the problem of the user he should create a request to solve it
-  var shouldCreateRequest by remember { mutableStateOf(false) }
+  val shouldCreateRequest by chatViewModel.shouldCreateRequest.collectAsState()
   aiSolverViewModel.setMessageContext(conversation)
 
+  val lazyListState = rememberLazyListState()
+  val coroutineScope = rememberCoroutineScope()
+
+  // Scroll to the last item when entering the screen
+  LaunchedEffect(conversation) {
+    if (conversation.isNotEmpty()) {
+      lazyListState.animateScrollToItem(conversation.lastIndex)
+    }
+  }
   Scaffold(
       modifier = Modifier.testTag("AiSolverScreen"),
       topBar = { AiSolverHeader(navigationActions) },
       bottomBar = {
-        SuggestionToCreateRequest()
-        /*if(!shouldCreateRequest){
-            MessageInputBar(
-                isAiSolverScreen = true,
-                onImageSelected = { uri: Uri? ->
-                    imageUri = uri
-                    uri?.let { imageBitmap = loadBitmapFromUri(localContext, it) }
-                },
-                onSendClickButton = { textMessage, onMessageChange ->
-                    chatViewModel.viewModelScope.launch {
-                        // upload Image User want to send to storage
-                        val imageUrl =
-                            if (imageUri != null) chatViewModel.uploadImagesToStorage(imageUri!!) else null
-                        val message = user?.let { buildMessage(it.uid, textMessage, imageUrl, it.userName) }
-                        if (message != null) {
-                            chatViewModel.sendMessage(true, message)
-                            onMessageChange("")
-                            val userInput = AiSolverViewModel.UserInput(textMessage, imageBitmap)
-                            aiSolverViewModel.updateMessageContext(message)
-                            aiSolverViewModel.generateMessage(
-                                userInput,
-                                onSuccess = {
-                                    shouldCreateRequest = it.shouldCreateRequest
-                                    reply = it.response
-                                    val aiReply =
-                                        ChatMessage.TextMessage(
-                                            message = reply,
-                                            senderName = "AiBot",
-                                            senderId = "JL36T8yHjWDYkuq4u6S4",
-                                            timestamp = System.currentTimeMillis())
+        if (!shouldCreateRequest) {
+          MessageInputBar(
+              isAiSolverScreen = true,
+              onImageSelected = { uri: Uri? ->
+                imageUri = uri
+                uri?.let { imageBitmap = loadBitmapFromUri(localContext, it) }
+              },
+              onSendClickButton = { textMessage, onMessageChange ->
+                chatViewModel.viewModelScope.launch {
+                  // upload Image User want to send to storage
+                  val imageUrl =
+                      if (imageUri != null) chatViewModel.uploadImagesToStorage(imageUri!!)
+                      else null
+                  val message =
+                      user?.let { buildMessage(it.uid, textMessage, imageUrl, it.userName) }
+                  if (message != null) {
+                    chatViewModel.sendMessage(true, message)
+                    onMessageChange("")
+                    val userInput = AiSolverViewModel.UserInput(textMessage, imageBitmap)
+                    aiSolverViewModel.updateMessageContext(message)
+                    aiSolverViewModel.generateMessage(
+                        userInput,
+                        onSuccess = {
+                          chatViewModel.setShouldCreateRequest(it.shouldCreateRequest)
+                          reply = it.response
+                          val aiReply =
+                              ChatMessage.TextMessage(
+                                  message = reply,
+                                  senderName = "AiBot",
+                                  senderId = "JL36T8yHjWDYkuq4u6S4",
+                                  timestamp = System.currentTimeMillis())
 
-                                    chatViewModel.sendMessage(true, aiReply)
-                                    isTyping = false
-                                })
-                            isTyping = true
-                            imageUri = null
-                            imageBitmap = null
-                        }
-                    }
-                })
-        }else{
-            //In case the user should create a request we display a button so that he directly navigate to the create Request Screen
-            SuggestionToCreateRequest()
-        }*/
-
-      }) { paddingValues ->
-        LazyColumn(modifier = Modifier.padding(paddingValues).imePadding().testTag("chat")) {
-          items(conversation) { message ->
-            if (message.senderId == user?.uid) {
-              SentMessage(message, true)
-            } else {
-              SentMessage(message, false, true, "")
-            }
-          }
-          if (isTyping) {
-            item { TypingIndicator() }
-          }
+                          chatViewModel.sendMessage(true, aiReply)
+                          isTyping = false
+                        })
+                    isTyping = true
+                    imageUri = null
+                    imageBitmap = null
+                  }
+                }
+              })
+        } else {
+          // In case the user should create a request we display a button so that he directly
+          // navigate to the create Request Screen
+          SuggestionToCreateRequest(
+              navigationActions = navigationActions,
+              onClick = { chatViewModel.setShouldCreateRequest(false) })
         }
+      }) { paddingValues ->
+        LazyColumn(
+            state = lazyListState,
+            modifier = Modifier.padding(paddingValues).imePadding().testTag("chat")) {
+              items(conversation) { message ->
+                if (message.senderId == user?.uid) {
+                  SentMessage(message, isSentByUser = true)
+                } else {
+                  SentMessage(message, isSentByUser = false, showProfilePicture = true, "")
+                }
+              }
+              if (isTyping) {
+                item { TypingIndicator() }
+              }
+            }
       }
 }
 
@@ -636,18 +653,17 @@ fun SentMessage(
  * creating a request or continue chatting)
  *
  * @param navigationActions to navigate create request screen on click
- * @param screenHeight represent the height configuration of the screen
  * @param onClick action to perform when clicking on "Continue chatting"
  */
 @Composable
-fun SuggestionToCreateRequest() {
-  Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
+fun SuggestionToCreateRequest(navigationActions: NavigationActions, onClick: () -> Unit) {
+  Box(modifier = Modifier.imePadding(), contentAlignment = Alignment.BottomCenter) {
     Column(
         modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("finishChatOptions"),
         horizontalAlignment = Alignment.CenterHorizontally) {
-          AiSolverButton(
-              title =
-                  "Contact a professional") { /* navigationActions.navigateTo(Route.CREATE_REQUEST) */}
+          AiSolverButton(title = "Contact a professional") {
+            navigationActions.navigateTo(Route.CREATE_REQUEST)
+          }
 
           Spacer(modifier = Modifier.height(8.dp)) // Adds spacing between button and text
 
@@ -655,8 +671,8 @@ fun SuggestionToCreateRequest() {
               text = "Continue chatting",
               fontSize = 18.sp,
               textDecoration = TextDecoration.Underline,
-              color = MaterialTheme.colorScheme.secondary,
-              modifier = Modifier.clickable { /* onClick() */}.testTag("continueChattingButton"))
+              color = colorScheme.secondary,
+              modifier = Modifier.clickable { onClick() }.testTag("continueChattingButton"))
         }
   }
 }
