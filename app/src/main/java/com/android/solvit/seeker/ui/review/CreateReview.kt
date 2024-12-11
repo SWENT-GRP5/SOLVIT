@@ -33,6 +33,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
@@ -57,6 +58,7 @@ import com.android.solvit.R
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.seeker.ui.service.ProviderItem
 import com.android.solvit.shared.model.map.Location
+import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestStatus
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
@@ -72,6 +74,9 @@ import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
 import java.text.SimpleDateFormat
 import java.util.Locale
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @Composable
 fun CreateReviewScreen(
@@ -86,6 +91,7 @@ fun CreateReviewScreen(
   }
   val ratingState = remember { mutableIntStateOf(0) }
   var comment by remember { mutableStateOf("") }
+  val providerState = remember { mutableStateOf<Provider?>(null) }
 
   // Lock Orientation to Portrait
   val context = LocalContext.current
@@ -93,6 +99,15 @@ fun CreateReviewScreen(
     val activity = context as? ComponentActivity
     activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
     onDispose { activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED }
+  }
+  // We fetch the
+  LaunchedEffect(navigationActions.currentRoute()) {
+    if (requestState.value != null &&
+        (requestState.value!!.status == ServiceRequestStatus.COMPLETED ||
+            requestState.value!!.status == ServiceRequestStatus.ARCHIVED)) {
+      providerState.value =
+          requestState.value!!.providerId?.let { listProviderViewModel.fetchProviderById(it) }
+    }
   }
   Scaffold(topBar = { TopSection(navigationActions) }) { paddingValues ->
     Column(
@@ -121,20 +136,33 @@ fun CreateReviewScreen(
           Button(
               onClick = {
                 if (requestState.value != null && requestState.value!!.providerId != null) {
-                  val review =
-                      Review(
-                          uid = reviewViewModel.getNewUid(),
-                          authorId = requestState.value!!.userId,
-                          serviceRequestId = requestState.value!!.uid,
-                          providerId = requestState.value!!.providerId!!,
-                          rating = ratingState.intValue,
-                          comment = comment)
-                  reviewViewModel.addReview(review)
-                  Toast.makeText(context, "Review Submitted", Toast.LENGTH_SHORT).show()
+                  // We use here so that code is executed sequentially to calculate the correct
+                  // average rating(suspend function) before updating provider
+                  CoroutineScope(Dispatchers.Main).launch {
+                    val review =
+                        Review(
+                            uid = reviewViewModel.getNewUid(),
+                            authorId = requestState.value!!.userId,
+                            serviceRequestId = requestState.value!!.uid,
+                            providerId = requestState.value!!.providerId!!,
+                            rating = ratingState.intValue,
+                            comment = comment)
+                    reviewViewModel.addReview(review)
+                    val averageRating =
+                        reviewViewModel.getAverageRatingByProvider(
+                            requestState.value!!.providerId!!)
+                    providerState.value?.let {
+                      listProviderViewModel.updateProvider(
+                          it.copy(rating = kotlin.math.ceil(averageRating).coerceIn(1.0, 5.0)))
+                    }
+
+                    Toast.makeText(context, "Review Submitted", Toast.LENGTH_SHORT).show()
+                    navigationActions.goBack()
+                  }
                 } else {
                   Toast.makeText(context, "Error Submitting Review", Toast.LENGTH_SHORT).show()
+                  navigationActions.goBack()
                 }
-                navigationActions.goBack()
               },
               modifier = Modifier.testTag("submitReviewButton")) {
                 Row(

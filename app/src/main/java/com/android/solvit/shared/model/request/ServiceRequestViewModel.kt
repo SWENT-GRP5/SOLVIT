@@ -96,7 +96,7 @@ open class ServiceRequestViewModel(private val repository: ServiceRequestReposit
         })
   }
 
-  private fun getScheduledRequests() {
+  fun getScheduledRequests() {
     repository.getScheduledServiceRequests(
         onSuccess = { _scheduledRequests.value = it },
         onFailure = { exception ->
