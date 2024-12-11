@@ -123,7 +123,7 @@ open class NavigationActions(
    *
    * @param destination The top level destination to navigate to.
    *
-   * Clear the back stack when navigating to a new destination.
+   * Clear the back stack up to startDestination when navigating to a new destination.
    */
   open fun navigateTo(destination: TopLevelDestination) {
     navController.navigate(destination.route) {
@@ -142,6 +142,13 @@ open class NavigationActions(
     navController.navigate(screen)
   }
 
+  /**
+   * Navigate to the specified screen and set the back stack to startDestination plus the specified
+   * routes.
+   *
+   * @param screen The screen to navigate to
+   * @param backStackRoutes The routes to set the back stack to
+   */
   open fun navigateAndSetBackStack(screen: String, backStackRoutes: List<String>) {
     navController.popBackStack(navController.graph.startDestinationId, false)
     backStackRoutes.forEach { route ->
@@ -159,15 +166,6 @@ open class NavigationActions(
   /** Navigate back to the previous screen. */
   open fun goBack() {
     navController.popBackStack()
-  }
-
-  /**
-   * Navigate back to the specified route.
-   *
-   * @param route The route to navigate back to
-   */
-  open fun goBackTo(route: String) {
-    navController.popBackStack(route, false)
   }
 
   /**

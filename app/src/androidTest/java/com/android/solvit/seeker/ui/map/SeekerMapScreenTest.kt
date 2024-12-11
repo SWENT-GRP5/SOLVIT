@@ -107,7 +107,7 @@ class SeekerMapScreenTest {
   fun onTabSelect_navigatesToCorrectRoute() {
     composeTestRule.setContent { SeekerMapScreen(listProviderViewModel, navigationActions, false) }
 
-    composeTestRule.onNodeWithTag(TopLevelDestinations.SERVICES.textId).assertIsDisplayed()
-    composeTestRule.onNodeWithTag(TopLevelDestinations.SERVICES.textId).performClick()
+    composeTestRule.onNodeWithTag(TopLevelDestinations.SEEKER_OVERVIEW.textId).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(TopLevelDestinations.SEEKER_OVERVIEW.textId).performClick()
   }
 }

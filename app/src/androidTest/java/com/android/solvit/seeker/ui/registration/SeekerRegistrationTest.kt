@@ -20,7 +20,7 @@ import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.map.LocationRepository
 import com.android.solvit.shared.model.map.LocationViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
-import com.android.solvit.shared.ui.navigation.Screen
+import com.android.solvit.shared.ui.navigation.Route
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -58,7 +58,7 @@ class SeekerRegistrationTest {
     locationRepository = mock(LocationRepository::class.java)
     locationViewModel = LocationViewModel(locationRepository)
 
-    `when`(navigationActions.currentRoute()).thenReturn(Screen.SEEKER_REGISTRATION_PROFILE)
+    `when`(navigationActions.currentRoute()).thenReturn(Route.SEEKER_REGISTRATION)
     `when`(locationRepository.search(ArgumentMatchers.anyString(), anyOrNull(), anyOrNull()))
         .thenAnswer { invocation ->
           val onSuccess = invocation.getArgument<(List<Location>) -> Unit>(1)
