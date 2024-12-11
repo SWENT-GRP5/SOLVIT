@@ -139,7 +139,8 @@ class EndToEndTestCreateProfile {
     chatViewModel = ChatViewModel(chatRepository)
     chatAssistantViewModel = ChatAssistantViewModel()
     notificationsViewModel = NotificationsViewModel(notificationsRepository)
-    calendarViewModel = ProviderCalendarViewModel(authViewModel, serviceRequestViewModel)
+    calendarViewModel =
+        ProviderCalendarViewModel(providerRepository, authViewModel, serviceRequestViewModel)
     aiSolverViewModel = AiSolverViewModel()
 
     `when`(locationRepository.search(ArgumentMatchers.anyString(), anyOrNull(), anyOrNull()))

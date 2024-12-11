@@ -197,7 +197,8 @@ fun ProviderCalendarScreen(
                         Text(
                             text =
                                 selectedDate.format(
-                                    DateTimeFormatter.ofPattern("EEEE d MMMM yyyy", Locale.ROOT)),
+                                    DateTimeFormatter.ofPattern(
+                                        "EEEE d MMMM yyyy", Locale.getDefault())),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             modifier =
