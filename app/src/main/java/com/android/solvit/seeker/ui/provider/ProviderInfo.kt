@@ -82,6 +82,16 @@ import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
 
+/**
+ * Main screen to display detailed information about a provider.
+ *
+ * @param navigationActions Actions for navigating between screens.
+ * @param providerViewModel ViewModel for provider data.
+ * @param reviewsViewModel ViewModel for reviews data.
+ * @param requestViewModel ViewModel for service requests.
+ * @param authViewModel ViewModel for user authentication.
+ * @param packageProposalViewModel ViewModel for package proposals.
+ */
 @Composable
 fun ProviderInfoScreen(
     navigationActions: NavigationActions,
@@ -153,6 +163,15 @@ fun ProviderInfoScreen(
       bottomBar = { BottomBar(showDialog = showDialog) })
 }
 
+/**
+ * Card to display package details, including price, description, and features.
+ *
+ * @param packageProposal The package proposal to display.
+ * @param selectedIndex Whether this package is currently selected.
+ * @param onIsSelectedChange Callback for when the selection state changes.
+ * @param modifier Modifier to style the card.
+ * @param selectedPackage Mutable state for the selected package.
+ */
 @Composable
 fun PackageCard(
     packageProposal: PackageProposal,
@@ -262,7 +281,17 @@ fun PackageCard(
         }
       }
 }
-
+/**
+ * Screen displaying the list of packages offered by the provider.
+ *
+ * @param provider The provider object.
+ * @param packages List of packages proposed by the provider.
+ * @param selectedPackage Mutable state for the selected package.
+ * @param showDialog Mutable state controlling the display of the dialog.
+ * @param requestViewModel ViewModel for handling service requests.
+ * @param userId Current user's ID.
+ * @param navigationActions Navigation actions for navigating to different screens.
+ */
 @Composable
 fun ProviderPackages(
     provider: Provider,
@@ -325,7 +354,11 @@ fun ProviderPackages(
         }
       }
 }
-
+/**
+ * Top bar for the provider details screen, with a back button.
+ *
+ * @param onBackClick Callback when the back button is clicked.
+ */
 @Composable
 fun ProviderTopBar(onBackClick: () -> Unit) {
   val context = LocalContext.current
@@ -354,6 +387,11 @@ fun ProviderTopBar(onBackClick: () -> Unit) {
       }
 }
 
+/**
+ * Header section displaying provider details such as name and service type.
+ *
+ * @param provider The provider object containing details.
+ */
 @Composable
 fun ProviderHeader(provider: Provider) {
   Box(
@@ -392,6 +430,13 @@ fun ProviderHeader(provider: Provider) {
       }
 }
 
+/**
+ * Tab navigation for provider details, packages, and reviews.
+ *
+ * @param selectedTab Currently selected tab.
+ * @param onTabSelected Callback when a tab is selected.
+ * @param displayPackages Whether the "Packages" tab should be displayed.
+ */
 @Composable
 fun ProviderTabs(
     selectedTab: ProviderTab,
@@ -434,6 +479,17 @@ enum class ProviderTab(val title: String) {
   REVIEWS("Reviews")
 }
 
+/**
+ * Screen displaying provider details such as rating, description, and contact information.
+ *
+ * @param provider The provider object.
+ * @param selectedPackage Currently selected package.
+ * @param reviews List of reviews for the provider.
+ * @param showDialog Mutable state controlling the display of the dialog.
+ * @param requestViewModel ViewModel for handling service requests.
+ * @param userId Current user's ID.
+ * @param navigationActions Navigation actions for navigating to different screens.
+ */
 @Composable
 fun ProviderDetails(
     provider: Provider,
@@ -545,6 +601,12 @@ fun ProviderDetails(
       }
 }
 
+/**
+ * Reusable component to display a rounded background section with customizable content.
+ *
+ * @param modifier Modifier to style the component.
+ * @param content Composable content to display inside the rubric.
+ */
 @Composable
 fun Rubric(modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
   Column(
@@ -558,6 +620,17 @@ fun Rubric(modifier: Modifier = Modifier, content: @Composable ColumnScope.() ->
       }
 }
 
+/**
+ * Screen displaying reviews for the provider.
+ *
+ * @param provider The provider object.
+ * @param selectedPackage Currently selected package.
+ * @param reviews List of reviews for the provider.
+ * @param showDialog Mutable state controlling the display of the dialog.
+ * @param requestViewModel ViewModel for handling service requests.
+ * @param userId Current user's ID.
+ * @param navigationActions Navigation actions for navigating to different screens.
+ */
 @Composable
 fun ProviderReviews(
     provider: Provider,
@@ -642,6 +715,11 @@ fun ProviderReviews(
       }
 }
 
+/**
+ * Component to display a single review, including rating and comments.
+ *
+ * @param review The review object to display.
+ */
 @Composable
 fun ReviewRow(review: Review) {
   Column(
@@ -673,6 +751,11 @@ fun ReviewRow(review: Review) {
       }
 }
 
+/**
+ * Component to display a star rating.
+ *
+ * @param rating The rating value (out of 5).
+ */
 @Composable
 fun RatingStars(rating: Int) {
   Row(
@@ -688,6 +771,11 @@ fun RatingStars(rating: Int) {
   }
 }
 
+/**
+ * Bottom bar with a "Book Now" button.
+ *
+ * @param showDialog Mutable state controlling the display of the booking dialog.
+ */
 @Composable
 fun BottomBar(showDialog: MutableState<Boolean>) {
   Row(
@@ -711,6 +799,17 @@ fun BottomBar(showDialog: MutableState<Boolean>) {
       }
 }
 
+/**
+ * Dialog to select a service request or create a new one.
+ *
+ * @param providerId ID of the provider.
+ * @param providerType Type of service provided.
+ * @param selectedPackage Currently selected package.
+ * @param showDialog Mutable state controlling the display of the dialog.
+ * @param requestViewModel ViewModel for handling service requests.
+ * @param userId Current user's ID.
+ * @param navigationActions Navigation actions for navigating to different screens.
+ */
 @Composable
 fun SelectRequestDialog(
     providerId: String,

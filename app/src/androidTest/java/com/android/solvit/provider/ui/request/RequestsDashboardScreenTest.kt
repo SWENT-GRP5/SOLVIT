@@ -469,6 +469,7 @@ class RequestsDashboardScreenTest {
       ScheduledJobsSection(
           providerId = "testProviderId",
           viewModel = viewModel,
+        navigationActions = navigationActions,
           listProviderViewModel = providerViewModel)
     }
 
