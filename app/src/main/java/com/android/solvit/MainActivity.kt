@@ -203,7 +203,7 @@ fun SeekerUI(
   val user by authViewModel.user.collectAsState()
 
   NavHost(navController = navController, startDestination = Route.SERVICES) {
-    composable(Route.SERVICES) { ServicesScreen(navigationActions, listProviderViewModel) }
+    composable(Route.SERVICES) { ServicesScreen(navigationActions, seekerProfileViewModel, listProviderViewModel) }
     composable(Route.PROVIDERS) {
       user?.let { it1 ->
         SelectProviderScreen(
