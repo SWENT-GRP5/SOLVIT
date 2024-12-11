@@ -198,15 +198,21 @@ fun CreateRequestScreen(
                         Toast.LENGTH_SHORT)
                     .show()
               }
-              requestViewModel.saveServiceRequestWithImage(serviceRequest, selectedImageUri!!)
+              requestViewModel.saveServiceRequestWithImage(serviceRequest, selectedImageUri!!) {
+                // Get the updated service request with the image URL
+                requestViewModel.getServiceRequestById(serviceRequest.uid) { updatedRequest ->
+                  requestViewModel.selectRequest(updatedRequest)
+                  navigationActions.navigateTo(Route.BOOKING_DETAILS)
+                }
+              }
             } else {
               requestViewModel.saveServiceRequest(serviceRequest)
+              requestViewModel.selectRequest(serviceRequest)
+              navigationActions.navigateTo(Route.BOOKING_DETAILS)
             }
             requestViewModel.unSelectProvider()
             notificationViewModel.sendNotifications(
                 serviceRequest, listProviderViewModel.providersList.value)
-            requestViewModel.selectRequest(serviceRequest)
-            navigationActions.navigateAndPopUpTo(Route.BOOKING_DETAILS, Route.REQUESTS_OVERVIEW)
             return@RequestScreen
           } catch (_: NumberFormatException) {}
         }

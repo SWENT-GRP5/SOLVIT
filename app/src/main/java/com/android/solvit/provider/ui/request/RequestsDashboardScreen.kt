@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -46,6 +47,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -66,6 +68,7 @@ import java.util.Locale
  *
  * @param navigationActions Actions for navigation.
  * @param serviceRequestViewModel ViewModel for managing service requests.
+ * @param authViewModel ViewModel for managing authentication.
  */
 @Composable
 fun RequestsDashboardScreen(
@@ -179,10 +182,10 @@ fun JobSectionContent(
   when (selectedTab) {
     0 -> PendingJobsSection(providerId, serviceRequestViewModel, navigationActions)
     1 -> AcceptedJobSection(providerId, serviceRequestViewModel, navigationActions)
-    2 -> ScheduledJobsSection(providerId, serviceRequestViewModel)
-    3 -> CompletedJobsSection(providerId, serviceRequestViewModel)
-    4 -> CanceledJobsSection(providerId, serviceRequestViewModel)
-    5 -> ArchivedJobsSection(providerId, serviceRequestViewModel)
+    2 -> ScheduledJobsSection(providerId, serviceRequestViewModel, navigationActions)
+    3 -> CompletedJobsSection(providerId, serviceRequestViewModel, navigationActions)
+    4 -> CanceledJobsSection(providerId, serviceRequestViewModel, navigationActions)
+    5 -> ArchivedJobsSection(providerId, serviceRequestViewModel, navigationActions)
   }
 }
 
@@ -190,8 +193,10 @@ fun JobSectionContent(
  * Composable function that displays a list of jobs based on the status.
  *
  * @param title Title of the section.
+ * @param providerId ID of the current provider.
  * @param requests List of ServiceRequest objects.
  * @param emptyMessage Message to display when the list is empty.
+ * @param onLearnMore Optional callback to learn more about a job.
  * @param onNavigateToJob Optional callback to navigate to the job's location.
  * @param onContactCustomer Optional callback to contact the customer.
  * @param onMarkAsCompleted Optional callback to mark the job as completed.
@@ -254,6 +259,7 @@ fun JobListSection(
  *
  * @param providerId ID of the current provider.
  * @param viewModel ViewModel for managing service requests.
+ * @param navigationActions Actions for navigation.
  */
 @Composable
 fun PendingJobsSection(
@@ -285,6 +291,7 @@ fun PendingJobsSection(
  *
  * @param providerId ID of the current provider.
  * @param viewModel ViewModel for managing service requests.
+ * @param navigationActions Actions for navigation.
  */
 @Composable
 fun AcceptedJobSection(
@@ -315,9 +322,14 @@ fun AcceptedJobSection(
  *
  * @param providerId ID of the current provider.
  * @param viewModel ViewModel for managing service requests.
+ * @param navigationActions Actions for navigation.
  */
 @Composable
-fun ScheduledJobsSection(providerId: String, viewModel: ServiceRequestViewModel) {
+fun ScheduledJobsSection(
+    providerId: String,
+    viewModel: ServiceRequestViewModel,
+    navigationActions: NavigationActions
+) {
   val context = LocalContext.current
   val scheduledRequests by viewModel.scheduledRequests.collectAsState()
 
@@ -345,6 +357,10 @@ fun ScheduledJobsSection(providerId: String, viewModel: ServiceRequestViewModel)
         providerId = providerId,
         requests = scheduledRequests,
         emptyMessage = "No scheduled jobs",
+        onLearnMore = {
+          viewModel.selectRequest(it)
+          navigationActions.navigateTo(Route.BOOKING_DETAILS)
+        },
         onNavigateToJob = { request ->
           request.location?.let { navigateToSingleJob(context, it.latitude, it.longitude) }
         },
@@ -362,9 +378,14 @@ fun ScheduledJobsSection(providerId: String, viewModel: ServiceRequestViewModel)
  *
  * @param providerId ID of the current provider.
  * @param viewModel ViewModel for managing service requests.
+ * @param navigationActions Actions for navigation.
  */
 @Composable
-fun CompletedJobsSection(providerId: String, viewModel: ServiceRequestViewModel) {
+fun CompletedJobsSection(
+    providerId: String,
+    viewModel: ServiceRequestViewModel,
+    navigationActions: NavigationActions
+) {
   val context = LocalContext.current
   val completedRequests by viewModel.completedRequests.collectAsState()
 
@@ -373,6 +394,10 @@ fun CompletedJobsSection(providerId: String, viewModel: ServiceRequestViewModel)
       providerId = providerId,
       requests = completedRequests,
       emptyMessage = "No completed jobs",
+      onLearnMore = {
+        viewModel.selectRequest(it)
+        navigationActions.navigateTo(Route.BOOKING_DETAILS)
+      },
       onContactCustomer = {
         Toast.makeText(context, "Contact Not yet Implemented", Toast.LENGTH_SHORT).show()
       },
@@ -385,9 +410,14 @@ fun CompletedJobsSection(providerId: String, viewModel: ServiceRequestViewModel)
  *
  * @param providerId ID of the current provider.
  * @param viewModel ViewModel for managing service requests.
+ * @param navigationActions Actions for navigation.
  */
 @Composable
-fun CanceledJobsSection(providerId: String, viewModel: ServiceRequestViewModel) {
+fun CanceledJobsSection(
+    providerId: String,
+    viewModel: ServiceRequestViewModel,
+    navigationActions: NavigationActions
+) {
   val context = LocalContext.current
   val canceledRequests by viewModel.cancelledRequests.collectAsState()
 
@@ -397,6 +427,10 @@ fun CanceledJobsSection(providerId: String, viewModel: ServiceRequestViewModel) 
       requests = canceledRequests,
       emptyMessage = "No canceled jobs",
       onChat = { Toast.makeText(context, "Chat Not yet Implemented", Toast.LENGTH_SHORT).show() },
+      onLearnMore = {
+        viewModel.selectRequest(it)
+        navigationActions.navigateTo(Route.BOOKING_DETAILS)
+      },
       onContactCustomer = {
         Toast.makeText(context, "Contact Not yet Implemented", Toast.LENGTH_SHORT).show()
       },
@@ -408,9 +442,14 @@ fun CanceledJobsSection(providerId: String, viewModel: ServiceRequestViewModel) 
  *
  * @param providerId ID of the current provider.
  * @param viewModel ViewModel for managing service requests.
+ * @param navigationActions Actions for navigation.
  */
 @Composable
-fun ArchivedJobsSection(providerId: String, viewModel: ServiceRequestViewModel) {
+fun ArchivedJobsSection(
+    providerId: String,
+    viewModel: ServiceRequestViewModel,
+    navigationActions: NavigationActions
+) {
   val context = LocalContext.current
   val archivedRequests by viewModel.archivedRequests.collectAsState()
 
@@ -419,6 +458,10 @@ fun ArchivedJobsSection(providerId: String, viewModel: ServiceRequestViewModel) 
       providerId = providerId,
       requests = archivedRequests,
       emptyMessage = "No archived jobs",
+      onLearnMore = {
+        viewModel.selectRequest(it)
+        navigationActions.navigateTo(Route.BOOKING_DETAILS)
+      },
       onChat = { Toast.makeText(context, "Chat Not yet Implemented", Toast.LENGTH_SHORT).show() },
       onContactCustomer = {
         Toast.makeText(context, "Contact Not yet Implemented", Toast.LENGTH_SHORT).show()
@@ -431,11 +474,13 @@ fun ArchivedJobsSection(providerId: String, viewModel: ServiceRequestViewModel) 
  * Accepted, Scheduled, Completed, Canceled, or Archived.
  *
  * @param request ServiceRequest object containing job details.
+ * @param onLearnMore Optional callback to learn more about a job.
  * @param onNavigateToJob Optional callback to navigate to the job's location.
  * @param onContactCustomer Optional callback to contact the customer.
  * @param onMarkAsCompleted Optional callback to mark the job as completed.
  * @param onConfirmRequest Optional callback to confirm a job request (for pending jobs).
  * @param onCancelRequest Optional callback to cancel the job.
+ * @param onArchiveRequest Optional callback to archive the job.
  * @param onChat Optional callback to initiate a chat with the customer.
  */
 @Composable
@@ -461,27 +506,24 @@ fun JobItem(
       colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
       shape = RoundedCornerShape(12.dp)) {
         Column(modifier = Modifier.padding(16.dp)) {
-          // Title and Navigate Button
+          // Learn More and Navigate Button
           Row(
               modifier = Modifier.fillMaxWidth(),
-              horizontalArrangement = Arrangement.SpaceBetween,
+              horizontalArrangement = Arrangement.SpaceBetween, // Distribute space between children
               verticalAlignment = Alignment.CenterVertically) {
-                // Job Title
-                Text(
-                    request.title, style = typography.titleMedium, color = colorScheme.onBackground)
-
-                // See more button
-                if (status == ServiceRequestStatus.PENDING ||
-                    status == ServiceRequestStatus.ACCEPTED) {
-                  onLearnMore?.let {
-                    Button(
-                        onClick = it,
-                        colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
-                        modifier = Modifier.testTag("LearnMoreButton_${request.uid}")) {
-                          Text("Learn More", color = colorScheme.onPrimary)
-                        }
-                  }
+                // See More Button
+                onLearnMore?.let {
+                  Button(
+                      onClick = it,
+                      colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
+                      modifier =
+                          Modifier.wrapContentWidth().testTag("LearnMoreButton_${request.uid}")) {
+                        Text("Learn More", color = colorScheme.onPrimary)
+                      }
                 }
+
+                Spacer(modifier = Modifier.weight(1f)) // Fills the space in between the two buttons
+
                 // Navigate Button for Scheduled Jobs
                 if (status == ServiceRequestStatus.SCHEDULED) {
                   onNavigateToJob?.let {
@@ -494,6 +536,13 @@ fun JobItem(
                   }
                 }
               }
+          // Job Title
+          Text(
+              text = request.title,
+              style = typography.titleMedium,
+              color = colorScheme.onBackground,
+              maxLines = 1,
+              overflow = TextOverflow.Ellipsis)
           // Job  Description
           Text(
               request.description,
@@ -513,7 +562,7 @@ fun JobItem(
                 contentDescription = "Scheduled Time",
                 tint = colorScheme.onSurfaceVariant)
             Text(
-                "Scheduled: $date at $time",
+                if (request.meetingDate == null) "Deadline: $date" else "Scheduled: $date at $time",
                 style = typography.bodySmall,
                 color = colorScheme.onSurfaceVariant)
           }
