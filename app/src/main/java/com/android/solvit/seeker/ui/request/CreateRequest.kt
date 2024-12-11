@@ -50,97 +50,98 @@ fun CreateRequestScreen(
     listProviderViewModel: ListProviderViewModel =
         viewModel(factory = ListProviderViewModel.Factory)
 ) {
-  // Lock Orientation to Portrait
-  val context = LocalContext.current
-  DisposableEffect(Unit) {
-    val activity = context as? ComponentActivity
-    activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-    onDispose {
-      locationViewModel.clear()
-      activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+    // Lock Orientation to Portrait
+    val context = LocalContext.current
+    DisposableEffect(Unit) {
+        val activity = context as? ComponentActivity
+        activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        onDispose {
+            locationViewModel.clear()
+            activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+        }
     }
-  }
 
-  val selectedProviderId = requestViewModel.selectedProviderId.collectAsState()
-  val selectedProviderService = requestViewModel.selectedProviderService.collectAsState()
+    val selectedProviderId = requestViewModel.selectedProviderId.collectAsState()
+    val selectedProviderService = requestViewModel.selectedProviderService.collectAsState()
 
-  var title by remember { mutableStateOf("") }
-  var description by remember { mutableStateOf("") }
-  var dueDate by remember { mutableStateOf("") }
-  var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
-  var selectedImageBitmap by remember { mutableStateOf<Bitmap?>(null) }
-  var selectedLocation by remember { mutableStateOf<Location?>(null) }
-  val locationQuery by locationViewModel.query.collectAsState()
-  var showDropdownLocation by remember { mutableStateOf(false) }
-  val locationSuggestions by
-      locationViewModel.locationSuggestions.collectAsState(initial = emptyList<Location?>())
-  val user by authViewModel.user.collectAsState()
-  var showDropdownType by remember { mutableStateOf(false) }
-  var typeQuery by remember { mutableStateOf("") }
-  val filteredServiceTypes =
-      Services.entries.filter { it.name.contains(typeQuery, ignoreCase = true) }
-  var selectedServiceType by remember { mutableStateOf(Services.OTHER) }
-  selectedProviderService.value?.let { selectedServiceType = it }
-  val localContext = LocalContext.current
-  val userId = user?.uid ?: "-1"
+    var title by remember { mutableStateOf("") }
+    var description by remember { mutableStateOf("") }
+    var dueDate by remember { mutableStateOf("") }
+    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+    var selectedImageBitmap by remember { mutableStateOf<Bitmap?>(null) }
+    var selectedLocation by remember { mutableStateOf<Location?>(null) }
+    val locationQuery by locationViewModel.query.collectAsState()
+    var showDropdownLocation by remember { mutableStateOf(false) }
+    val locationSuggestions by
+    locationViewModel.locationSuggestions.collectAsState(initial = emptyList<Location?>())
+    val user by authViewModel.user.collectAsState()
+    var showDropdownType by remember { mutableStateOf(false) }
+    var typeQuery by remember { mutableStateOf("") }
+    val filteredServiceTypes =
+        Services.entries.filter { it.name.contains(typeQuery, ignoreCase = true) }
+    var selectedServiceType by remember { mutableStateOf(Services.OTHER) }
+    selectedProviderService.value?.let { selectedServiceType = it }
+    val localContext = LocalContext.current
+    val userId = user?.uid ?: "-1"
 
-  var showAIAssistantDialog by remember { mutableStateOf(true) }
-  var showMultiStepDialog by remember { mutableStateOf(false) }
-  var currentStep by remember { mutableIntStateOf(1) }
-  var selectedImages by remember { mutableStateOf<List<Uri>>(emptyList()) }
+    var showAIAssistantDialog by remember { mutableStateOf(true) }
+    var showMultiStepDialog by remember { mutableStateOf(false) }
+    var currentStep by remember { mutableIntStateOf(1) }
+    var selectedImages by remember { mutableStateOf<List<Uri>>(emptyList()) }
 
-  Scaffold(
-      bottomBar = {
-        BottomNavigationMenu(
-            onTabSelect = { navigationActions.navigateTo(it.route) },
-            tabList = LIST_TOP_LEVEL_DESTINATION_PROVIDER,
-            selectedItem = navigationActions.currentRoute())
-      }) { // AI Assistant Dialog
+    Scaffold(
+        bottomBar = {
+            BottomNavigationMenu(
+                onTabSelect = { navigationActions.navigateTo(it.route) },
+                tabList = LIST_TOP_LEVEL_DESTINATION_PROVIDER,
+                selectedItem = navigationActions.currentRoute()
+            )
+        }) { // AI Assistant Dialog
         if (showAIAssistantDialog) {
-          AIAssistantDialog(
-              onCancel = { showAIAssistantDialog = false },
-              onUploadPictures = {
-                showAIAssistantDialog = false
-                showMultiStepDialog = true
-              })
+            AIAssistantDialog(
+                onCancel = { showAIAssistantDialog = false },
+                onUploadPictures = {
+                    showAIAssistantDialog = false
+                    showMultiStepDialog = true
+                })
         }
 
         // Multi-Step Dialog
         if (showMultiStepDialog) {
-          MultiStepDialog(
-              context = localContext,
-              showDialog = showMultiStepDialog,
-              currentStep = currentStep,
-              selectedImages = selectedImages,
-              onImagesSelected = { images ->
-                selectedImages = images
-                if (selectedImages.isNotEmpty()) {
-                  val uri = selectedImages[0]
-                  selectedImageUri = uri
-                }
-              },
-              onRemoveImage = { uri ->
-                selectedImages = selectedImages.filter { it != uri }
-                if (selectedImages.isEmpty()) {
-                  selectedImageUri = null
-                } else {
-                  val uri = selectedImages[0]
-                  selectedImageUri = uri
-                }
-              },
-              onStartAnalyzing = {
-                currentStep = 2 // Move to the analyzing step
-              },
-              onAnalyzeComplete = { generatedTitle, generatedType, generatedDescription ->
-                title = generatedTitle
-                typeQuery = generatedType
-                description = generatedDescription
-                currentStep = 3 // Move to the analysis complete step
-              },
-              onClose = {
-                showMultiStepDialog = false
-                currentStep = 1 // Reset step for the next time
-              })
+            MultiStepDialog(
+                context = localContext,
+                showDialog = showMultiStepDialog,
+                currentStep = currentStep,
+                selectedImages = selectedImages,
+                onImagesSelected = { images ->
+                    selectedImages = images
+                    if (selectedImages.isNotEmpty()) {
+                        val uri = selectedImages[0]
+                        selectedImageUri = uri
+                    }
+                },
+                onRemoveImage = { uri ->
+                    selectedImages = selectedImages.filter { it != uri }
+                    if (selectedImages.isEmpty()) {
+                        selectedImageUri = null
+                    } else {
+                        val uri = selectedImages[0]
+                        selectedImageUri = uri
+                    }
+                },
+                onStartAnalyzing = {
+                    currentStep = 2 // Move to the analyzing step
+                },
+                onAnalyzeComplete = { generatedTitle, generatedType, generatedDescription ->
+                    title = generatedTitle
+                    typeQuery = generatedType
+                    description = generatedDescription
+                    currentStep = 3 // Move to the analysis complete step
+                },
+                onClose = {
+                    showMultiStepDialog = false
+                    currentStep = 1 // Reset step for the next time
+                })
         }
 
         RequestScreen(
@@ -151,16 +152,16 @@ fun CreateRequestScreen(
             description = description,
             onDescriptionChange = { description = it },
             typeQuery =
-                if (selectedProviderService.value != null)
-                    Services.format(selectedProviderService.value!!)
-                else typeQuery,
+            if (selectedProviderService.value != null)
+                Services.format(selectedProviderService.value!!)
+            else typeQuery,
             onTypeQueryChange = { typeQuery = it },
             showDropdownType = showDropdownType,
             onShowDropdownTypeChange = { showDropdownType = it },
             filteredServiceTypes = filteredServiceTypes,
             onServiceTypeSelected = {
-              typeQuery = it.name
-              selectedServiceType = it
+                typeQuery = it.name
+                selectedServiceType = it
             },
             locationQuery = locationQuery,
             onLocationQueryChange = { locationViewModel.setQuery(it) },
@@ -171,8 +172,8 @@ fun CreateRequestScreen(
             locationSuggestions = locationSuggestions.filterNotNull(),
             userLocations = user?.locations ?: emptyList(),
             onLocationSelected = {
-              selectedLocation = it
-              authViewModel.addUserLocation(it, {}, {})
+                selectedLocation = it
+                authViewModel.addUserLocation(it, {}, {})
             },
             selectedLocation = selectedLocation,
             dueDate = dueDate,
@@ -180,51 +181,75 @@ fun CreateRequestScreen(
             selectedImageUri = selectedImageUri,
             imageUrl = null,
             onImageSelected = { uri ->
-              selectedImageUri = uri
-              uri?.let { selectedImageBitmap = loadBitmapFromUri(localContext, it) }
+                selectedImageUri = uri
+                uri?.let { selectedImageBitmap = loadBitmapFromUri(localContext, it) }
             },
             onSubmit = {
-              val calendar = GregorianCalendar()
-              val parts = dueDate.split("/")
-              if (parts.size == 3) {
-                try {
-                  calendar.set(parts[2].toInt(), parts[1].toInt() - 1, parts[0].toInt(), 0, 0, 0)
-                  val serviceRequest =
-                      ServiceRequest(
-                          title = title,
-                          description = description,
-                          providerId = selectedProviderId.value,
-                          userId = userId,
-                          dueDate = Timestamp(calendar.time),
-                          location = selectedLocation,
-                          status = ServiceRequestStatus.PENDING,
-                          uid = requestViewModel.getNewUid(),
-                          type = selectedServiceType,
-                          imageUrl = null)
-                  if (selectedImageUri != null) {
-                    if (!isInternetAvailable(localContext)) {
-                      Toast.makeText(
-                              localContext,
-                              "Image will show when you are back online",
-                              Toast.LENGTH_SHORT)
-                          .show()
+                val calendar = GregorianCalendar()
+                val parts = dueDate.split("/")
+                if (parts.size == 3) {
+                    try {
+                        calendar.set(
+                            parts[2].toInt(),
+                            parts[1].toInt() - 1,
+                            parts[0].toInt(),
+                            0,
+                            0,
+                            0
+                        )
+                        val serviceRequest =
+                            ServiceRequest(
+                                title = title,
+                                description = description,
+                                providerId = selectedProviderId.value,
+                                userId = userId,
+                                dueDate = Timestamp(calendar.time),
+                                location = selectedLocation,
+                                status = ServiceRequestStatus.PENDING,
+                                uid = requestViewModel.getNewUid(),
+                                type = selectedServiceType,
+                                imageUrl = null
+                            )
+                        if (selectedImageUri != null) {
+                            if (!isInternetAvailable(localContext)) {
+                                Toast.makeText(
+                                    localContext,
+                                    "Image will show when you are back online",
+                                    Toast.LENGTH_SHORT
+                                )
+                                    .show()
+                            }
+                            requestViewModel.saveServiceRequestWithImage(
+                                serviceRequest,
+                                selectedImageUri!!
+                            ) {
+                                // Get the updated service request with the image URL
+                                requestViewModel.getServiceRequestById(serviceRequest.uid) { updatedRequest ->
+                                    requestViewModel.selectRequest(updatedRequest)
+                                    navigationActions.navigateTo(Route.BOOKING_DETAILS)
+                                }
+                            }
+                        } else {
+                            requestViewModel.saveServiceRequest(serviceRequest)
+                            requestViewModel.selectRequest(serviceRequest)
+                            navigationActions.navigateTo(Route.BOOKING_DETAILS)
+                        }
+                        requestViewModel.unSelectProvider()
+                        notificationViewModel.sendNotifications(
+                            serviceRequest, listProviderViewModel.providersList.value
+                        )
+                        return@RequestScreen
+                    } catch (_: NumberFormatException) {
                     }
-                    requestViewModel.saveServiceRequestWithImage(serviceRequest, selectedImageUri!!)
-                  } else {
-                    requestViewModel.saveServiceRequest(serviceRequest)
-                  }
-                  requestViewModel.unSelectProvider()
-                  notificationViewModel.sendNotifications(
-                      serviceRequest, listProviderViewModel.providersList.value)
-                  requestViewModel.selectRequest(serviceRequest)
-                  navigationActions.navigateTo(Route.BOOKING_DETAILS)
-                  return@RequestScreen
-                } catch (_: NumberFormatException) {}
-              }
-              Toast.makeText(
-                      localContext, "Invalid format, date must be DD/MM/YYYY.", Toast.LENGTH_SHORT)
-                  .show()
+                }
+                Toast.makeText(
+                    localContext,
+                    "Invalid format, date must be DD/MM/YYYY.",
+                    Toast.LENGTH_SHORT
+                )
+                    .show()
             },
-            submitButtonText = "Submit Request")
-      }
+            submitButtonText = "Submit Request"
+        )
+    }
 }
