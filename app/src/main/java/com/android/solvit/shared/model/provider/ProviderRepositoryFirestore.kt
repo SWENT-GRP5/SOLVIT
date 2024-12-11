@@ -11,7 +11,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
-import java.time.LocalTime
 import java.time.ZoneId
 import kotlinx.coroutines.tasks.await
 
@@ -220,65 +219,96 @@ class ProviderRepositoryFirestore(
         val endHour = (slotMap["endHour"] as? Number)?.toInt()
         val endMinute = (slotMap["endMinute"] as? Number)?.toInt()
 
-        if (startHour != null &&
-            startMinute != null &&
-            endHour != null &&
-            endMinute != null &&
-            startHour in 0..23 &&
-            startMinute in 0..59 &&
-            endHour in 0..23 &&
-            endMinute in 0..59) {
-          val startTime = LocalTime.of(startHour, startMinute)
-          val endTime = LocalTime.of(endHour, endMinute)
-          if (startTime.isBefore(endTime)) {
-            TimeSlot(startTime, endTime)
-          } else null
-        } else null
+        if (startHour != null && startMinute != null && endHour != null && endMinute != null) {
+          try {
+            TimeSlot(startHour, startMinute, endHour, endMinute)
+          } catch (e: IllegalArgumentException) {
+            Log.e("ProviderRepositoryFirestore", "Invalid time values: $e")
+            null
+          }
+        } else {
+          Log.e("ProviderRepositoryFirestore", "Missing time values in slot: $slotMap")
+          null
+        }
       } catch (e: Exception) {
+        Log.e("ProviderRepositoryFirestore", "Error converting time slot: $e")
         null
       }
     }
   }
 
   private fun convertSchedule(scheduleMap: Map<String, Any>): Schedule {
-    @Suppress("UNCHECKED_CAST")
-    val regularHoursMap = (scheduleMap["regularHours"] as? Map<String, Any>) ?: mapOf<String, Any>()
-    @Suppress("UNCHECKED_CAST")
-    val exceptionsList = (scheduleMap["exceptions"] as? List<Map<String, Any>>) ?: listOf()
-
-    val regularHours = mutableMapOf<String, MutableList<TimeSlot>>()
-    for ((day, timeSlotsAny) in regularHoursMap) {
-      if (!day.matches("MONDAY|TUESDAY|WEDNESDAY|THURSDAY|FRIDAY|SATURDAY|SUNDAY".toRegex())) {
-        continue
-      }
+    try {
       @Suppress("UNCHECKED_CAST")
-      val timeSlotsList = timeSlotsAny as? List<Map<String, Any>> ?: continue
-      val slots = convertTimeSlots(timeSlotsList)
-      if (slots.isNotEmpty()) {
-        regularHours[day] = slots.toMutableList()
-      }
-    }
+      val regularHoursMap = (scheduleMap["regularHours"] as? Map<String, Any>) ?: mapOf()
+      @Suppress("UNCHECKED_CAST")
+      val exceptionsList = (scheduleMap["exceptions"] as? List<Map<String, Any>>) ?: listOf()
 
-    val exceptions = mutableListOf<ScheduleException>()
-    for (exceptionMap in exceptionsList) {
-      try {
-        val timestamp = exceptionMap["timestamp"] as? Timestamp ?: continue
-        @Suppress("UNCHECKED_CAST")
-        val timeSlotsAnyList = exceptionMap["timeSlots"] as? List<Map<String, Any>> ?: continue
-        val typeString = exceptionMap["type"] as? String ?: continue
-
-        val type = ExceptionType.valueOf(typeString)
-        val timeSlots = convertTimeSlots(timeSlotsAnyList)
-        if (timeSlots.isNotEmpty()) {
-          val date = timestamp.toDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
-          val exception = ScheduleException(date, timeSlots.toMutableList(), type)
-          exceptions.add(exception)
+      val regularHours = mutableMapOf<String, MutableList<TimeSlot>>()
+      for ((day, timeSlotsAny) in regularHoursMap) {
+        if (!day.matches("MONDAY|TUESDAY|WEDNESDAY|THURSDAY|FRIDAY|SATURDAY|SUNDAY".toRegex())) {
+          Log.w("ProviderRepositoryFirestore", "Invalid day format: $day")
+          continue
         }
-      } catch (e: IllegalArgumentException) {
-        continue // Skip invalid exception type or data
+        @Suppress("UNCHECKED_CAST") val timeSlotsList = timeSlotsAny as? List<Map<String, Any>>
+        if (timeSlotsList == null) {
+          Log.w("ProviderRepositoryFirestore", "Invalid time slots format for day: $day")
+          continue
+        }
+        val slots = convertTimeSlots(timeSlotsList)
+        if (slots.isNotEmpty()) {
+          regularHours[day] = slots.toMutableList()
+        }
       }
-    }
 
-    return Schedule(regularHours, exceptions)
+      val exceptions = mutableListOf<ScheduleException>()
+      for (exceptionMap in exceptionsList) {
+        try {
+          val timestamp = exceptionMap["timestamp"] as? Timestamp
+          if (timestamp == null) {
+            Log.w("ProviderRepositoryFirestore", "Missing timestamp in exception")
+            continue
+          }
+
+          @Suppress("UNCHECKED_CAST")
+          val timeSlotsAnyList = exceptionMap["timeSlots"] as? List<Map<String, Any>>
+          if (timeSlotsAnyList == null) {
+            Log.w("ProviderRepositoryFirestore", "Invalid timeSlots format in exception")
+            continue
+          }
+
+          val typeString = exceptionMap["type"] as? String
+          if (typeString == null) {
+            Log.w("ProviderRepositoryFirestore", "Missing type in exception")
+            continue
+          }
+
+          val type =
+              try {
+                ExceptionType.valueOf(typeString)
+              } catch (e: IllegalArgumentException) {
+                Log.w("ProviderRepositoryFirestore", "Invalid exception type: $typeString")
+                continue
+              }
+
+          val timeSlots = convertTimeSlots(timeSlotsAnyList)
+          if (timeSlots.isEmpty()) {
+            Log.w("ProviderRepositoryFirestore", "No valid time slots in exception")
+            continue
+          }
+
+          val date = timestamp.toDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
+          exceptions.add(ScheduleException(date, timeSlots.toMutableList(), type))
+        } catch (e: Exception) {
+          Log.e("ProviderRepositoryFirestore", "Error converting exception: $e")
+          continue
+        }
+      }
+
+      return Schedule(regularHours, exceptions)
+    } catch (e: Exception) {
+      Log.e("ProviderRepositoryFirestore", "Error converting schedule: $e")
+      return Schedule(mutableMapOf(), mutableListOf())
+    }
   }
 }

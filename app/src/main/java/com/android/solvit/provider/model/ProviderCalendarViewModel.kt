@@ -25,6 +25,7 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -43,7 +44,7 @@ enum class CalendarView {
  * @property authViewModel Authentication view model for user verification
  * @property serviceRequestViewModel View model for service request management
  */
-class ProviderCalendarViewModel(
+open class ProviderCalendarViewModel(
     private val providerRepository: ProviderRepository,
     private val authViewModel: AuthViewModel,
     private val serviceRequestViewModel: ServiceRequestViewModel
@@ -69,9 +70,6 @@ class ProviderCalendarViewModel(
 
   /** Initializes the view model by loading the current provider and service requests. */
   init {
-    // Initialize service requests
-    serviceRequestViewModel.getServiceRequests()
-
     // Observe changes in service requests, user, calendar view, and current view date
     viewModelScope.launch {
       combine(
@@ -84,61 +82,76 @@ class ProviderCalendarViewModel(
           .collect { (requests, user) ->
             _isLoading.value = true
             try {
-              val userId = user!!.uid // User is guaranteed to be non-null
+              if (user == null) {
+                _timeSlots.value = emptyMap()
+                _currentProvider.value = Provider()
+                return@collect
+              }
 
-              providerRepository.getProvider(
-                  userId,
-                  onSuccess = { provider ->
-                    if (provider != null) {
-                      _currentProvider.value = provider
+              // Only fetch service requests when we have a valid user
+              serviceRequestViewModel.getServiceRequests()
+
+              // Set up real-time listener for provider updates
+              providerRepository.addListenerOnProviders(
+                  onSuccess = { providers ->
+                    val currentProvider = providers.find { it.uid == user.uid }
+                    if (currentProvider != null) {
+                      _currentProvider.value = currentProvider
+
+                      // Only process requests after provider is loaded
+                      val startDate =
+                          when (_calendarView.value) {
+                            CalendarView.MONTH -> _currentViewDate.value.withDayOfMonth(1)
+                            CalendarView.WEEK ->
+                                _currentViewDate.value.with(
+                                    TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+                            CalendarView.DAY -> _currentViewDate.value
+                          }
+                      val endDate =
+                          when (_calendarView.value) {
+                            CalendarView.MONTH -> startDate.plusMonths(1).minusDays(1)
+                            CalendarView.WEEK -> startDate.plusWeeks(1).minusDays(1)
+                            CalendarView.DAY -> startDate
+                          }
+
+                      // Filter and group requests
+                      val filteredRequests =
+                          requests
+                              .filter { it.providerId == user.uid }
+                              .filter { request ->
+                                val requestDate =
+                                    request.meetingDate
+                                        ?.toInstant()
+                                        ?.atZone(ZoneId.systemDefault())
+                                        ?.toLocalDate() ?: return@filter false
+                                !requestDate.isBefore(startDate) && !requestDate.isAfter(endDate)
+                              }
+                      // Group by date and sort by time
+                      val groupedRequests =
+                          filteredRequests
+                              .groupBy {
+                                it.meetingDate!!
+                                    .toInstant()
+                                    .atZone(ZoneId.systemDefault())
+                                    .toLocalDate()
+                              }
+                              .mapValues { (_, requests) ->
+                                requests.sortedBy { it.meetingDate!!.toInstant() }
+                              }
+
+                      _timeSlots.value = groupedRequests
                     } else {
                       Log.e("ProviderCalendarViewModel", "Failed to find provider")
+                      _timeSlots.value = emptyMap()
                     }
                   },
                   onFailure = { e ->
                     Log.e("ProviderCalendarViewModel", "Failed to load provider", e)
+                    _timeSlots.value = emptyMap()
                   })
-
-              val startDate =
-                  when (_calendarView.value) {
-                    CalendarView.MONTH -> _currentViewDate.value.withDayOfMonth(1)
-                    CalendarView.WEEK ->
-                        _currentViewDate.value.with(
-                            TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
-                    CalendarView.DAY -> _currentViewDate.value
-                  }
-              val endDate =
-                  when (_calendarView.value) {
-                    CalendarView.MONTH -> startDate.plusMonths(1).minusDays(1)
-                    CalendarView.WEEK -> startDate.plusWeeks(1).minusDays(1)
-                    CalendarView.DAY -> startDate
-                  }
-
-              // Filter and group requests
-              val filteredRequests =
-                  requests
-                      .filter { it.providerId == userId }
-                      .filter { request ->
-                        val requestDate =
-                            request.meetingDate
-                                ?.toInstant()
-                                ?.atZone(ZoneId.systemDefault())
-                                ?.toLocalDate() ?: return@filter false
-                        !requestDate.isBefore(startDate) && !requestDate.isAfter(endDate)
-                      }
-              // Group by date and sort by time
-              val groupedRequests =
-                  filteredRequests
-                      .groupBy {
-                        it.meetingDate!!.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
-                      }
-                      .mapValues { (_, requests) ->
-                        requests.sortedBy { it.meetingDate!!.toInstant() }
-                      }
-
-              _timeSlots.value = groupedRequests
             } catch (e: Exception) {
               Log.e("ProviderCalendarViewModel", "Error processing service requests", e)
+              _timeSlots.value = emptyMap()
             } finally {
               _isLoading.value = false
             }
@@ -286,6 +299,27 @@ class ProviderCalendarViewModel(
   }
 
   /**
+   * Deletes an exception from the schedule.
+   *
+   * @param date The date of the exception to delete
+   * @param onComplete Callback with success status
+   */
+  fun deleteException(date: LocalDateTime, onComplete: (Boolean) -> Unit) {
+    try {
+      val exceptions = currentProvider.value.schedule.exceptions
+      exceptions
+          .find { it.date.toLocalDate() == date.toLocalDate() }
+          ?.let { exception ->
+            exceptions.remove(exception)
+            updateProviderSchedule(onComplete)
+          } ?: run { onComplete(false) }
+    } catch (e: Exception) {
+      Log.e("ProviderCalendarViewModel", "Failed to delete exception", e)
+      onComplete(false)
+    }
+  }
+
+  /**
    * Retrieves schedule exceptions within a specified date range. Optionally filters by exception
    * type.
    *
@@ -311,9 +345,14 @@ class ProviderCalendarViewModel(
    */
   private fun buildFeedbackMessage(result: ExceptionUpdateResult): String {
     return when {
-      result.isUpdate -> "Exception updated successfully"
-      result.mergedWith.isEmpty() -> "Exception added successfully"
-      else -> "Exception added and merged"
+      result.isUpdate -> "Schedule exception updated successfully"
+      result.mergedWith.isEmpty() -> "Schedule exception added successfully"
+      else -> {
+        val formatter = DateTimeFormatter.ofPattern("MMM d, yyyy")
+        val mergedDates =
+            result.mergedWith.joinToString(", ") { exception -> formatter.format(exception.date) }
+        "Schedule exception added and merged with existing exceptions on: $mergedDates"
+      }
     }
   }
 
@@ -324,13 +363,37 @@ class ProviderCalendarViewModel(
    * @param onComplete Callback with success status
    */
   private fun updateProviderSchedule(onComplete: (Boolean) -> Unit) {
-    providerRepository.updateProvider(
-        currentProvider.value,
-        onSuccess = { onComplete(true) },
-        onFailure = { e ->
-          Log.e("ProviderCalendarViewModel", "Failed to update provider schedule", e)
-          onComplete(false)
-        })
+    viewModelScope.launch {
+      try {
+        // Create a new provider instance with a deep copy of the schedule
+        val updatedProvider =
+            currentProvider.value.copy(
+                schedule =
+                    currentProvider.value.schedule.copy(
+                        regularHours =
+                            currentProvider.value.schedule.regularHours
+                                .mapValues { it.value.toMutableList() }
+                                .toMutableMap(),
+                        exceptions = currentProvider.value.schedule.exceptions.toMutableList()))
+
+        // Update the state immediately to reflect changes in UI
+        _currentProvider.value = updatedProvider
+
+        // Then update Firestore
+        providerRepository.updateProvider(
+            provider = updatedProvider,
+            onSuccess = { onComplete(true) },
+            onFailure = { e ->
+              // Revert the state if Firestore update fails
+              _currentProvider.value = currentProvider.value
+              Log.e("ProviderCalendarViewModel", "Failed to update provider schedule", e)
+              onComplete(false)
+            })
+      } catch (e: Exception) {
+        Log.e("ProviderCalendarViewModel", "Failed to update provider schedule", e)
+        onComplete(false)
+      }
+    }
   }
 
   /**
