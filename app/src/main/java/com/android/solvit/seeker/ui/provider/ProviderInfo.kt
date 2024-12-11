@@ -853,7 +853,8 @@ fun SelectRequestDialog(
                               }
                               requestViewModel.saveServiceRequest(request)
                               requestViewModel.selectRequest(request)
-                              navigationActions.navigateTo(Route.BOOKING_DETAILS)
+                              navigationActions.navigateAndSetBackStack(
+                                  Route.BOOKING_DETAILS, listOf(Route.REQUESTS_OVERVIEW))
                             }
                             showDialog.value = false
                           },

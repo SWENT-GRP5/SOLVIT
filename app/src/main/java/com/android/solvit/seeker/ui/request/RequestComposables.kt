@@ -476,7 +476,7 @@ fun DeleteButton(
       onClick = {
         try {
           requestViewModel.deleteServiceRequestById(request.uid)
-          navigationActions.goBackTo(Route.REQUESTS_OVERVIEW)
+          navigationActions.navigateAndSetBackStack(Route.REQUESTS_OVERVIEW, listOf())
         } catch (e: Exception) {
           Log.e("EditRequestScreen", "Error deleting request", e)
         }

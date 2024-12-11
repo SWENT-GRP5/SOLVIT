@@ -1,5 +1,6 @@
 package com.android.solvit.shared.ui.navigation
 
+import android.util.Log
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.Add
@@ -142,9 +143,16 @@ open class NavigationActions(
     navController.navigate(screen)
   }
 
-  open fun navigateAndPopUpTo(screen: String, popUpTo: String) {
+  open fun navigateAndSetBackStack(screen: String, backStackRoutes: List<String>) {
     navController.navigate(screen) {
-      popUpTo(popUpTo) { saveState = true }
+      popUpTo(navController.graph.startDestinationId) { inclusive = false }
+      backStackRoutes.forEach { route ->
+        Log.e("NavigationActions", "Adding $route to back stack")
+        navController.navigate(route) {
+          launchSingleTop = true
+          restoreState = true
+        }
+      }
       launchSingleTop = true
       restoreState = true
     }

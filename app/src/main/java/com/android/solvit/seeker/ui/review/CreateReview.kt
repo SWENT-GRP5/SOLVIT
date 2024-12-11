@@ -134,7 +134,7 @@ fun CreateReviewScreen(
                 } else {
                   Toast.makeText(context, "Error Submitting Review", Toast.LENGTH_SHORT).show()
                 }
-                navigationActions.goBack()
+                navigationActions.navigateAndSetBackStack(Route.REQUESTS_OVERVIEW, listOf())
               },
               modifier = Modifier.testTag("submitReviewButton")) {
                 Row(

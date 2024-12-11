@@ -132,7 +132,7 @@ fun ServiceBookingScreen(
   val isReadyToNavigate by chatViewModel.isReadyToNavigate.collectAsState()
   LaunchedEffect(isReadyToNavigate) {
     if (isReadyToNavigate) {
-      navigationActions.navigateTo(Screen.CHAT)
+      navigationActions.navigateAndSetBackStack(Screen.CHAT, listOf(Route.INBOX))
       chatViewModel.resetIsReadyToNavigate()
     }
   }
@@ -249,7 +249,7 @@ fun ServiceBookingScreen(
                                     })) {
                           if (provider != null) {
                             // Render provider card when provider is selected
-                            ProviderCard(provider, providerViewModel, navigationActions)
+                            ProviderCard(provider, isSeeker, providerViewModel, navigationActions)
                           } else {
                             // Render placeholder when no provider is selected
                             Column(
@@ -499,14 +499,17 @@ fun ServiceBookingScreen(
 @Composable
 fun ProviderCard(
     provider: Provider,
+    isSeeker: Boolean,
     providerViewModel: ListProviderViewModel,
     navigationActions: NavigationActions
 ) {
   Card(
       modifier =
           Modifier.testTag("provider_card").clickable {
-            providerViewModel.selectProvider(provider)
-            navigationActions.navigateTo(Route.PROVIDER_INFO)
+            if (isSeeker) {
+              providerViewModel.selectProvider(provider)
+              navigationActions.navigateTo(Route.PROVIDER_INFO)
+            }
           },
       elevation =
           CardDefaults.cardElevation(

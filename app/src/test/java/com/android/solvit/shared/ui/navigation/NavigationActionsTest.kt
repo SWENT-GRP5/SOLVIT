@@ -48,8 +48,7 @@ class NavigationActionsTest {
     `when`(navHostController.currentDestination).thenReturn(navigationDestination)
     `when`(navigationDestination.route).thenReturn(Route.CREATE_REQUEST)
 
-    assertThat(
-        navigationActions.currentRoute(), CoreMatchers.`is`(Route.CREATE_REQUEST))
+    assertThat(navigationActions.currentRoute(), CoreMatchers.`is`(Route.CREATE_REQUEST))
   }
 
   @Test
