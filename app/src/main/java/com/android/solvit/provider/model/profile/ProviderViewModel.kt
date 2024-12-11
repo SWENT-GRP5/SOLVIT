@@ -1,17 +1,20 @@
-package com.android.solvit.seeker.model.provider
+package com.android.solvit.provider.model.profile
 
-import com.android.solvit.shared.model.authentication.AuthRepository
+import android.util.Log
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.map.haversineDistance
 import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.provider.ProviderRepository
+import com.android.solvit.shared.model.provider.ProviderRepositoryFirestore
+import com.google.firebase.Firebase
+import com.google.firebase.firestore.firestore
+import com.google.firebase.storage.storage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-class ProviderViewModel(
-    private val repository: ProviderRepository,
-    private val authRepository: AuthRepository
-) {
+class ProviderViewModel(private val repository: ProviderRepository) : ViewModel() {
   private val _userProvider = MutableStateFlow<Provider?>(null)
   val userProvider: StateFlow<Provider?> = _userProvider
 
@@ -20,9 +23,29 @@ class ProviderViewModel(
   // represent the best route given location of different bookings
   val bestRoute = mutableListOf<Int>()
 
-  fun getProvider() {
+  // create factory
+  companion object {
+    val Factory: ViewModelProvider.Factory =
+        object : ViewModelProvider.Factory {
+          @Suppress("UNCHECKED_CAST")
+          override fun <T : ViewModel> create(modelClass: Class<T>): T {
+
+            return ProviderViewModel(
+                ProviderRepositoryFirestore(Firebase.firestore, Firebase.storage))
+                as T
+          }
+        }
+  }
+
+  fun getProvider(uid: String) {
     repository.getProvider(
-        authRepository.getUserId(), onSuccess = { _userProvider.value = it }, onFailure = {})
+        uid,
+        onSuccess = { _userProvider.value = it },
+        onFailure = { Log.e("ProviderViewModel", it.toString()) })
+  }
+
+  fun updateProvider(provider: Provider) {
+    repository.updateProvider(provider, onSuccess = { getProvider(provider.uid) }, onFailure = {})
   }
 
   fun distanceTo(startLoc: Location, destLoc: Location): Double {
