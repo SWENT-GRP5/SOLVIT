@@ -3,6 +3,7 @@ package com.android.solvit.shared.model.provider
 import android.net.Uri
 import android.util.Log
 import com.android.solvit.shared.model.map.Location
+import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.model.utils.uploadImageToStorage
 import com.google.android.gms.tasks.Task
@@ -10,7 +11,10 @@ import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FirebaseFirestoreException
+import com.google.firebase.firestore.toObject
 import com.google.firebase.storage.FirebaseStorage
+import java.time.LocalDate
 import java.time.ZoneId
 import kotlinx.coroutines.tasks.await
 
@@ -84,6 +88,81 @@ class ProviderRepositoryFirestore(
       if (value != null) {
         val providers = value.mapNotNull { convertDoc(it) }
         onSuccess(providers)
+      }
+    }
+  }
+
+  /** Get time slot and date given the start time of service request */
+  fun getTimeSlotAndDate(startTime: Timestamp): Pair<TimeSlot, LocalDate> {
+    val startDateTime =
+        startTime.toDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
+
+    val startLocalTime = startDateTime.toLocalTime()
+    val startLocalDate = startDateTime.toLocalDate()
+
+    val endLocalTime = startLocalTime.plusMinutes(60)
+
+    val timeSlot =
+        TimeSlot(
+            startHour = startLocalTime.hour,
+            startMinute = startLocalTime.minute,
+            endHour = endLocalTime.hour,
+            endMinute = endLocalTime.minute)
+    return timeSlot to startLocalDate
+  }
+
+  override fun addAcceptedRequest(request: ServiceRequest) {
+    db.runTransaction { transaction ->
+      val providerId =
+          request.providerId
+              ?: throw IllegalStateException("Service request doesn't have a provider ID")
+      val scheduleRef =
+          db.collection(collectionPath)
+              .document(providerId)
+              .collection("schedules")
+              .document("current")
+
+      val schedule =
+          transaction.get(scheduleRef).toObject<Schedule>()
+              ?: throw IllegalStateException("Schedule not found for provider $providerId")
+
+      val newTimeSlot =
+          AcceptedTimeSlot(
+              requestId = request.uid,
+              startTime =
+                  request.meetingDate
+                      ?: throw IllegalStateException("Service request doesn't have a meeting date"))
+
+      val date = getTimeSlotAndDate(newTimeSlot.startTime)
+
+      if (!schedule.isTimeSlotAvailable(date.first, date.second)) {
+        throw FirebaseFirestoreException(
+            "Time slot no longer available", FirebaseFirestoreException.Code.ABORTED)
+      }
+    }
+  }
+
+  override fun removeAcceptedRequest(request: ServiceRequest) {
+    db.runTransaction { transaction ->
+      val providerId =
+          request.providerId
+              ?: throw IllegalStateException("Service request doesn't have a provider ID")
+      val scheduleRef =
+          db.collection(collectionPath)
+              .document(providerId)
+              .collection("schedules")
+              .document("current")
+
+      val schedule = transaction.get(scheduleRef).toObject<Schedule>()
+
+      val updatedSchedule =
+          schedule?.copy(
+              acceptedTimeSlots =
+                  schedule.acceptedTimeSlots.filterNot { it.requestId == request.uid })
+      if (updatedSchedule != null) {
+        transaction.set(scheduleRef, updatedSchedule)
+      } else {
+        Log.e("ProviderRepository", "updatedScedule is null")
       }
     }
   }

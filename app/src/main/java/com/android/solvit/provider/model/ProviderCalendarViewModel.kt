@@ -15,6 +15,7 @@ import com.android.solvit.shared.model.provider.ScheduleException
 import com.android.solvit.shared.model.provider.TimeSlot
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestRepositoryFirebase
+import com.android.solvit.shared.model.request.ServiceRequestStatus
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
@@ -523,6 +524,29 @@ open class ProviderCalendarViewModel(
       !duringRegularHours && !hasExtraTimeException ->
           ConflictResult(true, "This time slot is outside your regular working hours")
       else -> ConflictResult(false, "No conflicts")
+    }
+  }
+
+  fun addAcceptedRequest(request: ServiceRequest) {
+    providerRepository.addAcceptedRequest(request)
+  }
+
+  fun removeAcceptedRequest(request: ServiceRequest) {
+    providerRepository.removeAcceptedRequest(request)
+  }
+
+  private fun startServiceRequestListener() {
+    serviceRequestViewModel.addListenerOnServiceRequests { requests ->
+      requests.forEach { request ->
+        when (request.status) {
+          ServiceRequestStatus.CANCELED,
+          ServiceRequestStatus.COMPLETED -> removeAcceptedRequest(request)
+          ServiceRequestStatus.ACCEPTED -> addAcceptedRequest(request)
+          else -> {
+            /* ignore */
+          }
+        }
+      }
     }
   }
 

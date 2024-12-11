@@ -5,7 +5,6 @@ import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.provider.TimeSlot
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.LocalTime
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -30,24 +29,23 @@ class BookProvider() : ViewModel() {
    * @return list of available time slots
    */
   fun getProviderAvailabilities(date: LocalDate): List<TimeSlot> {
-    val startTime = LocalTime.of(8, 0)
-    val endTime = LocalTime.of(19, 0)
 
-    val startDateTime = LocalDateTime.of(date, startTime)
-    val endDateTime = LocalDateTime.of(date, endTime)
-
-    val dateTimeList = mutableListOf<LocalDateTime>()
     val timeSlots = mutableListOf<TimeSlot>()
-    var currentDateTime = startDateTime
-    while (currentDateTime <= endDateTime) {
-      dateTimeList.add(currentDateTime)
-      currentDateTime = currentDateTime.plusHours(1)
-    }
-    dateTimeList.forEach {
-      if (currentProvider.value.schedule.isAvailable(it)) {
-        timeSlots.add(
-            TimeSlot(
-                startHour = it.hour, startMinute = it.minute, endHour = it.hour + 1, endMinute = 0))
+
+    val regularHours = currentProvider.value.schedule.regularHours[date.dayOfWeek.name]
+    regularHours?.forEach {
+      var currentTime = it.start
+      while (currentTime < it.end) {
+        val endTime = currentTime.plusHours(1)
+        if (currentProvider.value.schedule.isAvailable(LocalDateTime.of(date, currentTime))) {
+          timeSlots.add(
+              TimeSlot(
+                  startHour = it.startHour,
+                  startMinute = it.startMinute,
+                  endHour = endTime.hour,
+                  endMinute = endTime.minute))
+        }
+        currentTime = currentTime.plusHours(1)
       }
     }
     return timeSlots
