@@ -50,6 +50,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.request.ServiceRequest
@@ -62,6 +63,7 @@ import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
 import java.text.SimpleDateFormat
 import java.util.Locale
+import kotlinx.coroutines.launch
 
 /**
  * Composable function that displays the Requests Dashboard screen.
@@ -282,7 +284,9 @@ fun PendingJobsSection(
       onContactCustomer = {
         Toast.makeText(context, "Contact Not yet Implemented", Toast.LENGTH_SHORT).show()
       },
-      onConfirmRequest = { request -> viewModel.confirmRequest(request) },
+      onConfirmRequest = { request ->
+        viewModel.viewModelScope.launch { viewModel.confirmRequest(request, "test provider name") }
+      },
       onChat = { Toast.makeText(context, "Chat Not yet Implemented", Toast.LENGTH_SHORT).show() })
 }
 
@@ -342,7 +346,7 @@ fun ScheduledJobsSection(
         colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)) {
           Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
-                imageVector = Icons.Outlined.Place,
+                Icons.Outlined.Place,
                 contentDescription = "NavigateIcon",
                 tint = colorScheme.onPrimary)
             Spacer(modifier = Modifier.width(8.dp))

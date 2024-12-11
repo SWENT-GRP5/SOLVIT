@@ -3,15 +3,23 @@ package com.android.solvit.shared.model.authentication
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import com.android.solvit.shared.model.map.Location
+import com.android.solvit.shared.notifications.FcmTokenManager
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.firestore
+import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
-class AuthViewModel(private val authRepository: AuthRep) : ViewModel() {
+class AuthViewModel(
+    private val authRepository: AuthRep,
+    private val fcmTokenManager: FcmTokenManager? = null
+) : ViewModel() {
   private val _user = MutableStateFlow<User?>(null)
   val user: StateFlow<User?> = _user
 
@@ -27,7 +35,7 @@ class AuthViewModel(private val authRepository: AuthRep) : ViewModel() {
   private val _googleAccount = MutableStateFlow<GoogleSignInAccount?>(null)
   val googleAccount: StateFlow<GoogleSignInAccount?> = _googleAccount
 
-  private val _userRegistered = MutableStateFlow<Boolean>(false)
+  private val _userRegistered = MutableStateFlow(false)
   val userRegistered: StateFlow<Boolean> = _userRegistered
 
   private val maxLocationsSize = 5
@@ -37,20 +45,56 @@ class AuthViewModel(private val authRepository: AuthRep) : ViewModel() {
         object : ViewModelProvider.Factory {
           @Suppress("UNCHECKED_CAST")
           override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return AuthViewModel(AuthRepository(Firebase.auth, Firebase.firestore)) as T
+            return AuthViewModel(
+                AuthRepository(Firebase.auth, Firebase.firestore), FcmTokenManager.getInstance())
+                as T
           }
         }
   }
 
   init {
-    authRepository.init {
-      _user.value = it
-      if (it != null) {
-        _email.value = it.email
-        _role.value = it.role
-        if (it.registrationCompleted) {
+    authRepository.init { user ->
+      _user.value = user
+      if (user != null) {
+        _email.value = user.email
+        _role.value = user.role
+        if (user.registrationCompleted) {
           _userRegistered.value = true
+          fcmTokenManager?.let { updateFcmToken() }
         }
+      }
+    }
+  }
+
+  private fun updateFcmToken() {
+    fcmTokenManager?.let { manager ->
+      viewModelScope.launch {
+        try {
+          val userId = authRepository.getUserId()
+          if (userId.isNotEmpty()) {
+            val token = FirebaseMessaging.getInstance().token.await()
+            manager.updateUserFcmToken(userId, token)
+          }
+        } catch (e: Exception) {
+          Log.e("AuthViewModel", "Error updating FCM token", e)
+        }
+      }
+    }
+  }
+
+  private suspend fun onAuthenticationSuccess() {
+    // Store FCM token after successful authentication
+    fcmTokenManager?.let { manager ->
+      try {
+        val userId = authRepository.getUserId()
+        if (userId.isNotEmpty()) {
+          val token = FirebaseMessaging.getInstance().token.await()
+          manager.updateUserFcmToken(userId, token)
+        } else {
+          Log.w("AuthViewModel", "Empty user ID, cannot update FCM token")
+        }
+      } catch (e: Exception) {
+        Log.e("AuthViewModel", "Error updating FCM token", e)
       }
     }
   }
@@ -81,6 +125,7 @@ class AuthViewModel(private val authRepository: AuthRep) : ViewModel() {
         password.value,
         {
           _user.value = it
+          viewModelScope.launch { onAuthenticationSuccess() }
           onSuccess()
         },
         {
@@ -99,6 +144,7 @@ class AuthViewModel(private val authRepository: AuthRep) : ViewModel() {
         {
           _user.value = it
           _email.value = it.email
+          viewModelScope.launch { onAuthenticationSuccess() }
           onSuccess()
         },
         {
@@ -114,6 +160,7 @@ class AuthViewModel(private val authRepository: AuthRep) : ViewModel() {
         password.value,
         {
           _user.value = it
+          viewModelScope.launch { onAuthenticationSuccess() }
           onSuccess()
         },
         {
@@ -133,6 +180,7 @@ class AuthViewModel(private val authRepository: AuthRep) : ViewModel() {
         {
           _user.value = it
           _email.value = it.email
+          viewModelScope.launch { onAuthenticationSuccess() }
           onSuccess()
         },
         {

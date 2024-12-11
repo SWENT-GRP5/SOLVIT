@@ -221,17 +221,22 @@ dependencies {
     implementation(libs.play.services.auth)
 
     // Firebase
+    implementation(platform(libs.firebase.bom.v3270))
     implementation(libs.firebase.database.ktx)
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.ui.auth)
     implementation(libs.firebase.auth.ktx)
     implementation(libs.firebase.auth)
+    implementation(libs.firebase.messaging.ktx)
 
     // Networking with OkHttp
     implementation(libs.okhttp)
+    implementation(libs.gson)
 
     // Testing Unit
     testImplementation(libs.junit)
+    testImplementation(libs.mockk)
+    testImplementation(libs.mockk.agent)
     androidTestImplementation(libs.mockk)
     androidTestImplementation(libs.mockk.android)
     androidTestImplementation(libs.mockk.agent)
@@ -255,6 +260,14 @@ dependencies {
     androidTestImplementation(libs.mockito.kotlin)
     testImplementation(libs.robolectric)
 
+    // Mockito for unit tests
+    testImplementation("org.mockito:mockito-core:4.6.1")
+    testImplementation("org.mockito:mockito-inline:4.6.1")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:4.0.0")
+
+    // Mockito for Android instrumented tests (if needed)
+    androidTestImplementation("org.mockito:mockito-android:4.6.1")
+    androidTestImplementation("org.mockito.kotlin:mockito-kotlin:4.0.0")
 
     // --------- Kaspresso test framework ----------
     globalTestImplementation(libs.kaspresso)
@@ -281,6 +294,10 @@ dependencies {
 
     // ----------       Json serialization     ------------
     implementation(libs.kotlinx.serialization.json.v150)
+
+    // Add Firebase Functions dependency
+    implementation(platform("com.google.firebase:firebase-bom:32.6.0"))
+    implementation("com.google.firebase:firebase-functions-ktx")
 }
 
 tasks.withType<Test> {
@@ -304,6 +321,7 @@ tasks.register("jacocoTestReport", JacocoReport::class) {
         "**/R$*.class",
         "**/BuildConfig.*",
         "**/Manifest*.*",
+        "**/debug/**",
         "**/*Test*.*",
         "android/**/*.*",
     )
