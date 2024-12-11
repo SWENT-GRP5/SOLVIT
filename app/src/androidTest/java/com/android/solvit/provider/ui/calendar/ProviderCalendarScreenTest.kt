@@ -164,12 +164,12 @@ class ProviderCalendarScreenTest {
 
   // ===== View Display Tests =====
 
-    @Test
-    fun testInitialCalendarView() {
-        composeTestRule.onNodeWithTag("calendarTitle").assertIsDisplayed()
-        composeTestRule.onNodeWithTag("menuButton").assertIsDisplayed()
-        composeTestRule.onNodeWithTag("calendarViewToggle").assertIsDisplayed()
-    }
+  @Test
+  fun testInitialCalendarView() {
+    composeTestRule.onNodeWithTag("calendarTitle").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("menuButton").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("calendarViewToggle").assertIsDisplayed()
+  }
 
   @Test
   fun testMonthViewDisplay() {

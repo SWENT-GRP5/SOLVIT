@@ -10,19 +10,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.ModalBottomSheet
@@ -55,10 +46,6 @@ import com.android.solvit.provider.ui.calendar.views.day.DayView
 import com.android.solvit.provider.ui.calendar.views.month.MonthView
 import com.android.solvit.provider.ui.calendar.views.week.WeekView
 import com.android.solvit.seeker.ui.navigation.BottomNavigationMenu
-import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_PROVIDER
-import com.android.solvit.seeker.ui.navigation.BottomNavigationMenu
-import com.android.solvit.shared.model.request.ServiceRequest
-import com.android.solvit.shared.model.request.ServiceRequestStatus
 import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_PROVIDER
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
@@ -98,11 +85,11 @@ fun ProviderCalendarScreen(
             colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background))
       },
       bottomBar = {
-          val currentRoute = navigationActions.currentRoute() ?: "default_route"
-          BottomNavigationMenu(
-              onTabSelect = { navigationActions.navigateTo(it.route) },
-              tabList = LIST_TOP_LEVEL_DESTINATION_PROVIDER,
-              selectedItem = currentRoute)
+        val currentRoute = navigationActions.currentRoute() ?: "default_route"
+        BottomNavigationMenu(
+            onTabSelect = { navigationActions.navigateTo(it.route) },
+            tabList = LIST_TOP_LEVEL_DESTINATION_PROVIDER,
+            selectedItem = currentRoute)
       }) { paddingValues ->
         Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
           CalendarViewToggle(
