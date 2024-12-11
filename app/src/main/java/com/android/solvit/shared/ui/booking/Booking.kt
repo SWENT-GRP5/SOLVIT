@@ -271,7 +271,7 @@ fun ServiceBookingScreen(
                                       onClick = {
                                         if (role == "seeker") {
                                           providerViewModel.selectService(request!!.type)
-                                          navigationActions.navigateTo(Route.PROVIDERS)
+                                          navigationActions.navigateTo(Route.PROVIDERS_LIST)
                                         }
                                       })) {
                             Column(
@@ -471,7 +471,7 @@ fun ProviderCard(
       modifier =
           Modifier.width(141.dp).height(172.dp).testTag("provider_card").clickable {
             providerViewModel.selectProvider(provider)
-            navigationActions.navigateTo(Route.PROVIDER_PROFILE)
+            navigationActions.navigateTo(Route.PROVIDER_INFO)
           },
       elevation =
           CardDefaults.cardElevation(
@@ -594,7 +594,7 @@ fun ReviewButton(navigationActions: NavigationActions) {
       modifier = Modifier.fillMaxWidth().padding(top = 16.dp).testTag("review_button"),
       contentAlignment = Alignment.Center) {
         Button(
-            onClick = { navigationActions.navigateTo(Screen.REVIEW_SCREEN) },
+            onClick = { navigationActions.navigateTo(Route.REVIEW) },
             colors =
                 ButtonDefaults.buttonColors(
                     containerColor = colorScheme.primary, contentColor = colorScheme.onPrimary),

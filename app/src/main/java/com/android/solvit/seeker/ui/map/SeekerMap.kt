@@ -73,7 +73,7 @@ fun SeekerMapScreen(
               image = imageBitmap,
               onClick = {
                 providerViewModel.selectProvider(provider)
-                navigationActions.navigateTo(Route.PROVIDER_PROFILE)
+                navigationActions.navigateTo(Route.PROVIDER_INFO)
               })
         }
     providerMarkers.value = markers

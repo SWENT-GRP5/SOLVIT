@@ -87,7 +87,7 @@ fun ServicesScreen(
         BottomNavigationMenu(
             { navigationActions.navigateTo(it.route) },
             LIST_TOP_LEVEL_DESTINATION_SEEKER,
-            Route.SERVICES)
+            Route.SEEKER_OVERVIEW)
       }) {
         Column(modifier = Modifier.fillMaxSize()) {
           TopSection(searchViewModel, listProviderViewModel, navigationActions)
@@ -172,7 +172,7 @@ fun TopSection(
                           modifier =
                               Modifier.clickable {
                                 listProviderViewModel.selectService(searchResults[index].service)
-                                navigationActions.navigateTo(Route.PROVIDERS)
+                                navigationActions.navigateTo(Route.PROVIDERS_LIST)
                               })
                     }
                   }
@@ -286,7 +286,7 @@ fun CategoriesSection(
                 searchResults[index],
                 onClick = {
                   listProviderViewModel.selectService(searchResults[index].service)
-                  navigationActions.navigateTo(Route.PROVIDERS)
+                  navigationActions.navigateTo(Route.PROVIDERS_LIST)
                 })
           }
         }
@@ -317,7 +317,7 @@ fun PerformersSection(
                 topProviders[index],
                 onClick = {
                   listProviderViewModel.selectProvider(topProviders[index])
-                  navigationActions.navigateTo(Route.PROVIDER_PROFILE)
+                  navigationActions.navigateTo(Route.PROVIDER_INFO)
                 })
           }
         }

@@ -279,7 +279,7 @@ fun DisplayPopularProviders(
           modifier =
               Modifier.width(141.dp).height(172.dp).clickable {
                 listProviderViewModel.selectProvider(provider)
-                navigationActions.navigateTo(Route.PROVIDER_PROFILE)
+                navigationActions.navigateTo(Route.PROVIDER_INFO)
               },
           elevation =
               CardDefaults.cardElevation(
@@ -355,7 +355,7 @@ fun ListProviders(
                                   shape = RoundedCornerShape(size = 16.dp))
                               .clickable {
                                 listProviderViewModel.selectProvider(provider)
-                                navigationActions.navigateTo(Route.PROVIDER_PROFILE)
+                                navigationActions.navigateTo(Route.PROVIDER_INFO)
                               },
                       horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.Start)) {
                         AsyncImage(

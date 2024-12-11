@@ -13,46 +13,56 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavController
 
 object Route {
+  // Authentication & Registration
   const val AUTH = "Auth"
-  const val SERVICES = "Overview"
-  const val REQUESTS_FEED = "Requests Feed"
+  const val SEEKER_REGISTRATION = "Seeker registration"
+  const val PROVIDER_REGISTRATION = "Provider registration"
+
+  // Seeker UI
+  const val SEEKER_OVERVIEW = "Overview"
+  const val PROVIDERS_LIST = "Providers"
+  const val PROVIDER_INFO = "Provider info"
+  const val REQUESTS_OVERVIEW = "Requests Overview"
   const val CREATE_REQUEST = "Create request"
   const val EDIT_REQUEST = "Edit request"
-  const val REQUESTS_OVERVIEW = "Requests"
-  const val INBOX = "Messages"
-  const val PROFILE = "Profile"
-  const val PROVIDERS = "Providers"
-  const val MAP = "Map"
-  const val MAP_OF_SEEKERS = "Seekers Map"
+  const val REVIEW = "Review"
+  const val AI_SOLVER = "Ai Solver"
+
+  // Provider UI
+  const val REQUESTS_FEED = "Requests Feed"
   const val CALENDAR = "Calendar"
-  const val PROVIDER_PROFILE = "Provider Profile"
-  const val MY_JOBS = "My Jobs"
-  const val BOOKING_DETAILS = "Booking Details"
+  const val JOBS = "Jobs"
   const val NOTIFICATIONS = "Notifications Screen"
-  const val AI_SOLVER = "Ai Solver Screen"
+
+  // Shared UI
+  const val PROFILE = "Profile"
+  const val MAP = "Map"
+  const val INBOX = "Messages"
+  const val BOOKING_DETAILS = "Booking Details"
 }
 
 object Screen {
-  const val PROFILE = "Profile Screen"
-  const val EDIT_PROFILE = "EditProfile Screen"
-  const val SIGN_IN = "Sign In"
-  const val SIGN_UP = "Sign Up"
-  const val SIGN_UP_CHOOSE_ROLE = "Choose Role Screen"
-  const val FORGOT_PASSWORD = "Forgot Password"
-  const val SEEKER_REGISTRATION_PROFILE = "Seeker registration"
-  const val PROVIDER_REGISTRATION_PROFILE = "Provider registration"
-  const val CALENDAR = "Calendar"
-  const val MY_JOBS = "My Jobs"
-  const val PROVIDER_PROFILE = "Provider Profile"
-  const val PROVIDER_MODIFY_PROFILE = "Modify Provider Profile"
-  const val PREFERENCES = "Preferences"
-  const val INBOX = "Inbox Screen"
-  const val CHAT = "Chat Room Screen"
-  const val REVIEW_SCREEN = "Review Screen"
+  // Authentication & Registration
+  const val OPENING = "Opening Screen"
+  const val SIGN_IN = "Sign In Screen"
+  const val SIGN_UP = "Sign Up Screen"
+  const val CHOOSE_ROLE = "Choose Role Screen"
+  const val FORGOT_PASSWORD = "Forgot Password Screen"
+
+  // Seeker UI
+  const val SEEKER_PROFILE = "Seeker Profile Screen"
+  const val EDIT_SEEKER_PROFILE = "Edit Seeker Profile Screen"
   const val EDIT_PREFERENCES = "Edit Preferences"
-  const val NOTIFICATIONS = "Notifications Screen"
   const val AI_SOLVER_WELCOME_SCREEN = "Ai Get Started Screen"
   const val AI_SOLVER_CHAT_SCREEN = "AI Solver Chat Screen"
+
+  // Provider UI
+  const val PROVIDER_PROFILE = "Provider Profile"
+  const val PROVIDER_MODIFY_PROFILE = "Modify Provider Profile"
+
+  // Shared UI
+  const val INBOX = "Inbox Screen"
+  const val CHAT = "Chat Room Screen"
 }
 
 data class TopLevelDestination(val route: String, val icon: ImageVector, val textId: String)
@@ -60,48 +70,39 @@ data class TopLevelDestination(val route: String, val icon: ImageVector, val tex
 object TopLevelDestinations {
 
   ////////////////////////////////// Shared //////////////////////////////////
+  val MAP = TopLevelDestination(route = Route.MAP, icon = Icons.Outlined.LocationOn, textId = "Map")
   val MESSAGES =
       TopLevelDestination(Route.INBOX, icon = Icons.Outlined.MailOutline, textId = "Inbox messages")
-
-  ////////////////////////////////// PROVIDER //////////////////////////////////
-  val REQUEST_FEED =
+  val PROFILE =
       TopLevelDestination(
-          route = Route.REQUESTS_FEED, icon = Icons.Outlined.Home, textId = "Professional Home")
-  val MAP_OF_SEEKERS =
-      TopLevelDestination(
-          route = Route.MAP_OF_SEEKERS, icon = Icons.Outlined.LocationOn, textId = "Map of Seekers")
-  val CALENDAR =
-      TopLevelDestination(
-          route = Route.CALENDAR, icon = Icons.Outlined.DateRange, textId = "Professional Calendar")
-  val MY_JOBS =
-      TopLevelDestination(
-          route = Route.MY_JOBS, icon = Icons.Outlined.CheckCircle, textId = "My Jobs")
+          route = Route.PROFILE, icon = Icons.Outlined.AccountCircle, textId = "Profile")
 
   ////////////////////////////////// SEEKER //////////////////////////////////
-  val SERVICES =
+  val SEEKER_OVERVIEW =
       TopLevelDestination(
-          route = Route.SERVICES, icon = Icons.Outlined.Home, textId = "Customer Home")
-  val MAP_OF_PROVIDERS =
-      TopLevelDestination(
-          route = Route.MAP, icon = Icons.Outlined.LocationOn, textId = "Providers Map")
+          route = Route.SEEKER_OVERVIEW, icon = Icons.Outlined.Home, textId = "Customer Home")
   val CREATE_REQUEST =
       TopLevelDestination(
           route = Route.CREATE_REQUEST, icon = Icons.Outlined.Add, textId = "Request")
   val REQUESTS_OVERVIEW =
       TopLevelDestination(
           route = Route.REQUESTS_OVERVIEW, icon = Icons.Outlined.Menu, textId = "Overview")
-  val PROFILE =
+
+  ////////////////////////////////// PROVIDER //////////////////////////////////
+  val REQUEST_FEED =
       TopLevelDestination(
-          route = Route.PROFILE, icon = Icons.Outlined.AccountCircle, textId = "Profile")
-  val PROVIDER_PROFILE =
+          route = Route.REQUESTS_FEED, icon = Icons.Outlined.Home, textId = "Professional Home")
+  val CALENDAR =
       TopLevelDestination(
-          route = Screen.PROVIDER_PROFILE, icon = Icons.Outlined.AccountCircle, textId = "Profile")
+          route = Route.CALENDAR, icon = Icons.Outlined.DateRange, textId = "Professional Calendar")
+  val JOBS =
+      TopLevelDestination(route = Route.JOBS, icon = Icons.Outlined.CheckCircle, textId = "My Jobs")
 }
 
 val LIST_TOP_LEVEL_DESTINATION_SEEKER =
     listOf(
-        TopLevelDestinations.SERVICES,
-        TopLevelDestinations.MAP_OF_PROVIDERS,
+        TopLevelDestinations.SEEKER_OVERVIEW,
+        TopLevelDestinations.MAP,
         TopLevelDestinations.MESSAGES,
         TopLevelDestinations.REQUESTS_OVERVIEW,
         TopLevelDestinations.PROFILE)
@@ -109,10 +110,10 @@ val LIST_TOP_LEVEL_DESTINATION_SEEKER =
 val LIST_TOP_LEVEL_DESTINATION_PROVIDER =
     listOf(
         TopLevelDestinations.REQUEST_FEED,
-        TopLevelDestinations.MAP_OF_SEEKERS,
+        TopLevelDestinations.MAP,
         TopLevelDestinations.MESSAGES,
         TopLevelDestinations.CALENDAR,
-        TopLevelDestinations.PROVIDER_PROFILE)
+        TopLevelDestinations.PROFILE)
 
 open class NavigationActions(
     private val navController: NavController,
@@ -139,6 +140,14 @@ open class NavigationActions(
    */
   open fun navigateTo(screen: String) {
     navController.navigate(screen)
+  }
+
+  open fun navigateAndPopUpTo(screen: String, popUpTo: String) {
+    navController.navigate(screen) {
+      popUpTo(popUpTo) { saveState = true }
+      launchSingleTop = true
+      restoreState = true
+    }
   }
 
   /** Navigate back to the previous screen. */

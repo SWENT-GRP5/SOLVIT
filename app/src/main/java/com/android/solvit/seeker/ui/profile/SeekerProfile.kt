@@ -177,7 +177,7 @@ fun SeekerProfileScreen(
                           }
                         }
                         IconButton(
-                            onClick = { navigationActions.navigateTo(Screen.EDIT_PROFILE) },
+                            onClick = { navigationActions.navigateTo(Screen.EDIT_SEEKER_PROFILE) },
                             modifier = Modifier.testTag("EditProfileButton")) {
                               Icon(Icons.Default.Edit, contentDescription = "Edit Profile")
                             }

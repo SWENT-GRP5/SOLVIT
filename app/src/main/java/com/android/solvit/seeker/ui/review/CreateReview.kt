@@ -214,7 +214,7 @@ fun RequestBox(
                 provider?.let {
                   ProviderItem(provider = it) {
                     listProviderViewModel.selectProvider(it)
-                    navigationActions.navigateTo(Route.PROVIDER_PROFILE)
+                    navigationActions.navigateTo(Route.PROVIDER_INFO)
                   }
                 }
                 request.location?.let { MapCard(it) }

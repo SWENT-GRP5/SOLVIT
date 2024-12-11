@@ -426,7 +426,7 @@ fun AiSolverHeader(navigationActions: NavigationActions) {
         }
       },
       navigationIcon = {
-        IconButton(onClick = { navigationActions.navigateTo(Route.SERVICES) }) {
+        IconButton(onClick = { navigationActions.navigateTo(Route.SEEKER_OVERVIEW) }) {
           Icon(Icons.Default.ArrowBack, contentDescription = "Back")
         }
       },

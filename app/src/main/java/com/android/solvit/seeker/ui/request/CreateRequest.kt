@@ -206,7 +206,7 @@ fun CreateRequestScreen(
             notificationViewModel.sendNotifications(
                 serviceRequest, listProviderViewModel.providersList.value)
             requestViewModel.selectRequest(serviceRequest)
-            navigationActions.navigateTo(Route.BOOKING_DETAILS)
+            navigationActions.navigateAndPopUpTo(Route.BOOKING_DETAILS, Route.REQUESTS_OVERVIEW)
             return@RequestScreen
           } catch (_: NumberFormatException) {}
         }
