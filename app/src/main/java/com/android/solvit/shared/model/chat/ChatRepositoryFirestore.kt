@@ -22,8 +22,16 @@ class ChatRepositoryFirestore(
   private val collectionPathIA = "iamessages"
   private val chatImagesPath = "chatImages/"
 
-  // Create a chat room in the collection or retrive if a conversation already exits between user
-  // sender and receiver
+  /**
+   * Create a chat room in the collection or retrieve if a conversation already exits between user
+   * sender and receiver
+   *
+   * @param isIaMessage determine whether it's a conversation between two users or the AI Solver Bot
+   * @param currentUserUid represent the Uid of the current authenticated user
+   * @param onSuccess callback
+   * @param onFailure callback
+   * @param receiverUid represent the Uid of the message receiver
+   */
   override fun initChat(
       isIaMessage: Boolean,
       currentUserUid: String?,
@@ -91,6 +99,14 @@ class ChatRepositoryFirestore(
     }
   }
 
+  /**
+   * Link to a conversation between a provider and a seeker a request
+   *
+   * @param chatRoomId represent the Id of the conversation
+   * @param serviceRequestId represent the Id of the request
+   * @param onSuccess callback
+   * @param onFailure callback
+   */
   override fun linkChatToRequest(
       chatRoomId: String,
       serviceRequestId: String,
@@ -105,6 +121,13 @@ class ChatRepositoryFirestore(
         .addOnFailureListener { onFailure() }
   }
 
+  /**
+   * Get service request id of a conversation between a seeker and a provider
+   *
+   * @param chatRoomId represents the Id of the conversation
+   * @param onSuccess callback to set the service request uid
+   * @param onFailure callback
+   */
   override fun getChatRequest(
       chatRoomId: String,
       onSuccess: (String) -> Unit,
@@ -125,7 +148,15 @@ class ChatRepositoryFirestore(
         .addOnFailureListener { onFailure() }
   }
 
-  // Send Message in a chatRoom than links 2 users
+  /**
+   * Send message in a conversation between 2 users
+   *
+   * @param isIaMessage determines whether it's a chat with AI Bot or between two users
+   * @param chatRoomId represents the uid of chat room
+   * @param message represent the message we want to send
+   * @param onSuccess callback
+   * @param onFailure callback
+   */
   override fun sendMessage(
       isIaMessage: Boolean,
       chatRoomId: String,
@@ -151,7 +182,14 @@ class ChatRepositoryFirestore(
     }
   }
 
-  // Get All Messages of a chatRoom between 2 users
+  /**
+   * listen on all messages of a chat room
+   *
+   * @param isIaConversation determines whether it's a chat with AI Bot or between two users
+   * @param chatRoomId represents the uid of chat room
+   * @param onSuccess callback
+   * @param onFailure callback
+   */
   override fun listenForMessages(
       isIaConversation: Boolean,
       chatRoomId: String,
@@ -180,6 +218,13 @@ class ChatRepositoryFirestore(
             })
   }
 
+  /**
+   * listen on all last messages with different profiles of the current authenticated user
+   *
+   * @param currentUserUid represents the uid of the current authenticated user
+   * @param onSuccess callback
+   * @param onFailure callback
+   */
   override fun listenForLastMessages(
       currentUserUid: String?,
       onSuccess: (Map<String?, ChatMessage>) -> Unit,
@@ -232,6 +277,14 @@ class ChatRepositoryFirestore(
             })
   }
 
+  /**
+   * Clear a conversation between two users
+   *
+   * @param isIaConversation determines whether it's a chat with AI Bot or between two users
+   * @param chatRoomId represents the uid of chat room
+   * @param onSuccess callback
+   * @param onFailure callback
+   */
   override fun clearConversation(
       isIaConversation: Boolean,
       chatRoomId: String,
@@ -251,6 +304,56 @@ class ChatRepositoryFirestore(
     uploadImageToStorage(storage, chatImagesPath, imageUri, onSuccess, onFailure)
   }
 
+  /**
+   * Set for a chat with AI solver if given the problem, the seeker should create a request
+   *
+   * @param chatRoomId id of the chat with AI
+   * @param shouldCreateRequest AI response determine if it's true or false
+   * @param onSuccess callback
+   * @param onFailure callback
+   */
+  override fun seekerShouldCreateRequest(
+      chatRoomId: String,
+      shouldCreateRequest: Boolean,
+      onSuccess: () -> Unit,
+      onFailure: () -> Unit
+  ) {
+    firestore
+        .collection("chatRooms")
+        .document(chatRoomId)
+        .set(mapOf("shouldCreateRequest" to shouldCreateRequest), SetOptions.merge())
+        .addOnSuccessListener { onSuccess() }
+        .addOnFailureListener { onFailure() }
+  }
+
+  /**
+   * Get the flag should create request given a chat with AI Solver
+   *
+   * @param chatRoomId id of the chat with AI Solver
+   * @param onSuccess callback
+   * @param onFailure callback
+   */
+  override fun getShouldCreateRequest(
+      chatRoomId: String,
+      onSuccess: (Boolean) -> Unit,
+      onFailure: () -> Unit
+  ) {
+    firestore.collection("chatRooms").document(chatRoomId).get().addOnSuccessListener { document ->
+      val shouldCreateRequest = document.get("shouldCreateRequest")
+      if (shouldCreateRequest != null) {
+        onSuccess(shouldCreateRequest as Boolean)
+      } else {
+        onFailure()
+      }
+    }
+  }
+
+  /**
+   * Get the last message of a chat room
+   *
+   * @param chatRoomId uid of chat room
+   * @param onComplete callback
+   */
   fun getLastMessageForChatRoom(chatRoomId: String, onComplete: (ChatMessage?) -> Unit) {
     val chatRef = db.getReference(collectionPath).child(chatRoomId).child("chats")
 

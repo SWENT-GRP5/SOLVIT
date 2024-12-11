@@ -38,6 +38,9 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
   private val _isLoading = MutableStateFlow(true)
   val isLoading: StateFlow<Boolean> = _isLoading
 
+  private val _shouldCreateRequest = MutableStateFlow<Boolean>(false)
+  val shouldCreateRequest: StateFlow<Boolean> = _shouldCreateRequest
+
   private val _isLoadingMessageBox = MutableStateFlow(true)
   val isLoadingMessageBox: StateFlow<Boolean> = _isLoadingMessageBox
 
@@ -86,6 +89,7 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
       initChat(isIaConversation, currentUserUid)
       receiver?.let { setReceiver(receiver) }
       getConversation(isIaConversation)
+      getShouldCreateRequest()
       _isLoading.value = false
     }
   }
@@ -142,6 +146,31 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
     _chatRequest.value = serviceRequest
   }
 
+  /**
+   * Set for a chat with AI solver if given the problem, the seeker should create a request
+   *
+   * @param shouldCreateRequest AI response determine if it's true or false
+   */
+  fun setShouldCreateRequest(shouldCreateRequest: Boolean) {
+    chatId?.let {
+      repository.seekerShouldCreateRequest(
+          it,
+          shouldCreateRequest,
+          onSuccess = { _shouldCreateRequest.value = shouldCreateRequest },
+          onFailure = { Log.e("Chat View Model", "Failed to set should create request flag") })
+    }
+  }
+
+  /** Get the should create flag given an conversation with AI solver chatbot */
+  fun getShouldCreateRequest() {
+    chatId?.let {
+      repository.getShouldCreateRequest(
+          it,
+          onSuccess = { flag -> _shouldCreateRequest.value = flag },
+          onFailure = { Log.e("Chat View Model", "Failed to get should create Request flag") })
+    }
+  }
+
   fun sendMessage(isIaConversation: Boolean, message: ChatMessage) {
     Log.e("sendMessage", "$chatId")
     chatId?.let {
@@ -150,7 +179,10 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
           isIaConversation,
           chatRoomId = it,
           message,
-          onSuccess = { Log.e("send Message", "Message \"${message}\" is succesfully sent") },
+          onSuccess = {
+            Log.e("send Message", "Message \"${message}\" is succesfully sent")
+            getShouldCreateRequest()
+          },
           onFailure = { Log.e("send Message", "Failed") })
     }
   }
