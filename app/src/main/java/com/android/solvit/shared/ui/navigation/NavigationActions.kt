@@ -44,7 +44,7 @@ object Screen {
   const val PROVIDER_REGISTRATION_PROFILE = "Provider registration"
   const val CALENDAR = "Calendar"
   const val MY_JOBS = "My Jobs"
-  const val PROVIDER_PROFILE = "Provider Profile"
+  const val PROVIDER_PROFILE = "Provider Profile Screen"
   const val PROVIDER_MODIFY_PROFILE = "Modify Provider Profile"
   const val PREFERENCES = "Preferences"
   const val INBOX = "Inbox Screen"
