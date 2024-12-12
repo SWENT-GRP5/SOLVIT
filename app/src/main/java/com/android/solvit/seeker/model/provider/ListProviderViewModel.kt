@@ -128,7 +128,6 @@ class ListProviderViewModel(private val repository: ProviderRepository) : ViewMo
   /** Sort the list of providers given three Fields (Top Rates, Top Prices, Time) */
   fun sortProviders(field: String, isSelected: Boolean) {
     Log.e("sortProviders", "field : $field isSelected : $isSelected")
-    Log.e("listSorted", "${_providersListFiltered.value}")
     when (field) {
       "Top Rates" ->
           _providersListFiltered.value =

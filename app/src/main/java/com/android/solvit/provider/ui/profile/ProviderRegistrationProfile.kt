@@ -586,8 +586,7 @@ fun ProviderDetails(
       selectedService.isNotEmpty() &&
           isDescriptionOk &&
           isStartingPriceOk &&
-          selectedLanguages.isNotEmpty() &&
-          providerImageUri != null
+          selectedLanguages.isNotEmpty()
 
   Column(
       modifier = Modifier.fillMaxSize().padding(16.dp),
