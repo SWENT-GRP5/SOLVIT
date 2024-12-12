@@ -127,43 +127,44 @@ fun CreateRequestScreen(
               })
         }
 
-        // Multi-Step Dialog
-        if (showMultiStepDialog) {
-          MultiStepDialog(
-              context = localContext,
-              showDialog = showMultiStepDialog,
-              currentStep = currentStep,
-              selectedImages = selectedImages,
-              onImagesSelected = { images ->
-                selectedImages = images
-                if (selectedImages.isNotEmpty()) {
-                  val uri = selectedImages[0]
-                  selectedImageUri = uri
-                }
-              },
-              onRemoveImage = { uri ->
-                selectedImages = selectedImages.filter { it != uri }
-                if (selectedImages.isEmpty()) {
-                  selectedImageUri = null
-                } else {
-                  val uri = selectedImages[0]
-                  selectedImageUri = uri
-                }
-              },
-              onStartAnalyzing = {
-                currentStep = 2 // Move to the analyzing step
-              },
-              onAnalyzeComplete = { generatedTitle, generatedType, generatedDescription ->
-                title = generatedTitle
-                typeQuery = generatedType
-                description = generatedDescription
-                currentStep = 3 // Move to the analysis complete step
-              },
-              onClose = {
-                showMultiStepDialog = false
-                currentStep = 1 // Reset step for the next time
-              })
-        }
+  // Multi-Step Dialog
+  if (showMultiStepDialog) {
+    MultiStepDialog(
+        context = localContext,
+        showDialog = showMultiStepDialog,
+        currentStep = currentStep,
+        selectedImages = selectedImages,
+        onImagesSelected = { images ->
+          selectedImages = images
+          if (selectedImages.isNotEmpty()) {
+            val uri = selectedImages[0]
+            selectedImageUri = uri
+          }
+        },
+        onRemoveImage = { uri ->
+          selectedImages = selectedImages.filter { it != uri }
+          if (selectedImages.isEmpty()) {
+            selectedImageUri = null
+          } else {
+            val uri = selectedImages[0]
+            selectedImageUri = uri
+          }
+        },
+        onStartAnalyzing = {
+          currentStep = 2 // Move to the analyzing step
+        },
+        onAnalyzeComplete = { generatedTitle, generatedType, generatedDescription ->
+          title = generatedTitle
+          typeQuery = generatedType
+          selectedServiceType = Services.valueOf(generatedType)
+          description = generatedDescription
+          currentStep = 3 // Move to the analysis complete step
+        },
+        onClose = {
+          showMultiStepDialog = false
+          currentStep = 1 // Reset step for the next time
+        })
+  }
 
         RequestScreen(
             navigationActions = navigationActions,
