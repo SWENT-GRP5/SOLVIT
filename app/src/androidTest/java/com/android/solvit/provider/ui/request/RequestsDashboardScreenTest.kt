@@ -386,6 +386,7 @@ class RequestsDashboardScreenTest {
           onNavigateToJob = { clicked = true })
     }
     composeTestRule.onNodeWithTag("NavigateButton_1").performClick()
+    composeTestRule.waitForIdle()
     assert(clicked)
   }
 
@@ -394,6 +395,7 @@ class RequestsDashboardScreenTest {
     var clicked = false
     composeTestRule.setContent { JobItem(request = request, onConfirmRequest = { clicked = true }) }
     composeTestRule.onNodeWithTag("ConfirmButton_1").performClick()
+    composeTestRule.waitForIdle()
     assert(clicked)
   }
 
@@ -406,6 +408,7 @@ class RequestsDashboardScreenTest {
           onCancelRequest = { clicked = true })
     }
     composeTestRule.onNodeWithTag("CancelButton_1").performClick()
+    composeTestRule.waitForIdle()
     assert(clicked)
   }
 
@@ -418,6 +421,7 @@ class RequestsDashboardScreenTest {
           onMarkAsCompleted = { clicked = true })
     }
     composeTestRule.onNodeWithTag("CompleteButton_1").performClick()
+    composeTestRule.waitForIdle()
     assert(clicked)
   }
 
@@ -426,6 +430,7 @@ class RequestsDashboardScreenTest {
     var clicked = false
     composeTestRule.setContent { JobItem(request = request, onChat = { clicked = true }) }
     composeTestRule.onNodeWithTag("ChatButton_1").performClick()
+    composeTestRule.waitForIdle()
     assert(clicked)
   }
 
@@ -436,6 +441,7 @@ class RequestsDashboardScreenTest {
       JobItem(request = request, onContactCustomer = { clicked = true })
     }
     composeTestRule.onNodeWithTag("CallButton_1").performClick()
+    composeTestRule.waitForIdle()
     assert(clicked)
   }
 
