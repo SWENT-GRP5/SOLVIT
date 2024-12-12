@@ -488,6 +488,7 @@ class RequestsDashboardScreenTest {
     // Click the Complete button
     composeTestRule.onNodeWithTag("CompleteButton_test_scheduled_id").performClick()
 
+    composeTestRule.waitForIdle()
     // Verify that completeRequest was called with the correct request
     verify(serviceRequestRepository).saveServiceRequest(any(), any(), any())
 
