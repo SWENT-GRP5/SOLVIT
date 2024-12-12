@@ -2,10 +2,8 @@ package com.android.solvit.shared.model.request.analyzer
 
 import android.graphics.Bitmap
 import com.android.solvit.BuildConfig
-import com.android.solvit.shared.model.service.Services
 import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.Content
-import com.google.ai.client.generativeai.type.FunctionType
 import com.google.ai.client.generativeai.type.Schema
 import com.google.ai.client.generativeai.type.generationConfig
 import kotlinx.coroutines.Dispatchers
@@ -20,7 +18,7 @@ class GeminiImageAnalyzer(private val generativeModel: GenerativeModel = default
             name = "ImageAnalysisResponse",
             description = "The structured response for images analysis",
             Schema.str(name = "title", description = "The generated title for the analysis"),
-            Schema.str(name = "type", description = "The category of the analyzed images"),
+            Schema.str(name = "type", description = "The generated category for the analysis"),
             Schema.str(
                 name = "description",
                 description = "A detailed description of the analyzed images"))
