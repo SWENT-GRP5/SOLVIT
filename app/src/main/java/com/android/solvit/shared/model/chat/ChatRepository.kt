@@ -53,4 +53,17 @@ interface ChatRepository {
       onSuccess: (String) -> Unit,
       onFailure: (Exception) -> Unit
   )
+
+  fun seekerShouldCreateRequest(
+      chatRoomId: String,
+      shouldCreateRequest: Boolean,
+      onSuccess: () -> Unit,
+      onFailure: () -> Unit
+  )
+
+  fun getShouldCreateRequest(
+      chatRoomId: String,
+      onSuccess: (Boolean) -> Unit,
+      onFailure: () -> Unit
+  )
 }
