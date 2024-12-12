@@ -43,7 +43,7 @@ fun ProviderMapScreen(
   // State to hold the user's location
   var userLocation by remember { mutableStateOf<LatLng?>(null) }
   // Collect the service requests from the ViewModel
-  val requests by serviceRequestViewModel.requests.collectAsState()
+  val requests by serviceRequestViewModel.pendingRequests.collectAsState()
 
   // Allows to bypass location permission for testing
   if (requestLocationPermission) {
@@ -70,7 +70,10 @@ fun ProviderMapScreen(
               icon = icon,
               tag = "requestMarker-${request.uid}",
               image = imageBitmap,
-              onClick = { /*TODO: Navigate to request details screen*/})
+              onClick = {
+                serviceRequestViewModel.selectRequest(request)
+                navigationActions.navigateTo(Route.BOOKING_DETAILS)
+              })
         }
     requestMarkers.value = markers
     markersLoading.value = false
