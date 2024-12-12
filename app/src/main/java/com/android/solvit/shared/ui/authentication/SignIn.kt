@@ -42,6 +42,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.colorScheme
+import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -83,6 +84,8 @@ import com.android.solvit.R
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
+import com.android.solvit.shared.ui.theme.Typography
+import com.android.solvit.shared.ui.utils.ValidationRegex
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
@@ -124,12 +127,7 @@ fun SignInScreen(
   val backgroundColor = colorScheme.background // White background color
 
   Scaffold(
-      topBar = {
-        TopAppBar(
-            title = { Text("") },
-            navigationIcon = { GoBackButton(navigationActions) },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = backgroundColor))
-      },
+      topBar = {},
       content = { padding ->
         val modifier =
             Modifier.fillMaxSize()
@@ -183,33 +181,6 @@ fun SignInScreen(
           )
         }
       })
-}
-
-/**
- * A composable function that displays a "Go Back" button with a debounce mechanism to prevent
- * multiple rapid clicks.
- *
- * @param navigationActions A set of navigation actions to handle screen transitions.
- */
-@Composable
-fun GoBackButton(navigationActions: NavigationActions) {
-  var canGoBack by remember { mutableStateOf(true) }
-  val coroutineScope = rememberCoroutineScope()
-  IconButton(
-      onClick = {
-        if (canGoBack) {
-          canGoBack = false
-          navigationActions.goBack()
-          coroutineScope.launch {
-            delay(500)
-            canGoBack = true
-          }
-        }
-      },
-      modifier = Modifier.testTag("goBackButton"),
-      enabled = canGoBack) {
-        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "goBackButton")
-      }
 }
 
 /**
@@ -364,7 +335,7 @@ fun LogoSection() {
     Spacer(modifier = Modifier.height(4.dp))
     Text(
         text = "Welcome!",
-        fontSize = 28.sp,
+        style = Typography.bodyLarge.copy(fontSize = 28.sp),
         fontWeight = FontWeight.Bold,
         color = colorScheme.primary,
         modifier = Modifier.testTag("welcomeText"))
@@ -441,9 +412,8 @@ fun FormSection(
   Text(
       text = "Your password must have at least 6 characters",
       color = colorScheme.onSurfaceVariant,
-      fontSize = 12.sp,
       textAlign = TextAlign.Start,
-      style = TextStyle(fontSize = 12.sp, lineHeight = 16.sp),
+      style = Typography.bodySmall,
       modifier = Modifier.padding(top = 4.dp).fillMaxWidth())
 
   Spacer(modifier = Modifier.height(8.dp))
@@ -466,7 +436,7 @@ fun FormSection(
           text = "Remember me",
           modifier = Modifier.testTag("rememberMeCheckbox"),
           color = colorScheme.onSurfaceVariant,
-          fontSize = 16.sp)
+          style = Typography.bodyLarge)
     }
 
     // Section Forgot Password
@@ -477,7 +447,7 @@ fun FormSection(
           Text(
               text = "Forgot password?",
               color = colorScheme.onSurfaceVariant,
-              fontSize = 16.sp,
+              style = Typography.bodyLarge,
               textDecoration = TextDecoration.Underline,
               modifier =
                   Modifier.clickable { navigationActions.navigateTo(Screen.FORGOT_PASSWORD) }
@@ -501,7 +471,7 @@ fun FormSection(
 
   Spacer(modifier = Modifier.height(4.dp))
 
-  Text("OR", color = colorScheme.onSurface)
+  Text("OR", color = colorScheme.onSurface, style = Typography.bodyLarge)
 
   Spacer(modifier = Modifier.height(4.dp))
 
@@ -545,9 +515,7 @@ fun SignUpSection(navigationActions: NavigationActions) {
   ) {
     ClickableText(
         text = annotatedText,
-        style =
-            TextStyle(
-                color = colorScheme.onSurface, fontSize = 16.sp, textAlign = TextAlign.Center),
+        style = Typography.bodyLarge.copy(color = colorScheme.onSurface, textAlign = TextAlign.Center),
         onClick = { navigationActions.navigateTo(Screen.SIGN_UP) },
         modifier = Modifier.fillMaxWidth().testTag("signUpLink"))
   }
@@ -622,7 +590,7 @@ fun SignInButton(
             "Sign in",
             color = colorScheme.background,
             fontWeight = FontWeight.Bold,
-            fontSize = 16.sp)
+            style = Typography.bodyLarge)
       }
 }
 
@@ -662,11 +630,11 @@ fun GoogleButton(
           Text(
               text = text,
               color = colorScheme.onSurface,
-              fontSize = 16.sp,
               maxLines = 2,
               overflow = TextOverflow.Ellipsis,
               modifier = Modifier.weight(1f),
-              textAlign = TextAlign.Center)
+              textAlign = TextAlign.Center,
+              style = Typography.bodyLarge)
         }
       }
 }
@@ -794,7 +762,7 @@ fun CustomOutlinedTextField(
       Text(
           text = errorMessage,
           color = colorScheme.error,
-          fontSize = 15.sp, // Error text size
+          style = Typography.bodyMedium,
           modifier = Modifier.padding(start = 16.dp, top = 4.dp).testTag(errorTestTag))
     }
   }
@@ -904,17 +872,8 @@ fun PasswordTextField(
       Text(
           text = errorMessage,
           color = colorScheme.error,
-          fontSize = 15.sp, // Error text size
+          style = Typography.bodyMedium,
           modifier = Modifier.padding(start = 16.dp, top = 4.dp).testTag(testTagErrorPassword))
     }
   }
-}
-
-object ValidationRegex {
-  val PHONE_REGEX = Regex("^[+]?[0-9]{6,15}$")
-  val EMAIL_REGEX = Regex("^[\\w.-]+@[\\w.-]+\\.[a-zA-Z]{2,}$")
-  val FULL_NAME_REGEX = Regex("^[a-zA-Z]+(?:[-' ][a-zA-Z]+)* [a-zA-Z]+$")
-  val STARTING_PRICE_REGEX = Regex("^(0|[1-9]\\d*)(\\.\\d{1,2})?\$")
-  val NAME_REGEX = Regex("^[a-zA-ZÀ-ÿ '-]{2,50}$")
-  val DESCRIPTION_REGEX = Regex("^[a-zA-ZÀ-ÿ0-9 ,.!?-]{1,500}$")
 }

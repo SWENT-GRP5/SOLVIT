@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.sp
 import com.android.solvit.R
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
+import com.android.solvit.shared.ui.theme.Typography
 
 /**
  * A composable function that displays the opening screen of the application. The layout dynamically
@@ -88,7 +89,7 @@ fun OpeningScreenPortrait(navigationActions: NavigationActions) {
                                         color = colorScheme.secondary,
                                         fontWeight = FontWeight.Bold)))
                       },
-                  fontSize = 60.sp,
+                  style = Typography.titleLarge.copy(fontSize = 60.sp),
                   modifier = Modifier.testTag("appNamePortrait"))
               Spacer(modifier = Modifier.height(175.dp))
               Text(
@@ -132,6 +133,7 @@ fun OpeningScreenLandscape(navigationActions: NavigationActions) {
               // Right Side Texts
               Column(
                   verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.Start) {
+
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Text(
@@ -160,17 +162,17 @@ fun OpeningScreenLandscape(navigationActions: NavigationActions) {
                     // Tagline Text
                     Text(
                         text = "Your Problem, Our Priority",
-                        fontSize = 18.sp,
                         color = colorScheme.onSurface,
                         modifier = Modifier.testTag("taglineLandscape"),
-                        textAlign = TextAlign.Center)
+                        textAlign = TextAlign.Center,
+                        style = Typography.bodyLarge.copy(fontSize = 18.sp))
 
                     Spacer(modifier = Modifier.height(8.dp))
 
                     // Call-to-Action Button
                     Text(
                         text = "Tap to Continue",
-                        fontSize = 18.sp,
+                        style = Typography.bodyLarge.copy(fontSize = 18.sp),
                         textDecoration = TextDecoration.Underline,
                         color = colorScheme.secondary,
                         modifier =
