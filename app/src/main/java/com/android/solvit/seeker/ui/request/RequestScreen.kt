@@ -24,6 +24,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -35,6 +36,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.request.ServiceRequest
@@ -95,7 +98,13 @@ fun RequestScreen(
                     titleContentColor = colorScheme.onBackground,
                     actionIconContentColor = colorScheme.onBackground,
                 ),
-            title = { Text(screenTitle, Modifier.testTag("screenTitle")) },
+            title = {
+              Text(
+                  text = screenTitle,
+                  modifier = Modifier.testTag("screenTitle"),
+                  textAlign = TextAlign.Center,
+                  style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold))
+            },
             navigationIcon = {
               IconButton(
                   onClick = {
@@ -113,12 +122,14 @@ fun RequestScreen(
         Column(
             modifier =
                 Modifier.fillMaxSize()
-                    .padding(16.dp)
+                    .padding(20.dp)
                     .padding(paddingValues)
                     .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
             horizontalAlignment = Alignment.CenterHorizontally) {
+              ImagePicker(selectedImageUri, imageUrl, onImageSelected)
               TitleInput(title, onTitleChange)
+              DescriptionInput(description, onDescriptionChange)
               ServiceTypeDropdown(
                   typeQuery,
                   onTypeQueryChange,
@@ -126,7 +137,6 @@ fun RequestScreen(
                   onShowDropdownTypeChange,
                   filteredServiceTypes,
                   onServiceTypeSelected)
-              DescriptionInput(description, onDescriptionChange)
               LocationDropdown(
                   locationQuery = locationQuery,
                   onLocationQueryChange = onLocationQueryChange,
@@ -138,14 +148,9 @@ fun RequestScreen(
                   requestLocation = selectedRequest?.location,
                   isValueOk = selectedLocation != null)
               DatePickerFieldToModal(dueDate = dueDate, onDateChange = onDueDateChange)
-              ImagePicker(selectedImageUri, imageUrl, onImageSelected)
               Button(
                   onClick = onSubmit,
-                  modifier =
-                      Modifier.fillMaxWidth()
-                          .padding(start = 80.dp, end = 80.dp)
-                          .height(40.dp)
-                          .testTag("requestSubmit"),
+                  modifier = Modifier.fillMaxWidth().height(40.dp).testTag("requestSubmit"),
                   shape = RoundedCornerShape(25.dp),
                   enabled =
                       title.isNotBlank() &&
