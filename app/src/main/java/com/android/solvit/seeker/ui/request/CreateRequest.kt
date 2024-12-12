@@ -32,7 +32,7 @@ import com.android.solvit.shared.model.request.analyzer.MultiStepDialog
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.model.utils.isInternetAvailable
 import com.android.solvit.shared.model.utils.loadBitmapFromUri
-import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_PROVIDER
+import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_SEEKER
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
 import com.google.firebase.Timestamp
@@ -91,10 +91,11 @@ fun CreateRequestScreen(
 
   Scaffold(
       bottomBar = {
+        val currentRoute = navigationActions.currentRoute() ?: "default_route"
         BottomNavigationMenu(
             onTabSelect = { navigationActions.navigateTo(it.route) },
-            tabList = LIST_TOP_LEVEL_DESTINATION_PROVIDER,
-            selectedItem = navigationActions.currentRoute())
+            tabList = LIST_TOP_LEVEL_DESTINATION_SEEKER,
+            selectedItem = currentRoute)
       }) { // AI Assistant Dialog
         if (showAIAssistantDialog) {
           AIAssistantDialog(
