@@ -7,7 +7,6 @@ import androidx.activity.ComponentActivity
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -110,7 +109,7 @@ fun ServicesScreen(
           LazyColumn(modifier = Modifier.fillMaxSize()) {
             item { Spacer(Modifier.size(16.dp)) }
             item { DiscountSection(navigationActions, listProviderViewModel) }
-            item { ShortcutsSection(navigationActions, listProviderViewModel) }
+            item { ShortcutsSection(navigationActions) }
             item { CategoriesSection(searchViewModel, listProviderViewModel, navigationActions) }
             item { PerformersSection(listProviderViewModel, navigationActions) }
             item { Spacer(Modifier.size(40.dp)) }
@@ -209,7 +208,7 @@ fun TopSection(
                         modifier =
                             Modifier.clickable {
                               listProviderViewModel.selectService(searchResults[index].service)
-                              navigationActions.navigateTo(Route.PROVIDERS)
+                              navigationActions.navigateTo(Route.PROVIDERS_LIST)
                             })
                   }
                 }
@@ -232,7 +231,7 @@ fun DiscountSection(
               .clip(RoundedCornerShape(16.dp))
               .clickable {
                 listProviderViewModel.selectService(Services.PLUMBER)
-                navigationActions.navigateTo(Route.PROVIDERS)
+                navigationActions.navigateTo(Route.PROVIDERS_LIST)
               }) {
         // Background Image
         Image(
@@ -406,7 +405,7 @@ fun ServiceItem(service: ServicesListItem, workerCount: Int, onClick: () -> Unit
       shape = RoundedCornerShape(12.dp),
       border = BorderStroke(2.dp, service.color),
       colors =
-          CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.background)) {
+          CardDefaults.outlinedCardColors(containerColor = colorScheme.background)) {
         Column(
             modifier = Modifier.fillMaxSize().padding(12.dp),
             verticalArrangement = Arrangement.SpaceBetween,
@@ -423,7 +422,7 @@ fun ServiceItem(service: ServicesListItem, workerCount: Int, onClick: () -> Unit
                   text = Services.format(service.service),
                   modifier = Modifier.testTag(service.service.toString() + "Name"),
                   style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                  color = MaterialTheme.colorScheme.onBackground,
+                  color = colorScheme.onBackground,
                   textAlign = TextAlign.Center)
 
               // Worker count below the service name
@@ -431,7 +430,7 @@ fun ServiceItem(service: ServicesListItem, workerCount: Int, onClick: () -> Unit
                   text = "+ $workerCount workers",
                   modifier = Modifier.testTag(service.service.toString() + "WorkerCount"),
                   style = MaterialTheme.typography.bodySmall,
-                  color = MaterialTheme.colorScheme.onSurfaceVariant,
+                  color = colorScheme.onSurfaceVariant,
                   textAlign = TextAlign.Center)
             }
       }
