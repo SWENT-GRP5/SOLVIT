@@ -1,4 +1,4 @@
-package com.android.solvit.seeker.model.provider
+package com.android.solvit.provider.model.profile
 
 import com.android.solvit.shared.model.authentication.AuthRepository
 import com.android.solvit.shared.model.authentication.AuthViewModel
@@ -43,7 +43,7 @@ class ProviderViewModelTest {
     authViewModel = AuthViewModel(authRepository)
     whenever(authRepository.getUserId()).thenReturn("1234")
     providerRepository = mock(ProviderRepository::class.java)
-    providerViewModel = ProviderViewModel(providerRepository, authRepository)
+    providerViewModel = ProviderViewModel(providerRepository)
     `when`(providerRepository.getProvider(any(), any(), any())).thenAnswer {
       val onSuccess = it.getArgument<(Provider) -> Unit>(1)
       onSuccess(provider)
@@ -52,13 +52,13 @@ class ProviderViewModelTest {
 
   @Test
   fun getProvider() {
-    providerViewModel.getProvider()
+    providerViewModel.getProvider("1234")
     verify(providerRepository).getProvider(any(), any(), any())
   }
 
   @Test
   fun testOptimizeRouteBooking() {
-    providerViewModel.getProvider()
+    providerViewModel.getProvider("1234")
     val locations =
         listOf(
             Location(1.0, 1.0, "Location A"),
