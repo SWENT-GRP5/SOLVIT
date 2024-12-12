@@ -23,7 +23,6 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.colorScheme
@@ -164,10 +163,6 @@ fun TopOrdersSection(navigationActions: NavigationActions) {
       verticalAlignment = Alignment.CenterVertically) {
         val context = LocalContext.current
         Row {
-          Icon(
-              imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-              contentDescription = null,
-              modifier = Modifier.clickable { navigationActions.goBack() }.testTag("arrowBack"))
           Spacer(modifier = Modifier.size(22.dp))
           Text(
               text = "Orders",
