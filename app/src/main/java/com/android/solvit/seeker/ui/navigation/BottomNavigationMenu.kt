@@ -1,5 +1,6 @@
 package com.android.solvit.seeker.ui.navigation
 
+import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Canvas
@@ -37,6 +38,7 @@ import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.navigation.TopLevelDestination
 import com.android.solvit.shared.ui.navigation.TopLevelDestinations
 
+@SuppressLint("SourceLockedOrientationActivity")
 @Composable
 fun BottomNavigationMenu(
     onTabSelect: (TopLevelDestination) -> Unit,

@@ -1,5 +1,6 @@
 package com.android.solvit.shared.ui.chat
 
+import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -50,12 +51,14 @@ import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.chat.ChatMessage
 import com.android.solvit.shared.model.chat.ChatViewModel
 import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_PROVIDER
+import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_SEEKER
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
 import com.android.solvit.shared.ui.utils.formatTimestamp
 import com.android.solvit.shared.ui.utils.getReceiverImageUrl
 import com.android.solvit.shared.ui.utils.getReceiverName
 
+@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun MessageBox(
     chatViewModel: ChatViewModel,
@@ -94,7 +97,12 @@ fun MessageBox(
         bottomBar = {
           BottomNavigationMenu(
               onTabSelect = { navigationActions.navigateTo(it.route) },
-              tabList = LIST_TOP_LEVEL_DESTINATION_PROVIDER,
+              tabList =
+                  if (authViewModel.user.value?.role == "seeker") {
+                    LIST_TOP_LEVEL_DESTINATION_SEEKER
+                  } else {
+                    LIST_TOP_LEVEL_DESTINATION_PROVIDER
+                  },
               selectedItem = if (isReadyToNavigate) Screen.CHAT else Screen.INBOX)
         }) { paddingValues ->
           if (allMessages.isNotEmpty()) {

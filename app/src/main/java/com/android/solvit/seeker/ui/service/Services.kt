@@ -241,7 +241,7 @@ fun ShortcutsSection(
                   modifier =
                       Modifier.weight(1f)
                           .background(LightRed, shape = RoundedCornerShape(16.dp))
-                          .clickable { navigationActions.navigateTo(Route.MAP) }
+                          .clickable { navigationActions.navigateTo(Route.MAP_OF_SEEKER) }
                           .testTag("servicesScreenMapShortcut")) {
                     Column(
                         modifier = Modifier.padding(16.dp).fillMaxWidth(),

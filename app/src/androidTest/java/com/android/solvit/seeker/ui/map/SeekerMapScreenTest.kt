@@ -73,7 +73,7 @@ class SeekerMapScreenTest {
       onSuccess(testProviders)
     }
 
-    `when`(navigationActions.currentRoute()).thenReturn(Route.MAP)
+    `when`(navigationActions.currentRoute()).thenReturn(Route.MAP_OF_SEEKER)
   }
 
   @Test

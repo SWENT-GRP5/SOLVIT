@@ -69,7 +69,7 @@ import com.android.solvit.shared.ui.theme.LightOrange
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "SourceLockedOrientationActivity")
 @Composable
 fun RequestsOverviewScreen(
     navigationActions: NavigationActions,
@@ -88,10 +88,11 @@ fun RequestsOverviewScreen(
   Scaffold(
       modifier = Modifier.testTag("requestsOverviewScreen"),
       bottomBar = {
+        val currentRoute = navigationActions.currentRoute() ?: "default_route"
         BottomNavigationMenu(
             onTabSelect = { navigationActions.navigateTo(it.route) },
             tabList = LIST_TOP_LEVEL_DESTINATION_SEEKER,
-            selectedItem = Route.REQUESTS_OVERVIEW)
+            selectedItem = currentRoute)
       }) {
         val user = authViewModel.user.collectAsState()
         val userId = user.value?.uid ?: "-1"
