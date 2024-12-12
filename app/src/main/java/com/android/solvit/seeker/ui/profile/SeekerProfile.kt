@@ -58,8 +58,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -73,7 +71,7 @@ import com.android.solvit.shared.ui.navigation.Screen
 import com.android.solvit.shared.ui.theme.Typography
 
 @OptIn(ExperimentalMaterial3Api::class)
-@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
+@SuppressLint("UnusedMaterialScaffoldPaddingParameter", "SourceLockedOrientationActivity")
 @Composable
 fun SeekerProfileScreen(
     viewModel: SeekerProfileViewModel = viewModel(factory = SeekerProfileViewModel.Factory),
@@ -211,8 +209,7 @@ fun ProfileTopBar(navigationActions: NavigationActions, onLogout: () -> Unit) {
         Text(
             "Profile",
             modifier = Modifier.testTag("ProfileTitle"),
-            fontWeight = FontWeight.Bold,
-        )
+            style = Typography.titleLarge.copy(fontSize = 16.sp))
       },
       navigationIcon = {
         IconButton(
@@ -263,15 +260,14 @@ fun ProfileInfoCard(
                 Column {
                   Text(
                       text = fullName,
-                      fontWeight = FontWeight.Bold,
-                      fontSize = 20.sp,
                       color = colorScheme.onPrimary,
-                      modifier = Modifier.testTag("ProfileName"))
+                      modifier = Modifier.testTag("ProfileName"),
+                      style = Typography.titleLarge.copy(fontSize = 20.sp))
                   Text(
                       text = email,
-                      fontSize = 14.sp,
                       color = colorScheme.onPrimary.copy(alpha = 0.6f),
-                      modifier = Modifier.testTag("ProfileEmail"))
+                      modifier = Modifier.testTag("ProfileEmail"),
+                      style = Typography.bodyMedium)
                 }
               }
               IconButton(onClick = onEdit, modifier = Modifier.testTag("EditProfileButton")) {
@@ -360,18 +356,32 @@ fun AboutAppCard(context: Context) {
 fun LogoutDialog(onLogout: () -> Unit, onDismiss: () -> Unit) {
   AlertDialog(
       onDismissRequest = onDismiss,
-      title = { Text("Log out", modifier = Modifier.testTag("LogoutDialogTitle")) },
+      title = {
+        Text(
+            "Log out",
+            style = Typography.bodyLarge,
+            modifier = Modifier.testTag("LogoutDialogTitle"))
+      },
       text = {
-        Text("Are you sure you want to log out?", modifier = Modifier.testTag("LogoutDialogText"))
+        Text(
+            "Are you sure you want to log out?",
+            style = Typography.bodyLarge,
+            modifier = Modifier.testTag("LogoutDialogText"))
       },
       confirmButton = {
         Button(onClick = onLogout, modifier = Modifier.testTag("LogoutDialogConfirmButton")) {
-          Text("Log out")
+          Text(
+              "Log out",
+              style = Typography.bodyLarge,
+          )
         }
       },
       dismissButton = {
         Button(onClick = onDismiss, modifier = Modifier.testTag("LogoutDialogDismissButton")) {
-          Text("Cancel")
+          Text(
+              "Cancel",
+              style = Typography.bodyLarge,
+          )
         }
       },
       modifier = Modifier.testTag("LogoutDialog"))

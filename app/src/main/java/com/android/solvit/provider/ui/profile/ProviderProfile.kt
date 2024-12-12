@@ -42,7 +42,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -218,7 +217,8 @@ fun ProviderItem(
             color = colorScheme.onBackground,
             maxLines = if (expanded) Int.MAX_VALUE else maxLines,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.clickable { expanded = !expanded })
+            modifier = Modifier.clickable { expanded = !expanded },
+            style = Typography.bodyLarge)
       }
 }
 
@@ -255,9 +255,8 @@ fun InsightsCard(provider: Provider, serviceRequestViewModel: ServiceRequestView
               Text(
                   text = "Insights",
                   color = colorScheme.primary,
-                  fontWeight = FontWeight.Bold,
-                  fontSize = 24.sp,
-                  modifier = Modifier.testTag("InsightsTitle"))
+                  modifier = Modifier.testTag("InsightsTitle"),
+                  style = Typography.titleLarge.copy(fontSize = 24.sp))
               Row(
                   verticalAlignment = Alignment.CenterVertically,
                   modifier = Modifier.fillMaxWidth()) {
@@ -276,7 +275,7 @@ fun InsightsCard(provider: Provider, serviceRequestViewModel: ServiceRequestView
                                 Text(
                                     text = "${provider.rating}",
                                     color = colorScheme.onBackground,
-                                )
+                                    style = Typography.bodyLarge)
                               }
                           Row(
                               horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -284,9 +283,11 @@ fun InsightsCard(provider: Provider, serviceRequestViewModel: ServiceRequestView
                                 Text(
                                     text = "Popular",
                                     color = colorScheme.primary,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 18.sp)
-                                Text(text = "${provider.popular}", color = colorScheme.onBackground)
+                                    style = Typography.titleLarge.copy(fontSize = 18.sp))
+                                Text(
+                                    text = "${provider.popular}",
+                                    color = colorScheme.onBackground,
+                                    style = Typography.bodyLarge)
                               }
                           Row(
                               horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -296,7 +297,10 @@ fun InsightsCard(provider: Provider, serviceRequestViewModel: ServiceRequestView
                                     contentDescription = "Earnings",
                                     tint = colorScheme.primary,
                                     modifier = Modifier.size(32.dp))
-                                Text(text = "$earnings CHF", color = colorScheme.onBackground)
+                                Text(
+                                    text = "$earnings CHF",
+                                    color = colorScheme.onBackground,
+                                    style = Typography.bodyLarge)
                               }
                         }
                     Column(
@@ -305,8 +309,7 @@ fun InsightsCard(provider: Provider, serviceRequestViewModel: ServiceRequestView
                           Text(
                               text = "Jobs",
                               color = colorScheme.primary,
-                              fontWeight = FontWeight.Bold,
-                              fontSize = 18.sp)
+                              style = Typography.titleLarge.copy(fontSize = 18.sp))
                           Column {
                             for (status in ServiceRequestStatus.entries) {
                               val size =
@@ -321,7 +324,8 @@ fun InsightsCard(provider: Provider, serviceRequestViewModel: ServiceRequestView
                               Text(
                                   text = "$size ${status.name.lowercase()}",
                                   color = getStatusColor(status),
-                                  modifier = Modifier.testTag("${status.name}Tasks"))
+                                  modifier = Modifier.testTag("${status.name}Tasks"),
+                                  style = Typography.bodyLarge)
                             }
                           }
                         }
