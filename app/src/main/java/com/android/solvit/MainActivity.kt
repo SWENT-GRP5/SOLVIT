@@ -16,6 +16,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navigation
 import com.android.solvit.provider.model.ProviderCalendarViewModel
+import com.android.solvit.provider.model.profile.ProviderViewModel
 import com.android.solvit.provider.ui.NotificationScreen
 import com.android.solvit.provider.ui.calendar.ProviderCalendarScreen
 import com.android.solvit.provider.ui.map.ProviderMapScreen
@@ -97,11 +98,10 @@ fun SolvitApp() {
   val calendarViewModel = viewModel {
     ProviderCalendarViewModel(authViewModel, serviceRequestViewModel)
   }
-  val navController = rememberNavController()
-  val navigationActions = NavigationActions(navController)
   val aiSolverViewModel = viewModel<AiSolverViewModel>(factory = AiSolverViewModel.Factory)
   val notificationViewModel =
       viewModel<NotificationsViewModel>(factory = NotificationsViewModel.Factory)
+  val providerViewModel = viewModel<ProviderViewModel>(factory = ProviderViewModel.Factory)
 
   val packagesAssistantViewModel =
       viewModel<PackagesAssistantViewModel>(factory = PackagesAssistantViewModel.Factory)
@@ -131,6 +131,7 @@ fun SolvitApp() {
       "provider" ->
           ProviderUI(
               authViewModel,
+              providerViewModel,
               listProviderViewModel,
               serviceRequestViewModel,
               seekerProfileViewModel,
@@ -311,6 +312,7 @@ fun SeekerUI(
 @Composable
 fun ProviderUI(
     authViewModel: AuthViewModel,
+    providerViewModel: ProviderViewModel,
     listProviderViewModel: ListProviderViewModel,
     serviceRequestViewModel: ServiceRequestViewModel,
     seekerProfileViewModel: SeekerProfileViewModel,
@@ -368,11 +370,11 @@ fun ProviderUI(
     // Profile
     navigation(startDestination = Screen.PROVIDER_PROFILE, route = Route.PROFILE) {
       composable(Screen.PROVIDER_PROFILE) {
-        ProviderProfileScreen(listProviderViewModel, authViewModel, navigationActions)
+        ProviderProfileScreen(providerViewModel, authViewModel, navigationActions)
       }
       composable(Screen.PROVIDER_MODIFY_PROFILE) {
         ModifyProviderInformationScreen(
-            listProviderViewModel, authViewModel, locationViewModel, navigationActions)
+            providerViewModel, authViewModel, locationViewModel, navigationActions)
       }
     }
 
