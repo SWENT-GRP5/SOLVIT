@@ -149,4 +149,8 @@ class ListProviderViewModel(private val repository: ProviderRepository) : ViewMo
               else _providersListFiltered.value.sortedBy { it.nbrOfJobs }
     }
   }
+
+  fun countProvidersByService(service: Services): Int {
+    return _providersList.value.count { it.service == service }
+  }
 }

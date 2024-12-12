@@ -6,7 +6,7 @@ import com.android.solvit.shared.model.service.Services
 data class Provider(
     val uid: String = "",
     val name: String = "",
-    val service: Services = Services.TUTOR,
+    val service: Services = Services.OTHER,
     val imageUrl: String = "",
     val companyName: String = "",
     val phone: String = "",
