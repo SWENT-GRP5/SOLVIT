@@ -103,10 +103,10 @@ class RequestsFeedScreenTest {
     navController = mock(NavController::class.java)
     navigationActions = mock(NavigationActions::class.java)
     // Mocking the getServiceRequests function to return the pre-defined request list
-      `when`(serviceRequestRepository.getPendingServiceRequests(any(), any())).thenAnswer {
-        val onSuccess = it.getArgument<(List<ServiceRequest>) -> Unit>(0)
-        onSuccess(requests) // Simulate success
-      }
+    `when`(serviceRequestRepository.getPendingServiceRequests(any(), any())).thenAnswer {
+      val onSuccess = it.getArgument<(List<ServiceRequest>) -> Unit>(0)
+      onSuccess(requests) // Simulate success
+    }
 
     `when`(navigationActions.currentRoute()).thenReturn(Route.REQUESTS_FEED)
 
