@@ -122,8 +122,8 @@ class ProviderRepositoryFirestore(
               .collection("schedules")
               .document("current")
 
-      val schedule =
-          transaction.get(scheduleRef).toObject<Schedule>()
+      val schedule: Schedule =
+          transaction.get(scheduleRef).toObject(Schedule::class.java)
               ?: throw IllegalStateException("Schedule not found for provider $providerId")
 
       val newTimeSlot =
@@ -139,6 +139,9 @@ class ProviderRepositoryFirestore(
         throw FirebaseFirestoreException(
             "Time slot no longer available", FirebaseFirestoreException.Code.ABORTED)
       }
+      val updatedSchedule =
+          schedule.copy(acceptedTimeSlots = schedule.acceptedTimeSlots + newTimeSlot)
+      transaction.set(scheduleRef, updatedSchedule)
     }
   }
 
@@ -153,17 +156,16 @@ class ProviderRepositoryFirestore(
               .collection("schedules")
               .document("current")
 
-      val schedule = transaction.get(scheduleRef).toObject<Schedule>()
+      val schedule =
+          transaction.get(scheduleRef).toObject(Schedule::class.java)
+              ?: throw IllegalStateException("Schedule not found for provider $providerId")
 
       val updatedSchedule =
-          schedule?.copy(
+          schedule.copy(
               acceptedTimeSlots =
                   schedule.acceptedTimeSlots.filterNot { it.requestId == request.uid })
-      if (updatedSchedule != null) {
-        transaction.set(scheduleRef, updatedSchedule)
-      } else {
-        Log.e("ProviderRepository", "updatedScedule is null")
-      }
+
+      transaction.set(scheduleRef, updatedSchedule)
     }
   }
 
