@@ -266,4 +266,9 @@ open class ServiceRequestViewModel(private val repository: ServiceRequestReposit
           time.format(timeFormatter)
         }
   }
+
+  fun addListenerOnServiceRequests(onSuccess: (List<ServiceRequest>) -> Unit) {
+    repository.addListenerOnServiceRequests(
+        onSuccess = { onSuccess(requests.value) }, onFailure = {})
+  }
 }
