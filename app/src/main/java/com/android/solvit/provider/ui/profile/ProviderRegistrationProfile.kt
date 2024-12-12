@@ -243,7 +243,7 @@ fun ProviderRegistrationScreen(
                 CustomOutlinedTextField(
                     value = fullName,
                     onValueChange = { fullName = it },
-                    label = "Full Name",
+                    label = "First/Last Name",
                     placeholder = "Enter your full name",
                     isValueOk = isFullNameOk,
                     errorMessage = "Enter a valid first and last name",
@@ -761,19 +761,32 @@ fun UploadImage(selectedImageUri: Uri?, imageUrl: String?, onImageSelected: (Uri
             Text(
                 "Click to upload a picture of you",
                 color = colorScheme.onSurfaceVariant,
-                modifier = Modifier.clickable { imagePickerLauncher.launch("image/*") },
+                modifier =
+                    Modifier.testTag("uploadImage").clickable {
+                      imagePickerLauncher.launch("image/*")
+                    },
                 style =
                     MaterialTheme.typography.bodyLarge.copy(
                         textDecoration = TextDecoration.Underline))
           }
         } else {
-          AsyncImage(
-              model =
-                  selectedImageUri?.toString()
-                      ?: imageUrl, // Show selected image URI or fallback URL
-              contentDescription = "Uploaded Image",
-              contentScale = ContentScale.Crop,
-              modifier = Modifier.fillMaxSize())
+          Box(modifier = Modifier.fillMaxSize()) {
+            AsyncImage(
+                model =
+                    selectedImageUri?.toString()
+                        ?: imageUrl, // Show selected image URI or fallback URL
+                contentDescription = "Uploaded Image",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize())
+            Image(
+                painter = painterResource(id = R.drawable.close_icon),
+                contentDescription = "Delete Image",
+                contentScale = ContentScale.Fit,
+                modifier =
+                    Modifier.align(Alignment.TopEnd).size(32.dp).padding(4.dp).clickable {
+                      onImageSelected(null)
+                    })
+          }
         }
       }
 }
