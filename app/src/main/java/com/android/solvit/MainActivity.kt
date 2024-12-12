@@ -213,7 +213,7 @@ fun SeekerUI(
 
   NavHost(navController = navController, startDestination = Route.SEEKER_OVERVIEW) {
     // Overview
-    composable(Route.SEEKER_OVERVIEW) { ServicesScreen(navigationActions, listProviderViewModel) }
+    composable(Route.SEEKER_OVERVIEW) { ServicesScreen(navigationActions, seekerProfileViewModel, listProviderViewModel) }
 
     // Providers
     composable(Route.PROVIDERS_LIST) {
