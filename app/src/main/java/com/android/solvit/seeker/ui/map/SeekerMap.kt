@@ -9,9 +9,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.android.solvit.R
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.seeker.ui.navigation.BottomNavigationMenu
+import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.map.MapScreen
 import com.android.solvit.shared.ui.map.MarkerData
 import com.android.solvit.shared.ui.map.RequestLocationPermission
@@ -62,8 +62,9 @@ fun SeekerMapScreen(
     val markers =
         providers.map { provider ->
           val imageBitmap =
-              imageBitmapFromUrl(context, provider.imageUrl, R.drawable.empty_profile_img)
-          val icon = R.drawable.orders_ovw_image
+              imageBitmapFromUrl(
+                  context, provider.imageUrl, Services.getProfileImage(provider.service))
+          val icon = Services.getIcon(provider.service)
           MarkerData(
               location = LatLng(provider.location.latitude, provider.location.longitude),
               title = provider.name,

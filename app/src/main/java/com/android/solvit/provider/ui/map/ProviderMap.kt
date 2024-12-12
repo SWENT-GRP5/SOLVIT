@@ -12,6 +12,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.solvit.R
 import com.android.solvit.seeker.ui.navigation.BottomNavigationMenu
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
+import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.map.MapScreen
 import com.android.solvit.shared.ui.map.MarkerData
 import com.android.solvit.shared.ui.map.RequestLocationPermission
@@ -62,7 +63,7 @@ fun ProviderMapScreen(
     val markers =
         requests.map { request ->
           val imageBitmap = imageBitmapFromUrl(context, request.imageUrl ?: "", R.drawable.no_photo)
-          val icon = R.drawable.orders_ovw_image
+          val icon = Services.getIcon(request.type)
           MarkerData(
               location =
                   LatLng(request.location?.latitude ?: 0.0, request.location?.longitude ?: 0.0),

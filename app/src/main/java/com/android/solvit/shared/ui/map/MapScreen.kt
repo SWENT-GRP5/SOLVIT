@@ -209,11 +209,16 @@ fun MapMarker(markerData: MarkerData) {
                       Row(
                           modifier = Modifier.fillMaxWidth(),
                           horizontalArrangement = Arrangement.End) {
-                            Icon(
-                                painter = painterResource(markerData.icon),
-                                contentDescription = null,
-                                tint = Color.Unspecified,
-                                modifier = Modifier.size(30.dp))
+                            Box(
+                                modifier =
+                                    Modifier.background(
+                                        colorScheme.background, RoundedCornerShape(8.dp))) {
+                                  Icon(
+                                      painter = painterResource(markerData.icon),
+                                      contentDescription = null,
+                                      tint = Color.Unspecified,
+                                      modifier = Modifier.size(30.dp))
+                                }
                           }
                     }
               }
