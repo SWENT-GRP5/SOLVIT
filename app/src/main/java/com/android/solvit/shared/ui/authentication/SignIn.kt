@@ -39,8 +39,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -72,7 +70,6 @@ import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
 import com.android.solvit.shared.ui.utils.CustomOutlinedTextField
-import com.android.solvit.shared.ui.utils.GoBackButton
 import com.android.solvit.shared.ui.utils.PasswordTextField
 import com.android.solvit.shared.ui.utils.ValidationRegex
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -115,12 +112,6 @@ fun SignInScreen(
   val backgroundColor = colorScheme.background // White background color
 
   Scaffold(
-      topBar = {
-        TopAppBar(
-            title = { Text("") },
-            navigationIcon = { GoBackButton(navigationActions) },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = backgroundColor))
-      },
       content = { padding ->
         val modifier =
             Modifier.fillMaxSize()
