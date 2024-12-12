@@ -207,6 +207,7 @@ class SignUpButtonTest {
       SignUpButton(
           onClick = {},
           isComplete = true,
+
           goodFormEmail = true,
           passwordLengthComplete = true,
           samePassword = false)
