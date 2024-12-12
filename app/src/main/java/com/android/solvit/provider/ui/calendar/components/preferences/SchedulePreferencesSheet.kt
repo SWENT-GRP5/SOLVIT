@@ -3,18 +3,18 @@ package com.android.solvit.provider.ui.calendar.components.preferences
 import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.*
@@ -22,6 +22,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -35,6 +36,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+import java.time.format.TextStyle
 import java.util.Locale
 import kotlinx.coroutines.delay
 
@@ -45,8 +47,17 @@ fun SchedulePreferencesSheet(viewModel: ProviderCalendarViewModel, onDismiss: ()
   val tabs = listOf("Regular Hours", "Exceptions")
   var showError by remember { mutableStateOf<String?>(null) }
 
+  // Clear error after delay
+  LaunchedEffect(showError) {
+    if (showError != null) {
+      delay(3000)
+      showError = null
+    }
+  }
+
   ModalBottomSheet(
       onDismissRequest = onDismiss,
+      containerColor = MaterialTheme.colorScheme.background,
       modifier = Modifier.fillMaxHeight().testTag("schedulePreferencesSheet"),
       windowInsets = WindowInsets(0)) {
         Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
@@ -55,32 +66,31 @@ fun SchedulePreferencesSheet(viewModel: ProviderCalendarViewModel, onDismiss: ()
               style = MaterialTheme.typography.titleLarge,
               modifier = Modifier.padding(vertical = 16.dp).testTag("schedulePreferencesTitle"))
 
-          TabRow(selectedTabIndex = selectedTabIndex) {
-            tabs.forEachIndexed { index, title ->
-              Tab(
-                  selected = selectedTabIndex == index,
-                  onClick = { selectedTabIndex = index },
-                  text = { Text(title) })
-            }
-          }
+          TabRow(
+              selectedTabIndex = selectedTabIndex,
+              containerColor = MaterialTheme.colorScheme.background) {
+                tabs.forEachIndexed { index, title ->
+                  Tab(
+                      selected = selectedTabIndex == index,
+                      onClick = { selectedTabIndex = index },
+                      text = { Text(title) })
+                }
+              }
 
           Spacer(modifier = Modifier.height(16.dp))
 
-          // Show error if present
+          // Show error if present with a subtle design
           showError?.let { error ->
-            Surface(
-                color = MaterialTheme.colorScheme.errorContainer,
-                modifier = Modifier.fillMaxWidth().padding(8.dp)) {
-                  Text(
-                      text = error,
-                      color = MaterialTheme.colorScheme.onErrorContainer,
-                      modifier = Modifier.padding(8.dp))
-                }
+            Text(
+                text = error,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(horizontal = 8.dp))
             Spacer(modifier = Modifier.height(8.dp))
           }
 
           when (selectedTabIndex) {
-            0 -> RegularHoursTab(viewModel = viewModel, onError = { showError = it })
+            0 -> RegularHoursTab(viewModel = viewModel, onError = { error -> showError = error })
             1 -> ExceptionsTab(viewModel = viewModel, onError = { showError = it })
           }
 
@@ -93,86 +103,80 @@ fun SchedulePreferencesSheet(viewModel: ProviderCalendarViewModel, onDismiss: ()
 @SuppressLint("MutableCollectionMutableState")
 @Composable
 private fun RegularHoursTab(viewModel: ProviderCalendarViewModel, onError: (String?) -> Unit) {
-  var expandedDay by remember { mutableStateOf<DayOfWeek?>(null) }
-  var showSuccess by remember { mutableStateOf<String?>(null) }
-  var currentSchedule by remember {
-    mutableStateOf(viewModel.currentProvider.value.schedule.regularHours)
-  }
-
   val provider by viewModel.currentProvider.collectAsStateWithLifecycle()
+  var hasError by remember { mutableStateOf(false) }
 
-  // Update currentSchedule when provider changes
-  LaunchedEffect(provider) { currentSchedule = provider.schedule.regularHours }
+  Column(
+      modifier = Modifier.fillMaxWidth().testTag("regularHoursTab"),
+      verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        if (provider.uid.isEmpty()) {
+          Text(
+              "Loading provider information...",
+              style = MaterialTheme.typography.bodyMedium,
+              color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+              modifier = Modifier.padding(16.dp).testTag("loadingText"))
+          return@Column
+        }
 
-  // Clear success message after delay
-  LaunchedEffect(showSuccess) {
-    if (showSuccess != null) {
-      delay(3000)
-      showSuccess = null
-    }
-  }
+        Text(
+            "Set your regular working hours for each day of the week.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f))
 
-  Column(modifier = Modifier.fillMaxWidth().testTag("regularHoursTab")) {
-    showSuccess?.let { message ->
-      Surface(
-          color = MaterialTheme.colorScheme.primaryContainer,
-          modifier = Modifier.fillMaxWidth().testTag("successMessage")) {
-            Text(
-                text = message,
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                modifier = Modifier.padding(16.dp).testTag("successMessageText"))
-          }
-    }
+        DayOfWeek.values().forEach { day ->
+          val schedule = provider.schedule
+          val currentSchedule = schedule.regularHours[day.name] ?: emptyList()
+          var isExpanded by remember { mutableStateOf(false) }
 
-    DayOfWeek.entries.forEach { day ->
-      DayScheduleCard(
-          day = day,
-          currentSchedule = currentSchedule[day.name] ?: emptyList(),
-          isExpanded = expandedDay == day,
-          onExpandClick = { expandedDay = if (expandedDay == day) null else day },
-          onSaveHours = { startTime, endTime ->
-            val timeSlot = TimeSlot(startTime.hour, startTime.minute, endTime.hour, endTime.minute)
-            viewModel.setRegularHours(day.name, listOf(timeSlot)) { success ->
-              if (success) {
-                showSuccess = "Regular hours updated successfully"
-                onError(null)
-                // Update UI immediately
-                currentSchedule =
-                    currentSchedule.toMutableMap().apply {
-                      put(day.name, listOf(timeSlot).toMutableList())
-                    }
-                expandedDay = null
-              } else {
-                onError("Failed to update regular hours")
+          Surface(
+              modifier = Modifier.fillMaxWidth(),
+              shape = MaterialTheme.shapes.medium,
+              color = MaterialTheme.colorScheme.background,
+              tonalElevation = 1.dp,
+              border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) {
+                DayScheduleCard(
+                    day = day,
+                    currentSchedule = currentSchedule,
+                    isExpanded = isExpanded,
+                    onExpandClick = { isExpanded = !isExpanded },
+                    onSaveHours = { startTime, endTime ->
+                      viewModel.setRegularHours(day.name, listOf(TimeSlot(startTime, endTime))) {
+                          success ->
+                        if (success) {
+                          hasError = false
+                          onError(null)
+                        } else {
+                          hasError = true
+                          onError("Failed to set hours")
+                        }
+                      }
+                    },
+                    onClearHours = {
+                      viewModel.clearRegularHours(day.name) { success ->
+                        if (success) {
+                          hasError = false
+                          onError(null)
+                        } else {
+                          hasError = true
+                          onError("Failed to clear hours")
+                        }
+                      }
+                    },
+                    hasError = hasError)
               }
-            }
-          },
-          onClearHours = {
-            viewModel.clearRegularHours(day.name) { success ->
-              if (success) {
-                showSuccess = "Regular hours cleared successfully"
-                onError(null)
-                // Update UI immediately
-                currentSchedule = currentSchedule.toMutableMap().apply { remove(day.name) }
-              } else {
-                onError("Failed to clear regular hours")
-              }
-            }
-          })
-    }
-  }
+        }
+      }
 }
 
 @Composable
 private fun ExceptionsTab(viewModel: ProviderCalendarViewModel, onError: (String?) -> Unit) {
   var selectedDate by remember { mutableStateOf<LocalDateTime?>(null) }
   var showDatePicker by remember { mutableStateOf(false) }
-  var showTimePicker by remember { mutableStateOf(false) }
   var isAddingOffTime by remember { mutableStateOf(true) }
-  var startTime by remember { mutableStateOf<LocalTime?>(null) }
-  var endTime by remember { mutableStateOf<LocalTime?>(null) }
-  var timePickerMode by remember { mutableStateOf(TimePickerMode.START) }
+  var startTime by remember { mutableStateOf(LocalTime.of(9, 0)) }
+  var endTime by remember { mutableStateOf(LocalTime.of(17, 0)) }
   var showSuccess by remember { mutableStateOf<String?>(null) }
+  var isCreatorExpanded by remember { mutableStateOf(false) }
 
   val provider by viewModel.currentProvider.collectAsStateWithLifecycle()
 
@@ -197,178 +201,267 @@ private fun ExceptionsTab(viewModel: ProviderCalendarViewModel, onError: (String
           Text(
               "Loading provider information...",
               style = MaterialTheme.typography.bodyMedium,
-              color = MaterialTheme.colorScheme.onSurfaceVariant,
+              color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
               modifier = Modifier.padding(16.dp).testTag("loadingText"))
-          return
+          return@Column
         }
 
-        // Success message
-        showSuccess?.let { message ->
-          Surface(
-              color = MaterialTheme.colorScheme.primaryContainer,
-              modifier = Modifier.fillMaxWidth().testTag("successMessage")) {
-                Text(
-                    text = message,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    modifier = Modifier.padding(16.dp).testTag("successText"))
-              }
-        }
+        // Add Exception Section
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.medium,
+            color = MaterialTheme.colorScheme.background,
+            tonalElevation = 2.dp,
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) {
+              Column(
+                  modifier = Modifier.animateContentSize(),
+                  verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Row(
+                        modifier =
+                            Modifier.fillMaxWidth()
+                                .clickable { isCreatorExpanded = !isCreatorExpanded }
+                                .padding(16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically) {
+                          Text(
+                              "Add Exception",
+                              style = MaterialTheme.typography.titleMedium,
+                              color = MaterialTheme.colorScheme.onBackground,
+                              modifier = Modifier.testTag("addExceptionTitle"))
 
-        Row(
-            modifier = Modifier.fillMaxWidth().testTag("buttonsRow"),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-              FilledTonalButton(
-                  onClick = {
-                    isAddingOffTime = true
-                    showDatePicker = true
-                  },
-                  modifier = Modifier.weight(1f).testTag("addOffTimeButton"),
-                  colors =
-                      ButtonDefaults.filledTonalButtonColors(
-                          containerColor = MaterialTheme.colorScheme.errorContainer,
-                          contentColor = MaterialTheme.colorScheme.onErrorContainer)) {
-                    Text("Add Off Time")
-                  }
-              FilledTonalButton(
-                  onClick = {
-                    isAddingOffTime = false
-                    showDatePicker = true
-                  },
-                  modifier = Modifier.weight(1f).testTag("addExtraTimeButton"),
-                  colors =
-                      ButtonDefaults.filledTonalButtonColors(
-                          containerColor = MaterialTheme.colorScheme.primaryContainer,
-                          contentColor = MaterialTheme.colorScheme.onPrimaryContainer)) {
-                    Text("Add Extra Time")
-                  }
-            }
-
-        // Show existing exceptions
-        if (exceptions.isEmpty()) {
-          Surface(
-              modifier = Modifier.fillMaxWidth().testTag("noExceptionsSurface"),
-              color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-              shape = MaterialTheme.shapes.medium) {
-                Box(
-                    modifier = Modifier.fillMaxWidth().padding(32.dp).testTag("noExceptionsBox"),
-                    contentAlignment = Alignment.Center) {
-                      Text(
-                          "No exceptions scheduled",
-                          style = MaterialTheme.typography.bodyLarge,
-                          color = MaterialTheme.colorScheme.onSurfaceVariant,
-                          modifier = Modifier.testTag("noExceptionsText"))
-                    }
-              }
-        } else {
-          LazyColumn(
-              verticalArrangement = Arrangement.spacedBy(8.dp),
-              modifier = Modifier.weight(1f).testTag("exceptionsList")) {
-                items(exceptions) { exception ->
-                  ExceptionCard(
-                      date = exception.date,
-                      type = exception.exception.type,
-                      timeSlots = exception.exception.timeSlots,
-                      onDelete = {
-                        viewModel.deleteException(exception.date) { success ->
-                          if (success) {
-                            showSuccess = "Exception removed successfully"
-                            onError(null)
-                          } else {
-                            onError("Failed to remove exception")
-                          }
+                          Icon(
+                              imageVector =
+                                  if (isCreatorExpanded) Icons.Default.KeyboardArrowUp
+                                  else Icons.Default.KeyboardArrowDown,
+                              contentDescription = if (isCreatorExpanded) "Collapse" else "Expand",
+                              tint = MaterialTheme.colorScheme.onBackground)
                         }
-                      })
-                }
-              }
-        }
-      }
 
-  if (showDatePicker) {
-    DatePickerDialog(
-        onDismissRequest = { showDatePicker = false },
-        onDateSelected = { date ->
-          selectedDate = LocalDateTime.of(date, LocalTime.MIN)
-          showDatePicker = false
-          showTimePicker = true
-          timePickerMode = TimePickerMode.START
-        },
-        selectedDate = LocalDate.now())
-  }
+                    AnimatedVisibility(
+                        visible = isCreatorExpanded,
+                        enter = fadeIn() + expandVertically(),
+                        exit = fadeOut() + shrinkVertically()) {
+                          Column(
+                              modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                              verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                                // Exception Type Selection as segmented buttons
+                                Row(
+                                    modifier =
+                                        Modifier.fillMaxWidth()
+                                            .height(32.dp)
+                                            .clip(MaterialTheme.shapes.small)
+                                            .border(
+                                                1.dp,
+                                                MaterialTheme.colorScheme.outlineVariant,
+                                                MaterialTheme.shapes.small),
+                                    horizontalArrangement = Arrangement.Center) {
+                                      Surface(
+                                          modifier = Modifier.weight(1f).fillMaxHeight(),
+                                          color =
+                                              if (isAddingOffTime)
+                                                  MaterialTheme.colorScheme.error.copy(alpha = 0.1f)
+                                              else MaterialTheme.colorScheme.background,
+                                          border =
+                                              if (isAddingOffTime)
+                                                  BorderStroke(
+                                                      1.dp,
+                                                      MaterialTheme.colorScheme.error.copy(
+                                                          alpha = 0.5f))
+                                              else null,
+                                          onClick = { isAddingOffTime = true }) {
+                                            Box(
+                                                modifier = Modifier.fillMaxSize(),
+                                                contentAlignment = Alignment.Center) {
+                                                  Text(
+                                                      "Off Time",
+                                                      style = MaterialTheme.typography.labelMedium,
+                                                      color =
+                                                          if (isAddingOffTime)
+                                                              MaterialTheme.colorScheme.error
+                                                          else
+                                                              MaterialTheme.colorScheme.onBackground
+                                                                  .copy(alpha = 0.7f))
+                                                }
+                                          }
+                                      Surface(
+                                          modifier = Modifier.weight(1f).fillMaxHeight(),
+                                          color =
+                                              if (!isAddingOffTime)
+                                                  MaterialTheme.colorScheme.primary.copy(
+                                                      alpha = 0.1f)
+                                              else MaterialTheme.colorScheme.background,
+                                          border =
+                                              if (!isAddingOffTime)
+                                                  BorderStroke(
+                                                      1.dp,
+                                                      MaterialTheme.colorScheme.primary.copy(
+                                                          alpha = 0.5f))
+                                              else null,
+                                          onClick = { isAddingOffTime = false }) {
+                                            Box(
+                                                modifier = Modifier.fillMaxSize(),
+                                                contentAlignment = Alignment.Center) {
+                                                  Text(
+                                                      "Extra Time",
+                                                      style = MaterialTheme.typography.labelMedium,
+                                                      color =
+                                                          if (!isAddingOffTime)
+                                                              MaterialTheme.colorScheme.primary
+                                                          else
+                                                              MaterialTheme.colorScheme.onBackground
+                                                                  .copy(alpha = 0.7f))
+                                                }
+                                          }
+                                    }
 
-  if (showTimePicker && selectedDate != null) {
-    val timePickerTitle =
-        when (timePickerMode) {
-          TimePickerMode.START -> "Select Start Time"
-          TimePickerMode.END -> "Select End Time"
-        }
+                                // Date Selection with icon
+                                OutlinedButton(
+                                    onClick = { showDatePicker = true },
+                                    modifier = Modifier.fillMaxWidth().testTag("datePickerButton"),
+                                    colors =
+                                        ButtonDefaults.outlinedButtonColors(
+                                            containerColor =
+                                                MaterialTheme.colorScheme.background)) {
+                                      Row(
+                                          modifier = Modifier.fillMaxWidth(),
+                                          horizontalArrangement = Arrangement.SpaceBetween,
+                                          verticalAlignment = Alignment.CenterVertically) {
+                                            Text(
+                                                text =
+                                                    selectedDate?.format(
+                                                        DateTimeFormatter.ofPattern(
+                                                            "EEEE, MMM d, yyyy")) ?: "Select Date",
+                                                color = MaterialTheme.colorScheme.onBackground)
+                                            Icon(
+                                                imageVector = Icons.Default.DateRange,
+                                                contentDescription = "Select date",
+                                                tint = MaterialTheme.colorScheme.primary)
+                                          }
+                                    }
 
-    TimePickerDialog(
-        onDismiss = {
-          showTimePicker = false
-          selectedDate = null
-          startTime = null
-          endTime = null
-        },
-        onTimeSelected = { time ->
-          when (timePickerMode) {
-            TimePickerMode.START -> {
-              startTime = time
-              timePickerMode = TimePickerMode.END
+                                // Time Selection
+                                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                  Text(
+                                      "Time Range",
+                                      style = MaterialTheme.typography.bodyMedium,
+                                      color =
+                                          MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f))
+                                  Row(
+                                      modifier = Modifier.fillMaxWidth(),
+                                      horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                      verticalAlignment = Alignment.CenterVertically) {
+                                        ScrollableTimePickerRow(
+                                            selectedTime = startTime,
+                                            onTimeSelected = { startTime = it },
+                                            modifier = Modifier.weight(1f),
+                                            testTagPrefix = "start")
+
+                                        Text(
+                                            "to",
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color =
+                                                MaterialTheme.colorScheme.onBackground.copy(
+                                                    alpha = 0.7f))
+
+                                        ScrollableTimePickerRow(
+                                            selectedTime = endTime,
+                                            onTimeSelected = { endTime = it },
+                                            modifier = Modifier.weight(1f),
+                                            testTagPrefix = "end")
+                                      }
+                                }
+
+                                // Add Button
+                                Button(
+                                    onClick = {
+                                      if (selectedDate != null) {
+                                        val timeSlot = TimeSlot(startTime, endTime)
+                                        if (isAddingOffTime) {
+                                          viewModel.addOffTimeException(
+                                              selectedDate!!, listOf(timeSlot)) { success, message
+                                                ->
+                                                if (success) {
+                                                  showSuccess = message
+                                                  onError(null)
+                                                  selectedDate = null
+                                                  startTime = LocalTime.of(9, 0)
+                                                  endTime = LocalTime.of(17, 0)
+                                                  isCreatorExpanded = false
+                                                } else {
+                                                  onError(message)
+                                                }
+                                              }
+                                        } else {
+                                          viewModel.addExtraTimeException(
+                                              selectedDate!!, listOf(timeSlot)) { success, message
+                                                ->
+                                                if (success) {
+                                                  showSuccess = message
+                                                  onError(null)
+                                                  selectedDate = null
+                                                  startTime = LocalTime.of(9, 0)
+                                                  endTime = LocalTime.of(17, 0)
+                                                  isCreatorExpanded = false
+                                                } else {
+                                                  onError(message)
+                                                }
+                                              }
+                                        }
+                                      }
+                                    },
+                                    modifier = Modifier.fillMaxWidth().testTag("addButton"),
+                                    enabled = selectedDate != null && endTime.isAfter(startTime),
+                                    colors =
+                                        ButtonDefaults.buttonColors(
+                                            containerColor =
+                                                if (isAddingOffTime) MaterialTheme.colorScheme.error
+                                                else MaterialTheme.colorScheme.primary)) {
+                                      Text(
+                                          if (isAddingOffTime) "Add Off Time" else "Add Extra Time")
+                                    }
+                              }
+                        }
+                  }
             }
-            TimePickerMode.END -> {
-              try {
-                val timeSlot =
-                    TimeSlot(
-                        startHour = startTime!!.hour,
-                        startMinute = startTime!!.minute,
-                        endHour = time.hour,
-                        endMinute = time.minute)
-                endTime = time
-                if (isAddingOffTime) {
-                  viewModel.addOffTimeException(selectedDate!!, listOf(timeSlot)) { success, message
-                    ->
-                    if (success) {
-                      showSuccess = message
-                      onError(null)
-                    } else {
-                      onError(message)
+
+        // Existing Exceptions List
+        AnimatedVisibility(visible = exceptions.isNotEmpty()) {
+          Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(
+                "Existing Exceptions",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.padding(top = 8.dp))
+
+            exceptions.forEach { (date, exception) ->
+              ExceptionCard(
+                  date = date,
+                  type = exception.type,
+                  timeSlots = exception.timeSlots,
+                  onDelete = {
+                    viewModel.deleteException(date) { success, message ->
+                      if (success) {
+                        showSuccess = message
+                        onError(null)
+                      } else {
+                        onError(message)
+                      }
                     }
-                    showTimePicker = false
-                    selectedDate = null
-                    startTime = null
-                    endTime = null
-                  }
-                } else {
-                  viewModel.addExtraTimeException(selectedDate!!, listOf(timeSlot)) {
-                      success,
-                      message ->
-                    if (success) {
-                      showSuccess = message
-                      onError(null)
-                    } else {
-                      onError(message)
-                    }
-                    showTimePicker = false
-                    selectedDate = null
-                    startTime = null
-                    endTime = null
-                  }
-                }
-              } catch (e: IllegalArgumentException) {
-                onError(e.message ?: "Invalid time selection")
-                endTime = null
-                timePickerMode = TimePickerMode.END
-              }
+                  })
             }
           }
-        },
-        initialTime =
-            when (timePickerMode) {
-              TimePickerMode.START -> LocalTime.of(9, 0)
-              TimePickerMode.END -> startTime?.plusHours(1) ?: LocalTime.of(17, 0)
-            },
-        title = timePickerTitle)
-  }
+        }
+
+        if (showDatePicker) {
+          DatePickerDialog(
+              onDismissRequest = { showDatePicker = false },
+              onDateSelected = { date ->
+                selectedDate = date.atTime(LocalTime.NOON)
+                showDatePicker = false
+              },
+              selectedDate = selectedDate?.toLocalDate() ?: LocalDate.now())
+        }
+      }
 }
 
 @Composable
@@ -381,10 +474,23 @@ private fun ExceptionCard(
   Surface(
       modifier =
           Modifier.fillMaxWidth()
+              .animateContentSize()
               .testTag(
                   tag =
                       "exceptionCard_${date}_${type}_${timeSlots.first().startHour}_${timeSlots.first().startMinute}_${timeSlots.first().endHour}_${timeSlots.first().endMinute}"),
-      color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+      color =
+          when (type) {
+            ExceptionType.OFF_TIME -> MaterialTheme.colorScheme.error
+            ExceptionType.EXTRA_TIME -> MaterialTheme.colorScheme.primary
+          }.copy(alpha = 0.05f),
+      tonalElevation = 1.dp,
+      border =
+          BorderStroke(
+              1.dp,
+              when (type) {
+                ExceptionType.OFF_TIME -> MaterialTheme.colorScheme.error
+                ExceptionType.EXTRA_TIME -> MaterialTheme.colorScheme.primary
+              }.copy(alpha = 0.3f)),
       shape = MaterialTheme.shapes.medium) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(16.dp),
@@ -392,8 +498,9 @@ private fun ExceptionCard(
             verticalAlignment = Alignment.CenterVertically) {
               Column {
                 Text(
-                    text = date.format(DateTimeFormatter.ofPattern("MMM d, yyyy")),
-                    style = MaterialTheme.typography.titleMedium)
+                    text = date.format(DateTimeFormatter.ofPattern("EEEE, MMM d, yyyy")),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onBackground)
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text =
@@ -401,25 +508,30 @@ private fun ExceptionCard(
                           "${it.startHour}:${it.startMinute.toString().padStart(2, '0')} - ${it.endHour}:${it.endMinute.toString().padStart(2, '0')}"
                         },
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f))
                 Text(
                     text = if (type == ExceptionType.OFF_TIME) "Off Time" else "Extra Time",
                     style = MaterialTheme.typography.labelSmall,
                     color =
-                        if (type == ExceptionType.OFF_TIME) MaterialTheme.colorScheme.error
-                        else MaterialTheme.colorScheme.primary)
+                        when (type) {
+                          ExceptionType.OFF_TIME -> MaterialTheme.colorScheme.error
+                          ExceptionType.EXTRA_TIME -> MaterialTheme.colorScheme.primary
+                        })
               }
 
-              IconButton(
+              Surface(
                   onClick = onDelete,
-                  modifier =
-                      Modifier.size(32.dp)
-                          .testTag(
-                              "deleteExceptionButton_${date}_${type}_${timeSlots.first().startHour}_${timeSlots.first().startMinute}_${timeSlots.first().endHour}_${timeSlots.first().endMinute}")) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = "Delete",
-                        tint = MaterialTheme.colorScheme.error)
+                  modifier = Modifier.size(32.dp),
+                  shape = MaterialTheme.shapes.small,
+                  color = MaterialTheme.colorScheme.background,
+                  border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.5f))) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                      Icon(
+                          imageVector = Icons.Default.Clear,
+                          contentDescription = "Delete",
+                          modifier = Modifier.size(16.dp),
+                          tint = MaterialTheme.colorScheme.error)
+                    }
                   }
             }
       }
@@ -432,122 +544,97 @@ private fun DayScheduleCard(
     isExpanded: Boolean,
     onExpandClick: () -> Unit,
     onSaveHours: (LocalTime, LocalTime) -> Unit,
-    onClearHours: () -> Unit
+    onClearHours: () -> Unit,
+    hasError: Boolean
 ) {
-  var startTime by
-      remember(currentSchedule) {
-        mutableStateOf(
-            if (currentSchedule.isNotEmpty())
-                LocalTime.of(currentSchedule[0].startHour, currentSchedule[0].startMinute)
-            else LocalTime.of(9, 0))
-      }
-  var endTime by
-      remember(currentSchedule) {
-        mutableStateOf(
-            if (currentSchedule.isNotEmpty())
-                LocalTime.of(currentSchedule[0].endHour, currentSchedule[0].endMinute)
-            else LocalTime.of(17, 0))
-      }
-  val isValidTimeRange = endTime.isAfter(startTime)
+  Column(modifier = Modifier.fillMaxWidth()) {
+    Row(
+        modifier = Modifier.fillMaxWidth().clickable(onClick = onExpandClick).padding(16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically) {
+          Column {
+            Text(
+                text = day.getDisplayName(TextStyle.FULL, Locale.getDefault()),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onBackground)
+            if (currentSchedule.isNotEmpty()) {
+              Text(
+                  text =
+                      currentSchedule.first().let {
+                        "${it.startHour}:${it.startMinute.toString().padStart(2, '0')} - ${it.endHour}:${it.endMinute.toString().padStart(2, '0')}"
+                      },
+                  style = MaterialTheme.typography.bodyMedium,
+                  color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f))
+            }
+          }
 
-  Surface(
-      modifier =
-          Modifier.fillMaxWidth()
-              .padding(vertical = 4.dp)
-              .testTag("dayScheduleCard_${day.name}")
-              .animateContentSize(
-                  animationSpec =
-                      spring(
-                          dampingRatio = Spring.DampingRatioMediumBouncy,
-                          stiffness = Spring.StiffnessLow))
-              .testTag("dayScheduleCard_${day.name}"),
-      color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-      shape = MaterialTheme.shapes.medium) {
-        Column(modifier = Modifier.padding(16.dp)) {
           Row(
-              modifier = Modifier.fillMaxWidth().clickable { onExpandClick() },
-              horizontalArrangement = Arrangement.SpaceBetween,
+              horizontalArrangement = Arrangement.spacedBy(8.dp),
               verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text =
-                        day.name.lowercase().replaceFirstChar {
-                          if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString()
-                        },
-                    style = MaterialTheme.typography.titleMedium)
-
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically) {
-                      if (!isExpanded && currentSchedule.isNotEmpty()) {
-                        Text(
-                            text =
-                                "${currentSchedule.first().startHour}:${currentSchedule.first().startMinute.toString().padStart(2, '0')} - ${currentSchedule.first().endHour}:${currentSchedule.first().endMinute.toString().padStart(2, '0')}",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        TextButton(
-                            modifier = Modifier.testTag("clearButton_${day.name}"),
-                            onClick = onClearHours,
-                            colors =
-                                ButtonDefaults.textButtonColors(
-                                    contentColor =
-                                        MaterialTheme.colorScheme.error.copy(alpha = 0.8f))) {
-                              Text("Clear", style = MaterialTheme.typography.bodySmall)
+                if (currentSchedule.isNotEmpty()) {
+                  Surface(
+                      onClick = onClearHours,
+                      modifier = Modifier.size(32.dp),
+                      shape = MaterialTheme.shapes.small,
+                      color = MaterialTheme.colorScheme.background,
+                      border =
+                          BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.5f))) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center) {
+                              Icon(
+                                  imageVector = Icons.Default.Clear,
+                                  contentDescription = "Clear hours",
+                                  modifier = Modifier.size(16.dp),
+                                  tint = MaterialTheme.colorScheme.error.copy(alpha = 0.8f))
                             }
                       }
-                      IconButton(
-                          onClick = onExpandClick,
-                          modifier = Modifier.testTag("expandButton_${day.name}")) {
-                            Icon(
-                                imageVector =
-                                    if (isExpanded) Icons.Default.KeyboardArrowUp
-                                    else Icons.Default.KeyboardArrowDown,
-                                contentDescription = if (isExpanded) "Collapse" else "Expand")
-                          }
-                    }
+                }
+
+                Icon(
+                    imageVector =
+                        if (isExpanded) Icons.Default.KeyboardArrowUp
+                        else Icons.Default.KeyboardArrowDown,
+                    contentDescription = if (isExpanded) "Collapse" else "Expand",
+                    tint = MaterialTheme.colorScheme.onBackground)
               }
+        }
 
-          AnimatedVisibility(
-              visible = isExpanded,
-              enter = expandVertically() + fadeIn(),
-              exit = shrinkVertically() + fadeOut()) {
-                Column(
-                    modifier = Modifier.fillMaxWidth().testTag("time_picker_${day.name}"),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                      TimeSelectionSection(
-                          startTime = startTime,
-                          endTime = endTime,
-                          onStartTimeSelected = { newStartTime -> startTime = newStartTime },
-                          onEndTimeSelected = { newEndTime -> endTime = newEndTime },
-                          modifier = Modifier.testTag("time_picker_${day.name}_section"),
-                          day = day)
+    AnimatedVisibility(
+        visible = isExpanded,
+        enter = fadeIn() + expandVertically(),
+        exit = fadeOut() + shrinkVertically()) {
+          Column(
+              modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+              verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                var startTime by remember { mutableStateOf(LocalTime.of(9, 0)) }
+                var endTime by remember { mutableStateOf(LocalTime.of(17, 0)) }
 
-                      if (!isValidTimeRange) {
-                        Text(
-                            text = "End time must be after start time",
-                            color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier =
-                                Modifier.padding(top = 8.dp).testTag("timeError_${day.name}"))
-                      }
+                if (currentSchedule.isNotEmpty()) {
+                  startTime =
+                      LocalTime.of(
+                          currentSchedule.first().startHour, currentSchedule.first().startMinute)
+                  endTime =
+                      LocalTime.of(
+                          currentSchedule.first().endHour, currentSchedule.first().endMinute)
+                }
 
-                      Row(
-                          modifier = Modifier.fillMaxWidth(),
-                          horizontalArrangement = Arrangement.End) {
-                            Box(modifier = Modifier.alpha(if (isValidTimeRange) 1f else 0.5f)) {
-                              Button(
-                                  onClick = {
-                                    if (isValidTimeRange) onSaveHours(startTime, endTime)
-                                  },
-                                  modifier = Modifier.testTag("saveButton_${day.name}"),
-                                  enabled = isValidTimeRange) {
-                                    Text("Save")
-                                  }
-                            }
-                          }
+                TimeSelectionSection(
+                    startTime = startTime,
+                    endTime = endTime,
+                    onStartTimeSelected = { startTime = it },
+                    onEndTimeSelected = { endTime = it },
+                    day = day)
+
+                Button(
+                    onClick = { onSaveHours(startTime, endTime) },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = endTime.isAfter(startTime)) {
+                      Text("Save Hours")
                     }
               }
         }
-      }
+  }
 }
 
 @Composable

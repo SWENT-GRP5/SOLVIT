@@ -195,12 +195,42 @@ open class ProviderCalendarViewModel(
    * @param onComplete Callback with success status
    */
   fun setRegularHours(dayOfWeek: String, timeSlots: List<TimeSlot>, onComplete: (Boolean) -> Unit) {
-    try {
-      currentProvider.value.schedule.setRegularHours(dayOfWeek, timeSlots)
-      updateProviderSchedule(onComplete)
-    } catch (e: Exception) {
-      Log.e("ProviderCalendarViewModel", "Failed to set regular hours", e)
-      onComplete(false)
+    viewModelScope.launch {
+      try {
+        val currentProvider = _currentProvider.value
+        if (currentProvider.uid.isEmpty()) {
+          onComplete(false)
+          return@launch
+        }
+
+        // Update provider schedule
+        val updatedProvider =
+            currentProvider.copy(
+                schedule =
+                    currentProvider.schedule.copy(
+                        regularHours =
+                            currentProvider.schedule.regularHours.toMutableMap().apply {
+                              put(dayOfWeek, timeSlots.toMutableList())
+                            }))
+
+        // Save to repository
+        providerRepository.updateProvider(
+            provider = updatedProvider,
+            onSuccess = {
+              _currentProvider.value = updatedProvider
+              onComplete(true)
+            },
+            onFailure = { e ->
+              Log.e("ProviderCalendarViewModel", "Error setting regular hours", e)
+              onComplete(false)
+            })
+      } catch (e: IllegalArgumentException) {
+        Log.e("ProviderCalendarViewModel", "Invalid time range", e)
+        onComplete(false)
+      } catch (e: Exception) {
+        Log.e("ProviderCalendarViewModel", "Error setting regular hours", e)
+        onComplete(false)
+      }
     }
   }
 
@@ -211,12 +241,39 @@ open class ProviderCalendarViewModel(
    * @param onComplete Callback with success status
    */
   fun clearRegularHours(dayOfWeek: String, onComplete: (Boolean) -> Unit) {
-    try {
-      currentProvider.value.schedule.clearRegularHours(dayOfWeek)
-      updateProviderSchedule(onComplete)
-    } catch (e: Exception) {
-      Log.e("ProviderCalendarViewModel", "Failed to clear regular hours", e)
-      onComplete(false)
+    viewModelScope.launch {
+      try {
+        val currentProvider = _currentProvider.value
+        if (currentProvider.uid.isEmpty()) {
+          onComplete(false)
+          return@launch
+        }
+
+        // Update provider schedule
+        val updatedProvider =
+            currentProvider.copy(
+                schedule =
+                    currentProvider.schedule.copy(
+                        regularHours =
+                            currentProvider.schedule.regularHours.toMutableMap().apply {
+                              remove(dayOfWeek)
+                            }))
+
+        // Save to repository
+        providerRepository.updateProvider(
+            provider = updatedProvider,
+            onSuccess = {
+              _currentProvider.value = updatedProvider
+              onComplete(true)
+            },
+            onFailure = { e ->
+              Log.e("ProviderCalendarViewModel", "Error clearing regular hours", e)
+              onComplete(false)
+            })
+      } catch (e: Exception) {
+        Log.e("ProviderCalendarViewModel", "Error clearing regular hours", e)
+        onComplete(false)
+      }
     }
   }
 
@@ -302,20 +359,24 @@ open class ProviderCalendarViewModel(
    * Deletes an exception from the schedule.
    *
    * @param date The date of the exception to delete
-   * @param onComplete Callback with success status
+   * @param onComplete Callback with success status and feedback message
    */
-  fun deleteException(date: LocalDateTime, onComplete: (Boolean) -> Unit) {
+  fun deleteException(date: LocalDateTime, onComplete: (Boolean, String) -> Unit) {
     try {
       val exceptions = currentProvider.value.schedule.exceptions
       exceptions
           .find { it.date.toLocalDate() == date.toLocalDate() }
           ?.let { exception ->
             exceptions.remove(exception)
-            updateProviderSchedule(onComplete)
-          } ?: run { onComplete(false) }
+            updateProviderSchedule { success ->
+              onComplete(
+                  success,
+                  if (success) "Exception deleted successfully" else "Failed to delete exception")
+            }
+          } ?: run { onComplete(false, "Exception not found") }
     } catch (e: Exception) {
       Log.e("ProviderCalendarViewModel", "Failed to delete exception", e)
-      onComplete(false)
+      onComplete(false, e.message ?: "Failed to delete exception")
     }
   }
 

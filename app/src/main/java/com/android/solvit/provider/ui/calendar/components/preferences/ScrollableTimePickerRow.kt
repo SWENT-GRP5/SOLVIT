@@ -14,6 +14,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import java.time.LocalTime
+import kotlin.math.abs
 import kotlinx.coroutines.launch
 
 @Composable
@@ -72,22 +73,67 @@ private fun TimeColumn(
 ) {
   val listState = rememberLazyListState(initialFirstVisibleItemIndex = range.indexOf(selectedTime))
   val coroutineScope = rememberCoroutineScope()
-
-  // Track if the column is being scrolled
   var isScrolling by remember { mutableStateOf(false) }
+  var previousScrollTime by remember { mutableStateOf(0L) }
+  var scrollVelocity by remember { mutableStateOf(0f) }
+  var currentSelectedValue by remember { mutableStateOf(selectedTime) }
 
+  // Constants for calculations
+  val itemHeight = 40
+  val visibleItems = 3 // Number of fully visible items
+  val centerOffset = (visibleItems * itemHeight) / 2 // Center of the viewport
+
+  // Update current selected value when prop changes
+  LaunchedEffect(selectedTime) { currentSelectedValue = selectedTime }
+
+  // Debounce scroll state changes
   LaunchedEffect(listState.isScrollInProgress) {
     isScrolling = listState.isScrollInProgress
     onScrollStateChanged(isScrolling)
+  }
+
+  // Track scroll velocity
+  LaunchedEffect(listState.firstVisibleItemScrollOffset) {
+    val currentTime = System.currentTimeMillis()
+    val timeDiff = currentTime - previousScrollTime
+    if (timeDiff > 0) {
+      scrollVelocity = listState.firstVisibleItemScrollOffset.toFloat() / timeDiff
+    }
+    previousScrollTime = currentTime
+  }
+
+  // Handle snap-to-position after scroll ends
+  LaunchedEffect(listState.isScrollInProgress) {
     if (!listState.isScrollInProgress) {
       val firstIndex = listState.firstVisibleItemIndex
       val offset = listState.firstVisibleItemScrollOffset
-      val targetIndex = if (offset > 20) firstIndex + 1 else firstIndex
 
+      // Calculate the position relative to the center
+      val currentPosition = (firstIndex * itemHeight) + offset
+      val targetPosition = currentPosition + (itemHeight / 2)
+
+      // Calculate target index based on position and velocity
+      val velocityThreshold = 0.5f
+      val baseIndex = (targetPosition / itemHeight).toInt()
+
+      val targetIndex =
+          when {
+            scrollVelocity > velocityThreshold -> baseIndex + 1
+            scrollVelocity < -velocityThreshold -> baseIndex - 1
+            else -> baseIndex
+          }.coerceIn(0, range.count() - 1)
+
+      // Animate to target with spring-like behavior
       coroutineScope.launch {
-        listState.animateScrollToItem(targetIndex)
-        onValueSelected(range.elementAt(targetIndex))
+        listState.animateScrollToItem(index = targetIndex, scrollOffset = 0)
+        // Update the selected value and notify parent
+        val newValue = range.elementAt(targetIndex)
+        currentSelectedValue = newValue
+        onValueSelected(newValue)
       }
+
+      // Reset velocity
+      scrollVelocity = 0f
     }
   }
 
@@ -95,36 +141,46 @@ private fun TimeColumn(
     LazyColumn(
         state = listState,
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxHeight().testTag("${testTag}_list")) {
-          items(range.count() + 2) { index ->
+        modifier = Modifier.fillMaxHeight().testTag("${testTag}_list"),
+        userScrollEnabled = true) {
+          items(count = range.count() + 2, key = { it }) { index ->
             when {
               index == 0 || index > range.count() -> {
                 Spacer(modifier = Modifier.height(40.dp))
               }
               else -> {
-                val value = range.elementAt(index - 1)
-                val isVisible =
-                    index ==
-                        remember { derivedStateOf { listState.firstVisibleItemIndex } }.value + 1
+                val time = range.elementAt(index - 1)
+                val isSelected = time == currentSelectedValue
 
-                Text(
-                    text = value.toString().padStart(2, '0'),
+                // Calculate distance from center for visual effects
+                val itemPosition =
+                    (index * itemHeight) -
+                        (listState.firstVisibleItemIndex * itemHeight) -
+                        listState.firstVisibleItemScrollOffset
+                val distanceFromCenter = abs(centerOffset - itemPosition) / itemHeight.toFloat()
+
+                val alpha = if (isSelected) 1f else maxOf(0.3f, 1f - (distanceFromCenter * 0.3f))
+                val scale = if (isSelected) 1.2f else maxOf(0.8f, 1f - (distanceFromCenter * 0.15f))
+
+                Box(
                     modifier =
                         Modifier.height(40.dp)
-                            .padding(vertical = 8.dp)
-                            .scale(if (isVisible) 1.2f else 1f)
-                            .alpha(if (isVisible) 1f else 0.3f)
-                            .testTag("${testTag}_item_$value"),
-                    style =
-                        MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = if (isVisible) FontWeight.Bold else FontWeight.Normal),
-                    color =
-                        when {
-                          isScrolling -> MaterialTheme.colorScheme.primary
-                          isVisible -> MaterialTheme.colorScheme.onBackground
-                          else -> MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f)
-                        },
-                    textAlign = TextAlign.Center)
+                            .fillMaxWidth()
+                            .scale(scale)
+                            .alpha(alpha)
+                            .testTag("${testTag}_item_$time"),
+                    contentAlignment = Alignment.Center) {
+                      Text(
+                          text = time.toString().padStart(2, '0'),
+                          style =
+                              MaterialTheme.typography.titleMedium.copy(
+                                  fontWeight =
+                                      if (isSelected) FontWeight.Bold else FontWeight.Normal),
+                          color =
+                              if (isScrolling) MaterialTheme.colorScheme.primary
+                              else MaterialTheme.colorScheme.onBackground,
+                          textAlign = TextAlign.Center)
+                    }
               }
             }
           }
