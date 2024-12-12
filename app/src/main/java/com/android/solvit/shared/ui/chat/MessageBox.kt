@@ -41,6 +41,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
@@ -126,14 +127,7 @@ fun ChatListTopBar(
 
   TopAppBar(
       modifier = Modifier.testTag("InboxTopAppBar"),
-      title = {
-        Box(
-            modifier = Modifier.fillMaxWidth(),
-            // Allow the title to center
-            contentAlignment = Alignment.Center) {
-              Text(text = "Inbox", style = Typography.headlineLarge)
-            }
-      },
+      title = { Text(text = "Inbox", style = Typography.titleLarge, textAlign = TextAlign.Start) },
       navigationIcon = {
         IconButton(onClick = { navigationActions.goBack() }) {
           Icon(Icons.Default.ArrowBack, contentDescription = "Back")
