@@ -178,6 +178,8 @@ class SignUpButtonTest {
           passwordLengthComplete = true,
           samePassword = true)
     }
+    composeTestRule.waitForIdle()
+
     composeTestRule.onNodeWithTag("signUpButton").performClick()
 
     verify { Toast.makeText(any(), "Please fill in all required fields", Toast.LENGTH_SHORT) }
@@ -193,6 +195,7 @@ class SignUpButtonTest {
           passwordLengthComplete = true,
           samePassword = true)
     }
+    composeTestRule.waitForIdle()
     composeTestRule.onNodeWithTag("signUpButton").performClick()
 
     verify { Toast.makeText(any(), "Your email must have \"@\" and \".\"", Toast.LENGTH_SHORT) }
@@ -208,6 +211,7 @@ class SignUpButtonTest {
           passwordLengthComplete = true,
           samePassword = false)
     }
+    composeTestRule.waitForIdle()
     composeTestRule.onNodeWithTag("signUpButton").performClick()
 
     verify {
@@ -225,6 +229,7 @@ class SignUpButtonTest {
           passwordLengthComplete = false,
           samePassword = true)
     }
+    composeTestRule.waitForIdle()
     composeTestRule.onNodeWithTag("signUpButton").performClick()
 
     verify {
@@ -242,6 +247,7 @@ class SignUpButtonTest {
           passwordLengthComplete = true,
           samePassword = true)
     }
+    composeTestRule.waitForIdle()
     composeTestRule.onNodeWithTag("signUpButton").performClick()
 
     verify(exactly = 0) { Toast.makeText(any(), any<String>(), any()) }
