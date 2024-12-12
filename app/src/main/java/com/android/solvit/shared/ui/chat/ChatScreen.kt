@@ -117,6 +117,7 @@ fun ChatScreen(
   val receiverName = getReceiverName(receiver)
   val receiverPicture = getReceiverImageUrl(receiver)
   val user by authViewModel.user.collectAsState()
+  val isSeeker = user?.role == "seeker"
   chatViewModel.getChatRequest { id ->
     serviceRequestViewModel.getServiceRequestById(id) { chatViewModel.setChatRequest(it) }
   }
@@ -137,6 +138,7 @@ fun ChatScreen(
         MessageInputBar(
             chatAssistantViewModel = chatAssistantViewModel,
             isAiSolverScreen = false,
+            isSeeker = isSeeker,
             onImageSelected = { uri: Uri? ->
               imageUri = uri
               uri?.let { imageBitmap = loadBitmapFromUri(localContext, it) }
@@ -363,6 +365,7 @@ fun AiSolverScreen(
       bottomBar = {
         MessageInputBar(
             isAiSolverScreen = true,
+            isSeeker = true,
             onImageSelected = { uri: Uri? ->
               imageUri = uri
               uri?.let { imageBitmap = loadBitmapFromUri(localContext, it) }
@@ -605,6 +608,7 @@ fun MessageInputBar(
     chatAssistantViewModel: ChatAssistantViewModel =
         viewModel(factory = ChatAssistantViewModel.Factory),
     onImageSelected: (Uri?) -> Unit,
+    isSeeker: Boolean,
     isAiSolverScreen: Boolean,
     onSendClickButton: (String, (String) -> Unit) -> Unit
 ) {
@@ -629,9 +633,9 @@ fun MessageInputBar(
               .imePadding()
               .testTag("SendMessageBar")) {
         if (!isAiSolverScreen) {
-          AssistantSuggestions(chatAssistantViewModel) {
+          AssistantSuggestions(chatAssistantViewModel, isSeeker) {
             chatAssistantViewModel.updateSelectedTones(emptyList())
-            chatAssistantViewModel.generateMessage(it) { msg -> message = msg }
+            chatAssistantViewModel.generateMessage(it, isSeeker) { msg -> message = msg }
           }
         }
 
@@ -727,7 +731,10 @@ fun MessageInputBar(
   // AI Assistant Dialog if triggered
   if (showDialog) {
     ChatAssistantDialog(
-        chatAssistantViewModel, onDismiss = { showDialog = false }, onResponse = { message = it })
+        chatAssistantViewModel,
+        isSeeker,
+        onDismiss = { showDialog = false },
+        onResponse = { message = it })
   }
 }
 
@@ -771,6 +778,7 @@ fun buildMessage(
 @Composable
 fun AssistantSuggestions(
     chatAssistantViewModel: ChatAssistantViewModel,
+    isSeeker: Boolean,
     onSuggestionSelect: (String) -> Unit
 ) {
   val suggestions by chatAssistantViewModel.suggestions.collectAsState()
@@ -803,7 +811,7 @@ fun AssistantSuggestions(
         }
         IconButton(
             onClick = {
-              chatAssistantViewModel.generateSuggestions {
+              chatAssistantViewModel.generateSuggestions(isSeeker) {
                 Log.e("ChatScreen", "Suggestions generated")
               }
             }) {
