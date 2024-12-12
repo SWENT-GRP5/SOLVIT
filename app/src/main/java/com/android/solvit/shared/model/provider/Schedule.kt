@@ -130,37 +130,38 @@ data class Schedule(
   fun isAvailable(dateTime: LocalDateTime): Boolean {
     val time = dateTime.toLocalTime()
 
-    // Check for exceptions first
+    // Check regular hours first
+    val daySlots = regularHours[dateTime.dayOfWeek.name]
+    if (daySlots == null || daySlots.isEmpty()) {
+      // If no regular hours, check for extra time exceptions
+      val exception = exceptions.find { it.date.toLocalDate() == dateTime.toLocalDate() }
+      return exception?.type == ExceptionType.EXTRA_TIME &&
+          exception.timeSlots.any { slot -> !time.isBefore(slot.start) && time.isBefore(slot.end) }
+    }
+
+    // Check if time is within regular hours
+    val withinRegularHours =
+        daySlots.any { slot -> !time.isBefore(slot.start) && time.isBefore(slot.end) }
+
+    // If not within regular hours, check for extra time exceptions
+    if (!withinRegularHours) {
+      val exception = exceptions.find { it.date.toLocalDate() == dateTime.toLocalDate() }
+      return exception?.type == ExceptionType.EXTRA_TIME &&
+          exception.timeSlots.any { slot -> !time.isBefore(slot.start) && time.isBefore(slot.end) }
+    }
+
+    // Check for off-time exceptions that might override regular hours
     val exception = exceptions.find { it.date.toLocalDate() == dateTime.toLocalDate() }
-    if (exception != null) {
-      when (exception.type) {
-        ExceptionType.OFF_TIME -> {
-          // If there's an off-time exception overlapping with the time, provider is not available
-          if (exception.timeSlots.any { slot ->
-            (time.equals(slot.start) || time.isAfter(slot.start)) &&
-                (time.equals(slot.end) || time.isBefore(slot.end))
-          }) {
-            return false
-          }
-        }
-        ExceptionType.EXTRA_TIME -> {
-          // If there's an extra-time exception overlapping with the time, provider is available
-          if (exception.timeSlots.any { slot ->
-            (time.equals(slot.start) || time.isAfter(slot.start)) &&
-                (time.equals(slot.end) || time.isBefore(slot.end))
-          }) {
-            return true
-          }
-        }
+    if (exception?.type == ExceptionType.OFF_TIME) {
+      // Not available if there's an overlapping off-time slot
+      if (exception.timeSlots.any { slot ->
+        !time.isBefore(slot.start) && time.isBefore(slot.end)
+      }) {
+        return false
       }
     }
 
-    // Check regular hours
-    val daySlots = regularHours[dateTime.dayOfWeek.name] ?: return false
-    return daySlots.any { slot ->
-      (time.equals(slot.start) || time.isAfter(slot.start)) &&
-          (time.equals(slot.end) || time.isBefore(slot.end))
-    }
+    return true
   }
 
   /** Add a new exception to the schedule */

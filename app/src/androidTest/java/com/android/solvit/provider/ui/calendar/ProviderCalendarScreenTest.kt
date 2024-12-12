@@ -1,15 +1,24 @@
 package com.android.solvit.provider.ui.calendar
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.height
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.solvit.provider.model.CalendarView
 import com.android.solvit.provider.model.ProviderCalendarViewModel
+import com.android.solvit.provider.ui.calendar.components.preferences.SchedulePreferencesSheet
+import com.android.solvit.provider.ui.calendar.components.preferences.ScrollableTimePickerRow
 import com.android.solvit.shared.model.authentication.AuthRep
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.authentication.User
 import com.android.solvit.shared.model.map.Location
+import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.provider.ProviderRepository
+import com.android.solvit.shared.model.provider.Schedule
+import com.android.solvit.shared.model.provider.TimeSlot
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestRepository
 import com.android.solvit.shared.model.request.ServiceRequestStatus
@@ -108,16 +117,13 @@ class ProviderCalendarScreenTest {
             agreedPrice = 100.0,
             status = ServiceRequestStatus.ACCEPTED)
 
-    // Mock auth repository methods
-    doAnswer { invocation ->
-          val callback = invocation.arguments[0] as (User?) -> Unit
-          callback(testUser)
-          null
-        }
-        .`when`(authRep)
-        .init(any())
-
-    doReturn(testUserId).`when`(authRep).getUserId()
+    // Set up auth repository mock
+    `when`(authRep.getUserId()).thenReturn(testUserId)
+    `when`(authRep.init(any())).then { invocation ->
+      val callback = invocation.arguments[0] as (User?) -> Unit
+      callback(testUser)
+      null
+    }
 
     // Create real AuthViewModel with mocked repository
     authViewModel = AuthViewModel(authRep)
@@ -147,12 +153,49 @@ class ProviderCalendarScreenTest {
         .`when`(serviceRequestRepository)
         .getServiceRequests(any(), any())
 
-    // Create real ServiceRequestViewModel with mocked repository and spy on it
-    serviceRequestViewModel = spy(ServiceRequestViewModel(serviceRequestRepository))
+    // Create real ServiceRequestViewModel with mocked repository
+    serviceRequestViewModel = ServiceRequestViewModel(serviceRequestRepository)
 
-    // Initialize calendar view model
+    // Set up provider repository mock
+    `when`(providerRepository.addListenerOnProviders(any(), any())).then { invocation ->
+      val onSuccess = invocation.arguments[0] as (List<Provider>) -> Unit
+      onSuccess(
+          listOf(
+              Provider(
+                  uid = testUserId,
+                  schedule =
+                      Schedule(
+                          regularHours =
+                              mutableMapOf(
+                                  DayOfWeek.MONDAY.name to
+                                      mutableListOf(
+                                          TimeSlot(LocalTime.of(9, 0), LocalTime.of(17, 0))),
+                                  DayOfWeek.WEDNESDAY.name to
+                                      mutableListOf(
+                                          TimeSlot(LocalTime.of(10, 0), LocalTime.of(18, 0))))))))
+    }
+
+    // Mock updateProvider to update the provider list
+    doAnswer { invocation ->
+          val provider = invocation.arguments[0] as Provider
+          val onSuccess = invocation.arguments[1] as () -> Unit
+          `when`(providerRepository.addListenerOnProviders(any(), any())).then { listenerInvocation
+            ->
+            val listenerCallback = listenerInvocation.arguments[0] as (List<Provider>) -> Unit
+            listenerCallback(listOf(provider))
+          }
+          onSuccess()
+          null
+        }
+        .`when`(providerRepository)
+        .updateProvider(any(), any(), any())
+
+    // Initialize view model with real AuthViewModel and ServiceRequestViewModel
     viewModel =
-        ProviderCalendarViewModel(providerRepository, authViewModel, serviceRequestViewModel)
+        ProviderCalendarViewModel(
+            providerRepository = providerRepository,
+            authViewModel = authViewModel,
+            serviceRequestViewModel = serviceRequestViewModel)
   }
 
   private fun setupScreen() {
@@ -301,7 +344,6 @@ class ProviderCalendarScreenTest {
       swipeUp(startY = 1000f, endY = 100f)
     }
     composeTestRule.waitForIdle()
-
     composeTestRule
         .onNodeWithTag("dayViewServiceRequest_${afternoonTestRequest.uid}")
         .assertExists()
@@ -527,5 +569,147 @@ class ProviderCalendarScreenTest {
     // Verify current time indicator components in day view
     composeTestRule.onNodeWithTag("currentTimeIndicatorCircle").assertExists()
     composeTestRule.onNodeWithTag("currentTimeIndicatorLine").assertExists()
+  }
+
+  @Test
+  fun schedulePreferencesSheet_displaysCorrectly() {
+    composeTestRule.setContent { SchedulePreferencesSheet(viewModel = viewModel, onDismiss = {}) }
+
+    // Wait for data to load and UI to settle
+    composeTestRule.waitUntil(timeoutMillis = 5000) { !viewModel.isLoading.value }
+    composeTestRule.mainClock.autoAdvance = false
+    composeTestRule.mainClock.advanceTimeBy(1000)
+
+    // Verify initial state
+    composeTestRule.onNodeWithTag("schedulePreferencesSheet").assertExists()
+
+    // Verify tabs
+    composeTestRule.onNodeWithText("Regular Hours").assertExists()
+    composeTestRule.onNodeWithText("Exceptions").assertExists()
+
+    // Verify schedule display for Monday
+    composeTestRule.onNodeWithText("Monday").assertExists()
+    composeTestRule.onNodeWithText("9:00 - 17:00").assertExists()
+  }
+
+  @Test
+  fun schedulePreferencesSheet_canEditRegularHours() {
+    composeTestRule.setContent { SchedulePreferencesSheet(viewModel = viewModel, onDismiss = {}) }
+
+    // Wait for data to load and UI to settle
+    composeTestRule.waitUntil(timeoutMillis = 5000) { !viewModel.isLoading.value }
+    composeTestRule.mainClock.autoAdvance = false
+    composeTestRule.mainClock.advanceTimeBy(1000)
+
+    // Find and click Monday's schedule
+    composeTestRule.onNodeWithTag("day_schedule_card_MONDAY").performClick()
+    composeTestRule.mainClock.advanceTimeBy(500)
+
+    // Verify time selection is visible
+    composeTestRule.onNodeWithText("Start Time").assertExists()
+    composeTestRule.onNodeWithText("End Time").assertExists()
+
+    // Clear hours using unique identifier
+    composeTestRule.onNodeWithTag("clear_hours_MONDAY").performClick()
+    composeTestRule.mainClock.advanceTimeBy(1000) // Wait longer for provider update
+
+    // Wait for provider update to complete
+    composeTestRule.waitUntil(timeoutMillis = 5000) { !viewModel.isLoading.value }
+
+    composeTestRule.onNodeWithTag("no_hours_text_MONDAY", useUnmergedTree = true).assertExists()
+  }
+
+  @Test
+  fun schedulePreferencesSheet_canAddException() {
+    composeTestRule.setContent { SchedulePreferencesSheet(viewModel = viewModel, onDismiss = {}) }
+
+    // Wait for data to load and UI to settle
+    composeTestRule.waitUntil(timeoutMillis = 5000) { !viewModel.isLoading.value }
+    composeTestRule.mainClock.autoAdvance = false
+    composeTestRule.mainClock.advanceTimeBy(1000)
+
+    // Switch to Exceptions tab
+    composeTestRule.onNodeWithText("Exceptions").performClick()
+    composeTestRule.mainClock.advanceTimeBy(500)
+
+    // Click Add Exception button
+    composeTestRule.onNodeWithTag("addButton").performClick()
+    composeTestRule.mainClock.advanceTimeBy(500)
+
+    // Select Off Time
+    composeTestRule.onNodeWithText("Off Time").performClick()
+    composeTestRule.mainClock.advanceTimeBy(500)
+  }
+
+  @Test
+  fun schedulePreferencesSheet_integrationTest() {
+    composeTestRule.setContent { SchedulePreferencesSheet(viewModel = viewModel, onDismiss = {}) }
+
+    // Wait for data to load and UI to settle
+    composeTestRule.waitUntil(timeoutMillis = 5000) { !viewModel.isLoading.value }
+    composeTestRule.mainClock.autoAdvance = false
+    composeTestRule.mainClock.advanceTimeBy(1000)
+
+    // 1. Test Regular Hours tab
+    composeTestRule.onNodeWithTag("day_schedule_card_MONDAY").performClick()
+    composeTestRule.mainClock.advanceTimeBy(500)
+
+    // Verify time selection appears
+    composeTestRule.onNodeWithText("Start Time").assertExists()
+    composeTestRule.onNodeWithText("End Time").assertExists()
+
+    // Clear hours using unique identifier
+    composeTestRule.onNodeWithTag("clear_hours_MONDAY").performClick()
+    composeTestRule.mainClock.advanceTimeBy(1000) // Wait longer for provider update
+
+    // Wait for provider update to complete
+    composeTestRule.waitUntil(timeoutMillis = 5000) { !viewModel.isLoading.value }
+
+    composeTestRule.onNodeWithTag("no_hours_text_MONDAY", useUnmergedTree = true).assertExists()
+
+    // 2. Test Exceptions tab
+    composeTestRule.onNodeWithText("Exceptions").performClick()
+    composeTestRule.mainClock.advanceTimeBy(500)
+    composeTestRule.onNodeWithTag("addButton").assertExists()
+
+    // Add new exception
+    composeTestRule.onNodeWithTag("addButton").performClick()
+    composeTestRule.mainClock.advanceTimeBy(500)
+  }
+
+  @Test
+  fun scrollableTimePickerRow_displaysAndSelectsTime() {
+    var selectedTime = LocalTime.of(10, 0)
+
+    composeTestRule.setContent {
+      Box(modifier = Modifier.height(200.dp)) {
+        ScrollableTimePickerRow(
+            selectedTime = selectedTime,
+            onTimeSelected = { selectedTime = it },
+            testTagPrefix = "test")
+      }
+    }
+
+    // Wait for initial render
+    composeTestRule.mainClock.autoAdvance = false
+    composeTestRule.mainClock.advanceTimeBy(500)
+
+    // Verify initial state
+    composeTestRule.onNodeWithTag("test_hour").assertExists()
+    composeTestRule.onNodeWithTag("test_hour_picker").assertExists()
+    composeTestRule.onNodeWithTag("test_minute").assertExists()
+    composeTestRule.onNodeWithTag("test_minute_picker").assertExists()
+
+    // Verify initial time display
+    composeTestRule.onNodeWithText("10").assertExists()
+    composeTestRule.onNodeWithText("00").assertExists()
+
+    // Select a different hour by clicking an item
+    composeTestRule.onNodeWithTag("test_hour_picker_item_11").performClick()
+    composeTestRule.mainClock.advanceTimeBy(500)
+
+    // Verify selection changed
+    composeTestRule.onNodeWithText("11").assertExists()
+    assert(selectedTime.hour == 11)
   }
 }

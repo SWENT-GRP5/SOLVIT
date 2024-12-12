@@ -9,9 +9,9 @@ import java.time.LocalTime
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TimePickerDialog(
-    onDismiss: () -> Unit,
+    onDismissRequest: () -> Unit,
     onTimeSelected: (LocalTime) -> Unit,
-    initialTime: LocalTime,
+    initialTime: LocalTime = LocalTime.now(),
     title: String? = null
 ) {
   val selectedHour by remember { mutableIntStateOf(initialTime.hour) }
@@ -21,17 +21,24 @@ fun TimePickerDialog(
       rememberTimePickerState(initialHour = selectedHour, initialMinute = selectedMinute)
 
   AlertDialog(
-      onDismissRequest = onDismiss,
+      onDismissRequest = onDismissRequest,
       title = title?.let { { Text(it) } },
+      modifier = Modifier.testTag("time_picker_dialog"),
       confirmButton = {
         TextButton(
             onClick = {
               onTimeSelected(LocalTime.of(timePickerState.hour, timePickerState.minute))
-            }) {
+            },
+            modifier = Modifier.testTag("time_picker_confirm_button")) {
               Text("OK")
             }
       },
-      dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
+      dismissButton = {
+        TextButton(
+            onClick = onDismissRequest, modifier = Modifier.testTag("time_picker_dismiss_button")) {
+              Text("Cancel")
+            }
+      },
       text = { TimePicker(state = timePickerState, layoutType = TimePickerLayoutType.Vertical) },
-      modifier = Modifier.testTag(("timePickerDialog")))
+  )
 }

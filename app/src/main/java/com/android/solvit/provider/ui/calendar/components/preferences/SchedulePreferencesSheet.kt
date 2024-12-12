@@ -220,7 +220,8 @@ private fun ExceptionsTab(viewModel: ProviderCalendarViewModel, onError: (String
                         modifier =
                             Modifier.fillMaxWidth()
                                 .clickable { isCreatorExpanded = !isCreatorExpanded }
-                                .padding(16.dp),
+                                .padding(16.dp)
+                                .testTag("addButton"),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically) {
                           Text(
@@ -465,6 +466,168 @@ private fun ExceptionsTab(viewModel: ProviderCalendarViewModel, onError: (String
 }
 
 @Composable
+fun DayScheduleCard(
+    day: DayOfWeek,
+    currentSchedule: List<TimeSlot>,
+    isExpanded: Boolean,
+    onExpandClick: () -> Unit,
+    onSaveHours: (LocalTime, LocalTime) -> Unit,
+    onClearHours: () -> Unit,
+    hasError: Boolean
+) {
+  Column(modifier = Modifier.fillMaxWidth()) {
+    Row(
+        modifier =
+            Modifier.fillMaxWidth()
+                .clickable(onClick = onExpandClick)
+                .padding(16.dp)
+                .testTag("day_schedule_card_${day.name}"),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically) {
+          Column {
+            Text(
+                text = day.getDisplayName(TextStyle.FULL, Locale.getDefault()),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.testTag("day_schedule_title_${day.name}"))
+            if (currentSchedule.isEmpty()) {
+              Text(
+                  text = "No hours set",
+                  style = MaterialTheme.typography.bodyMedium,
+                  color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                  modifier = Modifier.testTag("no_hours_text_${day.name}"))
+            } else {
+              Text(
+                  text =
+                      currentSchedule.first().let {
+                        "${it.startHour}:${it.startMinute.toString().padStart(2, '0')} - ${it.endHour}:${it.endMinute.toString().padStart(2, '0')}"
+                      },
+                  style = MaterialTheme.typography.bodyMedium,
+                  color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                  modifier = Modifier.testTag("day_schedule_hours_${day.name}"))
+            }
+          }
+
+          Row(
+              horizontalArrangement = Arrangement.spacedBy(8.dp),
+              verticalAlignment = Alignment.CenterVertically) {
+                if (currentSchedule.isNotEmpty()) {
+                  IconButton(
+                      onClick = onClearHours,
+                      modifier = Modifier.testTag("clear_hours_${day.name}"),
+                      colors =
+                          IconButtonDefaults.iconButtonColors(
+                              contentColor = MaterialTheme.colorScheme.error)) {
+                        Icon(
+                            imageVector = Icons.Default.Clear,
+                            contentDescription = "Clear hours for ${day.name}",
+                            tint = MaterialTheme.colorScheme.error)
+                      }
+                }
+
+                Icon(
+                    imageVector =
+                        if (isExpanded) Icons.Default.KeyboardArrowUp
+                        else Icons.Default.KeyboardArrowDown,
+                    contentDescription = if (isExpanded) "Collapse" else "Expand",
+                    tint = MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier.testTag("expand_icon_${day.name}"))
+              }
+        }
+
+    AnimatedVisibility(
+        visible = isExpanded,
+        enter = fadeIn() + expandVertically(),
+        exit = fadeOut() + shrinkVertically()) {
+          Column(
+              modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+              verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                var startTime by remember { mutableStateOf(LocalTime.of(9, 0)) }
+                var endTime by remember { mutableStateOf(LocalTime.of(17, 0)) }
+
+                if (currentSchedule.isNotEmpty()) {
+                  startTime =
+                      LocalTime.of(
+                          currentSchedule.first().startHour, currentSchedule.first().startMinute)
+                  endTime =
+                      LocalTime.of(
+                          currentSchedule.first().endHour, currentSchedule.first().endMinute)
+                }
+
+                TimeSelectionSection(
+                    startTime = startTime,
+                    endTime = endTime,
+                    onStartTimeSelected = { startTime = it },
+                    onEndTimeSelected = { endTime = it },
+                    day = day)
+
+                Button(
+                    onClick = { onSaveHours(startTime, endTime) },
+                    modifier = Modifier.fillMaxWidth().testTag("save_hours_button_${day.name}"),
+                    enabled = endTime.isAfter(startTime)) {
+                      Text("Save Hours")
+                    }
+              }
+        }
+  }
+}
+
+@Composable
+fun TimeSelectionSection(
+    startTime: LocalTime,
+    endTime: LocalTime,
+    onStartTimeSelected: (LocalTime) -> Unit,
+    onEndTimeSelected: (LocalTime) -> Unit,
+    modifier: Modifier = Modifier,
+    day: DayOfWeek
+) {
+  Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically) {
+          Column(
+              modifier = Modifier.weight(1f).testTag("time_picker_${day.name}_start"),
+              horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = "Start Time",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.testTag("time_picker_${day.name}_start_label"))
+                ScrollableTimePickerRow(
+                    selectedTime = startTime,
+                    onTimeSelected = { newTime ->
+                      // Ensure start time is not after end time
+                      if (newTime.isBefore(endTime) || newTime.equals(endTime)) {
+                        onStartTimeSelected(newTime)
+                      }
+                    },
+                    testTagPrefix = "time_picker_${day.name}_start")
+              }
+
+          Column(
+              modifier = Modifier.weight(1f).testTag("time_picker_${day.name}_end"),
+              horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = "End Time",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.testTag("time_picker_${day.name}_end_label"))
+                ScrollableTimePickerRow(
+                    selectedTime = endTime,
+                    onTimeSelected = { newTime ->
+                      // Ensure end time is not before start time
+                      if (newTime.isAfter(startTime) || newTime.equals(startTime)) {
+                        onEndTimeSelected(newTime)
+                      }
+                    },
+                    testTagPrefix = "time_picker_${day.name}_end")
+              }
+        }
+  }
+}
+
+@Composable
 private fun ExceptionCard(
     date: LocalDateTime,
     type: ExceptionType,
@@ -535,161 +698,6 @@ private fun ExceptionCard(
                   }
             }
       }
-}
-
-@Composable
-private fun DayScheduleCard(
-    day: DayOfWeek,
-    currentSchedule: List<TimeSlot>,
-    isExpanded: Boolean,
-    onExpandClick: () -> Unit,
-    onSaveHours: (LocalTime, LocalTime) -> Unit,
-    onClearHours: () -> Unit,
-    hasError: Boolean
-) {
-  Column(modifier = Modifier.fillMaxWidth()) {
-    Row(
-        modifier = Modifier.fillMaxWidth().clickable(onClick = onExpandClick).padding(16.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically) {
-          Column {
-            Text(
-                text = day.getDisplayName(TextStyle.FULL, Locale.getDefault()),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onBackground)
-            if (currentSchedule.isNotEmpty()) {
-              Text(
-                  text =
-                      currentSchedule.first().let {
-                        "${it.startHour}:${it.startMinute.toString().padStart(2, '0')} - ${it.endHour}:${it.endMinute.toString().padStart(2, '0')}"
-                      },
-                  style = MaterialTheme.typography.bodyMedium,
-                  color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f))
-            }
-          }
-
-          Row(
-              horizontalArrangement = Arrangement.spacedBy(8.dp),
-              verticalAlignment = Alignment.CenterVertically) {
-                if (currentSchedule.isNotEmpty()) {
-                  Surface(
-                      onClick = onClearHours,
-                      modifier = Modifier.size(32.dp),
-                      shape = MaterialTheme.shapes.small,
-                      color = MaterialTheme.colorScheme.background,
-                      border =
-                          BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.5f))) {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center) {
-                              Icon(
-                                  imageVector = Icons.Default.Clear,
-                                  contentDescription = "Clear hours",
-                                  modifier = Modifier.size(16.dp),
-                                  tint = MaterialTheme.colorScheme.error.copy(alpha = 0.8f))
-                            }
-                      }
-                }
-
-                Icon(
-                    imageVector =
-                        if (isExpanded) Icons.Default.KeyboardArrowUp
-                        else Icons.Default.KeyboardArrowDown,
-                    contentDescription = if (isExpanded) "Collapse" else "Expand",
-                    tint = MaterialTheme.colorScheme.onBackground)
-              }
-        }
-
-    AnimatedVisibility(
-        visible = isExpanded,
-        enter = fadeIn() + expandVertically(),
-        exit = fadeOut() + shrinkVertically()) {
-          Column(
-              modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-              verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                var startTime by remember { mutableStateOf(LocalTime.of(9, 0)) }
-                var endTime by remember { mutableStateOf(LocalTime.of(17, 0)) }
-
-                if (currentSchedule.isNotEmpty()) {
-                  startTime =
-                      LocalTime.of(
-                          currentSchedule.first().startHour, currentSchedule.first().startMinute)
-                  endTime =
-                      LocalTime.of(
-                          currentSchedule.first().endHour, currentSchedule.first().endMinute)
-                }
-
-                TimeSelectionSection(
-                    startTime = startTime,
-                    endTime = endTime,
-                    onStartTimeSelected = { startTime = it },
-                    onEndTimeSelected = { endTime = it },
-                    day = day)
-
-                Button(
-                    onClick = { onSaveHours(startTime, endTime) },
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = endTime.isAfter(startTime)) {
-                      Text("Save Hours")
-                    }
-              }
-        }
-  }
-}
-
-@Composable
-private fun TimeSelectionSection(
-    startTime: LocalTime,
-    endTime: LocalTime,
-    onStartTimeSelected: (LocalTime) -> Unit,
-    onEndTimeSelected: (LocalTime) -> Unit,
-    modifier: Modifier = Modifier,
-    day: DayOfWeek
-) {
-  Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically) {
-          Column(
-              modifier = Modifier.weight(1f).testTag("time_picker_${day.name}_start"),
-              horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    text = "Start Time",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.testTag("time_picker_${day.name}_start_label"))
-                ScrollableTimePickerRow(
-                    selectedTime = startTime,
-                    onTimeSelected = { newTime ->
-                      // Ensure start time is not after end time
-                      if (newTime.isBefore(endTime) || newTime.equals(endTime)) {
-                        onStartTimeSelected(newTime)
-                      }
-                    },
-                    testTagPrefix = "time_picker_${day.name}_start")
-              }
-
-          Column(
-              modifier = Modifier.weight(1f).testTag("time_picker_${day.name}_end"),
-              horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    text = "End Time",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.testTag("time_picker_${day.name}_end_label"))
-                ScrollableTimePickerRow(
-                    selectedTime = endTime,
-                    onTimeSelected = { newTime ->
-                      // Ensure end time is not before start time
-                      if (newTime.isAfter(startTime) || newTime.equals(startTime)) {
-                        onEndTimeSelected(newTime)
-                      }
-                    },
-                    testTagPrefix = "time_picker_${day.name}_end")
-              }
-        }
-  }
 }
 
 private data class ExceptionEntry(val date: LocalDateTime, val exception: ScheduleException)
