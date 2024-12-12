@@ -117,7 +117,7 @@ class ListServicesRequestsScreenTest {
   @Test
   fun allComponentsAreDisplayed() {
     composeTestRule.setContent {
-      ListRequestsFeedScreen(serviceRequestViewModel, packageProposalViewModel, navigationActions)
+      RequestsFeedScreen(serviceRequestViewModel, packageProposalViewModel, navigationActions)
     }
     // Verify if the main screen container is displayed
     composeTestRule.onNodeWithTag("ListRequestsScreen").isDisplayed()
@@ -148,7 +148,7 @@ class ListServicesRequestsScreenTest {
   @Test
   fun testSearchBar() {
     composeTestRule.setContent {
-      ListRequestsFeedScreen(serviceRequestViewModel, packageProposalViewModel, navigationActions)
+      RequestsFeedScreen(serviceRequestViewModel, packageProposalViewModel, navigationActions)
     }
 
     composeTestRule.onNodeWithTag("SearchBar").performTextInput("French")
@@ -164,7 +164,7 @@ class ListServicesRequestsScreenTest {
   @Test
   fun testFilterServices() {
     composeTestRule.setContent {
-      ListRequestsFeedScreen(serviceRequestViewModel, packageProposalViewModel, navigationActions)
+      RequestsFeedScreen(serviceRequestViewModel, packageProposalViewModel, navigationActions)
     }
     assert(composeTestRule.onAllNodesWithTag("FilterBar").fetchSemanticsNodes().isNotEmpty())
     // Perform Service Filtering

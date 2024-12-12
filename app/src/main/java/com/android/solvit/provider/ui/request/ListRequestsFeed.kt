@@ -2,9 +2,7 @@ package com.android.solvit.provider.ui.request
 
 import android.widget.Toast
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,26 +16,28 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.colorScheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -54,7 +54,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -62,32 +61,149 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.android.solvit.R
+import com.android.solvit.seeker.model.profile.SeekerProfile
+import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.seeker.ui.navigation.BottomNavigationMenu
 import com.android.solvit.seeker.ui.provider.PackageCard
 import com.android.solvit.shared.model.NotificationsViewModel
 import com.android.solvit.shared.model.authentication.AuthViewModel
-import com.android.solvit.shared.model.map.Location
+import com.android.solvit.shared.model.chat.ChatViewModel
 import com.android.solvit.shared.model.packages.PackageProposal
 import com.android.solvit.shared.model.packages.PackageProposalViewModel
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestStatus
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.service.Services
-import com.android.solvit.shared.ui.map.GetDirectionsBubble
 import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_PROVIDER
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
-import com.android.solvit.shared.ui.theme.Orange
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-/** Composable function that displays the top bar of the requests feed screen. */
+/**
+ * Composable function that displays the list requests feed screen.
+ *
+ * @param serviceRequestViewModel The service request view model
+ * @param packageProposalViewModel The package proposal view model
+ * @param navigationActions The navigation actions
+ * @param notificationViewModel The notification view model
+ * @param authViewModel The authentication view model
+ */
+@Composable
+fun RequestsFeedScreen(
+    serviceRequestViewModel: ServiceRequestViewModel =
+        viewModel(factory = ServiceRequestViewModel.Factory),
+    packageProposalViewModel: PackageProposalViewModel =
+        viewModel(factory = PackageProposalViewModel.Factory),
+    navigationActions: NavigationActions,
+    notificationViewModel: NotificationsViewModel =
+        viewModel<NotificationsViewModel>(factory = NotificationsViewModel.Factory),
+    authViewModel: AuthViewModel = viewModel<AuthViewModel>(factory = AuthViewModel.Factory),
+    chatViewModel: ChatViewModel = viewModel(factory = ChatViewModel.Factory),
+    seekerProfileViewModel: SeekerProfileViewModel =
+        viewModel(factory = SeekerProfileViewModel.Factory),
+) {
+  val allRequests by serviceRequestViewModel.requests.collectAsState()
+  val requests = allRequests.filter { it.status == ServiceRequestStatus.PENDING }
+  val selectedRequest = remember { mutableStateOf<ServiceRequest?>(null) }
+  var selectedService by remember { mutableStateOf("All Services") }
+  val searchQuery = remember { mutableStateOf("") }
+  val showDialog = remember { mutableStateOf(false) }
+  val user by authViewModel.user.collectAsState()
+  val providerId = user?.uid ?: "-1"
+  val packages = packageProposalViewModel.proposal.collectAsState()
+  val seekerState = remember { mutableStateOf<SeekerProfile?>(null) }
+  val isReadyToNavigate by chatViewModel.isReadyToNavigate.collectAsState()
+
+  LaunchedEffect(selectedRequest.value) {
+    seekerState.value =
+        selectedRequest.value?.userId?.let { seekerProfileViewModel.fetchUserById(it) }
+  }
+
+  LaunchedEffect(isReadyToNavigate) {
+    if (isReadyToNavigate) {
+      navigationActions.navigateTo(Screen.CHAT)
+      chatViewModel.resetIsReadyToNavigate()
+    }
+  }
+
+  Scaffold(
+      topBar = { RequestsTopBar(navigationActions, notificationViewModel, providerId) },
+      bottomBar = {
+        BottomNavigationMenu(
+            onTabSelect = { navigationActions.navigateTo(it.route) },
+            tabList = LIST_TOP_LEVEL_DESTINATION_PROVIDER,
+            selectedItem = navigationActions.currentRoute())
+      }) { paddingValues ->
+        Column(
+            modifier =
+                Modifier.fillMaxSize()
+                    .padding(paddingValues)
+                    .background(colorScheme.background)
+                    .testTag("ScreenContent"),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally) {
+              Spacer(modifier = Modifier.height(8.dp))
+
+              // Search Bar and Service Type Filter
+              Row(
+                  modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                  horizontalArrangement = Arrangement.spacedBy(8.dp),
+                  verticalAlignment = Alignment.CenterVertically) {
+                    SearchBar(searchQuery, Modifier.weight(1f))
+                    ServiceTypeFilter(
+                        selectedService = selectedService,
+                        onServiceSelected = { selectedService = it },
+                    )
+                  }
+
+              // Filtered Requests List
+              val filteredRequests =
+                  requests.filter {
+                    val matchesService =
+                        selectedService == "All Services" ||
+                            it.type.name == selectedService.replace(" ", "_").uppercase()
+                    val matchesQuery =
+                        searchQuery.value.isBlank() ||
+                            it.title.contains(searchQuery.value, ignoreCase = true) ||
+                            it.description.contains(searchQuery.value, ignoreCase = true)
+                    matchesService && matchesQuery
+                  }
+
+              ListRequests(
+                  filteredRequests,
+                  showDialog,
+                  selectedRequest,
+                  chatViewModel,
+                  providerId,
+                  seekerState)
+
+              selectedRequest.value?.let {
+                ProposePackageDialog(
+                    providerId = providerId,
+                    request = it,
+                    packages = packages.value.filter { pckg -> pckg.providerId == providerId },
+                    showDialog = showDialog,
+                    requestViewModel = serviceRequestViewModel)
+              }
+            }
+      }
+}
+
+/**
+ * Composable function that displays the top bar of the requests feed screen.
+ *
+ * @param navigationActions The navigation actions
+ * @param notificationsViewModel The notification view model
+ * @param providerId The provider's ID
+ */
 @Composable
 fun RequestsTopBar(
     navigationActions: NavigationActions,
@@ -146,34 +262,57 @@ fun RequestsTopBar(
  * Composable function that displays the search bar of the requests feed screen.
  *
  * @param searchQuery The search query state
+ * @param modifier The modifier
  */
 @Composable
-fun SearchBar(searchQuery: MutableState<String>) {
-  OutlinedTextField(
-      value = searchQuery.value,
-      onValueChange = { searchQuery.value = it },
-      singleLine = true,
-      placeholder = {
-        Text(
-            "Search requests",
-            style = TextStyle(color = Orange, fontSize = 16.sp, fontWeight = FontWeight.Bold))
-      },
-      leadingIcon = {
-        Icon(
-            painter = painterResource(id = R.drawable.search_icon),
-            contentDescription = "Search icon",
-            tint = Orange,
-            modifier = Modifier.size(20.dp))
-      },
-      modifier =
-          Modifier.fillMaxWidth()
-              .padding(horizontal = 16.dp)
-              .height(56.dp)
-              .background(colorScheme.background)
-              .border(3.dp, Orange, RoundedCornerShape(12.dp))
-              .testTag("SearchBar"),
-      textStyle = TextStyle(color = Orange, fontSize = 16.sp, fontWeight = FontWeight.Bold),
-      shape = RoundedCornerShape(12.dp))
+fun SearchBar(searchQuery: MutableState<String>, modifier: Modifier = Modifier) {
+  Box(
+      modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+      contentAlignment = Alignment.Center) {
+        // Floating Search Bar with rounded corners and shadow
+        Row(
+            modifier =
+                Modifier.fillMaxWidth()
+                    .height(56.dp)
+                    .clip(RoundedCornerShape(28.dp)) // Fully rounded
+                    .background(colorScheme.surface),
+            verticalAlignment = Alignment.CenterVertically) {
+              // Leading Icon
+              Icons.Default.Search.let {
+                Icon(
+                    imageVector = it,
+                    contentDescription = "Search Icon",
+                    tint = colorScheme.onSurface,
+                    modifier = Modifier.padding(start = 16.dp))
+              }
+
+              Spacer(modifier = Modifier.width(8.dp))
+
+              // Search Input
+              BasicTextField(
+                  value = searchQuery.value,
+                  onValueChange = { searchQuery.value = it },
+                  singleLine = true,
+                  textStyle =
+                      TextStyle(
+                          color = colorScheme.onSurface,
+                          fontSize = 16.sp,
+                          fontWeight = FontWeight.Medium),
+                  decorationBox = { innerTextField ->
+                    if (searchQuery.value.isEmpty()) {
+                      Text(
+                          "Search requests",
+                          style =
+                              TextStyle(
+                                  color = colorScheme.onSurfaceVariant,
+                                  fontSize = 16.sp,
+                                  fontWeight = FontWeight.Medium))
+                    }
+                    innerTextField()
+                  },
+                  modifier = Modifier.fillMaxWidth().padding(end = 16.dp))
+            }
+      }
 }
 
 /**
@@ -182,12 +321,18 @@ fun SearchBar(searchQuery: MutableState<String>) {
  * @param requests The list of service requests
  * @param showDialog The showDialog state
  * @param selectedRequest The selected request
+ * @param chatViewModel The chat view model
+ * @param providerId The provider's ID
+ * @param seekerState The seeker state
  */
 @Composable
 fun ListRequests(
     requests: List<ServiceRequest>,
     showDialog: MutableState<Boolean>,
-    selectedRequest: MutableState<ServiceRequest?>
+    selectedRequest: MutableState<ServiceRequest?>,
+    chatViewModel: ChatViewModel,
+    providerId: String,
+    seekerState: MutableState<SeekerProfile?>
 ) {
   LazyColumn(
       modifier =
@@ -195,7 +340,10 @@ fun ListRequests(
               .padding(start = 16.dp, end = 16.dp)
               .background(colorScheme.background),
       verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        items(requests) { request -> ServiceRequestItem(request, showDialog, selectedRequest) }
+        items(requests) { request ->
+          ServiceRequestItem(
+              request, showDialog, selectedRequest, chatViewModel, providerId, seekerState)
+        }
       }
 }
 
@@ -205,130 +353,174 @@ fun ListRequests(
  * @param request The service request
  * @param showDialog The showDialog state
  * @param selectedRequest The selected request
+ * @param chatViewModel The chat view model
+ * @param providerId The provider's ID
+ * @param seekerState The seeker state
  */
 @Composable
 fun ServiceRequestItem(
     request: ServiceRequest,
     showDialog: MutableState<Boolean>,
-    selectedRequest: MutableState<ServiceRequest?>
+    selectedRequest: MutableState<ServiceRequest?>,
+    chatViewModel: ChatViewModel,
+    providerId: String,
+    seekerState: MutableState<SeekerProfile?>
 ) {
-  // State to hold the selected location
-  var selectedLocation by remember { mutableStateOf<Location?>(null) }
-  val context = LocalContext.current
-  // Placeholder onClick action
-  val onClick = { Toast.makeText(context, "Not Yet Implemented", Toast.LENGTH_SHORT).show() }
+  Card(
+      modifier = Modifier.fillMaxWidth().padding(8.dp),
+      shape = RoundedCornerShape(16.dp),
+      elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+      colors = CardDefaults.cardColors(containerColor = colorScheme.surface)) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+          // Header Image
+          val imageUrl = request.imageUrl
+          if (!imageUrl.isNullOrEmpty()) {
+            AsyncImage(
+                model = imageUrl,
+                placeholder = painterResource(id = R.drawable.loading),
+                error = painterResource(id = R.drawable.error),
+                contentDescription = "Service Image",
+                modifier = Modifier.fillMaxWidth().height(140.dp),
+                contentScale = ContentScale.Crop)
+          } else {
+            Box(
+                modifier = Modifier.fillMaxWidth().height(140.dp).background(Color.LightGray),
+                contentAlignment = Alignment.Center) {
+                  Text(
+                      text = "No Image Provided",
+                      style =
+                          TextStyle(
+                              color = Color.DarkGray,
+                              fontSize = 14.sp,
+                              fontWeight = FontWeight.Bold))
+                }
+          }
 
-  Column(
-      modifier =
-          Modifier.fillMaxWidth()
-              .padding(8.dp)
-              .border(1.dp, colorScheme.onSurfaceVariant, RoundedCornerShape(12.dp))
-              .background(colorScheme.primary, RoundedCornerShape(12.dp))
-              .padding(16.dp)
-              .testTag("ServiceRequest")) {
-
-        // Row for profile picture and request details
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-          Image(
-              painter = painterResource(id = R.drawable.default_pdp),
-              contentDescription = "Profile Picture",
-              modifier = Modifier.size(50.dp).clip(CircleShape))
-          Spacer(modifier = Modifier.width(8.dp))
-          Column(modifier = Modifier.weight(1f)) {
+          // Content Section
+          Column(modifier = Modifier.padding(16.dp)) {
+            // Title and Type
             Text(
                 text = request.title,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                color = colorScheme.onPrimary)
+                style =
+                    TextStyle(
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = colorScheme.onSurface))
+            Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = Services.format(request.type),
-                fontSize = 14.sp,
-                color = colorScheme.onPrimary)
+                style =
+                    TextStyle(
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Normal,
+                        color = colorScheme.onSurfaceVariant))
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Deadline
+            Row {
+              Text(
+                  text = "Deadline: ",
+                  style =
+                      TextStyle(
+                          fontSize = 14.sp,
+                          fontWeight = FontWeight.SemiBold,
+                          color = colorScheme.onSurface))
+              Text(
+                  text =
+                      SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                          .format(request.dueDate.toDate()),
+                  style =
+                      TextStyle(
+                          fontSize = 14.sp,
+                          fontWeight = FontWeight.Normal,
+                          color = colorScheme.error))
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Progressive Disclosure for Description
+            var isExpanded by remember { mutableStateOf(false) }
+            var textOverflow by remember { mutableStateOf(false) }
+            Text(
+                text = request.description,
+                style =
+                    TextStyle(
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Normal,
+                        lineHeight = 20.sp,
+                        color = colorScheme.onSurfaceVariant),
+                maxLines = if (isExpanded) Int.MAX_VALUE else 2,
+                overflow = TextOverflow.Ellipsis,
+                onTextLayout = { textLayoutResult ->
+                  if (!isExpanded) {
+                    // Check overflow only when text is not expanded
+                    textOverflow = textLayoutResult.hasVisualOverflow
+                  }
+                })
+            if (textOverflow) {
+              Text(
+                  text = if (isExpanded) "Read Less" else "Read More",
+                  modifier = Modifier.clickable { isExpanded = !isExpanded }.padding(top = 4.dp),
+                  style =
+                      TextStyle(
+                          fontSize = 12.sp,
+                          color = colorScheme.primary,
+                          fontWeight = FontWeight.Bold))
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Actions Row
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()) {
+                  InteractionBar("Propose", R.drawable.share_icon) {
+                    selectedRequest.value = request
+                    showDialog.value = true
+                  }
+                  InteractionBar("Reply", R.drawable.reply_icon) {
+                    selectedRequest.value = request
+                    chatViewModel.prepareForChat(
+                        false, providerId, request.userId, seekerState.value, request.uid)
+                  }
+                }
           }
-          IconButton(onClick = { onClick() }) {
-            Icon(
-                imageVector = Icons.Default.MoreVert,
-                contentDescription = "Menu",
-                tint = colorScheme.onPrimary)
-          }
         }
+      }
+}
 
-        // Row for deadline information
-        Row {
-          Text(
-              text = "Deadline: ",
-              fontSize = 15.sp,
-              fontWeight = FontWeight.Bold,
-              color = colorScheme.onPrimary)
-          Text(
-              text =
-                  SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-                      .format(request.dueDate.toDate()),
-              fontSize = 15.sp,
-              fontWeight = FontWeight.Bold,
-              color = colorScheme.error)
-        }
-
-        // Display location if available
-        request.location?.let {
-          Text(
-              text = if (it.name.length > 50) "${it.name.take(50)}..." else it.name,
-              fontSize = 12.sp,
-              color = colorScheme.onPrimary,
-              modifier = Modifier.clickable { selectedLocation = it })
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Display request description
+/**
+ * Composable function that displays an interaction bar.
+ *
+ * @param text The text to display
+ * @param icon The icon to display
+ * @param onClick The onClick action
+ */
+@Composable
+fun InteractionBar(text: String, icon: Int, onClick: () -> Unit = {}) {
+  Row(
+      modifier =
+          Modifier.clip(RoundedCornerShape(8.dp))
+              .clickable { onClick() }
+              .padding(horizontal = 12.dp, vertical = 8.dp),
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.Center) {
+        // Icon
+        Icon(
+            painter = painterResource(id = icon),
+            contentDescription = text,
+            tint = colorScheme.primary,
+            modifier = Modifier.size(20.dp))
+        Spacer(modifier = Modifier.width(8.dp))
+        // Text
         Text(
-            text = request.description,
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Bold,
-            lineHeight = 18.sp,
-            color = colorScheme.onPrimary)
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Display image if available, otherwise show placeholder text
-        val imageUrl = request.imageUrl
-        if (!imageUrl.isNullOrEmpty()) {
-          AsyncImage(
-              model = imageUrl,
-              placeholder = painterResource(id = R.drawable.loading),
-              error = painterResource(id = R.drawable.error),
-              contentDescription = "Service Image",
-              modifier =
-                  Modifier.fillMaxWidth()
-                      .height(160.dp)
-                      .border(1.dp, colorScheme.onPrimary, RoundedCornerShape(12.dp))
-                      .clip(RoundedCornerShape(12.dp)),
-              contentScale = ContentScale.Crop)
-        } else {
-          Box(
-              modifier =
-                  Modifier.fillMaxWidth()
-                      .height(160.dp)
-                      .border(1.dp, colorScheme.onPrimary, RoundedCornerShape(12.dp))
-                      .clip(RoundedCornerShape(12.dp)),
-              contentAlignment = Alignment.Center) {
-                Text(text = "No Image Provided", fontSize = 16.sp, color = colorScheme.onPrimary)
-              }
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Row for interaction buttons
-        Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-          InteractionBar("Comment", R.drawable.comment_icon, onClick)
-          InteractionBar("Propose your service", R.drawable.share_icon) {
-            selectedRequest.value = request
-            showDialog.value = true
-          }
-          InteractionBar("Reply", R.drawable.reply_icon, onClick)
-        }
-
-        // Display directions bubble if location is selected
-        selectedLocation?.let { GetDirectionsBubble(location = it) { selectedLocation = null } }
+            text = text,
+            style =
+                TextStyle(
+                    color = colorScheme.onSurface,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium))
       }
 }
 
@@ -342,6 +534,7 @@ fun ServiceRequestItem(
  * @param showDialog The showDialog state
  * @param requestViewModel The service request view model
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProposePackageDialog(
     providerId: String,
@@ -354,7 +547,10 @@ fun ProposePackageDialog(
   var selectedIndex by remember { mutableIntStateOf(-1) }
 
   if (showDialog.value) {
-    Dialog(onDismissRequest = { showDialog.value = false }) {
+    BasicAlertDialog(
+        onDismissRequest = { showDialog.value = false },
+        properties = DialogProperties(usePlatformDefaultWidth = false),
+    ) {
       Column(
           modifier =
               Modifier.fillMaxSize().padding(16.dp), // Add padding to avoid content touching edges
@@ -388,21 +584,29 @@ fun ProposePackageDialog(
                 }
               }
               Spacer(modifier = Modifier.height(16.dp)) // Add space between LazyRow and Button
-              Button(
-                  onClick = {
-                    selectedPackage.value?.let {
-                      requestViewModel.saveServiceRequest(
-                          request.copy(
-                              providerId = providerId,
-                              packageId = it.uid,
-                              agreedPrice = it.price,
-                              status = ServiceRequestStatus.ACCEPTED))
-                      showDialog.value = false
+              Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
+                Button(
+                    modifier = Modifier.testTag("CancelButton"),
+                    onClick = { showDialog.value = false }) {
+                      Text(text = "Cancel")
                     }
-                  },
-                  enabled = selectedPackage.value != null) {
-                    Text(text = "Propose Package")
-                  }
+                Spacer(modifier = Modifier.width(16.dp))
+                Button(
+                    onClick = {
+                      selectedPackage.value?.let {
+                        requestViewModel.saveServiceRequest(
+                            request.copy(
+                                providerId = providerId,
+                                packageId = it.uid,
+                                agreedPrice = it.price,
+                                status = ServiceRequestStatus.ACCEPTED))
+                        showDialog.value = false
+                      }
+                    },
+                    enabled = selectedPackage.value != null) {
+                      Text(text = "Propose Package")
+                    }
+              }
             } else {
               Card(
                   modifier = Modifier.fillMaxWidth().padding(16.dp),
@@ -464,19 +668,29 @@ fun ProposePackageDialog(
                                 color = colorScheme.error,
                                 fontSize = 12.sp)
                           }
-                          Spacer(modifier = Modifier.height(16.dp))
-                          Button(
-                              modifier = Modifier.testTag("ConfirmButton"),
-                              onClick = {
-                                requestViewModel.saveServiceRequest(
-                                    request.copy(
-                                        providerId = providerId,
-                                        agreedPrice = priceInput.toDouble(),
-                                        status = ServiceRequestStatus.ACCEPTED))
-                                showDialog.value = false
-                              },
-                              enabled = isPriceValid && priceInput.isNotEmpty()) {
-                                Text(text = "Confirm")
+                          Spacer(modifier = Modifier.width(16.dp))
+                          Row(
+                              horizontalArrangement = Arrangement.Center,
+                              modifier = Modifier.fillMaxWidth()) {
+                                Button(
+                                    modifier = Modifier.testTag("CancelButton"),
+                                    onClick = { showDialog.value = false }) {
+                                      Text(text = "Cancel")
+                                    }
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Button(
+                                    modifier = Modifier.testTag("ConfirmButton"),
+                                    onClick = {
+                                      requestViewModel.saveServiceRequest(
+                                          request.copy(
+                                              providerId = providerId,
+                                              agreedPrice = priceInput.toDouble(),
+                                              status = ServiceRequestStatus.ACCEPTED))
+                                      showDialog.value = false
+                                    },
+                                    enabled = isPriceValid && priceInput.isNotEmpty()) {
+                                      Text(text = "Confirm")
+                                    }
                               }
                         }
                   }
@@ -487,252 +701,53 @@ fun ProposePackageDialog(
 }
 
 /**
- * Composable function that displays an interaction bar.
- *
- * @param text The text to display
- * @param icon The icon to display
- * @param onClick The onClick action
- */
-@Composable
-fun InteractionBar(text: String, icon: Int, onClick: () -> Unit = {}) {
-  Column(horizontalAlignment = Alignment.CenterHorizontally) {
-    Text(text = text, fontSize = 14.sp, color = colorScheme.onPrimary)
-    IconButton(onClick = { onClick() }) {
-      Image(
-          painter = painterResource(id = icon),
-          contentDescription = text,
-          colorFilter = ColorFilter.tint(colorScheme.onPrimary),
-          modifier = Modifier.size(21.dp))
-    }
-  }
-}
-
-/**
- * Composable function that displays the filter bar of the requests feed screen.
- *
- * @param selectedService The selected service
- * @param selectedFilters The selected filters
- * @param onSelectedService The onSelectedService action
- * @param onFilterChange The onFilterChange action
- */
-@Composable
-fun FilterBar(
-    selectedService: String,
-    selectedFilters: Set<String>,
-    onSelectedService: (String) -> Unit,
-    onFilterChange: (String, Boolean) -> Unit
-) {
-  val filters = listOf("Service", "Near Me", "Due Time")
-
-  LazyRow(
-      modifier = Modifier.background(colorScheme.background).testTag("FilterBar"),
-      horizontalArrangement = Arrangement.spacedBy(5.dp),
-      verticalAlignment = Alignment.Top) {
-        // Display the filter chips
-        items(filters.size) { idx ->
-          val filter = filters[idx]
-          if (filter == "Service") {
-            ServiceChip(
-                selectedService = selectedService,
-                onServiceSelected = { service ->
-                  onSelectedService(service)
-                  onFilterChange("Service", true)
-                })
-          } else {
-            FilterChip(
-                label = filter,
-                isSelected = selectedFilters.contains(filter),
-                onSelected = { isSelected -> onFilterChange(filter, isSelected) })
-          }
-        }
-      }
-}
-
-/**
- * Composable function that displays a service chip.
+ * Composable function that displays a dropdown menu to filter service types.
  *
  * @param selectedService The selected service
  * @param onServiceSelected The onServiceSelected action
+ * @param modifier The modifier
  */
 @Composable
-fun ServiceChip(selectedService: String, onServiceSelected: (String) -> Unit) {
-  var selectedText by remember { mutableStateOf(selectedService) }
-  var showDropdown by remember { mutableStateOf(false) }
-
-  // Set the border text color based on the selected service
-  val borderTextColor =
-      if (selectedText != "Service") colorScheme.secondary else colorScheme.secondary
-
-  Box(
-      modifier =
-          Modifier.testTag("ServiceChip")
-              .chipModifier(colorScheme.background, borderTextColor)
-              .clickable { showDropdown = !showDropdown },
-      contentAlignment = Alignment.Center) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically) {
-              Text(
-                  text = selectedText,
-                  fontSize = 16.sp,
-                  lineHeight = 34.sp,
-                  fontWeight = FontWeight(400),
-                  color = borderTextColor)
-              Icon(
-                  imageVector = Icons.Default.ArrowDropDown,
-                  contentDescription = "More Options",
-                  tint = borderTextColor,
-              )
-            }
-      }
-
-  DropdownMenu(
-      expanded = showDropdown,
-      onDismissRequest = { showDropdown = false },
-      modifier =
-          Modifier.border(1.dp, colorScheme.onSurface, RoundedCornerShape(12.dp))
-              .background(colorScheme.background, RoundedCornerShape(12.dp))
-              .testTag("ServiceDropdown")) {
-        // Display the service options
-        Services.entries.forEach { service ->
-          val serviceName = Services.format(service)
-          DropdownMenuItem(
-              modifier = Modifier.testTag(serviceName),
-              text = { Text(serviceName) },
-              onClick = {
-                selectedText = serviceName
-                onServiceSelected(serviceName)
-                showDropdown = false
-              })
-        }
-      }
-}
-
-/**
- * Composable function that displays a filter chip.
- *
- * @param label The label to display
- * @param isSelected The isSelected state
- * @param onSelected The onSelected action
- */
-@Composable
-fun FilterChip(label: String, isSelected: Boolean, onSelected: (Boolean) -> Unit) {
-  val borderTextColor = if (isSelected) colorScheme.secondary else colorScheme.secondary
-
-  val context = LocalContext.current
-  Box(
-      modifier =
-          Modifier.chipModifier(colorScheme.background, borderTextColor).clickable {
-            onSelected(!isSelected)
-            Toast.makeText(context, "Not Yet Implemented", Toast.LENGTH_LONG).show()
-          },
-      contentAlignment = Alignment.Center) {
-        Text(
-            text = label,
-            fontSize = 16.sp,
-            lineHeight = 34.sp,
-            fontWeight = FontWeight(400),
-            color = borderTextColor)
-      }
-}
-
-/**
- * Modifier function that applies the chip style to a composable.
- *
- * @param backgroundColor The background color
- * @param borderTextColor The border text color
- */
-private fun Modifier.chipModifier(backgroundColor: Color, borderTextColor: Color) =
-    this.padding(8.dp)
-        .border(3.dp, borderTextColor, shape = RoundedCornerShape(12.dp))
-        .background(backgroundColor, shape = RoundedCornerShape(12.dp))
-        .padding(12.dp, 6.dp)
-
-/**
- * Composable function that displays the list requests feed screen.
- *
- * @param serviceRequestViewModel The service request view model
- * @param navigationActions The navigation actions
- */
-@Composable
-fun ListRequestsFeedScreen(
-    serviceRequestViewModel: ServiceRequestViewModel =
-        viewModel(factory = ServiceRequestViewModel.Factory),
-    packageProposalViewModel: PackageProposalViewModel =
-        viewModel(factory = PackageProposalViewModel.Factory),
-    navigationActions: NavigationActions,
-    notificationViewModel: NotificationsViewModel =
-        viewModel<NotificationsViewModel>(factory = NotificationsViewModel.Factory),
-    authViewModel: AuthViewModel = viewModel<AuthViewModel>(factory = AuthViewModel.Factory)
+fun ServiceTypeFilter(
+    selectedService: String,
+    onServiceSelected: (String) -> Unit,
+    modifier: Modifier = Modifier
 ) {
-  val allRequests by serviceRequestViewModel.requests.collectAsState()
-  val requests = allRequests.filter { it.status == ServiceRequestStatus.PENDING }
-  val selectedRequest = remember { mutableStateOf<ServiceRequest?>(null) }
-  val selectedFilters = remember { mutableStateOf(setOf<String>()) }
-  var selectedService by remember { mutableStateOf("Service") }
-  val searchQuery = remember { mutableStateOf("") }
-  val showDialog = remember { mutableStateOf(false) }
-  val user by authViewModel.user.collectAsState()
-  val providerId = user?.uid ?: "-1"
-  val packages = packageProposalViewModel.proposal.collectAsState()
+  var expanded by remember { mutableStateOf(false) }
 
-  Scaffold(
-      topBar = { RequestsTopBar(navigationActions, notificationViewModel, providerId) },
-      bottomBar = {
-        BottomNavigationMenu(
-            onTabSelect = { navigationActions.navigateTo(it.route) },
-            tabList = LIST_TOP_LEVEL_DESTINATION_PROVIDER,
-            selectedItem = navigationActions.currentRoute())
-      }) { paddingValues ->
-        Column(
-            modifier =
-                Modifier.fillMaxSize()
-                    .padding(paddingValues)
-                    .background(colorScheme.background)
-                    .testTag("ScreenContent"),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally) {
-              Spacer(modifier = Modifier.height(8.dp))
-              SearchBar(searchQuery) // Pass the searchQuery state
-              FilterBar(
-                  selectedService = selectedService,
-                  selectedFilters = selectedFilters.value,
-                  onSelectedService = { service -> selectedService = service },
-                  onFilterChange = { filter, isSelected ->
-                    selectedFilters.value =
-                        if (isSelected) selectedFilters.value + filter
-                        else selectedFilters.value - filter
-                  })
-
-              // Filter requests based on the search query
-              val filteredRequests =
-                  requests.filter { request ->
-                    // Check if the request matches the search query
-                    val query = searchQuery.value.trim().lowercase()
-                    val matchesQuery =
-                        query.isEmpty() ||
-                            request.title.lowercase().contains(query) ||
-                            request.description.lowercase().contains(query)
-
-                    // Check if the request matches the selected filters
-                    val matchesFilters =
-                        if (selectedService == "Service") true
-                        else request.type.name == selectedService.replace(" ", "_").uppercase()
-
-                    matchesQuery && matchesFilters
-                  }
-
-              ListRequests(filteredRequests, showDialog, selectedRequest)
-
-              selectedRequest.value?.let {
-                ProposePackageDialog(
-                    providerId = providerId,
-                    request = it,
-                    packages = packages.value.filter { pckg -> pckg.providerId == providerId },
-                    showDialog = showDialog,
-                    requestViewModel = serviceRequestViewModel)
-              }
-            }
-      }
+  Box(modifier = modifier.wrapContentWidth()) {
+    Button(
+        onClick = { expanded = !expanded },
+        shape = RoundedCornerShape(50),
+        colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
+        modifier = Modifier.height(56.dp)) {
+          Text(text = selectedService, color = colorScheme.onPrimary)
+        }
+    DropdownMenu(
+        expanded = expanded,
+        onDismissRequest = { expanded = false },
+        modifier =
+            Modifier.background(
+                color = colorScheme.surface,
+                shape = RoundedCornerShape(12.dp) // Add rounded corners
+                )) {
+          DropdownMenuItem(
+              text = { Text("All Services", style = TextStyle(fontWeight = FontWeight.Medium)) },
+              onClick = {
+                onServiceSelected("All Services")
+                expanded = false
+              })
+          // Add services dynamically here
+          Services.entries.forEach { service ->
+            DropdownMenuItem(
+                text = {
+                  Text(Services.format(service), style = TextStyle(fontWeight = FontWeight.Medium))
+                },
+                onClick = {
+                  onServiceSelected(Services.format(service))
+                  expanded = false
+                })
+          }
+        }
+  }
 }

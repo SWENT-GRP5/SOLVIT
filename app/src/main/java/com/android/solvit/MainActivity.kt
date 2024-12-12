@@ -22,8 +22,8 @@ import com.android.solvit.provider.ui.map.ProviderMapScreen
 import com.android.solvit.provider.ui.profile.ModifyProviderInformationScreen
 import com.android.solvit.provider.ui.profile.ProviderProfileScreen
 import com.android.solvit.provider.ui.profile.ProviderRegistrationScreen
-import com.android.solvit.provider.ui.request.ListRequestsFeedScreen
 import com.android.solvit.provider.ui.request.RequestsDashboardScreen
+import com.android.solvit.provider.ui.request.RequestsFeedScreen
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.seeker.ui.map.SeekerMapScreen
@@ -316,11 +316,12 @@ fun ProviderUI(
 
   NavHost(navController = navController, startDestination = Route.REQUESTS_FEED) {
     composable(Route.REQUESTS_FEED) {
-      ListRequestsFeedScreen(
+      RequestsFeedScreen(
           serviceRequestViewModel = serviceRequestViewModel,
           navigationActions = navigationActions,
           notificationViewModel = notificationViewModel,
-          authViewModel = authViewModel)
+          authViewModel = authViewModel,
+          chatViewModel = chatViewModel)
     }
     composable(Route.MAP_OF_SEEKERS) {
       ProviderMapScreen(
