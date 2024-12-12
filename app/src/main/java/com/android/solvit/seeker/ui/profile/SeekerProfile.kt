@@ -23,6 +23,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Notifications
@@ -40,8 +41,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -69,6 +68,7 @@ import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
 import com.android.solvit.shared.ui.theme.Typography
+import com.android.solvit.shared.ui.utils.TopAppBarInbox
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter", "SourceLockedOrientationActivity")
@@ -201,31 +201,18 @@ fun SeekerProfileScreen(
   }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileTopBar(navigationActions: NavigationActions, onLogout: () -> Unit) {
-  TopAppBar(
-      title = {
-        Text("Profile", modifier = Modifier.testTag("ProfileTitle"), style = Typography.titleLarge)
-      },
-      navigationIcon = {
-        IconButton(
-            onClick = { navigationActions.goBack() }, modifier = Modifier.testTag("BackButton")) {
-              Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-            }
-      },
-      actions = {
-        IconButton(onClick = onLogout, modifier = Modifier.testTag("LogoutButton")) {
-          Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = "Log out")
-        }
-      },
-      modifier = Modifier.testTag("ProfileTopBar"),
-      colors =
-          TopAppBarDefaults.topAppBarColors(
-              containerColor = colorScheme.background,
-              navigationIconContentColor = colorScheme.onBackground,
-              titleContentColor = colorScheme.onBackground,
-              actionIconContentColor = colorScheme.onBackground))
+  TopAppBarInbox(
+      titre = "Profile",
+      testTagTitle = "ProfileTitle",
+      leftButtonAction = { navigationActions.goBack() },
+      leftButtonForm = Icons.AutoMirrored.Filled.ArrowBack,
+      testTagLeft = "BackButton",
+      rightButton = onLogout,
+      rightButtonForm = Icons.AutoMirrored.Filled.ExitToApp,
+      testTagRight = "LogoutButton",
+      testTagGeneral = "ProfileTopBar")
 }
 
 @Composable

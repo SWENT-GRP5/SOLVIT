@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -54,6 +55,7 @@ import com.android.solvit.shared.model.chat.ChatViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
 import com.android.solvit.shared.ui.theme.Typography
+import com.android.solvit.shared.ui.utils.TopAppBarInbox
 import com.android.solvit.shared.ui.utils.formatTimestamp
 import com.android.solvit.shared.ui.utils.getReceiverImageUrl
 import com.android.solvit.shared.ui.utils.getReceiverName
@@ -92,28 +94,33 @@ fun MessageBox(
     }
   } else {
     Scaffold(
-        topBar = { ChatListTopBar(navigationActions, chatViewModel, authViewModel) },
-        bottomBar = {}) { paddingValues ->
-          if (allMessages.isNotEmpty()) {
-            LazyColumn(
-                modifier = Modifier.padding(paddingValues).fillMaxSize(),
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)) {
-                  items(allMessages.entries.toList()) { message ->
-                    ChatListItem(
-                        message = message.value,
-                        currentUserId = user?.uid ?: "",
-                        receiverId = message.key ?: "",
-                        role = authViewModel.user.value?.role ?: "",
-                        listProviderViewModel = listProviderViewModel,
-                        seekerProfileViewModel = seekerProfileViewModel,
-                        navigationActions = navigationActions,
-                        chatViewModel = chatViewModel)
-                  }
-                }
-          } else {
-            NoMessagesSent(modifier = Modifier.padding(paddingValues))
-          }
-        }
+        topBar = {
+          TopAppBarInbox(
+              titre = "Inbox",
+              leftButtonForm = Icons.AutoMirrored.Filled.ArrowBack,
+              leftButtonAction = { navigationActions.goBack() })
+        },
+    ) { paddingValues ->
+      if (allMessages.isNotEmpty()) {
+        LazyColumn(
+            modifier = Modifier.padding(paddingValues).fillMaxSize(),
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)) {
+              items(allMessages.entries.toList()) { message ->
+                ChatListItem(
+                    message = message.value,
+                    currentUserId = user?.uid ?: "",
+                    receiverId = message.key ?: "",
+                    role = authViewModel.user.value?.role ?: "",
+                    listProviderViewModel = listProviderViewModel,
+                    seekerProfileViewModel = seekerProfileViewModel,
+                    navigationActions = navigationActions,
+                    chatViewModel = chatViewModel)
+              }
+            }
+      } else {
+        NoMessagesSent(modifier = Modifier.padding(paddingValues))
+      }
+    }
   }
 }
 
@@ -124,13 +131,12 @@ fun ChatListTopBar(
     chatViewModel: ChatViewModel,
     authViewModel: AuthViewModel
 ) {
-
   TopAppBar(
       modifier = Modifier.testTag("InboxTopAppBar"),
       title = { Text(text = "Inbox", style = Typography.titleLarge, textAlign = TextAlign.Start) },
       navigationIcon = {
         IconButton(onClick = { navigationActions.goBack() }) {
-          Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+          Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
         }
       },
       actions = {

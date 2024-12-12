@@ -28,13 +28,9 @@ import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults.buttonColors
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
@@ -62,7 +58,7 @@ import com.android.solvit.shared.model.map.LocationViewModel
 import com.android.solvit.shared.ui.authentication.CustomOutlinedTextField
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.theme.Typography
-import com.android.solvit.shared.ui.utils.GoBackButton
+import com.android.solvit.shared.ui.utils.TopAppBarInbox
 import com.android.solvit.shared.ui.utils.ValidationRegex
 
 /**
@@ -128,18 +124,15 @@ fun SeekerRegistrationScreen(
 
   Scaffold(
       topBar = {
-        TopAppBar(
-            title = { Text("Seeker Registration", style = Typography.titleLarge) },
-            navigationIcon = {
-              if (currentStep > 1) {
-                IconButton(onClick = { currentStep -= 1 }) {
-                  Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                }
-              } else {
-                GoBackButton(navigationActions)
-              }
-            },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = backgroundColor))
+        TopAppBarInbox(
+            "Seeker Registration",
+            leftButtonAction =
+                if (currentStep > 1) {
+                  { currentStep -= 1 }
+                } else {
+                  { navigationActions.goBack() }
+                },
+            leftButtonForm = Icons.AutoMirrored.Filled.ArrowBack)
       },
       content = { padding ->
         Column(

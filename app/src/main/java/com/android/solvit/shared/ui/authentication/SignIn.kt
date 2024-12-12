@@ -122,7 +122,6 @@ fun SignInScreen(
   val backgroundColor = colorScheme.background // White background color
 
   Scaffold(
-      topBar = {},
       content = { padding ->
         val modifier =
             Modifier.fillMaxSize()

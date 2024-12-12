@@ -50,7 +50,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -58,8 +57,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.MutableState
@@ -105,7 +102,7 @@ import com.android.solvit.shared.ui.authentication.CustomOutlinedTextField
 import com.android.solvit.shared.ui.booking.PackageCard
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.theme.Typography
-import com.android.solvit.shared.ui.utils.GoBackButton
+import com.android.solvit.shared.ui.utils.TopAppBarInbox
 import com.android.solvit.shared.ui.utils.ValidationRegex
 
 /**
@@ -199,18 +196,15 @@ fun ProviderRegistrationScreen(
 
   Scaffold(
       topBar = {
-        TopAppBar(
-            title = { Text("Provider Registration") },
-            navigationIcon = {
-              if (currentStep > 1) {
-                IconButton(onClick = { currentStep -= 1 }) {
-                  Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                }
-              } else {
-                GoBackButton(navigationActions)
-              }
-            },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = backgroundColor))
+        TopAppBarInbox(
+            "Provider Registration",
+            leftButtonAction =
+                if (currentStep > 1) {
+                  { currentStep -= 1 }
+                } else {
+                  { navigationActions.goBack() }
+                },
+            leftButtonForm = Icons.AutoMirrored.Filled.ArrowBack)
       },
       content = { padding ->
         Column(
