@@ -101,7 +101,7 @@ fun ProviderProfileScreen(
       topBar = { ProfileTopBar(navigationActions, onLogout = { showLogoutDialog = true }) },
       bottomBar = {
         BottomNavigationMenu(
-            onTabSelect = { navigationActions.navigateTo(it.route) },
+            onTabSelect = { navigationActions.navigateTo(it) },
             tabList = LIST_TOP_LEVEL_DESTINATION_PROVIDER,
             selectedItem = Screen.PROVIDER_PROFILE)
       },

@@ -370,7 +370,8 @@ fun ProviderUI(
     // Profile
     navigation(startDestination = Screen.PROVIDER_PROFILE, route = Route.PROFILE) {
       composable(Screen.PROVIDER_PROFILE) {
-        ProviderProfileScreen(providerViewModel, authViewModel, navigationActions)
+        ProviderProfileScreen(
+            providerViewModel, authViewModel, serviceRequestViewModel, navigationActions)
       }
       composable(Screen.PROVIDER_MODIFY_PROFILE) {
         ModifyProviderInformationScreen(

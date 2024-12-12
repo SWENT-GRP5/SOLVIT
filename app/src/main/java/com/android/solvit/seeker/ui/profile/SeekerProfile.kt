@@ -116,7 +116,9 @@ fun SeekerProfileScreen(
           item {
             // Profile Info Card with Edit Button
             ProfileInfoCard(
-                fullName, email, onEdit = { navigationActions.navigateTo(Screen.EDIT_SEEKER_PROFILE) })
+                fullName,
+                email,
+                onEdit = { navigationActions.navigateTo(Screen.EDIT_SEEKER_PROFILE) })
           }
 
           item {
