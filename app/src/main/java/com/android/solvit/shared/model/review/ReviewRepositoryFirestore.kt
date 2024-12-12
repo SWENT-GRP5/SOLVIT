@@ -4,6 +4,7 @@ import android.util.Log
 import com.google.android.gms.tasks.Task
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.tasks.await
 
 class ReviewRepositoryFirestore(private val db: FirebaseFirestore) : ReviewRepository {
   private val collectionPath = "reviews"
@@ -59,15 +60,15 @@ class ReviewRepositoryFirestore(private val db: FirebaseFirestore) : ReviewRepos
     queryReviews("authorId", userId, onSuccess, onFailure)
   }
 
-  override fun getAverageRating(serviceRequestId: String): Double {
+  override suspend fun getAverageRating(serviceRequestId: String): Double {
     return calculateAverageRating("serviceRequestId", serviceRequestId)
   }
 
-  override fun getAverageRatingByProvider(providerId: String): Double {
+  override suspend fun getAverageRatingByProvider(providerId: String): Double {
     return calculateAverageRating("providerId", providerId)
   }
 
-  override fun getAverageRatingByUser(userId: String): Double {
+  override suspend fun getAverageRatingByUser(userId: String): Double {
     return calculateAverageRating("authorId", userId)
   }
 
@@ -136,19 +137,26 @@ class ReviewRepositoryFirestore(private val db: FirebaseFirestore) : ReviewRepos
     }
   }
 
-  fun calculateAverageRating(
+  suspend fun calculateAverageRating(
       field: String,
       value: String,
   ): Double {
     // Calculate the average rating based on a specific field and value
     var averageRating = 5.0
-    db.collection(collectionPath).whereEqualTo(field, value).get().addOnCompleteListener { result ->
-      if (result.isSuccessful) {
-        val reviews = result.result?.mapNotNull { documentToReview(it) } ?: emptyList()
-        averageRating = reviews.map { it.rating }.average()
-      }
+    Log.e("Collection", "${field} : $value")
+    return try {
+      val result = db.collection(collectionPath).whereEqualTo(field, value).get().await()
+      Log.e("averageRating Successfull", "$averageRating")
+      val reviews = result.mapNotNull { documentToReview(it) } ?: emptyList()
+      Log.e("Collection", "${reviews}")
+      averageRating = reviews.map { it.rating }.average()
+      Log.e("AverageRating", "${averageRating}")
+
+      averageRating
+    } catch (e: Exception) {
+      Log.e("Failed to get Average Rating", "$e")
+      averageRating
     }
-    return averageRating
   }
 
   fun documentToReview(document: DocumentSnapshot): Review? {

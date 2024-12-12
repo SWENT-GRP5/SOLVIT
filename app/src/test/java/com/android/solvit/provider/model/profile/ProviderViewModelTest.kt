@@ -6,11 +6,11 @@ import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.provider.ProviderRepository
 import com.android.solvit.shared.model.service.Services
-import com.google.firebase.Timestamp
-import junit.framework.TestCase
+import junit.framework.TestCase.assertEquals
 import org.junit.Before
 import org.junit.Test
-import org.mockito.Mockito
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.`when`
 import org.mockito.kotlin.any
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -34,17 +34,17 @@ class ProviderViewModelTest {
           false,
           0.0,
           0.0,
-          Timestamp.now(),
+          20.0,
           emptyList())
 
   @Before
   fun setUp() {
-    authRepository = Mockito.mock(AuthRepository::class.java)
+    authRepository = mock(AuthRepository::class.java)
     authViewModel = AuthViewModel(authRepository)
     whenever(authRepository.getUserId()).thenReturn("1234")
-    providerRepository = Mockito.mock(ProviderRepository::class.java)
+    providerRepository = mock(ProviderRepository::class.java)
     providerViewModel = ProviderViewModel(providerRepository)
-    Mockito.`when`(providerRepository.getProvider(any(), any(), any())).thenAnswer {
+    `when`(providerRepository.getProvider(any(), any(), any())).thenAnswer {
       val onSuccess = it.getArgument<(Provider) -> Unit>(1)
       onSuccess(provider)
     }
@@ -70,9 +70,9 @@ class ProviderViewModelTest {
     val optimizedRoute = providerViewModel.optimizeRouteBooking(locations)
 
     // Step 3: Verify that the result matches the expected route order
-    TestCase.assertEquals(expectedRoute.size, optimizedRoute.size)
+    assertEquals(expectedRoute.size, optimizedRoute.size)
     for (i in expectedRoute.indices) {
-      TestCase.assertEquals(expectedRoute[i].name, optimizedRoute[i].name)
+      assertEquals(expectedRoute[i].name, optimizedRoute[i].name)
     }
   }
 }
