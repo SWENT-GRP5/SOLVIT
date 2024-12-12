@@ -7,9 +7,7 @@ import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestStatus
 import com.android.solvit.shared.model.service.Services
 import com.google.android.gms.tasks.Task
-import com.google.firebase.Firebase
 import com.google.firebase.Timestamp
-import com.google.firebase.auth.auth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -36,17 +34,12 @@ class NotificationsRepositoryFirestore(private val db: FirebaseFirestore) :
   }
 
   /**
-   * Initializes the repository by adding an authentication state listener to Firebase Auth. When
-   * the user is authenticated, the provided `onSuccess` callback is triggered.
+   * Initializes the repository
    *
-   * @param onSuccess Callback to execute when a user is authenticated.
+   * @param onSuccess Callback to execute
    */
   override fun init(onSuccess: () -> Unit) {
-    Firebase.auth.addAuthStateListener {
-      if (it.currentUser != null) {
-        onSuccess()
-      }
-    }
+    onSuccess()
   }
 
   /**

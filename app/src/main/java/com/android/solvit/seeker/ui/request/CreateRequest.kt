@@ -31,9 +31,7 @@ import com.android.solvit.shared.model.utils.isInternetAvailable
 import com.android.solvit.shared.model.utils.loadBitmapFromUri
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
-import com.google.firebase.Firebase
 import com.google.firebase.Timestamp
-import com.google.firebase.auth.auth
 
 @Composable
 fun CreateRequestScreen(
@@ -79,7 +77,7 @@ fun CreateRequestScreen(
   var selectedServiceType by remember { mutableStateOf(Services.OTHER) }
   selectedProviderService.value?.let { selectedServiceType = it }
   val localContext = LocalContext.current
-  val userId = Firebase.auth.currentUser?.uid ?: "-1"
+  val userId = user?.uid ?: "-1"
 
   var showAIAssistantDialog by remember { mutableStateOf(true) }
   var showMultiStepDialog by remember { mutableStateOf(false) }
@@ -200,15 +198,21 @@ fun CreateRequestScreen(
                         Toast.LENGTH_SHORT)
                     .show()
               }
-              requestViewModel.saveServiceRequestWithImage(serviceRequest, selectedImageUri!!)
+              requestViewModel.saveServiceRequestWithImage(serviceRequest, selectedImageUri!!) {
+                // Get the updated service request with the image URL
+                requestViewModel.getServiceRequestById(serviceRequest.uid) { updatedRequest ->
+                  requestViewModel.selectRequest(updatedRequest)
+                  navigationActions.navigateTo(Route.BOOKING_DETAILS)
+                }
+              }
             } else {
               requestViewModel.saveServiceRequest(serviceRequest)
+              requestViewModel.selectRequest(serviceRequest)
+              navigationActions.navigateTo(Route.BOOKING_DETAILS)
             }
             requestViewModel.unSelectProvider()
             notificationViewModel.sendNotifications(
                 serviceRequest, listProviderViewModel.providersList.value)
-            requestViewModel.selectRequest(serviceRequest)
-            navigationActions.navigateTo(Route.BOOKING_DETAILS)
             return@RequestScreen
           } catch (_: NumberFormatException) {}
         }
