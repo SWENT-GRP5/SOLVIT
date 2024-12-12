@@ -20,8 +20,11 @@ class GeminiImageAnalyzer(private val generativeModel: GenerativeModel = default
             name = "ImageAnalysisResponse",
             description = "The structured response for images analysis",
             Schema.str(name = "title", description = "The generated title for the analysis"),
-            Schema(name = "type", description = "The category of the analyzed images",
-                type = FunctionType.STRING, enum = Services.entries.map { it.name }),
+            Schema(
+                name = "type",
+                description = "The category of the analyzed images",
+                type = FunctionType.STRING,
+                enum = Services.entries.map { it.name }),
             Schema.str(
                 name = "description",
                 description = "A detailed description of the analyzed images"))

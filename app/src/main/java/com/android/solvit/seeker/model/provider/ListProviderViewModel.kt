@@ -118,6 +118,6 @@ class ListProviderViewModel(private val repository: ProviderRepository) : ViewMo
   }
 
   fun countProvidersByService(service: Services): Int {
-      return _providersList.value.count { it.service == service }
+    return _providersList.value.count { it.service == service }
   }
 }

@@ -382,17 +382,19 @@ fun DatePickerFieldToModal(
       trailingIcon = { Icon(Icons.Default.DateRange, contentDescription = "Select date") },
       shape = RoundedCornerShape(12.dp),
       modifier =
-          modifier.fillMaxWidth()
+          modifier
+              .fillMaxWidth()
               .padding(horizontal = 20.dp)
-              .testTag("inputRequestDate").pointerInput(selectedDate) {
-            awaitEachGesture {
-              awaitFirstDown(pass = PointerEventPass.Initial)
-              val upEvent = waitForUpOrCancellation(pass = PointerEventPass.Initial)
-              if (upEvent != null) {
-                showModal = true
-              }
-            }
-          },
+              .testTag("inputRequestDate")
+              .pointerInput(selectedDate) {
+                awaitEachGesture {
+                  awaitFirstDown(pass = PointerEventPass.Initial)
+                  val upEvent = waitForUpOrCancellation(pass = PointerEventPass.Initial)
+                  if (upEvent != null) {
+                    showModal = true
+                  }
+                }
+              },
       colors =
           OutlinedTextFieldDefaults.colors(
               unfocusedContainerColor = Color.Transparent,

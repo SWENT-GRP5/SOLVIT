@@ -63,3 +63,5 @@ val Photographer = Color(0xFF414b82)
 val PersonalTrainer = Color(0xFFfb7c44)
 val HairStylist = Color(0xFFf15c62)
 val Other = Color(0xFF9B9999)
+
+val DarkBlue = Color(0xFF003366)

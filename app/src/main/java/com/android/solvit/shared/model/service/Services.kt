@@ -30,6 +30,7 @@ enum class Services {
     fun format(service: Services): String {
       return service.name.lowercase().replaceFirstChar { it.uppercase() }.replace("_", " ")
     }
+
     fun getIcon(service: Services): Int {
       return when (service) {
         PLUMBER -> R.drawable.ic_plumber
@@ -45,6 +46,7 @@ enum class Services {
         OTHER -> R.drawable.ic_tutor
       }
     }
+
     fun getColor(service: Services): Color {
       return when (service) {
         PLUMBER -> Plumber
@@ -58,6 +60,22 @@ enum class Services {
         PERSONAL_TRAINER -> PersonalTrainer
         HAIR_STYLIST -> HairStylist
         OTHER -> Tutor
+      }
+    }
+
+    fun getProfileImage(service: Services): Int {
+      return when (service) {
+        PLUMBER -> R.drawable.pr_plumber
+        ELECTRICIAN -> R.drawable.pr_electrician
+        TUTOR -> R.drawable.pr_tutor
+        EVENT_PLANNER -> R.drawable.pr_event_planner
+        WRITER -> R.drawable.pr_writer
+        CLEANER -> R.drawable.pr_cleaner
+        CARPENTER -> R.drawable.pr_carpenter
+        PHOTOGRAPHER -> R.drawable.pr_photographer
+        PERSONAL_TRAINER -> R.drawable.pr_personal_trainer
+        HAIR_STYLIST -> R.drawable.pr_hair_stylist
+        OTHER -> R.drawable.pr_tutor
       }
     }
   }

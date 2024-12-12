@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -27,10 +26,10 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DockedSearchBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -40,6 +39,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -47,7 +47,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -70,6 +69,7 @@ import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_SEEKER
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
+import com.android.solvit.shared.ui.theme.DarkBlue
 import com.android.solvit.shared.ui.theme.LightBlue
 import com.android.solvit.shared.ui.theme.LightOrange
 import com.android.solvit.shared.ui.theme.LightRed
@@ -101,18 +101,19 @@ fun ServicesScreen(
             Route.SERVICES)
       },
       topBar = {
-          TopSection(searchViewModel, seekerProfileViewModel, listProviderViewModel, navigationActions)
+        TopSection(
+            searchViewModel, seekerProfileViewModel, listProviderViewModel, navigationActions)
       }) { innerPadding ->
-        Column(modifier =
-        Modifier.fillMaxSize()
-            .padding(innerPadding),
-            ) {
+        Column(
+            modifier = Modifier.fillMaxSize().padding(innerPadding),
+        ) {
           LazyColumn(modifier = Modifier.fillMaxSize()) {
-            item { Spacer(Modifier.size(16.dp))}
+            item { Spacer(Modifier.size(16.dp)) }
+            item { DiscountSection(navigationActions, listProviderViewModel) }
             item { ShortcutsSection(navigationActions, listProviderViewModel) }
             item { CategoriesSection(searchViewModel, listProviderViewModel, navigationActions) }
             item { PerformersSection(listProviderViewModel, navigationActions) }
-            item { Spacer(Modifier.size(80.dp)) }
+            item { Spacer(Modifier.size(40.dp)) }
           }
         }
       }
@@ -130,76 +131,116 @@ fun TopSection(
   val searchResults by searchViewModel.servicesList.collectAsState()
   val isSearching by searchViewModel.isSearching.collectAsState()
   val userProfile by seekerProfileViewModel.seekerProfile.collectAsState()
+  val address = "EPFL - École Polytechnique Fédérale de Lausanne"
 
-    Box (modifier =
-    Modifier
-      .fillMaxWidth() ){
-      // Background Image
-      Image(
-          painter = painterResource(id = R.drawable.top_background),
-          contentDescription = null,
-          contentScale = ContentScale.Crop,
-          modifier = Modifier.matchParentSize()
-      )
-      Column(
-          modifier =
-          Modifier.fillMaxWidth()
-              .testTag("servicesScreenTopSection"),
-          horizontalAlignment = Alignment.CenterHorizontally
+  Box(modifier = Modifier.fillMaxWidth().testTag("servicesScreenTopSection")) {
+    // Background Image
+    Image(
+        painter = painterResource(id = R.drawable.top_background),
+        contentDescription = null,
+        contentScale = ContentScale.Crop,
+        modifier = Modifier.matchParentSize())
+    Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+      val context = LocalContext.current
+      val toast = Toast.makeText(context, "Not implemented yet", Toast.LENGTH_SHORT)
+      Row(
+          modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp).height(45.dp),
+          horizontalArrangement = Arrangement.SpaceBetween,
       ) {
-          val context = LocalContext.current
-          val toast = Toast.makeText(context, "Not implemented yet", Toast.LENGTH_SHORT)
-          Row(
-              modifier = Modifier.height(45.dp),
-              verticalAlignment = Alignment.CenterVertically,
-              horizontalArrangement = Arrangement.spacedBy(70.dp)
-          ) {
-              Image(
-                  painterResource(id = R.drawable.default_pdp),
-                  contentDescription = "profile picture",
-                  Modifier.size(40.dp)
-                      .clip(CircleShape)
-                      .border(4.dp, colorScheme.onPrimary, CircleShape)
-                      .clickable { navigationActions.navigateTo(Route.PROFILE) }
-                      .testTag("servicesScreenProfileImage"))
-              Text(text = userProfile.name, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-              IconButton(
-                  onClick = { toast.show() }, modifier = Modifier.testTag("servicesScreenMenu")
-              ) {
-                  Icon(imageVector = Icons.Default.Menu, contentDescription = null)
-              }
+        Image(
+            painterResource(id = R.drawable.ic_user),
+            contentDescription = "profile picture",
+            Modifier.size(40.dp)
+                .clip(CircleShape)
+                .clickable { navigationActions.navigateTo(Route.PROFILE) }
+                .testTag("servicesScreenProfileImage"))
+        Column(horizontalAlignment = Alignment.Start) {
+          // User's Location
+          Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                imageVector = Icons.Outlined.LocationOn,
+                contentDescription = "Location Icon",
+                tint = OnPrimary,
+                modifier =
+                    Modifier.size(16.dp).padding(end = 4.dp).testTag("servicesScreenLocationIcon"))
+
+            Text(
+                text =
+                    if (address.length > 27) { // Replace with `userProfile.address`
+                      address.take(27) + "..."
+                    } else {
+                      address
+                    },
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium,
+                color = OnPrimary,
+                modifier = Modifier.testTag("servicesScreenCurrentLocation"))
           }
-          DockedSearchBar(
-              query = searchText,
-              onQueryChange = searchViewModel::onSearchTextChange,
-              onSearch = searchViewModel::onSearchTextChange,
-              active = isSearching,
-              onActiveChange = { searchViewModel.onToggleSearch() },
-              modifier = Modifier.offset(y = 20.dp).testTag("servicesScreenSearchBar"),
-              placeholder = { Text("Find services near you") },
-              leadingIcon = {
-                  Icon(
-                      imageVector = Icons.Default.Search,
-                      contentDescription = null
-                  )
-              }) {
-              LazyColumn(
-                  modifier = Modifier.padding(16.dp),
-                  verticalArrangement = Arrangement.spacedBy(8.dp)
-              ) {
+
+          // User's Name
+          Text(
+              text = userProfile.name,
+              modifier = Modifier.testTag("servicesScreenUserName"),
+              fontSize = 20.sp,
+              fontWeight = FontWeight.Bold,
+              color = DarkBlue // Dark blue for emphasis
+              )
+        }
+        IconButton(onClick = { toast.show() }, modifier = Modifier.testTag("servicesScreenMenu")) {
+          Icon(imageVector = Icons.Default.Menu, contentDescription = null)
+        }
+      }
+      DockedSearchBar(
+          query = searchText,
+          onQueryChange = searchViewModel::onSearchTextChange,
+          onSearch = searchViewModel::onSearchTextChange,
+          active = isSearching,
+          onActiveChange = { searchViewModel.onToggleSearch() },
+          modifier = Modifier.offset(y = 20.dp).testTag("servicesScreenSearchBar"),
+          placeholder = { Text("Find services near you") },
+          leadingIcon = { Icon(imageVector = Icons.Default.Search, contentDescription = null) },
+          colors = SearchBarDefaults.colors(containerColor = OnPrimary)) {
+            LazyColumn(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)) {
                   items(searchResults.size) { index ->
-                      Text(
-                          Services.format(searchResults[index].service),
-                          modifier =
-                          Modifier.clickable {
+                    Text(
+                        Services.format(searchResults[index].service),
+                        modifier =
+                            Modifier.clickable {
                               listProviderViewModel.selectService(searchResults[index].service)
                               navigationActions.navigateTo(Route.PROVIDERS)
-                          })
+                            })
                   }
-              }
+                }
           }
-      }
+    }
   }
+}
+
+@Composable
+fun DiscountSection(
+    navigationActions: NavigationActions,
+    listProviderViewModel: ListProviderViewModel,
+) {
+  Box(
+      modifier =
+          Modifier.fillMaxWidth()
+              .testTag("servicesScreenDiscount")
+              .padding(16.dp)
+              .height(200.dp)
+              .clip(RoundedCornerShape(16.dp))
+              .clickable {
+                listProviderViewModel.selectService(Services.PLUMBER)
+                navigationActions.navigateTo(Route.PROVIDERS)
+              }) {
+        // Background Image
+        Image(
+            painter = painterResource(id = R.drawable.discount_bg),
+            contentDescription = "Discount Announcement",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.matchParentSize())
+      }
 }
 
 @Composable
@@ -225,16 +266,14 @@ fun ShortcutsSection(
                         "Solve It with AI",
                         color = colorScheme.onPrimary,
                         fontSize = 20.sp,
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = FontWeight.Bold
-                        ),
+                        style =
+                            MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                         fontWeight = FontWeight.Bold)
                     Icon(
                         painter = painterResource(id = R.drawable.ai_solver),
                         contentDescription = "ai_logo",
                         modifier = Modifier.size(50.dp),
-                        tint = Color.Unspecified
-                    )
+                        tint = Color.Unspecified)
                   }
             }
         Row(
@@ -254,14 +293,16 @@ fun ShortcutsSection(
                               painter = painterResource(id = R.drawable.ic_orders),
                               contentDescription = "All Orders",
                               modifier =
-                                  Modifier.size(40.dp).clip(RoundedCornerShape(8.dp)).align(Alignment.End))
+                                  Modifier.size(40.dp)
+                                      .clip(RoundedCornerShape(8.dp))
+                                      .align(Alignment.End))
                           Text(
                               "All Orders",
                               color = colorScheme.onPrimary,
                               fontSize = 20.sp,
-                              style = MaterialTheme.typography.titleMedium.copy(
-                                  fontWeight = FontWeight.Bold
-                              ),
+                              style =
+                                  MaterialTheme.typography.titleMedium.copy(
+                                      fontWeight = FontWeight.Bold),
                               fontWeight = FontWeight.Bold)
                         }
                   }
@@ -283,9 +324,9 @@ fun ShortcutsSection(
                               "Providers Map",
                               color = colorScheme.onPrimary,
                               fontSize = 20.sp,
-                              style = MaterialTheme.typography.titleMedium.copy(
-                                  fontWeight = FontWeight.Bold
-                              ),
+                              style =
+                                  MaterialTheme.typography.titleMedium.copy(
+                                      fontWeight = FontWeight.Bold),
                               fontWeight = FontWeight.Bold)
                         }
                   }
@@ -307,7 +348,7 @@ fun CategoriesSection(
     Text(
         "Top Categories",
         fontSize = 20.sp,
-        fontWeight = FontWeight.Bold,
+        fontWeight = FontWeight.Black,
         modifier = Modifier.testTag("servicesScreenCategoriesTitle"))
     LazyRow(
         modifier = Modifier.fillMaxWidth().height(150.dp).testTag("servicesScreenCategoriesList"),
@@ -315,7 +356,8 @@ fun CategoriesSection(
           items(searchResults.size) { index ->
             ServiceItem(
                 searchResults[index],
-                workerCount = listProviderViewModel.countProvidersByService(searchResults[index].service),
+                workerCount =
+                    listProviderViewModel.countProvidersByService(searchResults[index].service),
                 onClick = {
                   listProviderViewModel.selectService(searchResults[index].service)
                   navigationActions.navigateTo(Route.PROVIDERS)
@@ -333,16 +375,16 @@ fun PerformersSection(
   val providers by listProviderViewModel.providersList.collectAsState()
   val topProviders = providers.sortedByDescending { it.rating }
   Column(
-      modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("servicesScreenPerformers"),
+      modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("performersSection"),
       verticalArrangement = Arrangement.spacedBy(16.dp),
   ) {
     Text(
         "Top Performers",
         fontSize = 20.sp,
-        fontWeight = FontWeight.Bold,
+        fontWeight = FontWeight.Black,
         modifier = Modifier.testTag("servicesScreenPerformersTitle"))
     LazyRow(
-        Modifier.fillMaxWidth().testTag("servicesScreenPerformersList"),
+        modifier = Modifier.fillMaxWidth().testTag("servicesScreenPerformersList"),
         horizontalArrangement = Arrangement.spacedBy(16.dp)) {
           items(providers.size) { index ->
             ProviderItem(
@@ -357,126 +399,125 @@ fun PerformersSection(
 }
 
 @Composable
-fun ServiceItem(service: ServicesListItem,
-                workerCount: Int,
-                onClick: () -> Unit) {
-    OutlinedCard(
-        modifier = Modifier
-            .width(140.dp)
-            .height(160.dp)
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(12.dp),
-        border = BorderStroke(2.dp, service.color),
-        colors = CardDefaults.outlinedCardColors(
-            containerColor = MaterialTheme.colorScheme.background
-        )
-    ) {
+fun ServiceItem(service: ServicesListItem, workerCount: Int, onClick: () -> Unit) {
+  OutlinedCard(
+      modifier =
+          Modifier.width(140.dp)
+              .height(160.dp)
+              .testTag(service.service.toString() + "Item")
+              .clickable(onClick = onClick),
+      shape = RoundedCornerShape(12.dp),
+      border = BorderStroke(2.dp, service.color),
+      colors =
+          CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.background)) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(12.dp),
+            modifier = Modifier.fillMaxSize().padding(12.dp),
             verticalArrangement = Arrangement.SpaceBetween,
-            horizontalAlignment = Alignment.Start
-        ) {
-            // Service icon at the top
-            Icon(
-                painter = painterResource(id = service.icon),
-                contentDescription = null,
-                modifier = Modifier.size(48.dp),
-                tint = Color.Unspecified
-            )
+            horizontalAlignment = Alignment.Start) {
+              // Service icon at the top
+              Icon(
+                  painter = painterResource(id = service.icon),
+                  contentDescription = null,
+                  modifier = Modifier.size(48.dp).testTag(service.service.toString() + "Icon"),
+                  tint = Color.Unspecified)
 
-            // Service name in bold
-            Text(
-                text = Services.format(service.service),
-                style = MaterialTheme.typography.titleMedium.copy(
-                    fontWeight = FontWeight.Bold
-                ),
-                color = MaterialTheme.colorScheme.onBackground,
-                textAlign = TextAlign.Center
-            )
+              // Service name in bold
+              Text(
+                  text = Services.format(service.service),
+                  modifier = Modifier.testTag(service.service.toString() + "Name"),
+                  style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                  color = MaterialTheme.colorScheme.onBackground,
+                  textAlign = TextAlign.Center)
 
-            // Worker count below the service name
-            Text(
-                text = "+ $workerCount workers",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center
-            )
-        }
-    }
+              // Worker count below the service name
+              Text(
+                  text = "+ $workerCount workers",
+                  modifier = Modifier.testTag(service.service.toString() + "WorkerCount"),
+                  style = MaterialTheme.typography.bodySmall,
+                  color = MaterialTheme.colorScheme.onSurfaceVariant,
+                  textAlign = TextAlign.Center)
+            }
+      }
 }
 
 @Composable
 fun ProviderItem(provider: Provider, onClick: () -> Unit) {
   OutlinedCard(
       modifier =
-          Modifier
-              .width(180.dp)
-              .height(220.dp)
-              .clickable { onClick() }.testTag(provider.name + "Item"),
+          Modifier.width(180.dp).height(220.dp).testTag(provider.name + "Item").clickable {
+            onClick()
+          },
       shape = RoundedCornerShape(16.dp),
       elevation = CardDefaults.outlinedCardElevation()) {
         Box {
           AsyncImage(
               model = provider.imageUrl,
-              placeholder = painterResource(id = R.drawable.ic_no_img),
-              error = painterResource(id = R.drawable.ic_no_img),
+              placeholder = painterResource(id = Services.getProfileImage(provider.service)),
+              error = painterResource(id = Services.getProfileImage(provider.service)),
               contentDescription = null,
               contentScale = ContentScale.Crop,
-              modifier = Modifier
-                  .fillMaxSize()
-                  .clip(RoundedCornerShape(16.dp))
-          )
-            Box(
-                modifier = Modifier
-                    .padding(8.dp)
-                    .size(40.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(OnPrimary) // Choose a color that fits your theme
-                    .align(Alignment.TopStart),
-                contentAlignment = Alignment.Center
-            ) {
+              modifier =
+                  Modifier.testTag(Services.getProfileImage(provider.service).toString() + "Image")
+                      .fillMaxSize()
+                      .clip(RoundedCornerShape(16.dp)))
+          Box(
+              modifier =
+                  Modifier.padding(8.dp)
+                      .size(40.dp)
+                      .clip(RoundedCornerShape(8.dp))
+                      .background(OnPrimary) // Choose a color that fits your theme
+                      .align(Alignment.TopStart),
+              contentAlignment = Alignment.Center) {
                 Icon(
                     painter = painterResource(id = Services.getIcon(provider.service)),
                     contentDescription = null,
                     tint = Color.Unspecified,
-                    modifier = Modifier.size(30.dp)
-                )
-            }
+                    modifier =
+                        Modifier.size(30.dp)
+                            .testTag(Services.getIcon(provider.service).toString() + "Icon"))
+              }
+          // Gradient overlay at the bottom to create the tinted area behind texts
+          Box(
+              modifier =
+                  Modifier.fillMaxWidth()
+                      .height(100.dp)
+                      .align(Alignment.BottomCenter)
+                      .background(
+                          brush =
+                              Brush.verticalGradient(
+                                  colors =
+                                      listOf(
+                                          Color.Transparent, Services.getColor(provider.service)))))
 
           Column(
-              modifier = Modifier
-                  .align(Alignment.BottomStart)
-                  .padding(16.dp),
+              modifier = Modifier.align(Alignment.BottomStart).padding(16.dp),
               verticalArrangement = Arrangement.spacedBy(8.dp)) {
-              Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                   Text(
                       text = provider.rating.toString(),
-                      fontWeight = FontWeight.Bold,
+                      modifier = Modifier.testTag(provider.rating.toString() + "Rating"),
+                      fontWeight = FontWeight.ExtraBold,
                       fontSize = 16.sp,
-                      color = Color.White
-                  )
+                      color = Color.White)
                   Spacer(modifier = Modifier.width(4.dp))
                   Icon(
                       imageVector = Icons.Default.Star,
                       contentDescription = null,
                       tint = Color.Yellow,
-                      modifier = Modifier.size(16.dp)
-                  )
-              }
-              Text(
-                  text = provider.name,
-                  fontWeight = FontWeight.Bold,
-                  fontSize = 20.sp,
-                  color = Color.White
-              )
-              Text(
-                  text = Services.format(provider.service),
-                  fontWeight = FontWeight.Bold,
-                  fontSize = 18.sp,
-                  color = Color.White
-              )
+                      modifier = Modifier.size(16.dp))
+                }
+                Text(
+                    text = provider.name,
+                    modifier = Modifier.testTag(provider.name + "Name"),
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 20.sp,
+                    color = Color.White)
+                Text(
+                    text = Services.format(provider.service),
+                    modifier = Modifier.testTag(provider.service.toString() + "Service"),
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 18.sp,
+                    color = Color.White)
               }
         }
       }

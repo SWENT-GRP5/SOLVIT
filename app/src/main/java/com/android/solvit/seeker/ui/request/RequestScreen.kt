@@ -98,11 +98,13 @@ fun RequestScreen(
                     titleContentColor = colorScheme.onBackground,
                     actionIconContentColor = colorScheme.onBackground,
                 ),
-            title = { Text( text = screenTitle,
-                modifier =  Modifier.testTag("screenTitle"),
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.titleMedium.copy(
-                    fontWeight = FontWeight.Bold )  ) },
+            title = {
+              Text(
+                  text = screenTitle,
+                  modifier = Modifier.testTag("screenTitle"),
+                  textAlign = TextAlign.Center,
+                  style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold))
+            },
             navigationIcon = {
               IconButton(
                   onClick = {
@@ -148,10 +150,7 @@ fun RequestScreen(
               DatePickerFieldToModal(dueDate = dueDate, onDateChange = onDueDateChange)
               Button(
                   onClick = onSubmit,
-                  modifier =
-                      Modifier.fillMaxWidth()
-                          .height(40.dp)
-                          .testTag("requestSubmit"),
+                  modifier = Modifier.fillMaxWidth().height(40.dp).testTag("requestSubmit"),
                   shape = RoundedCornerShape(25.dp),
                   enabled =
                       title.isNotBlank() &&
