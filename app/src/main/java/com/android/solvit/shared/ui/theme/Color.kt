@@ -51,3 +51,6 @@ val STARTED_color = Color(0xFF00BFA5)
 val ENDED_color = Color(0xFF02F135)
 val CANCELLED_color = Color(0xFFE50000)
 val ARCHIVED_color = Color(0xFF000000)
+
+val IAButton_green_color = Color(0xFF00B383)
+val IAButton_blue_color = Color(0xFF0099FF)
