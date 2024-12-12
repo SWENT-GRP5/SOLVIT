@@ -101,7 +101,7 @@ class ProviderProfileScreenTest {
   @Test
   fun providerProfileScreen_profileInfoCard_performClick() {
     composeTestRule.onNodeWithTag("EditProfileButton").performClick()
-    verify(mockNavigationActions).navigateTo(Screen.PROVIDER_MODIFY_PROFILE)
+    verify(mockNavigationActions).navigateTo(Screen.EDIT_PROVIDER_PROFILE)
   }
 
   @Test

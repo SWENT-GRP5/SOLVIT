@@ -159,8 +159,12 @@ fun SharedUI(
   val user by authViewModel.user.collectAsState()
 
   val startDestination =
-      if (user == null) Route.AUTH
-      else if (user!!.role == "seeker") Route.SEEKER_REGISTRATION else Route.PROVIDER_REGISTRATION
+      when {
+        user == null -> Route.AUTH
+        user!!.role == "seeker" -> Route.SEEKER_REGISTRATION
+        user!!.role == "provider" -> Route.PROVIDER_REGISTRATION
+        else -> Route.AUTH
+      }
 
   NavHost(navController = navController, startDestination = startDestination) {
     // Authentication
@@ -373,7 +377,7 @@ fun ProviderUI(
         ProviderProfileScreen(
             providerViewModel, authViewModel, serviceRequestViewModel, navigationActions)
       }
-      composable(Screen.PROVIDER_MODIFY_PROFILE) {
+      composable(Screen.EDIT_PROVIDER_PROFILE) {
         ModifyProviderInformationScreen(
             providerViewModel, authViewModel, locationViewModel, navigationActions)
       }

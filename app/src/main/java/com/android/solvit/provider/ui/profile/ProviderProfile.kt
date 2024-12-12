@@ -122,7 +122,7 @@ fun ProviderProfileScreen(
               fullName = provider?.name ?: "",
               email = provider?.companyName ?: "",
               imageUrl = provider?.imageUrl ?: "",
-              onEdit = { navigationActions.navigateTo(Screen.PROVIDER_MODIFY_PROFILE) })
+              onEdit = { navigationActions.navigateTo(Screen.EDIT_PROVIDER_PROFILE) })
 
           // additional infos cards
           Card(

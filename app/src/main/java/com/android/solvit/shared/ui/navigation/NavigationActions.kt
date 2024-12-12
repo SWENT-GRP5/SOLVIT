@@ -14,55 +14,55 @@ import androidx.navigation.NavController
 
 object Route {
   // Authentication & Registration
-  const val AUTH = "Auth"
-  const val SEEKER_REGISTRATION = "Seeker registration"
-  const val PROVIDER_REGISTRATION = "Provider registration"
+  const val AUTH = "Authentication"
+  const val SEEKER_REGISTRATION = "Seeker_Registration"
+  const val PROVIDER_REGISTRATION = "Provider_Registration"
 
   // Seeker UI
-  const val SEEKER_OVERVIEW = "Overview"
-  const val PROVIDERS_LIST = "Providers"
-  const val PROVIDER_INFO = "Provider info"
-  const val REQUESTS_OVERVIEW = "Requests Overview"
-  const val CREATE_REQUEST = "Create request"
-  const val EDIT_REQUEST = "Edit request"
+  const val SEEKER_OVERVIEW = "Seeker_Overview"
+  const val PROVIDERS_LIST = "Providers_List"
+  const val PROVIDER_INFO = "Provider_Info"
+  const val REQUESTS_OVERVIEW = "Requests_Overview"
+  const val CREATE_REQUEST = "Create_Request"
+  const val EDIT_REQUEST = "Edit_Request"
   const val REVIEW = "Review"
-  const val AI_SOLVER = "Ai Solver"
+  const val AI_SOLVER = "Ai_Solver"
 
   // Provider UI
-  const val REQUESTS_FEED = "Requests Feed"
+  const val REQUESTS_FEED = "Requests_Feed"
   const val CALENDAR = "Calendar"
   const val JOBS = "Jobs"
-  const val NOTIFICATIONS = "Notifications Screen"
+  const val NOTIFICATIONS = "Notifications"
 
   // Shared UI
   const val PROFILE = "Profile"
   const val MAP = "Map"
   const val INBOX = "Messages"
-  const val BOOKING_DETAILS = "Booking Details"
+  const val BOOKING_DETAILS = "Booking_Details"
 }
 
 object Screen {
   // Authentication & Registration
-  const val OPENING = "Opening Screen"
-  const val SIGN_IN = "Sign In Screen"
-  const val SIGN_UP = "Sign Up Screen"
-  const val CHOOSE_ROLE = "Choose Role Screen"
-  const val FORGOT_PASSWORD = "Forgot Password Screen"
+  const val OPENING = "Opening_Screen"
+  const val SIGN_IN = "SignIn_Screen"
+  const val SIGN_UP = "Sign_Up_Screen"
+  const val CHOOSE_ROLE = "Choose_Role_Screen"
+  const val FORGOT_PASSWORD = "Forgot_Password_Screen"
 
   // Seeker UI
-  const val SEEKER_PROFILE = "Seeker Profile Screen"
-  const val EDIT_SEEKER_PROFILE = "Edit Seeker Profile Screen"
-  const val EDIT_PREFERENCES = "Edit Preferences"
-  const val AI_SOLVER_WELCOME_SCREEN = "Ai Get Started Screen"
-  const val AI_SOLVER_CHAT_SCREEN = "AI Solver Chat Screen"
+  const val SEEKER_PROFILE = "Seeker_Profile_Screen"
+  const val EDIT_SEEKER_PROFILE = "Edit_Seeker_Profile_Screen"
+  const val EDIT_PREFERENCES = "Edit_Preferences_Screen"
+  const val AI_SOLVER_WELCOME_SCREEN = "Ai_Get_Started_Screen"
+  const val AI_SOLVER_CHAT_SCREEN = "AI_Solver_Chat_Screen"
 
   // Provider UI
-  const val PROVIDER_PROFILE = "Provider Profile"
-  const val PROVIDER_MODIFY_PROFILE = "Modify Provider Profile"
+  const val PROVIDER_PROFILE = "Provider_Profile_Screen"
+  const val EDIT_PROVIDER_PROFILE = "Modify_Provider_Profile_Screen"
 
   // Shared UI
-  const val INBOX = "Inbox Screen"
-  const val CHAT = "Chat Room Screen"
+  const val INBOX = "Inbox_Screen"
+  const val CHAT = "Chat_Room_Screen"
 }
 
 data class TopLevelDestination(val route: String, val icon: ImageVector, val textId: String)
