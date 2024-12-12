@@ -112,8 +112,7 @@ fun RequestsFeedScreen(
     seekerProfileViewModel: SeekerProfileViewModel =
         viewModel(factory = SeekerProfileViewModel.Factory),
 ) {
-  val allRequests by serviceRequestViewModel.requests.collectAsState()
-  val requests = allRequests.filter { it.status == ServiceRequestStatus.PENDING }
+  val requests by serviceRequestViewModel.pendingRequests.collectAsState()
   val selectedRequest = remember { mutableStateOf<ServiceRequest?>(null) }
   var selectedService by remember { mutableStateOf("All Services") }
   val searchQuery = remember { mutableStateOf("") }
@@ -125,6 +124,7 @@ fun RequestsFeedScreen(
   val isReadyToNavigate by chatViewModel.isReadyToNavigate.collectAsState()
   val isSeekerReady = remember { mutableStateOf(false) }
   val repliedClicked = remember { mutableStateOf(false) }
+  val filteredRequests = filterRequests(requests, selectedService, searchQuery.value)
 
   LaunchedEffect(selectedRequest.value) {
     val seeker = selectedRequest.value?.userId?.let { seekerProfileViewModel.fetchUserById(it) }
@@ -178,19 +178,6 @@ fun RequestsFeedScreen(
                         selectedService = selectedService,
                         onServiceSelected = { selectedService = it },
                     )
-                  }
-
-              // Filtered Requests List
-              val filteredRequests =
-                  requests.filter {
-                    val matchesService =
-                        selectedService == "All Services" ||
-                            it.type.name == selectedService.replace(" ", "_").uppercase()
-                    val matchesQuery =
-                        searchQuery.value.isBlank() ||
-                            it.title.contains(searchQuery.value, ignoreCase = true) ||
-                            it.description.contains(searchQuery.value, ignoreCase = true)
-                    matchesService && matchesQuery
                   }
 
               ListRequests(filteredRequests, showDialog, selectedRequest, repliedClicked)
@@ -751,5 +738,31 @@ fun ServiceTypeFilter(
                 })
           }
         }
+  }
+}
+
+/**
+ * Function that filters the list of service requests based on the selected service and search
+ * query.
+ *
+ * @param requests The list of service requests
+ * @param selectedService The selected service
+ * @param searchQuery The search query
+ * @return The filtered list of service requests
+ */
+private fun filterRequests(
+    requests: List<ServiceRequest>,
+    selectedService: String,
+    searchQuery: String
+): List<ServiceRequest> {
+  return requests.filter {
+    val matchesService =
+        selectedService == "All Services" ||
+            it.type.name == selectedService.replace(" ", "_").uppercase()
+    val matchesQuery =
+        searchQuery.isBlank() ||
+            it.title.contains(searchQuery, ignoreCase = true) ||
+            it.description.contains(searchQuery, ignoreCase = true)
+    matchesService && matchesQuery
   }
 }
