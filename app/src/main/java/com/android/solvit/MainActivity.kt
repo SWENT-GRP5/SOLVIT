@@ -318,10 +318,12 @@ fun ProviderUI(
     composable(Route.REQUESTS_FEED) {
       RequestsFeedScreen(
           serviceRequestViewModel = serviceRequestViewModel,
+          packageProposalViewModel = packageViewModel,
           navigationActions = navigationActions,
           notificationViewModel = notificationViewModel,
           authViewModel = authViewModel,
-          chatViewModel = chatViewModel)
+          chatViewModel = chatViewModel,
+          seekerProfileViewModel = seekerProfileViewModel)
     }
     composable(Route.MAP_OF_SEEKERS) {
       ProviderMapScreen(
