@@ -22,6 +22,13 @@ import com.android.solvit.shared.ui.navigation.Route
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
 
+/**
+ * Composable function that displays the map screen for the provider.
+ *
+ * @param serviceRequestViewModel ViewModel to fetch the service requests
+ * @param navigationActions Actions to navigate to different screens
+ * @param requestLocationPermission Flag to request location permission
+ */
 @Composable
 fun ProviderMapScreen(
     serviceRequestViewModel: ServiceRequestViewModel =

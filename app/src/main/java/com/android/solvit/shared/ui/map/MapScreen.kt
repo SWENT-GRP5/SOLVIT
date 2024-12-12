@@ -70,6 +70,14 @@ import com.google.maps.android.compose.MarkerComposable
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 
+/**
+ * Composable that displays a map with markers and a bottom bar.
+ *
+ * @param userLocation The user's location.
+ * @param markers The list of MarkerData to display on the map.
+ * @param bottomBar The content of the bottom bar.
+ * @param markersLoading Whether the markers data are still loading.
+ */
 @Composable
 fun MapScreen(
     userLocation: LatLng?,
@@ -120,6 +128,14 @@ fun MapScreen(
   )
 }
 
+/**
+ * Composable that displays a map with markers.
+ *
+ * @param userLocation The user's location.
+ * @param markers The list of MarkerData to display on the map.
+ * @param modifier The modifier to apply to the map.
+ * @param onMapLoaded The callback to invoke when the map is loaded.
+ */
 @Composable
 fun MapContent(
     userLocation: LatLng?,
@@ -154,6 +170,11 @@ fun MapContent(
       }
 }
 
+/**
+ * Composable that displays a marker on the map.
+ *
+ * @param markerData The data to display on the marker.
+ */
 @Composable
 fun MapMarker(markerData: MarkerData) {
   MarkerComposable(
@@ -200,6 +221,13 @@ fun MapMarker(markerData: MarkerData) {
       }
 }
 
+/**
+ * Composable that requests location permission and retrieves the user's location.
+ *
+ * @param context The context to use for requesting permission.
+ * @param fusedLocationClient The FusedLocationProviderClient to use for retrieving the location.
+ * @param onLocationReceived The callback to invoke when the location is received.
+ */
 @Composable
 fun RequestLocationPermission(
     context: Context,
@@ -229,6 +257,12 @@ fun RequestLocationPermission(
   }
 }
 
+/**
+ * Retrieves the user's current location.
+ *
+ * @param fusedLocationClient The FusedLocationProviderClient to use for retrieving the location.
+ * @param onLocationReceived The callback to invoke when the location is received.
+ */
 @SuppressLint("MissingPermission")
 fun getCurrentLocation(
     fusedLocationClient: FusedLocationProviderClient,
@@ -239,6 +273,13 @@ fun getCurrentLocation(
   }
 }
 
+/**
+ * Converts a vector drawable to a BitmapDescriptor.
+ *
+ * @param context The context to use for retrieving the drawable.
+ * @param vectorResId The resource ID of the vector drawable.
+ * @return The BitmapDescriptor created from the vector drawable.
+ */
 fun bitmapDescriptorFromVector(context: Context, vectorResId: Int): BitmapDescriptor? {
   val vectorDrawable = AppCompatResources.getDrawable(context, vectorResId)
   vectorDrawable?.let {
@@ -251,6 +292,14 @@ fun bitmapDescriptorFromVector(context: Context, vectorResId: Int): BitmapDescri
   return null
 }
 
+/**
+ * Retrieves an ImageBitmap from a URL.
+ *
+ * @param context The context to use for loading the image.
+ * @param url The URL of the image.
+ * @param placeholder The resource ID of the placeholder image.
+ * @return The ImageBitmap loaded from the URL.
+ */
 suspend fun imageBitmapFromUrl(context: Context, url: String, placeholder: Int): ImageBitmap {
   val loader = ImageLoader(context)
   val request =
