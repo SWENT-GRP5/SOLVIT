@@ -30,8 +30,8 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
 import org.mockito.kotlin.any
 
-// Test class for ListServicesRequestsScreen functionality
-class ListServicesRequestsScreenTest {
+// Test class for RequestsFeedScreen functionality
+class RequestsFeedScreenTest {
   private lateinit var serviceRequestRepository: ServiceRequestRepository
   private lateinit var serviceRequestViewModel: ServiceRequestViewModel
   private lateinit var packageProposalRepository: PackageProposalRepository
@@ -55,7 +55,7 @@ class ListServicesRequestsScreenTest {
                       "Paris, Île-de-France, France métropolitaine, France"),
               status = ServiceRequestStatus.PENDING,
               uid = "gIoUWJGkTgLHgA7qts59",
-              type = Services.PLUMBER,
+              type = Services.TUTOR,
               imageUrl =
                   "https://firebasestorage.googleapis.com/v0/b/solvit-14cc1.appspot.com/o/serviceRequestImages%2F588d3bd9-bcb7-47bc-9911-61fae59eaece.jpg?alt=media&token=5f747f33-9732-4b90-9b34-55e28732ebc3"),
           ServiceRequest(
@@ -70,7 +70,7 @@ class ListServicesRequestsScreenTest {
                       "Paris, Île-de-France, France métropolitaine, France"),
               status = ServiceRequestStatus.PENDING,
               uid = "gIoUWJGkTgLHgA7qts59",
-              type = Services.TUTOR,
+              type = Services.PLUMBER,
               imageUrl =
                   "https://firebasestorage.googleapis.com/v0/b/solvit-14cc1.appspot.com/o/serviceRequestImages%2F588d3bd9-bcb7-47bc-9911-61fae59eaece.jpg?alt=media&token=5f747f33-9732-4b90-9b34-55e28732ebc3"))
 
@@ -166,10 +166,9 @@ class ListServicesRequestsScreenTest {
     composeTestRule.setContent {
       RequestsFeedScreen(serviceRequestViewModel, packageProposalViewModel, navigationActions)
     }
-    assert(composeTestRule.onAllNodesWithTag("FilterBar").fetchSemanticsNodes().isNotEmpty())
     // Perform Service Filtering
-    composeTestRule.onNodeWithTag("ServiceChip").isDisplayed()
-    composeTestRule.onNodeWithTag("ServiceChip").performClick()
+    composeTestRule.onNodeWithTag("ServiceFilter").isDisplayed()
+    composeTestRule.onNodeWithTag("ServiceFilter").performClick()
     // Choose to keep only tutors
     composeTestRule.onNodeWithTag("Tutor").isDisplayed()
     composeTestRule.onNodeWithTag("Tutor").performClick()

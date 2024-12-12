@@ -279,7 +279,7 @@ fun SearchBar(searchQuery: MutableState<String>, modifier: Modifier = Modifier) 
   Box(
       modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
       contentAlignment = Alignment.Center) {
-        // Floating Search Bar with rounded corners and shadow
+        // Floating Search Bar with rounded corners
         Row(
             modifier =
                 Modifier.fillMaxWidth()
@@ -320,7 +320,7 @@ fun SearchBar(searchQuery: MutableState<String>, modifier: Modifier = Modifier) 
                     }
                     innerTextField()
                   },
-                  modifier = Modifier.fillMaxWidth().padding(end = 16.dp))
+                  modifier = Modifier.fillMaxWidth().padding(end = 16.dp).testTag("SearchBar"))
             }
       }
 }
@@ -368,7 +368,7 @@ fun ServiceRequestItem(
     repliedClicked: MutableState<Boolean>,
 ) {
   Card(
-      modifier = Modifier.fillMaxWidth().padding(8.dp),
+      modifier = Modifier.fillMaxWidth().padding(8.dp).testTag("ServiceRequest"),
       shape = RoundedCornerShape(16.dp),
       elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
       colors = CardDefaults.cardColors(containerColor = colorScheme.surface)) {
@@ -720,7 +720,7 @@ fun ServiceTypeFilter(
         onClick = { expanded = !expanded },
         shape = RoundedCornerShape(50),
         colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
-        modifier = Modifier.height(56.dp)) {
+        modifier = Modifier.height(56.dp).testTag("ServiceFilter")) {
           Text(text = selectedService, color = colorScheme.onPrimary)
         }
     DropdownMenu(
@@ -733,6 +733,7 @@ fun ServiceTypeFilter(
                 )) {
           DropdownMenuItem(
               text = { Text("All Services", style = TextStyle(fontWeight = FontWeight.Medium)) },
+              modifier = Modifier.testTag("all_services"),
               onClick = {
                 onServiceSelected("All Services")
                 expanded = false
@@ -743,6 +744,7 @@ fun ServiceTypeFilter(
                 text = {
                   Text(Services.format(service), style = TextStyle(fontWeight = FontWeight.Medium))
                 },
+                modifier = Modifier.testTag(Services.format(service)),
                 onClick = {
                   onServiceSelected(Services.format(service))
                   expanded = false
