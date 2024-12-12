@@ -211,8 +211,9 @@ class SignUpButtonTest {
           passwordLengthComplete = true,
           samePassword = false)
     }
-    composeTestRule.waitForIdle()
+
     composeTestRule.onNodeWithTag("signUpButton").performClick()
+    composeTestRule.waitForIdle()
 
     verify {
       Toast.makeText(any(), "Password and Confirm Password must be the same", Toast.LENGTH_SHORT)
