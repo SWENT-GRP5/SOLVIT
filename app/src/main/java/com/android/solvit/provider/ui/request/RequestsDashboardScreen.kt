@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -46,9 +47,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestStatus
 import com.android.solvit.shared.model.request.ServiceRequestStatus.Companion.format
@@ -57,8 +60,6 @@ import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.utils.isInternetAvailable
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
-import com.google.firebase.Firebase
-import com.google.firebase.auth.auth
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -67,13 +68,16 @@ import java.util.Locale
  *
  * @param navigationActions Actions for navigation.
  * @param serviceRequestViewModel ViewModel for managing service requests.
+ * @param authViewModel ViewModel for managing authentication.
  */
 @Composable
 fun RequestsDashboardScreen(
     navigationActions: NavigationActions,
     serviceRequestViewModel: ServiceRequestViewModel =
-        viewModel(factory = ServiceRequestViewModel.Factory)
+        viewModel(factory = ServiceRequestViewModel.Factory),
+    authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory)
 ) {
+  val user by authViewModel.user.collectAsState()
   // Selected tab index
   var selectedTab by remember { mutableIntStateOf(2) }
   val statusTabs = ServiceRequestStatus.entries.toTypedArray()
@@ -92,6 +96,7 @@ fun RequestsDashboardScreen(
                   onTabSelected = { selectedTab = it })
               JobSectionContent(
                   selectedTab = selectedTab,
+                  providerId = user?.uid ?: "-1",
                   serviceRequestViewModel = serviceRequestViewModel,
                   navigationActions = navigationActions)
             }
@@ -162,22 +167,25 @@ fun StatusTabs(selectedTab: Int, tabs: Array<ServiceRequestStatus>, onTabSelecte
  * Composable function that displays the content of the selected tab in the Requests Dashboard
  * screen.
  *
+ * @param providerId ID of the current provider.
  * @param selectedTab Index of the selected tab.
  * @param serviceRequestViewModel ViewModel for managing service requests.
+ * @param navigationActions Actions for navigation.
  */
 @Composable
 fun JobSectionContent(
     selectedTab: Int,
+    providerId: String,
     serviceRequestViewModel: ServiceRequestViewModel,
     navigationActions: NavigationActions
 ) {
   when (selectedTab) {
-    0 -> PendingJobsSection(serviceRequestViewModel, navigationActions)
-    1 -> AcceptedJobSection(serviceRequestViewModel, navigationActions)
-    2 -> ScheduledJobsSection(serviceRequestViewModel)
-    3 -> CompletedJobsSection(serviceRequestViewModel)
-    4 -> CanceledJobsSection(serviceRequestViewModel)
-    5 -> ArchivedJobsSection(serviceRequestViewModel)
+    0 -> PendingJobsSection(providerId, serviceRequestViewModel, navigationActions)
+    1 -> AcceptedJobSection(providerId, serviceRequestViewModel, navigationActions)
+    2 -> ScheduledJobsSection(providerId, serviceRequestViewModel, navigationActions)
+    3 -> CompletedJobsSection(providerId, serviceRequestViewModel, navigationActions)
+    4 -> CanceledJobsSection(providerId, serviceRequestViewModel, navigationActions)
+    5 -> ArchivedJobsSection(providerId, serviceRequestViewModel, navigationActions)
   }
 }
 
@@ -185,8 +193,10 @@ fun JobSectionContent(
  * Composable function that displays a list of jobs based on the status.
  *
  * @param title Title of the section.
+ * @param providerId ID of the current provider.
  * @param requests List of ServiceRequest objects.
  * @param emptyMessage Message to display when the list is empty.
+ * @param onLearnMore Optional callback to learn more about a job.
  * @param onNavigateToJob Optional callback to navigate to the job's location.
  * @param onContactCustomer Optional callback to contact the customer.
  * @param onMarkAsCompleted Optional callback to mark the job as completed.
@@ -198,6 +208,7 @@ fun JobSectionContent(
 @Composable
 fun JobListSection(
     title: String,
+    providerId: String,
     requests: List<ServiceRequest>,
     emptyMessage: String,
     onLearnMore: ((ServiceRequest) -> Unit)? = null,
@@ -210,7 +221,6 @@ fun JobListSection(
     onChat: ((ServiceRequest) -> Unit)? = null
 ) {
   // Filter requests based on the current user's ID
-  val providerId = Firebase.auth.currentUser?.uid ?: "-1"
   val filteredRequests = requests.filter { it.providerId == providerId }
   LazyColumn(
       modifier = Modifier.fillMaxSize().padding(16.dp).testTag("${title}Section"),
@@ -247,15 +257,22 @@ fun JobListSection(
 /**
  * Composable functions for displaying the pending requests on the Requests Dashboard screen.
  *
+ * @param providerId ID of the current provider.
  * @param viewModel ViewModel for managing service requests.
+ * @param navigationActions Actions for navigation.
  */
 @Composable
-fun PendingJobsSection(viewModel: ServiceRequestViewModel, navigationActions: NavigationActions) {
+fun PendingJobsSection(
+    providerId: String,
+    viewModel: ServiceRequestViewModel,
+    navigationActions: NavigationActions
+) {
   val context = LocalContext.current
   val pendingRequests by viewModel.pendingRequests.collectAsState()
 
   JobListSection(
       title = "Pending",
+      providerId = providerId,
       requests = pendingRequests,
       emptyMessage = "No pending jobs",
       onLearnMore = {
@@ -272,15 +289,22 @@ fun PendingJobsSection(viewModel: ServiceRequestViewModel, navigationActions: Na
 /**
  * Composable functions for displaying the accepted requests on the Requests Dashboard screen.
  *
+ * @param providerId ID of the current provider.
  * @param viewModel ViewModel for managing service requests.
+ * @param navigationActions Actions for navigation.
  */
 @Composable
-fun AcceptedJobSection(viewModel: ServiceRequestViewModel, navigationActions: NavigationActions) {
+fun AcceptedJobSection(
+    providerId: String,
+    viewModel: ServiceRequestViewModel,
+    navigationActions: NavigationActions
+) {
   val context = LocalContext.current
   val acceptedRequests by viewModel.acceptedRequests.collectAsState()
 
   JobListSection(
       title = "Accepted",
+      providerId = providerId,
       requests = acceptedRequests,
       emptyMessage = "No accepted jobs",
       onLearnMore = {
@@ -296,10 +320,16 @@ fun AcceptedJobSection(viewModel: ServiceRequestViewModel, navigationActions: Na
 /**
  * Composable functions for displaying the scheduled requests on the Requests Dashboard screen.
  *
+ * @param providerId ID of the current provider.
  * @param viewModel ViewModel for managing service requests.
+ * @param navigationActions Actions for navigation.
  */
 @Composable
-fun ScheduledJobsSection(viewModel: ServiceRequestViewModel) {
+fun ScheduledJobsSection(
+    providerId: String,
+    viewModel: ServiceRequestViewModel,
+    navigationActions: NavigationActions
+) {
   val context = LocalContext.current
   val scheduledRequests by viewModel.scheduledRequests.collectAsState()
 
@@ -324,8 +354,13 @@ fun ScheduledJobsSection(viewModel: ServiceRequestViewModel) {
 
     JobListSection(
         title = "Scheduled",
+        providerId = providerId,
         requests = scheduledRequests,
         emptyMessage = "No scheduled jobs",
+        onLearnMore = {
+          viewModel.selectRequest(it)
+          navigationActions.navigateTo(Route.BOOKING_DETAILS)
+        },
         onNavigateToJob = { request ->
           request.location?.let { navigateToSingleJob(context, it.latitude, it.longitude) }
         },
@@ -341,17 +376,28 @@ fun ScheduledJobsSection(viewModel: ServiceRequestViewModel) {
 /**
  * Composable functions for displaying the completed requests on the Requests Dashboard screen.
  *
+ * @param providerId ID of the current provider.
  * @param viewModel ViewModel for managing service requests.
+ * @param navigationActions Actions for navigation.
  */
 @Composable
-fun CompletedJobsSection(viewModel: ServiceRequestViewModel) {
+fun CompletedJobsSection(
+    providerId: String,
+    viewModel: ServiceRequestViewModel,
+    navigationActions: NavigationActions
+) {
   val context = LocalContext.current
   val completedRequests by viewModel.completedRequests.collectAsState()
 
   JobListSection(
       title = "Completed",
+      providerId = providerId,
       requests = completedRequests,
       emptyMessage = "No completed jobs",
+      onLearnMore = {
+        viewModel.selectRequest(it)
+        navigationActions.navigateTo(Route.BOOKING_DETAILS)
+      },
       onContactCustomer = {
         Toast.makeText(context, "Contact Not yet Implemented", Toast.LENGTH_SHORT).show()
       },
@@ -362,18 +408,29 @@ fun CompletedJobsSection(viewModel: ServiceRequestViewModel) {
 /**
  * Composable functions for displaying the canceled requests on the Requests Dashboard screen.
  *
+ * @param providerId ID of the current provider.
  * @param viewModel ViewModel for managing service requests.
+ * @param navigationActions Actions for navigation.
  */
 @Composable
-fun CanceledJobsSection(viewModel: ServiceRequestViewModel) {
+fun CanceledJobsSection(
+    providerId: String,
+    viewModel: ServiceRequestViewModel,
+    navigationActions: NavigationActions
+) {
   val context = LocalContext.current
   val canceledRequests by viewModel.cancelledRequests.collectAsState()
 
   JobListSection(
       title = "Canceled",
+      providerId = providerId,
       requests = canceledRequests,
       emptyMessage = "No canceled jobs",
       onChat = { Toast.makeText(context, "Chat Not yet Implemented", Toast.LENGTH_SHORT).show() },
+      onLearnMore = {
+        viewModel.selectRequest(it)
+        navigationActions.navigateTo(Route.BOOKING_DETAILS)
+      },
       onContactCustomer = {
         Toast.makeText(context, "Contact Not yet Implemented", Toast.LENGTH_SHORT).show()
       },
@@ -383,17 +440,28 @@ fun CanceledJobsSection(viewModel: ServiceRequestViewModel) {
 /**
  * Composable functions for displaying the archived requests on the Requests Dashboard screen.
  *
+ * @param providerId ID of the current provider.
  * @param viewModel ViewModel for managing service requests.
+ * @param navigationActions Actions for navigation.
  */
 @Composable
-fun ArchivedJobsSection(viewModel: ServiceRequestViewModel) {
+fun ArchivedJobsSection(
+    providerId: String,
+    viewModel: ServiceRequestViewModel,
+    navigationActions: NavigationActions
+) {
   val context = LocalContext.current
   val archivedRequests by viewModel.archivedRequests.collectAsState()
 
   JobListSection(
       title = "Archived",
+      providerId = providerId,
       requests = archivedRequests,
       emptyMessage = "No archived jobs",
+      onLearnMore = {
+        viewModel.selectRequest(it)
+        navigationActions.navigateTo(Route.BOOKING_DETAILS)
+      },
       onChat = { Toast.makeText(context, "Chat Not yet Implemented", Toast.LENGTH_SHORT).show() },
       onContactCustomer = {
         Toast.makeText(context, "Contact Not yet Implemented", Toast.LENGTH_SHORT).show()
@@ -406,11 +474,13 @@ fun ArchivedJobsSection(viewModel: ServiceRequestViewModel) {
  * Accepted, Scheduled, Completed, Canceled, or Archived.
  *
  * @param request ServiceRequest object containing job details.
+ * @param onLearnMore Optional callback to learn more about a job.
  * @param onNavigateToJob Optional callback to navigate to the job's location.
  * @param onContactCustomer Optional callback to contact the customer.
  * @param onMarkAsCompleted Optional callback to mark the job as completed.
  * @param onConfirmRequest Optional callback to confirm a job request (for pending jobs).
  * @param onCancelRequest Optional callback to cancel the job.
+ * @param onArchiveRequest Optional callback to archive the job.
  * @param onChat Optional callback to initiate a chat with the customer.
  */
 @Composable
@@ -436,27 +506,24 @@ fun JobItem(
       colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
       shape = RoundedCornerShape(12.dp)) {
         Column(modifier = Modifier.padding(16.dp)) {
-          // Title and Navigate Button
+          // Learn More and Navigate Button
           Row(
               modifier = Modifier.fillMaxWidth(),
-              horizontalArrangement = Arrangement.SpaceBetween,
+              horizontalArrangement = Arrangement.SpaceBetween, // Distribute space between children
               verticalAlignment = Alignment.CenterVertically) {
-                // Job Title
-                Text(
-                    request.title, style = typography.titleMedium, color = colorScheme.onBackground)
-
-                // See more button
-                if (status == ServiceRequestStatus.PENDING ||
-                    status == ServiceRequestStatus.ACCEPTED) {
-                  onLearnMore?.let {
-                    Button(
-                        onClick = it,
-                        colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
-                        modifier = Modifier.testTag("LearnMoreButton_${request.uid}")) {
-                          Text("Learn More", color = colorScheme.onPrimary)
-                        }
-                  }
+                // See More Button
+                onLearnMore?.let {
+                  Button(
+                      onClick = it,
+                      colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
+                      modifier =
+                          Modifier.wrapContentWidth().testTag("LearnMoreButton_${request.uid}")) {
+                        Text("Learn More", color = colorScheme.onPrimary)
+                      }
                 }
+
+                Spacer(modifier = Modifier.weight(1f)) // Fills the space in between the two buttons
+
                 // Navigate Button for Scheduled Jobs
                 if (status == ServiceRequestStatus.SCHEDULED) {
                   onNavigateToJob?.let {
@@ -469,6 +536,13 @@ fun JobItem(
                   }
                 }
               }
+          // Job Title
+          Text(
+              text = request.title,
+              style = typography.titleMedium,
+              color = colorScheme.onBackground,
+              maxLines = 1,
+              overflow = TextOverflow.Ellipsis)
           // Job  Description
           Text(
               request.description,
@@ -488,7 +562,7 @@ fun JobItem(
                 contentDescription = "Scheduled Time",
                 tint = colorScheme.onSurfaceVariant)
             Text(
-                "Scheduled: $date at $time",
+                if (request.meetingDate == null) "Deadline: $date" else "Scheduled: $date at $time",
                 style = typography.bodySmall,
                 color = colorScheme.onSurfaceVariant)
           }

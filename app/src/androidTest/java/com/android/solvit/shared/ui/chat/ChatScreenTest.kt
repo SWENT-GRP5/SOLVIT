@@ -147,4 +147,14 @@ class ChatScreenTest {
     composeTestRule.setContent { TypingIndicator() }
     composeTestRule.onNodeWithTag("TypingIndicator").assertIsDisplayed()
   }
+
+  @Test
+  fun shouldCreateRequestTest() {
+    composeTestRule.setContent {
+      SuggestionToCreateRequest(navigationActions = navigationActions) {}
+    }
+    composeTestRule.onNodeWithTag("finishChatOptions").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("getStartedButton").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("continueChattingButton").assertIsDisplayed()
+  }
 }

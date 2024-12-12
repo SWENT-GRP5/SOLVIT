@@ -13,6 +13,7 @@ import androidx.compose.ui.test.performTextInput
 import androidx.navigation.compose.rememberNavController
 import androidx.test.core.app.ApplicationProvider
 import com.android.solvit.provider.model.ProviderCalendarViewModel
+import com.android.solvit.provider.model.profile.ProviderViewModel
 import com.android.solvit.provider.ui.profile.ProviderRegistrationScreen
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.seeker.model.profile.UserRepository
@@ -72,6 +73,7 @@ class EndToEndTestCreateProfile {
   private lateinit var authViewModel: AuthViewModel
   private lateinit var authViewModel2: AuthViewModel
   private lateinit var listProviderViewModel: ListProviderViewModel
+  private lateinit var providerViewModel: ProviderViewModel
   private lateinit var seekerProfileViewModel: SeekerProfileViewModel
   private lateinit var serviceRequestViewModel: ServiceRequestViewModel
   private lateinit var locationViewModel: LocationViewModel
@@ -131,6 +133,7 @@ class EndToEndTestCreateProfile {
 
     authViewModel = AuthViewModel(authRepository)
     seekerProfileViewModel = SeekerProfileViewModel(seekerRepository)
+    providerViewModel = ProviderViewModel(providerRepository)
     listProviderViewModel = ListProviderViewModel(providerRepository)
     locationViewModel = LocationViewModel(locationRepository)
     serviceRequestViewModel = ServiceRequestViewModel(serviceRequestRepository)
@@ -197,6 +200,7 @@ class EndToEndTestCreateProfile {
           "provider" ->
               ProviderUI(
                   authViewModel,
+                  providerViewModel,
                   listProviderViewModel,
                   serviceRequestViewModel,
                   seekerProfileViewModel,

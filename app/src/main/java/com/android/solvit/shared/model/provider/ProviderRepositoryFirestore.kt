@@ -7,7 +7,6 @@ import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.model.utils.uploadImageToStorage
 import com.google.android.gms.tasks.Task
 import com.google.firebase.Timestamp
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
@@ -70,7 +69,7 @@ class ProviderRepositoryFirestore(
   }
 
   override fun init(onSuccess: () -> Unit) {
-    FirebaseAuth.getInstance().addAuthStateListener { onSuccess() }
+    onSuccess()
   }
 
   override fun addListenerOnProviders(

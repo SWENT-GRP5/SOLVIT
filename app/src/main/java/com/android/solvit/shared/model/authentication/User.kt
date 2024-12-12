@@ -7,5 +7,6 @@ data class User(
     val role: String,
     val userName: String = "",
     val email: String = "",
-    val locations: List<Location> = emptyList()
+    val locations: List<Location> = emptyList(),
+    val registrationCompleted: Boolean = true,
 )

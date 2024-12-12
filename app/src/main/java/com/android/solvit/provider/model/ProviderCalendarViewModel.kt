@@ -174,6 +174,16 @@ class ProviderCalendarViewModel(
   }
 
   /**
+   * Checks if the provider is available for a one-hour appointment starting at the given time.
+   *
+   * @param startTime Start time of the proposed appointment
+   * @return True if available for the full hour, false otherwise
+   */
+  fun isAvailableForOneHour(startTime: LocalDateTime): Boolean {
+    return currentProvider.value.schedule.isAvailableForOneHour(startTime)
+  }
+
+  /**
    * Sets regular working hours for a specific day of the week. Validates and updates the time
    * slots, then persists changes to the repository.
    *

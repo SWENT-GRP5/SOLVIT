@@ -1,8 +1,10 @@
 package com.android.solvit.shared.ui.chat
 
+import android.content.pm.ActivityInfo
 import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -28,6 +30,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -54,11 +57,13 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -75,6 +80,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
@@ -97,9 +103,10 @@ import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.navigation.Screen
 import com.android.solvit.shared.ui.theme.Black
+import com.android.solvit.shared.ui.theme.IAButton_blue_color
+import com.android.solvit.shared.ui.theme.IAButton_green_color
 import com.android.solvit.shared.ui.utils.getReceiverImageUrl
 import com.android.solvit.shared.ui.utils.getReceiverName
-import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -111,6 +118,13 @@ fun ChatScreen(
     chatAssistantViewModel: ChatAssistantViewModel,
     serviceRequestViewModel: ServiceRequestViewModel
 ) {
+  // Lock Orientation to Portrait
+  val context = LocalContext.current
+  DisposableEffect(Unit) {
+    val activity = context as? ComponentActivity
+    activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+    onDispose { activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED }
+  }
   chatAssistantViewModel.clear()
 
   val messages by chatViewModel.coMessage.collectAsState()
@@ -166,12 +180,13 @@ fun ChatScreen(
                 item { RequestDetails(request!!, serviceRequestViewModel, navigationActions) }
               }
               items(messages) { message ->
-                if (message.senderId == FirebaseAuth.getInstance().currentUser?.uid) {
-                  // Item for messages authentified user send
+                if (message.senderId == user?.uid) {
+                  // Item for messages authenticated user send
                   SentMessage(message, true)
                 } else {
-                  // Item for messages authentified user receive
-                  SentMessage(message, false, true, receiverPicture)
+                  // Item for messages authenticated user receive
+                  SentMessage(
+                      message, isSentByUser = false, showProfilePicture = true, receiverPicture)
                 }
               }
             }
@@ -185,6 +200,14 @@ fun AiSolverWelcomeScreen(
     chatViewModel: ChatViewModel = viewModel(factory = ChatViewModel.Factory),
     authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory)
 ) {
+
+  // Lock Orientation to Portrait
+  val context = LocalContext.current
+  DisposableEffect(Unit) {
+    val activity = context as? ComponentActivity
+    activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+    onDispose { activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED }
+  }
 
   val user by authViewModel.user.collectAsState()
   val iaBotUserId = "JL36T8yHjWDYkuq4u6S4" // The default Id of the IA Bot created
@@ -270,26 +293,27 @@ fun AiSolverWelcomeScreen(
                                     .padding(top = screenHeight.times(0.01f)))
                         Spacer(modifier = Modifier.height(screenHeight.times(0.05f)))
                         if (conversation.isEmpty()) {
-                          ButtonStartConversationWithAI(
-                              navigationActions = navigationActions,
+                          AiSolverButton(
                               screenHeight = screenHeight,
                               title = "Let solve a new problem",
-                              clearConversation = false,
-                              chatViewModel)
+                              onClick = {
+                                navigationActions.navigateTo(Screen.AI_SOLVER_CHAT_SCREEN)
+                              })
                         } else {
-                          ButtonStartConversationWithAI(
-                              navigationActions = navigationActions,
+                          AiSolverButton(
                               screenHeight = screenHeight,
                               title = "Continue",
-                              clearConversation = false,
-                              chatViewModel)
+                              onClick = {
+                                navigationActions.navigateTo(Screen.AI_SOLVER_CHAT_SCREEN)
+                              })
                           Spacer(modifier = Modifier.height(8.dp))
-                          ButtonStartConversationWithAI(
-                              navigationActions = navigationActions,
+                          AiSolverButton(
                               screenHeight = screenHeight,
                               title = "Let solve a new problem",
-                              clearConversation = true,
-                              chatViewModel)
+                              onClick = {
+                                chatViewModel.clearConversation(true)
+                                navigationActions.navigateTo(Screen.AI_SOLVER_CHAT_SCREEN)
+                              })
                         }
                       }
                 }
@@ -299,18 +323,9 @@ fun AiSolverWelcomeScreen(
 }
 /** Represent either a solve new Problem Button or continue solving current Problem* */
 @Composable
-fun ButtonStartConversationWithAI(
-    navigationActions: NavigationActions,
-    screenHeight: Dp,
-    title: String,
-    clearConversation: Boolean,
-    chatViewModel: ChatViewModel
-) {
+fun AiSolverButton(screenHeight: Dp = 700.dp, title: String, onClick: () -> Unit) {
   Button(
-      onClick = {
-        if (clearConversation) chatViewModel.clearConversation(true)
-        navigationActions.navigateTo(Screen.AI_SOLVER_CHAT_SCREEN)
-      },
+      onClick = { onClick() },
       colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
       shape = RoundedCornerShape(50),
       contentPadding = PaddingValues(),
@@ -325,7 +340,7 @@ fun ButtonStartConversationWithAI(
                     .background(
                         brush =
                             Brush.horizontalGradient(
-                                colors = listOf(Color(0xFF00B383), Color(0xFF0099FF))),
+                                colors = listOf(IAButton_green_color, IAButton_blue_color)),
                         shape = RoundedCornerShape(50)),
             contentAlignment = Alignment.Center) {
               // Button text
@@ -348,6 +363,14 @@ fun AiSolverScreen(
     aiSolverViewModel: AiSolverViewModel
 ) {
 
+  // Lock Orientation to Portrait
+  val context = LocalContext.current
+  DisposableEffect(Unit) {
+    val activity = context as? ComponentActivity
+    activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+    onDispose { activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED }
+  }
+
   // To send Image Messages
   var imageUri by remember { mutableStateOf<Uri?>(null) }
   var imageBitmap by remember { mutableStateOf<Bitmap?>(null) }
@@ -356,62 +379,86 @@ fun AiSolverScreen(
   val conversation by chatViewModel.coMessage.collectAsState()
   val user by authViewModel.user.collectAsState()
   var isTyping by remember { mutableStateOf(false) }
+  // Boolean indicating if given the problem of the user he should create a request to solve it
+  val shouldCreateRequest by chatViewModel.shouldCreateRequest.collectAsState()
   aiSolverViewModel.setMessageContext(conversation)
 
+  val lazyListState = rememberLazyListState()
+  val coroutineScope = rememberCoroutineScope()
+
+  // Scroll to the last item when entering the screen
+  LaunchedEffect(conversation) {
+    if (conversation.isNotEmpty()) {
+      lazyListState.animateScrollToItem(conversation.lastIndex)
+    }
+  }
   Scaffold(
       modifier = Modifier.testTag("AiSolverScreen"),
       topBar = { AiSolverHeader(navigationActions) },
       bottomBar = {
-        MessageInputBar(
-            isAiSolverScreen = true,
-            onImageSelected = { uri: Uri? ->
-              imageUri = uri
-              uri?.let { imageBitmap = loadBitmapFromUri(localContext, it) }
-            },
-            onSendClickButton = { textMessage, onMessageChange ->
-              chatViewModel.viewModelScope.launch {
-                // upload Image User want to send to storage
-                val imageUrl =
-                    if (imageUri != null) chatViewModel.uploadImagesToStorage(imageUri!!) else null
-                val message = user?.let { buildMessage(it.uid, textMessage, imageUrl, it.userName) }
-                if (message != null) {
-                  chatViewModel.sendMessage(true, message)
-                  onMessageChange("")
-                  val userInput = AiSolverViewModel.UserInput(textMessage, imageBitmap)
-                  aiSolverViewModel.updateMessageContext(message)
-                  aiSolverViewModel.generateMessage(
-                      userInput,
-                      onSuccess = {
-                        reply = it
-                        val aiReply =
-                            ChatMessage.TextMessage(
-                                message = reply,
-                                senderName = "AiBot",
-                                senderId = "JL36T8yHjWDYkuq4u6S4",
-                                timestamp = System.currentTimeMillis())
+        if (!shouldCreateRequest) {
+          MessageInputBar(
+              isAiSolverScreen = true,
+              onImageSelected = { uri: Uri? ->
+                imageUri = uri
+                uri?.let { imageBitmap = loadBitmapFromUri(localContext, it) }
+              },
+              onSendClickButton = { textMessage, onMessageChange ->
+                chatViewModel.viewModelScope.launch {
+                  // upload Image User want to send to storage
+                  val imageUrl =
+                      if (imageUri != null) chatViewModel.uploadImagesToStorage(imageUri!!)
+                      else null
+                  val message =
+                      user?.let { buildMessage(it.uid, textMessage, imageUrl, it.userName) }
+                  if (message != null) {
+                    chatViewModel.sendMessage(true, message)
+                    onMessageChange("")
+                    val userInput = AiSolverViewModel.UserInput(textMessage, imageBitmap)
+                    aiSolverViewModel.updateMessageContext(message)
+                    aiSolverViewModel.generateMessage(
+                        userInput,
+                        onSuccess = {
+                          chatViewModel.setShouldCreateRequest(it.shouldCreateRequest)
+                          reply = it.response
+                          val aiReply =
+                              ChatMessage.TextMessage(
+                                  message = reply,
+                                  senderName = "AiBot",
+                                  senderId = "JL36T8yHjWDYkuq4u6S4",
+                                  timestamp = System.currentTimeMillis())
 
-                        chatViewModel.sendMessage(true, aiReply)
-                        isTyping = false
-                      })
-                  isTyping = true
-                  imageUri = null
-                  imageBitmap = null
+                          chatViewModel.sendMessage(true, aiReply)
+                          isTyping = false
+                        })
+                    isTyping = true
+                    imageUri = null
+                    imageBitmap = null
+                  }
+                }
+              })
+        } else {
+          // In case the user should create a request we display a button so that he directly
+          // navigate to the create Request Screen
+          SuggestionToCreateRequest(
+              navigationActions = navigationActions,
+              onClick = { chatViewModel.setShouldCreateRequest(false) })
+        }
+      }) { paddingValues ->
+        LazyColumn(
+            state = lazyListState,
+            modifier = Modifier.padding(paddingValues).imePadding().testTag("chat")) {
+              items(conversation) { message ->
+                if (message.senderId == user?.uid) {
+                  SentMessage(message, isSentByUser = true)
+                } else {
+                  SentMessage(message, isSentByUser = false, showProfilePicture = true, "")
                 }
               }
-            })
-      }) { paddingValues ->
-        LazyColumn(modifier = Modifier.padding(paddingValues).imePadding().testTag("chat")) {
-          items(conversation) { message ->
-            if (message.senderId == FirebaseAuth.getInstance().currentUser?.uid) {
-              SentMessage(message, true)
-            } else {
-              SentMessage(message, false, true, "")
+              if (isTyping) {
+                item { TypingIndicator() }
+              }
             }
-          }
-          if (isTyping) {
-            item { TypingIndicator() }
-          }
-        }
       }
 }
 
@@ -601,6 +648,35 @@ fun SentMessage(
       }
 }
 
+/**
+ * Composable displayed in the bottom bar of ai solve chat screen with 2 possibilities (either
+ * creating a request or continue chatting)
+ *
+ * @param navigationActions to navigate create request screen on click
+ * @param onClick action to perform when clicking on "Continue chatting"
+ */
+@Composable
+fun SuggestionToCreateRequest(navigationActions: NavigationActions, onClick: () -> Unit) {
+  Box(modifier = Modifier.imePadding(), contentAlignment = Alignment.BottomCenter) {
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("finishChatOptions"),
+        horizontalAlignment = Alignment.CenterHorizontally) {
+          AiSolverButton(title = "Contact a professional") {
+            navigationActions.navigateTo(Route.CREATE_REQUEST)
+          }
+
+          Spacer(modifier = Modifier.height(8.dp)) // Adds spacing between button and text
+
+          Text(
+              text = "Continue chatting",
+              fontSize = 18.sp,
+              textDecoration = TextDecoration.Underline,
+              color = colorScheme.secondary,
+              modifier = Modifier.clickable { onClick() }.testTag("continueChattingButton"))
+        }
+  }
+}
+
 @Composable
 fun MessageInputBar(
     chatAssistantViewModel: ChatAssistantViewModel =
@@ -746,7 +822,7 @@ fun buildMessage(
           text = messageText,
           imageUrl = imageUrl,
           senderId = userId,
-          senderName = senderName, // To Update
+          senderName = senderName,
           timestamp = System.currentTimeMillis())
     }
     // User send only a text
@@ -754,7 +830,7 @@ fun buildMessage(
       ChatMessage.TextMessage(
           message = messageText,
           senderId = userId,
-          senderName = "Hassan", // To Update
+          senderName = senderName,
           timestamp = System.currentTimeMillis())
     }
     // User send only a message
@@ -762,7 +838,7 @@ fun buildMessage(
       ChatMessage.ImageMessage(
           imageUrl = imageUrl,
           senderId = userId,
-          senderName = "Hassan", // To Update
+          senderName = senderName,
           timestamp = System.currentTimeMillis())
     }
     else -> null
