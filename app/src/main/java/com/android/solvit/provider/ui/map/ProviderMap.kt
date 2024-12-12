@@ -1,6 +1,5 @@
 package com.android.solvit.provider.ui.map
 
-import android.icu.util.GregorianCalendar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -22,7 +21,6 @@ import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
-import java.util.Calendar
 
 @Composable
 fun ProviderMapScreen(
@@ -51,25 +49,24 @@ fun ProviderMapScreen(
   // Create markers with detailed information for each provider
   val requestMarkers = remember { mutableStateOf<List<MarkerData>>(emptyList()) }
 
+  val markersLoading = remember { mutableStateOf(true) }
+
   LaunchedEffect(requests) {
     val markers =
         requests.map { request ->
-          val dueDate =
-              with(GregorianCalendar().apply { time = request.dueDate.toDate() }) {
-                "${get(Calendar.DAY_OF_MONTH)}/${get(Calendar.MONTH) + 1}/${get(Calendar.YEAR)}"
-              }
-          val imageBitmap =
-              imageBitmapFromUrl(context, request.imageUrl ?: "", R.drawable.empty_profile_img)
+          val imageBitmap = imageBitmapFromUrl(context, request.imageUrl ?: "", R.drawable.no_photo)
+          val icon = R.drawable.orders_ovw_image
           MarkerData(
               location =
                   LatLng(request.location?.latitude ?: 0.0, request.location?.longitude ?: 0.0),
               title = request.title,
-              snippet = request.type.toString().replace("_", " ") + "\n" + dueDate,
+              icon = icon,
               tag = "requestMarker-${request.uid}",
               image = imageBitmap,
               onClick = { /*TODO: Navigate to request details screen*/})
         }
     requestMarkers.value = markers
+    markersLoading.value = false
   }
 
   // Display the map screen with the user's location and request markers
@@ -81,5 +78,6 @@ fun ProviderMapScreen(
             onTabSelect = { navigationActions.navigateTo(it.route) },
             tabList = LIST_TOP_LEVEL_DESTINATION_PROVIDER,
             selectedItem = Route.MAP_OF_SEEKERS)
-      })
+      },
+      markersLoading = markersLoading.value)
 }

@@ -1,9 +1,6 @@
 package com.android.solvit.seeker.ui.map
 
-import android.content.pm.ActivityInfo
-import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -34,13 +31,6 @@ fun SeekerMapScreen(
 
   // Get the current context
   val context = LocalContext.current
-  // Lock Orientation to Portrait
-  DisposableEffect(Unit) {
-    val activity = context as? ComponentActivity
-    activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-    onDispose { activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED }
-  }
-
   // Initialize the FusedLocationProviderClient
   val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
   // State to hold the user's location
@@ -59,16 +49,18 @@ fun SeekerMapScreen(
   // Create markers with detailed information for each provider
   val providerMarkers = remember { mutableStateOf<List<MarkerData>>(emptyList()) }
 
+  val markersLoading = remember { mutableStateOf(true) }
+
   LaunchedEffect(providers) {
     val markers =
         providers.map { provider ->
           val imageBitmap =
               imageBitmapFromUrl(context, provider.imageUrl, R.drawable.empty_profile_img)
+          val icon = R.drawable.orders_ovw_image
           MarkerData(
               location = LatLng(provider.location.latitude, provider.location.longitude),
               title = provider.name,
-              snippet =
-                  provider.service.toString().replace("_", " ") + "\n" + provider.rating.toString(),
+              icon = icon,
               tag = "providerMarker-${provider.uid}",
               image = imageBitmap,
               onClick = {
@@ -77,6 +69,7 @@ fun SeekerMapScreen(
               })
         }
     providerMarkers.value = markers
+    markersLoading.value = false
   }
 
   // Display the map with user location and provider markers
@@ -88,5 +81,6 @@ fun SeekerMapScreen(
             onTabSelect = { navigationActions.navigateTo(it.route) },
             tabList = LIST_TOP_LEVEL_DESTINATION_SEEKER,
             selectedItem = Route.MAP)
-      })
+      },
+      markersLoading = markersLoading.value)
 }

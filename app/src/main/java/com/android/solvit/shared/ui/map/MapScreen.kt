@@ -14,17 +14,22 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.colorScheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -33,14 +38,20 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.imageResource
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import coil.ImageLoader
@@ -60,7 +71,12 @@ import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 
 @Composable
-fun MapScreen(userLocation: LatLng?, markers: List<MarkerData>, bottomBar: @Composable () -> Unit) {
+fun MapScreen(
+    userLocation: LatLng?,
+    markers: List<MarkerData>,
+    bottomBar: @Composable () -> Unit,
+    markersLoading: Boolean
+) {
 
   val context = LocalContext.current
   DisposableEffect(Unit) {
@@ -80,7 +96,24 @@ fun MapScreen(userLocation: LatLng?, markers: List<MarkerData>, bottomBar: @Comp
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-          MapContent(userLocation = userLocation, markers = markers)
+          Box {
+            MapContent(userLocation = userLocation, markers = markers)
+            if (markersLoading) {
+              Column(modifier = Modifier.align(Alignment.TopCenter).padding(16.dp)) {
+                OutlinedCard(
+                    shape = RoundedCornerShape(32.dp),
+                    elevation = CardDefaults.outlinedCardElevation()) {
+                      Row(
+                          modifier = Modifier.padding(8.dp),
+                          verticalAlignment = Alignment.CenterVertically) {
+                            Text("Loading images  ", fontWeight = FontWeight.Bold)
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(30.dp), color = colorScheme.onBackground)
+                          }
+                    }
+              }
+            }
+          }
         }
       },
       bottomBar = bottomBar,
@@ -130,35 +163,39 @@ fun MapMarker(markerData: MarkerData) {
         markerData.onClick()
         true
       }) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier =
-                Modifier.clip(RoundedCornerShape(8.dp))
-                    .background(colorScheme.background)
-                    .border(1.dp, colorScheme.onBackground, RoundedCornerShape(8.dp))
-                    .testTag(markerData.tag)) {
-              Image(
-                  markerData.image ?: ImageBitmap.imageResource(R.drawable.empty_profile_img),
-                  contentDescription = null,
-                  contentScale = ContentScale.Crop,
-                  modifier =
-                      Modifier.padding(top = 4.dp, start = 6.dp, end = 6.dp)
-                          .size(50.dp)
-                          .clip(CircleShape)
-                          .border(2.dp, colorScheme.onBackground, CircleShape)
-                          .testTag(markerData.tag + "Image"))
-              Text(
-                  maxLines = 1,
-                  textAlign = TextAlign.Center,
-                  text = markerData.title,
-                  modifier = Modifier.width(60.dp).padding(4.dp).testTag(markerData.tag + "Title"),
-                  style = MaterialTheme.typography.labelSmall)
-              Text(
-                  textAlign = TextAlign.Center,
-                  text = markerData.snippet,
-                  modifier =
-                      Modifier.width(60.dp).padding(4.dp).testTag(markerData.tag + "Snippet"),
-                  style = MaterialTheme.typography.bodySmall)
+        OutlinedCard(
+            modifier = Modifier.width(80.dp).height(100.dp).testTag(markerData.tag),
+            shape = RoundedCornerShape(8.dp),
+            elevation = CardDefaults.outlinedCardElevation()) {
+              Box {
+                Image(
+                    bitmap = markerData.image ?: ImageBitmap.imageResource(R.drawable.no_photo),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(8.dp)))
+                Column(
+                    modifier = Modifier.fillMaxSize().padding(6.dp),
+                    verticalArrangement = Arrangement.SpaceBetween) {
+                      Text(
+                          text = markerData.title,
+                          fontWeight = FontWeight.Bold,
+                          fontSize = 14.sp,
+                          color = Color.White,
+                          lineHeight = 16.sp,
+                          maxLines = 2,
+                          overflow = TextOverflow.Ellipsis,
+                          style = TextStyle(shadow = Shadow(color = Color.Black, blurRadius = 4f)))
+                      Row(
+                          modifier = Modifier.fillMaxWidth(),
+                          horizontalArrangement = Arrangement.End) {
+                            Icon(
+                                painter = painterResource(markerData.icon),
+                                contentDescription = null,
+                                tint = Color.Unspecified,
+                                modifier = Modifier.size(30.dp))
+                          }
+                    }
+              }
             }
       }
 }
@@ -233,7 +270,7 @@ suspend fun imageBitmapFromUrl(context: Context, url: String, placeholder: Int):
 data class MarkerData(
     val location: LatLng, // Position of the marker
     val title: String, // Name of the marker
-    val snippet: String, // Additional info like description
+    val icon: Int, // Icon to display on the marker
     val tag: String, // Unique identifier for the marker
     val image: ImageBitmap?,
     val onClick: () -> Unit
