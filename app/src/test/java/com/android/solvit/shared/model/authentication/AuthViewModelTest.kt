@@ -28,7 +28,7 @@ class AuthViewModelTest {
   private lateinit var authViewModel: AuthViewModel
   private val testUserId = "test-user-id"
   private val testFcmToken = "test-fcm-token"
-  private val testUser = User("uid", "email", "role", "name", emptyList())
+  private val testUser = User(testUserId, "role", "name", "email", emptyList())
   private val testDispatcher: TestDispatcher = UnconfinedTestDispatcher()
   private val testScope = TestScope(testDispatcher)
 
@@ -253,12 +253,17 @@ class AuthViewModelTest {
 
         var successCalled = false
 
+        coEvery { authRepository.updateUserLocations(any(), any(), any(), any()) } coAnswers
+            {
+              thirdArg<() -> Unit>().invoke()
+            }
+
         // Act
-        authViewModel.addUserLocation(location, { successCalled = true }, {})
+        authViewModel.addUserLocation(location, { successCalled = true }, { _: Exception -> })
 
         // Assert
         assert(successCalled)
-        coVerify(exactly = 0) { authRepository.updateUserLocations(any(), any(), any()) }
+        coVerify(exactly = 0) { authRepository.updateUserLocations(any(), any(), any(), any()) }
       }
 
   @Test
@@ -274,19 +279,20 @@ class AuthViewModelTest {
             }
         authViewModel = AuthViewModel(authRepository, fcmTokenManager)
 
-        coEvery { authRepository.updateUserLocations(any(), any(), any()) } coAnswers
+        coEvery { authRepository.updateUserLocations(any(), any(), any(), any()) } coAnswers
             {
-              secondArg<() -> Unit>().invoke()
+              thirdArg<() -> Unit>().invoke()
             }
 
         // Act
-        authViewModel.addUserLocation(newLocation, {}, {})
+        authViewModel.addUserLocation(newLocation, {}, { _: Exception -> })
 
         // Assert
         coVerify {
           authRepository.updateUserLocations(
+              eq(testUserId),
               withArg { updatedLocations ->
-                assert(updatedLocations.size == 5 && updatedLocations.first() == newLocation)
+                assert(updatedLocations.count() == 5 && updatedLocations[0] == newLocation)
                 true
               },
               any(),
@@ -307,12 +313,17 @@ class AuthViewModelTest {
 
         var successCalled = false
 
+        coEvery { authRepository.updateUserLocations(any(), any(), any(), any()) } coAnswers
+            {
+              thirdArg<() -> Unit>().invoke()
+            }
+
         // Act
-        authViewModel.removeUserLocation(location, { successCalled = true }, {})
+        authViewModel.removeUserLocation(location, { successCalled = true }, { _: Exception -> })
 
         // Assert
         assert(successCalled)
-        coVerify(exactly = 0) { authRepository.updateUserLocations(any(), any(), any()) }
+        coVerify(exactly = 0) { authRepository.updateUserLocations(any(), any(), any(), any()) }
       }
 
   @Test
