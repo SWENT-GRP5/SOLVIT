@@ -12,6 +12,7 @@ import androidx.compose.ui.test.performTextInput
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
 import com.android.solvit.provider.model.ProviderCalendarViewModel
+import com.android.solvit.provider.model.profile.ProviderViewModel
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.seeker.model.profile.UserRepository
 import com.android.solvit.seeker.model.profile.UserRepositoryFirestore
@@ -66,6 +67,7 @@ import org.mockito.Mockito.mock
 class EndToEndMessage {
   private lateinit var authViewModel: AuthViewModel
   private lateinit var listProviderViewModel: ListProviderViewModel
+  private lateinit var providerViewModel: ProviderViewModel
   private lateinit var seekerProfileViewModel: SeekerProfileViewModel
   private lateinit var serviceRequestViewModel: ServiceRequestViewModel
   private lateinit var locationViewModel: LocationViewModel
@@ -154,6 +156,7 @@ class EndToEndMessage {
     authViewModel = AuthViewModel(authRepository)
     seekerProfileViewModel = SeekerProfileViewModel(seekerRepository)
     listProviderViewModel = ListProviderViewModel(providerRepository)
+    providerViewModel = ProviderViewModel(providerRepository)
     locationViewModel = LocationViewModel(locationRepository)
     serviceRequestViewModel = ServiceRequestViewModel(serviceRequestRepository)
     reviewViewModel = ReviewViewModel(reviewRepository)
@@ -222,6 +225,7 @@ class EndToEndMessage {
           "provider" ->
               ProviderUI(
                   authViewModel,
+                  providerViewModel,
                   listProviderViewModel,
                   serviceRequestViewModel,
                   seekerProfileViewModel,
