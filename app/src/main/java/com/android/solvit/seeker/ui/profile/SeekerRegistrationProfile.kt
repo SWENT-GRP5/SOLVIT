@@ -129,7 +129,7 @@ fun SeekerRegistrationScreen(
   Scaffold(
       topBar = {
         TopAppBar(
-            title = { Text("Seeker Registration") },
+            title = { Text("Seeker Registration", style = Typography.titleLarge) },
             navigationIcon = {
               if (currentStep > 1) {
                 IconButton(onClick = { currentStep -= 1 }) {

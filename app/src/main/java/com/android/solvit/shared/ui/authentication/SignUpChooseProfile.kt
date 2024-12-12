@@ -79,7 +79,7 @@ fun SignUpChooseProfile(
   Scaffold(
       topBar = {
         TopAppBar(
-            title = { Text("Choose your profile") },
+            title = { Text("Choose your profile", style = Typography.titleLarge) },
             navigationIcon = { GoBackButton(navigationActions) },
             colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background))
       },

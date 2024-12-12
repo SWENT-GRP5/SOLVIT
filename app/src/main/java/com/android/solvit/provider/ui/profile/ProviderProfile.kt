@@ -65,6 +65,7 @@ import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
+import com.android.solvit.shared.ui.theme.Typography
 
 /**
  * A composable function that displays the provider's profile screen. It includes the profile header
@@ -190,12 +191,15 @@ fun ProfileHeader(
           Text(
               text = fullName,
               modifier = Modifier.testTag("professionalName"),
-              color = colorScheme.onBackground,
-              fontSize = 24.sp,
-              fontWeight = FontWeight.Bold,
-              textAlign = TextAlign.Center,
               maxLines = 2,
-              overflow = TextOverflow.Ellipsis)
+              overflow = TextOverflow.Ellipsis,
+              style =
+                  Typography.bodyLarge.copy(
+                      color = colorScheme.onBackground,
+                      fontSize = 24.sp,
+                      fontWeight = FontWeight.Bold,
+                      textAlign = TextAlign.Center,
+                  ))
 
           Spacer(modifier = Modifier.height(50.dp))
 
@@ -207,7 +211,7 @@ fun ProfileHeader(
                       containerColor = Color.Transparent, contentColor = colorScheme.error),
               border = BorderStroke(1.dp, colorScheme.error),
           ) {
-            Text("Logout")
+            Text("Logout", style = Typography.bodyLarge)
           }
 
           if (showLogoutDialog) {
@@ -217,7 +221,8 @@ fun ProfileHeader(
                 text = {
                   Text(
                       "Are you sure you want to log out?",
-                      modifier = Modifier.testTag("LogoutDialogText"))
+                      modifier = Modifier.testTag("LogoutDialogText"),
+                      style = Typography.bodyLarge)
                 },
                 confirmButton = {
                   Button(
@@ -233,7 +238,7 @@ fun ProfileHeader(
                   Button(
                       onClick = { showLogoutDialog = false },
                       modifier = Modifier.testTag("LogoutDialogDismissButton")) {
-                        Text("Cancel")
+                        Text("Cancel", style = Typography.bodyLarge)
                       }
                 },
                 modifier = Modifier.testTag("LogoutDialog"))
@@ -251,9 +256,8 @@ fun ProfileHeader(
           fun TitleText(text: String, fontSize: TextUnit = 21.sp, testTag: String = "") {
             Text(
                 text = text,
-                color = titleColor,
-                fontSize = fontSize,
-                modifier = Modifier.testTag(testTag))
+                modifier = Modifier.testTag(testTag),
+                style = Typography.bodyLarge.copy(color = titleColor, fontSize = fontSize))
           }
 
           @Composable
@@ -265,11 +269,10 @@ fun ProfileHeader(
           ) {
             Text(
                 text = text,
-                color = bodyColor,
-                fontSize = fontSize,
                 modifier = Modifier.testTag(testTag),
                 maxLines = maxLines,
-                overflow = TextOverflow.Ellipsis)
+                overflow = TextOverflow.Ellipsis,
+                style = Typography.bodyLarge.copy(color = bodyColor, fontSize = fontSize))
           }
 
           Column(
@@ -337,19 +340,19 @@ fun DescriptionSection(provider: Provider) {
         Column {
           Text(
               "Description",
-              fontSize = 40.sp,
               color = colorScheme.onPrimary,
               fontWeight = FontWeight.Bold,
               maxLines = 7,
               overflow = TextOverflow.Ellipsis,
-              modifier = Modifier.testTag("descriptionTitle"))
+              modifier = Modifier.testTag("descriptionTitle"),
+              style = Typography.bodyLarge.copy(fontSize = 40.sp))
           Text(
               description,
-              fontSize = 15.sp,
               color = colorScheme.onPrimary,
               maxLines = 7,
               overflow = TextOverflow.Ellipsis,
-              modifier = Modifier.testTag("descriptionText"))
+              modifier = Modifier.testTag("descriptionText"),
+              style = Typography.bodyLarge.copy(fontSize = 15.sp))
         }
       }
 }
@@ -410,29 +413,29 @@ fun StatsSection(
             Text(
                 rating,
                 fontSize = 40.sp,
-                color = colorScheme.onPrimary,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.testTag("ratingText"))
+                modifier = Modifier.testTag("ratingText"),
+                style =
+                    Typography.bodyLarge.copy(
+                        color = colorScheme.onPrimary, fontWeight = FontWeight.Bold))
             Text(
                 "Average Rating",
-                fontSize = 15.sp,
                 color = colorScheme.onPrimary,
-                modifier = Modifier.testTag("ratingLabel"))
+                modifier = Modifier.testTag("ratingLabel"),
+                style = Typography.bodyLarge.copy(fontSize = 15.sp))
           }
           Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
                 popular.replaceFirstChar {
                   if (it.isLowerCase()) it.uppercase() else it.toString()
                 },
-                fontSize = 40.sp,
                 color = colorScheme.onPrimary,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.testTag("popularityText"))
+                modifier = Modifier.testTag("popularityText"),
+                style = Typography.bodyLarge.copy(fontSize = 40.sp, fontWeight = FontWeight.Bold))
             Text(
                 "Popular",
-                fontSize = 15.sp,
                 color = colorScheme.onPrimary,
-                modifier = Modifier.testTag("popularityLabel"))
+                modifier = Modifier.testTag("popularityLabel"),
+                style = Typography.bodyLarge.copy(fontSize = 15.sp))
           }
         }
 
@@ -442,18 +445,20 @@ fun StatsSection(
           Column(horizontalAlignment = Alignment.Start) {
             Text(
                 "$earnings CHF",
-                fontSize =
-                    (if (earnings > 999999) 10
-                        else if (earnings > 999 && earnings < 999999) 20 else 40)
-                        .sp,
-                color = colorScheme.onPrimary,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.testTag("earningsText"))
+                modifier = Modifier.testTag("earningsText"),
+                style =
+                    Typography.bodyLarge.copy(
+                        fontSize =
+                            (if (earnings > 999999) 10
+                                else if (earnings > 999 && earnings < 999999) 20 else 40)
+                                .sp,
+                        color = colorScheme.onPrimary,
+                        fontWeight = FontWeight.Bold,
+                    ))
             Text(
                 "Earnings",
-                fontSize = 15.sp,
-                color = colorScheme.onPrimary,
-                modifier = Modifier.testTag("earningsLabel"))
+                modifier = Modifier.testTag("earningsLabel"),
+                style = Typography.bodyLarge.copy(fontSize = 15.sp, color = colorScheme.onPrimary))
           }
         }
 
@@ -462,47 +467,58 @@ fun StatsSection(
             LanguageList(provider)
             Text(
                 (if (provider.languages.size > 1) "Languages" else "Language"),
-                fontSize = 15.sp,
-                color = colorScheme.onPrimary,
-                modifier = Modifier.testTag("languagesLabel"))
+                modifier = Modifier.testTag("languagesLabel"),
+                style = Typography.bodyLarge.copy(fontSize = 15.sp, color = colorScheme.onPrimary))
           }
           Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.End) {
             Column {
               Text(
                   "Pending tasks: ${filteredPendingTasks.size}",
-                  fontSize = 20.sp,
-                  color = colorScheme.onPrimary,
-                  fontWeight = FontWeight.Bold,
-                  modifier = Modifier.testTag("pendingTasksText"))
+                  modifier = Modifier.testTag("pendingTasksText"),
+                  style =
+                      Typography.bodyLarge.copy(
+                          fontSize = 20.sp,
+                          color = colorScheme.onPrimary,
+                          fontWeight = FontWeight.Bold))
               Text(
                   "Accepted tasks: ${filteredAcceptedTasks.size}",
-                  fontSize = 20.sp,
-                  color = colorScheme.onPrimary,
-                  fontWeight = FontWeight.Bold,
-                  modifier = Modifier.testTag("acceptedTasksText"))
+                  modifier = Modifier.testTag("acceptedTasksText"),
+                  style =
+                      Typography.bodyLarge.copy(
+                          fontSize = 20.sp,
+                          color = colorScheme.onPrimary,
+                          fontWeight = FontWeight.Bold))
               Text(
                   "Scheduled tasks: ${filteredScheduledTasks.size}",
-                  fontSize = 20.sp,
-                  color = colorScheme.onPrimary,
-                  fontWeight = FontWeight.Bold,
+                  style =
+                      Typography.bodyLarge.copy(
+                          fontSize = 20.sp,
+                          color = colorScheme.onPrimary,
+                          fontWeight = FontWeight.Bold),
                   modifier = Modifier.testTag("scheduledTasksText"))
               Text(
                   "Completed tasks: ${filteredCompletedTasks.size}",
-                  fontSize = 20.sp,
-                  color = colorScheme.onPrimary,
-                  fontWeight = FontWeight.Bold,
+                  style =
+                      Typography.bodyLarge.copy(
+                          fontSize = 20.sp,
+                          color = colorScheme.onPrimary,
+                          fontWeight = FontWeight.Bold),
                   modifier = Modifier.testTag("completedTasksText"))
               Text(
                   "Canceled tasks: ${filteredCanceledTasks.size}",
-                  fontSize = 20.sp,
-                  color = colorScheme.onPrimary,
-                  fontWeight = FontWeight.Bold,
+                  style =
+                      Typography.bodyLarge.copy(
+                          fontSize = 20.sp,
+                          color = colorScheme.onPrimary,
+                          fontWeight = FontWeight.Bold),
                   modifier = Modifier.testTag("canceledTasksText"))
               Text(
                   "Archived tasks: ${filteredArchivedTasks.size}",
-                  fontSize = 20.sp,
-                  color = colorScheme.onPrimary,
-                  fontWeight = FontWeight.Bold,
+                  style =
+                      Typography.bodyLarge.copy(
+                          fontSize = 20.sp,
+                          color = colorScheme.onPrimary,
+                          fontWeight = FontWeight.Bold),
                   modifier = Modifier.testTag("archivedTasksText"))
             }
           }
@@ -549,27 +565,28 @@ fun LanguageList(provider: Provider) {
                 items(languagesToShow) { language ->
                   Text(
                       text = language.name.replaceFirstChar { it.uppercase() },
-                      fontSize = 40.sp,
-                      color = colorScheme.onPrimary,
-                      fontWeight = FontWeight.Bold,
                       modifier =
                           Modifier.testTag(
-                              "languageItem_${language.name}") // Tag for each language item
-                      )
+                              "languageItem_${language.name}"), // Tag for each language item
+                      style =
+                          Typography.bodyLarge.copy(
+                              fontSize = 40.sp,
+                              color = colorScheme.onPrimary,
+                              fontWeight = FontWeight.Bold))
                 }
                 if (!showAll && provider.languages.size > 3) {
                   item {
                     Text(
                         "View more...",
-                        fontSize = 16.sp,
-                        color = colorScheme.secondary,
-                        fontWeight = FontWeight.Medium,
                         modifier =
                             Modifier.clickable {
                                   showAll = true // Updates state to show all items
                                 }
-                                .testTag("viewMoreButton") // Tag for the "View more" button
-                        )
+                                .testTag("viewMoreButton"),
+                        style =
+                            Typography.bodyLarge.copy(
+                                color = colorScheme.secondary,
+                                fontWeight = FontWeight.Medium)) // Tag for the "View more" button
                   }
                 }
               }

@@ -59,7 +59,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -84,6 +83,7 @@ import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_PROVID
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
 import com.android.solvit.shared.ui.theme.Orange
+import com.android.solvit.shared.ui.theme.Typography
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -120,14 +120,14 @@ fun RequestsTopBar(
           Text(
               text = "Solv",
               style =
-                  TextStyle(
+                  Typography.bodyLarge.copy(
                       fontSize = 20.sp,
                       fontWeight = FontWeight.Bold,
                       color = colorScheme.onSurface))
           Text(
               text = "It",
               style =
-                  TextStyle(
+                  Typography.bodyLarge.copy(
                       fontSize = 20.sp,
                       fontWeight = FontWeight.Bold,
                       color = colorScheme.secondary))
@@ -136,7 +136,7 @@ fun RequestsTopBar(
         IconButton(onClick = { navigationActions.navigateTo(Screen.NOTIFICATIONS) }) {
           Icon(
               imageVector = Icons.Default.Notifications,
-              tint = if (hasUnreadNotifications) Color.Red else colorScheme.onSurface,
+              tint = if (hasUnreadNotifications) colorScheme.error else colorScheme.onSurface,
               contentDescription = "Notifications")
         }
       }
@@ -156,7 +156,7 @@ fun SearchBar(searchQuery: MutableState<String>) {
       placeholder = {
         Text(
             "Search requests",
-            style = TextStyle(color = Orange, fontSize = 16.sp, fontWeight = FontWeight.Bold))
+            style = Typography.bodyLarge.copy(fontWeight = FontWeight.Bold, color = Orange))
       },
       leadingIcon = {
         Icon(
@@ -172,7 +172,7 @@ fun SearchBar(searchQuery: MutableState<String>) {
               .background(colorScheme.background)
               .border(3.dp, Orange, RoundedCornerShape(12.dp))
               .testTag("SearchBar"),
-      textStyle = TextStyle(color = Orange, fontSize = 16.sp, fontWeight = FontWeight.Bold),
+      textStyle = Typography.bodyLarge.copy(fontWeight = FontWeight.Bold, color = Orange),
       shape = RoundedCornerShape(12.dp))
 }
 
@@ -237,13 +237,12 @@ fun ServiceRequestItem(
           Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = request.title,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                color = colorScheme.onPrimary)
+                style =
+                    Typography.bodyLarge.copy(
+                        fontWeight = FontWeight.Bold, color = colorScheme.onPrimary))
             Text(
                 text = Services.format(request.type),
-                fontSize = 14.sp,
-                color = colorScheme.onPrimary)
+                style = Typography.bodyMedium.copy(color = colorScheme.onPrimary))
           }
           IconButton(onClick = { onClick() }) {
             Icon(
@@ -257,25 +256,26 @@ fun ServiceRequestItem(
         Row {
           Text(
               text = "Deadline: ",
-              fontSize = 15.sp,
-              fontWeight = FontWeight.Bold,
-              color = colorScheme.onPrimary)
+              style =
+                  Typography.bodyLarge.copy(
+                      fontSize = 15.sp,
+                      fontWeight = FontWeight.Bold,
+                      color = colorScheme.onPrimary))
           Text(
               text =
                   SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
                       .format(request.dueDate.toDate()),
-              fontSize = 15.sp,
-              fontWeight = FontWeight.Bold,
-              color = colorScheme.error)
+              style =
+                  Typography.bodyLarge.copy(
+                      fontSize = 15.sp, fontWeight = FontWeight.Bold, color = colorScheme.error))
         }
 
         // Display location if available
         request.location?.let {
           Text(
               text = if (it.name.length > 50) "${it.name.take(50)}..." else it.name,
-              fontSize = 12.sp,
-              color = colorScheme.onPrimary,
-              modifier = Modifier.clickable { selectedLocation = it })
+              modifier = Modifier.clickable { selectedLocation = it },
+              style = Typography.bodySmall.copy(color = colorScheme.onPrimary))
         }
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -283,10 +283,11 @@ fun ServiceRequestItem(
         // Display request description
         Text(
             text = request.description,
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Bold,
-            lineHeight = 18.sp,
-            color = colorScheme.onPrimary)
+            style =
+                Typography.bodyMedium.copy(
+                    lineHeight = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = colorScheme.onPrimary))
         Spacer(modifier = Modifier.height(8.dp))
 
         // Display image if available, otherwise show placeholder text
@@ -311,7 +312,10 @@ fun ServiceRequestItem(
                       .border(1.dp, colorScheme.onPrimary, RoundedCornerShape(12.dp))
                       .clip(RoundedCornerShape(12.dp)),
               contentAlignment = Alignment.Center) {
-                Text(text = "No Image Provided", fontSize = 16.sp, color = colorScheme.onPrimary)
+                Text(
+                    text = "No Image Provided",
+                    color = colorScheme.onPrimary,
+                    style = Typography.bodyLarge)
               }
         }
 
@@ -401,7 +405,7 @@ fun ProposePackageDialog(
                     }
                   },
                   enabled = selectedPackage.value != null) {
-                    Text(text = "Propose Package")
+                    Text(text = "Propose Package", style = Typography.bodyLarge)
                   }
             } else {
               Card(
@@ -414,9 +418,11 @@ fun ProposePackageDialog(
                           Text(
                               text =
                                   "No packages available. Please enter a price for this service:",
-                              fontSize = 18.sp,
-                              fontWeight = FontWeight.Bold,
-                              color = colorScheme.onPrimaryContainer)
+                              style =
+                                  Typography.bodyLarge.copy(
+                                      fontSize = 18.sp,
+                                      fontWeight = FontWeight.Bold,
+                                      color = colorScheme.onPrimaryContainer))
                           Spacer(modifier = Modifier.height(16.dp))
                           var priceInput by remember { mutableStateOf("") }
                           var containsInvalidChars by remember { mutableStateOf(false) }
@@ -453,16 +459,14 @@ fun ProposePackageDialog(
                           if (!isPriceValid && priceInput.isNotEmpty()) {
                             Text(
                                 text = "Please enter a valid number (e.g., 99 or 99.99)",
-                                color = colorScheme.error,
-                                fontSize = 12.sp)
+                                style = Typography.bodySmall.copy(color = colorScheme.error))
                           }
                           // Error message for invalid characters
                           if (containsInvalidChars) {
                             Text(
                                 text =
                                     "Invalid characters entered. Please use numbers and a decimal point only.",
-                                color = colorScheme.error,
-                                fontSize = 12.sp)
+                                style = Typography.bodySmall.copy(color = colorScheme.error))
                           }
                           Spacer(modifier = Modifier.height(16.dp))
                           Button(
@@ -476,7 +480,7 @@ fun ProposePackageDialog(
                                 showDialog.value = false
                               },
                               enabled = isPriceValid && priceInput.isNotEmpty()) {
-                                Text(text = "Confirm")
+                                Text(text = "Confirm", style = Typography.bodyLarge)
                               }
                         }
                   }
@@ -496,7 +500,7 @@ fun ProposePackageDialog(
 @Composable
 fun InteractionBar(text: String, icon: Int, onClick: () -> Unit = {}) {
   Column(horizontalAlignment = Alignment.CenterHorizontally) {
-    Text(text = text, fontSize = 14.sp, color = colorScheme.onPrimary)
+    Text(text = text, color = colorScheme.onPrimary, style = Typography.bodyMedium)
     IconButton(onClick = { onClick() }) {
       Image(
           painter = painterResource(id = icon),
@@ -576,9 +580,11 @@ fun ServiceChip(selectedService: String, onServiceSelected: (String) -> Unit) {
               Text(
                   text = selectedText,
                   fontSize = 16.sp,
-                  lineHeight = 34.sp,
-                  fontWeight = FontWeight(400),
-                  color = borderTextColor)
+                  style =
+                      Typography.bodyLarge.copy(
+                          lineHeight = 34.sp,
+                          fontWeight = FontWeight(400),
+                          color = borderTextColor))
               Icon(
                   imageVector = Icons.Default.ArrowDropDown,
                   contentDescription = "More Options",
@@ -599,7 +605,7 @@ fun ServiceChip(selectedService: String, onServiceSelected: (String) -> Unit) {
           val serviceName = Services.format(service)
           DropdownMenuItem(
               modifier = Modifier.testTag(serviceName),
-              text = { Text(serviceName) },
+              text = { Text(serviceName, style = Typography.bodyLarge) },
               onClick = {
                 selectedText = serviceName
                 onServiceSelected(serviceName)
@@ -630,10 +636,9 @@ fun FilterChip(label: String, isSelected: Boolean, onSelected: (Boolean) -> Unit
       contentAlignment = Alignment.Center) {
         Text(
             text = label,
-            fontSize = 16.sp,
-            lineHeight = 34.sp,
-            fontWeight = FontWeight(400),
-            color = borderTextColor)
+            style =
+                Typography.bodyLarge.copy(
+                    lineHeight = 34.sp, fontWeight = FontWeight(400), color = borderTextColor))
       }
 }
 
@@ -729,7 +734,10 @@ fun ListRequestsFeedScreen(
                 ProposePackageDialog(
                     providerId = providerId,
                     request = it,
-                    packages = packages.value.filter { pckg -> pckg.providerId == providerId },
+                    packages =
+                        packages.value.filter { packageProposal ->
+                          packageProposal.providerId == providerId
+                        },
                     showDialog = showDialog,
                     requestViewModel = serviceRequestViewModel)
               }

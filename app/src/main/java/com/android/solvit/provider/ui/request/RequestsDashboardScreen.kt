@@ -28,7 +28,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.colorScheme
-import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
@@ -60,6 +59,7 @@ import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.utils.isInternetAvailable
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
+import com.android.solvit.shared.ui.theme.Typography
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -116,7 +116,7 @@ fun RequestsTopBar(title: String, onBackClicked: () -> Unit) {
       title = {
         Text(
             text = title,
-            style = typography.titleLarge,
+            style = Typography.titleLarge,
             color = colorScheme.onBackground,
             modifier = Modifier.testTag("JobDashboardTitle"))
       },
@@ -155,9 +155,8 @@ fun StatusTabs(selectedTab: Int, tabs: Array<ServiceRequestStatus>, onTabSelecte
               text = {
                 Text(
                     text = ServiceRequestStatus.format(status),
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = getStatusColor(status))
+                    color = getStatusColor(status),
+                    style = Typography.bodyMedium.copy(fontWeight = FontWeight.Bold))
               })
         }
       }
@@ -232,8 +231,7 @@ fun JobListSection(
           if (filteredRequests.isEmpty()) {
             Text(
                 text = emptyMessage,
-                style = typography.titleLarge,
-                color = colorScheme.onSurfaceVariant,
+                style = Typography.titleLarge.copy(color = colorScheme.onSurfaceVariant),
                 modifier = Modifier.testTag("${title}EmptyText"))
           } else {
             // Display a list of job items
@@ -346,7 +344,10 @@ fun ScheduledJobsSection(
                 contentDescription = "NavigateIcon",
                 tint = colorScheme.onPrimary)
             Spacer(modifier = Modifier.width(8.dp))
-            Text("Navigate to All Jobs of the Day", color = colorScheme.onPrimary)
+            Text(
+                "Navigate to All Jobs of the Day",
+                color = colorScheme.onPrimary,
+                style = Typography.bodyLarge)
           }
         }
 
@@ -518,7 +519,10 @@ fun JobItem(
                       colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
                       modifier =
                           Modifier.wrapContentWidth().testTag("LearnMoreButton_${request.uid}")) {
-                        Text("Learn More", color = colorScheme.onPrimary)
+                        Text(
+                            "Learn More",
+                            color = colorScheme.onPrimary,
+                            style = Typography.bodyLarge)
                       }
                 }
 
@@ -531,7 +535,10 @@ fun JobItem(
                         onClick = it,
                         colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
                         modifier = Modifier.testTag("NavigateButton_${request.uid}")) {
-                          Text("Navigate", color = colorScheme.onPrimary)
+                          Text(
+                              "Navigate",
+                              color = colorScheme.onPrimary,
+                              style = Typography.bodyLarge)
                         }
                   }
                 }
@@ -539,14 +546,14 @@ fun JobItem(
           // Job Title
           Text(
               text = request.title,
-              style = typography.titleMedium,
+              style = Typography.titleMedium,
               color = colorScheme.onBackground,
               maxLines = 1,
               overflow = TextOverflow.Ellipsis)
           // Job  Description
           Text(
               request.description,
-              style = typography.bodyMedium,
+              style = Typography.bodyMedium,
               color = colorScheme.onSurface,
               textAlign = TextAlign.Start)
           Spacer(modifier = Modifier.height(8.dp))
@@ -563,7 +570,7 @@ fun JobItem(
                 tint = colorScheme.onSurfaceVariant)
             Text(
                 if (request.meetingDate == null) "Deadline: $date" else "Scheduled: $date at $time",
-                style = typography.bodySmall,
+                style = Typography.bodySmall,
                 color = colorScheme.onSurfaceVariant)
           }
           Spacer(modifier = Modifier.height(8.dp))
@@ -575,7 +582,7 @@ fun JobItem(
                 contentDescription = "Location",
                 tint = colorScheme.onSurfaceVariant)
             request.location?.let {
-              Text(it.name, style = typography.bodySmall, color = colorScheme.onSurfaceVariant)
+              Text(it.name, style = Typography.bodySmall, color = colorScheme.onSurfaceVariant)
             }
           }
           Spacer(modifier = Modifier.height(8.dp))
@@ -639,7 +646,10 @@ fun JobItem(
                               ButtonDefaults.buttonColors(
                                   containerColor = colorScheme.errorContainer),
                           modifier = Modifier.testTag("CancelButton_${request.uid}")) {
-                            Text("Cancel", color = colorScheme.error, fontSize = 10.sp)
+                            Text(
+                                "Cancel",
+                                color = colorScheme.error,
+                                style = Typography.bodySmall.copy(fontSize = 10.sp))
                           }
                     }
                     Spacer(modifier = Modifier.width(2.dp))
@@ -672,14 +682,14 @@ fun JobItem(
                     Text(
                         text = format(ServiceRequestStatus.ARCHIVED),
                         color = getStatusColor(ServiceRequestStatus.ARCHIVED),
-                        style = typography.bodySmall,
+                        style = Typography.bodySmall,
                         modifier = Modifier.testTag("StatusText_${request.uid}"))
                   }
                   ServiceRequestStatus.CANCELED -> {
                     Text(
                         text = format(ServiceRequestStatus.CANCELED),
                         color = getStatusColor(ServiceRequestStatus.CANCELED),
-                        style = typography.bodySmall,
+                        style = Typography.bodySmall,
                         modifier = Modifier.testTag("StatusText_${request.uid}"))
                   }
                   ServiceRequestStatus.ACCEPTED -> {
@@ -687,7 +697,7 @@ fun JobItem(
                     Text(
                         text = format(ServiceRequestStatus.ACCEPTED),
                         color = getStatusColor(ServiceRequestStatus.ACCEPTED),
-                        style = typography.bodySmall,
+                        style = Typography.bodySmall,
                         modifier = Modifier.testTag("StatusText_${request.uid}"))
                   }
                   ServiceRequestStatus.COMPLETED -> {
@@ -695,7 +705,7 @@ fun JobItem(
                     Text(
                         text = format(ServiceRequestStatus.COMPLETED),
                         color = getStatusColor(ServiceRequestStatus.COMPLETED),
-                        style = typography.bodySmall,
+                        style = Typography.bodySmall,
                         modifier = Modifier.testTag("StatusText_${request.uid}"))
                     // Archive Button
                     onArchiveRequest?.let {
@@ -704,7 +714,10 @@ fun JobItem(
                           colors =
                               ButtonDefaults.buttonColors(containerColor = colorScheme.secondary),
                           modifier = Modifier.testTag("ArchiveButton_${request.uid}")) {
-                            Text("Archive", color = colorScheme.onSecondary)
+                            Text(
+                                "Archive",
+                                color = colorScheme.onSecondary,
+                                style = Typography.bodyLarge)
                           }
                     }
                   }

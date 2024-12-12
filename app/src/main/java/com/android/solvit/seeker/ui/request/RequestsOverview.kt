@@ -66,6 +66,7 @@ import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.theme.LightBlue
 import com.android.solvit.shared.ui.theme.LightOrange
+import com.android.solvit.shared.ui.theme.Typography
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -118,9 +119,11 @@ fun RequestsOverviewScreen(
                       text = {
                         Text(
                             text = ServiceRequestStatus.format(status),
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = getStatusColor(status))
+                            style =
+                                Typography.bodyLarge.copy(
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = getStatusColor(status)))
                       })
                 }
               }
@@ -170,9 +173,7 @@ fun TopOrdersSection(navigationActions: NavigationActions) {
           Spacer(modifier = Modifier.size(22.dp))
           Text(
               text = "Orders",
-              fontSize = 20.sp,
-              fontWeight = FontWeight.Bold,
-          )
+              style = Typography.titleLarge.copy(fontSize = 20.sp, fontWeight = FontWeight.Bold))
         }
         Icon(
             imageVector = Icons.Default.Menu,
@@ -194,9 +195,11 @@ fun NoRequestsText() {
   ) {
     Text(
         text = "You have no active service request.\nCreate one.",
-        fontSize = 20.sp,
-        fontWeight = FontWeight.Bold,
-        color = colorScheme.onSurfaceVariant)
+        style =
+            Typography.bodyLarge.copy(
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = colorScheme.onSurfaceVariant))
   }
 }
 
@@ -226,11 +229,11 @@ fun CategoriesFiltersSection() {
                           colorFilter = ColorFilter.tint(colorScheme.onPrimary))
                       Text(
                           text = "Services",
-                          fontWeight = FontWeight.Bold,
                           color = colorScheme.onPrimary,
                           modifier = Modifier.weight(0.8f),
                           maxLines = 1,
-                          softWrap = false)
+                          softWrap = false,
+                          style = Typography.bodyLarge.copy(fontWeight = FontWeight.Bold))
                     }
               }
 
@@ -251,11 +254,11 @@ fun CategoriesFiltersSection() {
                           colorFilter = ColorFilter.tint(colorScheme.onPrimary))
                       Text(
                           text = "Sort",
-                          fontWeight = FontWeight.Bold,
                           color = colorScheme.onPrimary,
                           modifier = Modifier.weight(0.8f),
                           maxLines = 1,
-                          softWrap = false)
+                          softWrap = false,
+                          style = Typography.bodyLarge.copy(fontWeight = FontWeight.Bold))
                     }
               }
         }
@@ -319,7 +322,7 @@ fun FilterItem(text: String, filter: () -> Unit) {
               }
               .testTag("$text FilterItem"),
       contentAlignment = Alignment.Center) {
-        Text(text = text)
+        Text(text = text, style = Typography.bodyLarge)
       }
 }
 
@@ -346,11 +349,12 @@ fun RequestItemRow(request: ServiceRequest, onClick: () -> Unit) {
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.size(48.dp).clip(RoundedCornerShape(12.dp)))
             Column {
-              Text(text = request.title, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+              Text(
+                  text = request.title,
+                  style = Typography.bodyLarge.copy(fontSize = 16.sp, fontWeight = FontWeight.Bold))
               Text(
                   text = Services.format(request.type),
-                  fontSize = 14.sp,
-              )
+                  style = Typography.bodyLarge.copy(fontSize = 14.sp))
             }
           }
           Spacer(modifier = Modifier.size(12.dp))
@@ -359,12 +363,15 @@ fun RequestItemRow(request: ServiceRequest, onClick: () -> Unit) {
               horizontalArrangement = Arrangement.SpaceBetween) {
                 Text(
                     text = ServiceRequestStatus.format(request.status),
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = getStatusColor(request.status))
+                    color = getStatusColor(request.status),
+                    style =
+                        Typography.bodyLarge.copy(fontSize = 14.sp, fontWeight = FontWeight.Bold))
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                  Text(text = "Until:", fontSize = 14.sp)
-                  Text(text = date, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                  Text(text = "Until:", style = Typography.bodyLarge.copy(fontSize = 14.sp))
+                  Text(
+                      text = date,
+                      style =
+                          Typography.bodyLarge.copy(fontSize = 14.sp, fontWeight = FontWeight.Bold))
                 }
               }
         }

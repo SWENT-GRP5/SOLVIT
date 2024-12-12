@@ -64,6 +64,7 @@ import com.android.solvit.shared.model.review.Review
 import com.android.solvit.shared.model.review.ReviewViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
+import com.android.solvit.shared.ui.theme.Typography
 import com.android.solvit.shared.ui.utils.GoBackButton
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
@@ -110,11 +111,11 @@ fun CreateReviewScreen(
               onValueChange = { comment = it },
               modifier = Modifier.fillMaxWidth().height(160.dp).testTag("reviewComment"),
               label = { Text("Comment") },
-              placeholder = { Text("Leave a comment") },
+              placeholder = { Text("Leave a comment", style = Typography.bodyLarge) },
               shape = RoundedCornerShape(16.dp),
               colors =
                   OutlinedTextFieldDefaults.colors(
-                      unfocusedContainerColor = Color.Transparent,
+                      unfocusedContainerColor = colorScheme.background,
                       focusedBorderColor = colorScheme.secondary,
                       unfocusedBorderColor = colorScheme.onSurfaceVariant))
           Spacer(modifier = Modifier.size(16.dp))
@@ -140,7 +141,7 @@ fun CreateReviewScreen(
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                     verticalAlignment = Alignment.CenterVertically) {
-                      Text("Submit Your Review")
+                      Text("Submit Your Review", style = Typography.bodyLarge)
                       Icon(imageVector = Icons.Filled.Done, contentDescription = "Submit Review")
                     }
               }
@@ -152,7 +153,7 @@ fun CreateReviewScreen(
 @Composable
 fun TopSection(navigationActions: NavigationActions) {
   TopAppBar(
-      title = { Text(text = "Leave a Review") },
+      title = { Text(text = "Leave a Review", style = Typography.bodyLarge) },
       modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("reviewTopBar"),
       navigationIcon = { GoBackButton(navigationActions) },
       colors =
@@ -189,9 +190,12 @@ fun RequestBox(
           Text(
               text = request.title,
               modifier = Modifier.testTag("requestTitle"),
-              fontWeight = FontWeight.ExtraBold,
-              fontSize = 20.sp)
-          Text(text = request.description, modifier = Modifier.testTag("requestDescription"))
+              style =
+                  Typography.bodyLarge.copy(fontSize = 20.sp, fontWeight = FontWeight.ExtraBold))
+          Text(
+              text = request.description,
+              modifier = Modifier.testTag("requestDescription"),
+              style = Typography.bodyLarge)
           Row(
               modifier = Modifier.fillMaxWidth(),
               horizontalArrangement = Arrangement.SpaceBetween) {
@@ -199,13 +203,13 @@ fun RequestBox(
                   Text(
                       text = "${request.agreedPrice} $",
                       modifier = Modifier.testTag("requestPrice"),
-                      fontWeight = FontWeight.SemiBold)
+                      style = Typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold))
                 }
                 request.meetingDate?.let {
                   Text(
                       text = dateFormat.format(request.meetingDate.toDate()),
                       modifier = Modifier.testTag("requestDate"),
-                      fontWeight = FontWeight.SemiBold)
+                      style = Typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold))
                 }
               }
           Row(

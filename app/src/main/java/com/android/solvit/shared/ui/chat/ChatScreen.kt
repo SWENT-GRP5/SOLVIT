@@ -44,7 +44,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -66,7 +65,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -97,6 +95,7 @@ import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.navigation.Screen
 import com.android.solvit.shared.ui.theme.Black
+import com.android.solvit.shared.ui.theme.Typography
 import com.android.solvit.shared.ui.utils.getReceiverImageUrl
 import com.android.solvit.shared.ui.utils.getReceiverName
 import kotlinx.coroutines.delay
@@ -240,7 +239,8 @@ fun AiSolverWelcomeScreen(
                                         brush =
                                             Brush.linearGradient(
                                                 colors =
-                                                    listOf(Color(0xFF00B383), Color(0xFF0099FF)),
+                                                    listOf(
+                                                        colorScheme.secondary, colorScheme.primary),
                                                 start = Offset.Zero,
                                                 end = Offset.Infinite),
                                         fontSize = screenHeight.times(0.04f).value.sp)) {
@@ -262,7 +262,7 @@ fun AiSolverWelcomeScreen(
                         Text(
                             text = "I'm pleased that I meet you! How can\nI help you right now?",
                             fontSize = screenHeight.times(0.02f).value.sp,
-                            color = Color.Gray,
+                            color = colorScheme.onSurfaceVariant,
                             textAlign = TextAlign.Center,
                             modifier =
                                 Modifier.padding(horizontal = 16.dp)
@@ -310,7 +310,7 @@ fun ButtonStartConversationWithAI(
         if (clearConversation) chatViewModel.clearConversation(true)
         navigationActions.navigateTo(Screen.AI_SOLVER_CHAT_SCREEN)
       },
-      colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+      colors = ButtonDefaults.buttonColors(containerColor = colorScheme.background),
       shape = RoundedCornerShape(50),
       contentPadding = PaddingValues(),
       modifier =
@@ -324,14 +324,14 @@ fun ButtonStartConversationWithAI(
                     .background(
                         brush =
                             Brush.horizontalGradient(
-                                colors = listOf(Color(0xFF00B383), Color(0xFF0099FF))),
+                                colors = listOf(colorScheme.primary, colorScheme.secondary)),
                         shape = RoundedCornerShape(50)),
             contentAlignment = Alignment.Center) {
               // Button text
               Text(
                   text = title,
                   fontSize = screenHeight.times(0.025f).value.sp,
-                  color = Color.White,
+                  color = colorScheme.surface,
                   maxLines = 1, // Ensure text stays on one line
                   overflow = TextOverflow.Ellipsis)
             }
@@ -422,7 +422,7 @@ fun AiSolverHeader(navigationActions: NavigationActions) {
       modifier = Modifier.testTag("AiChatHeader"),
       title = {
         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-          Text(text = "Ai Solver", style = MaterialTheme.typography.headlineLarge)
+          Text(text = "Ai Solver", style = Typography.headlineLarge)
         }
       },
       navigationIcon = {
@@ -432,10 +432,10 @@ fun AiSolverHeader(navigationActions: NavigationActions) {
       },
       colors =
           TopAppBarDefaults.topAppBarColors(
-              containerColor = Color.White,
-              titleContentColor = Color.Black,
-              navigationIconContentColor = Color.Black,
-              actionIconContentColor = Color.Black),
+              containerColor = colorScheme.surface,
+              titleContentColor = colorScheme.onSurface,
+              navigationIconContentColor = colorScheme.onSurface,
+              actionIconContentColor = colorScheme.onSurface),
   )
 }
 
@@ -460,8 +460,8 @@ fun TypingIndicator() {
   Text(
       modifier = Modifier.padding(5.dp).testTag("TypingIndicator"),
       text = "AiBot is typing$dots",
-      style = MaterialTheme.typography.bodyLarge,
-      color = Color.Gray)
+      style = Typography.bodyLarge,
+      color = colorScheme.onSurface)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -485,7 +485,7 @@ fun ChatHeader(name: String?, picture: String, navigationActions: NavigationActi
 
           Spacer(Modifier.width(8.dp))
 
-          Text(text = name ?: "Empty Name", style = MaterialTheme.typography.titleSmall)
+          Text(text = name ?: "Empty Name", style = Typography.titleSmall)
         }
       },
       navigationIcon = {
@@ -530,7 +530,8 @@ fun SentMessage(
                             topEnd = if (isSentByUser) 0.dp else 16.dp,
                             bottomStart = 16.dp,
                             bottomEnd = 16.dp))
-                    .background(if (isSentByUser) colorScheme.primary else Color.LightGray)
+                    .background(
+                        if (isSentByUser) colorScheme.primary else colorScheme.surfaceVariant)
                     .padding(horizontal = 16.dp, vertical = 12.dp)) {
               constraints
 
@@ -560,8 +561,8 @@ fun SentMessage(
 
                               append(message.message.substring(lastIndex))
                             },
-                        color = if (isSentByUser) colorScheme.background else Color.Black,
-                        style = MaterialTheme.typography.bodySmall)
+                        color = if (isSentByUser) colorScheme.background else colorScheme.onSurface,
+                        style = Typography.bodySmall)
                 is ChatMessage.ImageMessage -> {
                   Log.e("display Image", message.imageUrl)
                   AsyncImage(
@@ -580,8 +581,9 @@ fun SentMessage(
                       modifier = Modifier.fillMaxWidth()) {
                         Text(
                             text = message.text,
-                            color = if (isSentByUser) colorScheme.onPrimary else Color.Black,
-                            style = MaterialTheme.typography.bodySmall)
+                            color =
+                                if (isSentByUser) colorScheme.onPrimary else colorScheme.onSurface,
+                            style = Typography.bodySmall)
 
                         AsyncImage(
                             modifier =
@@ -640,7 +642,7 @@ fun MessageInputBar(
           Box(
               modifier =
                   Modifier.clip(RoundedCornerShape(12.dp))
-                      .background(Color.Transparent)
+                      .background(colorScheme.background)
                       .padding(bottom = 8.dp)) {
                 AsyncImage(
                     model = uri,
@@ -650,7 +652,7 @@ fun MessageInputBar(
                 Icon(
                     imageVector = Icons.Default.Close,
                     contentDescription = "Delete Image",
-                    tint = Color.Red,
+                    tint = colorScheme.error,
                     modifier =
                         Modifier.align(Alignment.TopEnd).padding(4.dp).clickable {
                           imageUri = null
@@ -677,12 +679,15 @@ fun MessageInputBar(
                           .padding(end = 8.dp)
                           .testTag("enterText"),
                   placeholder = {
-                    Text(text = "Send Message", color = colorScheme.onSurfaceVariant)
+                    Text(
+                        text = "Send Message",
+                        color = colorScheme.onSurfaceVariant,
+                        style = Typography.bodyLarge)
                   },
                   colors =
                       OutlinedTextFieldDefaults.colors(
-                          unfocusedBorderColor = Color.Transparent,
-                          focusedBorderColor = Color.Transparent,
+                          unfocusedBorderColor = colorScheme.background,
+                          focusedBorderColor = colorScheme.background,
                           focusedTextColor = colorScheme.onSurface),
                   singleLine = true)
 
@@ -788,7 +793,10 @@ fun AssistantSuggestions(
             Modifier.padding(horizontal = 8.dp),
             tint = colorScheme.onSurfaceVariant)
         if (suggestions.isEmpty()) {
-          Text("No suggestions available", color = colorScheme.onSurfaceVariant)
+          Text(
+              "No suggestions available",
+              color = colorScheme.onSurfaceVariant,
+              style = Typography.bodyLarge)
         } else {
           suggestions.forEach { suggestion ->
             Text(
@@ -798,7 +806,8 @@ fun AssistantSuggestions(
                         .clickable { onSuggestionSelect(suggestion) }
                         .padding(8.dp)
                         .testTag("suggestionItem$suggestion"),
-                color = colorScheme.onSurfaceVariant)
+                color = colorScheme.onSurfaceVariant,
+                style = Typography.bodyLarge)
           }
         }
         IconButton(
@@ -842,13 +851,15 @@ fun RequestDetails(
         Text(
             text = serviceRequest.title,
             modifier = Modifier.testTag("requestTitle"),
-            fontWeight = FontWeight.ExtraBold,
-            fontSize = 20.sp)
-        Text(text = serviceRequest.description, modifier = Modifier.testTag("requestDescription"))
+            style = Typography.bodyLarge.copy(fontSize = 20.sp, fontWeight = FontWeight.ExtraBold))
+        Text(
+            text = serviceRequest.description,
+            modifier = Modifier.testTag("requestDescription"),
+            style = Typography.bodyMedium)
         Text(
             text = serviceRequest.type.name,
             modifier = Modifier.testTag("requestType"),
-            fontWeight = FontWeight.Bold)
+            style = Typography.bodyMedium.copy(fontWeight = FontWeight.Bold))
       }
     }
   }

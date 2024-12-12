@@ -1,5 +1,6 @@
 package com.android.solvit.seeker.ui.navigation
 
+import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Canvas
@@ -30,13 +31,13 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_SEEKER
 import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.navigation.TopLevelDestination
 import com.android.solvit.shared.ui.navigation.TopLevelDestinations
 
+@SuppressLint("SourceLockedOrientationActivity")
 @Composable
 fun BottomNavigationMenu(
     onTabSelect: (TopLevelDestination) -> Unit,
@@ -138,18 +139,4 @@ fun BottomNavigationMenu(
                   modifier = Modifier.size(30.dp))
             }
       }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewSeekerBottomNavigationMenu() {
-  // Use the actual list of top-level destinations
-  val tabList = LIST_TOP_LEVEL_DESTINATION_SEEKER
-
-  // Preview with "Home" as the selected item
-  BottomNavigationMenu(
-      onTabSelect = {}, // No action needed for preview
-      tabList = tabList,
-      selectedItem = Route.SERVICES // Default to SERVICES (Home)
-      )
 }

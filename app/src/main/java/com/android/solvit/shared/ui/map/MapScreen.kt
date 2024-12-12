@@ -23,7 +23,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -48,6 +47,7 @@ import coil.request.ErrorResult
 import coil.request.ImageRequest
 import coil.request.SuccessResult
 import com.android.solvit.R
+import com.android.solvit.shared.ui.theme.Typography
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
@@ -152,13 +152,13 @@ fun MapMarker(markerData: MarkerData) {
                   textAlign = TextAlign.Center,
                   text = markerData.title,
                   modifier = Modifier.width(60.dp).padding(4.dp).testTag(markerData.tag + "Title"),
-                  style = MaterialTheme.typography.labelSmall)
+                  style = Typography.labelSmall)
               Text(
                   textAlign = TextAlign.Center,
                   text = markerData.snippet,
                   modifier =
                       Modifier.width(60.dp).padding(4.dp).testTag(markerData.tag + "Snippet"),
-                  style = MaterialTheme.typography.bodySmall)
+                  style = Typography.bodySmall)
             }
       }
 }

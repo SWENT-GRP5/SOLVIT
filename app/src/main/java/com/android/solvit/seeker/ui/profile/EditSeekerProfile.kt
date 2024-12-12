@@ -1,5 +1,6 @@
 package com.android.solvit.seeker.ui.profile
 
+import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
@@ -21,19 +22,19 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -62,8 +63,10 @@ import com.android.solvit.seeker.model.profile.SeekerProfile
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.android.solvit.shared.ui.theme.Typography
 
 @OptIn(ExperimentalMaterial3Api::class)
+@SuppressLint("SourceLockedOrientationActivity")
 @Composable
 fun EditSeekerProfileScreen(
     viewModel: SeekerProfileViewModel = viewModel(factory = SeekerProfileViewModel.Factory),
@@ -104,18 +107,15 @@ fun EditSeekerProfileScreen(
   }
 
   Scaffold(
-      backgroundColor = MaterialTheme.colorScheme.background,
+      modifier = Modifier.background(color = colorScheme.background),
       topBar = {
         TopAppBar(
-            backgroundColor = MaterialTheme.colorScheme.background,
             title = {
               Box(
                   modifier = Modifier.fillMaxWidth().testTag("goBackButton"),
                   contentAlignment = Alignment.Center) {
                     Text(
-                        "Bio-data",
-                        color = MaterialTheme.colorScheme.onBackground,
-                        fontWeight = FontWeight.Bold)
+                        "Bio-data", color = colorScheme.onBackground, style = Typography.titleLarge)
                   }
             },
             navigationIcon = {
@@ -123,10 +123,11 @@ fun EditSeekerProfileScreen(
                 Icon(
                     Icons.Default.ArrowBack,
                     contentDescription = "Back",
-                    tint = MaterialTheme.colorScheme.onBackground)
+                    tint = colorScheme.onBackground)
               }
             },
-            actions = { Box(modifier = Modifier.size(48.dp)) })
+            actions = { Box(modifier = Modifier.size(48.dp)) },
+            modifier = Modifier.background(color = colorScheme.background))
       }) { padding ->
         Column(
             modifier =
@@ -142,26 +143,32 @@ fun EditSeekerProfileScreen(
                   modifier =
                       Modifier.size(if (screenWidth < 360.dp) 60.dp else 74.dp)
                           .clip(CircleShape)
-                          .border(2.dp, MaterialTheme.colorScheme.primaryContainer, CircleShape))
+                          .border(2.dp, colorScheme.primaryContainer, CircleShape))
 
               Spacer(modifier = Modifier.height(verticalSpacing))
 
               // Full Name Text
               Text(
                   text = fullName,
-                  fontWeight = FontWeight.Bold,
-                  fontSize = if (screenWidth < 360.dp) 18.sp else 20.sp,
-                  color = MaterialTheme.colorScheme.onBackground,
-                  textAlign = TextAlign.Center,
-                  modifier = Modifier.padding(top = 8.dp))
+                  modifier = Modifier.padding(top = 8.dp),
+                  style =
+                      Typography.bodyLarge.copy(
+                          fontWeight = FontWeight.Bold,
+                          fontSize = if (screenWidth < 360.dp) 18.sp else 20.sp,
+                          color = colorScheme.onBackground,
+                          textAlign = TextAlign.Center,
+                      ))
 
               // Email Text
               Text(
                   text = email,
-                  fontSize = if (screenWidth < 360.dp) 12.sp else 14.sp,
-                  color = MaterialTheme.colorScheme.onSurfaceVariant,
-                  textAlign = TextAlign.Center,
-                  modifier = Modifier.padding(top = 4.dp))
+                  modifier = Modifier.padding(top = 4.dp),
+                  style =
+                      Typography.bodyLarge.copy(
+                          fontSize = if (screenWidth < 360.dp) 12.sp else 14.sp,
+                          color = colorScheme.onSurfaceVariant,
+                          textAlign = TextAlign.Center,
+                      ))
 
               Spacer(modifier = Modifier.height(verticalSpacing))
 
@@ -169,7 +176,7 @@ fun EditSeekerProfileScreen(
               OutlinedTextField(
                   value = fullName,
                   onValueChange = { fullName = it },
-                  label = { Text("Enter your full name") },
+                  label = { Text("Enter your full name", style = Typography.bodyLarge) },
                   modifier =
                       Modifier.fillMaxWidth()
                           .testTag("profileName")
@@ -181,7 +188,7 @@ fun EditSeekerProfileScreen(
               OutlinedTextField(
                   value = username,
                   onValueChange = { username = it },
-                  label = { Text("Enter your username") },
+                  label = { Text("Enter your username", style = Typography.bodyLarge) },
                   modifier =
                       Modifier.fillMaxWidth()
                           .testTag("profileUsername")
@@ -193,7 +200,7 @@ fun EditSeekerProfileScreen(
               OutlinedTextField(
                   value = email,
                   onValueChange = { email = it },
-                  label = { Text("Enter your email") },
+                  label = { Text("Enter your email", style = Typography.bodyLarge) },
                   modifier =
                       Modifier.fillMaxWidth()
                           .testTag("profileEmail")
@@ -210,7 +217,7 @@ fun EditSeekerProfileScreen(
               OutlinedTextField(
                   value = address,
                   onValueChange = { address = it },
-                  label = { Text("Enter your address") },
+                  label = { Text("Enter your address", style = Typography.bodyLarge) },
                   modifier =
                       Modifier.fillMaxWidth()
                           .testTag("profileAddress")
@@ -221,7 +228,7 @@ fun EditSeekerProfileScreen(
               // Save Button
               Button(
                   onClick = {
-                    userProfile.let { profile ->
+                    userProfile.let {
                       viewModel.updateUserProfile(
                           SeekerProfile(
                               uid = userProfile.uid,
@@ -242,11 +249,11 @@ fun EditSeekerProfileScreen(
                           .background(
                               brush =
                                   Brush.horizontalGradient(
-                                      listOf(
-                                          MaterialTheme.colorScheme.secondary,
-                                          MaterialTheme.colorScheme.secondary)),
+                                      listOf(colorScheme.secondary, colorScheme.secondary)),
                               shape = RoundedCornerShape(25.dp))) {
-                    Text("Update Profile", color = MaterialTheme.colorScheme.onPrimary)
+                    Text(
+                        "Update Profile",
+                        style = Typography.bodyLarge.copy(color = colorScheme.onPrimary))
                   }
             }
       }
@@ -274,7 +281,7 @@ fun CountryDropdownMenu(screenWidth: Dp) {
     OutlinedTextField(
         value = selectedCountry.code,
         onValueChange = {},
-        label = { Text("Country code") },
+        label = { Text("Country code", style = Typography.bodyLarge) },
         modifier =
             Modifier.fillMaxWidth()
                 .testTag("CountryCode")
@@ -309,7 +316,7 @@ fun CountryDropdownMenu(screenWidth: Dp) {
                     contentDescription = "Country Flag",
                     modifier = Modifier.size(24.dp))
                 Spacer(modifier = Modifier.width(16.dp))
-                Text(country.name)
+                Text(country.name, style = Typography.bodyLarge)
               }
             }
       }
@@ -321,7 +328,7 @@ fun CountryDropdownMenu(screenWidth: Dp) {
     OutlinedTextField(
         value = phoneNumber,
         onValueChange = { phoneNumber = it },
-        label = { Text("Phone number") },
+        label = { Text("Phone number", style = Typography.bodyLarge) },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
         modifier =
             Modifier.fillMaxWidth()

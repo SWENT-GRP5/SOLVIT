@@ -1,10 +1,14 @@
 package com.android.solvit.provider.ui.calendar.views.month
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -13,12 +17,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.android.solvit.provider.ui.calendar.components.header.CalendarDaysHeader
 import com.android.solvit.shared.model.request.ServiceRequest
+import com.android.solvit.shared.ui.theme.Typography
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters
-import java.util.*
+import java.util.Locale
 
 @Composable
 fun MonthView(
@@ -42,8 +47,7 @@ fun MonthView(
               text =
                   currentMonth.format(
                       DateTimeFormatter.ofPattern("MMMM yyyy", Locale.getDefault())),
-              style = MaterialTheme.typography.titleMedium,
-              fontWeight = FontWeight.Bold,
+              style = Typography.titleMedium.copy(fontWeight = FontWeight.Bold),
               modifier = Modifier.testTag("monthHeaderText"))
         }
 

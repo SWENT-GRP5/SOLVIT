@@ -41,7 +41,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -57,6 +56,7 @@ import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.authentication.CustomOutlinedTextField
 import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.android.solvit.shared.ui.theme.Typography
 import com.android.solvit.shared.ui.utils.GoBackButton
 import com.android.solvit.shared.ui.utils.ValidationRegex
 
@@ -99,7 +99,8 @@ fun ModifyProviderInformationScreen(
             title = {
               Text(
                   "Modify your profile information",
-                  modifier = Modifier.testTag("titleModifyProvider"))
+                  modifier = Modifier.testTag("titleModifyProvider"),
+                  style = Typography.titleLarge)
             },
             navigationIcon = { GoBackButton(navigationActions) },
             colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background))
@@ -334,10 +335,10 @@ fun ModifyInput(
       colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)) {
         Text(
             "Save !",
-            color = colorScheme.onPrimary,
-            fontWeight = FontWeight.Bold,
-            fontSize = 16.sp,
-            modifier = Modifier.testTag("saveButton"))
+            modifier = Modifier.testTag("saveButton"),
+            style =
+                Typography.bodyLarge.copy(
+                    color = colorScheme.onPrimary, fontWeight = FontWeight.Bold))
       }
 
   Spacer(modifier = Modifier.height(3.dp))
@@ -347,7 +348,7 @@ fun ModifyInput(
       color = colorScheme.onSurfaceVariant,
       fontSize = 12.sp,
       textAlign = TextAlign.Center,
-      style = TextStyle(fontSize = 12.sp, lineHeight = 16.sp),
+      style = Typography.bodySmall.copy(fontSize = 12.sp, lineHeight = 16.sp),
       modifier = Modifier.padding(top = 4.dp).fillMaxWidth())
 }
 
@@ -461,7 +462,7 @@ fun LanguageDropdownMenu(
                 val isSelected = language in selectedLanguages
 
                 DropdownMenuItem(
-                    text = { Text(language.name) },
+                    text = { Text(language.name, style = Typography.bodyLarge) },
                     onClick = {},
                     leadingIcon = {
                       Checkbox(

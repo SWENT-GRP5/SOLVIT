@@ -37,7 +37,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.colorScheme
-import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
@@ -79,6 +78,7 @@ import com.android.solvit.shared.model.review.ReviewViewModel
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
+import com.android.solvit.shared.ui.theme.Typography
 
 @Composable
 fun ProviderInfoScreen(
@@ -202,20 +202,20 @@ fun PackageCard(
                 Text(
                     modifier = Modifier.testTag("price"),
                     text = "$${packageProposal.price}",
-                    style = typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                    style = Typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
                     color =
                         if (!isSelected) colorScheme.onPrimaryContainer else colorScheme.onPrimary)
                 Spacer(modifier = Modifier.width(8.dp)) // Increased space between price and unit
                 Text(
                     text = "/hour",
-                    style = typography.bodySmall,
+                    style = Typography.bodySmall,
                     color =
                         if (!isSelected) colorScheme.onPrimaryContainer else colorScheme.onPrimary)
               }
               // Title of the Package
               Text(
                   text = packageProposal.title,
-                  style = typography.titleMedium,
+                  style = Typography.titleMedium,
                   color =
                       if (!isSelected) colorScheme.onPrimaryContainer else colorScheme.onPrimary)
               Spacer(
@@ -224,7 +224,7 @@ fun PackageCard(
               // Description of the Package
               Text(
                   text = packageProposal.description,
-                  style = typography.bodyMedium,
+                  style = Typography.bodyMedium,
                   color = if (!isSelected) colorScheme.onSurface else colorScheme.onPrimary)
               Spacer(
                   modifier =
@@ -242,7 +242,7 @@ fun PackageCard(
                     Spacer(modifier = Modifier.width(8.dp)) // Increased space between icon and text
                     Text(
                         text = feature,
-                        style = typography.bodyMedium,
+                        style = Typography.bodyMedium,
                         color = if (!isSelected) colorScheme.onSurface else colorScheme.onPrimary)
                   }
                 }
@@ -748,7 +748,7 @@ fun SelectRequestDialog(
                 // Title
                 Text(
                     text = "Choose the concerned service request:",
-                    style = typography.titleMedium,
+                    style = Typography.titleMedium,
                     modifier = Modifier.padding(bottom = 16.dp).testTag("dialog_title"),
                     color = colorScheme.onSurface)
 
@@ -783,12 +783,12 @@ fun SelectRequestDialog(
                                         horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                           Text(
                                               text = "Title:",
-                                              style = typography.bodyMedium,
+                                              style = Typography.bodyMedium,
                                               color = colorScheme.onPrimaryContainer)
                                           Text(
                                               modifier = Modifier.testTag("request_title"),
                                               text = request.title,
-                                              style = typography.bodyMedium,
+                                              style = Typography.bodyMedium,
                                               color = colorScheme.onPrimaryContainer)
                                         }
                                     Row(
@@ -796,12 +796,12 @@ fun SelectRequestDialog(
                                         horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                           Text(
                                               text = "Description:",
-                                              style = typography.bodyMedium,
+                                              style = Typography.bodyMedium,
                                               color = colorScheme.onPrimaryContainer)
                                           Text(
                                               modifier = Modifier.testTag("request_description"),
                                               text = request.description,
-                                              style = typography.bodyMedium,
+                                              style = Typography.bodyMedium,
                                               color = colorScheme.onPrimaryContainer,
                                               maxLines = 2,
                                               overflow = TextOverflow.Ellipsis)
@@ -820,7 +820,7 @@ fun SelectRequestDialog(
                       Text(
                           textAlign = TextAlign.Center,
                           text = "Create a new request with this provider assigned",
-                          style = typography.bodyMedium,
+                          style = Typography.bodyMedium,
                           color = colorScheme.primary)
                     }
 
@@ -834,7 +834,7 @@ fun SelectRequestDialog(
                               Modifier.padding(horizontal = 8.dp).testTag("dismiss_button")) {
                             Text(
                                 text = "Dismiss",
-                                style = typography.labelLarge,
+                                style = Typography.labelLarge,
                                 color = colorScheme.primary)
                           }
 
@@ -860,7 +860,7 @@ fun SelectRequestDialog(
                           shape = RoundedCornerShape(8.dp)) {
                             Text(
                                 text = "Confirm",
-                                style = typography.labelLarge,
+                                style = Typography.labelLarge,
                                 color = colorScheme.onPrimary)
                           }
                     }

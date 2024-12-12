@@ -23,7 +23,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -53,6 +52,7 @@ import com.android.solvit.shared.model.chat.ChatMessage
 import com.android.solvit.shared.model.chat.ChatViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
+import com.android.solvit.shared.ui.theme.Typography
 import com.android.solvit.shared.ui.utils.formatTimestamp
 import com.android.solvit.shared.ui.utils.getReceiverImageUrl
 import com.android.solvit.shared.ui.utils.getReceiverName
@@ -131,7 +131,7 @@ fun ChatListTopBar(
             modifier = Modifier.fillMaxWidth(),
             // Allow the title to center
             contentAlignment = Alignment.Center) {
-              Text(text = "Inbox", style = MaterialTheme.typography.headlineLarge)
+              Text(text = "Inbox", style = Typography.headlineLarge)
             }
       },
       navigationIcon = {
@@ -214,7 +214,7 @@ fun ChatListItem(
         Column(modifier = Modifier.weight(1f)) {
           Text(
               text = receiverName ?: "",
-              style = MaterialTheme.typography.titleMedium,
+              style = Typography.titleMedium,
               fontWeight = FontWeight.Bold)
           Text(
               text =
@@ -223,7 +223,7 @@ fun ChatListItem(
                     is ChatMessage.ImageMessage -> "image"
                     is ChatMessage.TextImageMessage -> message.text
                   },
-              style = MaterialTheme.typography.bodyLarge,
+              style = Typography.bodyLarge,
               color = Color.Gray,
               maxLines = 1,
               overflow = TextOverflow.Ellipsis)
@@ -231,7 +231,7 @@ fun ChatListItem(
         Spacer(modifier = Modifier.width(8.dp))
         Text(
             text = formatTimestamp(message.timestamp),
-            style = MaterialTheme.typography.bodyLarge,
+            style = Typography.bodyLarge,
             color = Color.Gray)
       }
 }
@@ -251,14 +251,8 @@ fun NoMessagesSent(modifier: Modifier) {
             modifier = Modifier.size(200.dp) // Adjust size as needed
             )
 
-        Text(
-            text = "No messages yet",
-            style = MaterialTheme.typography.bodyLarge,
-            color = Color.Black)
+        Text(text = "No messages yet", style = Typography.bodyLarge, color = Color.Black)
 
-        Text(
-            text = "Send your first message",
-            style = MaterialTheme.typography.bodySmall,
-            color = Color.Gray)
+        Text(text = "Send your first message", style = Typography.bodySmall, color = Color.Gray)
       }
 }

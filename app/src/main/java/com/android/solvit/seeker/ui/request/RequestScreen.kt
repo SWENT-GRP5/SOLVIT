@@ -41,6 +41,7 @@ import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.android.solvit.shared.ui.theme.Typography
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -95,7 +96,9 @@ fun RequestScreen(
                     titleContentColor = colorScheme.onBackground,
                     actionIconContentColor = colorScheme.onBackground,
                 ),
-            title = { Text(screenTitle, Modifier.testTag("screenTitle")) },
+            title = {
+              Text(screenTitle, Modifier.testTag("screenTitle"), style = Typography.titleLarge)
+            },
             navigationIcon = {
               IconButton(
                   onClick = {
@@ -167,7 +170,7 @@ fun RequestScreen(
                               contentDescription = null,
                               modifier = Modifier.size(24.dp))
                           Spacer(modifier = Modifier.width(8.dp))
-                          Text(submitButtonText)
+                          Text(submitButtonText, style = Typography.bodyLarge)
                         }
                   }
               if (selectedRequest != null) {

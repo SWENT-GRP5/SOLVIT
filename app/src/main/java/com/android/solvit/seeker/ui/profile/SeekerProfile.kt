@@ -37,7 +37,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -59,7 +58,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -69,6 +67,7 @@ import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
+import com.android.solvit.shared.ui.theme.Typography
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
@@ -109,8 +108,7 @@ fun SeekerProfileScreen(
               Text(
                   "Profile",
                   modifier = Modifier.testTag("ProfileTitle"),
-                  fontWeight = FontWeight.Bold,
-              )
+                  style = Typography.titleLarge)
             },
             navigationIcon = {
               IconButton(
@@ -165,14 +163,19 @@ fun SeekerProfileScreen(
                           Column {
                             Text(
                                 text = fullName,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 20.sp,
-                                color = colorScheme.onPrimary,
-                                modifier = Modifier.testTag("ProfileName"))
+                                modifier = Modifier.testTag("ProfileName"),
+                                style =
+                                    Typography.bodyLarge.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 20.sp,
+                                        color = colorScheme.onPrimary))
                             Text(
                                 text = email,
                                 fontSize = 14.sp,
-                                color = colorScheme.onPrimary.copy(alpha = 0.6f),
+                                style =
+                                    Typography.bodyMedium.copy(
+                                        color = colorScheme.onPrimary.copy(alpha = 0.6f),
+                                    ),
                                 modifier = Modifier.testTag("ProfileEmail"))
                           }
                         }
@@ -245,10 +248,8 @@ fun SeekerProfileScreen(
             Text(
                 text = "More Options",
                 style =
-                    TextStyle(
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp,
-                        color = colorScheme.onSurfaceVariant),
+                    Typography.bodyLarge.copy(
+                        fontWeight = FontWeight.Bold, color = colorScheme.onSurfaceVariant),
                 modifier = Modifier.padding(start = 16.dp).testTag("MoreOptionsText"))
           }
 
@@ -289,7 +290,10 @@ fun SeekerProfileScreen(
         onDismissRequest = { showLogoutDialog = false },
         title = { Text("Log out", modifier = Modifier.testTag("LogoutDialogTitle")) },
         text = {
-          Text("Are you sure you want to log out?", modifier = Modifier.testTag("LogoutDialogText"))
+          Text(
+              "Are you sure you want to log out?",
+              modifier = Modifier.testTag("LogoutDialogText"),
+              style = Typography.bodyLarge)
         },
         confirmButton = {
           Button(
@@ -298,14 +302,14 @@ fun SeekerProfileScreen(
                 showLogoutDialog = false
               },
               modifier = Modifier.testTag("LogoutDialogConfirmButton")) {
-                Text("Log out")
+                Text("Log out", style = Typography.bodyLarge)
               }
         },
         dismissButton = {
           Button(
               onClick = { showLogoutDialog = false },
               modifier = Modifier.testTag("LogoutDialogDismissButton")) {
-                Text("Cancel")
+                Text("Cancel", style = Typography.bodyLarge)
               }
         },
         modifier = Modifier.testTag("LogoutDialog"))
@@ -319,7 +323,7 @@ fun ProfileOptionItem(
     subtitle: String? = null,
     onClick: () -> Unit = {},
     iconColor: Color = colorScheme.onSurfaceVariant,
-    modifier: Modifier = Modifier
+    @SuppressLint("ModifierParameter") modifier: Modifier = Modifier
 ) {
   Row(
       modifier = modifier.fillMaxWidth().clickable { onClick() }.padding(vertical = 12.dp),
@@ -333,15 +337,14 @@ fun ProfileOptionItem(
         Column(modifier = Modifier.weight(1f)) {
           Text(
               optionName,
-              style = MaterialTheme.typography.bodyLarge,
-              color = colorScheme.onBackground,
-              modifier = Modifier.testTag("ProfileOptionName"))
+              style = Typography.bodyLarge.copy(color = colorScheme.onBackground),
+              modifier = Modifier.testTag("ProfileOptionName"),
+          )
           subtitle?.let {
             Text(
                 text = it,
                 style =
-                    TextStyle(
-                        fontSize = 12.sp, color = colorScheme.onBackground.copy(alpha = 0.5f)),
+                    Typography.bodySmall.copy(color = colorScheme.onBackground.copy(alpha = 0.5f)),
                 modifier = Modifier.padding(4.dp).testTag("ProfileOptionSubtitle"))
           }
         }

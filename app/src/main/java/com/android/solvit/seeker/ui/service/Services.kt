@@ -64,6 +64,7 @@ import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.theme.LightBlue
 import com.android.solvit.shared.ui.theme.LightOrange
 import com.android.solvit.shared.ui.theme.LightRed
+import com.android.solvit.shared.ui.theme.Typography
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -140,14 +141,14 @@ fun TopSection(
                   horizontalAlignment = Alignment.CenterHorizontally,
               ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                  Text("Current location", fontSize = 14.sp)
+                  Text("Current location", style = Typography.bodyLarge.copy(fontSize = 14.sp))
                   IconButton(
                       onClick = { toast.show() },
                       modifier = Modifier.size(16.dp).testTag("servicesScreenLocationButton")) {
                         Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = null)
                       }
                 }
-                Text("Lausanne, VD", fontSize = 15.sp)
+                Text("Lausanne, VD", style = Typography.bodyLarge.copy(fontSize = 15.sp))
               }
               IconButton(
                   onClick = { toast.show() }, modifier = Modifier.testTag("servicesScreenMenu")) {
@@ -161,7 +162,7 @@ fun TopSection(
             active = isSearching,
             onActiveChange = { searchViewModel.onToggleSearch() },
             modifier = Modifier.testTag("servicesScreenSearchBar"),
-            placeholder = { Text("Find services near you") },
+            placeholder = { Text("Find services near you", style = Typography.bodyLarge) },
             leadingIcon = { Icon(imageVector = Icons.Default.Search, contentDescription = null) }) {
               LazyColumn(
                   modifier = Modifier.padding(16.dp),
@@ -173,7 +174,8 @@ fun TopSection(
                               Modifier.clickable {
                                 listProviderViewModel.selectService(searchResults[index].service)
                                 navigationActions.navigateTo(Route.PROVIDERS)
-                              })
+                              },
+                          style = Typography.bodyLarge)
                     }
                   }
             }
@@ -203,8 +205,9 @@ fun ShortcutsSection(
                     Text(
                         "Solve It with AI",
                         color = colorScheme.onPrimary,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold)
+                        style =
+                            Typography.bodyLarge.copy(
+                                fontSize = 20.sp, fontWeight = FontWeight.Bold))
                     Image(
                         painter = painterResource(id = R.drawable.ai_flat_design),
                         contentDescription = "ai_logo",
@@ -233,8 +236,9 @@ fun ShortcutsSection(
                           Text(
                               "All Orders",
                               color = colorScheme.onPrimary,
-                              fontSize = 20.sp,
-                              fontWeight = FontWeight.Bold)
+                              style =
+                                  Typography.bodyLarge.copy(
+                                      fontSize = 20.sp, fontWeight = FontWeight.Bold))
                         }
                   }
               Box(
@@ -254,8 +258,9 @@ fun ShortcutsSection(
                           Text(
                               "Providers Map",
                               color = colorScheme.onPrimary,
-                              fontSize = 20.sp,
-                              fontWeight = FontWeight.Bold)
+                              style =
+                                  Typography.bodyLarge.copy(
+                                      fontSize = 20.sp, fontWeight = FontWeight.Bold))
                         }
                   }
             }
@@ -275,9 +280,8 @@ fun CategoriesSection(
   ) {
     Text(
         "Top Categories",
-        fontSize = 20.sp,
-        fontWeight = FontWeight.Bold,
-        modifier = Modifier.testTag("servicesScreenCategoriesTitle"))
+        modifier = Modifier.testTag("servicesScreenCategoriesTitle"),
+        style = Typography.bodyLarge.copy(fontSize = 20.sp, fontWeight = FontWeight.Bold))
     LazyRow(
         modifier = Modifier.fillMaxWidth().height(150.dp).testTag("servicesScreenCategoriesList"),
         horizontalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -306,9 +310,8 @@ fun PerformersSection(
   ) {
     Text(
         "Top Performers",
-        fontSize = 20.sp,
-        fontWeight = FontWeight.Bold,
-        modifier = Modifier.testTag("servicesScreenPerformersTitle"))
+        modifier = Modifier.testTag("servicesScreenPerformersTitle"),
+        style = Typography.bodyLarge.copy(fontSize = 20.sp, fontWeight = FontWeight.Bold))
     LazyRow(
         Modifier.fillMaxWidth().height(150.dp).testTag("servicesScreenPerformersList"),
         horizontalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -339,9 +342,8 @@ fun ServiceItem(service: ServicesListItem, onClick: () -> Unit) {
           Text(
               text = Services.format(service.service),
               modifier = Modifier.padding(20.dp).align(Alignment.BottomStart),
-              fontSize = 20.sp,
-              fontWeight = FontWeight.Bold,
-              textAlign = TextAlign.Start)
+              textAlign = TextAlign.Start,
+              style = Typography.bodyLarge.copy(fontSize = 20.sp, fontWeight = FontWeight.Bold))
         }
       }
 }
@@ -363,15 +365,22 @@ fun ProviderItem(provider: Provider, onClick: () -> Unit) {
               modifier = Modifier.fillMaxSize().padding(16.dp),
               verticalArrangement = Arrangement.SpaceBetween,
               horizontalAlignment = Alignment.Start) {
-                Text(text = Services.format(provider.service), fontWeight = FontWeight.Bold)
+                Text(
+                    text = Services.format(provider.service),
+                    style = Typography.bodyLarge.copy(fontWeight = FontWeight.Bold))
                 Row(modifier = Modifier.align(Alignment.End)) {
-                  Text(text = provider.rating.toString(), fontWeight = FontWeight.Bold)
+                  Text(
+                      text = provider.rating.toString(),
+                      style = Typography.bodyLarge.copy(fontWeight = FontWeight.Bold))
                   Icon(
                       imageVector = Icons.Default.Star,
                       contentDescription = null,
                       modifier = Modifier.size(16.dp))
                 }
-                Text(text = provider.name, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                Text(
+                    text = provider.name,
+                    style =
+                        Typography.bodyLarge.copy(fontSize = 20.sp, fontWeight = FontWeight.Bold))
               }
         }
       }

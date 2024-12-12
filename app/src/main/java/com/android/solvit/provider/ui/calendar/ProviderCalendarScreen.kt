@@ -17,7 +17,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
@@ -33,7 +32,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -50,6 +48,7 @@ import com.android.solvit.provider.ui.calendar.views.month.MonthView
 import com.android.solvit.provider.ui.calendar.views.week.WeekView
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
+import com.android.solvit.shared.ui.theme.Typography
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
@@ -75,13 +74,15 @@ fun ProviderCalendarScreen(
             title = {
               Text(
                   "My Calendar",
-                  fontFamily = FontFamily.Default,
-                  fontSize = 24.sp,
-                  fontWeight = FontWeight.ExtraBold,
-                  lineHeight = 24.sp,
                   textAlign = TextAlign.Left,
                   color = colorScheme.onBackground,
-                  modifier = Modifier.testTag("calendarTitle"))
+                  modifier = Modifier.testTag("calendarTitle"),
+                  style =
+                      Typography.bodyLarge.copy(
+                          fontSize = 24.sp,
+                          fontWeight = FontWeight.ExtraBold,
+                          lineHeight = 24.sp,
+                      ))
             },
             navigationIcon = {
               IconButton(
@@ -198,8 +199,7 @@ fun ProviderCalendarScreen(
                             text =
                                 selectedDate.format(
                                     DateTimeFormatter.ofPattern("EEEE d MMMM yyyy", Locale.ROOT)),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
+                            style = Typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                             modifier =
                                 Modifier.clickable {
                                       shouldAnimate = false
