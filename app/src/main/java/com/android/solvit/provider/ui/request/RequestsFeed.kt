@@ -83,9 +83,8 @@ import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_PROVIDER
 import com.android.solvit.shared.ui.navigation.NavigationActions
-import com.android.solvit.shared.ui.navigation.Screen
 import com.android.solvit.shared.ui.navigation.Route
-import com.android.solvit.shared.ui.theme.Orange
+import com.android.solvit.shared.ui.navigation.Screen
 import java.text.SimpleDateFormat
 import java.util.Locale
 

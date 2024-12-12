@@ -404,8 +404,7 @@ fun ServiceItem(service: ServicesListItem, workerCount: Int, onClick: () -> Unit
               .clickable(onClick = onClick),
       shape = RoundedCornerShape(12.dp),
       border = BorderStroke(2.dp, service.color),
-      colors =
-          CardDefaults.outlinedCardColors(containerColor = colorScheme.background)) {
+      colors = CardDefaults.outlinedCardColors(containerColor = colorScheme.background)) {
         Column(
             modifier = Modifier.fillMaxSize().padding(12.dp),
             verticalArrangement = Arrangement.SpaceBetween,
