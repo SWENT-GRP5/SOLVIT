@@ -95,6 +95,8 @@ import java.util.Locale
  * @param navigationActions The navigation actions
  * @param notificationViewModel The notification view model
  * @param authViewModel The authentication view model
+ * @param chatViewModel The chat view model
+ * @param seekerProfileViewModel The seeker profile view model
  */
 @Composable
 fun RequestsFeedScreen(
@@ -121,16 +123,30 @@ fun RequestsFeedScreen(
   val packages = packageProposalViewModel.proposal.collectAsState()
   val seekerState = remember { mutableStateOf<SeekerProfile?>(null) }
   val isReadyToNavigate by chatViewModel.isReadyToNavigate.collectAsState()
+  val isSeekerReady = remember { mutableStateOf(false) }
+  val repliedClicked = remember { mutableStateOf(false) }
 
   LaunchedEffect(selectedRequest.value) {
-    seekerState.value =
-        selectedRequest.value?.userId?.let { seekerProfileViewModel.fetchUserById(it) }
+    val seeker = selectedRequest.value?.userId?.let { seekerProfileViewModel.fetchUserById(it) }
+    seekerState.value = seeker
+    isSeekerReady.value = seeker != null // Mark as ready when seeker is fetched
+  }
+
+  LaunchedEffect(isSeekerReady.value) {
+    if (repliedClicked.value && isSeekerReady.value) {
+      selectedRequest.value?.let { request ->
+        chatViewModel.prepareForChat(
+            false, providerId, request.userId, seekerState.value, request.uid)
+      }
+    }
   }
 
   LaunchedEffect(isReadyToNavigate) {
-    if (isReadyToNavigate) {
+    if (repliedClicked.value && isReadyToNavigate) {
       navigationActions.navigateTo(Screen.CHAT)
       chatViewModel.resetIsReadyToNavigate()
+      isSeekerReady.value = false
+      repliedClicked.value = false
     }
   }
 
@@ -177,13 +193,7 @@ fun RequestsFeedScreen(
                     matchesService && matchesQuery
                   }
 
-              ListRequests(
-                  filteredRequests,
-                  showDialog,
-                  selectedRequest,
-                  chatViewModel,
-                  providerId,
-                  seekerState)
+              ListRequests(filteredRequests, showDialog, selectedRequest, repliedClicked)
 
               selectedRequest.value?.let {
                 ProposePackageDialog(
@@ -321,18 +331,14 @@ fun SearchBar(searchQuery: MutableState<String>, modifier: Modifier = Modifier) 
  * @param requests The list of service requests
  * @param showDialog The showDialog state
  * @param selectedRequest The selected request
- * @param chatViewModel The chat view model
- * @param providerId The provider's ID
- * @param seekerState The seeker state
+ * @param repliedClicked The repliedClicked state
  */
 @Composable
 fun ListRequests(
     requests: List<ServiceRequest>,
     showDialog: MutableState<Boolean>,
     selectedRequest: MutableState<ServiceRequest?>,
-    chatViewModel: ChatViewModel,
-    providerId: String,
-    seekerState: MutableState<SeekerProfile?>
+    repliedClicked: MutableState<Boolean>
 ) {
   LazyColumn(
       modifier =
@@ -341,8 +347,7 @@ fun ListRequests(
               .background(colorScheme.background),
       verticalArrangement = Arrangement.spacedBy(8.dp)) {
         items(requests) { request ->
-          ServiceRequestItem(
-              request, showDialog, selectedRequest, chatViewModel, providerId, seekerState)
+          ServiceRequestItem(request, showDialog, selectedRequest, repliedClicked)
         }
       }
 }
@@ -353,18 +358,14 @@ fun ListRequests(
  * @param request The service request
  * @param showDialog The showDialog state
  * @param selectedRequest The selected request
- * @param chatViewModel The chat view model
- * @param providerId The provider's ID
- * @param seekerState The seeker state
+ * @param repliedClicked The repliedClicked state
  */
 @Composable
 fun ServiceRequestItem(
     request: ServiceRequest,
     showDialog: MutableState<Boolean>,
     selectedRequest: MutableState<ServiceRequest?>,
-    chatViewModel: ChatViewModel,
-    providerId: String,
-    seekerState: MutableState<SeekerProfile?>
+    repliedClicked: MutableState<Boolean>,
 ) {
   Card(
       modifier = Modifier.fillMaxWidth().padding(8.dp),
@@ -481,8 +482,7 @@ fun ServiceRequestItem(
                   }
                   InteractionBar("Reply", R.drawable.reply_icon) {
                     selectedRequest.value = request
-                    chatViewModel.prepareForChat(
-                        false, providerId, request.userId, seekerState.value, request.uid)
+                    repliedClicked.value = true
                   }
                 }
           }
