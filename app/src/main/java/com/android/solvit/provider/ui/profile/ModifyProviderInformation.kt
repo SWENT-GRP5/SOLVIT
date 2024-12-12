@@ -46,7 +46,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.android.solvit.seeker.model.provider.ListProviderViewModel
+import com.android.solvit.provider.model.profile.ProviderViewModel
 import com.android.solvit.seeker.ui.request.LocationDropdown
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.map.Location
@@ -65,7 +65,7 @@ import com.android.solvit.shared.ui.utils.ValidationRegex
  * includes a form to update details such as name, company name, service, phone number, location,
  * languages, and description.
  *
- * @param listProviderViewModel The ViewModel used to manage and update the list of providers.
+ * @param providerViewModel The ViewModel used to manage and update the provider profile.
  * @param authViewModel The ViewModel managing authentication and user-related data.
  * @param locationViewModel The ViewModel used to fetch and manage location suggestions.
  * @param navigationActions A set of navigation actions to handle screen transitions.
@@ -77,8 +77,7 @@ import com.android.solvit.shared.ui.utils.ValidationRegex
     "SuspiciousIndentation")
 @Composable
 fun ModifyProviderInformationScreen(
-    listProviderViewModel: ListProviderViewModel =
-        viewModel(factory = ListProviderViewModel.Factory),
+    providerViewModel: ProviderViewModel = viewModel(factory = ProviderViewModel.Factory),
     authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory),
     locationViewModel: LocationViewModel = viewModel(factory = LocationViewModel.Factory),
     navigationActions: NavigationActions
@@ -92,6 +91,12 @@ fun ModifyProviderInformationScreen(
       activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
     }
   }
+
+  val user = authViewModel.user.collectAsState()
+  val userId = user.value?.uid ?: "-1"
+  val provider by providerViewModel.userProvider.collectAsState()
+
+  LaunchedEffect(user) { providerViewModel.getProvider(userId) }
 
   Scaffold(
       topBar = {
@@ -115,19 +120,14 @@ fun ModifyProviderInformationScreen(
                     .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top) {
-              val user = authViewModel.user.collectAsState()
-              val userId = user.value?.uid ?: "-1"
-              val provider =
-                  listProviderViewModel.providersList.collectAsState().value.find {
-                    it.uid == userId
-                  } ?: return@Column
-
-              ModifyInput(
-                  provider = provider,
-                  locationViewModel = locationViewModel,
-                  listProviderViewModel = listProviderViewModel,
-                  authViewModel = authViewModel,
-                  navigationActions = navigationActions)
+              provider?.let {
+                ModifyInput(
+                    provider = it,
+                    locationViewModel = locationViewModel,
+                    providerViewModel = providerViewModel,
+                    authViewModel = authViewModel,
+                    navigationActions = navigationActions)
+              }
             }
       })
 }
@@ -140,7 +140,7 @@ fun ModifyProviderInformationScreen(
  *
  * @param provider The current provider whose details are being modified.
  * @param locationViewModel The ViewModel used to fetch and manage location suggestions.
- * @param listProviderViewModel The ViewModel used to update the provider's details.
+ * @param providerViewModel The ViewModel used to update the provider's details.
  * @param authViewModel The ViewModel managing authentication and user-related data.
  * @param navigationActions A set of navigation actions to handle screen transitions.
  */
@@ -148,8 +148,7 @@ fun ModifyProviderInformationScreen(
 fun ModifyInput(
     provider: Provider,
     locationViewModel: LocationViewModel = viewModel(factory = LocationViewModel.Factory),
-    listProviderViewModel: ListProviderViewModel =
-        viewModel(factory = ListProviderViewModel.Factory),
+    providerViewModel: ProviderViewModel = viewModel(factory = ProviderViewModel.Factory),
     authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory),
     navigationActions: NavigationActions
 ) {
@@ -303,7 +302,7 @@ fun ModifyInput(
                   languages = newLanguage,
                   description = newDescription)
 
-          listProviderViewModel.updateProvider(provider = updatedProvider)
+          providerViewModel.updateProvider(provider = updatedProvider)
           authViewModel.setUserName(newName)
 
           navigationActions.goBack()
