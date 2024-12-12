@@ -85,7 +85,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.android.solvit.R
@@ -762,9 +761,7 @@ fun UploadImage(selectedImageUri: Uri?, imageUrl: String?, onImageSelected: (Uri
                 "Click to upload a picture of you",
                 color = colorScheme.onSurfaceVariant,
                 modifier = Modifier.clickable { imagePickerLauncher.launch("image/*") },
-                style =
-                    Typography.bodyLarge.copy(
-                        textDecoration = TextDecoration.Underline))
+                style = Typography.bodyLarge.copy(textDecoration = TextDecoration.Underline))
           }
         } else {
           AsyncImage(

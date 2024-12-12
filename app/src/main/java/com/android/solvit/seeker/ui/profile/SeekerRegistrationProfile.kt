@@ -229,14 +229,24 @@ fun SeekerRegistrationScreen(
                 Spacer(modifier = Modifier.height(30.dp))
 
                 Button(
-                    onClick = { if (isFormComplete) {currentStep = 2} else {Toast.makeText(context, "Please fill in all fields", Toast.LENGTH_SHORT).show()} },
+                    onClick = {
+                      if (isFormComplete) {
+                        currentStep = 2
+                      } else {
+                        Toast.makeText(context, "Please fill in all fields", Toast.LENGTH_SHORT)
+                            .show()
+                      }
+                    },
                     modifier =
                         Modifier.fillMaxWidth().height(60.dp).testTag("completeRegistrationButton"),
                     shape = RoundedCornerShape(12.dp),
-                    colors = if (isFormComplete) buttonColors(colorScheme.secondary) else buttonColors(
-                        colorScheme.onSurfaceVariant)
-                    ) {
-                      Text("Complete registration", color = colorScheme.onSecondary, style = Typography.bodyLarge)
+                    colors =
+                        if (isFormComplete) buttonColors(colorScheme.secondary)
+                        else buttonColors(colorScheme.onSurfaceVariant)) {
+                      Text(
+                          "Complete registration",
+                          color = colorScheme.onSecondary,
+                          style = Typography.bodyLarge)
                     }
               }
               // Preferences Step

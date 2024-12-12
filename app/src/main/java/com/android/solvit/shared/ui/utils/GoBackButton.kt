@@ -24,21 +24,21 @@ import kotlinx.coroutines.launch
  */
 @Composable
 fun GoBackButton(navigationActions: NavigationActions) {
-    var canGoBack by remember { mutableStateOf(true) }
-    val coroutineScope = rememberCoroutineScope()
-    IconButton(
-        onClick = {
-            if (canGoBack) {
-                canGoBack = false
-                navigationActions.goBack()
-                coroutineScope.launch {
-                    delay(500)
-                    canGoBack = true
-                }
-            }
-        },
-        modifier = Modifier.testTag("goBackButton"),
-        enabled = canGoBack) {
+  var canGoBack by remember { mutableStateOf(true) }
+  val coroutineScope = rememberCoroutineScope()
+  IconButton(
+      onClick = {
+        if (canGoBack) {
+          canGoBack = false
+          navigationActions.goBack()
+          coroutineScope.launch {
+            delay(500)
+            canGoBack = true
+          }
+        }
+      },
+      modifier = Modifier.testTag("goBackButton"),
+      enabled = canGoBack) {
         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "goBackButton")
-    }
+      }
 }

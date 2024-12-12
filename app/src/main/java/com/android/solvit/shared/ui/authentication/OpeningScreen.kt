@@ -133,7 +133,6 @@ fun OpeningScreenLandscape(navigationActions: NavigationActions) {
               // Right Side Texts
               Column(
                   verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.Start) {
-
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Text(

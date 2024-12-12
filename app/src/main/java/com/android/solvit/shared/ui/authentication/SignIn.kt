@@ -31,7 +31,6 @@ import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Button
@@ -42,13 +41,10 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.colorScheme
-import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -89,7 +85,6 @@ import com.android.solvit.shared.ui.utils.ValidationRegex
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
@@ -515,7 +510,8 @@ fun SignUpSection(navigationActions: NavigationActions) {
   ) {
     ClickableText(
         text = annotatedText,
-        style = Typography.bodyLarge.copy(color = colorScheme.onSurface, textAlign = TextAlign.Center),
+        style =
+            Typography.bodyLarge.copy(color = colorScheme.onSurface, textAlign = TextAlign.Center),
         onClick = { navigationActions.navigateTo(Screen.SIGN_UP) },
         modifier = Modifier.fillMaxWidth().testTag("signUpLink"))
   }

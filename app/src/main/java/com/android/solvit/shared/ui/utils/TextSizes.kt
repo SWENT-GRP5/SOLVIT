@@ -1,7 +1,5 @@
 package com.android.solvit.shared.ui.utils
 
-import androidx.compose.ui.unit.sp
-
 /*object TextSizes {
     val TITLE = 24.sp
     val SUBTITLE = 20.sp
