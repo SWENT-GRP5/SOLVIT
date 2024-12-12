@@ -151,7 +151,8 @@ class EndToEndProviderJobs {
     chatViewModel = ChatViewModel(chatRepository)
     chatAssistantViewModel = ChatAssistantViewModel()
     notificationsViewModel = NotificationsViewModel(notificationsRepository)
-    calendarViewModel = ProviderCalendarViewModel(authViewModel, serviceRequestViewModel)
+    calendarViewModel =
+        ProviderCalendarViewModel(providerRepository, authViewModel, serviceRequestViewModel)
     packagesAssistantViewModel = PackagesAssistantViewModel()
     aiSolverViewModel = AiSolverViewModel()
 
