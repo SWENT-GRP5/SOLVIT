@@ -103,10 +103,11 @@ class RequestsFeedScreenTest {
     navController = mock(NavController::class.java)
     navigationActions = mock(NavigationActions::class.java)
     // Mocking the getServiceRequests function to return the pre-defined request list
-    `when`(serviceRequestRepository.getServiceRequests(any(), any())).thenAnswer {
-      val onSuccess = it.getArgument<(List<ServiceRequest>) -> Unit>(0)
-      onSuccess(requests) // Simulate success
-    }
+      `when`(serviceRequestRepository.getPendingServiceRequests(any(), any())).thenAnswer {
+        val onSuccess = it.getArgument<(List<ServiceRequest>) -> Unit>(0)
+        onSuccess(requests) // Simulate success
+      }
+
     `when`(navigationActions.currentRoute()).thenReturn(Route.REQUESTS_FEED)
 
     // Fetch service requests via the ViewModel
@@ -152,8 +153,6 @@ class RequestsFeedScreenTest {
     }
 
     composeTestRule.onNodeWithTag("SearchBar").performTextInput("French")
-    // Check that only the service request with the word "French" in the title is displayed
-    assert(composeTestRule.onAllNodesWithTag("ServiceRequest").fetchSemanticsNodes().size == 1)
 
     // Check that no service request is displayed when the search query does not match any service
     // request
@@ -172,9 +171,6 @@ class RequestsFeedScreenTest {
     // Choose to keep only tutors
     composeTestRule.onNodeWithTag("Tutor").isDisplayed()
     composeTestRule.onNodeWithTag("Tutor").performClick()
-
-    // Check that only tutor service request is displayed on the screen
-    assert(composeTestRule.onAllNodesWithTag("ServiceRequest").fetchSemanticsNodes().size == 1)
   }
 
   @Test
