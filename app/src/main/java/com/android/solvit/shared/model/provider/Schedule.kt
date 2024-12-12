@@ -38,7 +38,8 @@ data class TimeSlot(
 
   /** Check if this time slot overlaps with another */
   fun overlaps(other: TimeSlot): Boolean {
-    return !(end.isBefore(other.start) || start.isAfter(other.end))
+    return !((end.isBefore(other.start) || end == other.start) ||
+        (start.isAfter(other.end) || start == other.end))
   }
 
   /** Merge this time slot with another overlapping slot */
@@ -306,7 +307,7 @@ data class Schedule(
       timeSlot.overlaps(
           TimeSlot(
               startHour = acceptedStart.hour,
-              startMinute = acceptedStart.minute,
+              startMinute = acceptedStart.minute, // Introduce a delay
               endHour = acceptedEnd.hour,
               endMinute = acceptedEnd.minute))
     }
@@ -336,8 +337,8 @@ data class Schedule(
             localDate = date)) {
           timeSlots.add(
               TimeSlot(
-                  startHour = it.startHour,
-                  startMinute = it.startMinute,
+                  startHour = currentTime.hour,
+                  startMinute = currentTime.minute,
                   endHour = endTime.hour,
                   endMinute = endTime.minute))
         }
