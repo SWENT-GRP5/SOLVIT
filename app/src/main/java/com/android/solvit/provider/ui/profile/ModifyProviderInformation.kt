@@ -56,9 +56,9 @@ import com.android.solvit.shared.model.provider.Language
 import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.authentication.CustomOutlinedTextField
-import com.android.solvit.shared.ui.authentication.GoBackButton
-import com.android.solvit.shared.ui.authentication.ValidationRegex
 import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.android.solvit.shared.ui.utils.GoBackButton
+import com.android.solvit.shared.ui.utils.ValidationRegex
 
 /**
  * A composable function that displays the screen for modifying a provider's profile information. It

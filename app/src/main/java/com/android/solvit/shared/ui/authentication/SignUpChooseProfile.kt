@@ -49,6 +49,8 @@ import com.android.solvit.seeker.ui.profile.Stepper
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
+import com.android.solvit.shared.ui.theme.Typography
+import com.android.solvit.shared.ui.utils.GoBackButton
 
 /**
  * A composable function that displays the "Choose Your Profile" screen during the sign-up process.
@@ -103,7 +105,7 @@ fun SignUpChooseProfile(
 
               Spacer(modifier = Modifier.height(30.dp))
 
-              ButtonCustomerProvider(
+              ButtonSeekerProvider(
                   text = "Seeker",
                   description = "I want to request services.",
                   testTag = "seekerButton",
@@ -124,7 +126,7 @@ fun SignUpChooseProfile(
 
               Spacer(modifier = Modifier.height(16.dp))
 
-              ButtonCustomerProvider(
+              ButtonSeekerProvider(
                   text = "Provider",
                   description = "I want to offer services.",
                   testTag = "providerButton",
@@ -168,7 +170,7 @@ fun SignUpChooseProfile(
  * @param onClickButton A lambda function to execute when the button is clicked.
  */
 @Composable
-fun ButtonCustomerProvider(
+fun ButtonSeekerProvider(
     text: String,
     description: String,
     testTag: String = "",
@@ -192,14 +194,14 @@ fun ButtonCustomerProvider(
                   text = text,
                   color = colorScheme.onPrimary,
                   fontWeight = FontWeight.Bold,
-                  fontSize = 20.sp)
+                  style = Typography.bodyLarge.copy(fontSize = 20.sp))
             }
 
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
             text = description,
-            fontSize = 12.sp,
+            style = Typography.bodySmall,
             color = colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center)
       }
@@ -217,7 +219,8 @@ fun SectionTitle(text: String, testTag: String = "") {
       text = text,
       fontSize = 25.sp,
       color = colorScheme.onBackground,
-      modifier = Modifier.testTag(testTag))
+      modifier = Modifier.testTag(testTag),
+      style = Typography.titleLarge)
 }
 
 /**
