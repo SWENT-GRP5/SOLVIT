@@ -37,7 +37,7 @@ class ProviderRepositoryFirestore(
       val rating = doc.getDouble("rating") ?: return null
       val popular = doc.getBoolean("popular") ?: return null
       val price = doc.getDouble("price") ?: return null
-      val deliveryTime = doc.getTimestamp("deliveryTime") ?: return null
+      val nbrOfJobs = doc.getDouble("nbrOfJobs") ?: return null
       val languages = (doc.get("languages") as List<*>).map { Language.valueOf(it as String) }
       val companyName = doc.getString("companyName") ?: ""
       val phone = doc.getString("phone") ?: ""
@@ -59,7 +59,7 @@ class ProviderRepositoryFirestore(
           popular,
           rating,
           price,
-          deliveryTime,
+          nbrOfJobs = nbrOfJobs,
           languages,
           schedule)
     } catch (e: Exception) {
@@ -98,19 +98,25 @@ class ProviderRepositoryFirestore(
       onSuccess: () -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    var providerWithImage = provider
+
     if (imageUri != null) {
       uploadImageToStorage(
           storage,
           providersImagesPath,
           imageUri,
-          onSuccess = { imageUrl -> providerWithImage = provider.copy(imageUrl = imageUrl) },
+          onSuccess = { imageUrl ->
+            Log.e("UploadImageTo Storage", "$imageUrl")
+            val providerWithImage = provider.copy(imageUrl = imageUrl)
+            performFirestoreOperation(
+                db.collection(collectionPath).document(provider.uid).set(providerWithImage),
+                onSuccess,
+                onFailure)
+          },
           onFailure = { Log.e("add Provider", "Failed to add provider $it") })
+    } else {
+      performFirestoreOperation(
+          db.collection(collectionPath).document(provider.uid).set(provider), onSuccess, onFailure)
     }
-    performFirestoreOperation(
-        db.collection(collectionPath).document(provider.uid).set(providerWithImage),
-        onSuccess,
-        onFailure)
   }
 
   override fun deleteProvider(uid: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {

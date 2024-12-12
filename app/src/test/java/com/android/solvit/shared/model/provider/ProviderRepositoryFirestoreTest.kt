@@ -62,7 +62,7 @@ class ProviderRepositoryFirestoreTest {
           false,
           0.0,
           0.0,
-          Timestamp.now(),
+          20.0,
           emptyList())
 
   @Before

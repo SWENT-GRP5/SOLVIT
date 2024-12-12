@@ -111,7 +111,7 @@ jobs:
 
       - name: Install Firebase CLI
         run: |
-          curl -sL https://firebase.tools | bash
+          curl -sL https://firebase.tools | sed s/latest/v13.16.0/ | bash
 
       - name: Start Firebase emulators
         run: |
