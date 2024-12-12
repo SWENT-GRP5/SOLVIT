@@ -23,10 +23,6 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
@@ -59,7 +55,6 @@ import com.android.solvit.seeker.ui.profile.AboutAppCard
 import com.android.solvit.seeker.ui.profile.LogoutDialog
 import com.android.solvit.seeker.ui.profile.ProfileInfoCard
 import com.android.solvit.seeker.ui.profile.ProfileTopBar
-import com.android.solvit.seeker.ui.navigation.BottomNavigationMenu
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.request.ServiceRequestStatus

@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Edit
@@ -107,11 +108,11 @@ fun SeekerProfileScreen(
   Scaffold(
       topBar = { ProfileTopBar(navigationActions, onLogout = { showLogoutDialog = true }) },
       bottomBar = {
-          val currentRoute = navigationActions.currentRoute() ?: "default_route"
-          BottomNavigationMenu(
-              onTabSelect = { navigationActions.navigateTo(it.route) },
-              tabList = LIST_TOP_LEVEL_DESTINATION_SEEKER,
-              selectedItem = currentRoute)
+        val currentRoute = navigationActions.currentRoute() ?: "default_route"
+        BottomNavigationMenu(
+            onTabSelect = { navigationActions.navigateTo(it.route) },
+            tabList = LIST_TOP_LEVEL_DESTINATION_SEEKER,
+            selectedItem = currentRoute)
       },
       containerColor = Color.Transparent,
   ) { paddingValues ->
