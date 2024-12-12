@@ -395,6 +395,7 @@ fun ProposePackageDialog(
                           request.copy(
                               providerId = providerId,
                               packageId = it.uid,
+                              agreedPrice = it.price,
                               status = ServiceRequestStatus.ACCEPTED))
                       showDialog.value = false
                     }

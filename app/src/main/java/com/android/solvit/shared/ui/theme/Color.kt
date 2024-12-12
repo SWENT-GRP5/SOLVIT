@@ -65,3 +65,6 @@ val HairStylist = Color(0xFFf15c62)
 val Other = Color(0xFF9B9999)
 
 val DarkBlue = Color(0xFF003366)
+
+val IAButton_green_color = Color(0xFF00B383)
+val IAButton_blue_color = Color(0xFF0099FF)
