@@ -64,7 +64,6 @@ class ProviderCalendarViewModelTest {
           popular = true,
           rating = 4.5,
           price = 100.0,
-          deliveryTime = Timestamp.now(),
           languages = listOf(Language.ENGLISH),
           schedule = testSchedule)
 
