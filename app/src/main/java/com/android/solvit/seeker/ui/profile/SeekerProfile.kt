@@ -206,10 +206,7 @@ fun SeekerProfileScreen(
 fun ProfileTopBar(navigationActions: NavigationActions, onLogout: () -> Unit) {
   TopAppBar(
       title = {
-        Text(
-            "Profile",
-            modifier = Modifier.testTag("ProfileTitle"),
-            style = Typography.titleLarge.copy(fontSize = 16.sp))
+        Text("Profile", modifier = Modifier.testTag("ProfileTitle"), style = Typography.titleLarge)
       },
       navigationIcon = {
         IconButton(
