@@ -132,6 +132,7 @@ class CreateReviewScreenTest {
     composeTestRule.onNodeWithTag("reviewStar5").performClick()
     composeTestRule.onNodeWithTag("reviewComment").performTextInput("comment")
     composeTestRule.onNodeWithTag("submitReviewButton").performClick()
+    composeTestRule.waitForIdle()
     verify(reviewRepository).addReview(any(), any(), any())
   }
 
@@ -141,6 +142,7 @@ class CreateReviewScreenTest {
     composeTestRule.onNodeWithTag("reviewStar5").performClick()
     composeTestRule.onNodeWithTag("reviewComment").performTextInput("comment")
     composeTestRule.onNodeWithTag("submitReviewButton").performClick()
+    composeTestRule.waitForIdle()
     verify(reviewRepository, never()).addReview(any(), any(), any())
   }
 }
