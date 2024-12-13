@@ -47,8 +47,6 @@ import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.utils.CustomOutlinedTextField
 import com.android.solvit.shared.ui.utils.GoBackButton
 import com.android.solvit.shared.ui.utils.ValidationRegex
-import com.android.solvit.shared.ui.utils.GoBackButton
-import com.android.solvit.shared.ui.utils.ValidationRegex
 
 /**
  * A composable function that provides a "Forgot Password" screen for users to reset their password.

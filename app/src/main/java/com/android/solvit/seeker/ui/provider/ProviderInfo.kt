@@ -204,14 +204,14 @@ fun PackageCard(
                   Text(
                       modifier = Modifier.testTag("price"),
                       text = "CHF${packageProposal.price}",
-                      style = typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                      style = Typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
                       color =
                           if (!selectedIndex) colorScheme.onPrimaryContainer
                           else colorScheme.onPrimary)
                   Spacer(modifier = Modifier.width(8.dp)) // Increased space between price and unit
                   Text(
                       text = "/hour",
-                      style = typography.bodySmall,
+                      style = Typography.bodySmall,
                       color =
                           if (!selectedIndex) colorScheme.onPrimaryContainer
                           else colorScheme.onPrimary)
@@ -220,7 +220,7 @@ fun PackageCard(
                 // Title of the Package
                 Text(
                     text = packageProposal.title,
-                    style = typography.titleMedium,
+                    style = Typography.titleMedium,
                     color =
                         if (!selectedIndex) colorScheme.onPrimaryContainer
                         else colorScheme.onPrimary)
@@ -230,7 +230,7 @@ fun PackageCard(
                 // Description of the Package
                 Text(
                     text = packageProposal.description,
-                    style = typography.bodyMedium,
+                    style = Typography.bodyMedium,
                     color = if (!selectedIndex) colorScheme.onSurface else colorScheme.onPrimary)
                 Spacer(
                     modifier =
@@ -249,7 +249,7 @@ fun PackageCard(
                           modifier = Modifier.width(8.dp)) // Increased space between icon and text
                       Text(
                           text = feature,
-                          style = typography.bodyMedium,
+                          style = Typography.bodyMedium,
                           color =
                               if (!selectedIndex) colorScheme.onSurface else colorScheme.onPrimary)
                     }
@@ -457,7 +457,7 @@ fun ProviderTabs(
               text = {
                 Text(
                     text = tab.title,
-                    style = typography.titleMedium.copy(fontSize = dynamicFontSize),
+                    style = Typography.titleMedium.copy(fontSize = dynamicFontSize),
                     maxLines = 1,
                     modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
                     color =

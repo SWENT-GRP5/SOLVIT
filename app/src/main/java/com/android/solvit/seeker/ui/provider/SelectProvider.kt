@@ -220,10 +220,10 @@ fun SpFilterBar(display: () -> Unit, listProviderViewModel: ListProviderViewMode
                           text = filter,
                           fontFamily = FontFamily(Font(R.font.roboto)),
                           style =
-                          Typography.bodySmall.copy(
-                              fontSize = 34.sp,
-                              fontWeight = FontWeight(400),
-                              color = colorScheme.primary),
+                              Typography.bodySmall.copy(
+                                  fontSize = 34.sp,
+                                  fontWeight = FontWeight(400),
+                                  color = colorScheme.primary),
                           modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp))
                     }
               }

@@ -59,7 +59,6 @@ import coil.request.ErrorResult
 import coil.request.ImageRequest
 import coil.request.SuccessResult
 import com.android.solvit.R
-import com.android.solvit.shared.ui.theme.Typography
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory

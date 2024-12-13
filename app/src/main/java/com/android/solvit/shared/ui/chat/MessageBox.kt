@@ -18,9 +18,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
@@ -42,7 +39,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
@@ -99,10 +95,7 @@ fun MessageBox(
     }
   } else {
     Scaffold(
-        topBar = {
-            TopAppBarInbox(
-                titre = "Inbox")
-        },
+        topBar = { TopAppBarInbox(titre = "Inbox") },
         bottomBar = {
           BottomNavigationMenu(
               onTabSelect = { navigationActions.navigateTo(it.route) },
@@ -151,7 +144,7 @@ fun ChatListTopBar(
             modifier = Modifier.fillMaxWidth(),
             // Allow the title to center
             contentAlignment = Alignment.Center) {
-              Text(text = "Inbox", style = MaterialTheme.typography.headlineLarge)
+              Text(text = "Inbox", style = Typography.headlineLarge)
             }
       },
       actions = {

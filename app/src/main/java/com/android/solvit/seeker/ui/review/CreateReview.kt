@@ -66,7 +66,6 @@ import com.android.solvit.shared.model.review.Review
 import com.android.solvit.shared.model.review.ReviewViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
-import com.android.solvit.shared.ui.utils.GoBackButton
 import com.android.solvit.shared.ui.theme.Typography
 import com.android.solvit.shared.ui.utils.GoBackButton
 import com.google.android.gms.maps.model.LatLng

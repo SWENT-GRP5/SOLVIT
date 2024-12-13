@@ -14,8 +14,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
@@ -197,7 +195,9 @@ fun ProviderCalendarScreen(
                                 selectedDate.format(
                                     DateTimeFormatter.ofPattern(
                                         "EEEE d MMMM yyyy", Locale.getDefault())),
-                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                            style =
+                                MaterialTheme.typography.titleMedium.copy(
+                                    fontWeight = FontWeight.Bold),
                             modifier =
                                 Modifier.clickable {
                                       shouldAnimate = false

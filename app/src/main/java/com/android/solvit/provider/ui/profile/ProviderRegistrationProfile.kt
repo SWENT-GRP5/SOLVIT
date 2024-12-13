@@ -98,14 +98,11 @@ import com.android.solvit.shared.model.provider.Language
 import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.model.utils.loadBitmapFromUri
-import com.android.solvit.shared.ui.authentication.CustomOutlinedTextField
 import com.android.solvit.shared.ui.booking.PackageCard
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.theme.Typography
-import com.android.solvit.shared.ui.utils.TopAppBarInbox
-import com.android.solvit.shared.ui.utils.ValidationRegex
 import com.android.solvit.shared.ui.utils.CustomOutlinedTextField
-import com.android.solvit.shared.ui.utils.GoBackButton
+import com.android.solvit.shared.ui.utils.TopAppBarInbox
 import com.android.solvit.shared.ui.utils.ValidationRegex
 
 /**
@@ -761,9 +758,7 @@ fun UploadImage(selectedImageUri: Uri?, imageUrl: String?, onImageSelected: (Uri
                     Modifier.testTag("uploadImage").clickable {
                       imagePickerLauncher.launch("image/*")
                     },
-                style =
-                    Typography.bodyLarge.copy(
-                        textDecoration = TextDecoration.Underline))
+                style = Typography.bodyLarge.copy(textDecoration = TextDecoration.Underline))
           }
         } else {
           Box(modifier = Modifier.fillMaxSize()) {

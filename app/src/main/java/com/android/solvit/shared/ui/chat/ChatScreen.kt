@@ -327,7 +327,7 @@ fun AiSolverWelcomeScreen(
 fun AiSolverButton(screenHeight: Dp = 700.dp, title: String, onClick: () -> Unit) {
   Button(
       onClick = { onClick() },
-      colors = ButtonDefaults.buttonColors(containerColor = colorSheme.background),
+      colors = ButtonDefaults.buttonColors(containerColor = colorScheme.background),
       shape = RoundedCornerShape(50),
       contentPadding = PaddingValues(),
       modifier =

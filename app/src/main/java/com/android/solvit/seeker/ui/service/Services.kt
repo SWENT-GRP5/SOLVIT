@@ -275,8 +275,8 @@ fun ShortcutsSection(
                         color = colorScheme.onPrimary,
                         fontSize = 20.sp,
                         style =
-                        Typography.bodyLarge.copy(
-                            fontSize = 20.sp, fontWeight = FontWeight.Bold))
+                            Typography.bodyLarge.copy(
+                                fontSize = 20.sp, fontWeight = FontWeight.Bold))
                     Icon(
                         painter = painterResource(id = R.drawable.ai_solver),
                         contentDescription = "ai_logo",
@@ -309,8 +309,8 @@ fun ShortcutsSection(
                               color = colorScheme.onPrimary,
                               fontSize = 20.sp,
                               style =
-                              Typography.bodyLarge.copy(
-                                  fontSize = 20.sp, fontWeight = FontWeight.Bold))
+                                  Typography.bodyLarge.copy(
+                                      fontSize = 20.sp, fontWeight = FontWeight.Bold))
                         }
                   }
               Box(
