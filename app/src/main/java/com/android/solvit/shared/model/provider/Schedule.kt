@@ -37,7 +37,8 @@ data class TimeSlot(
 
   /** Check if this time slot overlaps with another */
   fun overlaps(other: TimeSlot): Boolean {
-    return !(end.isBefore(other.start) || start.isAfter(other.end))
+    return !((end.isBefore(other.start) || end == other.start) ||
+        (start.isAfter(other.end) || start == other.end))
   }
 
   /** Merge this time slot with another overlapping slot */
@@ -162,6 +163,16 @@ data class Schedule(
     }
 
     return true
+  }
+
+  /** Checks if the provider is available for a one-hour slot starting at the given time */
+  fun isAvailableForOneHour(startTime: LocalDateTime): Boolean {
+    // Check current time slot
+    if (!isAvailable(startTime)) return false
+
+    // Check that the entire hour is available by checking the end time
+    val endTime = startTime.plusHours(1)
+    return isAvailable(endTime.minusMinutes(1))
   }
 
   /** Add a new exception to the schedule */

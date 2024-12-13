@@ -49,6 +49,7 @@ import com.android.solvit.seeker.ui.profile.Stepper
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
+import com.android.solvit.shared.ui.utils.GoBackButton
 
 /**
  * A composable function that displays the "Choose Your Profile" screen during the sign-up process.
@@ -132,12 +133,22 @@ fun SignUpChooseProfile(
                     authViewModel.setRole("provider")
                     if (authViewModel.googleAccount.value == null) {
                       authViewModel.registerWithEmailAndPassword(
-                          { navigationActions.navigateTo(Screen.PROVIDER_REGISTRATION_PROFILE) },
-                          {})
+                          {
+                            Toast.makeText(context, "You are Signed up!", Toast.LENGTH_SHORT).show()
+                            navigationActions.navigateTo(Screen.PROVIDER_REGISTRATION_PROFILE)
+                          },
+                          {
+                            Toast.makeText(context, "Failed to register", Toast.LENGTH_SHORT).show()
+                          })
                     } else {
                       authViewModel.registerWithGoogle(
-                          { navigationActions.navigateTo(Screen.PROVIDER_REGISTRATION_PROFILE) },
-                          {})
+                          {
+                            Toast.makeText(context, "You are Signed up!", Toast.LENGTH_SHORT).show()
+                            navigationActions.navigateTo(Screen.PROVIDER_REGISTRATION_PROFILE)
+                          },
+                          {
+                            Toast.makeText(context, "Failed to register", Toast.LENGTH_SHORT).show()
+                          })
                     }
                   })
 

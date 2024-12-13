@@ -1,5 +1,9 @@
 package com.android.solvit
 
+import android.app.Activity
+import android.app.Instrumentation
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.isDisplayed
@@ -12,7 +16,11 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.navigation.compose.rememberNavController
 import androidx.test.core.app.ApplicationProvider
+import androidx.test.espresso.intent.Intents
+import androidx.test.espresso.intent.Intents.intending
+import androidx.test.espresso.intent.matcher.IntentMatchers
 import com.android.solvit.provider.model.ProviderCalendarViewModel
+import com.android.solvit.provider.model.profile.ProviderViewModel
 import com.android.solvit.provider.ui.profile.ProviderRegistrationScreen
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.seeker.model.profile.UserRepository
@@ -72,6 +80,7 @@ class EndToEndTestCreateProfile {
   private lateinit var authViewModel: AuthViewModel
   private lateinit var authViewModel2: AuthViewModel
   private lateinit var listProviderViewModel: ListProviderViewModel
+  private lateinit var providerViewModel: ProviderViewModel
   private lateinit var seekerProfileViewModel: SeekerProfileViewModel
   private lateinit var serviceRequestViewModel: ServiceRequestViewModel
   private lateinit var locationViewModel: LocationViewModel
@@ -131,6 +140,7 @@ class EndToEndTestCreateProfile {
 
     authViewModel = AuthViewModel(authRepository)
     seekerProfileViewModel = SeekerProfileViewModel(seekerRepository)
+    providerViewModel = ProviderViewModel(providerRepository)
     listProviderViewModel = ListProviderViewModel(providerRepository)
     locationViewModel = LocationViewModel(locationRepository)
     serviceRequestViewModel = ServiceRequestViewModel(serviceRequestRepository)
@@ -148,6 +158,9 @@ class EndToEndTestCreateProfile {
           val onSuccess = invocation.getArgument<(List<Location>) -> Unit>(1)
           onSuccess(locations)
         }
+
+    // Initialize Intents in your test
+    Intents.init()
   }
 
   @After
@@ -160,6 +173,8 @@ class EndToEndTestCreateProfile {
             .setPersistenceEnabled(
                 true) // Set to true or false as needed for your production environment
             .build()
+
+    Intents.release()
 
     // Reinitialize FirebaseAuth without the emulator
     FirebaseAuth.getInstance().signOut()
@@ -197,6 +212,7 @@ class EndToEndTestCreateProfile {
           "provider" ->
               ProviderUI(
                   authViewModel,
+                  providerViewModel,
                   listProviderViewModel,
                   serviceRequestViewModel,
                   seekerProfileViewModel,
@@ -260,6 +276,16 @@ class EndToEndTestCreateProfile {
   @Test
   fun setProviderInfoDetails() {
 
+    // Create a simulated image Uri
+    val fakeImageUri = Uri.parse("content://com.android.test/fake_image.jpg")
+
+    // Create a mock intent result
+    val resultData = Intent().apply { data = fakeImageUri }
+    val result = Instrumentation.ActivityResult(Activity.RESULT_OK, resultData)
+
+    // Stub the intent to return the fake result
+    intending(IntentMatchers.hasAction(Intent.ACTION_GET_CONTENT)).respondWith(result)
+
     val sizeBefore = listProviderViewModel.providersList.value.size
     authRepository2 = mock(AuthRep::class.java)
 
@@ -306,6 +332,13 @@ class EndToEndTestCreateProfile {
     composeTestRule.onNodeWithTag("languageDropdown").assertIsDisplayed()
     composeTestRule.onNodeWithTag("languageDropdown").performClick()
     composeTestRule.onNodeWithTag("FRENCH").performClick() // Set French as language spoken
+
+    // Perform click on the provider image button
+    composeTestRule.onNodeWithTag("uploadImage").performClick()
+
+    // Simulate choosing an image
+    intending(IntentMatchers.hasAction(Intent.ACTION_GET_CONTENT))
+        .respondWith(Instrumentation.ActivityResult(Activity.RESULT_OK, resultData))
 
     composeTestRule.onNodeWithTag("savePreferencesButton").performScrollTo().performClick()
 

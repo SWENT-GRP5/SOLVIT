@@ -96,7 +96,7 @@ open class ServiceRequestViewModel(private val repository: ServiceRequestReposit
         })
   }
 
-  private fun getScheduledRequests() {
+  fun getScheduledRequests() {
     repository.getScheduledServiceRequests(
         onSuccess = { _scheduledRequests.value = it },
         onFailure = { exception ->
@@ -161,7 +161,11 @@ open class ServiceRequestViewModel(private val repository: ServiceRequestReposit
         })
   }
 
-  fun saveServiceRequestWithImage(serviceRequest: ServiceRequest, imageUri: Uri) {
+  fun saveServiceRequestWithImage(
+      serviceRequest: ServiceRequest,
+      imageUri: Uri,
+      onSuccess: () -> Unit = {}
+  ) {
     repository.saveServiceRequestWithImage(
         serviceRequest,
         imageUri,
@@ -170,6 +174,7 @@ open class ServiceRequestViewModel(private val repository: ServiceRequestReposit
           if (serviceRequest.uid == _selectedRequest.value?.uid) {
             _selectedRequest.value = serviceRequest
           }
+          onSuccess()
         },
         onFailure = { exception ->
           Log.e("ServiceRequestViewModel", "Error saving ServiceRequest", exception)

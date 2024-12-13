@@ -79,6 +79,7 @@ fun SeekerMapScreen(
     providerMarkers.value = markers
   }
 
+  val currentRoute = navigationActions.currentRoute() ?: "default_route"
   // Display the map with user location and provider markers
   MapScreen(
       userLocation = userLocation,
@@ -87,6 +88,6 @@ fun SeekerMapScreen(
         BottomNavigationMenu(
             onTabSelect = { navigationActions.navigateTo(it.route) },
             tabList = LIST_TOP_LEVEL_DESTINATION_SEEKER,
-            selectedItem = Route.MAP)
+            selectedItem = currentRoute)
       })
 }

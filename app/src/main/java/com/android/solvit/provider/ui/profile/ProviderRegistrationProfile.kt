@@ -103,11 +103,11 @@ import com.android.solvit.shared.model.provider.Language
 import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.model.utils.loadBitmapFromUri
-import com.android.solvit.shared.ui.authentication.CustomOutlinedTextField
-import com.android.solvit.shared.ui.authentication.GoBackButton
-import com.android.solvit.shared.ui.authentication.ValidationRegex
 import com.android.solvit.shared.ui.booking.PackageCard
 import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.android.solvit.shared.ui.utils.CustomOutlinedTextField
+import com.android.solvit.shared.ui.utils.GoBackButton
+import com.android.solvit.shared.ui.utils.ValidationRegex
 
 /**
  * Composable function to display the provider registration screen.
@@ -243,7 +243,7 @@ fun ProviderRegistrationScreen(
                 CustomOutlinedTextField(
                     value = fullName,
                     onValueChange = { fullName = it },
-                    label = "Full Name",
+                    label = "First/Last Name",
                     placeholder = "Enter your full name",
                     isValueOk = isFullNameOk,
                     errorMessage = "Enter a valid first and last name",
@@ -291,7 +291,10 @@ fun ProviderRegistrationScreen(
                     onShowDropdownLocationChange = { showDropdown = it },
                     locationSuggestions = locationSuggestions.filterNotNull(),
                     userLocations = user?.locations ?: emptyList(),
-                    onLocationSelected = { selectedLocation = it },
+                    onLocationSelected = {
+                      selectedLocation = it
+                      authViewModel.addUserLocation(it, {}, {})
+                    },
                     requestLocation = null,
                     backgroundColor = colorScheme.background,
                     isValueOk = isLocationOK)
@@ -510,6 +513,19 @@ fun ProviderRegistrationScreen(
                       viewModel.addProvider(newProviderProfile, providerImageUri)
                       authViewModel.setUserName(fullName)
                       authViewModel.registered()
+                      authViewModel.completeRegistration(
+                          {
+                            Toast.makeText(
+                                    context,
+                                    "Registration Successfully Completed",
+                                    Toast.LENGTH_SHORT)
+                                .show()
+                          },
+                          {
+                            Toast.makeText(
+                                    context, "Failed to complete registration", Toast.LENGTH_SHORT)
+                                .show()
+                          })
                       // navigationActions.goBack() // Navigate after saving
                     },
                     modifier = Modifier.fillMaxWidth().testTag("continueDashboardButton"),
@@ -745,19 +761,32 @@ fun UploadImage(selectedImageUri: Uri?, imageUrl: String?, onImageSelected: (Uri
             Text(
                 "Click to upload a picture of you",
                 color = colorScheme.onSurfaceVariant,
-                modifier = Modifier.clickable { imagePickerLauncher.launch("image/*") },
+                modifier =
+                    Modifier.testTag("uploadImage").clickable {
+                      imagePickerLauncher.launch("image/*")
+                    },
                 style =
                     MaterialTheme.typography.bodyLarge.copy(
                         textDecoration = TextDecoration.Underline))
           }
         } else {
-          AsyncImage(
-              model =
-                  selectedImageUri?.toString()
-                      ?: imageUrl, // Show selected image URI or fallback URL
-              contentDescription = "Uploaded Image",
-              contentScale = ContentScale.Crop,
-              modifier = Modifier.fillMaxSize())
+          Box(modifier = Modifier.fillMaxSize()) {
+            AsyncImage(
+                model =
+                    selectedImageUri?.toString()
+                        ?: imageUrl, // Show selected image URI or fallback URL
+                contentDescription = "Uploaded Image",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize())
+            Image(
+                painter = painterResource(id = R.drawable.close_icon),
+                contentDescription = "Delete Image",
+                contentScale = ContentScale.Fit,
+                modifier =
+                    Modifier.align(Alignment.TopEnd).size(32.dp).padding(4.dp).clickable {
+                      onImageSelected(null)
+                    })
+          }
         }
       }
 }

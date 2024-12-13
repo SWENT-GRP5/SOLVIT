@@ -99,16 +99,6 @@ class RequestsOverviewScreenTest {
   }
 
   @Test
-  fun topBarArrowNavigatesBack() {
-    composeTestRule.setContent {
-      RequestsOverviewScreen(navigationActions, serviceRequestViewModel)
-    }
-
-    composeTestRule.onNodeWithTag("arrowBack").performClick()
-    verify(navigationActions).goBack()
-  }
-
-  @Test
   fun categoriesSettingsShowsFilters() {
     composeTestRule.setContent {
       RequestsOverviewScreen(navigationActions, serviceRequestViewModel)

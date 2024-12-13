@@ -2,6 +2,7 @@ package com.android.solvit.seeker.ui.profile
 
 import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -59,10 +60,10 @@ import com.android.solvit.seeker.ui.request.LocationDropdown
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.map.LocationViewModel
-import com.android.solvit.shared.ui.authentication.CustomOutlinedTextField
-import com.android.solvit.shared.ui.authentication.GoBackButton
-import com.android.solvit.shared.ui.authentication.ValidationRegex
 import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.android.solvit.shared.ui.utils.CustomOutlinedTextField
+import com.android.solvit.shared.ui.utils.GoBackButton
+import com.android.solvit.shared.ui.utils.ValidationRegex
 
 /**
  * A composable function that provides a multi-step screen for registering a seeker profile. The
@@ -217,7 +218,10 @@ fun SeekerRegistrationScreen(
                     onShowDropdownLocationChange = { showDropdown = it },
                     locationSuggestions = locationSuggestions.filterNotNull(),
                     userLocations = user?.locations ?: emptyList(),
-                    onLocationSelected = { selectedLocation = it },
+                    onLocationSelected = {
+                      selectedLocation = it
+                      authViewModel.addUserLocation(it, {}, {})
+                    },
                     requestLocation = null,
                     backgroundColor = colorScheme.background,
                     isValueOk = isLocationOK)
@@ -333,6 +337,19 @@ fun SeekerRegistrationScreen(
                       viewModel.addUserProfile(newUserProfile)
                       authViewModel.setUserName(userName)
                       authViewModel.registered()
+                      authViewModel.completeRegistration(
+                          {
+                            Toast.makeText(
+                                    context,
+                                    "Registration Successfully Completed",
+                                    Toast.LENGTH_SHORT)
+                                .show()
+                          },
+                          {
+                            Toast.makeText(
+                                    context, "Failed to complete registration", Toast.LENGTH_SHORT)
+                                .show()
+                          })
                       // navigationActions.goBack() // Navigate after saving
                     },
                     modifier = Modifier.fillMaxWidth().testTag("exploreServicesButton"),

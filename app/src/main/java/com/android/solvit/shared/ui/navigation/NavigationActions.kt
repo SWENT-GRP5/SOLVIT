@@ -1,5 +1,6 @@
 package com.android.solvit.shared.ui.navigation
 
+import android.util.Log
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.Add
@@ -20,10 +21,10 @@ object Route {
   const val EDIT_REQUEST = "Edit request"
   const val REQUESTS_OVERVIEW = "Requests"
   const val INBOX = "Messages"
-  const val PROFILE = "Profile"
+  const val SEEKER_PROFILE = "Profile"
   const val PROVIDERS = "Providers"
-  const val MAP = "Map"
-  const val MAP_OF_SEEKERS = "Seekers Map"
+  const val MAP_OF_SEEKER = "Map"
+  const val MAP_OF_PROVIDER = "Seekers Map"
   const val CALENDAR = "Calendar"
   const val PROVIDER_PROFILE = "Provider Profile"
   const val MY_JOBS = "My Jobs"
@@ -43,7 +44,7 @@ object Screen {
   const val PROVIDER_REGISTRATION_PROFILE = "Provider registration"
   const val CALENDAR = "Calendar"
   const val MY_JOBS = "My Jobs"
-  const val PROVIDER_PROFILE = "Provider Profile"
+  const val PROVIDER_PROFILE = "Provider Profile Screen"
   const val PROVIDER_MODIFY_PROFILE = "Modify Provider Profile"
   const val PREFERENCES = "Preferences"
   const val INBOX = "Inbox Screen"
@@ -55,7 +56,12 @@ object Screen {
   const val AI_SOLVER_CHAT_SCREEN = "AI Solver Chat Screen"
 }
 
-data class TopLevelDestination(val route: String, val icon: ImageVector, val textId: String)
+data class TopLevelDestination(
+    val route: String,
+    val icon: ImageVector,
+    val textId: String,
+    val testTag: String = ""
+)
 
 object TopLevelDestinations {
 
@@ -67,32 +73,37 @@ object TopLevelDestinations {
   val REQUEST_FEED =
       TopLevelDestination(
           route = Route.REQUESTS_FEED, icon = Icons.Outlined.Home, textId = "Professional Home")
-  val MAP_OF_SEEKERS =
+  val MAP_OF_PROVIDER =
       TopLevelDestination(
-          route = Route.MAP_OF_SEEKERS, icon = Icons.Outlined.LocationOn, textId = "Map of Seekers")
+          route = Route.MAP_OF_PROVIDER,
+          icon = Icons.Outlined.LocationOn,
+          textId = "Map of Seekers")
   val CALENDAR =
       TopLevelDestination(
           route = Route.CALENDAR, icon = Icons.Outlined.DateRange, textId = "Professional Calendar")
   val MY_JOBS =
       TopLevelDestination(
-          route = Route.MY_JOBS, icon = Icons.Outlined.CheckCircle, textId = "My Jobs")
+          route = Route.MY_JOBS,
+          icon = Icons.Outlined.CheckCircle,
+          textId = "My Jobs",
+          testTag = "MyJobsTestTag")
 
   ////////////////////////////////// SEEKER //////////////////////////////////
   val SERVICES =
       TopLevelDestination(
           route = Route.SERVICES, icon = Icons.Outlined.Home, textId = "Customer Home")
-  val MAP_OF_PROVIDERS =
+  val MAP_OF_SEEKER =
       TopLevelDestination(
-          route = Route.MAP, icon = Icons.Outlined.LocationOn, textId = "Providers Map")
+          route = Route.MAP_OF_SEEKER, icon = Icons.Outlined.LocationOn, textId = "Providers Map")
   val CREATE_REQUEST =
       TopLevelDestination(
           route = Route.CREATE_REQUEST, icon = Icons.Outlined.Add, textId = "Request")
   val REQUESTS_OVERVIEW =
       TopLevelDestination(
           route = Route.REQUESTS_OVERVIEW, icon = Icons.Outlined.Menu, textId = "Overview")
-  val PROFILE =
+  val SEEKER_PROFILE =
       TopLevelDestination(
-          route = Route.PROFILE, icon = Icons.Outlined.AccountCircle, textId = "Profile")
+          route = Route.SEEKER_PROFILE, icon = Icons.Outlined.AccountCircle, textId = "Profile")
   val PROVIDER_PROFILE =
       TopLevelDestination(
           route = Screen.PROVIDER_PROFILE, icon = Icons.Outlined.AccountCircle, textId = "Profile")
@@ -101,15 +112,15 @@ object TopLevelDestinations {
 val LIST_TOP_LEVEL_DESTINATION_SEEKER =
     listOf(
         TopLevelDestinations.SERVICES,
-        TopLevelDestinations.MAP_OF_PROVIDERS,
+        TopLevelDestinations.MAP_OF_SEEKER,
         TopLevelDestinations.MESSAGES,
         TopLevelDestinations.REQUESTS_OVERVIEW,
-        TopLevelDestinations.PROFILE)
+        TopLevelDestinations.SEEKER_PROFILE)
 
 val LIST_TOP_LEVEL_DESTINATION_PROVIDER =
     listOf(
         TopLevelDestinations.REQUEST_FEED,
-        TopLevelDestinations.MAP_OF_SEEKERS,
+        TopLevelDestinations.MAP_OF_PROVIDER,
         TopLevelDestinations.MESSAGES,
         TopLevelDestinations.CALENDAR,
         TopLevelDestinations.PROVIDER_PROFILE)
@@ -161,6 +172,8 @@ open class NavigationActions(
    * @return The current route
    */
   open fun currentRoute(): String {
-    return navController.currentDestination?.route ?: ""
+    val currentRoute = navController.currentDestination?.route
+    Log.e("NavigationActions", "currentRoute: $currentRoute")
+    return currentRoute ?: ""
   }
 }

@@ -8,6 +8,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.test.core.app.ApplicationProvider
 import com.android.solvit.provider.model.ProviderCalendarViewModel
+import com.android.solvit.provider.model.profile.ProviderViewModel
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.seeker.model.profile.UserRepository
 import com.android.solvit.seeker.model.profile.UserRepositoryFirestore
@@ -67,6 +68,7 @@ class EndToEndProviderJobs {
   private lateinit var authViewModel: AuthViewModel
   private lateinit var listProviderViewModel: ListProviderViewModel
   private lateinit var seekerProfileViewModel: SeekerProfileViewModel
+  private lateinit var providerViewModel: ProviderViewModel
   private lateinit var serviceRequestViewModel: ServiceRequestViewModel
   private lateinit var locationViewModel: LocationViewModel
   private lateinit var reviewViewModel: ReviewViewModel
@@ -140,6 +142,7 @@ class EndToEndProviderJobs {
 
     authViewModel = AuthViewModel(authRepository)
     seekerProfileViewModel = SeekerProfileViewModel(seekerRepository)
+    providerViewModel = ProviderViewModel(providerRepository)
     listProviderViewModel = ListProviderViewModel(providerRepository)
     locationViewModel = LocationViewModel(locationRepository)
     serviceRequestViewModel = ServiceRequestViewModel(serviceRequestRepository)
@@ -213,6 +216,7 @@ class EndToEndProviderJobs {
           "provider" ->
               ProviderUI(
                   authViewModel,
+                  providerViewModel,
                   listProviderViewModel,
                   serviceRequestViewModel,
                   seekerProfileViewModel,
@@ -245,10 +249,10 @@ class EndToEndProviderJobs {
     // Navigate to the calendar screen
     composeTestRule.onNodeWithTag(TopLevelDestinations.CALENDAR.textId).performClick()
     composeTestRule.waitUntil { composeTestRule.onNodeWithTag("calendarTitle").isDisplayed() }
-    composeTestRule.onNodeWithTag("backButton").performClick()
+    // composeTestRule.onNodeWithTag("backButton").performClick()
 
     // Navigate to the job dashboard
-    composeTestRule.onNodeWithTag(TopLevelDestinations.CREATE_REQUEST.toString()).performClick()
+    composeTestRule.onNodeWithTag("MyJobsTestTag", useUnmergedTree = true).performClick()
 
     request = request.copy(providerId = authViewModel.user.value!!.uid)
     serviceRequestViewModel.saveServiceRequest(request)
