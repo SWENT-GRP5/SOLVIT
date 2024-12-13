@@ -4,7 +4,6 @@ import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.NavOptionsBuilder
 import org.hamcrest.CoreMatchers
-import org.hamcrest.MatcherAssert
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -30,8 +29,9 @@ class NavigationActionsTest {
   @Test
   fun navigateToCallsController1() {
 
-    navigationActions.navigateTo(TopLevelDestinations.SERVICES)
-    verify(navHostController).navigate(eq(Route.SERVICES), any<NavOptionsBuilder.() -> Unit>())
+    navigationActions.navigateTo(TopLevelDestinations.SEEKER_OVERVIEW)
+    verify(navHostController)
+        .navigate(eq(Route.SEEKER_OVERVIEW), any<NavOptionsBuilder.() -> Unit>())
 
     navigationActions.navigateTo(Route.REQUESTS_OVERVIEW)
     verify(navHostController).navigate(Route.REQUESTS_OVERVIEW)
@@ -48,15 +48,15 @@ class NavigationActionsTest {
     `when`(navHostController.currentDestination).thenReturn(navigationDestination)
     `when`(navigationDestination.route).thenReturn(Route.CREATE_REQUEST)
 
-    MatcherAssert.assertThat(
-        navigationActions.currentRoute(), CoreMatchers.`is`(Route.CREATE_REQUEST))
+    assertThat(navigationActions.currentRoute(), CoreMatchers.`is`(Route.CREATE_REQUEST))
   }
 
   @Test
   fun navigateToCallsController() {
 
-    navigationActions.navigateTo(TopLevelDestinations.SERVICES)
-    verify(navHostController).navigate(eq(Route.SERVICES), any<NavOptionsBuilder.() -> Unit>())
+    navigationActions.navigateTo(TopLevelDestinations.SEEKER_OVERVIEW)
+    verify(navHostController)
+        .navigate(eq(Route.SEEKER_OVERVIEW), any<NavOptionsBuilder.() -> Unit>())
 
     navigationActions.navigateTo(TopLevelDestinations.CREATE_REQUEST)
     verify(navHostController)
@@ -65,9 +65,8 @@ class NavigationActionsTest {
     navigationActions.navigateTo(TopLevelDestinations.MESSAGES)
     verify(navHostController).navigate(eq(Route.INBOX), any<NavOptionsBuilder.() -> Unit>())
 
-    navigationActions.navigateTo(TopLevelDestinations.SEEKER_PROFILE)
-    verify(navHostController)
-        .navigate(eq(Route.SEEKER_PROFILE), any<NavOptionsBuilder.() -> Unit>())
+    navigationActions.navigateTo(TopLevelDestinations.PROFILE)
+    verify(navHostController).navigate(eq(Route.PROFILE), any<NavOptionsBuilder.() -> Unit>())
   }
 
   @Test
@@ -83,11 +82,5 @@ class NavigationActionsTest {
     `when`(navDestination.route).thenReturn(Route.CREATE_REQUEST)
 
     assertThat(navigationActions.currentRoute(), CoreMatchers.`is`(Route.CREATE_REQUEST))
-  }
-
-  @Test
-  fun goBackToCallsController() {
-    navigationActions.goBackTo(Route.CREATE_REQUEST)
-    Mockito.verify(navHostController).popBackStack(Route.CREATE_REQUEST, false)
   }
 }

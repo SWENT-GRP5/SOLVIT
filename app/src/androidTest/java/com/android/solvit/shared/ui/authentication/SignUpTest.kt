@@ -154,7 +154,7 @@ class SignUpScreenTest {
     composeTestRule.onNodeWithTag("confirmPasswordInputField").performTextInput("password")
 
     composeTestRule.onNodeWithTag("signUpButton").performClick()
-    verify(mockNavigationActions).navigateTo(Screen.SIGN_UP_CHOOSE_ROLE)
+    verify(mockNavigationActions).navigateTo(Screen.CHOOSE_ROLE)
   }
 }
 

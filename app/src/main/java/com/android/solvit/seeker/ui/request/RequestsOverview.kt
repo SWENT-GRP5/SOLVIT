@@ -87,9 +87,9 @@ fun RequestsOverviewScreen(
   Scaffold(
       modifier = Modifier.testTag("requestsOverviewScreen"),
       bottomBar = {
-        val currentRoute = navigationActions.currentRoute() ?: "default_route"
+        val currentRoute = navigationActions.currentRoute()
         BottomNavigationMenu(
-            onTabSelect = { navigationActions.navigateTo(it.route) },
+            onTabSelect = { navigationActions.navigateTo(it) },
             tabList = LIST_TOP_LEVEL_DESTINATION_SEEKER,
             selectedItem = currentRoute)
       }) {

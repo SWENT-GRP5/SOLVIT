@@ -132,7 +132,7 @@ fun ServiceBookingScreen(
   val isReadyToNavigate by chatViewModel.isReadyToNavigate.collectAsState()
   LaunchedEffect(isReadyToNavigate) {
     if (isReadyToNavigate) {
-      navigationActions.navigateTo(Screen.CHAT)
+      navigationActions.navigateAndSetBackStack(Screen.CHAT, listOf(Route.INBOX))
       chatViewModel.resetIsReadyToNavigate()
     }
   }
@@ -244,12 +244,12 @@ fun ServiceBookingScreen(
                                     onClick = {
                                       if (isSeeker) {
                                         providerViewModel.selectService(request!!.type)
-                                        navigationActions.navigateTo(Route.PROVIDERS)
+                                        navigationActions.navigateTo(Route.PROVIDERS_LIST)
                                       }
                                     })) {
                           if (provider != null) {
                             // Render provider card when provider is selected
-                            ProviderCard(provider, providerViewModel, navigationActions)
+                            ProviderCard(provider, isSeeker, providerViewModel, navigationActions)
                           } else {
                             // Render placeholder when no provider is selected
                             Column(
@@ -499,14 +499,17 @@ fun ServiceBookingScreen(
 @Composable
 fun ProviderCard(
     provider: Provider,
+    isSeeker: Boolean,
     providerViewModel: ListProviderViewModel,
     navigationActions: NavigationActions
 ) {
   Card(
       modifier =
           Modifier.testTag("provider_card").clickable {
-            providerViewModel.selectProvider(provider)
-            navigationActions.navigateTo(Route.PROVIDER_PROFILE)
+            if (isSeeker) {
+              providerViewModel.selectProvider(provider)
+              navigationActions.navigateTo(Route.PROVIDER_INFO)
+            }
           },
       elevation =
           CardDefaults.cardElevation(
@@ -651,7 +654,7 @@ fun ReviewButton(navigationActions: NavigationActions) {
       modifier = Modifier.fillMaxWidth().padding(top = 16.dp).testTag("review_button"),
       contentAlignment = Alignment.Center) {
         Button(
-            onClick = { navigationActions.navigateTo(Screen.REVIEW_SCREEN) },
+            onClick = { navigationActions.navigateTo(Route.REVIEW) },
             colors =
                 ButtonDefaults.buttonColors(
                     containerColor = colorScheme.primary, contentColor = colorScheme.onPrimary),

@@ -48,6 +48,7 @@ val TONES_LIST = listOf("Formal", "Neutral", "Friendly", "Positive", "Negative",
 @Composable
 fun ChatAssistantDialog(
     chatAssistantViewModel: ChatAssistantViewModel,
+    isSeeker: Boolean,
     onDismiss: () -> Unit,
     onResponse: (String) -> Unit
 ) {
@@ -125,7 +126,7 @@ fun ChatAssistantDialog(
                   } else {
                     chatAssistantViewModel.updateSelectedTones(selectedTones)
                     isGenerating = true
-                    chatAssistantViewModel.generateMessage(input) {
+                    chatAssistantViewModel.generateMessage(input, isSeeker) {
                       onResponse(it)
                       onDismiss()
                     }

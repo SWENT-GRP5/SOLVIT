@@ -70,6 +70,7 @@ import com.android.solvit.seeker.ui.navigation.BottomNavigationMenu
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_SEEKER
 import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.navigation.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -107,11 +108,10 @@ fun SeekerProfileScreen(
   Scaffold(
       topBar = { ProfileTopBar(navigationActions, onLogout = { showLogoutDialog = true }) },
       bottomBar = {
-        val currentRoute = navigationActions.currentRoute() ?: "default_route"
         BottomNavigationMenu(
             onTabSelect = { navigationActions.navigateTo(it.route) },
             tabList = LIST_TOP_LEVEL_DESTINATION_SEEKER,
-            selectedItem = currentRoute)
+            selectedItem = Route.PROFILE)
       },
       containerColor = Color.Transparent,
   ) { paddingValues ->
@@ -123,7 +123,9 @@ fun SeekerProfileScreen(
           item {
             // Profile Info Card with Edit Button
             ProfileInfoCard(
-                fullName, email, onEdit = { navigationActions.navigateTo(Screen.EDIT_PROFILE) })
+                fullName,
+                email,
+                onEdit = { navigationActions.navigateTo(Screen.EDIT_SEEKER_PROFILE) })
           }
 
           item {

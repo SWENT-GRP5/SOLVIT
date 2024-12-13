@@ -1,6 +1,5 @@
 package com.android.solvit.seeker.ui.service
 
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -17,11 +16,9 @@ import com.android.solvit.shared.model.provider.ProviderRepository
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
-import kotlinx.coroutines.flow.take
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.mockito.Mockito
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
 import org.mockito.kotlin.any
@@ -82,11 +79,12 @@ class ServicesScreenTest {
   @Before
   fun setUp() {
     userRepository = mock(UserRepository::class.java)
-    providerRepository = Mockito.mock(ProviderRepository::class.java)
-    navController = Mockito.mock(NavController::class.java)
-    navigationActions = Mockito.mock(NavigationActions::class.java)
+    providerRepository = mock(ProviderRepository::class.java)
     listProviderViewModel = ListProviderViewModel(providerRepository)
     seekerProfileViewModel = SeekerProfileViewModel(userRepository)
+    navController = mock(NavController::class.java)
+    navigationActions = mock(NavigationActions::class.java)
+    `when`(navigationActions.currentRoute()).thenReturn(Route.SEEKER_OVERVIEW)
 
     // Mock successful data loading
     `when`(providerRepository.getProviders(any(), any(), any())).thenAnswer {
@@ -103,7 +101,7 @@ class ServicesScreenTest {
     }
     // Call the ViewModel method
     seekerProfileViewModel.getUserProfile("1234")
-    `when`(navigationActions.currentRoute()).thenReturn(Route.SERVICES)
+    `when`(navigationActions.currentRoute()).thenReturn(Route.SEEKER_OVERVIEW)
 
     composeTestRule.setContent {
       ServicesScreen(navigationActions, seekerProfileViewModel, listProviderViewModel)
@@ -133,7 +131,7 @@ class ServicesScreenTest {
   @Test
   fun profileImageNavigatesToProfileScreen() {
     composeTestRule.onNodeWithTag("servicesScreenProfileImage").performClick()
-    verify(navigationActions).navigateTo(Route.SEEKER_PROFILE)
+    verify(navigationActions).navigateTo(Route.PROFILE)
   }
 
   @Test
@@ -141,7 +139,7 @@ class ServicesScreenTest {
     val service = SERVICES_LIST[0]
     composeTestRule.onNodeWithTag("servicesScreenDiscount").performClick()
     assert(service.service == listProviderViewModel.selectedService.value)
-    verify(navigationActions).navigateTo(Route.PROVIDERS)
+    verify(navigationActions).navigateTo(Route.PROVIDERS_LIST)
   }
 
   @Test
@@ -172,7 +170,7 @@ class ServicesScreenTest {
   @Test
   fun mapShortcutsNavigateToMapScreen() {
     composeTestRule.onNodeWithTag("servicesScreenMapShortcut").performClick()
-    verify(navigationActions).navigateTo(Route.MAP_OF_SEEKER)
+    verify(navigationActions).navigateTo(Route.MAP)
   }
 
   @Test
@@ -219,6 +217,6 @@ class ServicesScreenTest {
     val service = SERVICES_LIST[0]
     composeTestRule.onNodeWithTag(service.service.toString() + "Item").performClick()
     assert(service.service == listProviderViewModel.selectedService.value)
-    verify(navigationActions).navigateTo(Route.PROVIDERS)
+    verify(navigationActions).navigateTo(Route.PROVIDERS_LIST)
   }
 }

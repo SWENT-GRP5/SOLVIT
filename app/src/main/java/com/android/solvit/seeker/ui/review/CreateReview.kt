@@ -157,12 +157,11 @@ fun CreateReviewScreen(
                     }
 
                     Toast.makeText(context, "Review Submitted", Toast.LENGTH_SHORT).show()
-                    navigationActions.goBack()
                   }
                 } else {
                   Toast.makeText(context, "Error Submitting Review", Toast.LENGTH_SHORT).show()
-                  navigationActions.goBack()
                 }
+                navigationActions.navigateAndSetBackStack(Route.REQUESTS_OVERVIEW, listOf())
               },
               modifier = Modifier.testTag("submitReviewButton")) {
                 Row(
@@ -242,7 +241,7 @@ fun RequestBox(
                 provider?.let {
                   ProviderItem(provider = it) {
                     listProviderViewModel.selectProvider(it)
-                    navigationActions.navigateTo(Route.PROVIDER_PROFILE)
+                    navigationActions.navigateTo(Route.PROVIDER_INFO)
                   }
                 }
                 request.location?.let { MapCard(it) }

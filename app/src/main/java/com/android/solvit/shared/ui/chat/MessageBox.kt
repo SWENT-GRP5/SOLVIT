@@ -53,6 +53,7 @@ import com.android.solvit.shared.model.chat.ChatViewModel
 import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_PROVIDER
 import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_SEEKER
 import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.navigation.Screen
 import com.android.solvit.shared.ui.utils.formatTimestamp
 import com.android.solvit.shared.ui.utils.getReceiverImageUrl
@@ -103,7 +104,7 @@ fun MessageBox(
                   } else {
                     LIST_TOP_LEVEL_DESTINATION_PROVIDER
                   },
-              selectedItem = if (isReadyToNavigate) Screen.CHAT else Screen.INBOX)
+              selectedItem = Route.INBOX)
         }) { paddingValues ->
           if (allMessages.isNotEmpty()) {
             LazyColumn(

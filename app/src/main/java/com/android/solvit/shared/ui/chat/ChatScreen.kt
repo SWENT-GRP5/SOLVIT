@@ -63,7 +63,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -132,6 +131,7 @@ fun ChatScreen(
   val receiverName = getReceiverName(receiver)
   val receiverPicture = getReceiverImageUrl(receiver)
   val user by authViewModel.user.collectAsState()
+  val isSeeker = user?.role == "seeker"
   chatViewModel.getChatRequest { id ->
     serviceRequestViewModel.getServiceRequestById(id) { chatViewModel.setChatRequest(it) }
   }
@@ -152,6 +152,7 @@ fun ChatScreen(
         MessageInputBar(
             chatAssistantViewModel = chatAssistantViewModel,
             isAiSolverScreen = false,
+            isSeeker = isSeeker,
             onImageSelected = { uri: Uri? ->
               imageUri = uri
               uri?.let { imageBitmap = loadBitmapFromUri(localContext, it) }
@@ -384,7 +385,6 @@ fun AiSolverScreen(
   aiSolverViewModel.setMessageContext(conversation)
 
   val lazyListState = rememberLazyListState()
-  val coroutineScope = rememberCoroutineScope()
 
   // Scroll to the last item when entering the screen
   LaunchedEffect(conversation) {
@@ -399,6 +399,7 @@ fun AiSolverScreen(
         if (!shouldCreateRequest) {
           MessageInputBar(
               isAiSolverScreen = true,
+              isSeeker = true,
               onImageSelected = { uri: Uri? ->
                 imageUri = uri
                 uri?.let { imageBitmap = loadBitmapFromUri(localContext, it) }
@@ -474,7 +475,7 @@ fun AiSolverHeader(navigationActions: NavigationActions) {
         }
       },
       navigationIcon = {
-        IconButton(onClick = { navigationActions.navigateTo(Route.SERVICES) }) {
+        IconButton(onClick = { navigationActions.goBack() }) {
           Icon(Icons.Default.ArrowBack, contentDescription = "Back")
         }
       },
@@ -682,6 +683,7 @@ fun MessageInputBar(
     chatAssistantViewModel: ChatAssistantViewModel =
         viewModel(factory = ChatAssistantViewModel.Factory),
     onImageSelected: (Uri?) -> Unit,
+    isSeeker: Boolean,
     isAiSolverScreen: Boolean,
     onSendClickButton: (String, (String) -> Unit) -> Unit
 ) {
@@ -706,9 +708,9 @@ fun MessageInputBar(
               .imePadding()
               .testTag("SendMessageBar")) {
         if (!isAiSolverScreen) {
-          AssistantSuggestions(chatAssistantViewModel) {
+          AssistantSuggestions(chatAssistantViewModel, isSeeker) {
             chatAssistantViewModel.updateSelectedTones(emptyList())
-            chatAssistantViewModel.generateMessage(it) { msg -> message = msg }
+            chatAssistantViewModel.generateMessage(it, isSeeker) { msg -> message = msg }
           }
         }
 
@@ -804,7 +806,10 @@ fun MessageInputBar(
   // AI Assistant Dialog if triggered
   if (showDialog) {
     ChatAssistantDialog(
-        chatAssistantViewModel, onDismiss = { showDialog = false }, onResponse = { message = it })
+        chatAssistantViewModel,
+        isSeeker,
+        onDismiss = { showDialog = false },
+        onResponse = { message = it })
   }
 }
 
@@ -848,6 +853,7 @@ fun buildMessage(
 @Composable
 fun AssistantSuggestions(
     chatAssistantViewModel: ChatAssistantViewModel,
+    isSeeker: Boolean,
     onSuggestionSelect: (String) -> Unit
 ) {
   val suggestions by chatAssistantViewModel.suggestions.collectAsState()
@@ -880,7 +886,7 @@ fun AssistantSuggestions(
         }
         IconButton(
             onClick = {
-              chatAssistantViewModel.generateSuggestions {
+              chatAssistantViewModel.generateSuggestions(isSeeker) {
                 Log.e("ChatScreen", "Suggestions generated")
               }
             }) {

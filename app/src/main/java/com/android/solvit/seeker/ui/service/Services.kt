@@ -87,7 +87,7 @@ fun ServicesScreen(
   val localContext = LocalContext.current
   LaunchedEffect(navigationActions.currentRoute()) {
     // Clear the selected service when this screen is entered
-    if (navigationActions.currentRoute() == Route.SERVICES) {
+    if (navigationActions.currentRoute() == Route.SEEKER_OVERVIEW) {
       listProviderViewModel.clearSelectedService()
       listProviderViewModel.refreshFilters()
     }
@@ -104,9 +104,9 @@ fun ServicesScreen(
       modifier = Modifier.testTag("servicesScreen"),
       bottomBar = {
         BottomNavigationMenu(
-            { navigationActions.navigateTo(it.route) },
+            { navigationActions.navigateTo(it) },
             LIST_TOP_LEVEL_DESTINATION_SEEKER,
-            Route.SERVICES)
+            Route.SEEKER_OVERVIEW)
       },
       topBar = {
         TopSection(
@@ -160,7 +160,7 @@ fun TopSection(
             contentDescription = "profile picture",
             Modifier.size(40.dp)
                 .clip(CircleShape)
-                .clickable { navigationActions.navigateTo(Route.SEEKER_PROFILE) }
+                .clickable { navigationActions.navigateTo(Route.PROFILE) }
                 .testTag("servicesScreenProfileImage"))
         Column(horizontalAlignment = Alignment.Start) {
           // User's Location
@@ -217,7 +217,7 @@ fun TopSection(
                         modifier =
                             Modifier.clickable {
                               listProviderViewModel.selectService(searchResults[index].service)
-                              navigationActions.navigateTo(Route.PROVIDERS)
+                              navigationActions.navigateTo(Route.PROVIDERS_LIST)
                             })
                   }
                 }
@@ -240,7 +240,7 @@ fun DiscountSection(
               .clip(RoundedCornerShape(16.dp))
               .clickable {
                 listProviderViewModel.selectService(Services.PLUMBER)
-                navigationActions.navigateTo(Route.PROVIDERS)
+                navigationActions.navigateTo(Route.PROVIDERS_LIST)
               }) {
         // Background Image
         Image(
@@ -317,7 +317,7 @@ fun ShortcutsSection(
                   modifier =
                       Modifier.weight(1f)
                           .background(LightRed, shape = RoundedCornerShape(16.dp))
-                          .clickable { navigationActions.navigateTo(Route.MAP_OF_SEEKER) }
+                          .clickable { navigationActions.navigateTo(Route.MAP) }
                           .testTag("servicesScreenMapShortcut")) {
                     Column(
                         modifier = Modifier.padding(16.dp).fillMaxWidth(),
@@ -367,7 +367,7 @@ fun CategoriesSection(
                     listProviderViewModel.countProvidersByService(searchResults[index].service),
                 onClick = {
                   listProviderViewModel.selectService(searchResults[index].service)
-                  navigationActions.navigateTo(Route.PROVIDERS)
+                  navigationActions.navigateTo(Route.PROVIDERS_LIST)
                 })
           }
         }
@@ -398,7 +398,7 @@ fun PerformersSection(
                 topProviders[index],
                 onClick = {
                   listProviderViewModel.selectProvider(topProviders[index])
-                  navigationActions.navigateTo(Route.PROVIDER_PROFILE)
+                  navigationActions.navigateTo(Route.PROVIDER_INFO)
                 })
           }
         }
@@ -415,8 +415,7 @@ fun ServiceItem(service: ServicesListItem, workerCount: Int, onClick: () -> Unit
               .clickable(onClick = onClick),
       shape = RoundedCornerShape(12.dp),
       border = BorderStroke(2.dp, service.color),
-      colors =
-          CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.background)) {
+      colors = CardDefaults.outlinedCardColors(containerColor = colorScheme.background)) {
         Column(
             modifier = Modifier.fillMaxSize().padding(12.dp),
             verticalArrangement = Arrangement.SpaceBetween,
@@ -433,7 +432,7 @@ fun ServiceItem(service: ServicesListItem, workerCount: Int, onClick: () -> Unit
                   text = Services.format(service.service),
                   modifier = Modifier.testTag(service.service.toString() + "Name"),
                   style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                  color = MaterialTheme.colorScheme.onBackground,
+                  color = colorScheme.onBackground,
                   textAlign = TextAlign.Center)
 
               // Worker count below the service name
@@ -441,7 +440,7 @@ fun ServiceItem(service: ServicesListItem, workerCount: Int, onClick: () -> Unit
                   text = "+ $workerCount workers",
                   modifier = Modifier.testTag(service.service.toString() + "WorkerCount"),
                   style = MaterialTheme.typography.bodySmall,
-                  color = MaterialTheme.colorScheme.onSurfaceVariant,
+                  color = colorScheme.onSurfaceVariant,
                   textAlign = TextAlign.Center)
             }
       }

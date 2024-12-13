@@ -95,7 +95,7 @@ fun RequestsDashboardScreen(
         RequestsTopBar(title = "Job Dashboard", onBackClicked = { navigationActions.goBack() })
       },
       bottomBar = {
-        val currentRoute = navigationActions.currentRoute() ?: "default_route"
+        val currentRoute = navigationActions.currentRoute()
         Log.e(
             "ProviderCalendarScreen", "Current route passed to BottomNavigationMenu: $currentRoute")
       },
