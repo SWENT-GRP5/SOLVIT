@@ -22,9 +22,6 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScrollableTabRow
@@ -66,6 +63,7 @@ import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.theme.LightBlue
 import com.android.solvit.shared.ui.theme.LightOrange
 import com.android.solvit.shared.ui.theme.Typography
+import com.android.solvit.shared.ui.utils.TopAppBarInbox
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -87,6 +85,12 @@ fun RequestsOverviewScreen(
 
   Scaffold(
       modifier = Modifier.testTag("requestsOverviewScreen"),
+      topBar = {
+        TopAppBarInbox(
+            titre = "Orders",
+            testTagGeneral = "topOrdersSection",
+        )
+      },
       bottomBar = {
         val currentRoute = navigationActions.currentRoute()
         BottomNavigationMenu(
@@ -103,7 +107,6 @@ fun RequestsOverviewScreen(
         val statusTabs = ServiceRequestStatus.entries.toTypedArray()
 
         Column {
-          TopOrdersSection(navigationActions)
           CategoriesFiltersSection()
 
           // Tabs for filtering by status
@@ -152,33 +155,6 @@ fun RequestsOverviewScreen(
                 }
           }
         }
-      }
-}
-
-@Composable
-fun TopOrdersSection(navigationActions: NavigationActions) {
-  Row(
-      modifier =
-          Modifier.fillMaxWidth()
-              .padding(horizontal = 20.dp, vertical = 32.dp)
-              .testTag("topOrdersSection"),
-      horizontalArrangement = Arrangement.SpaceBetween,
-      verticalAlignment = Alignment.CenterVertically) {
-        val context = LocalContext.current
-        Row {
-          Spacer(modifier = Modifier.size(22.dp))
-          Text(
-              text = "Orders",
-              style = Typography.titleLarge.copy(fontSize = 20.sp, fontWeight = FontWeight.Bold))
-        }
-        Icon(
-            imageVector = Icons.Default.Menu,
-            contentDescription = null,
-            modifier =
-                Modifier.clickable {
-                  Toast.makeText(context, "This feature is not yet implemented", Toast.LENGTH_SHORT)
-                      .show()
-                })
       }
 }
 

@@ -25,7 +25,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.colorScheme
@@ -33,8 +32,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -62,6 +59,7 @@ import com.android.solvit.shared.model.utils.isInternetAvailable
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.theme.Typography
+import com.android.solvit.shared.ui.utils.TopAppBarInbox
 import java.text.SimpleDateFormat
 import java.util.Locale
 import kotlinx.coroutines.CoroutineScope
@@ -92,7 +90,12 @@ fun RequestsDashboardScreen(
 
   Scaffold(
       topBar = {
-        RequestsTopBar(title = "Job Dashboard", onBackClicked = { navigationActions.goBack() })
+        TopAppBarInbox(
+            titre = "Job Dashboard",
+            testTagTitle = "JobDashboardTitle",
+            leftButtonForm = Icons.AutoMirrored.Filled.ArrowBack,
+            leftButtonAction = { navigationActions.goBack() },
+            testTagLeft = "JobDashboardBackButton")
       },
       bottomBar = {
         val currentRoute = navigationActions.currentRoute()
@@ -116,34 +119,6 @@ fun RequestsDashboardScreen(
               )
             }
       })
-}
-
-/**
- * Composable function that displays the top app bar for the Requests Dashboard screen.
- *
- * @param title Title of the screen.
- */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun RequestsTopBar(title: String, onBackClicked: () -> Unit) {
-  TopAppBar(
-      title = {
-        Text(
-            text = title,
-            style = Typography.titleLarge,
-            color = colorScheme.onBackground,
-            modifier = Modifier.testTag("JobDashboardTitle"))
-      },
-      navigationIcon = {
-        IconButton(onClick = onBackClicked, modifier = Modifier.testTag("JobDashboardBackButton")) {
-          Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Go back")
-        }
-      },
-      colors =
-          TopAppBarDefaults.centerAlignedTopAppBarColors(
-              containerColor = colorScheme.background,
-              navigationIconContentColor = colorScheme.onBackground,
-              titleContentColor = colorScheme.onBackground))
 }
 
 /**

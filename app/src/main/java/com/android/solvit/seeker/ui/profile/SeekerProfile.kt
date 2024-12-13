@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Edit
@@ -106,7 +105,15 @@ fun SeekerProfileScreen(
 
   // Display the profile information if it's available
   Scaffold(
-      topBar = { ProfileTopBar(navigationActions, onLogout = { showLogoutDialog = true }) },
+      topBar = {
+        TopAppBarInbox(
+            titre = "Profile",
+            testTagTitle = "ProfileTitle",
+            rightButton = { showLogoutDialog = true },
+            rightButtonForm = Icons.AutoMirrored.Filled.ExitToApp,
+            testTagRight = "LogoutButton",
+            testTagGeneral = "ProfileTopBar")
+      },
       bottomBar = {
         BottomNavigationMenu(
             onTabSelect = { navigationActions.navigateTo(it.route) },
@@ -209,20 +216,6 @@ fun SeekerProfileScreen(
         },
         onDismiss = { showLogoutDialog = false })
   }
-}
-
-@Composable
-fun ProfileTopBar(navigationActions: NavigationActions, onLogout: () -> Unit) {
-  TopAppBarInbox(
-      titre = "Profile",
-      testTagTitle = "ProfileTitle",
-      leftButtonAction = { navigationActions.goBack() },
-      leftButtonForm = Icons.AutoMirrored.Filled.ArrowBack,
-      testTagLeft = "BackButton",
-      rightButton = onLogout,
-      rightButtonForm = Icons.AutoMirrored.Filled.ExitToApp,
-      testTagRight = "LogoutButton",
-      testTagGeneral = "ProfileTopBar")
 }
 
 @Composable

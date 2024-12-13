@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocationOn
@@ -53,7 +54,6 @@ import com.android.solvit.seeker.ui.navigation.BottomNavigationMenu
 import com.android.solvit.seeker.ui.profile.AboutAppCard
 import com.android.solvit.seeker.ui.profile.LogoutDialog
 import com.android.solvit.seeker.ui.profile.ProfileInfoCard
-import com.android.solvit.seeker.ui.profile.ProfileTopBar
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.request.ServiceRequestStatus
@@ -65,6 +65,7 @@ import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.navigation.Screen
 import com.android.solvit.shared.ui.theme.Typography
+import com.android.solvit.shared.ui.utils.TopAppBarInbox
 
 /**
  * A composable function that displays the provider's profile screen. It includes the profile header
@@ -99,7 +100,15 @@ fun ProviderProfileScreen(
 
   // Display the profile information if it's available
   Scaffold(
-      topBar = { ProfileTopBar(navigationActions, onLogout = { showLogoutDialog = true }) },
+      topBar = {
+        TopAppBarInbox(
+            titre = "Profile",
+            testTagTitle = "ProfileTitle",
+            rightButton = { showLogoutDialog = true },
+            rightButtonForm = Icons.AutoMirrored.Filled.ExitToApp,
+            testTagRight = "LogoutButton",
+            testTagGeneral = "ProfileTopBar")
+      },
       bottomBar = {
         BottomNavigationMenu(
             onTabSelect = { navigationActions.navigateTo(it) },
