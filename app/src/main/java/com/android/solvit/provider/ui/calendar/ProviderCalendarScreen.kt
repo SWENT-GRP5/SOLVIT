@@ -13,13 +13,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -30,9 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.solvit.provider.model.CalendarView
 import com.android.solvit.provider.model.ProviderCalendarViewModel
@@ -48,6 +43,7 @@ import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_PROVID
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.theme.Typography
+import com.android.solvit.shared.ui.utils.TopAppBarInbox
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
@@ -68,23 +64,7 @@ fun ProviderCalendarScreen(
   var shouldAnimate by remember { mutableStateOf(true) }
 
   Scaffold(
-      topBar = {
-        TopAppBar(
-            title = {
-              Text(
-                  "My Calendar",
-                  textAlign = TextAlign.Left,
-                  color = colorScheme.onBackground,
-                  modifier = Modifier.testTag("calendarTitle"),
-                  style =
-                      Typography.bodyLarge.copy(
-                          fontSize = 24.sp,
-                          fontWeight = FontWeight.ExtraBold,
-                          lineHeight = 24.sp,
-                      ))
-            },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background))
-      },
+      topBar = { TopAppBarInbox(titre = "My Calendar", testTagTitle = "calendarTitle") },
       bottomBar = {
         BottomNavigationMenu(
             onTabSelect = { navigationActions.navigateTo(it.route) },
@@ -195,9 +175,7 @@ fun ProviderCalendarScreen(
                                 selectedDate.format(
                                     DateTimeFormatter.ofPattern(
                                         "EEEE d MMMM yyyy", Locale.getDefault())),
-                            style =
-                                MaterialTheme.typography.titleMedium.copy(
-                                    fontWeight = FontWeight.Bold),
+                            style = Typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                             modifier =
                                 Modifier.clickable {
                                       shouldAnimate = false

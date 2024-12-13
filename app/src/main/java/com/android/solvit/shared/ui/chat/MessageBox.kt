@@ -19,12 +19,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -128,43 +124,6 @@ fun MessageBox(
           }
         }
   }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun ChatListTopBar(
-    navigationActions: NavigationActions,
-    chatViewModel: ChatViewModel,
-    authViewModel: AuthViewModel
-) {
-  TopAppBar(
-      modifier = Modifier.testTag("InboxTopAppBar"),
-      title = {
-        Box(
-            modifier = Modifier.fillMaxWidth(),
-            // Allow the title to center
-            contentAlignment = Alignment.Center) {
-              Text(text = "Inbox", style = Typography.headlineLarge)
-            }
-      },
-      actions = {
-        IconButton(
-            onClick = {
-              // Toast.makeText(context, "Not Yet Implemented", Toast.LENGTH_LONG).show()
-            }) {
-              Image(
-                  painter = painterResource(id = R.drawable.new_message),
-                  contentDescription = "Action",
-                  modifier = Modifier.size(24.dp))
-            }
-      },
-      colors =
-          TopAppBarDefaults.topAppBarColors(
-              containerColor = Color.White,
-              titleContentColor = Color.Black,
-              navigationIconContentColor = Color.Black,
-              actionIconContentColor = Color.Black),
-  )
 }
 
 @Composable

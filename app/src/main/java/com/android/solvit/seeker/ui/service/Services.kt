@@ -49,7 +49,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -76,7 +75,7 @@ import com.android.solvit.shared.ui.theme.LightRed
 import com.android.solvit.shared.ui.theme.OnPrimary
 import com.android.solvit.shared.ui.theme.Typography
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "SourceLockedOrientationActivity")
 @Composable
 fun ServicesScreen(
     navigationActions: NavigationActions,
@@ -281,7 +280,7 @@ fun ShortcutsSection(
                         painter = painterResource(id = R.drawable.ai_solver),
                         contentDescription = "ai_logo",
                         modifier = Modifier.size(50.dp),
-                        tint = Color.Unspecified)
+                        tint = colorScheme.onPrimary)
                   }
             }
         Row(
@@ -422,7 +421,7 @@ fun ServiceItem(service: ServicesListItem, workerCount: Int, onClick: () -> Unit
                   painter = painterResource(id = service.icon),
                   contentDescription = null,
                   modifier = Modifier.size(48.dp).testTag(service.service.toString() + "Icon"),
-                  tint = Color.Unspecified)
+                  tint = colorScheme.onPrimary)
 
               // Service name in bold
               Text(
@@ -474,7 +473,7 @@ fun ProviderItem(provider: Provider, onClick: () -> Unit) {
                 Icon(
                     painter = painterResource(id = Services.getIcon(provider.service)),
                     contentDescription = null,
-                    tint = Color.Unspecified,
+                    tint = colorScheme.onPrimary,
                     modifier =
                         Modifier.size(30.dp)
                             .testTag(Services.getIcon(provider.service).toString() + "Icon"))
@@ -490,7 +489,8 @@ fun ProviderItem(provider: Provider, onClick: () -> Unit) {
                               Brush.verticalGradient(
                                   colors =
                                       listOf(
-                                          Color.Transparent, Services.getColor(provider.service)))))
+                                          colorScheme.background,
+                                          Services.getColor(provider.service)))))
 
           Column(
               modifier = Modifier.align(Alignment.BottomStart).padding(16.dp),
@@ -499,28 +499,29 @@ fun ProviderItem(provider: Provider, onClick: () -> Unit) {
                   Text(
                       text = provider.rating.toString(),
                       modifier = Modifier.testTag(provider.rating.toString() + "Rating"),
-                      fontWeight = FontWeight.ExtraBold,
-                      fontSize = 16.sp,
-                      color = Color.White)
+                      color = colorScheme.onBackground,
+                      style = Typography.bodyLarge.copy(fontWeight = FontWeight.ExtraBold))
                   Spacer(modifier = Modifier.width(4.dp))
                   Icon(
                       imageVector = Icons.Default.Star,
                       contentDescription = null,
-                      tint = Color.Yellow,
+                      tint = colorScheme.secondary,
                       modifier = Modifier.size(16.dp))
                 }
                 Text(
                     text = provider.name,
                     modifier = Modifier.testTag(provider.name + "Name"),
-                    fontWeight = FontWeight.ExtraBold,
-                    fontSize = 20.sp,
-                    color = Color.White)
+                    color = colorScheme.onBackground,
+                    style =
+                        Typography.titleLarge.copy(
+                            fontWeight = FontWeight.ExtraBold, fontSize = 20.sp))
                 Text(
                     text = Services.format(provider.service),
                     modifier = Modifier.testTag(provider.service.toString() + "Service"),
-                    fontWeight = FontWeight.ExtraBold,
-                    fontSize = 18.sp,
-                    color = Color.White)
+                    color = colorScheme.onBackground,
+                    style =
+                        Typography.titleLarge.copy(
+                            fontWeight = FontWeight.ExtraBold, fontSize = 18.sp))
               }
         }
       }

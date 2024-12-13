@@ -33,7 +33,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
@@ -80,6 +79,7 @@ import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.theme.Typography
+import com.android.solvit.shared.ui.utils.TopAppBarInbox
 
 /**
  * Main screen to display detailed information about a provider.
@@ -118,7 +118,15 @@ fun ProviderInfoScreen(
 
   Scaffold(
       containerColor = colorScheme.surface,
-      topBar = { ProviderTopBar(onBackClick = { navigationActions.goBack() }) },
+      topBar = {
+        TopAppBarInbox(
+            titre = "Provider",
+            testTagTitle = "topBarTitle",
+            leftButtonAction = { navigationActions.goBack() },
+            leftButtonForm = Icons.AutoMirrored.Filled.ArrowBack,
+            testTagLeft = "backButton",
+            testTagGeneral = "ProviderTopBar")
+      },
       content = { padding ->
         Column(modifier = Modifier.background(colorScheme.surface).fillMaxSize().padding(padding)) {
           ProviderHeader(provider)
@@ -302,7 +310,7 @@ fun ProviderPackages(
     navigationActions: NavigationActions
 ) {
   var selectedIndex by remember { mutableIntStateOf(-1) }
-  var boxHeightPx by remember { mutableStateOf(0) }
+  var boxHeightPx by remember { mutableIntStateOf(0) }
   Box(
       modifier =
           Modifier.fillMaxSize() // Fills the entire available space
@@ -351,37 +359,6 @@ fun ProviderPackages(
               userId,
               navigationActions)
         }
-      }
-}
-/**
- * Top bar for the provider details screen, with a back button.
- *
- * @param onBackClick Callback when the back button is clicked.
- */
-@Composable
-fun ProviderTopBar(onBackClick: () -> Unit) {
-  Row(
-      modifier =
-          Modifier.fillMaxWidth()
-              .background(color = colorScheme.background)
-              .testTag("ProviderTopBar"),
-      verticalAlignment = Alignment.CenterVertically) {
-        // Back button on the left
-        IconButton(onClick = onBackClick, modifier = Modifier.testTag("backButton")) {
-          Icon(
-              Icons.AutoMirrored.Filled.ArrowBack,
-              contentDescription = "Back",
-              tint = colorScheme.onBackground)
-        }
-
-        // Title in the center
-        Text(
-            text = "Provider",
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.weight(1f).testTag("topBarTitle"),
-            textAlign = TextAlign.Start,
-            color = colorScheme.onBackground)
       }
 }
 
