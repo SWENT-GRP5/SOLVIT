@@ -126,7 +126,7 @@ open class ServiceRequestViewModel(
         })
   }
 
-  private fun getScheduledRequests() {
+  fun getScheduledRequests() {
     repository.getScheduledServiceRequests(
         onSuccess = { _scheduledRequests.value = it },
         onFailure = { exception ->
@@ -191,7 +191,11 @@ open class ServiceRequestViewModel(
         })
   }
 
-  fun saveServiceRequestWithImage(serviceRequest: ServiceRequest, imageUri: Uri) {
+  fun saveServiceRequestWithImage(
+      serviceRequest: ServiceRequest,
+      imageUri: Uri,
+      onSuccess: () -> Unit = {}
+  ) {
     repository.saveServiceRequestWithImage(
         serviceRequest,
         imageUri,
@@ -200,6 +204,7 @@ open class ServiceRequestViewModel(
           if (serviceRequest.uid == _selectedRequest.value?.uid) {
             _selectedRequest.value = serviceRequest
           }
+          onSuccess()
         },
         onFailure = { exception ->
           Log.e("ServiceRequestViewModel", "Error saving ServiceRequest", exception)

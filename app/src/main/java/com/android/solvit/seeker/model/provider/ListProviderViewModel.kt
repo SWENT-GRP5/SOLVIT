@@ -10,6 +10,7 @@ import com.android.solvit.shared.model.provider.ProviderRepositoryFirestore
 import com.android.solvit.shared.model.service.Services
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
+import kotlin.random.Random
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -26,8 +27,7 @@ class ListProviderViewModel(private val repository: ProviderRepository) : ViewMo
   private val _providersListFiltered = MutableStateFlow<List<Provider>>(emptyList())
   val providersListFiltered: StateFlow<List<Provider>> = _providersListFiltered
 
-  private val filters = listOf("Price", "Languages", "Rating")
-  private val activeFilters = mutableMapOf<String, (Provider) -> Boolean>()
+  private var activeFilters = mutableMapOf<String, (Provider) -> Boolean>()
 
   companion object {
     val Factory: ViewModelProvider.Factory =
@@ -46,7 +46,10 @@ class ListProviderViewModel(private val repository: ProviderRepository) : ViewMo
   init {
     repository.init { getProviders() }
     repository.addListenerOnProviders(
-        onSuccess = { _providersList.value = it },
+        onSuccess = {
+          _providersList.value = it
+          _providersListFiltered.value = it
+        },
         onFailure = { exception ->
           Log.e("ListProviderViewModel", "Error listening List of Providers", exception)
         })
@@ -115,5 +118,39 @@ class ListProviderViewModel(private val repository: ProviderRepository) : ViewMo
 
   fun refreshFilters() {
     getProviders()
+    activeFilters.clear()
+  }
+
+  fun clearSelectedService() {
+    _selectedService.value = null
+  }
+
+  /** Sort the list of providers given three Fields (Top Rates, Top Prices, Time) */
+  fun sortProviders(field: String, isSelected: Boolean) {
+    Log.e("sortProviders", "field : $field isSelected : $isSelected")
+    when (field) {
+      "Top Rates" ->
+          _providersListFiltered.value =
+              if (isSelected) _providersListFiltered.value.sortedByDescending { it.rating }
+              else
+                  _providersListFiltered.value.sortedByDescending {
+                    it.rating + Random.nextDouble(1.0, 5.0)
+                  } // We use here hash code to randomize if field is unselected
+      "Top Prices" ->
+          _providersListFiltered.value =
+              if (isSelected) _providersListFiltered.value.sortedBy { it.price }
+              else
+                  _providersListFiltered.value.sortedBy {
+                    it.price + Random.nextDouble(1.0, 1000.0)
+                  }
+      "Highest Activity" ->
+          _providersListFiltered.value =
+              if (isSelected) _providersListFiltered.value.sortedBy { it.nbrOfJobs }
+              else _providersListFiltered.value.sortedBy { it.nbrOfJobs }
+    }
+  }
+
+  fun countProvidersByService(service: Services): Int {
+    return _providersList.value.count { it.service == service }
   }
 }
