@@ -38,6 +38,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.asImageBitmap
@@ -218,7 +219,7 @@ fun MapMarker(markerData: MarkerData) {
                                   Icon(
                                       painter = painterResource(markerData.icon),
                                       contentDescription = null,
-                                      tint = colorScheme.primary,
+                                      tint = Color.Unspecified,
                                       modifier = Modifier.size(30.dp))
                                 }
                           }
