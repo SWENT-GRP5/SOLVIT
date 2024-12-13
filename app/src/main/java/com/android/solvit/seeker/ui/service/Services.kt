@@ -160,7 +160,7 @@ fun TopSection(
             contentDescription = "profile picture",
             Modifier.size(40.dp)
                 .clip(CircleShape)
-                .clickable { navigationActions.navigateTo(Route.PROFILE) }
+                .clickable { navigationActions.navigateTo(Route.SEEKER_PROFILE) }
                 .testTag("servicesScreenProfileImage"))
         Column(horizontalAlignment = Alignment.Start) {
           // User's Location
@@ -317,7 +317,7 @@ fun ShortcutsSection(
                   modifier =
                       Modifier.weight(1f)
                           .background(LightRed, shape = RoundedCornerShape(16.dp))
-                          .clickable { navigationActions.navigateTo(Route.MAP) }
+                          .clickable { navigationActions.navigateTo(Route.MAP_OF_SEEKER) }
                           .testTag("servicesScreenMapShortcut")) {
                     Column(
                         modifier = Modifier.padding(16.dp).fillMaxWidth(),

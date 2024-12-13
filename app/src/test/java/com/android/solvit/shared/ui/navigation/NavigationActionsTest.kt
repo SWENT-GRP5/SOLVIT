@@ -65,8 +65,9 @@ class NavigationActionsTest {
     navigationActions.navigateTo(TopLevelDestinations.MESSAGES)
     verify(navHostController).navigate(eq(Route.INBOX), any<NavOptionsBuilder.() -> Unit>())
 
-    navigationActions.navigateTo(TopLevelDestinations.PROFILE)
-    verify(navHostController).navigate(eq(Route.PROFILE), any<NavOptionsBuilder.() -> Unit>())
+    navigationActions.navigateTo(TopLevelDestinations.SEEKER_PROFILE)
+    verify(navHostController)
+        .navigate(eq(Route.SEEKER_PROFILE), any<NavOptionsBuilder.() -> Unit>())
   }
 
   @Test
