@@ -64,7 +64,7 @@ fun ProviderCalendarScreen(
   var shouldAnimate by remember { mutableStateOf(true) }
 
   Scaffold(
-      topBar = { TopAppBarInbox(titre = "My Calendar", testTagTitle = "calendarTitle") },
+      topBar = { TopAppBarInbox(title = "My Calendar", testTagTitle = "calendarTitle") },
       bottomBar = {
         BottomNavigationMenu(
             onTabSelect = { navigationActions.navigateTo(it.route) },

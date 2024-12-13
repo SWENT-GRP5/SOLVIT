@@ -153,7 +153,7 @@ fun RequestsOverviewScreen(
 @Composable
 fun TopOrdersSection() {
   TopAppBarInbox(
-      titre = "Orders",
+      title = "Orders",
       testTagGeneral = "topOrdersSection",
   )
 }

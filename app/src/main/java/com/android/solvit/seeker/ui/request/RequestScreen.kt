@@ -87,7 +87,7 @@ fun RequestScreen(
       modifier = Modifier.padding(16.dp).testTag("requestScreen"),
       topBar = {
         TopAppBarInbox(
-            titre = screenTitle,
+            title = screenTitle,
             testTagTitle = "screenTitle",
             leftButtonAction = {
               navigationActions.goBack()

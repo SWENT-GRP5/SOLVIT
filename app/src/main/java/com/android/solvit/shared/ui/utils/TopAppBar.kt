@@ -24,7 +24,7 @@ import kotlinx.coroutines.launch
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun TopAppBarInbox(
-    titre: String = "",
+    title: String = "",
     testTagTitle: String = "",
     leftButtonAction: () -> Unit = {},
     leftButtonForm: ImageVector? = null,
@@ -40,7 +40,7 @@ fun TopAppBarInbox(
       modifier = Modifier.testTag(testTagGeneral),
       title = {
         Text(
-            text = titre,
+            text = title,
             style = Typography.titleLarge,
             textAlign = TextAlign.Start,
             modifier = Modifier.testTag(testTagTitle))

@@ -102,7 +102,7 @@ fun ProviderProfileScreen(
   Scaffold(
       topBar = {
         TopAppBarInbox(
-            titre = "Profile",
+            title = "Profile",
             testTagTitle = "ProfileTitle",
             rightButton = { showLogoutDialog = true },
             rightButtonForm = Icons.AutoMirrored.Filled.ExitToApp,

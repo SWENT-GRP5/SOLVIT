@@ -91,7 +91,7 @@ fun MessageBox(
     }
   } else {
     Scaffold(
-        topBar = { TopAppBarInbox(titre = "Inbox", testTagGeneral = "InboxTopAppBar") },
+        topBar = { TopAppBarInbox(title = "Inbox", testTagGeneral = "InboxTopAppBar") },
         bottomBar = {
           BottomNavigationMenu(
               onTabSelect = { navigationActions.navigateTo(it.route) },

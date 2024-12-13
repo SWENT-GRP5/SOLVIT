@@ -98,7 +98,7 @@ fun CreateRequestScreen(
   Scaffold(
       topBar = {
         TopAppBarInbox(
-            titre = "Create a new request",
+            title = "Create a new request",
             leftButtonForm = Icons.AutoMirrored.Filled.ArrowBack,
             leftButtonAction = { navigationActions.goBack() },
             testTagLeft = "CreateRequestBackButton")

@@ -19,7 +19,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.*
@@ -101,7 +100,7 @@ fun ModifyProviderInformationScreen(
   Scaffold(
       topBar = {
         TopAppBarInbox(
-            titre = "Modify your profile information",
+            title = "Modify your profile information",
             testTagTitle = "titleModifyProvider",
             leftButtonForm = Icons.AutoMirrored.Filled.ArrowBack,
             leftButtonAction = { navigationActions.goBack() })

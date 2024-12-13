@@ -91,7 +91,7 @@ fun RequestsDashboardScreen(
   Scaffold(
       topBar = {
         TopAppBarInbox(
-            titre = "Job Dashboard",
+            title = "Job Dashboard",
             testTagTitle = "JobDashboardTitle",
             leftButtonForm = Icons.AutoMirrored.Filled.ArrowBack,
             leftButtonAction = { navigationActions.goBack() },

@@ -28,8 +28,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -81,7 +79,7 @@ fun SignUpChooseProfile(
   Scaffold(
       topBar = {
         TopAppBarInbox(
-            titre = "Choose your profile",
+            title = "Choose your profile",
             leftButtonAction = { navigationActions.goBack() },
             leftButtonForm = Icons.AutoMirrored.Filled.ArrowBack)
       },

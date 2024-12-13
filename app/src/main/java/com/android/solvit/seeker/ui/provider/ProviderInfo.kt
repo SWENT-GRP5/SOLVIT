@@ -120,7 +120,7 @@ fun ProviderInfoScreen(
       containerColor = colorScheme.surface,
       topBar = {
         TopAppBarInbox(
-            titre = "Provider",
+            title = "Provider",
             testTagTitle = "topBarTitle",
             leftButtonAction = { navigationActions.goBack() },
             leftButtonForm = Icons.AutoMirrored.Filled.ArrowBack,
