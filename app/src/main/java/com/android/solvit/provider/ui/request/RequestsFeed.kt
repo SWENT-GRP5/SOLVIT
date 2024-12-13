@@ -199,6 +199,9 @@ fun RequestsFeedScreen(
  * @param navigationActions The navigation actions
  * @param notificationsViewModel The notification view model
  * @param providerId The provider's ID
+ * @param selectedService The selected service
+ * @param searchQuery The search query
+ * @param onServiceSelected The onServiceSelected action
  */
 @Composable
 fun RequestsTopBar(
@@ -269,7 +272,7 @@ fun RequestsTopBar(
       // Search Bar and Service Type Filter
       Row(
           modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).offset(y = 20.dp),
-          horizontalArrangement = Arrangement.spacedBy(8.dp),
+          horizontalArrangement = Arrangement.SpaceBetween,
           verticalAlignment = Alignment.CenterVertically) {
             SearchBar(searchQuery, Modifier.weight(1f))
             ServiceTypeFilter(
@@ -290,7 +293,7 @@ fun RequestsTopBar(
 @Composable
 fun SearchBar(searchQuery: MutableState<String>, modifier: Modifier = Modifier) {
   Box(
-      modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+      modifier = modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 8.dp),
       contentAlignment = Alignment.Center) {
         // Floating Search Bar with rounded corners
         Row(
@@ -744,7 +747,7 @@ fun ServiceTypeFilter(
 ) {
   var expanded by remember { mutableStateOf(false) }
 
-  Box(modifier = modifier.wrapContentWidth()) {
+  Box(modifier = modifier.wrapContentWidth().padding(horizontal = 8.dp, vertical = 8.dp)) {
     Button(
         onClick = { expanded = !expanded },
         shape = RoundedCornerShape(50),
