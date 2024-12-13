@@ -19,7 +19,6 @@ data class ServicesListItem(val service: Services, val image: Int, val icon: Int
 
 val SERVICES_LIST =
     listOf(
-        ServicesListItem(Services.OTHER, R.drawable.other, R.drawable.ic_other, Other),
         ServicesListItem(Services.PLUMBER, R.drawable.plumber, R.drawable.ic_plumber, Plumber),
         ServicesListItem(
             Services.ELECTRICIAN, R.drawable.electrician, R.drawable.ic_electrician, Electrician),
@@ -48,4 +47,4 @@ val SERVICES_LIST =
             R.drawable.hair_stylist,
             R.drawable.ic_hair_stylist,
             HairStylist),
-    )
+        ServicesListItem(Services.OTHER, R.drawable.other, R.drawable.ic_other, Other))

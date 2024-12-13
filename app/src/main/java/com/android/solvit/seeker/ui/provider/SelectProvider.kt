@@ -161,8 +161,8 @@ fun TopAppBar(
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier =
-                            Modifier.clickable(onClick = onClickAction) // Handle location click
-                        ) {
+                            Modifier.clickable(onClick = onClickAction)
+                                .testTag("filterByLocation")) {
                           Icon(
                               imageVector = Icons.Outlined.LocationOn,
                               contentDescription = "Location Icon",
@@ -393,7 +393,10 @@ fun ListProviders(
 ) {
   LazyColumn(
       modifier =
-          Modifier.fillMaxSize().background(colorScheme.background).padding(horizontal = 16.dp),
+          Modifier.fillMaxSize()
+              .background(colorScheme.background)
+              .padding(horizontal = 16.dp)
+              .testTag("providersList"),
       verticalArrangement = Arrangement.spacedBy(16.dp)) {
         // Popular providers section
         item {
@@ -1116,7 +1119,8 @@ fun SelectProviderScreen(
   var displayByLocation by remember { mutableStateOf(false) }
   val sheetStateFilter = rememberModalBottomSheetState()
   val sheetStateLocation = rememberModalBottomSheetState()
-  val servicesListItem = SERVICES_LIST.find { it.service == selectedService } ?: SERVICES_LIST[0]
+  val servicesListItem =
+      SERVICES_LIST.find { it.service == selectedService } ?: SERVICES_LIST.last()
   Scaffold(
       modifier = Modifier.fillMaxSize(),
       topBar = {
