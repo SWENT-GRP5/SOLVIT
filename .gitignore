@@ -51,6 +51,11 @@ functions/.env.*
 functions/lib/
 functions/.npmrc
 functions/package-lock.json
+functions/.eslintcache
+functions/coverage/
+functions/.nyc_output/
+functions/dist/
+functions/tsconfig.dev.json
 .firebaserc
 
 # MacOS
