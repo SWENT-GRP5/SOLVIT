@@ -8,6 +8,7 @@ import com.android.solvit.shared.ui.theme.Cleaner
 import com.android.solvit.shared.ui.theme.Electrician
 import com.android.solvit.shared.ui.theme.EventPlanner
 import com.android.solvit.shared.ui.theme.HairStylist
+import com.android.solvit.shared.ui.theme.Other
 import com.android.solvit.shared.ui.theme.PersonalTrainer
 import com.android.solvit.shared.ui.theme.Photographer
 import com.android.solvit.shared.ui.theme.Plumber
@@ -18,6 +19,7 @@ data class ServicesListItem(val service: Services, val image: Int, val icon: Int
 
 val SERVICES_LIST =
     listOf(
+        ServicesListItem(Services.OTHER, R.drawable.other, R.drawable.ic_other, Other),
         ServicesListItem(Services.PLUMBER, R.drawable.plumber, R.drawable.ic_plumber, Plumber),
         ServicesListItem(
             Services.ELECTRICIAN, R.drawable.electrician, R.drawable.ic_electrician, Electrician),
