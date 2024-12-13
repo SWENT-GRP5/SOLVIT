@@ -22,9 +22,6 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScrollableTabRow
@@ -77,23 +74,23 @@ fun RequestsOverviewScreen(
         viewModel(factory = ServiceRequestViewModel.Factory),
     authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory),
 ) {
-    // Lock Orientation to Portrait
-    val context = LocalContext.current
-    DisposableEffect(Unit) {
-        val activity = context as? ComponentActivity
-        activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-        onDispose { activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED }
-    }
+  // Lock Orientation to Portrait
+  val context = LocalContext.current
+  DisposableEffect(Unit) {
+    val activity = context as? ComponentActivity
+    activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+    onDispose { activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED }
+  }
 
-    Scaffold(
-        modifier = Modifier.testTag("requestsOverviewScreen"),
-        bottomBar = {
-            val currentRoute = navigationActions.currentRoute()
-            BottomNavigationMenu(
-                onTabSelect = { navigationActions.navigateTo(it) },
-                tabList = LIST_TOP_LEVEL_DESTINATION_SEEKER,
-                selectedItem = currentRoute)
-        }) {
+  Scaffold(
+      modifier = Modifier.testTag("requestsOverviewScreen"),
+      bottomBar = {
+        val currentRoute = navigationActions.currentRoute()
+        BottomNavigationMenu(
+            onTabSelect = { navigationActions.navigateTo(it) },
+            tabList = LIST_TOP_LEVEL_DESTINATION_SEEKER,
+            selectedItem = currentRoute)
+      }) {
         val user = authViewModel.user.collectAsState()
         val userId = user.value?.uid ?: "-1"
         val allRequests =
@@ -103,246 +100,246 @@ fun RequestsOverviewScreen(
         val statusTabs = ServiceRequestStatus.entries.toTypedArray()
 
         Column {
-            TopOrdersSection()
-            CategoriesFiltersSection()
+          TopOrdersSection()
+          CategoriesFiltersSection()
 
-            // Tabs for filtering by status
-            ScrollableTabRow(
-                selectedTabIndex = selectedTab,
-                modifier = Modifier.fillMaxWidth().testTag("statusTabRow"),
-                containerColor = colorScheme.background,
-                contentColor = colorScheme.primary) {
+          // Tabs for filtering by status
+          ScrollableTabRow(
+              selectedTabIndex = selectedTab,
+              modifier = Modifier.fillMaxWidth().testTag("statusTabRow"),
+              containerColor = colorScheme.background,
+              contentColor = colorScheme.primary) {
                 statusTabs.forEachIndexed { index, status ->
-                    Tab(
-                        selected = selectedTab == index,
-                        onClick = { selectedTab = index },
-                        text = {
-                            Text(
-                                text = ServiceRequestStatus.format(status),
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = getStatusColor(status))
+                  Tab(
+                      selected = selectedTab == index,
+                      onClick = { selectedTab = index },
+                      text = {
+                        Text(
+                            text = ServiceRequestStatus.format(status),
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = getStatusColor(status))
+                      })
+                }
+              }
+
+          val filteredRequests =
+              if (selectedTab < statusTabs.size) {
+                allRequests.filter { it.status == statusTabs[selectedTab] }
+              } else {
+                allRequests
+              }
+
+          if (filteredRequests.isEmpty()) {
+            NoRequestsText()
+          } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("requestsList"),
+                verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                  items(filteredRequests) { request ->
+                    RequestItemRow(
+                        request = request,
+                        onClick = {
+                          requestViewModel.selectRequest(request)
+                          navigationActions.navigateTo(Route.BOOKING_DETAILS)
                         })
+                  }
                 }
-            }
-
-            val filteredRequests =
-                if (selectedTab < statusTabs.size) {
-                    allRequests.filter { it.status == statusTabs[selectedTab] }
-                } else {
-                    allRequests
-                }
-
-            if (filteredRequests.isEmpty()) {
-                NoRequestsText()
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("requestsList"),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    items(filteredRequests) { request ->
-                        RequestItemRow(
-                            request = request,
-                            onClick = {
-                                requestViewModel.selectRequest(request)
-                                navigationActions.navigateTo(Route.BOOKING_DETAILS)
-                            })
-                    }
-                }
-            }
+          }
         }
-    }
+      }
 }
 
 @Composable
 fun TopOrdersSection() {
-    TopAppBarInbox(
-        titre = "Orders",
-        testTagGeneral = "topOrdersSection",
-    )
+  TopAppBarInbox(
+      titre = "Orders",
+      testTagGeneral = "topOrdersSection",
+  )
 }
 
 @Composable
 fun NoRequestsText() {
-    Column(
-        modifier = Modifier.fillMaxSize().testTag("noServiceRequestsScreen"),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Text(
-            text = "You have no active service request.\nCreate one.",
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            color = colorScheme.onSurfaceVariant)
-    }
+  Column(
+      modifier = Modifier.fillMaxSize().testTag("noServiceRequestsScreen"),
+      verticalArrangement = Arrangement.Center,
+      horizontalAlignment = Alignment.CenterHorizontally,
+  ) {
+    Text(
+        text = "You have no active service request.\nCreate one.",
+        fontSize = 20.sp,
+        fontWeight = FontWeight.Bold,
+        color = colorScheme.onSurfaceVariant)
+  }
 }
 
 @Composable
 fun CategoriesFiltersSection() {
-    var showFilters by remember { mutableStateOf(false) }
-    var showSort by remember { mutableStateOf(false) }
-    Column {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).testTag("filterRequestsBar"),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically) {
-            Box(
-                modifier =
-                Modifier.weight(1f)
-                    .background(LightBlue, shape = RoundedCornerShape(16.dp))
-                    .clickable { showFilters = !showFilters }
-                    .testTag("categoriesSettings")) {
+  var showFilters by remember { mutableStateOf(false) }
+  var showSort by remember { mutableStateOf(false) }
+  Column {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).testTag("filterRequestsBar"),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically) {
+          Box(
+              modifier =
+                  Modifier.weight(1f)
+                      .background(LightBlue, shape = RoundedCornerShape(16.dp))
+                      .clickable { showFilters = !showFilters }
+                      .testTag("categoriesSettings")) {
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 16.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center) {
-                    Image(
-                        painter = painterResource(id = R.drawable.filter_square),
-                        contentDescription = "categories filter",
-                        modifier = Modifier.size(24.dp).weight(0.3f).padding(horizontal = 4.dp),
-                        colorFilter = ColorFilter.tint(colorScheme.onPrimary))
-                    Text(
-                        text = "Services",
-                        fontWeight = FontWeight.Bold,
-                        color = colorScheme.onPrimary,
-                        modifier = Modifier.weight(0.8f),
-                        maxLines = 1,
-                        softWrap = false)
-                }
-            }
+                      Image(
+                          painter = painterResource(id = R.drawable.filter_square),
+                          contentDescription = "categories filter",
+                          modifier = Modifier.size(24.dp).weight(0.3f).padding(horizontal = 4.dp),
+                          colorFilter = ColorFilter.tint(colorScheme.onPrimary))
+                      Text(
+                          text = "Services",
+                          fontWeight = FontWeight.Bold,
+                          color = colorScheme.onPrimary,
+                          modifier = Modifier.weight(0.8f),
+                          maxLines = 1,
+                          softWrap = false)
+                    }
+              }
 
-            Box(
-                modifier =
-                Modifier.weight(1f)
-                    .background(LightOrange, shape = RoundedCornerShape(16.dp))
-                    .clickable { showSort = !showSort }
-                    .testTag("categoriesSort")) {
+          Box(
+              modifier =
+                  Modifier.weight(1f)
+                      .background(LightOrange, shape = RoundedCornerShape(16.dp))
+                      .clickable { showSort = !showSort }
+                      .testTag("categoriesSort")) {
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 16.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center) {
-                    Image(
-                        painter = painterResource(id = R.drawable.filter_circle),
-                        contentDescription = "categories sort",
-                        modifier = Modifier.size(24.dp).weight(0.3f).padding(horizontal = 4.dp),
-                        colorFilter = ColorFilter.tint(colorScheme.onPrimary))
-                    Text(
-                        text = "Sort",
-                        fontWeight = FontWeight.Bold,
-                        color = colorScheme.onPrimary,
-                        modifier = Modifier.weight(0.8f),
-                        maxLines = 1,
-                        softWrap = false)
-                }
-            }
+                      Image(
+                          painter = painterResource(id = R.drawable.filter_circle),
+                          contentDescription = "categories sort",
+                          modifier = Modifier.size(24.dp).weight(0.3f).padding(horizontal = 4.dp),
+                          colorFilter = ColorFilter.tint(colorScheme.onPrimary))
+                      Text(
+                          text = "Sort",
+                          fontWeight = FontWeight.Bold,
+                          color = colorScheme.onPrimary,
+                          modifier = Modifier.weight(0.8f),
+                          maxLines = 1,
+                          softWrap = false)
+                    }
+              }
         }
 
-        if (showFilters) {
-            CategoriesFilter()
-        }
-        if (showSort) {
-            CategoriesSort()
-        }
+    if (showFilters) {
+      CategoriesFilter()
     }
+    if (showSort) {
+      CategoriesSort()
+    }
+  }
 }
 
 @Composable
 fun CategoriesFilter() {
-    val context = LocalContext.current
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
-        modifier = Modifier.padding(16.dp).testTag("categoriesFilter")) {
+  val context = LocalContext.current
+  LazyVerticalGrid(
+      columns = GridCells.Fixed(2),
+      modifier = Modifier.padding(16.dp).testTag("categoriesFilter")) {
         items(SERVICES_LIST.size) {
-            FilterItem(Services.format(SERVICES_LIST[it].service)) {
-                Toast.makeText(context, "This feature is not yet implemented", Toast.LENGTH_SHORT)
-                    .show()
-            }
+          FilterItem(Services.format(SERVICES_LIST[it].service)) {
+            Toast.makeText(context, "This feature is not yet implemented", Toast.LENGTH_SHORT)
+                .show()
+          }
         }
-    }
+      }
 }
 
 @Composable
 fun CategoriesSort() {
-    val context = LocalContext.current
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
-        modifier = Modifier.padding(16.dp).testTag("categoriesSortFilter")) {
+  val context = LocalContext.current
+  LazyVerticalGrid(
+      columns = GridCells.Fixed(2),
+      modifier = Modifier.padding(16.dp).testTag("categoriesSortFilter")) {
         item {
-            FilterItem("Sort by date") {
-                Toast.makeText(context, "This feature is not yet implemented", Toast.LENGTH_SHORT)
-                    .show()
-            }
+          FilterItem("Sort by date") {
+            Toast.makeText(context, "This feature is not yet implemented", Toast.LENGTH_SHORT)
+                .show()
+          }
         }
         item {
-            FilterItem("Sort by status") {
-                Toast.makeText(context, "This feature is not yet implemented", Toast.LENGTH_SHORT)
-                    .show()
-            }
+          FilterItem("Sort by status") {
+            Toast.makeText(context, "This feature is not yet implemented", Toast.LENGTH_SHORT)
+                .show()
+          }
         }
-    }
+      }
 }
 
 @Composable
 fun FilterItem(text: String, filter: () -> Unit) {
-    var isFilterSelected by remember { mutableStateOf(false) }
-    val borderColor = if (isFilterSelected) colorScheme.onBackground else colorScheme.onSurfaceVariant
-    Box(
-        modifier =
-        Modifier.padding(8.dp)
-            .border(1.dp, borderColor, RoundedCornerShape(8.dp))
-            .clickable {
+  var isFilterSelected by remember { mutableStateOf(false) }
+  val borderColor = if (isFilterSelected) colorScheme.onBackground else colorScheme.onSurfaceVariant
+  Box(
+      modifier =
+          Modifier.padding(8.dp)
+              .border(1.dp, borderColor, RoundedCornerShape(8.dp))
+              .clickable {
                 isFilterSelected = !isFilterSelected
                 filter()
-            }
-            .testTag("$text FilterItem"),
-        contentAlignment = Alignment.Center) {
+              }
+              .testTag("$text FilterItem"),
+      contentAlignment = Alignment.Center) {
         Text(text = text)
-    }
+      }
 }
 
 @Composable
 fun RequestItemRow(request: ServiceRequest, onClick: () -> Unit) {
-    // Use a Box to wrap the entire row and the bottom bar
-    val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-    val date = dateFormat.format(request.dueDate.toDate())
-    Box(
-        modifier =
-        Modifier.fillMaxWidth()
-            .clickable { onClick() }
-            .border(1.dp, colorScheme.onSurfaceVariant, RoundedCornerShape(16.dp))
-            .padding(horizontal = 16.dp, vertical = 12.dp)
-            .testTag("requestListItem")) {
+  // Use a Box to wrap the entire row and the bottom bar
+  val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+  val date = dateFormat.format(request.dueDate.toDate())
+  Box(
+      modifier =
+          Modifier.fillMaxWidth()
+              .clickable { onClick() }
+              .border(1.dp, colorScheme.onSurfaceVariant, RoundedCornerShape(16.dp))
+              .padding(horizontal = 16.dp, vertical = 12.dp)
+              .testTag("requestListItem")) {
         Column {
-            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                val image = request.imageUrl
-                AsyncImage(
-                    model = if (!image.isNullOrEmpty()) image else R.drawable.no_photo,
-                    placeholder = painterResource(id = R.drawable.loading),
-                    error = painterResource(id = R.drawable.error),
-                    contentDescription = "service request image",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.size(48.dp).clip(RoundedCornerShape(12.dp)))
-                Column {
-                    Text(text = request.title, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-                    Text(
-                        text = Services.format(request.type),
-                        fontSize = 14.sp,
-                    )
-                }
+          Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            val image = request.imageUrl
+            AsyncImage(
+                model = if (!image.isNullOrEmpty()) image else R.drawable.no_photo,
+                placeholder = painterResource(id = R.drawable.loading),
+                error = painterResource(id = R.drawable.error),
+                contentDescription = "service request image",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.size(48.dp).clip(RoundedCornerShape(12.dp)))
+            Column {
+              Text(text = request.title, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+              Text(
+                  text = Services.format(request.type),
+                  fontSize = 14.sp,
+              )
             }
-            Spacer(modifier = Modifier.size(12.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween) {
+          }
+          Spacer(modifier = Modifier.size(12.dp))
+          Row(
+              modifier = Modifier.fillMaxWidth(),
+              horizontalArrangement = Arrangement.SpaceBetween) {
                 Text(
                     text = ServiceRequestStatus.format(request.status),
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
                     color = getStatusColor(request.status))
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(text = "Until:", fontSize = 14.sp)
-                    Text(text = date, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                  Text(text = "Until:", fontSize = 14.sp)
+                  Text(text = date, fontWeight = FontWeight.Bold, fontSize = 14.sp)
                 }
-            }
+              }
         }
-    }
+      }
 }
