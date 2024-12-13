@@ -24,6 +24,7 @@ import com.google.firebase.storage.ktx.storage
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters
@@ -517,83 +518,97 @@ open class ProviderCalendarViewModel(
     val meetingDate =
         LocalDateTime.ofInstant(meetingTimestamp.toDate().toInstant(), ZoneId.systemDefault())
 
-    // Create a TimeSlot for the 1-hour service duration
-    val timeSlot =
-        TimeSlot(
-            meetingDate.hour,
-            meetingDate.minute,
-            meetingDate.plusHours(1).hour,
-            meetingDate.plusHours(1).minute)
+    val schedule = currentProvider.value.schedule
 
-    val dayOfWeek = meetingDate.dayOfWeek.name
+    // Check for off-time conflicts first
+    val startOfDay = meetingDate.toLocalDate().atStartOfDay()
+    val endOfDay = startOfDay.plusDays(1).minusNanos(1)
+    val offTimeExceptions = schedule.getExceptions(startOfDay, endOfDay, ExceptionType.OFF_TIME)
+    println("Checking off-time conflicts:")
+    println("- Meeting date: $meetingDate")
+    println("- Off-time exceptions: $offTimeExceptions")
 
-    println("Checking conflict for date: $meetingDate ($dayOfWeek)")
-    println("Time slot: $timeSlot")
-
-    // Check if it's during regular hours
-    val regularHours = currentProvider.value.schedule.regularHours[dayOfWeek] ?: emptyList()
-    println("Regular hours for $dayOfWeek: $regularHours")
-
-    val duringRegularHours =
-        regularHours.any { slot -> timeSlot.start >= slot.start && timeSlot.end <= slot.end }
-    println("During regular hours: $duringRegularHours")
-
-    // Check exceptions
-    val exceptions =
-        currentProvider.value.schedule.exceptions.filter {
-          it.date.toLocalDate() == meetingDate.toLocalDate()
-        }
-    println("Relevant exceptions: $exceptions")
+    val requestSlot = TimeSlot(meetingDate.toLocalTime(), meetingDate.plusHours(1).toLocalTime())
+    println("- Request slot: $requestSlot")
 
     val hasOffTimeConflict =
-        exceptions
-            .filter { it.type == ExceptionType.OFF_TIME }
-            .any { exception -> exception.timeSlots.any { it.overlaps(timeSlot) } }
-    println("Has off-time conflict: $hasOffTimeConflict")
+        offTimeExceptions.any { exception ->
+          exception.timeSlots.any { slot ->
+            val offTimeSlot =
+                TimeSlot(
+                    LocalTime.of(slot.startHour, slot.startMinute),
+                    LocalTime.of(slot.endHour, slot.endMinute))
+            println("  - Checking against off-time slot: $offTimeSlot")
+            // Check if the request slot overlaps with the off-time slot
+            val overlaps =
+                !(requestSlot.end <= offTimeSlot.start || requestSlot.start >= offTimeSlot.end)
+            println("  - Overlaps: $overlaps")
+            overlaps
+          }
+        }
+    if (hasOffTimeConflict) {
+      println("Found off-time conflict")
+      return ConflictResult(true, "This time slot conflicts with your off-time schedule")
+    }
 
-    // If outside regular hours, check for EXTRA_TIME exception
-    val hasExtraTimeException =
-        if (!duringRegularHours) {
-          exceptions
-              .filter { it.type == ExceptionType.EXTRA_TIME }
-              .any { exception ->
-                exception.timeSlots.any { slot ->
-                  timeSlot.start >= slot.start && timeSlot.end <= slot.end
-                }
-              }
-        } else true // During regular hours, so no need for EXTRA_TIME
-    println("Has extra time exception: $hasExtraTimeException")
+    // Check if it's outside regular hours
+    val regularHours = schedule.regularHours[meetingDate.dayOfWeek.name] ?: emptyList()
+    println("\nChecking regular hours:")
+    println("- Day of week: ${meetingDate.dayOfWeek}")
+    println("- Regular hours: $regularHours")
+    println("- Request slot: $requestSlot")
+    val requestSlot2 = TimeSlot(meetingDate.toLocalTime(), meetingDate.plusHours(1).toLocalTime())
+    val duringRegularHours =
+        regularHours.any { slot ->
+          val slotStart = LocalTime.of(slot.startHour, slot.startMinute)
+          val slotEnd = LocalTime.of(slot.endHour, slot.endMinute)
+          requestSlot2.start >= slotStart && requestSlot2.end <= slotEnd
+        }
 
-    // Check other service requests
+    if (!duringRegularHours) {
+      // Check for extra time exceptions
+      val extraTimeExceptions =
+          schedule.getExceptions(meetingDate, meetingDate, ExceptionType.EXTRA_TIME)
+      val hasExtraTime =
+          extraTimeExceptions.any { exception ->
+            exception.timeSlots.any { slot ->
+              val slotStart = LocalTime.of(slot.startHour, slot.startMinute)
+              val slotEnd = LocalTime.of(slot.endHour, slot.endMinute)
+              requestSlot2.start >= slotStart && requestSlot2.end <= slotEnd
+            }
+          }
+      if (!hasExtraTime) {
+        return ConflictResult(true, "This time slot is outside your regular working hours")
+      }
+    }
+
+    // Check for conflicts with other service requests
     val acceptedRequests = serviceRequestViewModel.acceptedRequests.value
-    println("Accepted requests: $acceptedRequests")
-
     val hasServiceRequestConflict =
         acceptedRequests
             .filter { request ->
+              request.uid != serviceRequest.uid && // Don't conflict with self
+                  request.meetingDate?.let { timestamp ->
+                    LocalDateTime.ofInstant(timestamp.toDate().toInstant(), ZoneId.systemDefault())
+                        .toLocalDate() == meetingDate.toLocalDate()
+                  } ?: false
+            }
+            .any { request ->
               request.meetingDate?.let { timestamp ->
-                LocalDateTime.ofInstant(timestamp.toDate().toInstant(), ZoneId.systemDefault())
-                    .toLocalDate() == meetingDate.toLocalDate()
+                val otherDate =
+                    LocalDateTime.ofInstant(timestamp.toDate().toInstant(), ZoneId.systemDefault())
+                val requestSlot3 =
+                    TimeSlot(meetingDate.toLocalTime(), meetingDate.plusHours(1).toLocalTime())
+                val otherSlot =
+                    TimeSlot(otherDate.toLocalTime(), otherDate.plusHours(1).toLocalTime())
+                requestSlot3.overlaps(otherSlot)
               } ?: false
             }
-            .mapNotNull { request ->
-              request.meetingDate?.let { timestamp ->
-                val date =
-                    LocalDateTime.ofInstant(timestamp.toDate().toInstant(), ZoneId.systemDefault())
-                TimeSlot(date.hour, date.minute, date.plusHours(1).hour, date.plusHours(1).minute)
-              }
-            }
-            .any { it.overlaps(timeSlot) }
-    println("Has service request conflict: $hasServiceRequestConflict")
 
-    return when {
-      hasOffTimeConflict ->
-          ConflictResult(true, "This time slot conflicts with your off-time schedule")
-      hasServiceRequestConflict ->
-          ConflictResult(true, "This time slot conflicts with another accepted service request")
-      !duringRegularHours && !hasExtraTimeException ->
-          ConflictResult(true, "This time slot is outside your regular working hours")
-      else -> ConflictResult(false, "No conflicts")
+    return if (hasServiceRequestConflict) {
+      ConflictResult(true, "This time slot conflicts with another accepted service request")
+    } else {
+      ConflictResult(false, "No conflicts")
     }
   }
 
