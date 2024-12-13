@@ -95,9 +95,8 @@ fun SolvitApp() {
   val chatViewModel = viewModel<ChatViewModel>(factory = ChatViewModel.Factory)
   val chatAssistantViewModel =
       viewModel<ChatAssistantViewModel>(factory = ChatAssistantViewModel.Factory)
-  val calendarViewModel = viewModel {
-    ProviderCalendarViewModel(authViewModel, serviceRequestViewModel)
-  }
+  val calendarViewModel =
+      viewModel<ProviderCalendarViewModel>(factory = ProviderCalendarViewModel.Factory)
   val aiSolverViewModel = viewModel<AiSolverViewModel>(factory = AiSolverViewModel.Factory)
   val notificationViewModel =
       viewModel<NotificationsViewModel>(factory = NotificationsViewModel.Factory)
@@ -281,8 +280,8 @@ fun SeekerUI(
     composable(Route.EDIT_REQUEST) {
       EditRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
     }
-    composable(Route.MAP) { SeekerMapScreen(listProviderViewModel, navigationActions) }
-    navigation(startDestination = Screen.PROFILE, route = Route.PROFILE) {
+    composable(Route.MAP_OF_SEEKER) { SeekerMapScreen(listProviderViewModel, navigationActions) }
+    navigation(startDestination = Screen.PROFILE, route = Route.SEEKER_PROFILE) {
       composable(Screen.PROFILE) {
         SeekerProfileScreen(seekerProfileViewModel, navigationActions, authViewModel)
       }
@@ -329,12 +328,19 @@ fun ProviderUI(
           chatViewModel = chatViewModel,
           seekerProfileViewModel = seekerProfileViewModel)
     }
-    composable(Route.MAP_OF_SEEKERS) {
+    composable(Route.MAP_OF_PROVIDER) {
       ProviderMapScreen(
           serviceRequestViewModel = serviceRequestViewModel, navigationActions = navigationActions)
     }
     composable(Screen.CALENDAR) {
       ProviderCalendarScreen(navigationActions = navigationActions, viewModel = calendarViewModel)
+    }
+    composable(Screen.MY_JOBS) {
+      RequestsDashboardScreen(
+          navigationActions,
+          serviceRequestViewModel,
+          authViewModel = authViewModel,
+          listProviderViewModel = listProviderViewModel)
     }
     composable(Route.BOOKING_DETAILS) {
       ServiceBookingScreen(

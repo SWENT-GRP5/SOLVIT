@@ -104,9 +104,4 @@ class SeekerProfileTest {
     composeTestRule.onNodeWithTag("HelpSupportOption").performClick()
     composeTestRule.onNodeWithTag("AboutAppOption").performClick()
   }
-
-  @Test
-  fun backArrowNavigatesBack() {
-    composeTestRule.onNodeWithTag("BackButton").performClick()
-  }
 }

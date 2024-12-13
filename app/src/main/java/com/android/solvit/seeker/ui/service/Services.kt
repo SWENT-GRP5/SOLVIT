@@ -7,7 +7,6 @@ import androidx.activity.ComponentActivity
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -43,6 +42,7 @@ import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -82,8 +82,16 @@ fun ServicesScreen(
     seekerProfileViewModel: SeekerProfileViewModel,
     listProviderViewModel: ListProviderViewModel
 ) {
+
   // Lock Orientation to Portrait
   val localContext = LocalContext.current
+  LaunchedEffect(navigationActions.currentRoute()) {
+    // Clear the selected service when this screen is entered
+    if (navigationActions.currentRoute() == Route.SERVICES) {
+      listProviderViewModel.clearSelectedService()
+      listProviderViewModel.refreshFilters()
+    }
+  }
   DisposableEffect(Unit) {
     val activity = localContext as? ComponentActivity
     activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
@@ -110,7 +118,7 @@ fun ServicesScreen(
           LazyColumn(modifier = Modifier.fillMaxSize()) {
             item { Spacer(Modifier.size(16.dp)) }
             item { DiscountSection(navigationActions, listProviderViewModel) }
-            item { ShortcutsSection(navigationActions, listProviderViewModel) }
+            item { ShortcutsSection(navigationActions) }
             item { CategoriesSection(searchViewModel, listProviderViewModel, navigationActions) }
             item { PerformersSection(listProviderViewModel, navigationActions) }
             item { Spacer(Modifier.size(40.dp)) }
@@ -152,7 +160,7 @@ fun TopSection(
             contentDescription = "profile picture",
             Modifier.size(40.dp)
                 .clip(CircleShape)
-                .clickable { navigationActions.navigateTo(Route.PROFILE) }
+                .clickable { navigationActions.navigateTo(Route.SEEKER_PROFILE) }
                 .testTag("servicesScreenProfileImage"))
         Column(horizontalAlignment = Alignment.Start) {
           // User's Location
@@ -246,7 +254,6 @@ fun DiscountSection(
 @Composable
 fun ShortcutsSection(
     navigationActions: NavigationActions,
-    listProviderViewModel: ListProviderViewModel
 ) {
   Column(
       modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("servicesScreenShortcuts"),
@@ -310,7 +317,7 @@ fun ShortcutsSection(
                   modifier =
                       Modifier.weight(1f)
                           .background(LightRed, shape = RoundedCornerShape(16.dp))
-                          .clickable { navigationActions.navigateTo(Route.MAP) }
+                          .clickable { navigationActions.navigateTo(Route.MAP_OF_SEEKER) }
                           .testTag("servicesScreenMapShortcut")) {
                     Column(
                         modifier = Modifier.padding(16.dp).fillMaxWidth(),

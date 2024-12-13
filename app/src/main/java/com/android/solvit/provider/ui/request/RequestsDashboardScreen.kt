@@ -1,5 +1,6 @@
 package com.android.solvit.provider.ui.request
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -51,6 +52,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestStatus
@@ -62,6 +64,9 @@ import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
 import java.text.SimpleDateFormat
 import java.util.Locale
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 /**
  * Composable function that displays the Requests Dashboard screen.
@@ -69,13 +74,16 @@ import java.util.Locale
  * @param navigationActions Actions for navigation.
  * @param serviceRequestViewModel ViewModel for managing service requests.
  * @param authViewModel ViewModel for managing authentication.
+ * @param listProviderViewModel View model for list of providers
  */
 @Composable
 fun RequestsDashboardScreen(
     navigationActions: NavigationActions,
     serviceRequestViewModel: ServiceRequestViewModel =
         viewModel(factory = ServiceRequestViewModel.Factory),
-    authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory)
+    authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory),
+    listProviderViewModel: ListProviderViewModel =
+        viewModel(factory = ListProviderViewModel.Factory)
 ) {
   val user by authViewModel.user.collectAsState()
   // Selected tab index
@@ -85,6 +93,11 @@ fun RequestsDashboardScreen(
   Scaffold(
       topBar = {
         RequestsTopBar(title = "Job Dashboard", onBackClicked = { navigationActions.goBack() })
+      },
+      bottomBar = {
+        val currentRoute = navigationActions.currentRoute() ?: "default_route"
+        Log.e(
+            "ProviderCalendarScreen", "Current route passed to BottomNavigationMenu: $currentRoute")
       },
       content = { innerPadding ->
         Column(
@@ -98,7 +111,9 @@ fun RequestsDashboardScreen(
                   selectedTab = selectedTab,
                   providerId = user?.uid ?: "-1",
                   serviceRequestViewModel = serviceRequestViewModel,
-                  navigationActions = navigationActions)
+                  navigationActions = navigationActions,
+                  listProviderViewModel = listProviderViewModel,
+              )
             }
       })
 }
@@ -107,7 +122,6 @@ fun RequestsDashboardScreen(
  * Composable function that displays the top app bar for the Requests Dashboard screen.
  *
  * @param title Title of the screen.
- * @param onBackClicked Callback to handle back button click.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -168,6 +182,7 @@ fun StatusTabs(selectedTab: Int, tabs: Array<ServiceRequestStatus>, onTabSelecte
  * screen.
  *
  * @param providerId ID of the current provider.
+ * @param listProviderViewModel view model to fetch infos of the provider
  * @param selectedTab Index of the selected tab.
  * @param serviceRequestViewModel ViewModel for managing service requests.
  * @param navigationActions Actions for navigation.
@@ -175,6 +190,7 @@ fun StatusTabs(selectedTab: Int, tabs: Array<ServiceRequestStatus>, onTabSelecte
 @Composable
 fun JobSectionContent(
     selectedTab: Int,
+    listProviderViewModel: ListProviderViewModel,
     providerId: String,
     serviceRequestViewModel: ServiceRequestViewModel,
     navigationActions: NavigationActions
@@ -182,7 +198,9 @@ fun JobSectionContent(
   when (selectedTab) {
     0 -> PendingJobsSection(providerId, serviceRequestViewModel, navigationActions)
     1 -> AcceptedJobSection(providerId, serviceRequestViewModel, navigationActions)
-    2 -> ScheduledJobsSection(providerId, serviceRequestViewModel, navigationActions)
+    2 ->
+        ScheduledJobsSection(
+            providerId, serviceRequestViewModel, navigationActions, listProviderViewModel)
     3 -> CompletedJobsSection(providerId, serviceRequestViewModel, navigationActions)
     4 -> CanceledJobsSection(providerId, serviceRequestViewModel, navigationActions)
     5 -> ArchivedJobsSection(providerId, serviceRequestViewModel, navigationActions)
@@ -322,13 +340,15 @@ fun AcceptedJobSection(
  *
  * @param providerId ID of the current provider.
  * @param viewModel ViewModel for managing service requests.
+ * @param listProviderViewModel ViewModel
  * @param navigationActions Actions for navigation.
  */
 @Composable
 fun ScheduledJobsSection(
     providerId: String,
     viewModel: ServiceRequestViewModel,
-    navigationActions: NavigationActions
+    navigationActions: NavigationActions,
+    listProviderViewModel: ListProviderViewModel
 ) {
   val context = LocalContext.current
   val scheduledRequests by viewModel.scheduledRequests.collectAsState()
@@ -367,7 +387,19 @@ fun ScheduledJobsSection(
         onContactCustomer = {
           Toast.makeText(context, "Contact Not yet Implemented", Toast.LENGTH_SHORT).show()
         },
-        onMarkAsCompleted = { request -> viewModel.completeRequest(request) },
+        onMarkAsCompleted = { request ->
+          CoroutineScope(Dispatchers.Main).launch {
+            viewModel.completeRequest(request)
+            val provider = listProviderViewModel.fetchProviderById(providerId)
+            // Update nbr of jobs completed of provider
+            if (provider != null) {
+              listProviderViewModel.updateProvider(
+                  provider.copy(nbrOfJobs = provider.nbrOfJobs + 1))
+            } else {
+              Log.e("JobsSection", "Failed to fetch provider")
+            }
+          }
+        },
         onCancelRequest = { request -> viewModel.cancelRequest(request) },
         onChat = { Toast.makeText(context, "Chat Not yet Implemented", Toast.LENGTH_SHORT).show() })
   }
