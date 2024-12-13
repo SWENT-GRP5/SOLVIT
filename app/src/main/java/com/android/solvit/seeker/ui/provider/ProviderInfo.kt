@@ -57,7 +57,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -361,7 +360,6 @@ fun ProviderPackages(
  */
 @Composable
 fun ProviderTopBar(onBackClick: () -> Unit) {
-  val context = LocalContext.current
   Row(
       modifier =
           Modifier.fillMaxWidth()

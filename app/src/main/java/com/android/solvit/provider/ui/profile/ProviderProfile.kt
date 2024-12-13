@@ -63,6 +63,7 @@ import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_PROVIDER
 import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.navigation.Screen
 
 /**
@@ -103,7 +104,7 @@ fun ProviderProfileScreen(
         BottomNavigationMenu(
             onTabSelect = { navigationActions.navigateTo(it) },
             tabList = LIST_TOP_LEVEL_DESTINATION_PROVIDER,
-            selectedItem = Screen.PROVIDER_PROFILE)
+            selectedItem = Route.PROFILE)
       },
       containerColor = Color.Transparent,
   ) { paddingValues ->

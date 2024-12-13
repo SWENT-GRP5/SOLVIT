@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -85,11 +84,10 @@ fun ProviderCalendarScreen(
             colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background))
       },
       bottomBar = {
-        val currentRoute = navigationActions.currentRoute() ?: "default_route"
         BottomNavigationMenu(
             onTabSelect = { navigationActions.navigateTo(it.route) },
             tabList = LIST_TOP_LEVEL_DESTINATION_PROVIDER,
-            selectedItem = currentRoute)
+            selectedItem = Route.CALENDAR)
       }) { paddingValues ->
         Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
           CalendarViewToggle(

@@ -67,7 +67,7 @@ class ProviderMapScreenTest {
       onSuccess(testRequests)
     }
 
-    `when`(navigationActions.currentRoute()).thenReturn(Route.MAP_OF_SEEKER)
+    `when`(navigationActions.currentRoute()).thenReturn(Route.MAP)
   }
 
   @Test

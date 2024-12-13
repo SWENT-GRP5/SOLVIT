@@ -238,15 +238,15 @@ fun CreateRequestScreen(
                           requestViewModel.getServiceRequestById(serviceRequest.uid) {
                               updatedRequest ->
                             requestViewModel.selectRequest(updatedRequest)
-                              navigationActions.navigateAndSetBackStack(
-                                  Route.BOOKING_DETAILS, listOf(Route.REQUESTS_OVERVIEW))
+                            navigationActions.navigateAndSetBackStack(
+                                Route.BOOKING_DETAILS, listOf(Route.REQUESTS_OVERVIEW))
                           }
                         }
                   } else {
                     requestViewModel.saveServiceRequest(serviceRequest)
                     requestViewModel.selectRequest(serviceRequest)
-                      navigationActions.navigateAndSetBackStack(
-                          Route.BOOKING_DETAILS, listOf(Route.REQUESTS_OVERVIEW))
+                    navigationActions.navigateAndSetBackStack(
+                        Route.BOOKING_DETAILS, listOf(Route.REQUESTS_OVERVIEW))
                   }
                   requestViewModel.unSelectProvider()
                   notificationViewModel.sendNotifications(

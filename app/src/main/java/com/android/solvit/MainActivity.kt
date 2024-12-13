@@ -231,7 +231,8 @@ fun SeekerUI(
           listProviderViewModel,
           reviewViewModel,
           serviceRequestViewModel,
-          authViewModel)
+          authViewModel,
+          packageProposalViewModel)
     }
 
     // Service Requests
@@ -346,23 +347,15 @@ fun ProviderUI(
     }
 
     // Map
-    composable(Route.MAP) {
-      ProviderMapScreen(
-          serviceRequestViewModel, navigationActions)
-    }
+    composable(Route.MAP) { ProviderMapScreen(serviceRequestViewModel, navigationActions) }
 
     // Calendar
-    composable(Route.CALENDAR) {
-      ProviderCalendarScreen(navigationActions, calendarViewModel)
-    }
+    composable(Route.CALENDAR) { ProviderCalendarScreen(navigationActions, calendarViewModel) }
 
     // Jobs & Bookings
     composable(Route.JOBS) {
       RequestsDashboardScreen(
-          navigationActions,
-          serviceRequestViewModel,
-          authViewModel,
-          listProviderViewModel)
+          navigationActions, serviceRequestViewModel, authViewModel, listProviderViewModel)
     }
     composable(Route.BOOKING_DETAILS) {
       ServiceBookingScreen(

@@ -88,7 +88,7 @@ fun SeekerMapScreen(
         BottomNavigationMenu(
             onTabSelect = { navigationActions.navigateTo(it) },
             tabList = LIST_TOP_LEVEL_DESTINATION_SEEKER,
-            selectedItem = Route.MAP_OF_SEEKER)
+            selectedItem = Route.MAP)
       },
       markersLoading = markersLoading.value)
 }
