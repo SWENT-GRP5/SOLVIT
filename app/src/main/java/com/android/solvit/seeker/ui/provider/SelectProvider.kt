@@ -204,9 +204,8 @@ fun TopAppBar(
                       Spacer(modifier = Modifier.height(4.dp))
                       Text(
                           text = "Find the best $serviceName near you",
-                          style =
-                              typography.bodyMedium.copy(
-                                  color = colorScheme.onPrimary.copy(alpha = 0.8f)))
+                          style = typography.bodyMedium.copy(color = colorScheme.onPrimary),
+                          fontWeight = FontWeight.Medium)
                     }
                   }
 
@@ -370,7 +369,7 @@ fun DisplayPopularProviders(
       userScrollEnabled = true,
   ) {
     items(providers.filter { it.popular }) { provider ->
-      ProviderItem(provider) {
+      ProviderItem(provider, false) {
         listProviderViewModel.selectProvider(provider)
         navigationActions.navigateTo(Route.PROVIDER_INFO)
       }
