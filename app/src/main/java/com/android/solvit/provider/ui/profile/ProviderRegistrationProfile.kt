@@ -204,7 +204,8 @@ fun ProviderRegistrationScreen(
                 } else {
                   { navigationActions.goBack() }
                 },
-            leftButtonForm = Icons.AutoMirrored.Filled.ArrowBack)
+            leftButtonForm = Icons.AutoMirrored.Filled.ArrowBack,
+            testTagLeft = "goBackButton")
       },
       content = { padding ->
         Column(
