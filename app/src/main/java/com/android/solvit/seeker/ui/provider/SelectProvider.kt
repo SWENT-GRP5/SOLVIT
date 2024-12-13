@@ -218,12 +218,11 @@ fun SpFilterBar(display: () -> Unit, listProviderViewModel: ListProviderViewMode
                         else null) {
                       Text(
                           text = filter,
+                          fontSize = Typography.bodySmall.fontSize,
+                          lineHeight = 34.sp,
                           fontFamily = FontFamily(Font(R.font.roboto)),
-                          style =
-                              Typography.bodySmall.copy(
-                                  fontSize = 34.sp,
-                                  fontWeight = FontWeight(400),
-                                  color = colorScheme.primary),
+                          fontWeight = FontWeight(400),
+                          color = colorScheme.primary,
                           modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp))
                     }
               }
@@ -256,11 +255,11 @@ fun SpFilterBar(display: () -> Unit, listProviderViewModel: ListProviderViewMode
 fun Title(title: String) {
   Row(modifier = Modifier.padding(16.dp)) {
     Text(
-        text = title,
         modifier = Modifier.width(73.dp).height(22.dp),
+        text = title,
         style =
             Typography.bodyLarge.copy(
-                fontSize = 18.sp, fontWeight = FontWeight(400), color = colorScheme.onBackground))
+                fontWeight = FontWeight(600), color = colorScheme.onBackground, fontSize = 18.sp))
   }
 }
 
@@ -293,7 +292,7 @@ fun Note(note: String = "5") {
                   text = note,
                   style =
                       Typography.bodyMedium.copy(
-                          fontWeight = FontWeight.Medium, color = colorScheme.surface))
+                          color = colorScheme.surface, fontWeight = FontWeight.Medium))
             }
       }
 }
@@ -425,10 +424,10 @@ fun ListProviders(
                                 text = provider.name,
                                 style =
                                     Typography.bodyLarge.copy(
+                                        lineHeight = 24.sp,
                                         fontWeight = FontWeight(400),
-                                        color = colorScheme.onBackground),
-                                textAlign = TextAlign.Center,
-                            )
+                                        color = colorScheme.onBackground,
+                                        textAlign = TextAlign.Center))
                             Spacer(Modifier.weight(1f))
                             Note(provider.rating.toInt().toString())
                           }
@@ -436,12 +435,10 @@ fun ListProviders(
                           Text(
                               text = provider.description,
                               style =
-                                  TextStyle(
-                                      fontSize = 14.sp,
+                                  Typography.bodyMedium.copy(
                                       lineHeight = 15.sp,
                                       fontWeight = FontWeight(400),
-                                      color = colorScheme.onBackground.copy(alpha = 0.6f),
-                                  ),
+                                      color = colorScheme.onBackground.copy(alpha = 0.6f)),
                               maxLines = 2,
                               overflow = TextOverflow.Ellipsis)
                         }
@@ -535,7 +532,7 @@ fun FilterSubText(text: String) {
       text = text,
       style =
           Typography.bodyLarge.copy(
-              fontSize = 18.sp, fontWeight = FontWeight(500), color = colorScheme.onBackground),
+              fontWeight = FontWeight(500), color = colorScheme.onBackground, fontSize = 18.sp),
       modifier = Modifier.padding(top = 24.dp, bottom = 4.dp))
 }
 
@@ -646,7 +643,6 @@ fun LanguageFilterField(list: List<String>, listProviderViewModel: ListProviderV
                   }) {
                 Text(
                     text = list[idx],
-                    fontSize = 18.sp,
                     modifier = Modifier.padding(3.dp).align(Alignment.Center),
                     color =
                         if (iconsPressed[idx]) colorScheme.onPrimary
@@ -750,19 +746,12 @@ fun ApplyButton(listProviderViewModel: ListProviderViewModel, display: () -> Uni
         ) {
           Text(
               text = "Apply", // TODO()
-              style =
-                  Typography.bodyMedium.copy(
-                      fontSize = 18.sp,
-                      fontWeight = FontWeight.Bold,
-                      color = colorScheme.onPrimary))
+              color = colorScheme.onPrimary,
+              style = Typography.bodyMedium.copy(fontWeight = FontWeight.Bold))
           Text(
               text = "${filteredList.size} providers", // TODO()
-              fontWeight = FontWeight.Bold,
-              fontSize = 14.sp,
               color = colorScheme.onPrimary,
-              style =
-                  Typography.bodyMedium.copy(
-                      fontWeight = FontWeight.Bold, color = colorScheme.onPrimary))
+              style = Typography.bodyMedium.copy(fontWeight = FontWeight.Bold))
         }
   }
 }
@@ -784,9 +773,9 @@ fun FilterComposable(listProviderViewModel: ListProviderViewModel, display: () -
             text = "Filters",
             style =
                 Typography.bodyLarge.copy(
-                    fontSize = 21.sp,
                     fontWeight = FontWeight(600),
-                    color = colorScheme.onBackground))
+                    color = colorScheme.onBackground,
+                    fontSize = 21.sp))
         FilterSubText("Price")
         PriceFilter(listProviderViewModel)
         FilterSubText("Languages")
@@ -837,8 +826,7 @@ fun SearchLocBar(searchedAddress: String, onSearchChanged: (String) -> Unit) {
       value = searchedAddress,
       onValueChange = onSearchChanged,
       placeholder = {
-        Text(
-            "Enter a new address", style = Typography.bodyLarge.copy(color = colorScheme.onSurface))
+        Text("Enter a new address", color = colorScheme.onSurface, style = Typography.bodyLarge)
       },
       leadingIcon = {
         Icon(
@@ -961,7 +949,6 @@ fun FilterByLocation(
                   fontWeight = FontWeight(500),
                   color = colorScheme.onBackground,
                   lineHeight = 20.sp))
-
       Row(
           modifier =
               Modifier.fillMaxWidth()
@@ -998,7 +985,6 @@ fun FilterByLocation(
                   fontWeight = FontWeight(500),
                   color = colorScheme.onBackground,
                   lineHeight = 20.sp))
-
       LazyColumn(modifier = Modifier.testTag("cachedLocations")) {
         itemsIndexed(cachedLocations) { index, location ->
           // TODO see the index if it's the first element set its background color to the green

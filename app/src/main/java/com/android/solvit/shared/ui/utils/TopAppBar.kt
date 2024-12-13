@@ -46,28 +46,28 @@ fun TopAppBarInbox(
             modifier = Modifier.testTag(testTagTitle))
       },
       navigationIcon = {
-        IconButton(
-            onClick = {
-              if (canGoBack) {
-                canGoBack = false
-                leftButtonAction()
-                coroutineScope.launch {
-                  delay(500)
-                  canGoBack = true
+        if (leftButtonForm != null) {
+          IconButton(
+              onClick = {
+                if (canGoBack) {
+                  canGoBack = false
+                  leftButtonAction()
+                  coroutineScope.launch {
+                    delay(500)
+                    canGoBack = true
+                  }
                 }
-              }
-            }) {
-              if (leftButtonForm != null) {
+              }) {
                 Icon(
                     leftButtonForm,
                     contentDescription = "Back",
                     modifier = Modifier.testTag(testTagLeft))
               }
-            }
+        }
       },
       actions = {
-        IconButton(onClick = { rightButton() }) {
-          if (rightButtonForm != null) {
+        if (rightButtonForm != null) {
+          IconButton(onClick = { rightButton() }) {
             Icon(
                 rightButtonForm,
                 contentDescription = "Back",

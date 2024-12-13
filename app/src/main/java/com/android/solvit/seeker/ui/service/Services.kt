@@ -34,7 +34,6 @@ import androidx.compose.material3.DockedSearchBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
@@ -49,6 +48,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -75,7 +75,7 @@ import com.android.solvit.shared.ui.theme.LightRed
 import com.android.solvit.shared.ui.theme.OnPrimary
 import com.android.solvit.shared.ui.theme.Typography
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "SourceLockedOrientationActivity")
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun ServicesScreen(
     navigationActions: NavigationActions,
@@ -273,14 +273,13 @@ fun ShortcutsSection(
                         "Solve It with AI",
                         color = colorScheme.onPrimary,
                         fontSize = 20.sp,
-                        style =
-                            Typography.bodyLarge.copy(
-                                fontSize = 20.sp, fontWeight = FontWeight.Bold))
+                        style = Typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                        fontWeight = FontWeight.Bold)
                     Icon(
                         painter = painterResource(id = R.drawable.ai_solver),
                         contentDescription = "ai_logo",
                         modifier = Modifier.size(50.dp),
-                        tint = colorScheme.onPrimary)
+                        tint = Color.Unspecified)
                   }
             }
         Row(
@@ -307,9 +306,8 @@ fun ShortcutsSection(
                               "All Orders",
                               color = colorScheme.onPrimary,
                               fontSize = 20.sp,
-                              style =
-                                  Typography.bodyLarge.copy(
-                                      fontSize = 20.sp, fontWeight = FontWeight.Bold))
+                              style = Typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                              fontWeight = FontWeight.Bold)
                         }
                   }
               Box(
@@ -330,9 +328,8 @@ fun ShortcutsSection(
                               "Providers Map",
                               color = colorScheme.onPrimary,
                               fontSize = 20.sp,
-                              style =
-                                  Typography.bodyLarge.copy(
-                                      fontSize = 20.sp, fontWeight = FontWeight.Bold))
+                              style = Typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                              fontWeight = FontWeight.Bold)
                         }
                   }
             }
@@ -352,8 +349,9 @@ fun CategoriesSection(
   ) {
     Text(
         "Top Categories",
-        modifier = Modifier.testTag("servicesScreenCategoriesTitle"),
-        style = Typography.bodyLarge.copy(fontSize = 20.sp, fontWeight = FontWeight.Bold))
+        fontSize = 20.sp,
+        fontWeight = FontWeight.Black,
+        modifier = Modifier.testTag("servicesScreenCategoriesTitle"))
     LazyRow(
         modifier = Modifier.fillMaxWidth().height(150.dp).testTag("servicesScreenCategoriesList"),
         horizontalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -384,8 +382,9 @@ fun PerformersSection(
   ) {
     Text(
         "Top Performers",
-        modifier = Modifier.testTag("servicesScreenPerformersTitle"),
-        style = Typography.bodyLarge.copy(fontSize = 20.sp, fontWeight = FontWeight.Bold))
+        fontSize = 20.sp,
+        fontWeight = FontWeight.Black,
+        modifier = Modifier.testTag("servicesScreenPerformersTitle"))
     LazyRow(
         modifier = Modifier.fillMaxWidth().testTag("servicesScreenPerformersList"),
         horizontalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -421,7 +420,7 @@ fun ServiceItem(service: ServicesListItem, workerCount: Int, onClick: () -> Unit
                   painter = painterResource(id = service.icon),
                   contentDescription = null,
                   modifier = Modifier.size(48.dp).testTag(service.service.toString() + "Icon"),
-                  tint = colorScheme.onPrimary)
+                  tint = Color.Unspecified)
 
               // Service name in bold
               Text(
@@ -435,7 +434,7 @@ fun ServiceItem(service: ServicesListItem, workerCount: Int, onClick: () -> Unit
               Text(
                   text = "+ $workerCount workers",
                   modifier = Modifier.testTag(service.service.toString() + "WorkerCount"),
-                  style = MaterialTheme.typography.bodySmall,
+                  style = Typography.bodySmall,
                   color = colorScheme.onSurfaceVariant,
                   textAlign = TextAlign.Center)
             }
@@ -473,7 +472,7 @@ fun ProviderItem(provider: Provider, onClick: () -> Unit) {
                 Icon(
                     painter = painterResource(id = Services.getIcon(provider.service)),
                     contentDescription = null,
-                    tint = colorScheme.onPrimary,
+                    tint = Color.Unspecified,
                     modifier =
                         Modifier.size(30.dp)
                             .testTag(Services.getIcon(provider.service).toString() + "Icon"))
@@ -489,8 +488,7 @@ fun ProviderItem(provider: Provider, onClick: () -> Unit) {
                               Brush.verticalGradient(
                                   colors =
                                       listOf(
-                                          colorScheme.background,
-                                          Services.getColor(provider.service)))))
+                                          Color.Transparent, Services.getColor(provider.service)))))
 
           Column(
               modifier = Modifier.align(Alignment.BottomStart).padding(16.dp),
@@ -499,28 +497,29 @@ fun ProviderItem(provider: Provider, onClick: () -> Unit) {
                   Text(
                       text = provider.rating.toString(),
                       modifier = Modifier.testTag(provider.rating.toString() + "Rating"),
-                      color = colorScheme.onBackground,
-                      style = Typography.bodyLarge.copy(fontWeight = FontWeight.ExtraBold))
+                      fontWeight = FontWeight.ExtraBold,
+                      fontSize = 16.sp,
+                      color = Color.White)
                   Spacer(modifier = Modifier.width(4.dp))
                   Icon(
                       imageVector = Icons.Default.Star,
                       contentDescription = null,
-                      tint = colorScheme.secondary,
+                      tint = Color.Yellow,
                       modifier = Modifier.size(16.dp))
                 }
                 Text(
                     text = provider.name,
                     modifier = Modifier.testTag(provider.name + "Name"),
-                    color = colorScheme.onBackground,
+                    color = Color.White,
                     style =
                         Typography.titleLarge.copy(
                             fontWeight = FontWeight.ExtraBold, fontSize = 20.sp))
                 Text(
                     text = Services.format(provider.service),
                     modifier = Modifier.testTag(provider.service.toString() + "Service"),
-                    color = colorScheme.onBackground,
+                    color = Color.White,
                     style =
-                        Typography.titleLarge.copy(
+                        Typography.bodyLarge.copy(
                             fontWeight = FontWeight.ExtraBold, fontSize = 18.sp))
               }
         }
