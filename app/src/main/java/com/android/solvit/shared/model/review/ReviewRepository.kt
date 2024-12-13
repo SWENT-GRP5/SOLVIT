@@ -108,7 +108,7 @@ interface ReviewRepository {
    * @param serviceRequestId The ID of the service request.
    * @return The average rating as a Double.
    */
-  suspend fun getAverageRating(serviceRequestId: String): Double
+  fun getAverageRating(serviceRequestId: String): Double
 
   /**
    * Retrieves the average rating for a specific provider.
@@ -116,7 +116,7 @@ interface ReviewRepository {
    * @param providerId The ID of the provider.
    * @return The average rating as a Double.
    */
-  suspend fun getAverageRatingByProvider(providerId: String): Double
+  fun getAverageRatingByProvider(providerId: String): Double
 
   /**
    * Retrieves the average rating for a specific user.
@@ -124,5 +124,5 @@ interface ReviewRepository {
    * @param userId The ID of the user.
    * @return The average rating as a Double.
    */
-  suspend fun getAverageRatingByUser(userId: String): Double
+  fun getAverageRatingByUser(userId: String): Double
 }

@@ -17,6 +17,7 @@ import com.android.solvit.shared.model.provider.ProviderRepository
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
+import com.google.firebase.Timestamp
 import kotlinx.coroutines.flow.take
 import org.junit.Before
 import org.junit.Rule
@@ -49,7 +50,7 @@ class ServicesScreenTest {
           true,
           4.0,
           25.0,
-          20.0,
+          Timestamp.now(),
           listOf(Language.FRENCH, Language.ENGLISH, Language.ARABIC, Language.SPANISH))
 
   private val provider2 =
@@ -65,7 +66,7 @@ class ServicesScreenTest {
           true,
           3.0,
           25.0,
-          20.0,
+          Timestamp.now(),
           listOf(Language.SPANISH))
 
   private val testSeekerProfile =

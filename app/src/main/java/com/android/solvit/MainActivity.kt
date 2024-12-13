@@ -335,13 +335,6 @@ fun ProviderUI(
     composable(Screen.CALENDAR) {
       ProviderCalendarScreen(navigationActions = navigationActions, viewModel = calendarViewModel)
     }
-    composable(Screen.MY_JOBS) {
-      RequestsDashboardScreen(
-          navigationActions,
-          serviceRequestViewModel,
-          authViewModel = authViewModel,
-          listProviderViewModel = listProviderViewModel)
-    }
     composable(Route.BOOKING_DETAILS) {
       ServiceBookingScreen(
           navigationActions,

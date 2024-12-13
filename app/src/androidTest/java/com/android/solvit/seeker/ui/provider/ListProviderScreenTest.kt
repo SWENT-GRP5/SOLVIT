@@ -19,7 +19,7 @@ import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.provider.ProviderRepository
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
-import junit.framework.TestCase.assertEquals
+import com.google.firebase.Timestamp
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -57,7 +57,8 @@ class ListProviderScreenTest {
           true,
           5.0,
           25.0,
-          languages = listOf(Language.FRENCH, Language.ENGLISH, Language.ARABIC, Language.SPANISH))
+          Timestamp.now(),
+          listOf(Language.FRENCH, Language.ENGLISH, Language.ARABIC, Language.SPANISH))
 
   private val provider2 =
       Provider(
@@ -72,7 +73,8 @@ class ListProviderScreenTest {
           true,
           5.0,
           25.0,
-          languages = listOf(Language.SPANISH))
+          Timestamp.now(),
+          listOf(Language.SPANISH))
 
   @Before
   fun setUp() {
@@ -126,12 +128,9 @@ class ListProviderScreenTest {
 
   @Test
   fun filterProviderCallsFilterScreen() {
-    // We assert here that there is three filter options displayed in the screen (Top Rates, Top
-    // Prices, Highest Activity)
-    assertEquals(3, composeTestRule.onAllNodesWithTag("filterOption").fetchSemanticsNodes().size)
-    composeTestRule.onAllNodesWithTag("filterOption")[0].performClick()
-    composeTestRule.onNodeWithTag("filterIcon").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("filterIcon").performClick()
+    composeTestRule.onNodeWithTag("filterOption").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("filterOption").performClick()
+    composeTestRule.onNodeWithTag("filterSheet").assertIsDisplayed()
   }
 
   @Test
@@ -156,8 +155,8 @@ class ListProviderScreenTest {
   @Test
   fun filterAction() {
 
-    composeTestRule.onNodeWithTag("filterIcon").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("filterIcon").performClick()
+    composeTestRule.onNodeWithTag("filterOption").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("filterOption").performClick()
     composeTestRule.onNodeWithTag("filterSheet").assertIsDisplayed()
     composeTestRule.onAllNodesWithTag("filterAct")[0].assertIsDisplayed()
     composeTestRule.onAllNodesWithTag("filterAct")[0].performClick()

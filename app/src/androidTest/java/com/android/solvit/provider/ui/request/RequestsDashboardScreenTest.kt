@@ -7,12 +7,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.android.solvit.seeker.model.provider.ListProviderViewModel
-import com.android.solvit.shared.model.authentication.AuthRep
-import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.map.Location
-import com.android.solvit.shared.model.provider.Provider
-import com.android.solvit.shared.model.provider.ProviderRepository
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestRepository
 import com.android.solvit.shared.model.request.ServiceRequestStatus
@@ -23,16 +18,11 @@ import com.google.firebase.Timestamp
 import java.text.SimpleDateFormat
 import java.util.GregorianCalendar
 import java.util.Locale
-import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
-import org.mockito.kotlin.any
-import org.mockito.kotlin.argThat
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
 
 @RunWith(AndroidJUnit4::class)
 class RequestsDashboardScreenTest {
@@ -42,10 +32,6 @@ class RequestsDashboardScreenTest {
   private lateinit var viewModel: ServiceRequestViewModel
   private lateinit var navigationActions: NavigationActions
   private lateinit var serviceRequestRepository: ServiceRequestRepository
-  private lateinit var authRep: AuthRep
-  private lateinit var providerRepository: ProviderRepository
-  private lateinit var authViewModel: AuthViewModel
-  private lateinit var providerViewModel: ListProviderViewModel
 
   private val request =
       ServiceRequest(
@@ -67,21 +53,13 @@ class RequestsDashboardScreenTest {
   fun setup() {
     serviceRequestRepository = mock(ServiceRequestRepository::class.java)
     navigationActions = mock(NavigationActions::class.java)
-    authRep = mock(AuthRep::class.java)
-    providerRepository = mock(ProviderRepository::class.java)
-    authViewModel = AuthViewModel(authRep)
-    providerViewModel = ListProviderViewModel(providerRepository)
     viewModel = ServiceRequestViewModel(serviceRequestRepository)
   }
 
   @Test
   fun testInitialTabIsCurrent() {
     composeTestRule.setContent {
-      RequestsDashboardScreen(
-          navigationActions,
-          serviceRequestViewModel = viewModel,
-          authViewModel = authViewModel,
-          listProviderViewModel = providerViewModel)
+      RequestsDashboardScreen(navigationActions, serviceRequestViewModel = viewModel)
     }
 
     // Verify that the "Current" tab is selected by default
@@ -386,7 +364,6 @@ class RequestsDashboardScreenTest {
           onNavigateToJob = { clicked = true })
     }
     composeTestRule.onNodeWithTag("NavigateButton_1").performClick()
-    composeTestRule.waitForIdle()
     assert(clicked)
   }
 
@@ -395,7 +372,6 @@ class RequestsDashboardScreenTest {
     var clicked = false
     composeTestRule.setContent { JobItem(request = request, onConfirmRequest = { clicked = true }) }
     composeTestRule.onNodeWithTag("ConfirmButton_1").performClick()
-    composeTestRule.waitForIdle()
     assert(clicked)
   }
 
@@ -408,7 +384,6 @@ class RequestsDashboardScreenTest {
           onCancelRequest = { clicked = true })
     }
     composeTestRule.onNodeWithTag("CancelButton_1").performClick()
-    composeTestRule.waitForIdle()
     assert(clicked)
   }
 
@@ -421,7 +396,6 @@ class RequestsDashboardScreenTest {
           onMarkAsCompleted = { clicked = true })
     }
     composeTestRule.onNodeWithTag("CompleteButton_1").performClick()
-    composeTestRule.waitForIdle()
     assert(clicked)
   }
 
@@ -430,7 +404,6 @@ class RequestsDashboardScreenTest {
     var clicked = false
     composeTestRule.setContent { JobItem(request = request, onChat = { clicked = true }) }
     composeTestRule.onNodeWithTag("ChatButton_1").performClick()
-    composeTestRule.waitForIdle()
     assert(clicked)
   }
 
@@ -441,60 +414,6 @@ class RequestsDashboardScreenTest {
       JobItem(request = request, onContactCustomer = { clicked = true })
     }
     composeTestRule.onNodeWithTag("CallButton_1").performClick()
-    composeTestRule.waitForIdle()
     assert(clicked)
-  }
-
-  @Test
-  fun testOnMarkAsCompleteInvokesExpectedMethods() = runTest {
-    val testProvider =
-        Provider(
-            uid = "testProviderId",
-            name = "Test Provider",
-            nbrOfJobs = 5.0,
-        )
-
-    val scheduledRequests =
-        listOf(
-            ServiceRequest(
-                uid = "test_scheduled_id",
-                title = "Scheduled Job",
-                providerId = "testProviderId",
-                description = "Job Description",
-                status = ServiceRequestStatus.SCHEDULED))
-
-    whenever(serviceRequestRepository.getScheduledServiceRequests(any(), any())).thenAnswer {
-      val onSuccess = it.getArgument<(List<ServiceRequest>) -> Unit>(0)
-      onSuccess(scheduledRequests)
-    }
-
-    whenever(providerViewModel.fetchProviderById("testProviderId")).thenReturn(testProvider)
-    viewModel.getScheduledRequests()
-
-    composeTestRule.setContent {
-      ScheduledJobsSection(
-          providerId = "testProviderId",
-          viewModel = viewModel,
-          navigationActions = navigationActions,
-          listProviderViewModel = providerViewModel)
-    }
-
-    composeTestRule.waitForIdle()
-
-    composeTestRule.waitUntil(timeoutMillis = 5000) {
-      composeTestRule.onNodeWithTag("CompleteButton_test_scheduled_id").isDisplayed()
-    }
-
-    // Click the Complete button
-    composeTestRule.onNodeWithTag("CompleteButton_test_scheduled_id").performClick()
-
-    composeTestRule.waitForIdle()
-    // Verify that completeRequest was called with the correct request
-    verify(serviceRequestRepository).saveServiceRequest(any(), any(), any())
-
-    // Verify that the provider was fetched and updated after job completion
-    verify(providerRepository).returnProvider("testProviderId")
-    verify(providerRepository)
-        .updateProvider(argThat { nbrOfJobs == testProvider.nbrOfJobs + 1 }, any(), any())
   }
 }

@@ -1,6 +1,5 @@
 package com.android.solvit.provider.ui.request
 
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -52,7 +51,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestStatus
@@ -64,9 +62,6 @@ import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
 import java.text.SimpleDateFormat
 import java.util.Locale
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 /**
  * Composable function that displays the Requests Dashboard screen.
@@ -74,16 +69,13 @@ import kotlinx.coroutines.launch
  * @param navigationActions Actions for navigation.
  * @param serviceRequestViewModel ViewModel for managing service requests.
  * @param authViewModel ViewModel for managing authentication.
- * @param listProviderViewModel View model for list of providers
  */
 @Composable
 fun RequestsDashboardScreen(
     navigationActions: NavigationActions,
     serviceRequestViewModel: ServiceRequestViewModel =
         viewModel(factory = ServiceRequestViewModel.Factory),
-    authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory),
-    listProviderViewModel: ListProviderViewModel =
-        viewModel(factory = ListProviderViewModel.Factory)
+    authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory)
 ) {
   val user by authViewModel.user.collectAsState()
   // Selected tab index
@@ -106,9 +98,7 @@ fun RequestsDashboardScreen(
                   selectedTab = selectedTab,
                   providerId = user?.uid ?: "-1",
                   serviceRequestViewModel = serviceRequestViewModel,
-                  navigationActions = navigationActions,
-                  listProviderViewModel = listProviderViewModel,
-              )
+                  navigationActions = navigationActions)
             }
       })
 }
@@ -178,7 +168,6 @@ fun StatusTabs(selectedTab: Int, tabs: Array<ServiceRequestStatus>, onTabSelecte
  * screen.
  *
  * @param providerId ID of the current provider.
- * @param listProviderViewModel view model to fetch infos of the provider
  * @param selectedTab Index of the selected tab.
  * @param serviceRequestViewModel ViewModel for managing service requests.
  * @param navigationActions Actions for navigation.
@@ -186,7 +175,6 @@ fun StatusTabs(selectedTab: Int, tabs: Array<ServiceRequestStatus>, onTabSelecte
 @Composable
 fun JobSectionContent(
     selectedTab: Int,
-    listProviderViewModel: ListProviderViewModel,
     providerId: String,
     serviceRequestViewModel: ServiceRequestViewModel,
     navigationActions: NavigationActions
@@ -194,9 +182,7 @@ fun JobSectionContent(
   when (selectedTab) {
     0 -> PendingJobsSection(providerId, serviceRequestViewModel, navigationActions)
     1 -> AcceptedJobSection(providerId, serviceRequestViewModel, navigationActions)
-    2 ->
-        ScheduledJobsSection(
-            providerId, serviceRequestViewModel, navigationActions, listProviderViewModel)
+    2 -> ScheduledJobsSection(providerId, serviceRequestViewModel, navigationActions)
     3 -> CompletedJobsSection(providerId, serviceRequestViewModel, navigationActions)
     4 -> CanceledJobsSection(providerId, serviceRequestViewModel, navigationActions)
     5 -> ArchivedJobsSection(providerId, serviceRequestViewModel, navigationActions)
@@ -336,15 +322,13 @@ fun AcceptedJobSection(
  *
  * @param providerId ID of the current provider.
  * @param viewModel ViewModel for managing service requests.
- * @param listProviderViewModel ViewModel
  * @param navigationActions Actions for navigation.
  */
 @Composable
 fun ScheduledJobsSection(
     providerId: String,
     viewModel: ServiceRequestViewModel,
-    navigationActions: NavigationActions,
-    listProviderViewModel: ListProviderViewModel
+    navigationActions: NavigationActions
 ) {
   val context = LocalContext.current
   val scheduledRequests by viewModel.scheduledRequests.collectAsState()
@@ -383,19 +367,7 @@ fun ScheduledJobsSection(
         onContactCustomer = {
           Toast.makeText(context, "Contact Not yet Implemented", Toast.LENGTH_SHORT).show()
         },
-        onMarkAsCompleted = { request ->
-          CoroutineScope(Dispatchers.Main).launch {
-            viewModel.completeRequest(request)
-            val provider = listProviderViewModel.fetchProviderById(providerId)
-            // Update nbr of jobs completed of provider
-            if (provider != null) {
-              listProviderViewModel.updateProvider(
-                  provider.copy(nbrOfJobs = provider.nbrOfJobs + 1))
-            } else {
-              Log.e("JobsSection", "Failed to fetch provider")
-            }
-          }
-        },
+        onMarkAsCompleted = { request -> viewModel.completeRequest(request) },
         onCancelRequest = { request -> viewModel.cancelRequest(request) },
         onChat = { Toast.makeText(context, "Chat Not yet Implemented", Toast.LENGTH_SHORT).show() })
   }

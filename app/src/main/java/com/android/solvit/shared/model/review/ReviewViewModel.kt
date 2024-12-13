@@ -74,15 +74,15 @@ class ReviewViewModel(private val repository: ReviewRepository) : ViewModel() {
         onFailure = { exception -> Log.e("ReviewViewModel", "Error fetching Reviews", exception) })
   }
 
-  suspend fun getAverageRating(serviceRequestId: String): Double {
+  fun getAverageRating(serviceRequestId: String): Double {
     return repository.getAverageRating(serviceRequestId)
   }
 
-  suspend fun getAverageRatingByProvider(providerId: String): Double {
+  fun getAverageRatingByProvider(providerId: String): Double {
     return repository.getAverageRatingByProvider(providerId)
   }
 
-  suspend fun getAverageRatingByUser(userId: String): Double {
+  fun getAverageRatingByUser(userId: String): Double {
     return repository.getAverageRatingByUser(userId)
   }
 

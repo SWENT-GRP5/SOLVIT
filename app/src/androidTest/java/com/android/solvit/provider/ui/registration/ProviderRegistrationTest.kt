@@ -138,7 +138,6 @@ class ProviderRegistrationTest {
 
     composeTestRule.onNodeWithTag("inputRequestAddress").performTextClearance()
     composeTestRule.onNodeWithTag("inputRequestAddress").performTextInput("USA")
-    composeTestRule.waitForIdle()
     composeTestRule.waitUntil { locationViewModel.locationSuggestions.value.isNotEmpty() }
     composeTestRule.onAllNodesWithTag("locationResult")[0].performClick()
 
@@ -183,7 +182,6 @@ class ProviderRegistrationTest {
     composeTestRule.onNodeWithTag("phoneNumberInput").performTextInput("123456789")
     composeTestRule.onNodeWithTag("companyNameInput").performTextInput("Company")
     composeTestRule.onNodeWithTag("inputRequestAddress").performTextInput("USA")
-    composeTestRule.waitForIdle()
     composeTestRule.waitUntil { locationViewModel.locationSuggestions.value.isNotEmpty() }
     composeTestRule.onAllNodesWithTag("locationResult")[0].performClick()
 
@@ -208,7 +206,6 @@ class ProviderRegistrationTest {
     }
 
     composeTestRule.onNodeWithTag("inputRequestAddress").performTextInput("USA")
-    composeTestRule.waitForIdle()
     composeTestRule.waitUntil { locationViewModel.locationSuggestions.value.isNotEmpty() }
 
     composeTestRule.onAllNodesWithTag("locationResult")[0].assertIsDisplayed()

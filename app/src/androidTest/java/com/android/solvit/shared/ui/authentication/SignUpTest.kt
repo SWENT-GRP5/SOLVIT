@@ -39,7 +39,6 @@ class SignUpScreenTest {
   @Test
   fun signUp_testAllTheTest() {
     composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
-    composeTestRule.waitForIdle()
 
     composeTestRule.onNodeWithTag("goBackButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("signUpIllustration").assertIsDisplayed()
@@ -56,7 +55,6 @@ class SignUpScreenTest {
   @Test
   fun signUp_testAllPerformClick() {
     composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
-    composeTestRule.waitForIdle()
 
     composeTestRule.onNodeWithTag("goBackButton").performClick()
     composeTestRule.onNodeWithTag("passwordInputField").performClick()
@@ -69,7 +67,6 @@ class SignUpScreenTest {
   @Test
   fun signUp_emailAndPasswordInput() {
     composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
-    composeTestRule.waitForIdle()
 
     // Test email input
     composeTestRule.onNodeWithTag("emailInputField").performTextInput("test@example.com")
@@ -79,7 +76,6 @@ class SignUpScreenTest {
   @Test
   fun signUp_errorShowInEmailField() {
     composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
-    composeTestRule.waitForIdle()
 
     composeTestRule.onNodeWithTag("emailErrorMessage").isNotDisplayed()
     composeTestRule.onNodeWithTag("emailInputField").performTextInput("test@example")
@@ -92,7 +88,6 @@ class SignUpScreenTest {
   @Test
   fun signUp_errorShowInPasswordField() {
     composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
-    composeTestRule.waitForIdle()
 
     composeTestRule.onNodeWithTag("passwordErrorMessage").isNotDisplayed()
     composeTestRule.onNodeWithTag("passwordInputField").performTextInput("12345")
@@ -105,7 +100,6 @@ class SignUpScreenTest {
   @Test
   fun signUp_errorShowInConfirmPasswordField() {
     composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
-    composeTestRule.waitForIdle()
 
     composeTestRule.onNodeWithTag("confirmPasswordErrorMessage").isNotDisplayed()
     composeTestRule.onNodeWithTag("confirmPasswordInputField").performTextInput("12345")
@@ -118,7 +112,6 @@ class SignUpScreenTest {
   @Test
   fun signUp_emailInput() {
     composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
-    composeTestRule.waitForIdle()
 
     // Test email input
     composeTestRule.onNodeWithTag("emailInputField").performTextInput("test@example.com")
@@ -127,7 +120,6 @@ class SignUpScreenTest {
   @Test
   fun signUp_googleSignInReturnsValidActivityResult() {
     composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
-    composeTestRule.waitForIdle()
     composeTestRule.onNodeWithTag("googleSignUpButton").performClick()
     // assert that an Intent resolving to Google Mobile Services has been sent (for sign-in)
     Intents.intended(IntentMatchers.toPackage("com.google.android.gms"))
@@ -148,7 +140,6 @@ class SignUpScreenTest {
   @Test
   fun signUp_signUpButtonNavigatesToChooseRoleScreen() {
     composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
-    composeTestRule.waitForIdle()
     composeTestRule.onNodeWithTag("emailInputField").performTextInput("test@test.com")
     composeTestRule.onNodeWithTag("passwordInputField").performTextInput("password")
     composeTestRule.onNodeWithTag("confirmPasswordInputField").performTextInput("password")
@@ -178,8 +169,6 @@ class SignUpButtonTest {
           passwordLengthComplete = true,
           samePassword = true)
     }
-    composeTestRule.waitForIdle()
-
     composeTestRule.onNodeWithTag("signUpButton").performClick()
 
     verify { Toast.makeText(any(), "Please fill in all required fields", Toast.LENGTH_SHORT) }
@@ -195,7 +184,6 @@ class SignUpButtonTest {
           passwordLengthComplete = true,
           samePassword = true)
     }
-    composeTestRule.waitForIdle()
     composeTestRule.onNodeWithTag("signUpButton").performClick()
 
     verify { Toast.makeText(any(), "Your email must have \"@\" and \".\"", Toast.LENGTH_SHORT) }
@@ -211,9 +199,7 @@ class SignUpButtonTest {
           passwordLengthComplete = true,
           samePassword = false)
     }
-
     composeTestRule.onNodeWithTag("signUpButton").performClick()
-    composeTestRule.waitForIdle()
 
     verify {
       Toast.makeText(any(), "Password and Confirm Password must be the same", Toast.LENGTH_SHORT)
@@ -230,7 +216,6 @@ class SignUpButtonTest {
           passwordLengthComplete = false,
           samePassword = true)
     }
-    composeTestRule.waitForIdle()
     composeTestRule.onNodeWithTag("signUpButton").performClick()
 
     verify {
@@ -248,7 +233,6 @@ class SignUpButtonTest {
           passwordLengthComplete = true,
           samePassword = true)
     }
-    composeTestRule.waitForIdle()
     composeTestRule.onNodeWithTag("signUpButton").performClick()
 
     verify(exactly = 0) { Toast.makeText(any(), any<String>(), any()) }

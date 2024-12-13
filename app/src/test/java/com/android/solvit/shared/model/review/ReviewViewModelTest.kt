@@ -95,7 +95,7 @@ class ReviewViewModelTest {
   }
 
   @Test
-  fun getAverageRating_returnsCorrectValue() = runTest {
+  fun getAverageRating_returnsCorrectValue() {
     val serviceRequestId = "request1"
     val averageRating = 4.5
     `when`(reviewRepository.getAverageRating(serviceRequestId)).thenReturn(averageRating)
@@ -166,7 +166,7 @@ class ReviewViewModelTest {
   }
 
   @Test
-  fun getAverageRatingByProvider_returnsCorrectValue() = runTest {
+  fun getAverageRatingByProvider_returnsCorrectValue() {
     val providerId = "provider1"
     val averageRating = 4.5
     `when`(reviewRepository.getAverageRatingByProvider(providerId)).thenReturn(averageRating)
@@ -177,7 +177,7 @@ class ReviewViewModelTest {
   }
 
   @Test
-  fun getAverageRatingByUser_returnsCorrectValue() = runTest {
+  fun getAverageRatingByUser_returnsCorrectValue() {
     val userId = "user1"
     val averageRating = 4.0
     `when`(reviewRepository.getAverageRatingByUser(userId)).thenReturn(averageRating)
