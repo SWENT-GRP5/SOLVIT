@@ -88,7 +88,7 @@ fun ProviderMapScreen(
         BottomNavigationMenu(
             onTabSelect = { navigationActions.navigateTo(it.route) },
             tabList = LIST_TOP_LEVEL_DESTINATION_PROVIDER,
-            selectedItem = Route.MAP_OF_SEEKERS)
+            selectedItem = Route.MAP_OF_SEEKER)
       },
       markersLoading = markersLoading.value)
 }
