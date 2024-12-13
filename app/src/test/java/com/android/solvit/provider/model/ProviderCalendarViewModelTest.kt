@@ -64,6 +64,7 @@ class ProviderCalendarViewModelTest {
           popular = true,
           rating = 4.5,
           price = 100.0,
+          nbrOfJobs = 0.0,
           languages = listOf(Language.ENGLISH),
           schedule = testSchedule)
 
