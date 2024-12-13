@@ -95,6 +95,11 @@ fun RequestsDashboardScreen(
       topBar = {
         RequestsTopBar(title = "Job Dashboard", onBackClicked = { navigationActions.goBack() })
       },
+      bottomBar = {
+        val currentRoute = navigationActions.currentRoute() ?: "default_route"
+        Log.e(
+            "ProviderCalendarScreen", "Current route passed to BottomNavigationMenu: $currentRoute")
+      },
       content = { innerPadding ->
         Column(
             modifier =
@@ -118,7 +123,6 @@ fun RequestsDashboardScreen(
  * Composable function that displays the top app bar for the Requests Dashboard screen.
  *
  * @param title Title of the screen.
- * @param onBackClicked Callback to handle back button click.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
