@@ -106,7 +106,7 @@ class EndToEndMessage {
           true,
           5.0,
           100.0,
-          Timestamp.now(),
+          0.0,
           emptyList())
   private val request =
       ServiceRequest(
@@ -164,7 +164,8 @@ class EndToEndMessage {
     chatViewModel = ChatViewModel(chatRepository)
     chatAssistantViewModel = ChatAssistantViewModel()
     notificationsViewModel = NotificationsViewModel(notificationsRepository)
-    calendarViewModel = ProviderCalendarViewModel(authViewModel, serviceRequestViewModel)
+    calendarViewModel =
+        ProviderCalendarViewModel(providerRepository, authViewModel, serviceRequestViewModel)
     aiSolverViewModel = AiSolverViewModel()
 
     authViewModel.setEmail(email)
