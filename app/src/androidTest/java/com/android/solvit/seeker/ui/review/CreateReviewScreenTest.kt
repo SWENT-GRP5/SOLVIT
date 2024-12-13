@@ -19,6 +19,7 @@ import com.android.solvit.shared.model.review.ReviewViewModel
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.google.firebase.Timestamp
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -97,6 +98,7 @@ class CreateReviewScreenTest {
       val onSuccess = it.getArgument<(List<Provider>) -> Unit>(1)
       onSuccess(listOf(provider))
     }
+
     `when`(reviewRepository.getNewUid()).thenReturn("0")
     composeTestRule.setContent {
       CreateReviewScreen(
@@ -124,11 +126,13 @@ class CreateReviewScreenTest {
   }
 
   @Test
-  fun submitValidReview() {
+  fun submitValidReview() = runTest {
+    `when`(reviewRepository.getAverageRatingByProvider(any())).thenReturn(4.0)
     serviceRequestViewModel.selectRequest(request)
     composeTestRule.onNodeWithTag("reviewStar5").performClick()
     composeTestRule.onNodeWithTag("reviewComment").performTextInput("comment")
     composeTestRule.onNodeWithTag("submitReviewButton").performClick()
+    composeTestRule.waitForIdle()
     verify(reviewRepository).addReview(any(), any(), any())
   }
 
@@ -138,6 +142,7 @@ class CreateReviewScreenTest {
     composeTestRule.onNodeWithTag("reviewStar5").performClick()
     composeTestRule.onNodeWithTag("reviewComment").performTextInput("comment")
     composeTestRule.onNodeWithTag("submitReviewButton").performClick()
+    composeTestRule.waitForIdle()
     verify(reviewRepository, never()).addReview(any(), any(), any())
   }
 }

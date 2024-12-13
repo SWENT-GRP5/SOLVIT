@@ -6,7 +6,6 @@ import android.content.pm.ActivityInfo
 import android.location.Address
 import android.location.Geocoder
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -31,6 +30,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
@@ -57,12 +57,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -102,12 +104,20 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
 import java.util.Locale
 
+/**
+ * Composable function for displaying a top app bar in the provider selection screen.
+ *
+ * @param navigationActions Actions for navigating between screens.
+ * @param selectedService Currently selected service.
+ * @param onClickAction Callback when the location filter is clicked.
+ * @param seekerProfileViewModel ViewModel for accessing and managing seeker profile data.
+ */
 @Composable
 fun SpTopAppBar(
     navigationActions: NavigationActions,
     selectedService: Services?,
     onClickAction: () -> Unit,
-    seekerProfileViewModel: SeekerProfileViewModel
+    seekerProfileViewModel: SeekerProfileViewModel,
 ) {
 
   val location by seekerProfileViewModel.locationSearched.collectAsState()
@@ -160,62 +170,88 @@ fun SpTopAppBar(
   }
 }
 
+/**
+ * Composable function for the filter bar, allowing users to filter providers by predefined
+ * categories.
+ *
+ * @param display Callback to trigger the display of the filter modal.
+ * @param listProviderViewModel ViewModel for managing provider data and filters.
+ */
 @Composable
 fun SpFilterBar(display: () -> Unit, listProviderViewModel: ListProviderViewModel) {
-  val context = LocalContext.current
-  val filters = listOf("Top Rates", "Top Prices", "Time")
+
+  val filters = listOf("Top Rates", "Top Prices", "Highest Activity")
+
+  val isSelected = remember { mutableStateListOf(-1, -1, -1) }
 
   Row(
       modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("filterBar"),
       horizontalArrangement = Arrangement.SpaceBetween,
       verticalAlignment = Alignment.CenterVertically) {
-        Row(modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-          filters.forEach { filter ->
-            Card(
-                modifier =
-                    Modifier.wrapContentSize()
-                        .clickable {
-                          Toast.makeText(context, "Not Yet Implemented", Toast.LENGTH_LONG).show()
-                        }
-                        .testTag("filterIcon"),
-                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-                colors = CardDefaults.cardColors(containerColor = colorScheme.background),
-                border = BorderStroke(1.dp, colorScheme.primary),
-                shape = RoundedCornerShape(50)) {
-                  Text(
-                      text = filter,
-                      fontFamily = FontFamily(Font(R.font.roboto)),
-                      modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                      style =
-                          Typography.bodyLarge.copy(
+        Row(
+            modifier = Modifier.fillMaxWidth().weight(1f),
+            horizontalArrangement = Arrangement.SpaceEvenly) {
+              filters.forEach { filter ->
+                Card(
+                    modifier =
+                        Modifier.wrapContentSize()
+                            .clickable {
+                              val index = filters.indexOf(filter)
+                              isSelected[index] = if (isSelected[index] == index) -1 else index
+                              listProviderViewModel.sortProviders(
+                                  filter,
+                                  isSelected[index] == index,
+                              )
+                            }
+                            .shadow(
+                                elevation = 8.dp,
+                                shape = RoundedCornerShape(16.dp),
+                                ambientColor = Color.Yellow,
+                                spotColor = Color(0xFF6D29F6))
+                            .testTag("filterOption"),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                    colors = CardDefaults.cardColors(containerColor = colorScheme.background),
+                    shape = RoundedCornerShape(16.dp),
+                    border =
+                        if (isSelected[filters.indexOf(filter)] == filters.indexOf(filter))
+                            BorderStroke(1.dp, colorScheme.primary)
+                        else null) {
+                      Text(
+                          text = filter,
+                          fontFamily = FontFamily(Font(R.font.roboto)),
+                          style =
+                          Typography.bodySmall.copy(
                               fontSize = 34.sp,
                               fontWeight = FontWeight(400),
-                              color = colorScheme.primary))
-                }
-          }
-        }
+                              color = colorScheme.primary),
+                          modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp))
+                    }
+              }
+            }
 
         Spacer(modifier = Modifier.width(16.dp))
 
-        Card(
+        Icon(
+            painter = painterResource(id = R.drawable.tune),
+            contentDescription = "filter options",
             modifier =
-                Modifier.clickable {
+                Modifier.padding(8.dp)
+                    .size(32.dp)
+                    .shadow(12.dp, shape = CircleShape)
+                    .testTag("filterIcon")
+                    .clickable {
                       listProviderViewModel.refreshFilters()
                       display()
-                    }
-                    .testTag("filterOption"),
-            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-            colors = CardDefaults.cardColors(containerColor = colorScheme.background)) {
-              Icon(
-                  painter =
-                      painterResource(id = R.drawable.tune), // Make sure to use your SVG resource
-                  contentDescription = "filter options",
-                  modifier = Modifier.padding(8.dp).size(32.dp).testTag("filterIcon"),
-                  tint = colorScheme.onBackground)
-            }
+                    },
+            tint = colorScheme.onBackground)
       }
 }
 
+/**
+ * Displays a title text with a specific style.
+ *
+ * @param title The text to display as the title.
+ */
 @Composable
 fun Title(title: String) {
   Row(modifier = Modifier.padding(16.dp)) {
@@ -228,6 +264,11 @@ fun Title(title: String) {
   }
 }
 
+/**
+ * Displays a rating bubble with a star icon and a rating value.
+ *
+ * @param note The rating value to display (default is "5").
+ */
 @Composable
 fun Note(note: String = "5") {
   Box(
@@ -257,6 +298,13 @@ fun Note(note: String = "5") {
       }
 }
 
+/**
+ * Displays a horizontal list of popular providers with their images and ratings.
+ *
+ * @param providers List of providers to display.
+ * @param listProviderViewModel ViewModel for managing provider data and interactions.
+ * @param navigationActions Actions for navigating between screens.
+ */
 @Composable
 fun DisplayPopularProviders(
     providers: List<Provider>,
@@ -274,7 +322,7 @@ fun DisplayPopularProviders(
           modifier =
               Modifier.width(141.dp).height(172.dp).clickable {
                 listProviderViewModel.selectProvider(provider)
-                navigationActions.navigateTo(Route.PROVIDER_PROFILE)
+                navigationActions.navigateTo(Route.PROVIDER_INFO)
               },
           elevation =
               CardDefaults.cardElevation(
@@ -321,6 +369,13 @@ fun DisplayPopularProviders(
   }
 }
 
+/**
+ * Displays a vertical list of all providers, categorized into "Popular" and "See All."
+ *
+ * @param providers List of providers to display.
+ * @param listProviderViewModel ViewModel for managing provider data and interactions.
+ * @param navigationActions Actions for navigating between screens.
+ */
 @Composable
 fun ListProviders(
     providers: List<Provider>,
@@ -328,10 +383,13 @@ fun ListProviders(
     navigationActions: NavigationActions
 ) {
   LazyColumn(
-      modifier = Modifier.fillMaxWidth().testTag("providersList"),
+      modifier = Modifier.fillMaxSize().testTag("providersList"),
       verticalArrangement = Arrangement.spacedBy(16.dp),
       userScrollEnabled = true,
   ) {
+    item { Title("Popular") }
+    item { DisplayPopularProviders(providers, listProviderViewModel, navigationActions) }
+    item { Title("See All") }
     items(providers) { provider ->
       Row(
           modifier = Modifier.fillMaxWidth(),
@@ -348,7 +406,7 @@ fun ListProviders(
                                   shape = RoundedCornerShape(size = 16.dp))
                               .clickable {
                                 listProviderViewModel.selectProvider(provider)
-                                navigationActions.navigateTo(Route.PROVIDER_PROFILE)
+                                navigationActions.navigateTo(Route.PROVIDER_INFO)
                               },
                       horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.Start)) {
                         AsyncImage(
@@ -394,6 +452,11 @@ fun ListProviders(
   }
 }
 
+/**
+ * Composable function for filtering providers by price using a range slider and input fields.
+ *
+ * @param listProviderViewModel ViewModel for managing provider filters.
+ */
 @Composable
 fun PriceFilter(listProviderViewModel: ListProviderViewModel) {
   var minPrice by remember { mutableStateOf("min") }
@@ -461,6 +524,11 @@ fun PriceFilter(listProviderViewModel: ListProviderViewModel) {
   }
 }
 
+/**
+ * Displays a subheading text for the filter categories.
+ *
+ * @param text The subheading text to display.
+ */
 @Composable
 fun FilterSubText(text: String) {
   Text(
@@ -471,6 +539,23 @@ fun FilterSubText(text: String) {
       modifier = Modifier.padding(top = 24.dp, bottom = 4.dp))
 }
 
+/**
+ * Helper function for filtering providers based on string fields, such as languages or ratings.
+ *
+ * @param selectedFields Currently selected filter fields.
+ * @param iconsPressed List of boolean values indicating which icons are pressed.
+ * @param iconsColor List of colors for the icons.
+ * @param updateStateField Callback to update the selectedFields state.
+ * @param updateStateIconsPressed Callback to update the iconsPressed state.
+ * @param updateStateIconsColor Callback to update the iconsColor state.
+ * @param idx Index of the current element.
+ * @param elem The current element being filtered.
+ * @param listProviderViewModel ViewModel for managing provider filters.
+ * @param filterAction Action to filter providers based on the current field.
+ * @param defaultFilterAction Action to apply a default filter when no specific filters are
+ *   selected.
+ * @param filterField The name of the filter field (e.g., "Language" or "Rating").
+ */
 fun filterStringFields(
     selectedFields: MutableList<String>,
     iconsPressed: MutableList<Boolean>,
@@ -511,6 +596,13 @@ fun filterStringFields(
   }
 }
 
+/**
+ * Displays a list of language filter options, allowing users to filter providers by their supported
+ * languages.
+ *
+ * @param list List of available language options.
+ * @param listProviderViewModel ViewModel for managing provider filters.
+ */
 @Composable
 fun LanguageFilterField(list: List<String>, listProviderViewModel: ListProviderViewModel) {
   var selectedFields by remember { mutableStateOf(listOf<String>()) }
@@ -565,6 +657,12 @@ fun LanguageFilterField(list: List<String>, listProviderViewModel: ListProviderV
       }
 }
 
+/**
+ * Displays a row of rating filter options, allowing users to filter providers by their ratings.
+ *
+ * @param list List of available rating options.
+ * @param listProviderViewModel ViewModel for managing provider filters.
+ */
 @Composable
 fun RatingFilterField(list: List<String>, listProviderViewModel: ListProviderViewModel) {
   var selectedFields by remember { mutableStateOf(listOf<String>()) }
@@ -623,6 +721,12 @@ fun RatingFilterField(list: List<String>, listProviderViewModel: ListProviderVie
       }
 }
 
+/**
+ * Displays a button for applying the selected filters and updating the provider list.
+ *
+ * @param listProviderViewModel ViewModel for managing provider filters.
+ * @param display Callback to hide the filter modal.
+ */
 @Composable
 fun ApplyButton(listProviderViewModel: ListProviderViewModel, display: () -> Unit) {
   val filteredList by listProviderViewModel.providersListFiltered.collectAsState()
@@ -663,6 +767,13 @@ fun ApplyButton(listProviderViewModel: ListProviderViewModel, display: () -> Uni
   }
 }
 
+/**
+ * Composable function for displaying the filter modal, with options for filtering by price,
+ * languages, and ratings.
+ *
+ * @param listProviderViewModel ViewModel for managing provider filters.
+ * @param display Callback to hide the filter modal.
+ */
 @Composable
 fun FilterComposable(listProviderViewModel: ListProviderViewModel, display: () -> Unit) {
   Column(
@@ -688,7 +799,13 @@ fun FilterComposable(listProviderViewModel: ListProviderViewModel, display: () -
         ApplyButton(listProviderViewModel, display)
       }
 }
-
+/**
+ * Retrieves a human-readable location name from latitude and longitude coordinates.
+ *
+ * @param latLng The latitude and longitude coordinates.
+ * @param context The context for accessing geocoding services.
+ * @return A readable location name (e.g., city and country) or "Unknown Location" if unavailable.
+ */
 fun getLocationName(latLng: LatLng, context: Context): String {
   val geocoder = Geocoder(context, Locale.getDefault())
   return try {
@@ -708,6 +825,12 @@ fun getLocationName(latLng: LatLng, context: Context): String {
   }
 }
 
+/**
+ * Composable function for a search bar to input and search for locations.
+ *
+ * @param searchedAddress The current input in the search bar.
+ * @param onSearchChanged Callback when the search input changes.
+ */
 @Composable
 fun SearchLocBar(searchedAddress: String, onSearchChanged: (String) -> Unit) {
   TextField(
@@ -730,6 +853,13 @@ fun SearchLocBar(searchedAddress: String, onSearchChanged: (String) -> Unit) {
               .testTag("SearchLocBar"))
 }
 
+/**
+ * Displays a location suggestion with its name and an icon.
+ *
+ * @param location The location object containing the name and other details.
+ * @param index Index of the location in the list.
+ * @param onClickAction Callback when the location is clicked.
+ */
 @Composable
 fun LocationSuggestion(location: Location, index: Int, onClickAction: () -> Unit) {
 
@@ -766,6 +896,14 @@ fun LocationSuggestion(location: Location, index: Int, onClickAction: () -> Unit
       }
 }
 
+/**
+ * Displays a location filter modal, allowing users to filter providers by their location.
+ *
+ * @param userId Current user's ID.
+ * @param seekerProfileViewModel ViewModel for managing seeker profile data.
+ * @param onClick Callback when a location is selected.
+ * @param locationViewModel ViewModel for managing location data and queries.
+ */
 @SuppressLint("SuspiciousIndentation")
 @Composable
 fun FilterByLocation(
@@ -890,6 +1028,16 @@ fun FilterByLocation(
   }
 }
 
+/**
+ * Main screen for selecting providers, with options for filtering by location, price, rating, and
+ * more.
+ *
+ * @param seekerProfileViewModel ViewModel for managing seeker profile data.
+ * @param listProviderViewModel ViewModel for managing provider data and interactions.
+ * @param userId Current user's ID.
+ * @param navigationActions Actions for navigating between screens.
+ * @param locationViewModel ViewModel for managing location data and queries.
+ */
 @SuppressLint("SourceLockedOrientationActivity")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -904,19 +1052,19 @@ fun SelectProviderScreen(
 ) {
   // Lock Orientation to Portrait
   val context = LocalContext.current
+
   DisposableEffect(Unit) {
     val activity = context as? ComponentActivity
     activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
     onDispose {
       locationViewModel.clear()
+
       activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
     }
   }
 
   val selectedService by listProviderViewModel.selectedService.collectAsState()
-  if (selectedService != null)
-      listProviderViewModel.filterProviders(
-          filter = { provider -> provider.service == selectedService }, "Service")
+  listProviderViewModel.getProviders()
   val providers by listProviderViewModel.providersListFiltered.collectAsState()
 
   var displayFilters by remember { mutableStateOf(false) }
@@ -934,9 +1082,6 @@ fun SelectProviderScreen(
       }) { paddingValues ->
         Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
           SpFilterBar(display = { displayFilters = true }, listProviderViewModel)
-          Title("Popular")
-          DisplayPopularProviders(providers, listProviderViewModel, navigationActions)
-          Title("See All")
           ListProviders(providers, listProviderViewModel, navigationActions)
         }
         if (displayFilters) {

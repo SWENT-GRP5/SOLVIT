@@ -22,7 +22,7 @@ class ChatAssistantDialogTest {
   @Before
   fun setup() {
     chatAssistantViewModel = ChatAssistantViewModel()
-    composeTestRule.setContent { ChatAssistantDialog(chatAssistantViewModel, {}, {}) }
+    composeTestRule.setContent { ChatAssistantDialog(chatAssistantViewModel, true, {}, {}) }
   }
 
   @Test

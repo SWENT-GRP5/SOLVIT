@@ -77,11 +77,11 @@ class ChatAssistantViewModelTest {
     chatAssistantViewModel.setContext(messageContext, senderName, receiverName, requestContext)
     chatAssistantViewModel.updateSelectedTones(selectedTones)
     val input = "input"
-    val prompt = chatAssistantViewModel.buildMessagePrompt(input)
+    val prompt = chatAssistantViewModel.buildMessagePrompt(input, true)
     val expectedPrompt =
-        "Write a single message response for sender to receiver, based on the following conversation:\n" +
+        "Write a single chat message response for sender to receiver, based on the following conversation:\n" +
             messageContext.joinToString("\n") { it.senderName + ": " + it.message } +
-            ", based on the following service request:\n" +
+            ", based on the following service request posted by $senderName:\n" +
             requestContext.title +
             ": " +
             requestContext.description +
@@ -97,11 +97,11 @@ class ChatAssistantViewModelTest {
   @Test
   fun buildSuggestionsPromptCreatesCorrectPrompt() {
     chatAssistantViewModel.setContext(messageContext, senderName, receiverName, requestContext)
-    val prompt = chatAssistantViewModel.buildSuggestionsPrompt()
+    val prompt = chatAssistantViewModel.buildSuggestionsPrompt(true)
     val expectedPrompt =
         "Provide a list without repetitions of suggestions themes for a response, based on the following conversation:\n" +
             messageContext.joinToString("\n") { it.senderName + ": " + it.message } +
-            ", based on the following service request:\n" +
+            ", based on the following service request posted by $senderName:\n" +
             requestContext.title +
             ": " +
             requestContext.description +

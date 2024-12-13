@@ -62,6 +62,7 @@ import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_PROVIDER
 import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.navigation.Screen
 import com.android.solvit.shared.ui.theme.Typography
 
@@ -74,7 +75,7 @@ import com.android.solvit.shared.ui.theme.Typography
  * @param authViewModel The ViewModel managing authentication.
  * @param navigationActions Actions for navigating between screens.
  */
-@SuppressLint("SourceLockedOrientationActivity")
+@SuppressLint("SourceLockedOrientationActivity", "UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun ProviderProfileScreen(
     providerViewModel: ProviderViewModel = viewModel(factory = ListProviderViewModel.Factory),
@@ -101,9 +102,9 @@ fun ProviderProfileScreen(
       topBar = { ProfileTopBar(navigationActions, onLogout = { showLogoutDialog = true }) },
       bottomBar = {
         BottomNavigationMenu(
-            onTabSelect = { navigationActions.navigateTo(it.route) },
+            onTabSelect = { navigationActions.navigateTo(it) },
             tabList = LIST_TOP_LEVEL_DESTINATION_PROVIDER,
-            selectedItem = Screen.PROVIDER_PROFILE)
+            selectedItem = Route.PROFILE)
       },
       containerColor = Color.Transparent,
   ) { paddingValues ->
@@ -122,7 +123,7 @@ fun ProviderProfileScreen(
               fullName = provider?.name ?: "",
               email = provider?.companyName ?: "",
               imageUrl = provider?.imageUrl ?: "",
-              onEdit = { navigationActions.navigateTo(Screen.PROVIDER_MODIFY_PROFILE) })
+              onEdit = { navigationActions.navigateTo(Screen.EDIT_PROVIDER_PROFILE) })
 
           // additional infos cards
           Card(

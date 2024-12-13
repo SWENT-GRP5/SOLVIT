@@ -73,15 +73,8 @@ class ProviderProfileScreenTest {
   @Test
   fun providerProfileScreen_profileTopBar_displaysCorrectly() {
     composeTestRule.onNodeWithTag("ProfileTitle").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("BackButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("LogoutButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("ProfileTopBar").assertIsDisplayed()
-  }
-
-  @Test
-  fun providerProfileScreen_profileTopBar_performClick() {
-    composeTestRule.onNodeWithTag("BackButton").performClick()
-    verify(mockNavigationActions).goBack()
   }
 
   @Test
@@ -101,7 +94,7 @@ class ProviderProfileScreenTest {
   @Test
   fun providerProfileScreen_profileInfoCard_performClick() {
     composeTestRule.onNodeWithTag("EditProfileButton").performClick()
-    verify(mockNavigationActions).navigateTo(Screen.PROVIDER_MODIFY_PROFILE)
+    verify(mockNavigationActions).navigateTo(Screen.EDIT_PROVIDER_PROFILE)
   }
 
   @Test
