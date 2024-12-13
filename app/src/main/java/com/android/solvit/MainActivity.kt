@@ -280,8 +280,8 @@ fun SeekerUI(
     composable(Route.EDIT_REQUEST) {
       EditRequestScreen(navigationActions, serviceRequestViewModel, locationViewModel)
     }
-    composable(Route.MAP) { SeekerMapScreen(listProviderViewModel, navigationActions) }
-    navigation(startDestination = Screen.PROFILE, route = Route.PROFILE) {
+    composable(Route.MAP_OF_SEEKER) { SeekerMapScreen(listProviderViewModel, navigationActions) }
+    navigation(startDestination = Screen.PROFILE, route = Route.SEEKER_PROFILE) {
       composable(Screen.PROFILE) {
         SeekerProfileScreen(seekerProfileViewModel, navigationActions, authViewModel)
       }
@@ -328,7 +328,7 @@ fun ProviderUI(
           chatViewModel = chatViewModel,
           seekerProfileViewModel = seekerProfileViewModel)
     }
-    composable(Route.MAP_OF_SEEKERS) {
+    composable(Route.MAP_OF_PROVIDER) {
       ProviderMapScreen(
           serviceRequestViewModel = serviceRequestViewModel, navigationActions = navigationActions)
     }
