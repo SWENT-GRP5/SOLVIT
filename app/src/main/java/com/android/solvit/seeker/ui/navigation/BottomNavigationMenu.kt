@@ -1,5 +1,6 @@
 package com.android.solvit.seeker.ui.navigation
 
+import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Canvas
@@ -37,6 +38,7 @@ import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.navigation.TopLevelDestination
 import com.android.solvit.shared.ui.navigation.TopLevelDestinations
 
+@SuppressLint("SourceLockedOrientationActivity")
 @Composable
 fun BottomNavigationMenu(
     onTabSelect: (TopLevelDestination) -> Unit,
@@ -135,7 +137,11 @@ fun BottomNavigationMenu(
                   contentDescription =
                       if (tabList == LIST_TOP_LEVEL_DESTINATION_SEEKER) "Add" else "Myjobs",
                   tint = colorScheme.onPrimary,
-                  modifier = Modifier.size(30.dp))
+                  modifier =
+                      Modifier.size(30.dp)
+                          .testTag(
+                              if (tabList == LIST_TOP_LEVEL_DESTINATION_SEEKER) "AddTestTag"
+                              else "MyJobsTestTag"))
             }
       }
 }

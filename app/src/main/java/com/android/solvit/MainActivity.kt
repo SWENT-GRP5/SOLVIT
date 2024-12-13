@@ -95,9 +95,8 @@ fun SolvitApp() {
   val chatViewModel = viewModel<ChatViewModel>(factory = ChatViewModel.Factory)
   val chatAssistantViewModel =
       viewModel<ChatAssistantViewModel>(factory = ChatAssistantViewModel.Factory)
-  val calendarViewModel = viewModel {
-    ProviderCalendarViewModel(authViewModel, serviceRequestViewModel)
-  }
+  val calendarViewModel =
+      viewModel<ProviderCalendarViewModel>(factory = ProviderCalendarViewModel.Factory)
   val aiSolverViewModel = viewModel<AiSolverViewModel>(factory = AiSolverViewModel.Factory)
   val notificationViewModel =
       viewModel<NotificationsViewModel>(factory = NotificationsViewModel.Factory)
@@ -349,20 +348,21 @@ fun ProviderUI(
     // Map
     composable(Route.MAP) {
       ProviderMapScreen(
-          serviceRequestViewModel = serviceRequestViewModel, navigationActions = navigationActions)
+          serviceRequestViewModel, navigationActions)
     }
 
     // Calendar
     composable(Route.CALENDAR) {
-      ProviderCalendarScreen(navigationActions = navigationActions, viewModel = calendarViewModel)
+      ProviderCalendarScreen(navigationActions, calendarViewModel)
     }
 
     // Jobs & Bookings
     composable(Route.JOBS) {
       RequestsDashboardScreen(
-          navigationActions = navigationActions,
-          serviceRequestViewModel = serviceRequestViewModel,
-          authViewModel = authViewModel)
+          navigationActions,
+          serviceRequestViewModel,
+          authViewModel,
+          listProviderViewModel)
     }
     composable(Route.BOOKING_DETAILS) {
       ServiceBookingScreen(

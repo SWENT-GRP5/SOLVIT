@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Edit
@@ -67,7 +66,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.android.solvit.R
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
+import com.android.solvit.seeker.ui.navigation.BottomNavigationMenu
 import com.android.solvit.shared.model.authentication.AuthViewModel
+import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_SEEKER
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
 
@@ -105,7 +106,13 @@ fun SeekerProfileScreen(
   // Display the profile information if it's available
   Scaffold(
       topBar = { ProfileTopBar(navigationActions, onLogout = { showLogoutDialog = true }) },
-      bottomBar = {},
+      bottomBar = {
+        val currentRoute = navigationActions.currentRoute() ?: "default_route"
+        BottomNavigationMenu(
+            onTabSelect = { navigationActions.navigateTo(it.route) },
+            tabList = LIST_TOP_LEVEL_DESTINATION_SEEKER,
+            selectedItem = currentRoute)
+      },
       containerColor = Color.Transparent,
   ) { paddingValues ->
     LazyColumn(
@@ -216,12 +223,6 @@ fun ProfileTopBar(navigationActions: NavigationActions, onLogout: () -> Unit) {
             modifier = Modifier.testTag("ProfileTitle"),
             fontWeight = FontWeight.Bold,
         )
-      },
-      navigationIcon = {
-        IconButton(
-            onClick = { navigationActions.goBack() }, modifier = Modifier.testTag("BackButton")) {
-              Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-            }
       },
       actions = {
         IconButton(onClick = onLogout, modifier = Modifier.testTag("LogoutButton")) {

@@ -17,7 +17,6 @@ import com.android.solvit.shared.model.provider.ProviderRepository
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
-import com.google.firebase.Timestamp
 import kotlinx.coroutines.flow.take
 import org.junit.Before
 import org.junit.Rule
@@ -50,7 +49,7 @@ class ServicesScreenTest {
           true,
           4.0,
           25.0,
-          Timestamp.now(),
+          20.0,
           listOf(Language.FRENCH, Language.ENGLISH, Language.ARABIC, Language.SPANISH))
 
   private val provider2 =
@@ -66,7 +65,7 @@ class ServicesScreenTest {
           true,
           3.0,
           25.0,
-          Timestamp.now(),
+          20.0,
           listOf(Language.SPANISH))
 
   private val testSeekerProfile =
@@ -136,7 +135,7 @@ class ServicesScreenTest {
   @Test
   fun profileImageNavigatesToProfileScreen() {
     composeTestRule.onNodeWithTag("servicesScreenProfileImage").performClick()
-    verify(navigationActions).navigateTo(Route.PROFILE)
+    verify(navigationActions).navigateTo(Route.SEEKER_PROFILE)
   }
 
   @Test
@@ -175,7 +174,7 @@ class ServicesScreenTest {
   @Test
   fun mapShortcutsNavigateToMapScreen() {
     composeTestRule.onNodeWithTag("servicesScreenMapShortcut").performClick()
-    verify(navigationActions).navigateTo(Route.MAP)
+    verify(navigationActions).navigateTo(Route.MAP_OF_SEEKER)
   }
 
   @Test

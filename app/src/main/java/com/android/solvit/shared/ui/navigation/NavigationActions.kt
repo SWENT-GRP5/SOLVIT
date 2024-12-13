@@ -65,7 +65,12 @@ object Screen {
   const val CHAT = "Chat_Room_Screen"
 }
 
-data class TopLevelDestination(val route: String, val icon: ImageVector, val textId: String)
+data class TopLevelDestination(
+    val route: String,
+    val icon: ImageVector,
+    val textId: String,
+    val testTag: String = ""
+)
 
 object TopLevelDestinations {
 

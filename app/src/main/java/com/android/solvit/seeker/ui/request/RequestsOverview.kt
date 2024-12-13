@@ -23,7 +23,6 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.colorScheme
@@ -69,7 +68,7 @@ import com.android.solvit.shared.ui.theme.LightOrange
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "SourceLockedOrientationActivity")
 @Composable
 fun RequestsOverviewScreen(
     navigationActions: NavigationActions,
@@ -88,10 +87,11 @@ fun RequestsOverviewScreen(
   Scaffold(
       modifier = Modifier.testTag("requestsOverviewScreen"),
       bottomBar = {
+        val currentRoute = navigationActions.currentRoute() ?: "default_route"
         BottomNavigationMenu(
             onTabSelect = { navigationActions.navigateTo(it) },
             tabList = LIST_TOP_LEVEL_DESTINATION_SEEKER,
-            selectedItem = Route.REQUESTS_OVERVIEW)
+            selectedItem = currentRoute)
       }) {
         val user = authViewModel.user.collectAsState()
         val userId = user.value?.uid ?: "-1"
@@ -163,10 +163,6 @@ fun TopOrdersSection(navigationActions: NavigationActions) {
       verticalAlignment = Alignment.CenterVertically) {
         val context = LocalContext.current
         Row {
-          Icon(
-              imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-              contentDescription = null,
-              modifier = Modifier.clickable { navigationActions.goBack() }.testTag("arrowBack"))
           Spacer(modifier = Modifier.size(22.dp))
           Text(
               text = "Orders",

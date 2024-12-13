@@ -74,7 +74,7 @@ import com.android.solvit.shared.ui.navigation.Screen
  * @param authViewModel The ViewModel managing authentication.
  * @param navigationActions Actions for navigating between screens.
  */
-@SuppressLint("SourceLockedOrientationActivity")
+@SuppressLint("SourceLockedOrientationActivity", "UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun ProviderProfileScreen(
     providerViewModel: ProviderViewModel = viewModel(factory = ListProviderViewModel.Factory),
