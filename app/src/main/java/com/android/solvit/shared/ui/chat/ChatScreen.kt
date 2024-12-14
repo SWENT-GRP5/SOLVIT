@@ -1,9 +1,11 @@
 package com.android.solvit.shared.ui.chat
 
+import android.content.Context
 import android.content.pm.ActivityInfo
 import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -36,11 +38,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.AddCircle
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardColors
@@ -96,6 +98,7 @@ import com.android.solvit.shared.model.chat.ChatMessage
 import com.android.solvit.shared.model.chat.ChatViewModel
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
+import com.android.solvit.shared.model.utils.isInternetAvailable
 import com.android.solvit.shared.model.utils.loadBitmapFromUri
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
@@ -172,7 +175,8 @@ fun ChatScreen(
                   imageBitmap = null
                 }
               }
-            })
+            },
+            context = context)
       }) { paddingValues ->
         LazyColumn(
             modifier = Modifier.padding(paddingValues).imePadding().testTag("conversation")) {
@@ -224,7 +228,7 @@ fun AiSolverWelcomeScreen(
             title = {},
             navigationIcon = {
               IconButton(onClick = { navigationActions.goBack() }) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
               }
             },
             colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background))
@@ -237,7 +241,13 @@ fun AiSolverWelcomeScreen(
                 .padding(innerPadding)
                 .testTag("AiGetStartedScreen"),
         contentAlignment = Alignment.TopCenter) {
-          if (isLoading) {
+          if (!isInternetAvailable(context)) {
+            Text(
+                text = "AI solver requires Internet Connection",
+                color = colorScheme.error,
+                style = Typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+                modifier = Modifier.testTag("noInternetConnection").align(Alignment.Center))
+          } else if (isLoading) {
             CircularProgressIndicator(modifier = Modifier.testTag("loadingIndicator"))
           } else {
             val screenHeight = maxHeight
@@ -438,7 +448,8 @@ fun AiSolverScreen(
                     imageBitmap = null
                   }
                 }
-              })
+              },
+              context = context)
         } else {
           // In case the user should create a request we display a button so that he directly
           // navigate to the create Request Screen
@@ -477,7 +488,7 @@ fun AiSolverHeader(navigationActions: NavigationActions) {
       },
       navigationIcon = {
         IconButton(onClick = { navigationActions.goBack() }) {
-          Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+          Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
         }
       },
       colors =
@@ -540,7 +551,7 @@ fun ChatHeader(name: String?, picture: String, navigationActions: NavigationActi
       },
       navigationIcon = {
         IconButton(onClick = { navigationActions.goBack() }) {
-          Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+          Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
         }
       })
 }
@@ -688,7 +699,8 @@ fun MessageInputBar(
     onImageSelected: (Uri?) -> Unit,
     isSeeker: Boolean,
     isAiSolverScreen: Boolean,
-    onSendClickButton: (String, (String) -> Unit) -> Unit
+    onSendClickButton: (String, (String) -> Unit) -> Unit,
+    context: Context
 ) {
   var message by remember { mutableStateOf("") }
   var imageUri by remember { mutableStateOf<Uri?>(null) }
@@ -711,7 +723,7 @@ fun MessageInputBar(
               .imePadding()
               .testTag("SendMessageBar")) {
         if (!isAiSolverScreen) {
-          AssistantSuggestions(chatAssistantViewModel, isSeeker) {
+          AssistantSuggestions(chatAssistantViewModel, isSeeker, context) {
             chatAssistantViewModel.updateSelectedTones(emptyList())
             chatAssistantViewModel.generateMessage(it, isSeeker) { msg -> message = msg }
           }
@@ -773,7 +785,17 @@ fun MessageInputBar(
               // Optional AI Chat Assistant Button
               if (!isAiSolverScreen) {
                 IconButton(
-                    onClick = { showDialog = true },
+                    onClick = {
+                      if (isInternetAvailable(context)) {
+                        showDialog = true
+                      } else {
+                        Toast.makeText(
+                                context,
+                                "Chat Assistant requires Internet Connection",
+                                Toast.LENGTH_SHORT)
+                            .show()
+                      }
+                    },
                     modifier = Modifier.size(48.dp).testTag("aiButton")) {
                       Icon(
                           painter = painterResource(R.drawable.ai_message),
@@ -796,11 +818,18 @@ fun MessageInputBar(
               IconButton(
                   onClick = {
                     imageUri = null
+                    if (!isInternetAvailable(context)) {
+                      Toast.makeText(
+                              context,
+                              "Your messages will be sent when you are back online",
+                              Toast.LENGTH_SHORT)
+                          .show()
+                    }
                     onSendClickButton(message) { message = it }
                   },
                   modifier = Modifier.size(48.dp).testTag("sendMessageButton")) {
                     Icon(
-                        imageVector = Icons.Default.Send,
+                        imageVector = Icons.AutoMirrored.Filled.Send,
                         contentDescription = "Send",
                         tint = colorScheme.onSurfaceVariant,
                         modifier = Modifier.rotate(-45f))
@@ -859,6 +888,7 @@ fun buildMessage(
 fun AssistantSuggestions(
     chatAssistantViewModel: ChatAssistantViewModel,
     isSeeker: Boolean,
+    context: Context,
     onSuggestionSelect: (String) -> Unit
 ) {
   val suggestions by chatAssistantViewModel.suggestions.collectAsState()
@@ -875,9 +905,11 @@ fun AssistantSuggestions(
             contentDescription = "AI suggestions",
             Modifier.padding(horizontal = 8.dp),
             tint = colorScheme.onSurfaceVariant)
-        if (suggestions.isEmpty()) {
+        if (!isInternetAvailable(context)) {
+          Text("No Internet Connection", color = colorScheme.error, style = Typography.bodyLarge)
+        } else if (suggestions.isEmpty()) {
           Text(
-              "No suggestions available",
+              "Load Suggestions",
               color = colorScheme.onSurfaceVariant,
               style = Typography.bodyLarge)
         } else {
@@ -895,8 +927,14 @@ fun AssistantSuggestions(
         }
         IconButton(
             onClick = {
-              chatAssistantViewModel.generateSuggestions(isSeeker) {
-                Log.e("ChatScreen", "Suggestions generated")
+              if (isInternetAvailable(context)) {
+                chatAssistantViewModel.generateSuggestions(isSeeker) {
+                  Log.e("ChatScreen", "Suggestions generated")
+                }
+              } else {
+                Toast.makeText(
+                        context, "Chat Assistant requires Internet Connection", Toast.LENGTH_SHORT)
+                    .show()
               }
             }) {
               Icon(
