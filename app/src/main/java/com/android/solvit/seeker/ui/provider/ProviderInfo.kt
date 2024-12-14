@@ -37,6 +37,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
@@ -61,6 +62,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -826,138 +828,152 @@ fun SelectRequestDialog(
   val selectedRequest = remember { mutableStateOf<ServiceRequest?>(null) }
 
   Dialog(onDismissRequest = { showDialog.value = false }) {
-    Card(
-        modifier =
-            Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                .height(400.dp)
-                .testTag("dialog_card"),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = colorScheme.surface)) {
-          Column(
-              modifier = Modifier.padding(16.dp),
-              verticalArrangement = Arrangement.Top,
-              horizontalAlignment = Alignment.CenterHorizontally) {
-                // Title
-                Text(
-                    text = "Choose the concerned service request:",
-                    style = typography.titleMedium,
-                    modifier = Modifier.padding(bottom = 16.dp).testTag("dialog_title"),
-                    color = colorScheme.onSurface)
+    Surface(shape = RoundedCornerShape(16.dp), color = colorScheme.background) {
+      Card(
+          modifier =
+              Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                  .height(400.dp)
+                  .testTag("dialog_card"),
+          shape = RoundedCornerShape(16.dp),
+          colors = CardDefaults.cardColors(containerColor = colorScheme.background)) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.CenterHorizontally) {
+                  // Title
+                  Text(
+                      text = "Select request to assign",
+                      style = typography.titleLarge,
+                      modifier =
+                          Modifier.padding(bottom = 16.dp)
+                              .testTag("dialog_title")
+                              .align(Alignment.CenterHorizontally),
+                      color = colorScheme.onPrimaryContainer)
 
-                // LazyColumn to display requests
-                LazyColumn(
-                    modifier =
-                        Modifier.testTag("requests_column")
-                            .fillMaxWidth()
-                            .weight(
-                                1f), // Allows the list to scroll properly when content overflows
-                    verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                      items(requests) { request ->
-                        Card(
+                  // LazyColumn to display requests
+                  LazyColumn(
+                      modifier =
+                          Modifier.testTag("requests_column")
+                              .fillMaxWidth()
+                              .weight(
+                                  1f), // Allows the list to scroll properly when content overflows
+                      verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        items(requests) { request ->
+                          Card(
+                              modifier =
+                                  Modifier.fillMaxWidth()
+                                      .testTag("request_card")
+                                      .border(
+                                          2.dp,
+                                          if (selectedRequest.value == request)
+                                              colorScheme.secondary
+                                          else colorScheme.background,
+                                          RoundedCornerShape(12.dp))
+                                      .shadow(elevation = 5.dp, shape = RoundedCornerShape(12.dp))
+                                      .clickable { selectedRequest.value = request },
+                              shape = RoundedCornerShape(12.dp),
+                              colors =
+                                  CardDefaults.cardColors(
+                                      containerColor = colorScheme.background)) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth().padding(12.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    verticalAlignment = Alignment.CenterVertically) {
+                                      Box(
+                                          modifier =
+                                              Modifier.size(48.dp)
+                                                  .clip(RoundedCornerShape(8.dp))
+                                                  .background(Color.LightGray)) {
+                                            AsyncImage(
+                                                model =
+                                                    if (!request.imageUrl.isNullOrEmpty())
+                                                        request.imageUrl
+                                                    else R.drawable.no_photo,
+                                                placeholder =
+                                                    painterResource(id = R.drawable.loading),
+                                                error = painterResource(id = R.drawable.error),
+                                                contentDescription = "Service Image",
+                                                contentScale = ContentScale.Fit)
+                                          }
+
+                                      Spacer(Modifier.width(16.dp))
+                                      Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                        Text(
+                                            modifier = Modifier.testTag("request_title"),
+                                            text = request.title,
+                                            style = typography.titleMedium,
+                                            color = colorScheme.onPrimaryContainer)
+                                        Text(
+                                            modifier = Modifier.testTag("request_description"),
+                                            text = request.description,
+                                            style = typography.bodyMedium,
+                                            color = colorScheme.onPrimaryContainer,
+                                            maxLines = 2,
+                                            overflow = TextOverflow.Ellipsis)
+                                      }
+                                    }
+                              }
+                        }
+                      }
+
+                  // Action Buttons
+                  Row(
+                      modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+                      horizontalArrangement = Arrangement.SpaceEvenly) {
+                        TextButton(
+                            onClick = { showDialog.value = false },
                             modifier =
-                                Modifier.fillMaxWidth()
-                                    .testTag("request_card")
-                                    .border(
-                                        2.dp,
-                                        if (selectedRequest.value == request) colorScheme.primary
-                                        else colorScheme.surface,
-                                        RoundedCornerShape(12.dp))
-                                    .clickable { selectedRequest.value = request },
-                            shape = RoundedCornerShape(12.dp),
-                            colors =
-                                CardDefaults.cardColors(
-                                    containerColor = colorScheme.primaryContainer)) {
-                              Column(
-                                  modifier = Modifier.padding(12.dp),
-                                  verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                          Text(
-                                              text = "Title:",
-                                              style = typography.bodyMedium,
-                                              color = colorScheme.onPrimaryContainer)
-                                          Text(
-                                              modifier = Modifier.testTag("request_title"),
-                                              text = request.title,
-                                              style = typography.bodyMedium,
-                                              color = colorScheme.onPrimaryContainer)
-                                        }
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                          Text(
-                                              text = "Description:",
-                                              style = typography.bodyMedium,
-                                              color = colorScheme.onPrimaryContainer)
-                                          Text(
-                                              modifier = Modifier.testTag("request_description"),
-                                              text = request.description,
-                                              style = typography.bodyMedium,
-                                              color = colorScheme.onPrimaryContainer,
-                                              maxLines = 2,
-                                              overflow = TextOverflow.Ellipsis)
-                                        }
-                                  }
+                                Modifier.padding(horizontal = 8.dp).testTag("dismiss_button")) {
+                              Text(
+                                  text = "Dismiss",
+                                  style = typography.labelLarge,
+                                  color = colorScheme.primary)
+                            }
+
+                        Button(
+                            modifier =
+                                Modifier.padding(horizontal = 8.dp).testTag("confirm_button"),
+                            enabled = selectedRequest.value != null,
+                            onClick = {
+                              selectedRequest.value?.let {
+                                var request = it.copy(providerId = providerId)
+                                val packageProposal = selectedPackage.value
+                                if (packageProposal != null) {
+                                  request =
+                                      request.copy(
+                                          packageId = packageProposal.uid,
+                                          agreedPrice = packageProposal.price)
+                                }
+                                requestViewModel.saveServiceRequest(request)
+                                requestViewModel.selectRequest(request)
+                                navigationActions.navigateAndSetBackStack(
+                                    Route.BOOKING_DETAILS, listOf(Route.REQUESTS_OVERVIEW))
+                              }
+                              showDialog.value = false
+                            },
+                            shape = RoundedCornerShape(8.dp)) {
+                              Text(
+                                  text = "Confirm",
+                                  style = typography.labelLarge,
+                                  color = colorScheme.onPrimary)
                             }
                       }
-                    }
 
-                TextButton(
-                    onClick = {
-                      requestViewModel.selectProvider(providerId, providerType)
-                      navigationActions.navigateTo(Route.CREATE_REQUEST)
-                    },
-                    modifier = Modifier.testTag("clear_selection_button")) {
-                      Text(
-                          textAlign = TextAlign.Center,
-                          text = "Create a new request with this provider assigned",
-                          style = typography.bodyMedium,
-                          color = colorScheme.primary)
-                    }
-
-                // Action Buttons
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceEvenly) {
-                      TextButton(
-                          onClick = { showDialog.value = false },
-                          modifier =
-                              Modifier.padding(horizontal = 8.dp).testTag("dismiss_button")) {
-                            Text(
-                                text = "Dismiss",
-                                style = typography.labelLarge,
-                                color = colorScheme.primary)
-                          }
-
-                      Button(
-                          modifier = Modifier.padding(horizontal = 8.dp).testTag("confirm_button"),
-                          enabled = selectedRequest.value != null,
-                          onClick = {
-                            selectedRequest.value?.let {
-                              var request = it.copy(providerId = providerId)
-                              val packageProposal = selectedPackage.value
-                              if (packageProposal != null) {
-                                request =
-                                    request.copy(
-                                        packageId = packageProposal.uid,
-                                        agreedPrice = packageProposal.price)
-                              }
-                              requestViewModel.saveServiceRequest(request)
-                              requestViewModel.selectRequest(request)
-                              navigationActions.navigateAndSetBackStack(
-                                  Route.BOOKING_DETAILS, listOf(Route.REQUESTS_OVERVIEW))
-                            }
-                            showDialog.value = false
-                          },
-                          shape = RoundedCornerShape(8.dp)) {
-                            Text(
-                                text = "Confirm",
-                                style = typography.labelLarge,
-                                color = colorScheme.onPrimary)
-                          }
-                    }
-              }
-        }
+                  TextButton(
+                      onClick = {
+                        requestViewModel.selectProvider(providerId, providerType)
+                        navigationActions.navigateTo(Route.CREATE_REQUEST)
+                      },
+                      modifier = Modifier.testTag("clear_selection_button")) {
+                        Text(
+                            textAlign = TextAlign.Center,
+                            textDecoration = TextDecoration.Underline,
+                            text = "Create a new request with this provider assigned",
+                            style = typography.bodyMedium,
+                            color = colorScheme.primary)
+                      }
+                }
+          }
+    }
   }
 }

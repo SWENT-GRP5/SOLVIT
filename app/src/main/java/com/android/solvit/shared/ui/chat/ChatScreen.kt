@@ -68,6 +68,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -102,8 +103,6 @@ import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.navigation.Screen
 import com.android.solvit.shared.ui.theme.Black
-import com.android.solvit.shared.ui.theme.IAButton_blue_color
-import com.android.solvit.shared.ui.theme.IAButton_green_color
 import com.android.solvit.shared.ui.utils.getReceiverImageUrl
 import com.android.solvit.shared.ui.utils.getReceiverName
 import kotlinx.coroutines.delay
@@ -265,7 +264,8 @@ fun AiSolverWelcomeScreen(
                                         brush =
                                             Brush.linearGradient(
                                                 colors =
-                                                    listOf(Color(0xFF00B383), Color(0xFF0099FF)),
+                                                    listOf(
+                                                        colorScheme.primary, colorScheme.secondary),
                                                 start = Offset.Zero,
                                                 end = Offset.Infinite),
                                         fontSize = screenHeight.times(0.04f).value.sp)) {
@@ -328,12 +328,16 @@ fun AiSolverButton(screenHeight: Dp = 700.dp, title: String, onClick: () -> Unit
   Button(
       onClick = { onClick() },
       colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-      shape = RoundedCornerShape(50),
       contentPadding = PaddingValues(),
       modifier =
           Modifier.fillMaxWidth(0.8f)
               .height(screenHeight.times(0.07f))
-              .testTag("getStartedButton")) {
+              .testTag("getStartedButton")
+              .shadow(
+                  elevation = 8.dp,
+                  shape = RoundedCornerShape(16.dp),
+                  ambientColor = colorScheme.primary,
+                  spotColor = colorScheme.secondary)) {
         // Gradient background
         Box(
             modifier =
@@ -341,7 +345,7 @@ fun AiSolverButton(screenHeight: Dp = 700.dp, title: String, onClick: () -> Unit
                     .background(
                         brush =
                             Brush.horizontalGradient(
-                                colors = listOf(IAButton_green_color, IAButton_blue_color)),
+                                colors = listOf(colorScheme.primary, colorScheme.secondary)),
                         shape = RoundedCornerShape(50)),
             contentAlignment = Alignment.Center) {
               // Button text
