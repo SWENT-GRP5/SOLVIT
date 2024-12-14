@@ -47,6 +47,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.shared.model.authentication.AuthViewModel
@@ -273,7 +274,9 @@ fun PendingJobsSection(
       onContactCustomer = {
         Toast.makeText(context, "Contact Not yet Implemented", Toast.LENGTH_SHORT).show()
       },
-      onConfirmRequest = { request -> viewModel.confirmRequest(request) },
+      onConfirmRequest = { request ->
+        viewModel.viewModelScope.launch { viewModel.confirmRequest(request, "test provider name") }
+      },
       onChat = { Toast.makeText(context, "Chat Not yet Implemented", Toast.LENGTH_SHORT).show() })
 }
 
@@ -335,7 +338,7 @@ fun ScheduledJobsSection(
         colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)) {
           Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
-                imageVector = Icons.Outlined.Place,
+                Icons.Outlined.Place,
                 contentDescription = "NavigateIcon",
                 tint = colorScheme.onPrimary)
             Spacer(modifier = Modifier.width(8.dp))

@@ -4,6 +4,8 @@ agp = "8.4.2"
 coilCompose = "2.4.0"
 converterGson = "2.9.0"
 firebaseBom = "33.4.0"
+firebaseBomVersion = "32.7.0"
+gson = "2.10.1"
 generativeaiVersion = "0.7.0"
 json = "20240303"
 kotlin = "1.9.0"
@@ -82,6 +84,7 @@ testng = "6.9.6"
 navigationTesting = "2.8.2"
 coreI18n = "1.0.0-alpha01"
 generativeai = "0.9.0"
+uiDesktop = "1.7.0"
 uiautomator = "2.2.0"
 
 [libraries]
@@ -108,18 +111,26 @@ androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-man
 androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling", version.ref ="uiTooling" }
 androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview", version.ref="ui" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
+com-google-firebase-firebase-auth-ktx = { module = "com.google.firebase:firebase-auth-ktx" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
 core-ktx = { module = "com.google.android.play:core-ktx", version.ref = "coreKtxVersion" }
+firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-auth = { module = "com.google.firebase:firebase-auth", version.ref = "firebaseAuth" }
 firebase-auth-ktx = { module = "com.google.firebase:firebase-auth-ktx", version.ref = "firebaseAuthKtx" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
+firebase-bom-v3270 = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBomVersion" }
 firebase-database-ktx = { module = "com.google.firebase:firebase-database-ktx", version.ref = "firebaseDatabaseKtx" }
 firebase-firestore = { module = "com.google.firebase:firebase-firestore", version.ref = "firebaseFirestore" }
 firebase-firestore-ktx = { module = "com.google.firebase:firebase-firestore-ktx" }
+firebase-messaging-ktx = { module = "com.google.firebase:firebase-messaging-ktx" }
 firebase-ui-auth = { module = "com.firebaseui:firebase-ui-auth", version.ref = "firebaseUiAuth" }
 compose-viewmodel = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "composeViewModel" }
 generativeai-v070 = { module = "com.google.ai.client.generativeai:generativeai", version.ref = "generativeaiVersion" }
 google-firebase-auth-ktx = { module = "com.google.firebase:firebase-auth-ktx" }
+google-firebase-database-ktx = { module = "com.google.firebase:firebase-database-ktx" }
+google-firebase-firestore-ktx = { module = "com.google.firebase:firebase-firestore-ktx" }
+google-firebase-storage-ktx = { module = "com.google.firebase:firebase-storage-ktx" }
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 json = { module = "org.json:json", version.ref = "json" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 
@@ -156,6 +167,7 @@ kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotl
 kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
 androidx-core-i18n = { group = "androidx.core", name = "core-i18n", version.ref = "coreI18n" }
 generativeai = { group = "com.google.ai.client.generativeai", name = "generativeai", version.ref = "generativeai" }
+androidx-ui-desktop = { group = "androidx.compose.ui", name = "ui-desktop", version.ref = "uiDesktop" }
 androidx-uiautomator = { group = "androidx.test.uiautomator", name = "uiautomator", version.ref = "uiautomator" }
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
