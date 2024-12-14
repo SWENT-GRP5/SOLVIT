@@ -434,7 +434,7 @@ fun ProviderRowCard(
     listProviderViewModel: ListProviderViewModel,
     navigationActions: NavigationActions
 ) {
-  OutlinedCard (
+  OutlinedCard(
       modifier =
           Modifier.fillMaxWidth()
               .clickable {
