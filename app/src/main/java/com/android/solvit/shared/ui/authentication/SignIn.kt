@@ -55,7 +55,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -69,6 +68,7 @@ import com.android.solvit.R
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
+import com.android.solvit.shared.ui.theme.Typography
 import com.android.solvit.shared.ui.utils.CustomOutlinedTextField
 import com.android.solvit.shared.ui.utils.PasswordTextField
 import com.android.solvit.shared.ui.utils.ValidationRegex
@@ -319,7 +319,7 @@ fun LogoSection() {
     Spacer(modifier = Modifier.height(4.dp))
     Text(
         text = "Welcome!",
-        fontSize = 28.sp,
+        style = Typography.bodyLarge.copy(fontSize = 28.sp),
         fontWeight = FontWeight.Bold,
         color = colorScheme.primary,
         modifier = Modifier.testTag("welcomeText"))
@@ -396,9 +396,8 @@ fun FormSection(
   Text(
       text = "Your password must have at least 6 characters",
       color = colorScheme.onSurfaceVariant,
-      fontSize = 12.sp,
       textAlign = TextAlign.Start,
-      style = TextStyle(fontSize = 12.sp, lineHeight = 16.sp),
+      style = Typography.bodySmall,
       modifier = Modifier.padding(top = 4.dp).fillMaxWidth())
 
   Spacer(modifier = Modifier.height(8.dp))
@@ -421,7 +420,7 @@ fun FormSection(
           text = "Remember me",
           modifier = Modifier.testTag("rememberMeCheckbox"),
           color = colorScheme.onSurfaceVariant,
-          fontSize = 16.sp)
+          style = Typography.bodyLarge)
     }
 
     // Section Forgot Password
@@ -432,7 +431,7 @@ fun FormSection(
           Text(
               text = "Forgot password?",
               color = colorScheme.onSurfaceVariant,
-              fontSize = 16.sp,
+              style = Typography.bodyLarge,
               textDecoration = TextDecoration.Underline,
               modifier =
                   Modifier.clickable { navigationActions.navigateTo(Screen.FORGOT_PASSWORD) }
@@ -456,7 +455,7 @@ fun FormSection(
 
   Spacer(modifier = Modifier.height(4.dp))
 
-  Text("OR", color = colorScheme.onSurface)
+  Text("OR", color = colorScheme.onSurface, style = Typography.bodyLarge)
 
   Spacer(modifier = Modifier.height(4.dp))
 
@@ -501,8 +500,7 @@ fun SignUpSection(navigationActions: NavigationActions) {
     ClickableText(
         text = annotatedText,
         style =
-            TextStyle(
-                color = colorScheme.onSurface, fontSize = 16.sp, textAlign = TextAlign.Center),
+            Typography.bodyLarge.copy(color = colorScheme.onSurface, textAlign = TextAlign.Center),
         onClick = { navigationActions.navigateTo(Screen.SIGN_UP) },
         modifier = Modifier.fillMaxWidth().testTag("signUpLink"))
   }
@@ -577,7 +575,7 @@ fun SignInButton(
             "Sign in",
             color = colorScheme.background,
             fontWeight = FontWeight.Bold,
-            fontSize = 16.sp)
+            style = Typography.bodyLarge)
       }
 }
 
@@ -617,11 +615,11 @@ fun GoogleButton(
           Text(
               text = text,
               color = colorScheme.onSurface,
-              fontSize = 16.sp,
               maxLines = 2,
               overflow = TextOverflow.Ellipsis,
               modifier = Modifier.weight(1f),
-              textAlign = TextAlign.Center)
+              textAlign = TextAlign.Center,
+              style = Typography.bodyLarge)
         }
       }
 }

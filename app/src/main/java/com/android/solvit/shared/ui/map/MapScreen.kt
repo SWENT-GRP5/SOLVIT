@@ -47,7 +47,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -59,6 +58,7 @@ import coil.request.ErrorResult
 import coil.request.ImageRequest
 import coil.request.SuccessResult
 import com.android.solvit.R
+import com.android.solvit.shared.ui.theme.Typography
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
@@ -78,6 +78,7 @@ import com.google.maps.android.compose.rememberCameraPositionState
  * @param bottomBar The content of the bottom bar.
  * @param markersLoading Whether the markers data are still loading.
  */
+@SuppressLint("SourceLockedOrientationActivity")
 @Composable
 fun MapScreen(
     userLocation: LatLng?,
@@ -199,13 +200,15 @@ fun MapMarker(markerData: MarkerData) {
                     verticalArrangement = Arrangement.SpaceBetween) {
                       Text(
                           text = markerData.title,
-                          fontWeight = FontWeight.Bold,
-                          fontSize = 14.sp,
-                          color = Color.White,
-                          lineHeight = 16.sp,
                           maxLines = 2,
                           overflow = TextOverflow.Ellipsis,
-                          style = TextStyle(shadow = Shadow(color = Color.Black, blurRadius = 4f)))
+                          style =
+                              Typography.titleLarge.copy(
+                                  fontWeight = FontWeight.Bold,
+                                  fontSize = 14.sp,
+                                  color = colorScheme.onPrimary,
+                                  lineHeight = 16.sp,
+                                  shadow = Shadow(color = colorScheme.primary, blurRadius = 4f)))
                       Row(
                           modifier = Modifier.fillMaxWidth(),
                           horizontalArrangement = Arrangement.End) {

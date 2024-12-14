@@ -2,9 +2,12 @@ package com.android.solvit.provider.ui.calendar.views.month
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -17,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import com.android.solvit.provider.ui.calendar.components.utils.StatusIndicator
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestStatus
+import com.android.solvit.shared.ui.theme.Typography
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
@@ -58,9 +62,10 @@ fun MonthDayItem(
       horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = date.dayOfMonth.toString(),
-            style = MaterialTheme.typography.bodyMedium,
+            style =
+                Typography.bodyMedium.copy(
+                    fontWeight = if (isCurrentDay) FontWeight.Bold else FontWeight.Normal),
             color = textColor,
-            fontWeight = if (isCurrentDay) FontWeight.Bold else FontWeight.Normal,
             modifier = Modifier.testTag("monthDayNumber_${date}"))
 
         if (dayStatuses.isNotEmpty()) {

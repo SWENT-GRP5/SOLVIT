@@ -28,7 +28,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Surface
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Add
@@ -39,7 +38,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -69,6 +69,7 @@ import com.android.solvit.shared.ui.theme.OnSecondary
 import com.android.solvit.shared.ui.theme.Primary
 import com.android.solvit.shared.ui.theme.Secondary
 import com.android.solvit.shared.ui.theme.SurfaceVariant
+import com.android.solvit.shared.ui.theme.Typography
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -122,9 +123,7 @@ fun AIAssistantDialog(onCancel: () -> Unit, onUploadPictures: () -> Unit) {
                                   .testTag("aiAssistantTitleBox")) {
                             Text(
                                 text = "Your AI-Powered Assistant",
-                                style =
-                                    MaterialTheme.typography.bodyMedium.copy(
-                                        fontWeight = FontWeight.Bold),
+                                style = Typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                                 color = OnPrimary,
                                 textAlign = TextAlign.Center)
                           }
@@ -134,7 +133,7 @@ fun AIAssistantDialog(onCancel: () -> Unit, onUploadPictures: () -> Unit) {
                 Text(
                     text =
                         "Would you like to use the AI assistant to create your request by uploading pictures of your issue?",
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = Typography.bodyMedium,
                     textAlign = TextAlign.Center,
                     color = OnBackground,
                     modifier = Modifier.padding(vertical = 16.dp).testTag("aiAssistantDescription"))
@@ -196,7 +195,7 @@ fun ImagePickerStep(
         if (selectedImages.isEmpty()) {
           Text(
               text = "No Images added",
-              style = MaterialTheme.typography.bodyMedium,
+              style = Typography.bodyMedium,
               color = OnBackground,
               textAlign = TextAlign.Center,
               modifier = Modifier.fillMaxWidth().testTag("noImagesText"))
@@ -270,8 +269,8 @@ fun ImagePickerStep(
         Text(
             text =
                 "The initial image you select will be displayed in the service request. Feel free to update it after analysis.",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onBackground,
+            style = Typography.bodySmall,
+            color = colorScheme.onBackground,
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth().padding(top = 8.dp).testTag("imagePickerNote"))
       }
@@ -306,7 +305,7 @@ fun StepHeader(@DrawableRes iconRes: Int, title: String) {
         contentAlignment = Alignment.Center) {
           Text(
               text = title,
-              style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+              style = Typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
               color = OnPrimary,
               textAlign = TextAlign.Center)
         }
@@ -395,7 +394,7 @@ fun MultiStepDialog(
                       Spacer(modifier = Modifier.height(16.dp))
                       Text(
                           text = "Analysis complete! Fields have been filled with AI suggestions.",
-                          style = MaterialTheme.typography.bodyMedium,
+                          style = Typography.bodyMedium,
                           textAlign = TextAlign.Center,
                           color = OnBackground,
                           modifier = Modifier.testTag("stepThreeMessage"))
@@ -404,9 +403,9 @@ fun MultiStepDialog(
                       Text(
                           text =
                               "Please note: You still need to manually add the address and deadline for your service request.",
-                          style = MaterialTheme.typography.bodySmall,
+                          style = Typography.bodySmall,
                           textAlign = TextAlign.Center,
-                          color = MaterialTheme.colorScheme.onBackground,
+                          color = colorScheme.onBackground,
                           modifier = Modifier.padding(horizontal = 8.dp).testTag("completionNote"))
                       Spacer(modifier = Modifier.height(16.dp))
                       // New Proceed Button

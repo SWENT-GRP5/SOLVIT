@@ -26,16 +26,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -67,9 +65,10 @@ import com.android.solvit.R
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
+import com.android.solvit.shared.ui.theme.Typography
 import com.android.solvit.shared.ui.utils.CustomOutlinedTextField
-import com.android.solvit.shared.ui.utils.GoBackButton
 import com.android.solvit.shared.ui.utils.PasswordTextField
+import com.android.solvit.shared.ui.utils.TopAppBarInbox
 import com.android.solvit.shared.ui.utils.ValidationRegex
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -157,10 +156,9 @@ fun SignUpScreen(
 
   Scaffold(
       topBar = {
-        TopAppBar(
-            title = { Text("") },
-            navigationIcon = { GoBackButton(navigationActions) },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background))
+        TopAppBarInbox(
+            leftButtonAction = { navigationActions.goBack() },
+            leftButtonForm = Icons.AutoMirrored.Filled.ArrowBack)
       },
       content = {
         Column(
@@ -265,7 +263,7 @@ fun SignUpScreen(
                       ButtonDefaults.buttonColors(
                           containerColor = colorScheme.primary,
                           contentColor = colorScheme.background)) {
-                    Text("Generate a password")
+                    Text("Generate a password", style = Typography.bodyLarge)
                   }
 
               Spacer(modifier = Modifier.height(20.dp))
@@ -290,10 +288,7 @@ fun SignUpScreen(
 
 @Composable
 fun ScreenTitle(title: String, testTag: String) {
-  Text(
-      text = title,
-      style = MaterialTheme.typography.titleLarge,
-      modifier = Modifier.testTag(testTag))
+  Text(text = title, style = Typography.titleLarge, modifier = Modifier.testTag(testTag))
 }
 
 /**
@@ -354,7 +349,7 @@ fun SignUpButton(
             "Sign Up",
             color = colorScheme.onPrimary,
             fontWeight = FontWeight.Bold,
-            fontSize = 16.sp)
+            style = Typography.bodyLarge)
       }
 }
 
@@ -418,8 +413,8 @@ fun AlreadyHaveAccountText(navigationActions: NavigationActions) {
       ClickableText(
           text = annotatedText,
           style =
-              TextStyle(
-                  color = colorScheme.onSurface, fontSize = 16.sp, textAlign = TextAlign.Center),
+              Typography.bodyLarge.copy(
+                  color = colorScheme.onSurface, textAlign = TextAlign.Center),
           onClick = { offset ->
             annotatedText
                 .getStringAnnotations(tag = "Log in", start = offset, end = offset)

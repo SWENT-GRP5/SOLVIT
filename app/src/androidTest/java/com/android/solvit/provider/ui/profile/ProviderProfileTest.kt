@@ -73,13 +73,7 @@ class ProviderProfileScreenTest {
   @Test
   fun providerProfileScreen_profileTopBar_displaysCorrectly() {
     composeTestRule.onNodeWithTag("ProfileTitle").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("LogoutButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("ProfileTopBar").assertIsDisplayed()
-  }
-
-  @Test
-  fun providerProfileScreen_logoutButton_performClick() {
-    composeTestRule.onNodeWithTag("LogoutButton").performClick()
   }
 
   @Test
