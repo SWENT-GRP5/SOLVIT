@@ -7,7 +7,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -23,18 +22,17 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -64,6 +62,7 @@ import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.theme.Typography
+import com.android.solvit.shared.ui.utils.TopAppBarInbox
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("SourceLockedOrientationActivity")
@@ -109,25 +108,13 @@ fun EditSeekerProfileScreen(
   Scaffold(
       modifier = Modifier.background(color = colorScheme.background),
       topBar = {
-        TopAppBar(
-            title = {
-              Box(
-                  modifier = Modifier.fillMaxWidth().testTag("goBackButton"),
-                  contentAlignment = Alignment.Center) {
-                    Text(
-                        "Bio-data", color = colorScheme.onBackground, style = Typography.titleLarge)
-                  }
-            },
-            navigationIcon = {
-              IconButton(onClick = { navigationActions.goBack() }) {
-                Icon(
-                    Icons.Default.ArrowBack,
-                    contentDescription = "Back",
-                    tint = colorScheme.onBackground)
-              }
-            },
-            actions = { Box(modifier = Modifier.size(48.dp)) },
-            modifier = Modifier.background(color = colorScheme.background))
+        TopAppBarInbox(
+            title = "Bio-data",
+            testTagTitle = "goBackButton",
+            testTagGeneral = "notifications_title",
+            leftButtonForm = Icons.AutoMirrored.Filled.ArrowBack,
+            leftButtonAction = { navigationActions.goBack() },
+            testTagLeft = "goBackButton")
       }) { padding ->
         Column(
             modifier =

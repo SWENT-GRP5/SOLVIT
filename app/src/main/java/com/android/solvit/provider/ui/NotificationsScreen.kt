@@ -10,13 +10,10 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -37,6 +34,7 @@ import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestStatus
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.theme.Typography
+import com.android.solvit.shared.ui.utils.TopAppBarInbox
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -55,24 +53,12 @@ fun NotificationScreen(
   val selectedServiceRequest = remember { mutableStateOf<ServiceRequest?>(null) }
   Scaffold(
       topBar = {
-        TopAppBar(
-            title = {
-              Row(
-                  modifier = Modifier.fillMaxWidth().testTag("notifications_title"),
-                  horizontalArrangement = Arrangement.Start) {
-                    Text(
-                        "Notifications",
-                        textAlign = TextAlign.Center,
-                        style = Typography.titleLarge)
-                  }
-            },
-            navigationIcon = {
-              IconButton(
-                  onClick = { navigationActions.goBack() },
-                  modifier = Modifier.testTag("goBackButton")) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                  }
-            })
+        TopAppBarInbox(
+            title = "Notifications",
+            testTagGeneral = "notifications_title",
+            leftButtonForm = Icons.AutoMirrored.Filled.ArrowBack,
+            leftButtonAction = { navigationActions.goBack() },
+            testTagLeft = "goBackButton")
       }) { paddingValues ->
         // Content inside the Scaffold
         Column(modifier = Modifier.padding(paddingValues)) {
