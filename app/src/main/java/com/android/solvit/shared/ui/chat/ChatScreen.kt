@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -754,7 +755,7 @@ fun MessageInputBar(
                   onValueChange = { message = it },
                   modifier =
                       Modifier.weight(1f)
-                          .height(56.dp) // Matches the height of buttons for alignment
+                          .heightIn(max = 200.dp) // Matches the height of buttons for alignment
                           .padding(end = 8.dp)
                           .testTag("enterText"),
                   placeholder = {
@@ -767,8 +768,7 @@ fun MessageInputBar(
                       OutlinedTextFieldDefaults.colors(
                           unfocusedBorderColor = colorScheme.background,
                           focusedBorderColor = colorScheme.background,
-                          focusedTextColor = colorScheme.onSurface),
-                  singleLine = true)
+                          focusedTextColor = colorScheme.onSurface))
 
               // Optional AI Chat Assistant Button
               if (!isAiSolverScreen) {
@@ -934,15 +934,15 @@ fun RequestDetails(
         Text(
             text = serviceRequest.title,
             modifier = Modifier.testTag("requestTitle"),
-            style = Typography.bodyLarge.copy(fontSize = 20.sp, fontWeight = FontWeight.ExtraBold))
+            style = Typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis)
         Text(
             text = serviceRequest.description,
             modifier = Modifier.testTag("requestDescription"),
-            style = Typography.bodyMedium)
-        Text(
-            text = serviceRequest.type.name,
-            modifier = Modifier.testTag("requestType"),
-            style = Typography.bodyMedium.copy(fontWeight = FontWeight.Bold))
+            style = Typography.bodyMedium,
+            maxLines = 4,
+            overflow = TextOverflow.Ellipsis)
       }
     }
   }
