@@ -4,7 +4,11 @@ import android.net.Uri
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.service.Services
 import com.google.firebase.Timestamp
+import java.time.LocalDate
+import java.time.ZoneId
+import java.util.Date
 import org.hamcrest.CoreMatchers.`is`
+import org.hamcrest.CoreMatchers.nullValue
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -37,7 +41,27 @@ class ServiceRequestViewModelTest {
   @Before
   fun setUp() {
     serviceRequestRepository = mock(ServiceRequestRepository::class.java)
-    serviceRequestViewModel = ServiceRequestViewModel(serviceRequestRepository)
+    `when`(serviceRequestRepository.init(any())).thenAnswer {
+      (it.arguments[0] as () -> Unit).invoke()
+    }
+    // Mock the addListenerOnServiceRequests to avoid side effects
+    `when`(serviceRequestRepository.addListenerOnServiceRequests(any(), any())).thenAnswer {}
+
+    // Mock all repository methods to avoid NPEs
+    `when`(serviceRequestRepository.getServiceRequests(any(), any())).thenAnswer {}
+    `when`(serviceRequestRepository.getPendingServiceRequests(any(), any())).thenAnswer {}
+    `when`(serviceRequestRepository.getAcceptedServiceRequests(any(), any())).thenAnswer {}
+    `when`(serviceRequestRepository.getScheduledServiceRequests(any(), any())).thenAnswer {}
+    `when`(serviceRequestRepository.getCompletedServiceRequests(any(), any())).thenAnswer {}
+    `when`(serviceRequestRepository.getCancelledServiceRequests(any(), any())).thenAnswer {}
+    `when`(serviceRequestRepository.getArchivedServiceRequests(any(), any())).thenAnswer {}
+
+    serviceRequestViewModel =
+        ServiceRequestViewModel(
+            repository = serviceRequestRepository,
+            notificationManager = null,
+            authViewModel = null,
+            fcmTokenManager = null)
   }
 
   @Test
@@ -48,6 +72,9 @@ class ServiceRequestViewModelTest {
 
   @Test
   fun getTodosCallsRepository() {
+    // Reset to clear initialization calls
+    org.mockito.Mockito.reset(serviceRequestRepository)
+
     serviceRequestViewModel.getServiceRequests()
     verify(serviceRequestRepository).getServiceRequests(any(), any())
   }
@@ -152,7 +179,7 @@ class ServiceRequestViewModelTest {
 
   @Test
   fun confirmRequest_callsRepository() {
-    serviceRequestViewModel.confirmRequest(serviceRequest)
+    serviceRequestViewModel.confirmRequest(serviceRequest, providerName = "Test Provider")
     verify(serviceRequestRepository)
         .saveServiceRequest(
             eq(serviceRequest.copy(status = ServiceRequestStatus.ACCEPTED)), any(), any())
@@ -188,5 +215,130 @@ class ServiceRequestViewModelTest {
     verify(serviceRequestRepository)
         .saveServiceRequest(
             eq(serviceRequest.copy(status = ServiceRequestStatus.ARCHIVED)), any(), any())
+  }
+
+  @Test
+  fun updateAllRequests_callsAllGetMethods() {
+    // Reset the mock to clear the init calls
+    org.mockito.Mockito.reset(serviceRequestRepository)
+
+    // Set up the init mock again after reset
+    `when`(serviceRequestRepository.init(any())).thenAnswer {
+      (it.arguments[0] as () -> Unit).invoke()
+    }
+
+    // Create a new ViewModel to trigger init
+    serviceRequestViewModel =
+        ServiceRequestViewModel(
+            repository = serviceRequestRepository,
+            notificationManager = null,
+            authViewModel = null,
+            fcmTokenManager = null)
+
+    // Verify all get methods are called
+    verify(serviceRequestRepository).getServiceRequests(any(), any())
+    verify(serviceRequestRepository).getPendingServiceRequests(any(), any())
+    verify(serviceRequestRepository).getAcceptedServiceRequests(any(), any())
+    verify(serviceRequestRepository).getScheduledServiceRequests(any(), any())
+    verify(serviceRequestRepository).getCompletedServiceRequests(any(), any())
+    verify(serviceRequestRepository).getCancelledServiceRequests(any(), any())
+    verify(serviceRequestRepository).getArchivedServiceRequests(any(), any())
+  }
+
+  @Test
+  fun selectRequest_updatesSelectedRequest() {
+    serviceRequestViewModel.selectRequest(serviceRequest)
+    assertThat(serviceRequestViewModel.selectedRequest.value, `is`(serviceRequest))
+  }
+
+  @Test
+  fun selectProvider_updatesProviderIdAndService() {
+    val providerId = "testProvider"
+    val service = Services.PLUMBER
+
+    serviceRequestViewModel.selectProvider(providerId, service)
+
+    assertThat(serviceRequestViewModel.selectedProviderId.value, `is`(providerId))
+    assertThat(serviceRequestViewModel.selectedProviderService.value, `is`(service))
+  }
+
+  @Test
+  fun unSelectProvider_clearsProviderIdAndService() {
+    // First set some values
+    serviceRequestViewModel.selectProvider("testProvider", Services.PLUMBER)
+
+    // Verify initial state
+    assertThat(serviceRequestViewModel.selectedProviderId.value, `is`("testProvider"))
+    assertThat(serviceRequestViewModel.selectedProviderService.value, `is`(Services.PLUMBER))
+
+    // Then unselect
+    serviceRequestViewModel.unSelectProvider()
+
+    // Verify cleared state
+    assertThat(serviceRequestViewModel.selectedProviderId.value, `is`(nullValue()))
+    assertThat(serviceRequestViewModel.selectedProviderService.value, `is`(nullValue()))
+  }
+
+  @Test
+  fun getServiceRequestById_callsRepository() {
+    val id = "testId"
+    val onSuccess: (ServiceRequest) -> Unit = {}
+
+    serviceRequestViewModel.getServiceRequestById(id, onSuccess)
+
+    verify(serviceRequestRepository).getServiceRequestById(eq(id), eq(onSuccess), any())
+  }
+
+  @Test
+  fun getTodayScheduledRequests_returnsCorrectlyFilteredAndSortedList() {
+    // Create test data with different dates
+    val today = LocalDate.now()
+    val tomorrow = today.plusDays(1)
+    val yesterday = today.minusDays(1)
+
+    // Convert LocalDate to Timestamp with specific times for sorting
+    val todayTimestamp =
+        Timestamp(Date.from(today.atTime(10, 0).atZone(ZoneId.systemDefault()).toInstant()))
+    val tomorrowTimestamp =
+        Timestamp(Date.from(tomorrow.atTime(11, 0).atZone(ZoneId.systemDefault()).toInstant()))
+    val yesterdayTimestamp =
+        Timestamp(Date.from(yesterday.atTime(9, 0).atZone(ZoneId.systemDefault()).toInstant()))
+
+    val request1 = serviceRequest.copy(uid = "1", meetingDate = todayTimestamp)
+    val request2 = serviceRequest.copy(uid = "2", meetingDate = tomorrowTimestamp)
+    val request3 = serviceRequest.copy(uid = "3", meetingDate = yesterdayTimestamp)
+    val requests = listOf(request1, request2, request3)
+
+    // Reset to clear initialization calls
+    org.mockito.Mockito.reset(serviceRequestRepository)
+
+    // Re-mock all repository methods to avoid NPEs
+    `when`(serviceRequestRepository.init(any())).thenAnswer {
+      (it.arguments[0] as () -> Unit).invoke()
+    }
+    `when`(serviceRequestRepository.addListenerOnServiceRequests(any(), any())).thenAnswer {}
+    `when`(serviceRequestRepository.getServiceRequests(any(), any())).thenAnswer {}
+
+    // Set up the scheduled requests with our test data - immediately invoke the callback
+    `when`(serviceRequestRepository.getScheduledServiceRequests(any(), any())).thenAnswer {
+      (it.arguments[0] as (List<ServiceRequest>) -> Unit).invoke(requests)
+    }
+
+    // Mock other repository methods
+    `when`(serviceRequestRepository.getPendingServiceRequests(any(), any())).thenAnswer {}
+    `when`(serviceRequestRepository.getAcceptedServiceRequests(any(), any())).thenAnswer {}
+    `when`(serviceRequestRepository.getCompletedServiceRequests(any(), any())).thenAnswer {}
+    `when`(serviceRequestRepository.getCancelledServiceRequests(any(), any())).thenAnswer {}
+    `when`(serviceRequestRepository.getArchivedServiceRequests(any(), any())).thenAnswer {}
+
+    // Initialize the ViewModel again to trigger updateAllRequests
+    serviceRequestViewModel = ServiceRequestViewModel(serviceRequestRepository)
+
+    // Get today's scheduled requests
+    val todayRequests = serviceRequestViewModel.getTodayScheduledRequests()
+
+    // Verify only today's request is returned and it's correctly sorted
+    assertThat(todayRequests.size, `is`(1))
+    assertThat(todayRequests[0].uid, `is`("1"))
   }
 }

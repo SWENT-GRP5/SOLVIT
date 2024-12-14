@@ -17,7 +17,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
@@ -41,6 +40,7 @@ import androidx.compose.ui.window.Dialog
 import com.android.solvit.R
 import com.android.solvit.shared.model.chat.ChatAssistantViewModel
 import com.android.solvit.shared.model.provider.Language
+import com.android.solvit.shared.ui.theme.Typography
 import kotlinx.coroutines.delay
 
 val TONES_LIST = listOf("Formal", "Neutral", "Friendly", "Positive", "Negative", "Professional")
@@ -74,12 +74,18 @@ fun ChatAssistantDialog(
                 modifier = Modifier.testTag("modeSelectionRow").fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically) {
-                  Text("Generation", modifier = Modifier.testTag("generationText"))
+                  Text(
+                      "Generation",
+                      modifier = Modifier.testTag("generationText"),
+                      style = Typography.bodyLarge)
                   Switch(
                       checked = translationMode,
                       onCheckedChange = { translationMode = it },
                       modifier = Modifier.testTag("modeSwitch"))
-                  Text("Translation", modifier = Modifier.testTag("translationText"))
+                  Text(
+                      "Translation",
+                      modifier = Modifier.testTag("translationText"),
+                      style = Typography.bodyLarge)
                 }
 
             if (translationMode) {
@@ -92,7 +98,7 @@ fun ChatAssistantDialog(
                   value = input,
                   onValueChange = { input = it },
                   modifier = Modifier.testTag("messageField"),
-                  label = { Text("The message to translate") },
+                  label = { Text("The message to translate", style = Typography.bodyLarge) },
                   shape = RoundedCornerShape(8.dp))
             } else {
               // Tones selection row
@@ -109,7 +115,7 @@ fun ChatAssistantDialog(
                   value = input,
                   onValueChange = { input = it },
                   modifier = Modifier.testTag("inputField"),
-                  label = { Text("Optional additional infos") },
+                  label = { Text("Optional additional infos", style = Typography.bodyLarge) },
                   shape = RoundedCornerShape(8.dp))
             }
 
@@ -141,12 +147,12 @@ fun ChatAssistantDialog(
                         delay(500)
                       }
                     }
-                    Text(".".repeat(dotCount))
+                    Text(".".repeat(dotCount), style = Typography.bodyLarge)
                   } else {
                     if (translationMode) {
-                      Text("Translate Message")
+                      Text("Translate Message", style = Typography.bodyLarge)
                     } else {
-                      Text("Generate Response")
+                      Text("Generate Response", style = Typography.bodyLarge)
                     }
                   }
                 }
@@ -193,7 +199,7 @@ fun LanguageSelection(onSelect: (String) -> Unit, label: String) {
     TextField(
         value = selectedLanguage,
         onValueChange = {},
-        label = { Text(label) },
+        label = { Text(label, style = Typography.bodyLarge) },
         readOnly = true,
         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
         modifier = Modifier.menuAnchor().testTag("languageSelection$label"),
@@ -207,7 +213,7 @@ fun LanguageSelection(onSelect: (String) -> Unit, label: String) {
     ) {
       languages.forEach { language ->
         DropdownMenuItem(
-            text = { Text(language.name, style = MaterialTheme.typography.bodyLarge) },
+            text = { Text(language.name, style = Typography.bodyLarge) },
             onClick = {
               selectedLanguage = language.name
               onSelect(language.name)
