@@ -48,6 +48,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -128,7 +129,7 @@ fun TopAppBar(
   Box(
       modifier =
           Modifier.fillMaxWidth()
-              .height(200.dp)
+              .height(180.dp)
               .background(
                   brush =
                       Brush.verticalGradient(
@@ -204,7 +205,7 @@ fun TopAppBar(
                       Spacer(modifier = Modifier.height(4.dp))
                       Text(
                           text = "Find the best $serviceName near you",
-                          style = typography.bodyMedium.copy(color = colorScheme.onPrimary),
+                          style = typography.bodyMedium.copy(color = serviceItem.color),
                           fontWeight = FontWeight.Medium)
                     }
                   }
@@ -363,7 +364,7 @@ fun DisplayPopularProviders(
     navigationActions: NavigationActions
 ) {
   LazyRow(
-      modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("popularProviders"),
+      modifier = Modifier.fillMaxWidth().testTag("popularProviders"),
       horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.Start),
       verticalAlignment = Alignment.Top,
       userScrollEnabled = true,
@@ -433,14 +434,15 @@ fun ProviderRowCard(
     listProviderViewModel: ListProviderViewModel,
     navigationActions: NavigationActions
 ) {
-  Card(
+  OutlinedCard (
       modifier =
           Modifier.fillMaxWidth()
               .clickable {
                 listProviderViewModel.selectProvider(provider)
                 navigationActions.navigateTo(Route.PROVIDER_INFO)
               }
-              .shadow(8.dp, shape = RoundedCornerShape(12.dp)),
+              .shadow(4.dp, shape = RoundedCornerShape(12.dp)),
+      border = BorderStroke(1.dp, Services.getColor(provider.service)),
       shape = RoundedCornerShape(12.dp),
       colors = CardDefaults.cardColors(colorScheme.background)) {
         Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
