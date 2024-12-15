@@ -36,12 +36,9 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -58,7 +55,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -72,9 +68,11 @@ import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_SEEKER
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.navigation.Screen
+import com.android.solvit.shared.ui.theme.Typography
+import com.android.solvit.shared.ui.utils.TopAppBarInbox
 
 @OptIn(ExperimentalMaterial3Api::class)
-@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
+@SuppressLint("UnusedMaterialScaffoldPaddingParameter", "SourceLockedOrientationActivity")
 @Composable
 fun SeekerProfileScreen(
     viewModel: SeekerProfileViewModel = viewModel(factory = SeekerProfileViewModel.Factory),
@@ -106,7 +104,15 @@ fun SeekerProfileScreen(
 
   // Display the profile information if it's available
   Scaffold(
-      topBar = { ProfileTopBar(navigationActions, onLogout = { showLogoutDialog = true }) },
+      topBar = {
+        TopAppBarInbox(
+            title = "Profile",
+            testTagTitle = "ProfileTitle",
+            rightButton = { showLogoutDialog = true },
+            rightButtonForm = Icons.AutoMirrored.Filled.ExitToApp,
+            testTagRight = "LogoutButton",
+            testTagGeneral = "ProfileTopBar")
+      },
       bottomBar = {
         BottomNavigationMenu(
             onTabSelect = { navigationActions.navigateTo(it.route) },
@@ -188,10 +194,8 @@ fun SeekerProfileScreen(
             Text(
                 text = "More Options",
                 style =
-                    TextStyle(
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp,
-                        color = colorScheme.onSurfaceVariant),
+                    Typography.bodyLarge.copy(
+                        fontWeight = FontWeight.Bold, color = colorScheme.onSurfaceVariant),
                 modifier = Modifier.padding(start = 16.dp).testTag("MoreOptionsText"))
           }
 
@@ -211,31 +215,6 @@ fun SeekerProfileScreen(
         },
         onDismiss = { showLogoutDialog = false })
   }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun ProfileTopBar(navigationActions: NavigationActions, onLogout: () -> Unit) {
-  TopAppBar(
-      title = {
-        Text(
-            "Profile",
-            modifier = Modifier.testTag("ProfileTitle"),
-            fontWeight = FontWeight.Bold,
-        )
-      },
-      actions = {
-        IconButton(onClick = onLogout, modifier = Modifier.testTag("LogoutButton")) {
-          Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = "Log out")
-        }
-      },
-      modifier = Modifier.testTag("ProfileTopBar"),
-      colors =
-          TopAppBarDefaults.topAppBarColors(
-              containerColor = colorScheme.background,
-              navigationIconContentColor = colorScheme.onBackground,
-              titleContentColor = colorScheme.onBackground,
-              actionIconContentColor = colorScheme.onBackground))
 }
 
 @Composable
@@ -267,15 +246,14 @@ fun ProfileInfoCard(
                 Column {
                   Text(
                       text = fullName,
-                      fontWeight = FontWeight.Bold,
-                      fontSize = 20.sp,
                       color = colorScheme.onPrimary,
-                      modifier = Modifier.testTag("ProfileName"))
+                      modifier = Modifier.testTag("ProfileName"),
+                      style = Typography.titleLarge.copy(fontSize = 20.sp))
                   Text(
                       text = email,
-                      fontSize = 14.sp,
                       color = colorScheme.onPrimary.copy(alpha = 0.6f),
-                      modifier = Modifier.testTag("ProfileEmail"))
+                      modifier = Modifier.testTag("ProfileEmail"),
+                      style = Typography.bodyMedium)
                 }
               }
               IconButton(onClick = onEdit, modifier = Modifier.testTag("EditProfileButton")) {
@@ -292,7 +270,7 @@ fun ProfileOptionItem(
     subtitle: String? = null,
     onClick: () -> Unit = {},
     iconColor: Color = colorScheme.onSurfaceVariant,
-    modifier: Modifier = Modifier
+    @SuppressLint("ModifierParameter") modifier: Modifier = Modifier
 ) {
   Row(
       modifier = modifier.fillMaxWidth().clickable { onClick() }.padding(vertical = 12.dp),
@@ -306,15 +284,14 @@ fun ProfileOptionItem(
         Column(modifier = Modifier.weight(1f)) {
           Text(
               optionName,
-              style = MaterialTheme.typography.bodyLarge,
-              color = colorScheme.onBackground,
-              modifier = Modifier.testTag("ProfileOptionName"))
+              style = Typography.bodyLarge.copy(color = colorScheme.onBackground),
+              modifier = Modifier.testTag("ProfileOptionName"),
+          )
           subtitle?.let {
             Text(
                 text = it,
                 style =
-                    TextStyle(
-                        fontSize = 12.sp, color = colorScheme.onBackground.copy(alpha = 0.5f)),
+                    Typography.bodySmall.copy(color = colorScheme.onBackground.copy(alpha = 0.5f)),
                 modifier = Modifier.padding(4.dp).testTag("ProfileOptionSubtitle"))
           }
         }
@@ -365,18 +342,32 @@ fun AboutAppCard(context: Context) {
 fun LogoutDialog(onLogout: () -> Unit, onDismiss: () -> Unit) {
   AlertDialog(
       onDismissRequest = onDismiss,
-      title = { Text("Log out", modifier = Modifier.testTag("LogoutDialogTitle")) },
+      title = {
+        Text(
+            "Log out",
+            style = Typography.bodyLarge,
+            modifier = Modifier.testTag("LogoutDialogTitle"))
+      },
       text = {
-        Text("Are you sure you want to log out?", modifier = Modifier.testTag("LogoutDialogText"))
+        Text(
+            "Are you sure you want to log out?",
+            style = Typography.bodyLarge,
+            modifier = Modifier.testTag("LogoutDialogText"))
       },
       confirmButton = {
         Button(onClick = onLogout, modifier = Modifier.testTag("LogoutDialogConfirmButton")) {
-          Text("Log out")
+          Text(
+              "Log out",
+              style = Typography.bodyLarge,
+          )
         }
       },
       dismissButton = {
         Button(onClick = onDismiss, modifier = Modifier.testTag("LogoutDialogDismissButton")) {
-          Text("Cancel")
+          Text(
+              "Cancel",
+              style = Typography.bodyLarge,
+          )
         }
       },
       modifier = Modifier.testTag("LogoutDialog"))

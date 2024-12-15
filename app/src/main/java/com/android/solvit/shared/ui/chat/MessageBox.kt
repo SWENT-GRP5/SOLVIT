@@ -19,13 +19,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -55,6 +50,8 @@ import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_SEEKER
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.navigation.Screen
+import com.android.solvit.shared.ui.theme.Typography
+import com.android.solvit.shared.ui.utils.TopAppBarInbox
 import com.android.solvit.shared.ui.utils.formatTimestamp
 import com.android.solvit.shared.ui.utils.getReceiverImageUrl
 import com.android.solvit.shared.ui.utils.getReceiverName
@@ -92,7 +89,7 @@ fun MessageBox(
     }
   } else {
     Scaffold(
-        topBar = { ChatListTopBar(navigationActions, chatViewModel, authViewModel) },
+        topBar = { TopAppBarInbox(title = "Inbox", testTagGeneral = "InboxTopAppBar") },
         bottomBar = {
           BottomNavigationMenu(
               onTabSelect = { navigationActions.navigateTo(it.route) },
@@ -125,43 +122,6 @@ fun MessageBox(
           }
         }
   }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun ChatListTopBar(
-    navigationActions: NavigationActions,
-    chatViewModel: ChatViewModel,
-    authViewModel: AuthViewModel
-) {
-  TopAppBar(
-      modifier = Modifier.testTag("InboxTopAppBar"),
-      title = {
-        Box(
-            modifier = Modifier.fillMaxWidth(),
-            // Allow the title to center
-            contentAlignment = Alignment.Center) {
-              Text(text = "Inbox", style = MaterialTheme.typography.headlineLarge)
-            }
-      },
-      actions = {
-        IconButton(
-            onClick = {
-              // Toast.makeText(context, "Not Yet Implemented", Toast.LENGTH_LONG).show()
-            }) {
-              Image(
-                  painter = painterResource(id = R.drawable.new_message),
-                  contentDescription = "Action",
-                  modifier = Modifier.size(24.dp))
-            }
-      },
-      colors =
-          TopAppBarDefaults.topAppBarColors(
-              containerColor = Color.White,
-              titleContentColor = Color.Black,
-              navigationIconContentColor = Color.Black,
-              actionIconContentColor = Color.Black),
-  )
 }
 
 @Composable
@@ -219,7 +179,7 @@ fun ChatListItem(
         Column(modifier = Modifier.weight(1f)) {
           Text(
               text = receiverName ?: "",
-              style = MaterialTheme.typography.titleMedium,
+              style = Typography.titleMedium,
               fontWeight = FontWeight.Bold)
           Text(
               text =
@@ -228,7 +188,7 @@ fun ChatListItem(
                     is ChatMessage.ImageMessage -> "image"
                     is ChatMessage.TextImageMessage -> message.text
                   },
-              style = MaterialTheme.typography.bodyLarge,
+              style = Typography.bodyLarge,
               color = Color.Gray,
               maxLines = 1,
               overflow = TextOverflow.Ellipsis)
@@ -236,7 +196,7 @@ fun ChatListItem(
         Spacer(modifier = Modifier.width(8.dp))
         Text(
             text = formatTimestamp(message.timestamp),
-            style = MaterialTheme.typography.bodyLarge,
+            style = Typography.bodyLarge,
             color = Color.Gray)
       }
 }
@@ -256,14 +216,8 @@ fun NoMessagesSent(modifier: Modifier) {
             modifier = Modifier.size(200.dp) // Adjust size as needed
             )
 
-        Text(
-            text = "No messages yet",
-            style = MaterialTheme.typography.bodyLarge,
-            color = Color.Black)
+        Text(text = "No messages yet", style = Typography.bodyLarge, color = Color.Black)
 
-        Text(
-            text = "Send your first message",
-            style = MaterialTheme.typography.bodySmall,
-            color = Color.Gray)
+        Text(text = "Send your first message", style = Typography.bodySmall, color = Color.Gray)
       }
 }

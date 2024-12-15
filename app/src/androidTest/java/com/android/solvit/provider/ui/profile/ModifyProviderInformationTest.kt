@@ -83,7 +83,6 @@ class ProfessionalProfileScreenTest {
           locationViewModel = locationViewModel,
           navigationActions = navigationActions)
     }
-    composeTestRule.onNodeWithTag("goBackButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("titleModifyProvider").assertIsDisplayed()
   }
 

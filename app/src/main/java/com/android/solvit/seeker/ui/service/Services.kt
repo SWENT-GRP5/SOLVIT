@@ -33,7 +33,6 @@ import androidx.compose.material3.DockedSearchBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
@@ -72,6 +71,7 @@ import com.android.solvit.shared.ui.theme.LightBlue
 import com.android.solvit.shared.ui.theme.LightOrange
 import com.android.solvit.shared.ui.theme.LightRed
 import com.android.solvit.shared.ui.theme.OnPrimary
+import com.android.solvit.shared.ui.theme.Typography
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -254,8 +254,7 @@ fun ShortcutsSection(
                         "Solve It with AI",
                         color = colorScheme.onPrimary,
                         fontSize = 20.sp,
-                        style =
-                            MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                        style = Typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                         fontWeight = FontWeight.Bold)
                     Icon(
                         painter = painterResource(id = R.drawable.ai_solver),
@@ -288,9 +287,7 @@ fun ShortcutsSection(
                               "All Orders",
                               color = colorScheme.onPrimary,
                               fontSize = 20.sp,
-                              style =
-                                  MaterialTheme.typography.titleMedium.copy(
-                                      fontWeight = FontWeight.Bold),
+                              style = Typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                               fontWeight = FontWeight.Bold)
                         }
                   }
@@ -312,9 +309,7 @@ fun ShortcutsSection(
                               "Providers Map",
                               color = colorScheme.onPrimary,
                               fontSize = 20.sp,
-                              style =
-                                  MaterialTheme.typography.titleMedium.copy(
-                                      fontWeight = FontWeight.Bold),
+                              style = Typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                               fontWeight = FontWeight.Bold)
                         }
                   }
@@ -412,7 +407,7 @@ fun ServiceItem(service: ServicesListItem, workerCount: Int, onClick: () -> Unit
               Text(
                   text = Services.format(service.service),
                   modifier = Modifier.testTag(service.service.toString() + "Name"),
-                  style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                  style = Typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                   color = colorScheme.onBackground,
                   textAlign = TextAlign.Center)
 
@@ -420,7 +415,7 @@ fun ServiceItem(service: ServicesListItem, workerCount: Int, onClick: () -> Unit
               Text(
                   text = "+ $workerCount workers",
                   modifier = Modifier.testTag(service.service.toString() + "WorkerCount"),
-                  style = MaterialTheme.typography.bodySmall,
+                  style = Typography.bodySmall,
                   color = colorScheme.onSurfaceVariant,
                   textAlign = TextAlign.Center)
             }
@@ -428,7 +423,7 @@ fun ServiceItem(service: ServicesListItem, workerCount: Int, onClick: () -> Unit
 }
 
 @Composable
-fun ProviderItem(provider: Provider, onClick: () -> Unit) {
+fun ProviderItem(provider: Provider, showIcon: Boolean = true, onClick: () -> Unit) {
   OutlinedCard(
       modifier =
           Modifier.width(180.dp).height(220.dp).testTag(provider.name + "Item").clickable {
@@ -447,22 +442,24 @@ fun ProviderItem(provider: Provider, onClick: () -> Unit) {
                   Modifier.testTag(Services.getProfileImage(provider.service).toString() + "Image")
                       .fillMaxSize()
                       .clip(RoundedCornerShape(16.dp)))
-          Box(
-              modifier =
-                  Modifier.padding(8.dp)
-                      .size(40.dp)
-                      .clip(RoundedCornerShape(8.dp))
-                      .background(OnPrimary) // Choose a color that fits your theme
-                      .align(Alignment.TopStart),
-              contentAlignment = Alignment.Center) {
-                Icon(
-                    painter = painterResource(id = Services.getIcon(provider.service)),
-                    contentDescription = null,
-                    tint = Color.Unspecified,
-                    modifier =
-                        Modifier.size(30.dp)
-                            .testTag(Services.getIcon(provider.service).toString() + "Icon"))
-              }
+          if (showIcon) {
+            Box(
+                modifier =
+                    Modifier.padding(8.dp)
+                        .size(40.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(OnPrimary) // Choose a color that fits your theme
+                        .align(Alignment.TopStart),
+                contentAlignment = Alignment.Center) {
+                  Icon(
+                      painter = painterResource(id = Services.getIcon(provider.service)),
+                      contentDescription = null,
+                      tint = Color.Unspecified,
+                      modifier =
+                          Modifier.size(30.dp)
+                              .testTag(Services.getIcon(provider.service).toString() + "Icon"))
+                }
+          }
           // Gradient overlay at the bottom to create the tinted area behind texts
           Box(
               modifier =
@@ -496,15 +493,17 @@ fun ProviderItem(provider: Provider, onClick: () -> Unit) {
                 Text(
                     text = provider.name,
                     modifier = Modifier.testTag(provider.name + "Name"),
-                    fontWeight = FontWeight.ExtraBold,
-                    fontSize = 20.sp,
-                    color = Color.White)
+                    color = Color.White,
+                    style =
+                        Typography.titleLarge.copy(
+                            fontWeight = FontWeight.ExtraBold, fontSize = 20.sp))
                 Text(
                     text = Services.format(provider.service),
                     modifier = Modifier.testTag(provider.service.toString() + "Service"),
-                    fontWeight = FontWeight.ExtraBold,
-                    fontSize = 18.sp,
-                    color = Color.White)
+                    color = Color.White,
+                    style =
+                        Typography.bodyLarge.copy(
+                            fontWeight = FontWeight.ExtraBold, fontSize = 18.sp))
               }
         }
       }

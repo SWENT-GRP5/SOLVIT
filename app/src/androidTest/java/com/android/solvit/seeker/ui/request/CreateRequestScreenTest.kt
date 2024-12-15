@@ -134,7 +134,6 @@ class CreateRequestScreenTest {
           listProviderViewModel)
     }
 
-    composeTestRule.onNodeWithTag("CreateRequestBackButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("screenTitle").assertIsDisplayed()
     composeTestRule.onNodeWithTag("screenTitle").assertIsDisplayed()
     composeTestRule.onNodeWithTag("screenTitle").assertTextEquals("Create a new request")

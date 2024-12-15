@@ -78,24 +78,6 @@ class SeekerProfileTest {
   }
 
   @Test
-  fun logOutButtonOpensDialog() {
-    composeTestRule.onNodeWithTag("LogoutButton").performClick()
-    composeTestRule.onNodeWithTag("LogoutDialog").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("LogoutDialogTitle").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("LogoutDialogText").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("LogoutDialogConfirmButton").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("LogoutDialogDismissButton").assertIsDisplayed()
-  }
-
-  @Test
-  fun logOutDialogConfirmButtonCallsSignOut() {
-    composeTestRule.onNodeWithTag("LogoutButton").performClick()
-    composeTestRule.onNodeWithTag("LogoutDialogConfirmButton").performClick()
-    // Verify that the logout function is called
-    // This can be done by verifying the mock or checking the state change
-  }
-
-  @Test
   fun profileOptionItemsAreClickable() {
     composeTestRule.onNodeWithTag("MyAccountOption").performClick()
     composeTestRule.onNodeWithTag("OrdersOption").performClick()

@@ -17,6 +17,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Phone
@@ -25,8 +26,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -40,7 +39,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -57,8 +55,9 @@ import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.model.utils.EditProfileHeader
 import com.android.solvit.shared.model.utils.SaveButton
 import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.android.solvit.shared.ui.theme.Typography
 import com.android.solvit.shared.ui.utils.CustomOutlinedTextField
-import com.android.solvit.shared.ui.utils.GoBackButton
+import com.android.solvit.shared.ui.utils.TopAppBarInbox
 import com.android.solvit.shared.ui.utils.ValidationRegex
 
 /**
@@ -108,14 +107,11 @@ fun ModifyProviderInformationScreen(
 
   Scaffold(
       topBar = {
-        TopAppBar(
-            title = {
-              Text(
-                  "Modify your profile information",
-                  modifier = Modifier.testTag("titleModifyProvider"))
-            },
-            navigationIcon = { GoBackButton(navigationActions) },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background))
+        TopAppBarInbox(
+            title = "Modify your profile information",
+            testTagTitle = "titleModifyProvider",
+            leftButtonForm = Icons.AutoMirrored.Filled.ArrowBack,
+            leftButtonAction = { navigationActions.goBack() })
       },
       content = { padding ->
         Column(
@@ -329,7 +325,7 @@ fun ModifyInput(
       color = colorScheme.onSurfaceVariant,
       fontSize = 12.sp,
       textAlign = TextAlign.Center,
-      style = TextStyle(fontSize = 12.sp, lineHeight = 16.sp),
+      style = Typography.bodySmall.copy(fontSize = 12.sp, lineHeight = 16.sp),
       modifier = Modifier.padding(top = 4.dp).fillMaxWidth())
 }
 
@@ -443,7 +439,7 @@ fun LanguageDropdownMenu(
                 val isSelected = language in selectedLanguages
 
                 DropdownMenuItem(
-                    text = { Text(language.name) },
+                    text = { Text(language.name, style = Typography.bodyLarge) },
                     onClick = {},
                     leadingIcon = {
                       Checkbox(

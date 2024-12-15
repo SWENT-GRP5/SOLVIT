@@ -29,7 +29,6 @@ import com.android.solvit.shared.model.review.ReviewViewModel
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -235,24 +234,6 @@ class ProviderInfoTest {
         composeTestRule.onAllNodesWithTag("PackageCard").fetchSemanticsNodes().isNotEmpty(), true)
     composeTestRule.onAllNodesWithTag("PackageCard")[0].assertIsDisplayed()
     composeTestRule.onAllNodesWithTag("PackageCard")[1].assertIsDisplayed()
-  }
-
-  @Test
-  fun providerTopBarDisplaysCorrectly() {
-    composeTestRule.setContent { ProviderTopBar(onBackClick = {}) }
-
-    composeTestRule.onNodeWithTag("ProviderTopBar").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("backButton").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("topBarTitle").assertTextEquals("Provider")
-  }
-
-  @Test
-  fun backButtonTriggersCallback() {
-    var backClicked = false
-    composeTestRule.setContent { ProviderTopBar(onBackClick = { backClicked = true }) }
-
-    composeTestRule.onNodeWithTag("backButton").performClick()
-    assertTrue(backClicked)
   }
 
   @Test

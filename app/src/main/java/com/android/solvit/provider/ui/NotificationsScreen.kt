@@ -6,18 +6,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -27,7 +23,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -38,6 +33,8 @@ import com.android.solvit.shared.model.NotificationsViewModel
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestStatus
 import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.android.solvit.shared.ui.theme.Typography
+import com.android.solvit.shared.ui.utils.TopAppBarInbox
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -56,21 +53,12 @@ fun NotificationScreen(
   val selectedServiceRequest = remember { mutableStateOf<ServiceRequest?>(null) }
   Scaffold(
       topBar = {
-        TopAppBar(
-            title = {
-              Row(
-                  modifier = Modifier.fillMaxWidth().testTag("notifications_title"),
-                  horizontalArrangement = Arrangement.Start) {
-                    Text("Notifications", textAlign = TextAlign.Center)
-                  }
-            },
-            navigationIcon = {
-              IconButton(
-                  onClick = { navigationActions.goBack() },
-                  modifier = Modifier.testTag("goBackButton")) {
-                    Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
-                  }
-            })
+        TopAppBarInbox(
+            title = "Notifications",
+            testTagGeneral = "notifications_title",
+            leftButtonForm = Icons.AutoMirrored.Filled.ArrowBack,
+            leftButtonAction = { navigationActions.goBack() },
+            testTagLeft = "goBackButton")
       }) { paddingValues ->
         // Content inside the Scaffold
         Column(modifier = Modifier.padding(paddingValues)) {
@@ -78,8 +66,7 @@ fun NotificationScreen(
             Text(
                 text = "No notifications available",
                 modifier = Modifier.fillMaxSize().testTag("noNotificationsText"), // Added test tag
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.bodySmall)
+                style = Typography.bodySmall.copy(textAlign = TextAlign.Center))
           } else {
             LazyColumn(
                 modifier = Modifier.fillMaxSize().testTag("notificationsList"), // Added test tag
@@ -129,18 +116,17 @@ fun NotificationItem(
       Text(
           text = notification.title,
           modifier = Modifier.testTag("notificationTitle_${notification.uid}"),
-          style = MaterialTheme.typography.titleMedium,
-          color = colorScheme.primary,
-          textAlign = TextAlign.Center)
+          style =
+              Typography.titleMedium.copy(
+                  color = colorScheme.primary, textAlign = TextAlign.Center))
       Text(
           text = notification.message,
           modifier = Modifier.testTag("notificationMessage_${notification.uid}"),
-          style = MaterialTheme.typography.bodyMedium)
+          style = Typography.bodyMedium)
       Text(
           text = "Received on: ${notification.timestamp.toDate().formatAsDate()}",
           modifier = Modifier.testTag("notificationTimestamp_${notification.uid}"),
-          style = MaterialTheme.typography.titleSmall,
-          color = Color.Gray)
+          style = Typography.titleSmall.copy(color = colorScheme.onBackground))
     }
   }
 }
@@ -162,39 +148,38 @@ fun Dialog(onDismiss: () -> Unit, serviceRequest: ServiceRequest) {
             // Title
             Text(
                 text = "Title : ${serviceRequest.title}",
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.primary,
+                style = Typography.titleLarge.copy(color = colorScheme.primary),
                 modifier = Modifier.testTag("dialogTitle"))
             // Description
             Text(
                 text = "Description: ${serviceRequest.description}",
-                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                style = Typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                 modifier = Modifier.testTag("dialogDescription"))
             // Location
             serviceRequest.location?.name?.let { locationName ->
               Row {
                 Text(
                     text = "Location: ",
-                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold))
+                    style = Typography.bodyMedium.copy(fontWeight = FontWeight.Bold))
                 Text(
                     text = locationName,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.primary,
+                    style = Typography.bodyMedium,
+                    color = colorScheme.primary,
                     modifier = Modifier.testTag("dialogLocation") // Set color for location name
                     )
               }
             }
             // Due Date
-            serviceRequest.dueDate.toDate()?.let { date ->
+            serviceRequest.dueDate.toDate().let { date ->
               val formattedDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(date)
               Row {
                 Text(
                     text = "Due Date: ",
-                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold))
+                    style = Typography.bodyMedium.copy(fontWeight = FontWeight.Bold))
                 Text(
                     text = " $formattedDate",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.primary,
+                    style = Typography.bodyMedium,
+                    color = colorScheme.primary,
                     modifier = Modifier.testTag("dialogDueDate"))
               }
             }
@@ -202,10 +187,10 @@ fun Dialog(onDismiss: () -> Unit, serviceRequest: ServiceRequest) {
             Row {
               Text(
                   text = "Status: ",
-                  style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold))
+                  style = Typography.bodyMedium.copy(fontWeight = FontWeight.Bold))
               Text(
                   text = ServiceRequestStatus.format(serviceRequest.status),
-                  style = MaterialTheme.typography.bodyMedium,
+                  style = Typography.bodyMedium,
                   color =
                       ServiceRequestStatus.getStatusColor(serviceRequest.status), // Colored status
                   modifier = Modifier.testTag("dialogStatus"))

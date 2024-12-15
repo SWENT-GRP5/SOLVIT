@@ -1,14 +1,13 @@
 package com.android.solvit.seeker.ui.profile
 
+import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -22,20 +21,18 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -50,13 +47,9 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.solvit.R
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
@@ -67,10 +60,12 @@ import com.android.solvit.shared.model.map.LocationViewModel
 import com.android.solvit.shared.model.utils.EditProfileHeader
 import com.android.solvit.shared.model.utils.SaveButton
 import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.android.solvit.shared.ui.theme.Typography
 import com.android.solvit.shared.ui.utils.CustomOutlinedTextField
+import com.android.solvit.shared.ui.utils.TopAppBarInbox
 import com.android.solvit.shared.ui.utils.ValidationRegex
 
-@OptIn(ExperimentalMaterial3Api::class)
+@SuppressLint("SourceLockedOrientationActivity")
 @Composable
 fun EditSeekerProfileScreen(
     viewModel: SeekerProfileViewModel = viewModel(factory = SeekerProfileViewModel.Factory),
@@ -89,7 +84,6 @@ fun EditSeekerProfileScreen(
     }
   }
 
-  val locationQuery by locationViewModel.query.collectAsState()
   val locationSuggestions by
       locationViewModel.locationSuggestions.collectAsState(initial = emptyList<Location?>())
   var selectedLocation by remember { mutableStateOf<Location?>(null) }
@@ -133,26 +127,15 @@ fun EditSeekerProfileScreen(
   }
 
   Scaffold(
-      backgroundColor = colorScheme.background,
+      modifier = Modifier.background(color = colorScheme.background),
       topBar = {
-        TopAppBar(
-            backgroundColor = colorScheme.background,
-            title = {
-              Box(
-                  modifier = Modifier.fillMaxWidth().testTag("goBackButton"),
-                  contentAlignment = Alignment.Center) {
-                    Text("Bio-data", color = colorScheme.onBackground, fontWeight = FontWeight.Bold)
-                  }
-            },
-            navigationIcon = {
-              IconButton(onClick = { navigationActions.goBack() }) {
-                Icon(
-                    Icons.Default.ArrowBack,
-                    contentDescription = "Back",
-                    tint = colorScheme.onBackground)
-              }
-            },
-            actions = { Box(modifier = Modifier.size(48.dp)) })
+        TopAppBarInbox(
+            title = "Bio-data",
+            testTagTitle = "goBackButton",
+            testTagGeneral = "notifications_title",
+            leftButtonForm = Icons.AutoMirrored.Filled.ArrowBack,
+            leftButtonAction = { navigationActions.goBack() },
+            testTagLeft = "goBackButton")
       }) { padding ->
         Column(
             modifier =
@@ -172,13 +155,12 @@ fun EditSeekerProfileScreen(
 
               Spacer(modifier = Modifier.height(verticalSpacing))
 
-              Log.e("SCREEN DEBUG", "${address.name}")
               // Full Name Input
               CustomOutlinedTextField(
                   value = fullName,
                   onValueChange = { fullName = it },
                   label = "Name",
-                  placeholder = "Enter your new full name",
+                  placeholder = "Enter your full name",
                   isValueOk = okNewName,
                   leadingIcon = Icons.Default.AccountCircle,
                   leadingIconDescription = "Name Icon",
@@ -186,40 +168,22 @@ fun EditSeekerProfileScreen(
                   errorMessage = "Your name must have at least 2 characters and less than 50",
                   errorTestTag = "nameErrorMessage",
                   maxLines = 2)
-              /*OutlinedTextField(
-              value = fullName,
-              onValueChange = { fullName = it },
-              label = { Text("Enter your full name") },
-              modifier =
-                  Modifier.fillMaxWidth()
-                      .testTag("profileName")
-                      .padding(horizontal = horizontalPadding))*/
 
               Spacer(modifier = Modifier.height(verticalSpacing))
 
+              // Username Input
               CustomOutlinedTextField(
                   value = username,
                   onValueChange = { username = it },
                   label = "Username",
                   placeholder = "Enter your new username",
                   isValueOk = isUserNameOk,
-                  leadingIcon = Icons.Default.Phone,
+                  leadingIcon = Icons.Default.Person,
                   leadingIconDescription = "Phone Number Icon",
                   testTag = "profileUsername",
                   errorMessage = "Enter a valid username",
                   errorTestTag = "newPhoneNumberErrorMessage",
                   maxLines = 1)
-
-              /*
-              // Username Input
-                OutlinedTextField(
-                    value = username,
-                    onValueChange = { username = it },
-                    label = { Text("Enter your username") },
-                    modifier =
-                        Modifier.fillMaxWidth()
-                            .testTag("profileUsername")
-                            .padding(horizontal = horizontalPadding))*/
 
               Spacer(modifier = Modifier.height(verticalSpacing))
 
@@ -279,14 +243,10 @@ fun EditSeekerProfileScreen(
                   },
                   allIsGood = allIsGood)
 
-              androidx.compose.material3.Text(
+              Text(
                   text =
                       "Don't forget to save your changes by clicking the button before leaving the page!",
-                  color = colorScheme.onSurfaceVariant,
-                  fontSize = 12.sp,
-                  textAlign = TextAlign.Center,
-                  style = TextStyle(fontSize = 12.sp, lineHeight = 16.sp),
-                  modifier = Modifier.padding(top = 4.dp).fillMaxWidth())
+              )
             }
       }
 }
@@ -301,7 +261,6 @@ val countries =
         Country("France", "+33", R.drawable.france_flag),
         Country("Switzerland", "+41", R.drawable.switzerland_flag))
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CountryDropdownMenu(screenWidth: Dp) {
   var expanded by remember { mutableStateOf(false) }
@@ -313,7 +272,7 @@ fun CountryDropdownMenu(screenWidth: Dp) {
     OutlinedTextField(
         value = selectedCountry.code,
         onValueChange = {},
-        label = { Text("Country code") },
+        label = { Text("Country code", style = Typography.bodyLarge) },
         modifier =
             Modifier.fillMaxWidth()
                 .testTag("CountryCode")
@@ -348,7 +307,7 @@ fun CountryDropdownMenu(screenWidth: Dp) {
                     contentDescription = "Country Flag",
                     modifier = Modifier.size(24.dp))
                 Spacer(modifier = Modifier.width(16.dp))
-                Text(country.name)
+                Text(country.name, style = Typography.bodyLarge)
               }
             }
       }
@@ -360,7 +319,7 @@ fun CountryDropdownMenu(screenWidth: Dp) {
     OutlinedTextField(
         value = phoneNumber,
         onValueChange = { phoneNumber = it },
-        label = { Text("Phone number") },
+        label = { Text("Phone number", style = Typography.bodyLarge) },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
         modifier =
             Modifier.fillMaxWidth()

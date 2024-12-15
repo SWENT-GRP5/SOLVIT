@@ -1,8 +1,13 @@
 package com.android.solvit
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Surface
@@ -10,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -66,8 +72,34 @@ import com.android.solvit.shared.ui.theme.SampleAppTheme
 
 class MainActivity : ComponentActivity() {
 
+  private val requestPermissionLauncher =
+      registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+        if (isGranted) {
+          Log.d("FCM_DEBUG", "Notification permission granted")
+        } else {
+          Log.w("FCM_DEBUG", "Notification permission denied")
+        }
+      }
+
+  private fun askNotificationPermission() {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+      when {
+        ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
+            PackageManager.PERMISSION_GRANTED -> {
+          Log.d("FCM_DEBUG", "Notification permission already granted")
+        }
+        else -> {
+          requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+      }
+    }
+  }
+
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+
+    // Request notification permission
+    askNotificationPermission()
 
     setContent {
       SampleAppTheme {
