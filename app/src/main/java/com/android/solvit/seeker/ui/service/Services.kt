@@ -442,7 +442,7 @@ fun ServiceItem(service: ServicesListItem, workerCount: Int, onClick: () -> Unit
 }
 
 @Composable
-fun ProviderItem(provider: Provider, onClick: () -> Unit) {
+fun ProviderItem(provider: Provider, showIcon: Boolean = true, onClick: () -> Unit) {
   OutlinedCard(
       modifier =
           Modifier.width(180.dp).height(220.dp).testTag(provider.name + "Item").clickable {
@@ -461,22 +461,24 @@ fun ProviderItem(provider: Provider, onClick: () -> Unit) {
                   Modifier.testTag(Services.getProfileImage(provider.service).toString() + "Image")
                       .fillMaxSize()
                       .clip(RoundedCornerShape(16.dp)))
-          Box(
-              modifier =
-                  Modifier.padding(8.dp)
-                      .size(40.dp)
-                      .clip(RoundedCornerShape(8.dp))
-                      .background(OnPrimary) // Choose a color that fits your theme
-                      .align(Alignment.TopStart),
-              contentAlignment = Alignment.Center) {
-                Icon(
-                    painter = painterResource(id = Services.getIcon(provider.service)),
-                    contentDescription = null,
-                    tint = Color.Unspecified,
-                    modifier =
-                        Modifier.size(30.dp)
-                            .testTag(Services.getIcon(provider.service).toString() + "Icon"))
-              }
+          if (showIcon) {
+            Box(
+                modifier =
+                    Modifier.padding(8.dp)
+                        .size(40.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(OnPrimary) // Choose a color that fits your theme
+                        .align(Alignment.TopStart),
+                contentAlignment = Alignment.Center) {
+                  Icon(
+                      painter = painterResource(id = Services.getIcon(provider.service)),
+                      contentDescription = null,
+                      tint = Color.Unspecified,
+                      modifier =
+                          Modifier.size(30.dp)
+                              .testTag(Services.getIcon(provider.service).toString() + "Icon"))
+                }
+          }
           // Gradient overlay at the bottom to create the tinted area behind texts
           Box(
               modifier =
