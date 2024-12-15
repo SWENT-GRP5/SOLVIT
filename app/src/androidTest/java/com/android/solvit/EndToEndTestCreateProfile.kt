@@ -128,7 +128,7 @@ class EndToEndTestCreateProfile {
     storage.useEmulator("10.0.2.2", 9199)
 
     authRepository = AuthRepository(Firebase.auth, firestore)
-    seekerRepository = UserRepositoryFirestore(firestore)
+    seekerRepository = UserRepositoryFirestore(firestore, storage)
     providerRepository = ProviderRepositoryFirestore(firestore, storage)
     locationRepository = mock(LocationRepository::class.java)
     serviceRequestRepository = ServiceRequestRepositoryFirebase(firestore, storage)
@@ -286,7 +286,6 @@ class EndToEndTestCreateProfile {
     // Stub the intent to return the fake result
     intending(IntentMatchers.hasAction(Intent.ACTION_GET_CONTENT)).respondWith(result)
 
-    val sizeBefore = listProviderViewModel.providersList.value.size
     authRepository2 = mock(AuthRep::class.java)
 
     // Mock the `init` method
@@ -327,8 +326,10 @@ class EndToEndTestCreateProfile {
     composeTestRule
         .onNodeWithTag("descriptionInputProviderRegistration")
         .performTextInput("No need a description ! I'm the Best Plumber In Town")
+    composeTestRule.onNodeWithTag("startingPriceInputProviderRegistration").performScrollTo()
     composeTestRule.onNodeWithTag("startingPriceInputProviderRegistration").assertIsDisplayed()
     composeTestRule.onNodeWithTag("startingPriceInputProviderRegistration").performTextInput("25")
+    composeTestRule.onNodeWithTag("languageDropdown").performScrollTo()
     composeTestRule.onNodeWithTag("languageDropdown").assertIsDisplayed()
     composeTestRule.onNodeWithTag("languageDropdown").performClick()
     composeTestRule.onNodeWithTag("FRENCH").performClick() // Set French as language spoken
