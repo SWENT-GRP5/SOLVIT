@@ -497,7 +497,7 @@ fun PriceFilter(listProviderViewModel: ListProviderViewModel) {
                             filter = { provider -> provider.price >= 0 }, "Price")
                       }
                     },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().testTag("minPrice"),
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
               }
@@ -531,7 +531,7 @@ fun PriceFilter(listProviderViewModel: ListProviderViewModel) {
                             filter = { provider -> provider.price >= 0 }, "Price")
                       }
                     },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().testTag("maxPrice"),
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
               }

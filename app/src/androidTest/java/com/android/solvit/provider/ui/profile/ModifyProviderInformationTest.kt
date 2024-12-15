@@ -133,7 +133,8 @@ class ProfessionalProfileScreenTest {
   fun modifyProviderInformationScreen_errorIsDisplayInThePhoneNumberContent() {
 
     composeTestRule.setContent {
-      ModifyInput(provider, locationViewModel, navigationActions = navigationActions)
+      ModifyInput(
+          provider, locationViewModel = locationViewModel, navigationActions = navigationActions)
     }
     composeTestRule.onNodeWithTag("newPhoneNumberInputField").assertIsDisplayed()
     composeTestRule.onNodeWithTag("newPhoneNumberErrorMessage").assertIsNotDisplayed()
@@ -150,7 +151,8 @@ class ProfessionalProfileScreenTest {
   fun modifyProviderInformationScreen_errorIsDisplayInTheDescriptionContent() {
 
     composeTestRule.setContent {
-      ModifyInput(provider, locationViewModel, navigationActions = navigationActions)
+      ModifyInput(
+          provider, locationViewModel = locationViewModel, navigationActions = navigationActions)
     }
     composeTestRule.onNodeWithTag("newDescriptionInputField").assertIsDisplayed()
     composeTestRule.onNodeWithTag("newDescriptionErrorMessage").assertIsNotDisplayed()
@@ -164,7 +166,8 @@ class ProfessionalProfileScreenTest {
   @Test
   fun modifyProviderInformationScreen_errorIsDisplayInTheLocationContent() {
     composeTestRule.setContent {
-      ModifyInput(provider, locationViewModel, navigationActions = navigationActions)
+      ModifyInput(
+          provider, locationViewModel = locationViewModel, navigationActions = navigationActions)
     }
     composeTestRule.onNodeWithTag("newLocationInputField").performTextClearance()
     composeTestRule.onNodeWithTag("newLocationInputField").performTextInput("USA")

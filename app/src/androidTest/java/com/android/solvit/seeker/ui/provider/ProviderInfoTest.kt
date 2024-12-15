@@ -316,9 +316,7 @@ class ProviderInfoTest {
     }
 
     composeTestRule.onNodeWithTag("dialog_card").assertIsDisplayed()
-    composeTestRule
-        .onNodeWithTag("dialog_title")
-        .assertTextEquals("Choose the concerned service request:")
+    composeTestRule.onNodeWithTag("dialog_title").assertTextEquals("Select request to assign")
     composeTestRule.onNodeWithTag("requests_column").assertIsDisplayed()
     composeTestRule.onNodeWithTag("dismiss_button").assertIsDisplayed()
     composeTestRule.onNodeWithTag("dismiss_button").performClick()

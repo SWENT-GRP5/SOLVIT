@@ -132,7 +132,6 @@ fun ModifyProviderInformationScreen(
             ModifyInput(
                 provider = it,
                 providerEmail = userEmail,
-                spacerWeight = Modifier.weight(1f),
                 screenWidth = screenWidth,
                 verticalSpacing = verticalSpacing,
                 locationViewModel = locationViewModel,
@@ -159,10 +158,9 @@ fun ModifyProviderInformationScreen(
 @Composable
 fun ModifyInput(
     provider: Provider,
-    providerEmail: String,
-    spacerWeight: Modifier,
-    screenWidth: Dp,
-    verticalSpacing: Dp,
+    providerEmail: String = "",
+    screenWidth: Dp = 100.dp,
+    verticalSpacing: Dp = 100.dp,
     locationViewModel: LocationViewModel = viewModel(factory = LocationViewModel.Factory),
     providerViewModel: ProviderViewModel = viewModel(factory = ProviderViewModel.Factory),
     authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory),

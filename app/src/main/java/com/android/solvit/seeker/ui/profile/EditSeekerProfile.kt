@@ -1,6 +1,7 @@
 package com.android.solvit.seeker.ui.profile
 
 import android.content.pm.ActivityInfo
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
@@ -102,20 +103,21 @@ fun EditSeekerProfileScreen(
 
   val user by authViewModel.user.collectAsState()
   val userProfile by viewModel.seekerProfile.collectAsState()
-  user?.let { viewModel.getUserProfile(it.uid) }
+
+  LaunchedEffect(user) { user?.let { viewModel.getUserProfile(it.uid) } }
   var fullName by remember { mutableStateOf(userProfile.name) }
 
   var username by remember { mutableStateOf(userProfile.username) }
   var email by remember { mutableStateOf(userProfile.email) }
 
   var phone by remember { mutableStateOf(userProfile.phone) }
-  var address by remember { mutableStateOf<Location?>(userProfile.address) }
+  var address by remember { mutableStateOf(userProfile.address) }
   var imageUrl by remember { mutableStateOf(userProfile.imageUrl) }
 
   var showDropdown by remember { mutableStateOf(false) }
 
   val okNewName = ValidationRegex.NAME_REGEX.matches(fullName)
-  val okNewLocation = address != null
+  val okNewLocation = address.name.isNotEmpty()
   val okNewPhoneNumber = ValidationRegex.PHONE_REGEX.matches(phone)
   val isUserNameOk = username.isNotBlank() && username.length > 2
 
@@ -125,9 +127,9 @@ fun EditSeekerProfileScreen(
     fullName = userProfile.name
     imageUrl = userProfile.imageUrl
     username = userProfile.username
+    address = userProfile.address
     email = userProfile.email
     phone = userProfile.phone
-    address = userProfile.address
   }
 
   Scaffold(
@@ -170,6 +172,7 @@ fun EditSeekerProfileScreen(
 
               Spacer(modifier = Modifier.height(verticalSpacing))
 
+              Log.e("SCREEN DEBUG", "${address.name}")
               // Full Name Input
               CustomOutlinedTextField(
                   value = fullName,
@@ -229,12 +232,11 @@ fun EditSeekerProfileScreen(
                   errorMessage = "Your phone number must be at least 6 digits",
                   leadingIcon = Icons.Default.Phone,
                   leadingIconDescription = "Phone Icon",
-                  testTag = "phoneNumberInput",
+                  testTag = "profilePhone",
                   errorTestTag = "phoneNumberErrorSeekerRegistration",
                   keyboardType = KeyboardType.Number)
               // Address Input
               Spacer(modifier = Modifier.height(verticalSpacing))
-              // TODO testTag profileAdress
               LocationDropdown(
                   locationQuery = address!!.name,
                   onLocationQueryChange = { locationViewModel.setQuery(it) },
@@ -248,7 +250,8 @@ fun EditSeekerProfileScreen(
                   },
                   requestLocation = null,
                   backgroundColor = colorScheme.background,
-                  isValueOk = okNewLocation)
+                  isValueOk = okNewLocation,
+                  testTag = "profileAddress")
 
               Spacer(modifier = Modifier.weight(1f))
 

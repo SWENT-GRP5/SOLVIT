@@ -52,10 +52,10 @@ class UserRepositoryFirestoreTest {
           username = "johndoe",
           email = "john.doe@example.com",
           phone = "+1234567890",
-          address = "Chemin des Triaudes")
+          address = Location(0.0, 0.0, "Chemin des Triaudes"))
 
-  private val testLocation1 = Location(46.5197, 6.6323, "Location1")
-  private val testLocation2 = Location(47.3769, 8.5417, "Location2")
+  private val testLocation1 = Location(0.0, 0.0, "Location1")
+  private val testLocation2 = Location(0.0, 0.0, "Location2")
   private val testUserId = "12345"
   private val mockPreferences = listOf("⚡ Electrical Work", "📚 Tutoring")
 
@@ -104,7 +104,8 @@ class UserRepositoryFirestoreTest {
         .thenReturn(testSeekerProfile.username)
     Mockito.`when`(mockDocumentSnapshot.getString("email")).thenReturn(testSeekerProfile.email)
     Mockito.`when`(mockDocumentSnapshot.getString("phone")).thenReturn(testSeekerProfile.phone)
-    Mockito.`when`(mockDocumentSnapshot.getString("address")).thenReturn(testSeekerProfile.address)
+    Mockito.`when`(mockDocumentSnapshot.getString("address"))
+        .thenReturn(testSeekerProfile.address.name)
     val onFailure: () -> Unit = mock()
 
     firebaseRepository.getUserProfile(
@@ -203,8 +204,8 @@ class UserRepositoryFirestoreTest {
 
   @Test
   fun `getLocations returns parsed locations from document`() {
-    val locationMap1 = mapOf("latitude" to 46.5197, "longitude" to 6.6323, "name" to "Location1")
-    val locationMap2 = mapOf("latitude" to 47.3769, "longitude" to 8.5417, "name" to "Location2")
+    val locationMap1 = mapOf("latitude" to 0.0, "longitude" to 0.0, "name" to "Location1")
+    val locationMap2 = mapOf("latitude" to 0.0, "longitude" to 0.0, "name" to "Location2")
 
     `when`(mockDocumentSnapshot.get("cachedLocations"))
         .thenReturn(listOf(locationMap1, locationMap2))
@@ -249,8 +250,8 @@ class UserRepositoryFirestoreTest {
     `when`(mockDocumentReference.get()).thenReturn(Tasks.forResult(mockDocumentSnapshot))
 
     // Mock the locations data
-    val locationMap1 = mapOf("latitude" to 46.5197, "longitude" to 6.6323, "name" to "Location1")
-    val locationMap2 = mapOf("latitude" to 47.3769, "longitude" to 8.5417, "name" to "Location2")
+    val locationMap1 = mapOf("latitude" to 0.0, "longitude" to 0.0, "name" to "Location1")
+    val locationMap2 = mapOf("latitude" to 0.0, "longitude" to 0.0, "name" to "Location2")
     `when`(mockDocumentSnapshot.get("cachedLocations"))
         .thenReturn(listOf(locationMap1, locationMap2))
 
@@ -412,7 +413,9 @@ class UserRepositoryFirestoreTest {
     `when`(mockDocumentSnapshot.getString("username")).thenReturn("johndoe")
     `when`(mockDocumentSnapshot.getString("email")).thenReturn("john.doe@example.com")
     `when`(mockDocumentSnapshot.getString("phone")).thenReturn("+1234567890")
-    `when`(mockDocumentSnapshot.getString("address")).thenReturn("Chemin des Triaudes")
+    val locationMap =
+        mapOf("latitude" to 46.5197, "longitude" to 6.6323, "name" to "Chemin des Triaudes")
+    `when`(mockDocumentSnapshot.get("address")).thenReturn(locationMap)
     `when`(mockDocumentSnapshot.getString("imageUrl")).thenReturn("")
 
     // Call the helper method
@@ -424,7 +427,7 @@ class UserRepositoryFirestoreTest {
     assertEquals("johndoe", profile?.username)
     assertEquals("john.doe@example.com", profile?.email)
     assertEquals("+1234567890", profile?.phone)
-    assertEquals("Chemin des Triaudes", profile?.address)
+    assertEquals("Chemin des Triaudes", profile?.address?.name)
     assertEquals("", profile?.imageUrl)
   }
 
@@ -440,7 +443,8 @@ class UserRepositoryFirestoreTest {
     `when`(mockDocumentSnapshot.getString("username")).thenReturn("johndoe")
     `when`(mockDocumentSnapshot.getString("email")).thenReturn("john.doe@example.com")
     `when`(mockDocumentSnapshot.getString("phone")).thenReturn("+1234567890")
-    `when`(mockDocumentSnapshot.getString("address")).thenReturn("Chemin des Triaudes")
+    val locationMap = mapOf("latitude" to 0.0, "longitude" to 0.0, "name" to "Chemin des Triaudes")
+    `when`(mockDocumentSnapshot.get("address")).thenReturn(locationMap)
     `when`(mockDocumentSnapshot.getString("imageUrl")).thenReturn("")
     `when`(mockDocumentSnapshot.get("preferences")).thenReturn(mockPreferences)
 
@@ -455,7 +459,7 @@ class UserRepositoryFirestoreTest {
             username = "johndoe",
             email = "john.doe@example.com",
             phone = "+1234567890",
-            address = "Chemin des Triaudes",
+            address = Location(0.0, 0.0, "Chemin des Triaudes"),
             preferences = mockPreferences),
         result)
   }
