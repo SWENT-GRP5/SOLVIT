@@ -46,7 +46,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.colorScheme
-import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.RangeSlider
@@ -101,6 +100,7 @@ import com.android.solvit.shared.ui.theme.GradientBlue
 import com.android.solvit.shared.ui.theme.GradientGreen
 import com.android.solvit.shared.ui.theme.OnSurfaceVariant
 import com.android.solvit.shared.ui.theme.SurfaceVariant
+import com.android.solvit.shared.ui.theme.Typography
 import com.android.solvit.shared.ui.theme.Yellow
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
@@ -173,7 +173,7 @@ fun TopAppBar(
                           Text(
                               text = location.name,
                               style =
-                                  typography.bodyMedium.copy(
+                                  Typography.bodyMedium.copy(
                                       color = colorScheme.onPrimary,
                                       fontWeight = FontWeight.Medium),
                               maxLines = 1,
@@ -200,12 +200,12 @@ fun TopAppBar(
                       Text(
                           text = serviceName,
                           style =
-                              typography.headlineMedium.copy(
+                              Typography.headlineMedium.copy(
                                   color = colorScheme.onPrimary, fontWeight = FontWeight.Bold))
                       Spacer(modifier = Modifier.height(4.dp))
                       Text(
                           text = "Find the best $serviceName near you",
-                          style = typography.bodyMedium.copy(color = serviceItem.color),
+                          style = Typography.bodyMedium.copy(color = serviceItem.color),
                           fontWeight = FontWeight.Medium)
                     }
                   }
@@ -266,7 +266,7 @@ fun FilterBar(
                         else null) {
                       Text(
                           text = filter,
-                          fontSize = typography.bodySmall.fontSize,
+                          fontSize = Typography.bodySmall.fontSize,
                           lineHeight = 34.sp,
                           fontFamily = FontFamily(Font(R.font.roboto)),
                           fontWeight = FontWeight(400),
@@ -402,7 +402,7 @@ fun ListProviders(
         item {
           Text(
               text = "Popular",
-              style = typography.titleMedium,
+              style = Typography.titleMedium,
               modifier = Modifier.padding(vertical = 8.dp))
         }
         item { DisplayPopularProviders(providers, listProviderViewModel, navigationActions) }
@@ -411,7 +411,7 @@ fun ListProviders(
         item {
           Text(
               text = "See All",
-              style = typography.titleMedium,
+              style = Typography.titleMedium,
               modifier = Modifier.padding(vertical = 8.dp))
         }
         items(providers) { provider ->
@@ -461,7 +461,7 @@ fun ProviderRowCard(
             // Provider Name
             Text(
                 text = provider.name,
-                style = typography.bodyLarge,
+                style = Typography.bodyLarge,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis)
 
@@ -470,7 +470,7 @@ fun ProviderRowCard(
             var textOverflow by remember { mutableStateOf(false) }
             Text(
                 text = provider.description,
-                style = typography.bodySmall.copy(color = colorScheme.onSurfaceVariant),
+                style = Typography.bodySmall.copy(color = colorScheme.onSurfaceVariant),
                 maxLines = if (isExpanded) Int.MAX_VALUE else 2,
                 overflow = TextOverflow.Ellipsis,
                 onTextLayout = { textLayoutResult ->
@@ -485,7 +485,7 @@ fun ProviderRowCard(
                   text = if (isExpanded) "Read Less" else "Read More",
                   modifier = Modifier.clickable { isExpanded = !isExpanded }.padding(top = 4.dp),
                   style =
-                      typography.bodySmall.copy(
+                      Typography.bodySmall.copy(
                           color = colorScheme.primary, fontWeight = FontWeight.Bold))
             }
           }
