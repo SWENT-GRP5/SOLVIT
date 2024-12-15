@@ -472,11 +472,7 @@ fun AiSolverScreen(
 fun AiSolverHeader(navigationActions: NavigationActions) {
   TopAppBar(
       modifier = Modifier.testTag("AiChatHeader"),
-      title = {
-        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-          Text(text = "Ai Solver", style = Typography.headlineLarge)
-        }
-      },
+      title = { Text(text = "AI Solver", style = Typography.titleLarge) },
       navigationIcon = {
         IconButton(onClick = { navigationActions.goBack() }) {
           Icon(Icons.Default.ArrowBack, contentDescription = "Back")
