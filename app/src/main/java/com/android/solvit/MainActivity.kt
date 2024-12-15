@@ -215,11 +215,10 @@ fun SharedUI(
           packageProposalViewModel,
           packagesAssistantViewModel)
     }
-
-    composable(Screen.SEEKER_REGISTRATION_PROFILE) {
+    composable(Route.SEEKER_REGISTRATION) {
       SeekerRegistrationScreen(
           seekerProfileViewModel, navigationActions, locationViewModel, authViewModel)
-
+    }
   }
 }
 
