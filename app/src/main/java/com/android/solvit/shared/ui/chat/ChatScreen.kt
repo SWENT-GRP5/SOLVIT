@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -733,7 +734,7 @@ fun MessageInputBar(
           Box(
               modifier =
                   Modifier.clip(RoundedCornerShape(12.dp))
-                      .background(colorScheme.background)
+                      .background(colorScheme.surface)
                       .padding(bottom = 8.dp)) {
                 AsyncImage(
                     model = uri,
@@ -766,7 +767,7 @@ fun MessageInputBar(
                   onValueChange = { message = it },
                   modifier =
                       Modifier.weight(1f)
-                          .height(56.dp) // Matches the height of buttons for alignment
+                          .heightIn(min = 56.dp) // Matches the height of buttons for alignment
                           .padding(end = 8.dp)
                           .testTag("enterText"),
                   placeholder = {
@@ -777,10 +778,10 @@ fun MessageInputBar(
                   },
                   colors =
                       OutlinedTextFieldDefaults.colors(
-                          unfocusedBorderColor = colorScheme.background,
-                          focusedBorderColor = colorScheme.background,
+                          unfocusedBorderColor = colorScheme.surface,
+                          focusedBorderColor = colorScheme.surface,
                           focusedTextColor = colorScheme.onSurface),
-                  singleLine = true)
+                  maxLines = 5)
 
               // Optional AI Chat Assistant Button
               if (!isAiSolverScreen) {
