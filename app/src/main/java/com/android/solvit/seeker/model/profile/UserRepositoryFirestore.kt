@@ -1,15 +1,22 @@
 package com.android.solvit.seeker.model.profile
 
+import android.net.Uri
 import android.util.Log
 import com.android.solvit.shared.model.map.Location
+import com.android.solvit.shared.model.utils.uploadImageToStorage
 import com.google.android.gms.tasks.Task
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.tasks.await
 
-open class UserRepositoryFirestore(private val db: FirebaseFirestore) : UserRepository {
+open class UserRepositoryFirestore(
+    private val db: FirebaseFirestore,
+    private val storage: FirebaseStorage
+) : UserRepository {
 
   private val collectionPath = "user"
+  private val usersImagesPath = "usersImages/"
 
   override fun init(onSuccess: () -> Unit) {
     onSuccess()
@@ -21,11 +28,28 @@ open class UserRepositoryFirestore(private val db: FirebaseFirestore) : UserRepo
 
   override fun addUserProfile(
       profile: SeekerProfile,
+      imageUri: Uri?,
       onSuccess: () -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    performFirestoreOperation(
-        db.collection(collectionPath).document(profile.uid).set(profile), onSuccess, onFailure)
+    if (imageUri != null) {
+      uploadImageToStorage(
+          storage,
+          usersImagesPath,
+          imageUri,
+          onSuccess = { imageUrl ->
+            performFirestoreOperation(
+                db.collection(collectionPath)
+                    .document(profile.uid)
+                    .set(profile.copy(imageUrl = imageUrl)),
+                onSuccess,
+                onFailure)
+          },
+          onFailure = { Log.e("Add Seeker", "Failed to add seeker $it") })
+    } else {
+      performFirestoreOperation(
+          db.collection(collectionPath).document(profile.uid).set(profile), onSuccess, onFailure)
+    }
   }
 
   override fun getUserProfile(
@@ -126,18 +150,14 @@ open class UserRepositoryFirestore(private val db: FirebaseFirestore) : UserRepo
       onSuccess: (List<Location>) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    Log.e("AVANT", userId)
     db.collection(collectionPath).document(userId).get().addOnCompleteListener { task ->
-      Log.e("Apres", "soy aqui $userId")
       if (task.isSuccessful) {
-        Log.e("updateUserLocation", "yes task is succesfull")
         val doc = task.result
         var locations = getLocations(doc)
         locations.add(0, newLocation)
         if (locations.size > 2) {
           locations = locations.take(2).toMutableList()
         }
-        Log.e("CACHED LOCAATIONS", "$locations")
         db.collection(collectionPath).document(userId).update("cachedLocations", locations.toList())
         onSuccess(locations.toList())
       } else {

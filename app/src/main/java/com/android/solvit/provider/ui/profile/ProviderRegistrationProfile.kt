@@ -115,7 +115,6 @@ import com.android.solvit.shared.ui.utils.ValidationRegex
  * @param packageViewModel the [PackageProposalViewModel] to handle the package proposals
  * @param assistantViewModel the [PackagesAssistantViewModel] to handle generate packages
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint(
     "UnusedMaterialScaffoldPaddingParameter",
     "UnusedMaterial3ScaffoldPaddingParameter",

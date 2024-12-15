@@ -31,8 +31,8 @@ class ProviderRepositoryFirestore(
       val description = (doc.getString("description")) ?: return null
       val locationDoc = doc.get("location") as? Map<*, *>
       val latitude = locationDoc?.get("latitude") as? Double ?: return null
-      val longitude = locationDoc?.get("longitude") as? Double ?: return null
-      val nameLoc = locationDoc?.get("name") as? String ?: return null
+      val longitude = locationDoc["longitude"] as? Double ?: return null
+      val nameLoc = locationDoc["name"] as? String ?: return null
       val location = Location(latitude, longitude, nameLoc)
       val rating = doc.getDouble("rating") ?: return null
       val popular = doc.getBoolean("popular") ?: return null
@@ -105,7 +105,7 @@ class ProviderRepositoryFirestore(
           providersImagesPath,
           imageUri,
           onSuccess = { imageUrl ->
-            Log.e("UploadImageTo Storage", "$imageUrl")
+            Log.e("UploadImageTo Storage", imageUrl)
             val providerWithImage = provider.copy(imageUrl = imageUrl)
             performFirestoreOperation(
                 db.collection(collectionPath).document(provider.uid).set(providerWithImage),
@@ -247,7 +247,7 @@ class ProviderRepositoryFirestore(
 
   private fun convertSchedule(scheduleMap: Map<String, Any>): Schedule {
     @Suppress("UNCHECKED_CAST")
-    val regularHoursMap = (scheduleMap["regularHours"] as? Map<String, Any>) ?: mapOf<String, Any>()
+    val regularHoursMap = (scheduleMap["regularHours"] as? Map<String, Any>) ?: mapOf()
     @Suppress("UNCHECKED_CAST")
     val exceptionsList = (scheduleMap["exceptions"] as? List<Map<String, Any>>) ?: listOf()
 
