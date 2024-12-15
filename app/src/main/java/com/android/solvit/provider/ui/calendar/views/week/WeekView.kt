@@ -1,8 +1,13 @@
 package com.android.solvit.provider.ui.calendar.views.week
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -15,13 +20,14 @@ import com.android.solvit.provider.ui.calendar.components.grid.TimeGrid
 import com.android.solvit.provider.ui.calendar.components.header.WeekDayHeader
 import com.android.solvit.provider.ui.calendar.components.timeslot.ServiceRequestTimeSlot
 import com.android.solvit.shared.model.request.ServiceRequest
+import com.android.solvit.shared.ui.theme.Typography
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters
-import java.util.*
+import java.util.Locale
 
 @Composable
 fun WeekView(
@@ -50,8 +56,7 @@ fun WeekView(
                   "${startOfWeek.format(DateTimeFormatter.ofPattern("d MMMM", Locale.getDefault()))} - ${
                     startOfWeek.plusDays(6).format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.getDefault()))
                 }",
-              style = MaterialTheme.typography.titleMedium,
-              fontWeight = FontWeight.Bold,
+              style = Typography.titleMedium.copy(fontWeight = FontWeight.Bold),
               modifier = Modifier.testTag("weekViewHeaderText"))
         }
 

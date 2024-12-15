@@ -3,9 +3,16 @@ package com.android.solvit.provider.ui.calendar.components.timeslot
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,6 +29,7 @@ import com.android.solvit.provider.model.CalendarView
 import com.android.solvit.provider.ui.calendar.components.utils.StatusIndicator
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestStatus
+import com.android.solvit.shared.ui.theme.Typography
 import java.time.Duration
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -62,7 +70,7 @@ fun ServiceRequestTimeSlot(
             Text(
                 text = request.title,
                 style =
-                    MaterialTheme.typography.bodySmall.copy(
+                    Typography.bodySmall.copy(
                         fontWeight = FontWeight.Bold, fontSize = 8.sp, lineHeight = 12.sp),
                 color = colorScheme.onSurface,
                 maxLines = 4,
@@ -79,13 +87,12 @@ fun ServiceRequestTimeSlot(
                     Text(
                         text =
                             "${startTime.format(DateTimeFormatter.ofPattern("H:mm"))} - ${endTime.format(DateTimeFormatter.ofPattern("H:mm"))}",
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = Typography.bodyMedium,
                         color = colorScheme.onSurface,
                         modifier = Modifier.testTag("serviceRequestTime_${request.uid}"))
                     Text(
                         text = request.title,
-                        style =
-                            MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                        style = Typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                         color = colorScheme.onSurface,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
@@ -96,9 +103,7 @@ fun ServiceRequestTimeSlot(
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = request.description,
-                    style =
-                        MaterialTheme.typography.bodySmall.copy(
-                            fontSize = 12.sp, lineHeight = 14.sp),
+                    style = Typography.bodySmall.copy(fontSize = 12.sp, lineHeight = 14.sp),
                     color = colorScheme.onSurface,
                     maxLines = 3,
                     overflow = TextOverflow.Ellipsis,

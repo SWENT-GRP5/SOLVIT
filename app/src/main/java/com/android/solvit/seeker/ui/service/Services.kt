@@ -34,7 +34,6 @@ import androidx.compose.material3.DockedSearchBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
@@ -74,6 +73,7 @@ import com.android.solvit.shared.ui.theme.LightBlue
 import com.android.solvit.shared.ui.theme.LightOrange
 import com.android.solvit.shared.ui.theme.LightRed
 import com.android.solvit.shared.ui.theme.OnPrimary
+import com.android.solvit.shared.ui.theme.Typography
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -273,8 +273,7 @@ fun ShortcutsSection(
                         "Solve It with AI",
                         color = colorScheme.onPrimary,
                         fontSize = 20.sp,
-                        style =
-                            MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                        style = Typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                         fontWeight = FontWeight.Bold)
                     Icon(
                         painter = painterResource(id = R.drawable.ai_solver),
@@ -307,9 +306,7 @@ fun ShortcutsSection(
                               "All Orders",
                               color = colorScheme.onPrimary,
                               fontSize = 20.sp,
-                              style =
-                                  MaterialTheme.typography.titleMedium.copy(
-                                      fontWeight = FontWeight.Bold),
+                              style = Typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                               fontWeight = FontWeight.Bold)
                         }
                   }
@@ -331,9 +328,7 @@ fun ShortcutsSection(
                               "Providers Map",
                               color = colorScheme.onPrimary,
                               fontSize = 20.sp,
-                              style =
-                                  MaterialTheme.typography.titleMedium.copy(
-                                      fontWeight = FontWeight.Bold),
+                              style = Typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                               fontWeight = FontWeight.Bold)
                         }
                   }
@@ -431,7 +426,7 @@ fun ServiceItem(service: ServicesListItem, workerCount: Int, onClick: () -> Unit
               Text(
                   text = Services.format(service.service),
                   modifier = Modifier.testTag(service.service.toString() + "Name"),
-                  style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                  style = Typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                   color = colorScheme.onBackground,
                   textAlign = TextAlign.Center)
 
@@ -439,7 +434,7 @@ fun ServiceItem(service: ServicesListItem, workerCount: Int, onClick: () -> Unit
               Text(
                   text = "+ $workerCount workers",
                   modifier = Modifier.testTag(service.service.toString() + "WorkerCount"),
-                  style = MaterialTheme.typography.bodySmall,
+                  style = Typography.bodySmall,
                   color = colorScheme.onSurfaceVariant,
                   textAlign = TextAlign.Center)
             }
@@ -517,15 +512,17 @@ fun ProviderItem(provider: Provider, showIcon: Boolean = true, onClick: () -> Un
                 Text(
                     text = provider.name,
                     modifier = Modifier.testTag(provider.name + "Name"),
-                    fontWeight = FontWeight.ExtraBold,
-                    fontSize = 20.sp,
-                    color = Color.White)
+                    color = Color.White,
+                    style =
+                        Typography.titleLarge.copy(
+                            fontWeight = FontWeight.ExtraBold, fontSize = 20.sp))
                 Text(
                     text = Services.format(provider.service),
                     modifier = Modifier.testTag(provider.service.toString() + "Service"),
-                    fontWeight = FontWeight.ExtraBold,
-                    fontSize = 18.sp,
-                    color = Color.White)
+                    color = Color.White,
+                    style =
+                        Typography.bodyLarge.copy(
+                            fontWeight = FontWeight.ExtraBold, fontSize = 18.sp))
               }
         }
       }

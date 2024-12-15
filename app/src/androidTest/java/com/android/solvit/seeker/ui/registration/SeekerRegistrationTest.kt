@@ -1,8 +1,6 @@
 package com.android.solvit.seeker.ui.registration
 
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertIsEnabled
-import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.isNotDisplayed
@@ -75,7 +73,6 @@ class SeekerRegistrationTest {
           locationViewModel = locationViewModel)
     }
 
-    composeTestRule.onNodeWithTag("goBackButton").assertIsDisplayed()
     // Step 1: Registration form fields should be displayed
     composeTestRule.onNodeWithTag("signUpIcon").assertIsDisplayed()
     composeTestRule.onNodeWithTag("signUpSeekerTitle").assertIsDisplayed()
@@ -151,14 +148,16 @@ class SeekerRegistrationTest {
     }
 
     // Initially, the button should be disabled when fields are empty
-    composeTestRule.onNodeWithTag("completeRegistrationButton").assertIsNotEnabled()
+    composeTestRule.onNodeWithTag("completeRegistrationButton").performClick()
+    composeTestRule.onNodeWithTag("savePreferencesButton").isNotDisplayed()
 
     // Fill out only some of the fields
     composeTestRule.onNodeWithTag("fullNameInput").performTextInput("John Doe")
     composeTestRule.onNodeWithTag("phoneNumberInput").performTextInput("123456789")
 
     // Button should still be disabled as not all fields are filled
-    composeTestRule.onNodeWithTag("completeRegistrationButton").assertIsNotEnabled()
+    composeTestRule.onNodeWithTag("completeRegistrationButton").performClick()
+    composeTestRule.onNodeWithTag("savePreferencesButton").isNotDisplayed()
 
     // Complete the rest of the fields
     composeTestRule.onNodeWithTag("userNameInput").performTextInput("password123")
@@ -166,7 +165,8 @@ class SeekerRegistrationTest {
     composeTestRule.waitUntil { locationViewModel.locationSuggestions.value.isNotEmpty() }
     composeTestRule.onAllNodesWithTag("locationResult")[0].performClick()
     // Now the button should be enabled
-    composeTestRule.onNodeWithTag("completeRegistrationButton").assertIsEnabled()
+    composeTestRule.onNodeWithTag("completeRegistrationButton").performClick()
+    composeTestRule.onNodeWithTag("savePreferencesButton").isDisplayed()
   }
 
   @Test

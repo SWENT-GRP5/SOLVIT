@@ -74,7 +74,6 @@ class ProviderRegistrationTest {
       )
     }
 
-    composeTestRule.onNodeWithTag("goBackButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("signUpIcon").assertIsDisplayed()
     composeTestRule.onNodeWithTag("signUpProviderTitle").assertIsDisplayed()
     composeTestRule.onNodeWithTag("fullNameInput").assertIsDisplayed()

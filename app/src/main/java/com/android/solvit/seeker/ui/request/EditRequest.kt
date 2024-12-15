@@ -1,5 +1,6 @@
 package com.android.solvit.seeker.ui.request
 
+import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
 import android.icu.util.GregorianCalendar
 import android.net.Uri
@@ -23,6 +24,7 @@ import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.google.firebase.Timestamp
 import java.util.Calendar
 
+@SuppressLint("SourceLockedOrientationActivity")
 @Composable
 fun EditRequestScreen(
     navigationActions: NavigationActions,
