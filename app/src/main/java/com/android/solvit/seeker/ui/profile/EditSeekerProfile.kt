@@ -48,8 +48,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.solvit.R
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
@@ -98,7 +100,7 @@ fun EditSeekerProfileScreen(
   val user by authViewModel.user.collectAsState()
   val userProfile by viewModel.seekerProfile.collectAsState()
 
-  LaunchedEffect(user) { user?.let { viewModel.getUserProfile(it.uid) } }
+  user?.let { viewModel.getUserProfile(it.uid) }
   var fullName by remember { mutableStateOf(userProfile.name) }
 
   var username by remember { mutableStateOf(userProfile.username) }
@@ -142,6 +144,7 @@ fun EditSeekerProfileScreen(
                 Modifier.fillMaxWidth()
                     .padding(horizontalPadding)
                     .padding(top = 32.dp)
+                    .padding(16.dp)
                     .fillMaxHeight()
                     .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -246,7 +249,11 @@ fun EditSeekerProfileScreen(
               Text(
                   text =
                       "Don't forget to save your changes by clicking the button before leaving the page!",
-              )
+                  color = colorScheme.onSurfaceVariant,
+                  fontSize = 12.sp,
+                  textAlign = TextAlign.Center,
+                  style = Typography.bodySmall.copy(fontSize = 12.sp, lineHeight = 16.sp),
+                  modifier = Modifier.padding(top = 4.dp).fillMaxWidth())
             }
       }
 }

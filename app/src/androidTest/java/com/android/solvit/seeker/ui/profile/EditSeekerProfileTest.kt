@@ -8,8 +8,6 @@ import androidx.navigation.NavController
 import com.android.solvit.seeker.model.profile.SeekerProfile
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.seeker.model.profile.UserRepository
-import com.android.solvit.shared.model.authentication.AuthRepository
-import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.map.LocationRepository
 import com.android.solvit.shared.model.map.LocationViewModel
@@ -26,10 +24,8 @@ import org.mockito.kotlin.eq
 class EditSeekerProfileTest {
   private lateinit var userRepository: UserRepository
   private lateinit var navController: NavController
-  private lateinit var authRepository: AuthRepository
   private lateinit var seekerProfileViewModel: SeekerProfileViewModel
   private lateinit var navigationActions: NavigationActions
-  private lateinit var authViewModel: AuthViewModel
 
   private lateinit var locationRepository: LocationRepository
   private lateinit var locationViewModel: LocationViewModel
@@ -52,15 +48,13 @@ class EditSeekerProfileTest {
     locationViewModel = LocationViewModel(locationRepository)
     userRepository = mock(UserRepository::class.java)
     navController = mock(NavController::class.java)
-    authRepository = mock(AuthRepository::class.java)
+
     seekerProfileViewModel = SeekerProfileViewModel(userRepository)
     navigationActions = NavigationActions(navController)
-    authViewModel = AuthViewModel(authRepository)
 
     composeTestRule.setContent {
       EditSeekerProfileScreen(
           seekerProfileViewModel,
-          authViewModel = authViewModel,
           locationViewModel = locationViewModel,
           navigationActions = navigationActions)
     }
