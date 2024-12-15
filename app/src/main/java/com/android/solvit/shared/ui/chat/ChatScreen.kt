@@ -1,5 +1,6 @@
 package com.android.solvit.shared.ui.chat
 
+import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
 import android.graphics.Bitmap
 import android.net.Uri
@@ -38,11 +39,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.AddCircle
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardColors
@@ -111,6 +112,16 @@ import com.android.solvit.shared.ui.utils.getReceiverName
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+/**
+ * Composable for the chat screen, where users can send and receive messages in a chat conversation.
+ *
+ * @param navigationActions Actions to navigate to different screens
+ * @param chatViewModel ViewModel for chat messages
+ * @param authViewModel ViewModel for user authentication
+ * @param chatAssistantViewModel ViewModel for AI chat assistant
+ * @param serviceRequestViewModel ViewModel for service requests
+ */
+@SuppressLint("SourceLockedOrientationActivity")
 @Composable
 fun ChatScreen(
     navigationActions: NavigationActions,
@@ -196,6 +207,14 @@ fun ChatScreen(
       }
 }
 
+/**
+ * Composable for displaying the Welcome screen for the AI Problem Solver.
+ *
+ * @param navigationActions Actions to navigate to different screens
+ * @param chatViewModel ViewModel for chat messages
+ * @param authViewModel ViewModel for user authentication
+ */
+@SuppressLint("SourceLockedOrientationActivity")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AiSolverWelcomeScreen(
@@ -226,7 +245,7 @@ fun AiSolverWelcomeScreen(
             title = {},
             navigationIcon = {
               IconButton(onClick = { navigationActions.goBack() }) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
               }
             },
             colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background))
@@ -325,7 +344,14 @@ fun AiSolverWelcomeScreen(
         }
   }
 }
-/** Represent either a solve new Problem Button or continue solving current Problem* */
+
+/**
+ * Represent either a solve new Problem Button or continue solving current Problem
+ *
+ * @param screenHeight height of the screen
+ * @param title title of the button
+ * @param onClick action to perform when clicking on the button
+ */
 @Composable
 fun AiSolverButton(screenHeight: Dp = 700.dp, title: String, onClick: () -> Unit) {
   Button(
@@ -358,7 +384,15 @@ fun AiSolverButton(screenHeight: Dp = 700.dp, title: String, onClick: () -> Unit
       }
 }
 
-/** Chat with Ai problem solver chatbot */
+/**
+ * Chat with Ai problem solver chatbot
+ *
+ * @param navigationActions to navigate back to the previous screen
+ * @param authViewModel ViewModel for user authentication
+ * @param chatViewModel ViewModel for chat messages
+ * @param aiSolverViewModel ViewModel for AI problem solver
+ */
+@SuppressLint("SourceLockedOrientationActivity")
 @Composable
 fun AiSolverScreen(
     navigationActions: NavigationActions,
@@ -466,7 +500,11 @@ fun AiSolverScreen(
       }
 }
 
-/** Header of Chat with Ai problem solver */
+/**
+ * Header of Chat with Ai problem solver
+ *
+ * @param navigationActions to navigate back to the previous screen
+ */
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun AiSolverHeader(navigationActions: NavigationActions) {
@@ -475,7 +513,7 @@ fun AiSolverHeader(navigationActions: NavigationActions) {
       title = { Text(text = "AI Solver", style = Typography.titleLarge) },
       navigationIcon = {
         IconButton(onClick = { navigationActions.goBack() }) {
-          Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+          Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
         }
       },
       colors =
@@ -512,6 +550,14 @@ fun TypingIndicator() {
       color = colorScheme.onSurface)
 }
 
+/**
+ * Composable for displaying the header of the chat screen with the name and profile picture of the
+ * chat partner.
+ *
+ * @param name The name of the chat partner
+ * @param picture The profile picture of the chat partner
+ * @param navigationActions Actions to navigate to different screens
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatHeader(name: String?, picture: String, navigationActions: NavigationActions) {
@@ -538,11 +584,19 @@ fun ChatHeader(name: String?, picture: String, navigationActions: NavigationActi
       },
       navigationIcon = {
         IconButton(onClick = { navigationActions.goBack() }) {
-          Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+          Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
         }
       })
 }
 
+/**
+ * Composable for displaying a chat message in the chat screen.
+ *
+ * @param message The chat message to display
+ * @param isSentByUser Boolean indicating if the message was sent by the user
+ * @param showProfilePicture Boolean indicating if the profile picture should be displayed
+ * @param receiverPicture The profile picture of the chat partner
+ */
 @Composable
 fun SentMessage(
     message: ChatMessage,
@@ -550,7 +604,6 @@ fun SentMessage(
     showProfilePicture: Boolean = false,
     receiverPicture: String = ""
 ) {
-
   Row(
       modifier =
           Modifier.fillMaxWidth()
@@ -661,7 +714,7 @@ fun SentMessage(
 }
 
 /**
- * Composable displayed in the bottom bar of ai solve chat screen with 2 possibilities (either
+ * Composable displayed in the bottom bar of the AI chat screen with 2 possibilities (either
  * creating a request or continue chatting)
  *
  * @param navigationActions to navigate create request screen on click
@@ -689,6 +742,15 @@ fun SuggestionToCreateRequest(navigationActions: NavigationActions, onClick: () 
   }
 }
 
+/**
+ * Composable for displaying the message input bar at the bottom of the chat screen.
+ *
+ * @param chatAssistantViewModel ViewModel for AI chat assistant
+ * @param onImageSelected Callback when an image is selected
+ * @param isSeeker Boolean indicating if the user is a seeker
+ * @param isAiSolverScreen Boolean indicating if the screen is the AI Problem Solver screen
+ * @param onSendClickButton Callback when the send button is clicked
+ */
 @Composable
 fun MessageInputBar(
     chatAssistantViewModel: ChatAssistantViewModel =
@@ -809,7 +871,7 @@ fun MessageInputBar(
                   },
                   modifier = Modifier.size(48.dp).testTag("sendMessageButton")) {
                     Icon(
-                        imageVector = Icons.Default.Send,
+                        imageVector = Icons.AutoMirrored.Filled.Send,
                         contentDescription = "Send",
                         tint = colorScheme.onSurfaceVariant,
                         modifier = Modifier.rotate(-45f))
@@ -827,7 +889,14 @@ fun MessageInputBar(
   }
 }
 
-/** Handle different messages possible format a user send */
+/**
+ * Handle different messages possible format a user send
+ *
+ * @param userId id of the user
+ * @param messageText text of the message
+ * @param imageUrl url of the image
+ * @param senderName name of the sender
+ */
 fun buildMessage(
     userId: String,
     messageText: String?,
@@ -864,6 +933,13 @@ fun buildMessage(
   }
 }
 
+/**
+ * Composable for displaying the AI Chat Assistant dialog.
+ *
+ * @param chatAssistantViewModel ViewModel for AI chat assistant
+ * @param isSeeker Boolean indicating if the user is a seeker
+ * @param onSuggestionSelect Callback when a suggestion is selected
+ */
 @Composable
 fun AssistantSuggestions(
     chatAssistantViewModel: ChatAssistantViewModel,
@@ -916,6 +992,13 @@ fun AssistantSuggestions(
       }
 }
 
+/**
+ * Composable for displaying a request's details.
+ *
+ * @param serviceRequest The service request to display
+ * @param serviceRequestViewModel ViewModel for service requests
+ * @param navigationActions Actions to navigate to different screens
+ */
 @Composable
 fun RequestDetails(
     serviceRequest: ServiceRequest,
