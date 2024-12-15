@@ -8,6 +8,7 @@ import com.android.solvit.shared.ui.theme.Cleaner
 import com.android.solvit.shared.ui.theme.Electrician
 import com.android.solvit.shared.ui.theme.EventPlanner
 import com.android.solvit.shared.ui.theme.HairStylist
+import com.android.solvit.shared.ui.theme.Other
 import com.android.solvit.shared.ui.theme.PersonalTrainer
 import com.android.solvit.shared.ui.theme.Photographer
 import com.android.solvit.shared.ui.theme.Plumber
@@ -46,4 +47,4 @@ val SERVICES_LIST =
             R.drawable.hair_stylist,
             R.drawable.ic_hair_stylist,
             HairStylist),
-    )
+        ServicesListItem(Services.OTHER, R.drawable.other, R.drawable.ic_other, Other))
