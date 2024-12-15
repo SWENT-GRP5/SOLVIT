@@ -33,7 +33,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.colorScheme
@@ -71,7 +70,6 @@ import com.android.solvit.shared.ui.navigation.Screen
 import com.android.solvit.shared.ui.theme.Typography
 import com.android.solvit.shared.ui.utils.TopAppBarInbox
 
-@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter", "SourceLockedOrientationActivity")
 @Composable
 fun SeekerProfileScreen(
@@ -108,7 +106,7 @@ fun SeekerProfileScreen(
         TopAppBarInbox(
             title = "Profile",
             testTagTitle = "ProfileTitle",
-            rightButton = { showLogoutDialog = true },
+            rightButtonAction = { showLogoutDialog = true },
             rightButtonForm = Icons.AutoMirrored.Filled.ExitToApp,
             testTagRight = "LogoutButton",
             testTagGeneral = "ProfileTopBar")
