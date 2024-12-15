@@ -19,12 +19,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Alignment
@@ -42,7 +42,9 @@ import com.android.solvit.R
 import com.android.solvit.seeker.ui.profile.Stepper
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
-import com.android.solvit.shared.ui.navigation.Screen
+import com.android.solvit.shared.ui.navigation.Route
+import com.android.solvit.shared.ui.theme.Typography
+import com.android.solvit.shared.ui.utils.TopAppBarInbox
 
 /**
  * A composable function that displays the "Choose Your Profile" screen during the sign-up process.
@@ -70,10 +72,10 @@ fun SignUpChooseProfile(
 
   Scaffold(
       topBar = {
-        TopAppBar(
-            title = { Text("Choose your profile") },
-            navigationIcon = { GoBackButton(navigationActions) },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background))
+        TopAppBarInbox(
+            title = "Choose your profile",
+            leftButtonAction = { navigationActions.goBack() },
+            leftButtonForm = Icons.AutoMirrored.Filled.ArrowBack)
       },
       content = { padding ->
         Column(
@@ -97,7 +99,7 @@ fun SignUpChooseProfile(
 
               Spacer(modifier = Modifier.height(30.dp))
 
-              ButtonCustomerProvider(
+              ButtonSeekerProvider(
                   text = "Seeker",
                   description = "I want to request services.",
                   testTag = "seekerButton",
@@ -105,10 +107,10 @@ fun SignUpChooseProfile(
                     authViewModel.setRole("seeker")
                     if (authViewModel.googleAccount.value == null) {
                       authViewModel.registerWithEmailAndPassword(
-                          { navigationActions.navigateTo(Screen.SEEKER_REGISTRATION_PROFILE) }, {})
+                          { navigationActions.navigateTo(Route.SEEKER_REGISTRATION) }, {})
                     } else {
                       authViewModel.registerWithGoogle(
-                          { navigationActions.navigateTo(Screen.SEEKER_REGISTRATION_PROFILE) }, {})
+                          { navigationActions.navigateTo(Route.SEEKER_REGISTRATION) }, {})
                     }
                   })
 
@@ -118,7 +120,7 @@ fun SignUpChooseProfile(
 
               Spacer(modifier = Modifier.height(16.dp))
 
-              ButtonCustomerProvider(
+              ButtonSeekerProvider(
                   text = "Provider",
                   description = "I want to offer services.",
                   testTag = "providerButton",
@@ -128,7 +130,7 @@ fun SignUpChooseProfile(
                       authViewModel.registerWithEmailAndPassword(
                           {
                             Toast.makeText(context, "You are Signed up!", Toast.LENGTH_SHORT).show()
-                            navigationActions.navigateTo(Screen.PROVIDER_REGISTRATION_PROFILE)
+                            navigationActions.navigateTo(Route.PROVIDER_REGISTRATION)
                           },
                           {
                             Toast.makeText(context, "Failed to register", Toast.LENGTH_SHORT).show()
@@ -137,7 +139,7 @@ fun SignUpChooseProfile(
                       authViewModel.registerWithGoogle(
                           {
                             Toast.makeText(context, "You are Signed up!", Toast.LENGTH_SHORT).show()
-                            navigationActions.navigateTo(Screen.PROVIDER_REGISTRATION_PROFILE)
+                            navigationActions.navigateTo(Route.PROVIDER_REGISTRATION)
                           },
                           {
                             Toast.makeText(context, "Failed to register", Toast.LENGTH_SHORT).show()
@@ -158,7 +160,7 @@ fun SignUpChooseProfile(
  * @param onClickButton A lambda function to execute when the button is clicked.
  */
 @Composable
-fun ButtonCustomerProvider(
+fun ButtonSeekerProvider(
     text: String,
     description: String,
     testTag: String = "",
@@ -182,14 +184,14 @@ fun ButtonCustomerProvider(
                   text = text,
                   color = colorScheme.onPrimary,
                   fontWeight = FontWeight.Bold,
-                  fontSize = 20.sp)
+                  style = Typography.bodyLarge.copy(fontSize = 20.sp))
             }
 
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
             text = description,
-            fontSize = 12.sp,
+            style = Typography.bodySmall,
             color = colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center)
       }
@@ -207,5 +209,6 @@ fun SectionTitle(text: String, testTag: String = "") {
       text = text,
       fontSize = 25.sp,
       color = colorScheme.onBackground,
-      modifier = Modifier.testTag(testTag))
+      modifier = Modifier.testTag(testTag),
+      style = Typography.titleLarge)
 }

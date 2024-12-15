@@ -10,7 +10,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
-import org.mockito.kotlin.verify
 
 @RunWith(AndroidJUnit4::class)
 class SignUpChooseProfileTest {
@@ -23,21 +22,18 @@ class SignUpChooseProfileTest {
   fun signUpChooseProfile_displaysAllComponents() {
     composeTestRule.setContent { SignUpChooseProfile(mockNavigationActions) }
 
-    composeTestRule.onNodeWithTag("goBackButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("roleIllustration").assertIsDisplayed()
     composeTestRule.onNodeWithTag("signUpAsTitle").assertIsDisplayed()
     composeTestRule.onNodeWithTag("seekerButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("providerButton").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("learnMoreLink").assertIsDisplayed()
   }
 
   @Test
   fun signUpChooseProfile_performClick() {
     composeTestRule.setContent { SignUpChooseProfile(mockNavigationActions) }
 
-    composeTestRule.onNodeWithTag("goBackButton").performClick()
     composeTestRule.onNodeWithTag("seekerButton").performClick()
     composeTestRule.onNodeWithTag("providerButton").performClick()
-
-    verify(mockNavigationActions).goBack()
   }
 }

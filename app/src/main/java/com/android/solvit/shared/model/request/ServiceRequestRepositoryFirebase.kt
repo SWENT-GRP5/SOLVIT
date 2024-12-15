@@ -139,7 +139,6 @@ class ServiceRequestRepositoryFirebase(
       onFailure: (Exception) -> Unit
   ) {
     if (imageUri != null) {
-      saveServiceRequest(serviceRequest, onSuccess, onFailure)
       uploadImageToStorage(
           storage,
           imageFolderPath,

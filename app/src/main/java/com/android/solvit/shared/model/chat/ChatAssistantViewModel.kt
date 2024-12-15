@@ -161,10 +161,11 @@ class ChatAssistantViewModel : ViewModel() {
    * Build the prompt for the chat assistant
    *
    * @param input Additional infos to add to the prompt
+   * @param isSeeker Flag to indicate if the user is a seeker
    * @return The generated prompt
    */
-  fun buildMessagePrompt(input: String): String {
-    var prompt = "Write a single message response"
+  fun buildMessagePrompt(input: String, isSeeker: Boolean): String {
+    var prompt = "Write a single chat message response"
     if (senderName.value.isNotEmpty()) {
       prompt += " for " + senderName.value
     }
@@ -176,7 +177,8 @@ class ChatAssistantViewModel : ViewModel() {
       prompt += messageContextToPrompt()
     }
     if (_requestContext.value != null) {
-      prompt += ", based on the following service request:\n"
+      prompt +=
+          ", based on the following service request posted by ${if (isSeeker) senderName.value else receiverName.value}:\n"
       prompt += requestContext.value!!.title + ": " + requestContext.value!!.description
     }
     if (_selectedTones.value.isNotEmpty()) {
@@ -196,10 +198,11 @@ class ChatAssistantViewModel : ViewModel() {
    * Generate a response message from the chat assistant
    *
    * @param input Additional infos to add to the prompt
+   * @param isSeeker Flag to indicate if the user is a seeker
    * @param onResponse Callback to handle the response
    */
-  fun generateMessage(input: String, onResponse: (String) -> Unit) {
-    val prompt = buildMessagePrompt(input)
+  fun generateMessage(input: String, isSeeker: Boolean, onResponse: (String) -> Unit) {
+    val prompt = buildMessagePrompt(input, isSeeker)
     Log.d("ChatAssistantViewModel", "model prompted")
     viewModelScope.launch {
       try {
@@ -215,16 +218,18 @@ class ChatAssistantViewModel : ViewModel() {
   /**
    * Build the prompt for the suggestions assistant
    *
+   * @param isSeeker Flag to indicate if the user is a seeker
    * @return The generated prompt
    */
-  fun buildSuggestionsPrompt(): String {
+  fun buildSuggestionsPrompt(isSeeker: Boolean): String {
     var prompt = "Provide a list without repetitions of suggestions themes for a response"
     if (_messageContext.value.isNotEmpty()) {
       prompt += ", based on the following conversation:\n"
       prompt += messageContextToPrompt()
     }
     if (_requestContext.value != null) {
-      prompt += ", based on the following service request:\n"
+      prompt +=
+          ", based on the following service request posted by ${if (isSeeker) senderName.value else receiverName.value}:\n"
       prompt += requestContext.value!!.title + ": " + requestContext.value!!.description
     }
     prompt +=
@@ -235,10 +240,11 @@ class ChatAssistantViewModel : ViewModel() {
   /**
    * Generate suggestions for a response message from the chat assistant
    *
+   * @param isSeeker Flag to indicate if the user is a seeker
    * @param onResponse Callback to handle the response
    */
-  fun generateSuggestions(onResponse: () -> Unit) {
-    val prompt = buildSuggestionsPrompt()
+  fun generateSuggestions(isSeeker: Boolean, onResponse: () -> Unit) {
+    val prompt = buildSuggestionsPrompt(isSeeker)
     Log.d("ChatAssistantViewModel", "model prompted")
     viewModelScope.launch {
       try {

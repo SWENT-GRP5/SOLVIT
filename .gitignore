@@ -39,5 +39,24 @@ gradlew
 secret.properties
 release-key.jks
 
+# Firebase
+.firebase/
+firebase-debug.log
+*-debug.log
+.runtimeconfig.json
+ui-debug.log
+functions/node_modules/
+functions/.env
+functions/.env.*
+functions/lib/
+functions/.npmrc
+functions/package-lock.json
+functions/.eslintcache
+functions/coverage/
+functions/.nyc_output/
+functions/dist/
+functions/tsconfig.dev.json
+.firebaserc
+
 # MacOS
 **/.DS_Store

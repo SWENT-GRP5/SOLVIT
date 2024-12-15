@@ -30,7 +30,7 @@ class PreferencesTest {
     navigationActions = mock(NavigationActions::class.java)
     seekerViewModel = SeekerProfileViewModel(userRepository)
 
-    `when`(navigationActions.currentRoute()).thenReturn(Screen.PREFERENCES)
+    `when`(navigationActions.currentRoute()).thenReturn(Screen.EDIT_PREFERENCES)
   }
 
   @Test

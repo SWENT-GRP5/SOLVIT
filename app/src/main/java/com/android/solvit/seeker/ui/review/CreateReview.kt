@@ -1,5 +1,6 @@
 package com.android.solvit.seeker.ui.review
 
+import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
 import android.view.MotionEvent
 import android.widget.Toast
@@ -18,10 +19,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.Button
 import androidx.compose.material3.CardColors
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.OutlinedCard
@@ -29,10 +30,9 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
@@ -57,14 +57,16 @@ import com.android.solvit.R
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.seeker.ui.service.ProviderItem
 import com.android.solvit.shared.model.map.Location
+import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestStatus
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.review.Review
 import com.android.solvit.shared.model.review.ReviewViewModel
-import com.android.solvit.shared.ui.authentication.GoBackButton
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
+import com.android.solvit.shared.ui.theme.Typography
+import com.android.solvit.shared.ui.utils.TopAppBarInbox
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.Marker
@@ -72,7 +74,11 @@ import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
 import java.text.SimpleDateFormat
 import java.util.Locale
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
+@SuppressLint("SourceLockedOrientationActivity")
 @Composable
 fun CreateReviewScreen(
     reviewViewModel: ReviewViewModel,
@@ -86,6 +92,7 @@ fun CreateReviewScreen(
   }
   val ratingState = remember { mutableIntStateOf(0) }
   var comment by remember { mutableStateOf("") }
+  val providerState = remember { mutableStateOf<Provider?>(null) }
 
   // Lock Orientation to Portrait
   val context = LocalContext.current
@@ -94,74 +101,88 @@ fun CreateReviewScreen(
     activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
     onDispose { activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED }
   }
-  Scaffold(topBar = { TopSection(navigationActions) }) { paddingValues ->
-    Column(
-        modifier =
-            Modifier.padding(paddingValues)
-                .fillMaxWidth()
-                .padding(16.dp)
-                .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.CenterHorizontally) {
-          RequestBox(requestState, listProviderViewModel, navigationActions)
-          RatingBar(ratingState)
-          OutlinedTextField(
-              value = comment,
-              onValueChange = { comment = it },
-              modifier = Modifier.fillMaxWidth().height(160.dp).testTag("reviewComment"),
-              label = { Text("Comment") },
-              placeholder = { Text("Leave a comment") },
-              shape = RoundedCornerShape(16.dp),
-              colors =
-                  OutlinedTextFieldDefaults.colors(
-                      unfocusedContainerColor = Color.Transparent,
-                      focusedBorderColor = colorScheme.secondary,
-                      unfocusedBorderColor = colorScheme.onSurfaceVariant))
-          Spacer(modifier = Modifier.size(16.dp))
-          Button(
-              onClick = {
-                if (requestState.value != null && requestState.value!!.providerId != null) {
-                  val review =
-                      Review(
-                          uid = reviewViewModel.getNewUid(),
-                          authorId = requestState.value!!.userId,
-                          serviceRequestId = requestState.value!!.uid,
-                          providerId = requestState.value!!.providerId!!,
-                          rating = ratingState.intValue,
-                          comment = comment)
-                  reviewViewModel.addReview(review)
-                  Toast.makeText(context, "Review Submitted", Toast.LENGTH_SHORT).show()
-                } else {
-                  Toast.makeText(context, "Error Submitting Review", Toast.LENGTH_SHORT).show()
-                }
-                navigationActions.goBack()
-              },
-              modifier = Modifier.testTag("submitReviewButton")) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    verticalAlignment = Alignment.CenterVertically) {
-                      Text("Submit Your Review")
-                      Icon(imageVector = Icons.Filled.Done, contentDescription = "Submit Review")
-                    }
-              }
-        }
+  // We fetch the
+  LaunchedEffect(navigationActions.currentRoute()) {
+    if (requestState.value != null &&
+        (requestState.value!!.status == ServiceRequestStatus.COMPLETED ||
+            requestState.value!!.status == ServiceRequestStatus.ARCHIVED)) {
+      providerState.value =
+          requestState.value!!.providerId?.let { listProviderViewModel.fetchProviderById(it) }
+    }
   }
-}
+  Scaffold(
+      topBar = {
+        TopAppBarInbox(
+            title = "Leave a Review",
+            testTagGeneral = "reviewTopBar",
+            leftButtonForm = Icons.AutoMirrored.Filled.ArrowBack,
+            leftButtonAction = { navigationActions.goBack() },
+            testTagLeft = "goBackButton")
+      }) { paddingValues ->
+        Column(
+            modifier =
+                Modifier.padding(paddingValues)
+                    .fillMaxWidth()
+                    .padding(16.dp)
+                    .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally) {
+              RequestBox(requestState, listProviderViewModel, navigationActions)
+              RatingBar(ratingState)
+              OutlinedTextField(
+                  value = comment,
+                  onValueChange = { comment = it },
+                  modifier = Modifier.fillMaxWidth().height(160.dp).testTag("reviewComment"),
+                  label = { Text("Comment") },
+                  placeholder = { Text("Leave a comment", style = Typography.bodyLarge) },
+                  shape = RoundedCornerShape(16.dp),
+                  colors =
+                      OutlinedTextFieldDefaults.colors(
+                          unfocusedContainerColor = colorScheme.background,
+                          focusedBorderColor = colorScheme.secondary,
+                          unfocusedBorderColor = colorScheme.onSurfaceVariant))
+              Spacer(modifier = Modifier.size(16.dp))
+              Button(
+                  onClick = {
+                    if (requestState.value != null && requestState.value!!.providerId != null) {
+                      // We use here so that code is executed sequentially to calculate the correct
+                      // average rating(suspend function) before updating provider
+                      CoroutineScope(Dispatchers.Main).launch {
+                        val review =
+                            Review(
+                                uid = reviewViewModel.getNewUid(),
+                                authorId = requestState.value!!.userId,
+                                serviceRequestId = requestState.value!!.uid,
+                                providerId = requestState.value!!.providerId!!,
+                                rating = ratingState.intValue,
+                                comment = comment)
+                        reviewViewModel.addReview(review)
+                        val averageRating =
+                            reviewViewModel.getAverageRatingByProvider(
+                                requestState.value!!.providerId!!)
+                        providerState.value?.let {
+                          listProviderViewModel.updateProvider(
+                              it.copy(rating = kotlin.math.ceil(averageRating).coerceIn(1.0, 5.0)))
+                        }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun TopSection(navigationActions: NavigationActions) {
-  TopAppBar(
-      title = { Text(text = "Leave a Review") },
-      modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("reviewTopBar"),
-      navigationIcon = { GoBackButton(navigationActions) },
-      colors =
-          TopAppBarColors(
-              colorScheme.background,
-              colorScheme.background,
-              colorScheme.onBackground,
-              colorScheme.onBackground,
-              colorScheme.onBackground))
+                        Toast.makeText(context, "Review Submitted", Toast.LENGTH_SHORT).show()
+                      }
+                    } else {
+                      Toast.makeText(context, "Error Submitting Review", Toast.LENGTH_SHORT).show()
+                    }
+                    navigationActions.navigateAndSetBackStack(Route.REQUESTS_OVERVIEW, listOf())
+                  },
+                  modifier = Modifier.testTag("submitReviewButton")) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        verticalAlignment = Alignment.CenterVertically) {
+                          Text("Submit Your Review", style = Typography.bodyLarge)
+                          Icon(
+                              imageVector = Icons.Filled.Done, contentDescription = "Submit Review")
+                        }
+                  }
+            }
+      }
 }
 
 @Composable
@@ -189,9 +210,12 @@ fun RequestBox(
           Text(
               text = request.title,
               modifier = Modifier.testTag("requestTitle"),
-              fontWeight = FontWeight.ExtraBold,
-              fontSize = 20.sp)
-          Text(text = request.description, modifier = Modifier.testTag("requestDescription"))
+              style =
+                  Typography.bodyLarge.copy(fontSize = 20.sp, fontWeight = FontWeight.ExtraBold))
+          Text(
+              text = request.description,
+              modifier = Modifier.testTag("requestDescription"),
+              style = Typography.bodyLarge)
           Row(
               modifier = Modifier.fillMaxWidth(),
               horizontalArrangement = Arrangement.SpaceBetween) {
@@ -199,13 +223,13 @@ fun RequestBox(
                   Text(
                       text = "${request.agreedPrice} $",
                       modifier = Modifier.testTag("requestPrice"),
-                      fontWeight = FontWeight.SemiBold)
+                      style = Typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold))
                 }
                 request.meetingDate?.let {
                   Text(
                       text = dateFormat.format(request.meetingDate.toDate()),
                       modifier = Modifier.testTag("requestDate"),
-                      fontWeight = FontWeight.SemiBold)
+                      style = Typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold))
                 }
               }
           Row(
@@ -214,7 +238,7 @@ fun RequestBox(
                 provider?.let {
                   ProviderItem(provider = it) {
                     listProviderViewModel.selectProvider(it)
-                    navigationActions.navigateTo(Route.PROVIDER_PROFILE)
+                    navigationActions.navigateTo(Route.PROVIDER_INFO)
                   }
                 }
                 request.location?.let { MapCard(it) }

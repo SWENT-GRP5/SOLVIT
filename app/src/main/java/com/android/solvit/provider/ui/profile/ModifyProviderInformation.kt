@@ -17,6 +17,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Phone
@@ -25,8 +26,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -41,13 +40,12 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.android.solvit.seeker.model.provider.ListProviderViewModel
+import com.android.solvit.provider.model.profile.ProviderViewModel
 import com.android.solvit.seeker.ui.request.LocationDropdown
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.map.Location
@@ -55,17 +53,18 @@ import com.android.solvit.shared.model.map.LocationViewModel
 import com.android.solvit.shared.model.provider.Language
 import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.service.Services
-import com.android.solvit.shared.ui.authentication.CustomOutlinedTextField
-import com.android.solvit.shared.ui.authentication.GoBackButton
-import com.android.solvit.shared.ui.authentication.ValidationRegex
 import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.android.solvit.shared.ui.theme.Typography
+import com.android.solvit.shared.ui.utils.CustomOutlinedTextField
+import com.android.solvit.shared.ui.utils.TopAppBarInbox
+import com.android.solvit.shared.ui.utils.ValidationRegex
 
 /**
  * A composable function that displays the screen for modifying a provider's profile information. It
  * includes a form to update details such as name, company name, service, phone number, location,
  * languages, and description.
  *
- * @param listProviderViewModel The ViewModel used to manage and update the list of providers.
+ * @param providerViewModel The ViewModel used to manage and update the provider profile.
  * @param authViewModel The ViewModel managing authentication and user-related data.
  * @param locationViewModel The ViewModel used to fetch and manage location suggestions.
  * @param navigationActions A set of navigation actions to handle screen transitions.
@@ -77,8 +76,7 @@ import com.android.solvit.shared.ui.navigation.NavigationActions
     "SuspiciousIndentation")
 @Composable
 fun ModifyProviderInformationScreen(
-    listProviderViewModel: ListProviderViewModel =
-        viewModel(factory = ListProviderViewModel.Factory),
+    providerViewModel: ProviderViewModel = viewModel(factory = ProviderViewModel.Factory),
     authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory),
     locationViewModel: LocationViewModel = viewModel(factory = LocationViewModel.Factory),
     navigationActions: NavigationActions
@@ -93,16 +91,19 @@ fun ModifyProviderInformationScreen(
     }
   }
 
+  val user = authViewModel.user.collectAsState()
+  val userId = user.value?.uid ?: "-1"
+  val provider by providerViewModel.userProvider.collectAsState()
+
+  LaunchedEffect(user) { providerViewModel.getProvider(userId) }
+
   Scaffold(
       topBar = {
-        TopAppBar(
-            title = {
-              Text(
-                  "Modify your profile information",
-                  modifier = Modifier.testTag("titleModifyProvider"))
-            },
-            navigationIcon = { GoBackButton(navigationActions) },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background))
+        TopAppBarInbox(
+            title = "Modify your profile information",
+            testTagTitle = "titleModifyProvider",
+            leftButtonForm = Icons.AutoMirrored.Filled.ArrowBack,
+            leftButtonAction = { navigationActions.goBack() })
       },
       content = { padding ->
         Column(
@@ -114,19 +115,14 @@ fun ModifyProviderInformationScreen(
                     .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top) {
-              val user = authViewModel.user.collectAsState()
-              val userId = user.value?.uid ?: "-1"
-              val provider =
-                  listProviderViewModel.providersList.collectAsState().value.find {
-                    it.uid == userId
-                  } ?: return@Column
-
-              ModifyInput(
-                  provider = provider,
-                  locationViewModel = locationViewModel,
-                  listProviderViewModel = listProviderViewModel,
-                  authViewModel = authViewModel,
-                  navigationActions = navigationActions)
+              provider?.let {
+                ModifyInput(
+                    provider = it,
+                    locationViewModel = locationViewModel,
+                    providerViewModel = providerViewModel,
+                    authViewModel = authViewModel,
+                    navigationActions = navigationActions)
+              }
             }
       })
 }
@@ -139,7 +135,7 @@ fun ModifyProviderInformationScreen(
  *
  * @param provider The current provider whose details are being modified.
  * @param locationViewModel The ViewModel used to fetch and manage location suggestions.
- * @param listProviderViewModel The ViewModel used to update the provider's details.
+ * @param providerViewModel The ViewModel used to update the provider's details.
  * @param authViewModel The ViewModel managing authentication and user-related data.
  * @param navigationActions A set of navigation actions to handle screen transitions.
  */
@@ -147,8 +143,7 @@ fun ModifyProviderInformationScreen(
 fun ModifyInput(
     provider: Provider,
     locationViewModel: LocationViewModel = viewModel(factory = LocationViewModel.Factory),
-    listProviderViewModel: ListProviderViewModel =
-        viewModel(factory = ListProviderViewModel.Factory),
+    providerViewModel: ProviderViewModel = viewModel(factory = ProviderViewModel.Factory),
     authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory),
     navigationActions: NavigationActions
 ) {
@@ -302,7 +297,7 @@ fun ModifyInput(
                   languages = newLanguage,
                   description = newDescription)
 
-          listProviderViewModel.updateProvider(provider = updatedProvider)
+          providerViewModel.updateProvider(provider = updatedProvider)
           authViewModel.setUserName(newName)
 
           navigationActions.goBack()
@@ -334,10 +329,10 @@ fun ModifyInput(
       colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)) {
         Text(
             "Save !",
-            color = colorScheme.onPrimary,
-            fontWeight = FontWeight.Bold,
-            fontSize = 16.sp,
-            modifier = Modifier.testTag("saveButton"))
+            modifier = Modifier.testTag("saveButton"),
+            style =
+                Typography.bodyLarge.copy(
+                    color = colorScheme.onPrimary, fontWeight = FontWeight.Bold))
       }
 
   Spacer(modifier = Modifier.height(3.dp))
@@ -347,7 +342,7 @@ fun ModifyInput(
       color = colorScheme.onSurfaceVariant,
       fontSize = 12.sp,
       textAlign = TextAlign.Center,
-      style = TextStyle(fontSize = 12.sp, lineHeight = 16.sp),
+      style = Typography.bodySmall.copy(fontSize = 12.sp, lineHeight = 16.sp),
       modifier = Modifier.padding(top = 4.dp).fillMaxWidth())
 }
 
@@ -461,7 +456,7 @@ fun LanguageDropdownMenu(
                 val isSelected = language in selectedLanguages
 
                 DropdownMenuItem(
-                    text = { Text(language.name) },
+                    text = { Text(language.name, style = Typography.bodyLarge) },
                     onClick = {},
                     leadingIcon = {
                       Checkbox(
