@@ -212,9 +212,7 @@ fun SeekerUI(
 
   NavHost(navController = navController, startDestination = Route.SEEKER_OVERVIEW) {
     // Overview
-    composable(Route.SEEKER_OVERVIEW) {
-      ServicesScreen(navigationActions, seekerProfileViewModel, listProviderViewModel)
-    }
+    composable(Route.SEEKER_OVERVIEW) { ServicesScreen(navigationActions, listProviderViewModel) }
 
     // Providers
     composable(Route.PROVIDERS_LIST) {
@@ -276,7 +274,8 @@ fun SeekerUI(
         SeekerProfileScreen(seekerProfileViewModel, navigationActions, authViewModel)
       }
       composable(Screen.EDIT_SEEKER_PROFILE) {
-        EditSeekerProfileScreen(seekerProfileViewModel, navigationActions, authViewModel)
+        EditSeekerProfileScreen(
+            seekerProfileViewModel, navigationActions, locationViewModel, authViewModel)
       }
       composable(Screen.EDIT_PREFERENCES) {
         EditPreferences(user!!.uid, seekerProfileViewModel, navigationActions)

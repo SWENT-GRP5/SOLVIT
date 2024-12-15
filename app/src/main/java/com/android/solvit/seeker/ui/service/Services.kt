@@ -28,7 +28,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DockedSearchBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -54,13 +53,13 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.android.solvit.R
-import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.seeker.model.service.SearchServicesViewModel
 import com.android.solvit.seeker.ui.navigation.BottomNavigationMenu
@@ -69,7 +68,6 @@ import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_SEEKER
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
-import com.android.solvit.shared.ui.theme.DarkBlue
 import com.android.solvit.shared.ui.theme.LightBlue
 import com.android.solvit.shared.ui.theme.LightOrange
 import com.android.solvit.shared.ui.theme.LightRed
@@ -79,7 +77,6 @@ import com.android.solvit.shared.ui.theme.OnPrimary
 @Composable
 fun ServicesScreen(
     navigationActions: NavigationActions,
-    seekerProfileViewModel: SeekerProfileViewModel,
     listProviderViewModel: ListProviderViewModel
 ) {
 
@@ -108,10 +105,8 @@ fun ServicesScreen(
             LIST_TOP_LEVEL_DESTINATION_SEEKER,
             Route.SEEKER_OVERVIEW)
       },
-      topBar = {
-        TopSection(
-            searchViewModel, seekerProfileViewModel, listProviderViewModel, navigationActions)
-      }) { innerPadding ->
+      topBar = { TopSection(searchViewModel, listProviderViewModel, navigationActions) }) {
+          innerPadding ->
         Column(
             modifier = Modifier.fillMaxSize().padding(innerPadding),
         ) {
@@ -131,15 +126,12 @@ fun ServicesScreen(
 @Composable
 fun TopSection(
     searchViewModel: SearchServicesViewModel,
-    seekerProfileViewModel: SeekerProfileViewModel,
     listProviderViewModel: ListProviderViewModel,
     navigationActions: NavigationActions
 ) {
   val searchText by searchViewModel.searchText.collectAsState()
   val searchResults by searchViewModel.servicesList.collectAsState()
   val isSearching by searchViewModel.isSearching.collectAsState()
-  val userProfile by seekerProfileViewModel.seekerProfile.collectAsState()
-  val address = "EPFL - École Polytechnique Fédérale de Lausanne"
 
   Box(modifier = Modifier.fillMaxWidth().testTag("servicesScreenTopSection")) {
     // Background Image
@@ -162,38 +154,27 @@ fun TopSection(
                 .clip(CircleShape)
                 .clickable { navigationActions.navigateTo(Route.PROFILE) }
                 .testTag("servicesScreenProfileImage"))
-        Column(horizontalAlignment = Alignment.Start) {
-          // User's Location
-          Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                imageVector = Icons.Outlined.LocationOn,
-                contentDescription = "Location Icon",
-                tint = OnPrimary,
-                modifier =
-                    Modifier.size(16.dp).padding(end = 4.dp).testTag("servicesScreenLocationIcon"))
 
-            Text(
-                text =
-                    if (address.length > 27) { // Replace with `userProfile.address`
-                      address.take(27) + "..."
-                    } else {
-                      address
-                    },
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium,
-                color = OnPrimary,
-                modifier = Modifier.testTag("servicesScreenCurrentLocation"))
-          }
-
-          // User's Name
+        Row(
+            modifier = Modifier.testTag("SloganIcon"),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
           Text(
-              text = userProfile.name,
-              modifier = Modifier.testTag("servicesScreenUserName"),
-              fontSize = 20.sp,
-              fontWeight = FontWeight.Bold,
-              color = DarkBlue // Dark blue for emphasis
-              )
+              text = "Solv",
+              style =
+                  TextStyle(
+                      fontSize = 25.sp,
+                      fontWeight = FontWeight.Bold,
+                      color = colorScheme.onBackground))
+          Text(
+              text = "It",
+              style =
+                  TextStyle(
+                      fontSize = 25.sp,
+                      fontWeight = FontWeight.Bold,
+                      color = colorScheme.secondary))
         }
+
         IconButton(onClick = { toast.show() }, modifier = Modifier.testTag("servicesScreenMenu")) {
           Icon(imageVector = Icons.Default.Menu, contentDescription = null)
         }

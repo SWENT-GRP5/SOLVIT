@@ -25,7 +25,7 @@ class SeekerProfileViewModel(
               username = "", // Hardcoded username
               email = "", // Hardcoded Email
               phone = "", // Hardcoded Phone Number
-              address = "" // Hardcoded Address
+              address = Location(0.0, 0.0, "") // Hardcoded Address
               ))
   val seekerProfile: StateFlow<SeekerProfile> = _seekerProfile
 

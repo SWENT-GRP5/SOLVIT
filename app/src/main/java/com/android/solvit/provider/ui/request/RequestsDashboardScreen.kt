@@ -501,6 +501,18 @@ fun ArchivedJobsSection(
   )
 }
 
+@Composable
+fun OnLearnMoreButton(onLearnMore: (() -> Unit)?, request: ServiceRequest) {
+  onLearnMore?.let {
+    Button(
+        onClick = it,
+        colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
+        modifier = Modifier.wrapContentWidth().testTag("LearnMoreButton_${request.uid}")) {
+          Text("Learn More", color = colorScheme.onPrimary)
+        }
+  }
+}
+
 /**
  * JobItem represents a job item in a list. The display changes based on job status: Pending,
  * Accepted, Scheduled, Completed, Canceled, or Archived.
@@ -544,20 +556,9 @@ fun JobItem(
               horizontalArrangement = Arrangement.SpaceBetween, // Distribute space between children
               verticalAlignment = Alignment.CenterVertically) {
                 // See More Button
-                onLearnMore?.let {
-                  Button(
-                      onClick = it,
-                      colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
-                      modifier =
-                          Modifier.wrapContentWidth().testTag("LearnMoreButton_${request.uid}")) {
-                        Text("Learn More", color = colorScheme.onPrimary)
-                      }
-                }
-
-                Spacer(modifier = Modifier.weight(1f)) // Fills the space in between the two buttons
-
-                // Navigate Button for Scheduled Jobs
                 if (status == ServiceRequestStatus.SCHEDULED) {
+                  OnLearnMoreButton(onLearnMore, request)
+                  Spacer(modifier = Modifier.weight(1f))
                   onNavigateToJob?.let {
                     Button(
                         onClick = it,
@@ -566,20 +567,33 @@ fun JobItem(
                           Text("Navigate", color = colorScheme.onPrimary)
                         }
                   }
+                } else {
+                  Text(
+                      text = request.title,
+                      style = typography.titleMedium,
+                      color = colorScheme.onBackground,
+                      maxLines = 1,
+                      overflow = TextOverflow.Ellipsis,
+                      modifier = Modifier.weight(1f))
+                  Spacer(modifier = Modifier.weight(1f))
+                  OnLearnMoreButton(onLearnMore, request)
                 }
               }
+          if (status == ServiceRequestStatus.SCHEDULED)
           // Job Title
           Text(
-              text = request.title,
-              style = typography.titleMedium,
-              color = colorScheme.onBackground,
-              maxLines = 1,
-              overflow = TextOverflow.Ellipsis)
+                  text = request.title,
+                  style = typography.titleMedium,
+                  color = colorScheme.onBackground,
+                  maxLines = 1,
+                  overflow = TextOverflow.Ellipsis)
           // Job  Description
           Text(
               request.description,
               style = typography.bodyMedium,
               color = colorScheme.onSurface,
+              maxLines = 3,
+              overflow = TextOverflow.Ellipsis,
               textAlign = TextAlign.Start)
           Spacer(modifier = Modifier.height(8.dp))
 
@@ -607,7 +621,12 @@ fun JobItem(
                 contentDescription = "Location",
                 tint = colorScheme.onSurfaceVariant)
             request.location?.let {
-              Text(it.name, style = typography.bodySmall, color = colorScheme.onSurfaceVariant)
+              Text(
+                  it.name,
+                  style = typography.bodySmall,
+                  color = colorScheme.onSurfaceVariant,
+                  maxLines = 1,
+                  overflow = TextOverflow.Ellipsis)
             }
           }
           Spacer(modifier = Modifier.height(8.dp))

@@ -49,7 +49,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -95,8 +94,6 @@ import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.map.RequestLocationPermission
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
-import com.android.solvit.shared.ui.theme.GradientBlue
-import com.android.solvit.shared.ui.theme.GradientGreen
 import com.android.solvit.shared.ui.theme.OnSurfaceVariant
 import com.android.solvit.shared.ui.theme.SurfaceVariant
 import com.android.solvit.shared.ui.theme.Yellow
@@ -468,68 +465,77 @@ fun ListProviders(
  */
 @Composable
 fun PriceFilter(listProviderViewModel: ListProviderViewModel) {
-  var minPrice by remember { mutableStateOf("min") }
-  var maxPrice by remember { mutableStateOf("max") }
-  var sliderPosition by remember { mutableStateOf(0f..100f) }
+  var minPrice by remember { mutableStateOf("") }
+  var maxPrice by remember { mutableStateOf("") }
 
   Column {
     Row(
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
-          BasicTextField(
-              value = minPrice,
-              textStyle = TextStyle(color = colorScheme.onSurfaceVariant),
-              onValueChange = {
-                minPrice = it
-                val minPriceValue = it.toDoubleOrNull()
-                if (minPriceValue != null) {
-                  listProviderViewModel.filterProviders(
-                      filter = { provider -> provider.price >= minPriceValue }, "Price")
-                } else {
-                  listProviderViewModel.filterProviders(
-                      filter = { provider -> provider.price >= 0 }, "Price")
-                }
-              },
-              modifier =
-                  Modifier.weight(1f)
-                      .background(color = colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
-                      .padding(16.dp)
-                      .testTag("minPrice"),
-              singleLine = true,
-              keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
-
-          BasicTextField(
-              value = maxPrice,
-              textStyle = TextStyle(color = colorScheme.onSurfaceVariant),
-              onValueChange = {
-                maxPrice = it
-                val maxPriceValue = it.toDoubleOrNull()
-                val minPriceValue = minPrice.toDoubleOrNull()
-                if (maxPriceValue != null &&
-                    minPriceValue != null &&
-                    minPriceValue < maxPriceValue) {
-                  listProviderViewModel.filterProviders(
-                      { provider -> maxPriceValue >= provider.price }, "Price")
-                } else {
-                  listProviderViewModel.filterProviders(
-                      filter = { provider -> provider.price >= 0 }, "Price")
-                }
-              },
+          Box(
               modifier =
                   Modifier.weight(1f)
                       .background(colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
-                      .padding(16.dp)
-                      .testTag("maxPrice"),
-              singleLine = true,
-              keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
-        }
+                      .padding(16.dp)) {
+                if (minPrice.isEmpty()) {
+                  Text(
+                      text = "Min Price",
+                      style = TextStyle(color = colorScheme.onSurfaceVariant.copy(alpha = 0.5f)))
+                }
 
-    Spacer(Modifier.height(8.dp))
-    RangeSlider(
-        value = sliderPosition,
-        onValueChange = { sliderPosition = it },
-        valueRange = 0f..100f,
-        modifier = Modifier.fillMaxWidth())
+                BasicTextField(
+                    value = minPrice,
+                    textStyle = TextStyle(color = colorScheme.onSurfaceVariant),
+                    onValueChange = {
+                      minPrice = it
+                      val minPriceValue = it.toDoubleOrNull()
+                      if (minPriceValue != null) {
+                        listProviderViewModel.filterProviders(
+                            filter = { provider -> provider.price >= minPriceValue }, "Price")
+                      } else {
+                        listProviderViewModel.filterProviders(
+                            filter = { provider -> provider.price >= 0 }, "Price")
+                      }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
+              }
+
+          // Max Price Text Field
+          Box(
+              modifier =
+                  Modifier.weight(1f)
+                      .background(colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
+                      .padding(16.dp)) {
+                if (maxPrice.isEmpty()) {
+                  Text(
+                      text = "Max Price",
+                      style = TextStyle(color = colorScheme.onSurfaceVariant.copy(alpha = 0.5f)))
+                }
+
+                BasicTextField(
+                    value = maxPrice,
+                    textStyle = TextStyle(color = colorScheme.onSurfaceVariant),
+                    onValueChange = {
+                      maxPrice = it
+                      val maxPriceValue = it.toDoubleOrNull()
+                      val minPriceValue = minPrice.toDoubleOrNull()
+                      if (maxPriceValue != null &&
+                          minPriceValue != null &&
+                          minPriceValue < maxPriceValue) {
+                        listProviderViewModel.filterProviders(
+                            filter = { provider -> maxPriceValue >= provider.price }, "Price")
+                      } else {
+                        listProviderViewModel.filterProviders(
+                            filter = { provider -> provider.price >= 0 }, "Price")
+                      }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
+              }
+        }
   }
 }
 
@@ -747,7 +753,9 @@ fun ApplyButton(listProviderViewModel: ListProviderViewModel, display: () -> Uni
               .width(249.dp)
               .height(56.dp)
               .background(
-                  brush = Brush.horizontalGradient(colors = listOf(GradientBlue, GradientGreen)),
+                  brush =
+                      Brush.horizontalGradient(
+                          colors = listOf(colorScheme.primary, colorScheme.secondary)),
                   shape = RoundedCornerShape(50))
               .clickable {
                 listProviderViewModel.applyFilters()
@@ -755,17 +763,16 @@ fun ApplyButton(listProviderViewModel: ListProviderViewModel, display: () -> Uni
               },
   ) {
     Column(
-        horizontalAlignment = Alignment.CenterHorizontally, // Center horizontally
-        verticalArrangement = Arrangement.Center, // Center vertically
-        modifier = Modifier.fillMaxSize() // Ensures the content fills the button
-        ) {
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier.fillMaxSize()) {
           Text(
-              text = "Apply", // TODO()
+              text = "Apply",
               fontWeight = FontWeight.Bold,
               fontSize = 14.sp,
               color = colorScheme.onPrimary)
           Text(
-              text = "${filteredList.size} providers", // TODO()
+              text = "${filteredList.size} providers",
               fontWeight = FontWeight.Bold,
               fontSize = 14.sp,
               color = colorScheme.onPrimary)
@@ -1077,7 +1084,7 @@ fun SelectProviderScreen(
 
   val selectedService by listProviderViewModel.selectedService.collectAsState()
   listProviderViewModel.getProviders()
-  val providers by listProviderViewModel.providersListFiltered.collectAsState()
+  val providers by listProviderViewModel.providersList.collectAsState()
 
   var displayFilters by remember { mutableStateOf(false) }
   var displayByLocation by remember { mutableStateOf(false) }

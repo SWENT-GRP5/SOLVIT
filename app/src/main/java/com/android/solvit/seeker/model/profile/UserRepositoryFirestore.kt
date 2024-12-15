@@ -265,7 +265,10 @@ open class UserRepositoryFirestore(private val db: FirebaseFirestore) : UserRepo
       val imageUrl = document.getString("imageUrl") ?: ""
       val email = document.getString("email") ?: return null
       val phone = document.getString("phone") ?: return null
-      val address = document.getString("address") ?: return null
+      val address = document.get("address") as? Map<*, *>
+      val latitude = address?.get("latitude") as? Double ?: return null
+      val longitude = address?.get("longitude") as? Double ?: return null
+      val nameLoc = address?.get("name") as? String ?: return null
       val preferences = document.get("preferences") as? List<String> ?: emptyList()
       Log.e(
           "DocumentToUser",
@@ -276,7 +279,7 @@ open class UserRepositoryFirestore(private val db: FirebaseFirestore) : UserRepo
             imageUrl = imageUrl,
             email = email,
             phone = phone,
-            address = address,
+            address = Location(latitude, longitude, nameLoc),
             preferences = preferences)}")
       SeekerProfile(
           uid = uid,
@@ -285,7 +288,7 @@ open class UserRepositoryFirestore(private val db: FirebaseFirestore) : UserRepo
           imageUrl = imageUrl,
           email = email,
           phone = phone,
-          address = address,
+          address = Location(latitude, longitude, nameLoc),
           preferences = preferences)
     } catch (e: Exception) {
       Log.e("RepositoryFirestore", "Error converting document to UserProfile", e)

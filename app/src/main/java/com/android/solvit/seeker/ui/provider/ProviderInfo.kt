@@ -82,6 +82,7 @@ import com.android.solvit.shared.model.review.ReviewViewModel
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
+import com.android.solvit.shared.ui.theme.SecondaryPackage
 
 /**
  * Main screen to display detailed information about a provider.
@@ -190,7 +191,7 @@ fun PackageCard(
       elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
       colors =
           CardDefaults.cardColors(
-              containerColor = if (!selectedIndex) colorScheme.surface else colorScheme.secondary,
+              containerColor = if (!selectedIndex) colorScheme.surface else SecondaryPackage,
           )) {
         Box(modifier = Modifier.fillMaxSize()) {
           Column(

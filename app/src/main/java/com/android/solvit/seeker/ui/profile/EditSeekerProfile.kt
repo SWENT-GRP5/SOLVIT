@@ -1,23 +1,23 @@
 package com.android.solvit.seeker.ui.profile
 
 import android.content.pm.ActivityInfo
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.DropdownMenuItem
@@ -27,12 +27,13 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -44,12 +45,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -58,16 +58,23 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.solvit.R
-import com.android.solvit.seeker.model.profile.SeekerProfile
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
+import com.android.solvit.seeker.ui.request.LocationDropdown
 import com.android.solvit.shared.model.authentication.AuthViewModel
+import com.android.solvit.shared.model.map.Location
+import com.android.solvit.shared.model.map.LocationViewModel
+import com.android.solvit.shared.model.utils.EditProfileHeader
+import com.android.solvit.shared.model.utils.SaveButton
 import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.android.solvit.shared.ui.utils.CustomOutlinedTextField
+import com.android.solvit.shared.ui.utils.ValidationRegex
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditSeekerProfileScreen(
     viewModel: SeekerProfileViewModel = viewModel(factory = SeekerProfileViewModel.Factory),
     navigationActions: NavigationActions,
+    locationViewModel: LocationViewModel = viewModel(factory = LocationViewModel.Factory),
     authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory)
 ) {
   // Lock Orientation to Portrait
@@ -75,8 +82,16 @@ fun EditSeekerProfileScreen(
   DisposableEffect(Unit) {
     val activity = context as? ComponentActivity
     activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-    onDispose { activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED }
+    onDispose {
+      locationViewModel.clear()
+      activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+    }
   }
+
+  val locationQuery by locationViewModel.query.collectAsState()
+  val locationSuggestions by
+      locationViewModel.locationSuggestions.collectAsState(initial = emptyList<Location?>())
+  var selectedLocation by remember { mutableStateOf<Location?>(null) }
 
   val configuration = LocalConfiguration.current
   val screenWidth = configuration.screenWidthDp.dp
@@ -88,15 +103,27 @@ fun EditSeekerProfileScreen(
   val user by authViewModel.user.collectAsState()
   val userProfile by viewModel.seekerProfile.collectAsState()
   user?.let { viewModel.getUserProfile(it.uid) }
+  var fullName by remember { mutableStateOf(userProfile.name) }
 
-  var fullName by remember { mutableStateOf("") }
-  var username by remember { mutableStateOf("") }
-  var email by remember { mutableStateOf("") }
-  var phone by remember { mutableStateOf("") }
-  var address by remember { mutableStateOf("") }
+  var username by remember { mutableStateOf(userProfile.username) }
+  var email by remember { mutableStateOf(userProfile.email) }
+
+  var phone by remember { mutableStateOf(userProfile.phone) }
+  var address by remember { mutableStateOf<Location?>(userProfile.address) }
+  var imageUrl by remember { mutableStateOf(userProfile.imageUrl) }
+
+  var showDropdown by remember { mutableStateOf(false) }
+
+  val okNewName = ValidationRegex.NAME_REGEX.matches(fullName)
+  val okNewLocation = address != null
+  val okNewPhoneNumber = ValidationRegex.PHONE_REGEX.matches(phone)
+  val isUserNameOk = username.isNotBlank() && username.length > 2
+
+  val allIsGood = okNewName && okNewPhoneNumber && okNewLocation && isUserNameOk
 
   LaunchedEffect(userProfile) {
     fullName = userProfile.name
+    imageUrl = userProfile.imageUrl
     username = userProfile.username
     email = userProfile.email
     phone = userProfile.phone
@@ -104,18 +131,15 @@ fun EditSeekerProfileScreen(
   }
 
   Scaffold(
-      backgroundColor = MaterialTheme.colorScheme.background,
+      backgroundColor = colorScheme.background,
       topBar = {
         TopAppBar(
-            backgroundColor = MaterialTheme.colorScheme.background,
+            backgroundColor = colorScheme.background,
             title = {
               Box(
                   modifier = Modifier.fillMaxWidth().testTag("goBackButton"),
                   contentAlignment = Alignment.Center) {
-                    Text(
-                        "Bio-data",
-                        color = MaterialTheme.colorScheme.onBackground,
-                        fontWeight = FontWeight.Bold)
+                    Text("Bio-data", color = colorScheme.onBackground, fontWeight = FontWeight.Bold)
                   }
             },
             navigationIcon = {
@@ -123,7 +147,7 @@ fun EditSeekerProfileScreen(
                 Icon(
                     Icons.Default.ArrowBack,
                     contentDescription = "Back",
-                    tint = MaterialTheme.colorScheme.onBackground)
+                    tint = colorScheme.onBackground)
               }
             },
             actions = { Box(modifier = Modifier.size(48.dp)) })
@@ -131,123 +155,135 @@ fun EditSeekerProfileScreen(
         Column(
             modifier =
                 Modifier.fillMaxWidth()
-                    .padding(padding)
+                    .padding(horizontalPadding)
                     .padding(top = 32.dp)
+                    .fillMaxHeight()
                     .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally) {
-              // Profile Picture
-              Image(
-                  painter = painterResource(id = R.drawable.empty_profile_img),
-                  contentDescription = "Profile Picture",
-                  modifier =
-                      Modifier.size(if (screenWidth < 360.dp) 60.dp else 74.dp)
-                          .clip(CircleShape)
-                          .border(2.dp, MaterialTheme.colorScheme.primaryContainer, CircleShape))
-
-              Spacer(modifier = Modifier.height(verticalSpacing))
-
-              // Full Name Text
-              Text(
-                  text = fullName,
-                  fontWeight = FontWeight.Bold,
-                  fontSize = if (screenWidth < 360.dp) 18.sp else 20.sp,
-                  color = MaterialTheme.colorScheme.onBackground,
-                  textAlign = TextAlign.Center,
-                  modifier = Modifier.padding(top = 8.dp))
-
-              // Email Text
-              Text(
-                  text = email,
-                  fontSize = if (screenWidth < 360.dp) 12.sp else 14.sp,
-                  color = MaterialTheme.colorScheme.onSurfaceVariant,
-                  textAlign = TextAlign.Center,
-                  modifier = Modifier.padding(top = 4.dp))
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceEvenly) {
+              EditProfileHeader(
+                  imageUrl = imageUrl,
+                  fullName = fullName,
+                  email = email,
+                  screenWidth = screenWidth,
+                  verticalSpacing = verticalSpacing)
 
               Spacer(modifier = Modifier.height(verticalSpacing))
 
               // Full Name Input
-              OutlinedTextField(
+              CustomOutlinedTextField(
                   value = fullName,
                   onValueChange = { fullName = it },
-                  label = { Text("Enter your full name") },
-                  modifier =
-                      Modifier.fillMaxWidth()
-                          .testTag("profileName")
-                          .padding(horizontal = horizontalPadding))
+                  label = "Name",
+                  placeholder = "Enter your new full name",
+                  isValueOk = okNewName,
+                  leadingIcon = Icons.Default.AccountCircle,
+                  leadingIconDescription = "Name Icon",
+                  testTag = "profileName",
+                  errorMessage = "Your name must have at least 2 characters and less than 50",
+                  errorTestTag = "nameErrorMessage",
+                  maxLines = 2)
+              /*OutlinedTextField(
+              value = fullName,
+              onValueChange = { fullName = it },
+              label = { Text("Enter your full name") },
+              modifier =
+                  Modifier.fillMaxWidth()
+                      .testTag("profileName")
+                      .padding(horizontal = horizontalPadding))*/
 
               Spacer(modifier = Modifier.height(verticalSpacing))
 
-              // Username Input
-              OutlinedTextField(
+              CustomOutlinedTextField(
                   value = username,
                   onValueChange = { username = it },
-                  label = { Text("Enter your username") },
-                  modifier =
-                      Modifier.fillMaxWidth()
-                          .testTag("profileUsername")
-                          .padding(horizontal = horizontalPadding))
+                  label = "Username",
+                  placeholder = "Enter your new username",
+                  isValueOk = isUserNameOk,
+                  leadingIcon = Icons.Default.Phone,
+                  leadingIconDescription = "Phone Number Icon",
+                  testTag = "profileUsername",
+                  errorMessage = "Enter a valid username",
+                  errorTestTag = "newPhoneNumberErrorMessage",
+                  maxLines = 1)
+
+              /*
+              // Username Input
+                OutlinedTextField(
+                    value = username,
+                    onValueChange = { username = it },
+                    label = { Text("Enter your username") },
+                    modifier =
+                        Modifier.fillMaxWidth()
+                            .testTag("profileUsername")
+                            .padding(horizontal = horizontalPadding))*/
 
               Spacer(modifier = Modifier.height(verticalSpacing))
 
-              // Email Input
-              OutlinedTextField(
-                  value = email,
-                  onValueChange = { email = it },
-                  label = { Text("Enter your email") },
-                  modifier =
-                      Modifier.fillMaxWidth()
-                          .testTag("profileEmail")
-                          .padding(horizontal = horizontalPadding))
-
-              Spacer(modifier = Modifier.height(verticalSpacing))
-
-              // Country Dropdown and Phone Number
-              CountryDropdownMenu(screenWidth)
-
-              Spacer(modifier = Modifier.height(verticalSpacing))
-
+              CustomOutlinedTextField(
+                  value = phone,
+                  onValueChange = { phone = it },
+                  label = "Phone Number",
+                  placeholder = "Enter your phone number",
+                  isValueOk = okNewPhoneNumber,
+                  errorMessage = "Your phone number must be at least 6 digits",
+                  leadingIcon = Icons.Default.Phone,
+                  leadingIconDescription = "Phone Icon",
+                  testTag = "phoneNumberInput",
+                  errorTestTag = "phoneNumberErrorSeekerRegistration",
+                  keyboardType = KeyboardType.Number)
               // Address Input
-              OutlinedTextField(
-                  value = address,
-                  onValueChange = { address = it },
-                  label = { Text("Enter your address") },
-                  modifier =
-                      Modifier.fillMaxWidth()
-                          .testTag("profileAddress")
-                          .padding(horizontal = horizontalPadding))
-
               Spacer(modifier = Modifier.height(verticalSpacing))
+              // TODO testTag profileAdress
+              LocationDropdown(
+                  locationQuery = address!!.name,
+                  onLocationQueryChange = { locationViewModel.setQuery(it) },
+                  showDropdownLocation = showDropdown,
+                  onShowDropdownLocationChange = { showDropdown = it },
+                  locationSuggestions = locationSuggestions.filterNotNull(),
+                  userLocations = user?.locations ?: emptyList(),
+                  onLocationSelected = {
+                    selectedLocation = it
+                    authViewModel.addUserLocation(it, {}, {})
+                  },
+                  requestLocation = null,
+                  backgroundColor = colorScheme.background,
+                  isValueOk = okNewLocation)
 
-              // Save Button
-              Button(
+              Spacer(modifier = Modifier.weight(1f))
+
+              SaveButton(
                   onClick = {
-                    userProfile.let { profile ->
-                      viewModel.updateUserProfile(
-                          SeekerProfile(
+                    if (allIsGood) {
+                      val updatedUser =
+                          userProfile.copy(
                               uid = userProfile.uid,
                               name = fullName,
                               username = username,
                               email = email,
                               phone = phone,
-                              address = address))
+                              address = selectedLocation ?: userProfile.address)
+                      viewModel.updateUserProfile(updatedUser)
                       authViewModel.setUserName(username)
+                      navigationActions.goBack()
+                    } else {
+                      Toast.makeText(
+                              context,
+                              "Please fill in all the correct information before modify it",
+                              Toast.LENGTH_SHORT)
+                          .show()
                     }
-                    navigationActions.goBack()
                   },
-                  shape = RoundedCornerShape(25.dp),
-                  modifier =
-                      Modifier.fillMaxWidth()
-                          .height(60.dp)
-                          .padding(horizontal = horizontalPadding)
-                          .background(
-                              brush =
-                                  Brush.horizontalGradient(
-                                      listOf(
-                                          MaterialTheme.colorScheme.secondary,
-                                          MaterialTheme.colorScheme.secondary)),
-                              shape = RoundedCornerShape(25.dp))) {
-                    Text("Update Profile", color = MaterialTheme.colorScheme.onPrimary)
-                  }
+                  allIsGood = allIsGood)
+
+              androidx.compose.material3.Text(
+                  text =
+                      "Don't forget to save your changes by clicking the button before leaving the page!",
+                  color = colorScheme.onSurfaceVariant,
+                  fontSize = 12.sp,
+                  textAlign = TextAlign.Center,
+                  style = TextStyle(fontSize = 12.sp, lineHeight = 16.sp),
+                  modifier = Modifier.padding(top = 4.dp).fillMaxWidth())
             }
       }
 }

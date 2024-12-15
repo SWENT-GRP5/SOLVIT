@@ -127,7 +127,7 @@ fun EditPreferences(
                   Modifier.align(Alignment.BottomCenter) // Correct alignment here
                       .height(60.dp)
                       .testTag("updatePreferencesButton"),
-              colors = ButtonDefaults.buttonColors(colorScheme.secondary)) {
+              colors = ButtonDefaults.buttonColors(colorScheme.primary)) {
                 Text(text = "Update Preferences")
               }
         }

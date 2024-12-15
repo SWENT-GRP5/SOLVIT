@@ -103,6 +103,7 @@ import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.navigation.Screen
 import com.android.solvit.shared.ui.theme.Black
+import com.android.solvit.shared.ui.theme.Carpenter
 import com.android.solvit.shared.ui.utils.getReceiverImageUrl
 import com.android.solvit.shared.ui.utils.getReceiverName
 import kotlinx.coroutines.delay
@@ -263,9 +264,7 @@ fun AiSolverWelcomeScreen(
                                     SpanStyle(
                                         brush =
                                             Brush.linearGradient(
-                                                colors =
-                                                    listOf(
-                                                        colorScheme.primary, colorScheme.secondary),
+                                                colors = listOf(colorScheme.primary, Carpenter),
                                                 start = Offset.Zero,
                                                 end = Offset.Infinite),
                                         fontSize = screenHeight.times(0.04f).value.sp)) {
@@ -337,7 +336,7 @@ fun AiSolverButton(screenHeight: Dp = 700.dp, title: String, onClick: () -> Unit
                   elevation = 8.dp,
                   shape = RoundedCornerShape(16.dp),
                   ambientColor = colorScheme.primary,
-                  spotColor = colorScheme.secondary)) {
+                  spotColor = Carpenter)) {
         // Gradient background
         Box(
             modifier =
@@ -345,7 +344,7 @@ fun AiSolverButton(screenHeight: Dp = 700.dp, title: String, onClick: () -> Unit
                     .background(
                         brush =
                             Brush.horizontalGradient(
-                                colors = listOf(colorScheme.primary, colorScheme.secondary)),
+                                colors = listOf(colorScheme.primary, Carpenter)),
                         shape = RoundedCornerShape(50)),
             contentAlignment = Alignment.Center) {
               // Button text
@@ -676,7 +675,7 @@ fun SuggestionToCreateRequest(navigationActions: NavigationActions, onClick: () 
               text = "Continue chatting",
               fontSize = 18.sp,
               textDecoration = TextDecoration.Underline,
-              color = colorScheme.secondary,
+              color = Carpenter,
               modifier = Modifier.clickable { onClick() }.testTag("continueChattingButton"))
         }
   }
