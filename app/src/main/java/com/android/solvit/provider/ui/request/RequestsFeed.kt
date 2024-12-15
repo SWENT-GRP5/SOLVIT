@@ -1,6 +1,5 @@
 package com.android.solvit.provider.ui.request
 
-import android.widget.Toast
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -24,7 +23,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.BasicAlertDialog
@@ -217,42 +215,37 @@ fun RequestsTopBar(
   Row(
       modifier =
           Modifier.fillMaxWidth().background(colorScheme.background).testTag("RequestsTopBar"),
-      horizontalArrangement = Arrangement.SpaceBetween,
       verticalAlignment = Alignment.CenterVertically) {
+        Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+          Row(
+              modifier = Modifier.testTag("SloganIcon"),
+              verticalAlignment = Alignment.CenterVertically,
+          ) {
+            Text(
+                text = "Solv",
+                style =
+                    TextStyle(
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = colorScheme.onSurface))
+            Text(
+                text = "It",
+                style =
+                    TextStyle(
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = colorScheme.secondary))
+          }
+        }
+
         IconButton(
-            modifier = Modifier.testTag("MenuOption"),
-            onClick = {
-              Toast.makeText(context, "Not Yet Implemented", Toast.LENGTH_LONG).show()
-            }) {
-              Icon(imageVector = Icons.Default.Menu, contentDescription = "Menu Option")
+            modifier = Modifier.padding(end = 8.dp),
+            onClick = { navigationActions.navigateTo(Route.NOTIFICATIONS) }) {
+              Icon(
+                  imageVector = Icons.Default.Notifications,
+                  tint = if (hasUnreadNotifications) Color.Red else colorScheme.onSurface,
+                  contentDescription = "Notifications")
             }
-
-        Row(
-            modifier = Modifier.testTag("SloganIcon"),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-          Text(
-              text = "Solv",
-              style =
-                  TextStyle(
-                      fontSize = 20.sp,
-                      fontWeight = FontWeight.Bold,
-                      color = colorScheme.onSurface))
-          Text(
-              text = "It",
-              style =
-                  TextStyle(
-                      fontSize = 20.sp,
-                      fontWeight = FontWeight.Bold,
-                      color = colorScheme.secondary))
-        }
-
-        IconButton(onClick = { navigationActions.navigateTo(Route.NOTIFICATIONS) }) {
-          Icon(
-              imageVector = Icons.Default.Notifications,
-              tint = if (hasUnreadNotifications) Color.Red else colorScheme.onSurface,
-              contentDescription = "Notifications")
-        }
       }
 }
 
