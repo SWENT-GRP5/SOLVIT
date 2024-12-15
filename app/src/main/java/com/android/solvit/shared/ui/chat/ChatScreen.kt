@@ -28,6 +28,8 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -571,82 +573,92 @@ fun SentMessage(
         }
 
         BoxWithConstraints(
-            modifier =
-                Modifier.fillMaxWidth(fraction = 0.8f) // Limit bubble width to 80% of the screen
-                    .clip(
-                        RoundedCornerShape(
-                            topStart = if (isSentByUser) 16.dp else 0.dp,
-                            topEnd = if (isSentByUser) 0.dp else 16.dp,
-                            bottomStart = 16.dp,
-                            bottomEnd = 16.dp))
-                    .background(
-                        if (isSentByUser) colorScheme.primary else colorScheme.surfaceVariant)
-                    .padding(horizontal = 16.dp, vertical = 12.dp)) {
-              constraints
+            modifier = Modifier.padding(horizontal = 8.dp) // Add padding around the bubble
+            ) {
+              val maxBubbleWidth =
+                  maxWidth * 0.8f // Dynamically calculate 80% of the available width
+              Box(
+                  modifier =
+                      Modifier.widthIn(max = maxBubbleWidth) // Constrain bubble width
+                          .wrapContentWidth() // Wrap content width to ensure text wraps
+                          .clip(
+                              RoundedCornerShape(
+                                  topStart = if (isSentByUser) 16.dp else 0.dp,
+                                  topEnd = if (isSentByUser) 0.dp else 16.dp,
+                                  bottomStart = 16.dp,
+                                  bottomEnd = 16.dp))
+                          .background(
+                              if (isSentByUser) colorScheme.primary else colorScheme.surfaceVariant)
+                          .padding(horizontal = 16.dp, vertical = 12.dp)) {
+                    // Message Item take different forms given the format
+                    when (message) {
+                      is ChatMessage.TextMessage ->
+                          Text(
+                              text =
+                                  buildAnnotatedString {
+                                    // To convert in bold some part of IA generated messages
+                                    val boldRegex = Regex("\\*\\*(.*?)\\*\\*")
+                                    var lastIndex = 0
 
-              // Message Item take different forms given the format
-              when (message) {
-                is ChatMessage.TextMessage ->
-                    Text(
-                        text =
-                            buildAnnotatedString {
-                              // To convert in bold some part of IA generated messages
-                              val boldRegex = Regex("\\*\\*(.*?)\\*\\*")
-                              var lastIndex = 0
+                                    boldRegex.findAll(message.message).forEach { matchResult ->
+                                      val start = matchResult.range.first
+                                      val end = matchResult.range.last
+                                      val boldText = matchResult.groupValues[1]
 
-                              boldRegex.findAll(message.message).forEach { matchResult ->
-                                val start = matchResult.range.first
-                                val end = matchResult.range.last
-                                val boldText = matchResult.groupValues[1]
+                                      append(message.message.substring(lastIndex, start))
 
-                                append(message.message.substring(lastIndex, start))
+                                      withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                        append(boldText)
+                                      }
 
-                                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                                  append(boldText)
-                                }
+                                      lastIndex = end + 1
+                                    }
 
-                                lastIndex = end + 1
-                              }
-
-                              append(message.message.substring(lastIndex))
-                            },
-                        color = if (isSentByUser) colorScheme.background else colorScheme.onSurface,
-                        style = Typography.bodySmall)
-                is ChatMessage.ImageMessage -> {
-                  Log.e("display Image", message.imageUrl)
-                  AsyncImage(
-                      modifier =
-                          Modifier.fillMaxWidth().aspectRatio(1f).clip(RoundedCornerShape(8.dp)),
-                      model = message.imageUrl,
-                      placeholder = painterResource(id = R.drawable.loading),
-                      error = painterResource(id = R.drawable.error),
-                      contentDescription = "Image message",
-                      contentScale = ContentScale.Crop,
-                  )
-                }
-                is ChatMessage.TextImageMessage -> {
-                  Column(
-                      verticalArrangement = Arrangement.spacedBy(8.dp),
-                      modifier = Modifier.fillMaxWidth()) {
-                        Text(
-                            text = message.text,
-                            color =
-                                if (isSentByUser) colorScheme.onPrimary else colorScheme.onSurface,
-                            style = Typography.bodySmall)
-
+                                    append(message.message.substring(lastIndex))
+                                  },
+                              color =
+                                  if (isSentByUser) colorScheme.background
+                                  else colorScheme.onSurface,
+                              style = Typography.bodySmall)
+                      is ChatMessage.ImageMessage -> {
+                        Log.e("display Image", message.imageUrl)
                         AsyncImage(
                             modifier =
                                 Modifier.fillMaxWidth()
-                                    .aspectRatio(1f) // Maintain 1:1 aspect ratio
+                                    .aspectRatio(1f)
                                     .clip(RoundedCornerShape(8.dp)),
-                            model = message.imageUrl.ifEmpty { R.drawable.error },
+                            model = message.imageUrl,
                             placeholder = painterResource(id = R.drawable.loading),
                             error = painterResource(id = R.drawable.error),
                             contentDescription = "Image message",
-                            contentScale = ContentScale.Crop)
+                            contentScale = ContentScale.Crop,
+                        )
                       }
-                }
-              }
+                      is ChatMessage.TextImageMessage -> {
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier.fillMaxWidth()) {
+                              Text(
+                                  text = message.text,
+                                  color =
+                                      if (isSentByUser) colorScheme.onPrimary
+                                      else colorScheme.onSurface,
+                                  style = Typography.bodySmall)
+
+                              AsyncImage(
+                                  modifier =
+                                      Modifier.fillMaxWidth()
+                                          .aspectRatio(1f) // Maintain 1:1 aspect ratio
+                                          .clip(RoundedCornerShape(8.dp)),
+                                  model = message.imageUrl.ifEmpty { R.drawable.error },
+                                  placeholder = painterResource(id = R.drawable.loading),
+                                  error = painterResource(id = R.drawable.error),
+                                  contentDescription = "Image message",
+                                  contentScale = ContentScale.Crop)
+                            }
+                      }
+                    }
+                  }
             }
       }
 }
