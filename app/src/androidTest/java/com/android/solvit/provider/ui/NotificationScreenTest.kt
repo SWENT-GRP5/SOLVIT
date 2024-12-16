@@ -210,8 +210,8 @@ class NotificationsScreenTest {
         .assertTextEquals("description") // Matching the description
 
     // For the due date
-      composeTestRule
-          .onNodeWithTag("dialogDueDate")
-          .assertTextEquals("01/02/2024") //  Matching the date format used
+    composeTestRule
+        .onNodeWithTag("dialogDueDate")
+        .assertTextEquals("01/02/2024") //  Matching the date format used
   }
 }

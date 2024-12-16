@@ -117,7 +117,8 @@ fun NotificationScreen(
                             MaterialTheme.typography.bodyLarge.copy(
                                 fontWeight = FontWeight.Bold, fontSize = 20.sp),
                         color = colorScheme.primary,
-                        modifier = Modifier.padding(vertical = 8.dp).testTag("notificationTimestamp"))
+                        modifier =
+                            Modifier.padding(vertical = 8.dp).testTag("notificationTimestamp"))
 
                     Spacer(modifier = Modifier.height(8.dp)) // Adds space between date and cards
 
