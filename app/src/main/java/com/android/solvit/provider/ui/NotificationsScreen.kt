@@ -39,6 +39,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -241,7 +242,8 @@ fun Notifications_Dialog(onDismiss: () -> Unit, serviceRequest: ServiceRequest) 
                           modifier = Modifier.fillMaxWidth(),
                           horizontalArrangement = Arrangement.SpaceBetween) {
                             // Image 1
-                            val imageUrl1 = serviceRequest.imageUrl
+                           val imageUrl1 = serviceRequest.imageUrl
+                           if (!imageUrl1.isNullOrEmpty()) {
                             AsyncImage(
                                 model = imageUrl1,
                                 placeholder = painterResource(id = R.drawable.loading),
@@ -255,6 +257,25 @@ fun Notifications_Dialog(onDismiss: () -> Unit, serviceRequest: ServiceRequest) 
                                             1.dp, colorScheme.onPrimary, RoundedCornerShape(12.dp))
                                         .clip(RoundedCornerShape(12.dp)),
                                 contentScale = ContentScale.Crop)
+                           } else {
+                               Box(
+                                   modifier = Modifier.weight(1f)
+                                           .height(100.dp)
+                                           .testTag("request_image")
+                                           .border(
+                                               1.dp, colorScheme.onPrimary, RoundedCornerShape(12.dp))
+                                           .clip(RoundedCornerShape(12.dp)).background(Color.LightGray),
+                                   contentAlignment = Alignment.Center) {
+                                   Text(
+                                       text = "No Image Provided",
+                                       style =
+                                       TextStyle(
+                                           color = Color.DarkGray,
+                                           fontSize = 14.sp,
+                                           fontWeight = FontWeight.Bold)
+                                   )
+                               }
+                           }
 
                             Spacer(modifier = Modifier.width(8.dp))
 
