@@ -135,7 +135,7 @@ class SeekerRegistrationTest {
     composeTestRule.onNodeWithTag("completeRegistrationButton").performClick()
 
     // Verify that the step does not progress and userRepository was not called
-    verify(userRepository, never()).addUserProfile(any(), any(), any())
+    verify(userRepository, never()).addUserProfile(any(), any(), any(), any())
   }
 
   @Test
