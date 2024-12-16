@@ -119,8 +119,8 @@ class ListProviderViewModel(private val repository: ProviderRepository) : ViewMo
 
   fun updateMinPrice(price: String) {
     _minPrice.value = price
-    val minPriceValue = _minPrice.value!!.toDoubleOrNull()
-    val maxPriceValue = _maxPrice.value!!.toDoubleOrNull()
+    val minPriceValue = _minPrice.value.toDoubleOrNull()
+    val maxPriceValue = _maxPrice.value.toDoubleOrNull()
     if ((maxPriceValue != null && minPriceValue != null && minPriceValue <= maxPriceValue) ||
         (maxPriceValue == null && minPriceValue != null)) {
       filterProviders(filter = { provider -> provider.price >= minPriceValue }, "Price")
@@ -231,7 +231,7 @@ class ListProviderViewModel(private val repository: ProviderRepository) : ViewMo
                   }
       "Highest Activity" ->
           _providersListFiltered.value =
-              if (isSelected) _providersListFiltered.value.sortedBy { it.nbrOfJobs }
+              if (isSelected) _providersListFiltered.value.sortedByDescending { it.nbrOfJobs }
               else _providersListFiltered.value.sortedBy { it.nbrOfJobs }
     }
   }

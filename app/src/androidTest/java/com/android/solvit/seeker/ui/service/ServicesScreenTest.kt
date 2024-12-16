@@ -103,7 +103,9 @@ class ServicesScreenTest {
     seekerProfileViewModel.getUserProfile("1234")
     `when`(navigationActions.currentRoute()).thenReturn(Route.SEEKER_OVERVIEW)
 
-    composeTestRule.setContent { ServicesScreen(navigationActions, listProviderViewModel) }
+    composeTestRule.setContent {
+      ServicesScreen(navigationActions, seekerProfileViewModel, listProviderViewModel)
+    }
   }
 
   @Test
