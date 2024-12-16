@@ -26,6 +26,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.BasicAlertDialog
@@ -220,9 +221,16 @@ fun RequestsTopBar(
         modifier = Modifier.matchParentSize())
     Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
       Row(
-          modifier = Modifier.fillMaxWidth().testTag("RequestsTopBar").padding(start = 16.dp),
+          modifier = Modifier.fillMaxWidth().testTag("RequestsTopBar"),
           horizontalArrangement = Arrangement.SpaceBetween,
           verticalAlignment = Alignment.CenterVertically) {
+            IconButton(onClick = { navigationActions.navigateTo(Route.NOTIFICATIONS) }) {
+              Icon(
+                  imageVector = Icons.Default.Notifications,
+                  tint = if (hasUnreadNotifications) Color.Red else colorScheme.onBackground,
+                  contentDescription = "Notifications")
+            }
+
             Row(
                 modifier = Modifier.testTag("SloganIcon"),
                 verticalAlignment = Alignment.CenterVertically,
@@ -243,12 +251,14 @@ fun RequestsTopBar(
                           color = colorScheme.secondary))
             }
 
-            IconButton(onClick = { navigationActions.navigateTo(Route.NOTIFICATIONS) }) {
-              Icon(
-                  imageVector = Icons.Default.Notifications,
-                  tint = if (hasUnreadNotifications) Color.Red else colorScheme.onBackground,
-                  contentDescription = "Notifications")
-            }
+            IconButton(
+                modifier = Modifier.testTag("MenuOption"),
+                onClick = { navigationActions.navigateTo(Route.JOBS) }) {
+                  Icon(
+                      imageVector = Icons.Default.Menu,
+                      contentDescription = "Menu Option",
+                      tint = colorScheme.onBackground)
+                }
           }
 
       // Search Bar and Service Type Filter
