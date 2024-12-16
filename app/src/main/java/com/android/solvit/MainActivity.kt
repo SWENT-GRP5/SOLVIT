@@ -12,10 +12,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -112,8 +112,8 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun SolvitApp() {
   val authViewModel = viewModel<AuthViewModel>(factory = AuthViewModel.Factory)
-  val user = authViewModel.user.collectAsState()
-  val userRegistered = authViewModel.userRegistered.collectAsState()
+  val user = authViewModel.user.collectAsStateWithLifecycle()
+  val userRegistered = authViewModel.userRegistered.collectAsStateWithLifecycle()
   val listProviderViewModel =
       viewModel<ListProviderViewModel>(factory = ListProviderViewModel.Factory)
   val seekerProfileViewModel =
@@ -187,7 +187,7 @@ fun SharedUI(
 ) {
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
-  val user by authViewModel.user.collectAsState()
+  val user by authViewModel.user.collectAsStateWithLifecycle()
 
   val startDestination =
       when {
@@ -240,7 +240,7 @@ fun SeekerUI(
 ) {
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
-  val user by authViewModel.user.collectAsState()
+  val user by authViewModel.user.collectAsStateWithLifecycle()
 
   NavHost(navController = navController, startDestination = Route.SEEKER_OVERVIEW) {
     // Overview
@@ -363,7 +363,7 @@ fun ProviderUI(
 ) {
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
-  val user by authViewModel.user.collectAsState()
+  val user by authViewModel.user.collectAsStateWithLifecycle()
 
   NavHost(navController = navController, startDestination = Route.REQUESTS_FEED) {
     // Overview

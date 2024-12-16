@@ -36,7 +36,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -55,6 +54,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.solvit.R
 import com.android.solvit.seeker.model.profile.SeekerProfile
@@ -87,8 +87,8 @@ fun EditSeekerProfileScreen(
   val horizontalPadding = if (screenWidth < 360.dp) 8.dp else 16.dp
   val verticalSpacing = if (screenHeight < 640.dp) 8.dp else 16.dp
 
-  val user by authViewModel.user.collectAsState()
-  val userProfile by viewModel.seekerProfile.collectAsState()
+  val user by authViewModel.user.collectAsStateWithLifecycle()
+  val userProfile by viewModel.seekerProfile.collectAsStateWithLifecycle()
   user?.let { viewModel.getUserProfile(it.uid) }
 
   var fullName by remember { mutableStateOf("") }

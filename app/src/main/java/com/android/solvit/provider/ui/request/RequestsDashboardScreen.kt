@@ -33,7 +33,6 @@ import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -47,6 +46,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
@@ -84,7 +84,7 @@ fun RequestsDashboardScreen(
     listProviderViewModel: ListProviderViewModel =
         viewModel(factory = ListProviderViewModel.Factory)
 ) {
-  val user by authViewModel.user.collectAsState()
+  val user by authViewModel.user.collectAsStateWithLifecycle()
   // Selected tab index
   var selectedTab by remember { mutableIntStateOf(2) }
   val statusTabs = ServiceRequestStatus.entries.toTypedArray()
@@ -260,7 +260,7 @@ fun PendingJobsSection(
     navigationActions: NavigationActions
 ) {
   val context = LocalContext.current
-  val pendingRequests by viewModel.pendingRequests.collectAsState()
+  val pendingRequests by viewModel.pendingRequests.collectAsStateWithLifecycle()
 
   JobListSection(
       title = "Pending",
@@ -294,7 +294,7 @@ fun AcceptedJobSection(
     navigationActions: NavigationActions
 ) {
   val context = LocalContext.current
-  val acceptedRequests by viewModel.acceptedRequests.collectAsState()
+  val acceptedRequests by viewModel.acceptedRequests.collectAsStateWithLifecycle()
 
   JobListSection(
       title = "Accepted",
@@ -327,7 +327,7 @@ fun ScheduledJobsSection(
     listProviderViewModel: ListProviderViewModel
 ) {
   val context = LocalContext.current
-  val scheduledRequests by viewModel.scheduledRequests.collectAsState()
+  val scheduledRequests by viewModel.scheduledRequests.collectAsStateWithLifecycle()
 
   Column(Modifier.fillMaxSize().padding(16.dp)) {
     // "Navigate to All Jobs of the Day" button
@@ -398,7 +398,7 @@ fun CompletedJobsSection(
     navigationActions: NavigationActions
 ) {
   val context = LocalContext.current
-  val completedRequests by viewModel.completedRequests.collectAsState()
+  val completedRequests by viewModel.completedRequests.collectAsStateWithLifecycle()
 
   JobListSection(
       title = "Completed",
@@ -430,7 +430,7 @@ fun CanceledJobsSection(
     navigationActions: NavigationActions
 ) {
   val context = LocalContext.current
-  val canceledRequests by viewModel.cancelledRequests.collectAsState()
+  val canceledRequests by viewModel.cancelledRequests.collectAsStateWithLifecycle()
 
   JobListSection(
       title = "Canceled",
@@ -462,7 +462,7 @@ fun ArchivedJobsSection(
     navigationActions: NavigationActions
 ) {
   val context = LocalContext.current
-  val archivedRequests by viewModel.archivedRequests.collectAsState()
+  val archivedRequests by viewModel.archivedRequests.collectAsStateWithLifecycle()
 
   JobListSection(
       title = "Archived",

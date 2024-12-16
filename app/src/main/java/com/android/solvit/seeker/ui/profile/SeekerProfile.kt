@@ -41,7 +41,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -58,6 +57,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.android.solvit.R
@@ -86,8 +86,8 @@ fun SeekerProfileScreen(
     onDispose { activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED }
   }
   // Collect the user profile from the StateFlow
-  val user by authViewModel.user.collectAsState()
-  val userProfile by viewModel.seekerProfile.collectAsState()
+  val user by authViewModel.user.collectAsStateWithLifecycle()
+  val userProfile by viewModel.seekerProfile.collectAsStateWithLifecycle()
   user?.let { viewModel.getUserProfile(it.uid) }
 
   var fullName by remember { mutableStateOf("") }

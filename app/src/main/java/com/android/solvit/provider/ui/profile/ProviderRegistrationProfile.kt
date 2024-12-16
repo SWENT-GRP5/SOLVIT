@@ -60,7 +60,6 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
@@ -82,6 +81,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.android.solvit.R
@@ -146,14 +146,15 @@ fun ProviderRegistrationScreen(
   var companyName by remember { mutableStateOf("") }
   var phone by remember { mutableStateOf("") }
   var selectedLocation by remember { mutableStateOf<Location?>(null) }
-  val locationQuery by locationViewModel.query.collectAsState()
+  val locationQuery by locationViewModel.query.collectAsStateWithLifecycle()
 
   var showDropdown by remember { mutableStateOf(false) }
   val locationSuggestions by
-      locationViewModel.locationSuggestions.collectAsState(initial = emptyList<Location?>())
+      locationViewModel.locationSuggestions.collectAsStateWithLifecycle(
+          initialValue = emptyList<Location?>())
 
   // represent the current authenticated user
-  val user by authViewModel.user.collectAsState()
+  val user by authViewModel.user.collectAsStateWithLifecycle()
 
   // Additional Informations about the provider
   var selectedService by remember { mutableStateOf("") }
@@ -813,7 +814,7 @@ fun ProviderPackages(
   var showDialog by remember { mutableStateOf(false) }
   var showForm by remember { mutableStateOf(false) }
   val packagesVisibilityStates = remember { mutableStateMapOf<Int, Boolean>() }
-  val assistantPackages = assistantViewModel.packageProposals.collectAsState()
+  val assistantPackages = assistantViewModel.packageProposals.collectAsStateWithLifecycle()
   Column(
       modifier = Modifier.fillMaxWidth().padding(16.dp),
       verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -1045,8 +1046,8 @@ fun PackageProposalDialog(
   // States to manage the dialog
   var numberOfPackages by remember { mutableIntStateOf(0) }
   var expanded by remember { mutableStateOf(false) }
-  val assistantPackages = assistantViewModel.packageProposals.collectAsState()
-  val isLoading = assistantViewModel.isLoading.collectAsState()
+  val assistantPackages = assistantViewModel.packageProposals.collectAsStateWithLifecycle()
+  val isLoading = assistantViewModel.isLoading.collectAsStateWithLifecycle()
   val query = remember { mutableStateOf("") }
 
   // Dialog to generate packages with AI

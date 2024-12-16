@@ -41,7 +41,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,6 +55,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.android.solvit.R
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
@@ -134,10 +134,10 @@ fun TopSection(
     listProviderViewModel: ListProviderViewModel,
     navigationActions: NavigationActions
 ) {
-  val searchText by searchViewModel.searchText.collectAsState()
-  val searchResults by searchViewModel.servicesList.collectAsState()
-  val isSearching by searchViewModel.isSearching.collectAsState()
-  val userProfile by seekerProfileViewModel.seekerProfile.collectAsState()
+  val searchText by searchViewModel.searchText.collectAsStateWithLifecycle()
+  val searchResults by searchViewModel.servicesList.collectAsStateWithLifecycle()
+  val isSearching by searchViewModel.isSearching.collectAsStateWithLifecycle()
+  val userProfile by seekerProfileViewModel.seekerProfile.collectAsStateWithLifecycle()
   val address = "EPFL" // Replace with `userProfile.address`
 
   Box(modifier = Modifier.fillMaxWidth().testTag("servicesScreenTopSection")) {
@@ -350,7 +350,7 @@ fun CategoriesSection(
     listProviderViewModel: ListProviderViewModel,
     navigationActions: NavigationActions
 ) {
-  val searchResults by searchServicesViewModel.servicesList.collectAsState()
+  val searchResults by searchServicesViewModel.servicesList.collectAsStateWithLifecycle()
   Column(
       modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("servicesScreenCategories"),
       verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -382,7 +382,7 @@ fun PerformersSection(
     listProviderViewModel: ListProviderViewModel,
     navigationActions: NavigationActions
 ) {
-  val providers by listProviderViewModel.providersList.collectAsState()
+  val providers by listProviderViewModel.providersList.collectAsStateWithLifecycle()
   val topProviders = providers.sortedByDescending { it.rating }
   Column(
       modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("performersSection"),

@@ -55,7 +55,6 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -79,6 +78,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.android.solvit.R
@@ -122,7 +122,7 @@ fun TopAppBar(
     onClickAction: () -> Unit,
     seekerProfileViewModel: SeekerProfileViewModel
 ) {
-  val location by seekerProfileViewModel.locationSearched.collectAsState()
+  val location by seekerProfileViewModel.locationSearched.collectAsStateWithLifecycle()
   val serviceName = selectedService?.let { Services.format(it) } ?: "Service Providers"
   val serviceIcon = serviceItem.icon
 
@@ -777,7 +777,7 @@ fun RatingFilterField(list: List<String>, listProviderViewModel: ListProviderVie
  */
 @Composable
 fun ApplyButton(listProviderViewModel: ListProviderViewModel, display: () -> Unit) {
-  val filteredList by listProviderViewModel.providersListFiltered.collectAsState()
+  val filteredList by listProviderViewModel.providersListFiltered.collectAsStateWithLifecycle()
   Box(
       modifier =
           Modifier.testTag("applyFilterButton")
@@ -960,9 +960,9 @@ fun FilterByLocation(
   // Represent the address user is searching
   var searchedAddress by remember { mutableStateOf("") }
   // List of location suggestions given the searched address
-  val locationSuggestions by locationViewModel.locationSuggestions.collectAsState()
+  val locationSuggestions by locationViewModel.locationSuggestions.collectAsStateWithLifecycle()
   // List of saved locations of user
-  val cachedLocations by seekerProfileViewModel.cachedLocations.collectAsState()
+  val cachedLocations by seekerProfileViewModel.cachedLocations.collectAsStateWithLifecycle()
   // User current location
   var userLocation by remember { mutableStateOf<LatLng?>(null) }
   // Get the current context
@@ -1112,9 +1112,9 @@ fun SelectProviderScreen(
     }
   }
 
-  val selectedService by listProviderViewModel.selectedService.collectAsState()
+  val selectedService by listProviderViewModel.selectedService.collectAsStateWithLifecycle()
   listProviderViewModel.getProviders()
-  val providers by listProviderViewModel.providersListFiltered.collectAsState()
+  val providers by listProviderViewModel.providersListFiltered.collectAsStateWithLifecycle()
 
   var displayFilters by remember { mutableStateOf(false) }
   var displayByLocation by remember { mutableStateOf(false) }

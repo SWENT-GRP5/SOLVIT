@@ -41,7 +41,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -63,6 +62,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.android.solvit.R
@@ -102,16 +102,18 @@ fun ProviderInfoScreen(
     packageProposalViewModel: PackageProposalViewModel =
         viewModel(factory = PackageProposalViewModel.Factory)
 ) {
-  val provider = providerViewModel.selectedProvider.collectAsState().value ?: return
+  val provider = providerViewModel.selectedProvider.collectAsStateWithLifecycle().value ?: return
   val reviews =
-      reviewsViewModel.reviews.collectAsState().value.filter { it.providerId == provider.uid }
+      reviewsViewModel.reviews.collectAsStateWithLifecycle().value.filter {
+        it.providerId == provider.uid
+      }
 
   var selectedTab by remember { mutableStateOf(ProviderTab.DETAILS) }
   val selectedPackage = remember { mutableStateOf<PackageProposal?>(null) }
   val showDialog = remember { mutableStateOf(false) }
 
-  val packagesProposal by packageProposalViewModel.proposal.collectAsState()
-  val user = authViewModel.user.collectAsState()
+  val packagesProposal by packageProposalViewModel.proposal.collectAsStateWithLifecycle()
+  val user = authViewModel.user.collectAsStateWithLifecycle()
   val userId = user.value?.uid ?: "-1"
 
   val packages = packagesProposal.filter { it.providerId == provider.uid }
@@ -796,7 +798,7 @@ fun SelectRequestDialog(
     navigationActions: NavigationActions
 ) {
   val requests =
-      requestViewModel.pendingRequests.collectAsState().value.filter {
+      requestViewModel.pendingRequests.collectAsStateWithLifecycle().value.filter {
         it.userId == userId && it.type == providerType
       }
 

@@ -47,7 +47,6 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -69,6 +68,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.android.solvit.R
@@ -117,16 +117,17 @@ fun RequestsFeedScreen(
     seekerProfileViewModel: SeekerProfileViewModel =
         viewModel(factory = SeekerProfileViewModel.Factory),
 ) {
-  val requests by serviceRequestViewModel.pendingRequests.collectAsState()
+  val allRequests by serviceRequestViewModel.requests.collectAsStateWithLifecycle()
+  val requests = allRequests.filter { it.status == ServiceRequestStatus.PENDING }
   val selectedRequest = remember { mutableStateOf<ServiceRequest?>(null) }
   var selectedService by remember { mutableStateOf("All Services") }
   val searchQuery = remember { mutableStateOf("") }
   val showDialog = remember { mutableStateOf(false) }
-  val user by authViewModel.user.collectAsState()
+  val user by authViewModel.user.collectAsStateWithLifecycle()
   val providerId = user?.uid ?: "-1"
-  val packages = packageProposalViewModel.proposal.collectAsState()
+  val packages = packageProposalViewModel.proposal.collectAsStateWithLifecycle()
   val seekerState = remember { mutableStateOf<SeekerProfile?>(null) }
-  val isReadyToNavigate by chatViewModel.isReadyToNavigate.collectAsState()
+  val isReadyToNavigate by chatViewModel.isReadyToNavigate.collectAsStateWithLifecycle()
   val isSeekerReady = remember { mutableStateOf(false) }
   val repliedClicked = remember { mutableStateOf(false) }
   val filteredRequests = filterRequests(requests, selectedService, searchQuery.value)
@@ -215,7 +216,7 @@ fun RequestsTopBar(
   val context = LocalContext.current
   // Fetch notifications and check for unread ones
   LaunchedEffect(providerId) { notificationsViewModel.init(providerId) }
-  val notifications by notificationsViewModel.notifications.collectAsState()
+  val notifications by notificationsViewModel.notifications.collectAsStateWithLifecycle()
   val hasUnreadNotifications = notifications.any { !it.isRead }
 
   Box(modifier = Modifier.fillMaxWidth().testTag("servicesScreenTopSection")) {

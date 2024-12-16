@@ -61,7 +61,16 @@ open class ServiceRequestViewModel(
   init {
     repository.init { updateAllRequests() }
     repository.addListenerOnServiceRequests(
-        onSuccess = { _requests.value = it },
+        onSuccess = { requests ->
+          _requests.value = requests
+          // Update all request categories when new data arrives
+          _pendingRequests.value = requests.filter { it.status == ServiceRequestStatus.PENDING }
+          _acceptedRequests.value = requests.filter { it.status == ServiceRequestStatus.ACCEPTED }
+          _scheduledRequests.value = requests.filter { it.status == ServiceRequestStatus.SCHEDULED }
+          _completedRequests.value = requests.filter { it.status == ServiceRequestStatus.COMPLETED }
+          _cancelledRequests.value = requests.filter { it.status == ServiceRequestStatus.CANCELED }
+          _archivedRequests.value = requests.filter { it.status == ServiceRequestStatus.ARCHIVED }
+        },
         onFailure = { exception ->
           Log.e("ServiceRequestViewModel", "Error listening ServiceRequests", exception)
         })

@@ -29,7 +29,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,6 +43,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.solvit.provider.model.profile.ProviderViewModel
 import com.android.solvit.seeker.ui.request.LocationDropdown
@@ -91,9 +91,9 @@ fun ModifyProviderInformationScreen(
     }
   }
 
-  val user = authViewModel.user.collectAsState()
+  val user = authViewModel.user.collectAsStateWithLifecycle()
   val userId = user.value?.uid ?: "-1"
-  val provider by providerViewModel.userProvider.collectAsState()
+  val provider by providerViewModel.userProvider.collectAsStateWithLifecycle()
 
   LaunchedEffect(user) { providerViewModel.getProvider(userId) }
 
@@ -166,11 +166,12 @@ fun ModifyInput(
   var showDropdown by remember { mutableStateOf(false) }
 
   val locationSuggestions by
-      locationViewModel.locationSuggestions.collectAsState(initial = emptyList<Location?>())
+      locationViewModel.locationSuggestions.collectAsStateWithLifecycle(
+          initialValue = emptyList<Location?>())
   var selectedLocation by remember { mutableStateOf<Location?>(provider.location) }
   val okNewLocation = selectedLocation != null
 
-  val user by authViewModel.user.collectAsState()
+  val user by authViewModel.user.collectAsStateWithLifecycle()
 
   var newLanguage by remember { mutableStateOf(provider.languages) }
 
