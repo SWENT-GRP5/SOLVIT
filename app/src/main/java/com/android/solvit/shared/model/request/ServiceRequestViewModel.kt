@@ -58,6 +58,11 @@ open class ServiceRequestViewModel(
   private val _selectedProviderService = MutableStateFlow<Services?>(null)
   val selectedProviderService: StateFlow<Services?> = _selectedProviderService
 
+  private val _selectedServices = MutableStateFlow<List<Services>>(emptyList())
+  val selectedServices: StateFlow<List<Services>> = _selectedServices
+  private val _sortSelected = MutableStateFlow(false)
+  val sortSelected: StateFlow<Boolean> = _sortSelected
+
   init {
     repository.init { updateAllRequests() }
     repository.addListenerOnServiceRequests(
@@ -108,6 +113,23 @@ open class ServiceRequestViewModel(
         onFailure = { exception ->
           Log.e("ServiceRequestViewModel", "Error fetching ServiceRequests", exception)
         })
+  }
+
+  fun selectService(service: Services) {
+    _selectedServices.value += service
+  }
+
+  fun unSelectService(service: Services) {
+    _selectedServices.value -= service
+  }
+
+  fun sortSelected() {
+    _sortSelected.value = !_sortSelected.value
+  }
+
+  fun clearFilters() {
+    _selectedServices.value = emptyList()
+    _sortSelected.value = false
   }
 
   private fun getPendingRequests() {
