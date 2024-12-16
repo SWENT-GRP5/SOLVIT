@@ -74,7 +74,7 @@ import com.android.solvit.shared.ui.theme.LightRed
 import com.android.solvit.shared.ui.theme.OnPrimary
 import com.android.solvit.shared.ui.theme.Typography
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "SourceLockedOrientationActivity")
 @Composable
 fun ServicesScreen(
     navigationActions: NavigationActions,
@@ -396,7 +396,7 @@ fun PerformersSection(
     LazyRow(
         modifier = Modifier.fillMaxWidth().testTag("servicesScreenPerformersList"),
         horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-          items(providers.size) { index ->
+          items(topProviders.size) { index ->
             ProviderItem(
                 topProviders[index],
                 onClick = {
