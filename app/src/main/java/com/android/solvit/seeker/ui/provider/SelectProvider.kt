@@ -1107,7 +1107,8 @@ fun SelectProviderScreen(
     activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
     onDispose {
       locationViewModel.clear()
-
+      listProviderViewModel.clearSelectedService()
+      listProviderViewModel.refreshFilters()
       activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
     }
   }
@@ -1122,6 +1123,7 @@ fun SelectProviderScreen(
   val sheetStateLocation = rememberModalBottomSheetState()
   val servicesListItem =
       SERVICES_LIST.find { it.service == selectedService } ?: SERVICES_LIST.last()
+  Log.d("SelectProvider", "$selectedService")
   Scaffold(
       modifier = Modifier.fillMaxSize(),
       topBar = {
