@@ -229,7 +229,7 @@ fun SeekerRegistrationScreen(
                 Column(
                     modifier =
                         Modifier.fillMaxWidth() // Ensure content takes up full width
-                            .padding(16.dp)) {
+                            .padding(start = 0.dp, top = 16.dp, end = 16.dp, bottom = 16.dp)) {
                       Text(
                           text = "Set Your Preferences",
                           style = MaterialTheme.typography.titleLarge,
