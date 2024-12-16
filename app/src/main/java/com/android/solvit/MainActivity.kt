@@ -128,7 +128,7 @@ fun SolvitApp() {
   val chatAssistantViewModel =
       viewModel<ChatAssistantViewModel>(factory = ChatAssistantViewModel.Factory)
   val calendarViewModel =
-      viewModel<ProviderCalendarViewModel>(factory = ProviderCalendarViewModel.Factory)
+      viewModel<ProviderCalendarViewModel>(factory = ProviderCalendarViewModel.provideFactory(serviceRequestViewModel))
   val aiSolverViewModel = viewModel<AiSolverViewModel>(factory = AiSolverViewModel.Factory)
   val notificationViewModel =
       viewModel<NotificationsViewModel>(factory = NotificationsViewModel.Factory)

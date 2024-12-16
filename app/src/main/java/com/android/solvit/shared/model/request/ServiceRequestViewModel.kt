@@ -253,6 +253,10 @@ open class ServiceRequestViewModel(
     _selectedRequest.value = serviceRequest
   }
 
+  fun setSelectedRequest(request: ServiceRequest) {
+    _selectedRequest.value = request
+  }
+
   fun selectProvider(providerId: String, type: Services) {
     _selectedProviderId.value = providerId
     _selectedProviderService.value = type

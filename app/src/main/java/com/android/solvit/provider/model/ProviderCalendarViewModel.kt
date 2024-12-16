@@ -29,8 +29,8 @@ import java.time.temporal.TemporalAdjusters
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 enum class CalendarView {
@@ -485,19 +485,16 @@ class ProviderCalendarViewModel(
    */
   data class ConflictResult(val hasConflict: Boolean, val reason: String)
 
-  companion object Factory : ViewModelProvider.Factory {
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-      // Creates dependencies inline during ViewModel instantiation
-      val providerRepository =
-          ProviderRepositoryFirestore(Firebase.firestore, FirebaseStorage.getInstance())
-      val authViewModel = AuthViewModel(AuthRepository(Firebase.auth, Firebase.firestore))
-      val serviceRequestViewModel =
-          ServiceRequestViewModel(
-              ServiceRequestRepositoryFirebase(Firebase.firestore, Firebase.storage))
+  companion object {
+    fun provideFactory(serviceRequestViewModel: ServiceRequestViewModel): ViewModelProvider.Factory =
+        object : ViewModelProvider.Factory {
+          @Suppress("UNCHECKED_CAST")
+          override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            val providerRepository = ProviderRepositoryFirestore(Firebase.firestore, FirebaseStorage.getInstance())
+            val authViewModel = AuthViewModel(AuthRepository(Firebase.auth, Firebase.firestore))
 
-      return ProviderCalendarViewModel(providerRepository, authViewModel, serviceRequestViewModel)
-          as T
-    }
+            return ProviderCalendarViewModel(providerRepository, authViewModel, serviceRequestViewModel) as T
+          }
+        }
   }
 }
