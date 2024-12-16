@@ -1,5 +1,6 @@
 package com.android.solvit.seeker.ui.request
 
+import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
 import android.net.Uri
 import androidx.activity.ComponentActivity
@@ -23,12 +24,9 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Alignment
@@ -41,7 +39,10 @@ import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.android.solvit.shared.ui.theme.Typography
+import com.android.solvit.shared.ui.utils.TopAppBarInbox
 
+@SuppressLint("SourceLockedOrientationActivity")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RequestScreen(
@@ -84,38 +85,29 @@ fun RequestScreen(
   }
   Scaffold(
       modifier = Modifier.padding(16.dp).testTag("requestScreen"),
-      bottomBar = {},
       topBar = {
-        TopAppBar(
-            colors =
-                TopAppBarColors(
-                    containerColor = colorScheme.background,
-                    scrolledContainerColor = colorScheme.background,
-                    navigationIconContentColor = colorScheme.onBackground,
-                    titleContentColor = colorScheme.onBackground,
-                    actionIconContentColor = colorScheme.onBackground,
-                ),
-            title = { Text(screenTitle, Modifier.testTag("screenTitle")) },
-            navigationIcon = {
-              IconButton(
-                  onClick = { navigationActions.goBack() },
-                  modifier = Modifier.testTag("goBackButton")) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-                        contentDescription = "Back")
-                  }
-            })
+        TopAppBarInbox(
+            title = screenTitle,
+            testTagTitle = "screenTitle",
+            leftButtonAction = {
+              navigationActions.goBack()
+              requestViewModel.unSelectProvider()
+            },
+            leftButtonForm = Icons.AutoMirrored.Outlined.ArrowBack,
+            testTagLeft = "goBackButton")
       },
       content = { paddingValues ->
         Column(
             modifier =
                 Modifier.fillMaxSize()
-                    .padding(16.dp)
+                    .padding(20.dp)
                     .padding(paddingValues)
                     .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
             horizontalAlignment = Alignment.CenterHorizontally) {
+              ImagePicker(selectedImageUri, imageUrl, onImageSelected)
               TitleInput(title, onTitleChange)
+              DescriptionInput(description, onDescriptionChange)
               ServiceTypeDropdown(
                   typeQuery,
                   onTypeQueryChange,
@@ -123,7 +115,6 @@ fun RequestScreen(
                   onShowDropdownTypeChange,
                   filteredServiceTypes,
                   onServiceTypeSelected)
-              DescriptionInput(description, onDescriptionChange)
               LocationDropdown(
                   locationQuery = locationQuery,
                   onLocationQueryChange = onLocationQueryChange,
@@ -135,14 +126,9 @@ fun RequestScreen(
                   requestLocation = selectedRequest?.location,
                   isValueOk = selectedLocation != null)
               DatePickerFieldToModal(dueDate = dueDate, onDateChange = onDueDateChange)
-              ImagePicker(selectedImageUri, imageUrl, onImageSelected)
               Button(
                   onClick = onSubmit,
-                  modifier =
-                      Modifier.fillMaxWidth()
-                          .padding(start = 80.dp, end = 80.dp)
-                          .height(40.dp)
-                          .testTag("requestSubmit"),
+                  modifier = Modifier.fillMaxWidth().height(40.dp).testTag("requestSubmit"),
                   shape = RoundedCornerShape(25.dp),
                   enabled =
                       title.isNotBlank() &&
@@ -164,7 +150,7 @@ fun RequestScreen(
                               contentDescription = null,
                               modifier = Modifier.size(24.dp))
                           Spacer(modifier = Modifier.width(8.dp))
-                          Text(submitButtonText)
+                          Text(submitButtonText, style = Typography.bodyLarge)
                         }
                   }
               if (selectedRequest != null) {

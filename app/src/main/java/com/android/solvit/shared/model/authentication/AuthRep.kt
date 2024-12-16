@@ -37,11 +37,21 @@ interface AuthRep {
       onFailure: (Exception) -> Unit
   )
 
+  fun setUserName(
+      userName: String,
+      userId: String,
+      onSuccess: () -> Unit,
+      onFailure: (Exception) -> Unit
+  )
+
   fun logout(onSuccess: () -> Unit)
 
   fun updateUserLocations(
+      userId: String,
       locations: List<Location>,
       onSuccess: () -> Unit,
       onFailure: (Exception) -> Unit
   )
+
+  fun completeRegistration(userId: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit)
 }

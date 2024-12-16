@@ -6,9 +6,7 @@ import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.model.utils.uploadImageToStorage
 import com.google.android.gms.tasks.Task
-import com.google.firebase.Firebase
 import com.google.firebase.Timestamp
-import com.google.firebase.auth.auth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
@@ -26,11 +24,7 @@ class ServiceRequestRepositoryFirebase(
   }
 
   override fun init(onSuccess: () -> Unit) {
-    Firebase.auth.addAuthStateListener {
-      if (it.currentUser != null) {
-        onSuccess()
-      }
-    }
+    onSuccess()
   }
 
   override fun addListenerOnServiceRequests(
@@ -108,6 +102,26 @@ class ServiceRequestRepositoryFirebase(
     getServiceRequestsByStatus(ServiceRequestStatus.ARCHIVED, onSuccess, onFailure)
   }
 
+  override fun getServiceRequestById(
+      id: String,
+      onSuccess: (ServiceRequest) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    db.collection(collectionPath).document(id).get().addOnCompleteListener { result ->
+      if (result.isSuccessful) {
+        val serviceRequest = documentToServiceRequest(result.result!!)
+        if (serviceRequest != null) {
+          onSuccess(serviceRequest)
+        } else {
+          onFailure(Exception("Service request not found"))
+        }
+      } else {
+        val exception = result.exception ?: Exception("Unknown error")
+        onFailure(exception)
+      }
+    }
+  }
+
   override fun saveServiceRequest(
       serviceRequest: ServiceRequest,
       onSuccess: () -> Unit,
@@ -125,7 +139,6 @@ class ServiceRequestRepositoryFirebase(
       onFailure: (Exception) -> Unit
   ) {
     if (imageUri != null) {
-      saveServiceRequest(serviceRequest, onSuccess, onFailure)
       uploadImageToStorage(
           storage,
           imageFolderPath,
@@ -138,6 +151,60 @@ class ServiceRequestRepositoryFirebase(
           onFailure)
     } else {
       saveServiceRequest(serviceRequest, onSuccess, onFailure)
+    }
+  }
+
+  override fun uploadMultipleImagesToStorage(
+      imageUris: List<Uri>,
+      onSuccess: (List<String>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    val imageUrls = mutableListOf<String>()
+    val totalCount = imageUris.size
+    var successCount = 0
+    var failureCount = 0
+
+    if (imageUris.isEmpty()) {
+      Log.w("ImageUpload", "No images to upload.")
+      onSuccess(emptyList())
+      return
+    }
+
+    Log.i("ImageUpload", "Starting upload for $totalCount images.")
+
+    for (uri in imageUris) {
+      uploadImageToStorage(
+          storage = storage,
+          path = imageFolderPath,
+          imageUri = uri,
+          onSuccess = { url ->
+            synchronized(imageUrls) {
+              imageUrls.add(url)
+              successCount++
+            }
+            Log.i(
+                "ImageUpload",
+                "Image uploaded successfully: $uri. Total success: $successCount/$totalCount")
+            if (successCount + failureCount == totalCount) {
+              Log.i(
+                  "ImageUpload",
+                  "All uploads completed. Success: $successCount, Failures: $failureCount")
+              onSuccess(imageUrls)
+            }
+          },
+          onFailure = { exception ->
+            synchronized(this) { failureCount++ }
+            Log.e(
+                "ImageUpload",
+                "Failed to upload image: $uri. Exception: ${exception.message}. Total failures: $failureCount/$totalCount",
+                exception)
+            if (successCount + failureCount == totalCount) {
+              Log.w(
+                  "ImageUpload",
+                  "Uploads completed with errors. Success: $successCount, Failures: $failureCount")
+              onFailure(Exception("Failed to upload $failureCount out of $totalCount images."))
+            }
+          })
     }
   }
 

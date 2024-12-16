@@ -7,6 +7,8 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.test.core.app.ApplicationProvider
+import com.android.solvit.provider.model.ProviderCalendarViewModel
+import com.android.solvit.provider.model.profile.ProviderViewModel
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.seeker.model.profile.UserRepository
 import com.android.solvit.seeker.model.profile.UserRepositoryFirestore
@@ -16,6 +18,7 @@ import com.android.solvit.shared.model.NotificationsRepositoryFirestore
 import com.android.solvit.shared.model.NotificationsViewModel
 import com.android.solvit.shared.model.authentication.AuthRepository
 import com.android.solvit.shared.model.authentication.AuthViewModel
+import com.android.solvit.shared.model.chat.AiSolverViewModel
 import com.android.solvit.shared.model.chat.ChatAssistantViewModel
 import com.android.solvit.shared.model.chat.ChatRepository
 import com.android.solvit.shared.model.chat.ChatRepositoryFirestore
@@ -26,6 +29,7 @@ import com.android.solvit.shared.model.map.LocationViewModel
 import com.android.solvit.shared.model.packages.PackageProposalRepository
 import com.android.solvit.shared.model.packages.PackageProposalRepositoryFirestore
 import com.android.solvit.shared.model.packages.PackageProposalViewModel
+import com.android.solvit.shared.model.packages.PackagesAssistantViewModel
 import com.android.solvit.shared.model.provider.ProviderRepository
 import com.android.solvit.shared.model.provider.ProviderRepositoryFirestore
 import com.android.solvit.shared.model.request.ServiceRequest
@@ -64,12 +68,16 @@ class EndToEndProviderJobs {
   private lateinit var authViewModel: AuthViewModel
   private lateinit var listProviderViewModel: ListProviderViewModel
   private lateinit var seekerProfileViewModel: SeekerProfileViewModel
+  private lateinit var providerViewModel: ProviderViewModel
   private lateinit var serviceRequestViewModel: ServiceRequestViewModel
   private lateinit var locationViewModel: LocationViewModel
   private lateinit var reviewViewModel: ReviewViewModel
   private lateinit var packageProposalViewModel: PackageProposalViewModel
   private lateinit var chatViewModel: ChatViewModel
   private lateinit var chatAssistantViewModel: ChatAssistantViewModel
+  private lateinit var calendarViewModel: ProviderCalendarViewModel
+  private lateinit var packagesAssistantViewModel: PackagesAssistantViewModel
+  private lateinit var aiSolverViewModel: AiSolverViewModel
 
   private lateinit var chatRepository: ChatRepository
   private lateinit var notificationsViewModel: NotificationsViewModel
@@ -123,17 +131,18 @@ class EndToEndProviderJobs {
     storage.useEmulator("10.0.2.2", 9199)
 
     authRepository = AuthRepository(Firebase.auth, firestore)
-    seekerRepository = UserRepositoryFirestore(firestore)
+    seekerRepository = UserRepositoryFirestore(firestore, storage)
     providerRepository = ProviderRepositoryFirestore(firestore, storage)
     locationRepository = mock(LocationRepository::class.java)
     serviceRequestRepository = ServiceRequestRepositoryFirebase(firestore, storage)
     reviewRepository = ReviewRepositoryFirestore(firestore)
     packageProposalRepository = PackageProposalRepositoryFirestore(firestore)
-    chatRepository = ChatRepositoryFirestore(database)
+    chatRepository = ChatRepositoryFirestore(database, storage, firestore)
     notificationsRepository = NotificationsRepositoryFirestore(firestore)
 
     authViewModel = AuthViewModel(authRepository)
     seekerProfileViewModel = SeekerProfileViewModel(seekerRepository)
+    providerViewModel = ProviderViewModel(providerRepository)
     listProviderViewModel = ListProviderViewModel(providerRepository)
     locationViewModel = LocationViewModel(locationRepository)
     serviceRequestViewModel = ServiceRequestViewModel(serviceRequestRepository)
@@ -142,6 +151,10 @@ class EndToEndProviderJobs {
     chatViewModel = ChatViewModel(chatRepository)
     chatAssistantViewModel = ChatAssistantViewModel()
     notificationsViewModel = NotificationsViewModel(notificationsRepository)
+    calendarViewModel =
+        ProviderCalendarViewModel(providerRepository, authViewModel, serviceRequestViewModel)
+    packagesAssistantViewModel = PackagesAssistantViewModel()
+    aiSolverViewModel = AiSolverViewModel()
 
     `when`(locationRepository.search(ArgumentMatchers.anyString(), anyOrNull(), anyOrNull()))
         .thenAnswer { invocation ->
@@ -183,7 +196,8 @@ class EndToEndProviderJobs {
             listProviderViewModel,
             seekerProfileViewModel,
             locationViewModel,
-            packageProposalViewModel)
+            packageProposalViewModel,
+            packagesAssistantViewModel)
       } else {
         when (user.value!!.role) {
           "seeker" ->
@@ -196,17 +210,22 @@ class EndToEndProviderJobs {
                   locationViewModel,
                   chatViewModel,
                   chatAssistantViewModel,
-                  notificationsViewModel)
+                  notificationsViewModel,
+                  aiSolverViewModel,
+                  packageProposalViewModel)
           "provider" ->
               ProviderUI(
                   authViewModel,
+                  providerViewModel,
                   listProviderViewModel,
                   serviceRequestViewModel,
                   seekerProfileViewModel,
                   chatViewModel,
                   notificationsViewModel,
                   locationViewModel,
-                  chatAssistantViewModel)
+                  packageProposalViewModel,
+                  chatAssistantViewModel,
+                  calendarViewModel)
         }
       }
     }
@@ -230,10 +249,10 @@ class EndToEndProviderJobs {
     // Navigate to the calendar screen
     composeTestRule.onNodeWithTag(TopLevelDestinations.CALENDAR.textId).performClick()
     composeTestRule.waitUntil { composeTestRule.onNodeWithTag("calendarTitle").isDisplayed() }
-    composeTestRule.onNodeWithTag("backButton").performClick()
+    // composeTestRule.onNodeWithTag("backButton").performClick()
 
     // Navigate to the job dashboard
-    composeTestRule.onNodeWithTag(TopLevelDestinations.CREATE_REQUEST.toString()).performClick()
+    composeTestRule.onNodeWithTag("MyJobsTestTag", useUnmergedTree = true).performClick()
 
     request = request.copy(providerId = authViewModel.user.value!!.uid)
     serviceRequestViewModel.saveServiceRequest(request)

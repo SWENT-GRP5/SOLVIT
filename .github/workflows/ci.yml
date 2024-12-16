@@ -84,6 +84,9 @@ jobs:
         run: |
           echo "GOOGLE_AI_API_KEY=${{ secrets.GOOGLE_AI_API_KEY }}" >> local.properties
 
+      - name : Set Open AI API Key
+        run: echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> local.properties
+
       # Cache the Emulator, if the cache does not hit, create the emulator
       - name: AVD cache
         uses: actions/cache@v4
@@ -108,7 +111,7 @@ jobs:
 
       - name: Install Firebase CLI
         run: |
-          curl -sL https://firebase.tools | bash
+          curl -sL https://firebase.tools | sed s/latest/v13.16.0/ | bash
 
       - name: Start Firebase emulators
         run: |

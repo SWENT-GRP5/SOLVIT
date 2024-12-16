@@ -10,6 +10,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.DateRange
@@ -17,6 +21,16 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.*
 import androidx.compose.material3.MaterialTheme.colorScheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,6 +50,8 @@ import com.android.solvit.shared.model.Notification
 import com.android.solvit.shared.model.NotificationsViewModel
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.android.solvit.shared.ui.theme.Typography
+import com.android.solvit.shared.ui.utils.TopAppBarInbox
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.rememberCameraPositionState
@@ -54,28 +70,14 @@ fun NotificationScreen(
   val notifications by viewModel.notifications.collectAsState()
   var showDialog by remember { mutableStateOf(false) }
   val selectedServiceRequest = remember { mutableStateOf<ServiceRequest?>(null) }
-
   Scaffold(
       topBar = {
-        TopAppBar(
-            title = {
-              Row(
-                  modifier = Modifier.fillMaxWidth().testTag("notifications_title"),
-                  horizontalArrangement = Arrangement.Start) {
-                    Text(
-                        "Notifications",
-                        textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.titleLarge)
-                  }
-            },
-            navigationIcon = {
-              IconButton(
-                  onClick = { navigationActions.goBack() },
-                  modifier = Modifier.testTag("goBackButton")) {
-                    Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
-                  }
-            },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.surface))
+        TopAppBarInbox(
+            title = "Notifications",
+            testTagGeneral = "notifications_title",
+            leftButtonForm = Icons.AutoMirrored.Filled.ArrowBack,
+            leftButtonAction = { navigationActions.goBack() },
+            testTagLeft = "goBackButton")
       }) { paddingValues ->
         Column(modifier = Modifier.padding(paddingValues)) {
           if (notifications.isEmpty()) {

@@ -30,23 +30,15 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.colorScheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -55,21 +47,16 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
@@ -81,12 +68,22 @@ import com.android.solvit.R
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
+import com.android.solvit.shared.ui.theme.Typography
+import com.android.solvit.shared.ui.utils.CustomOutlinedTextField
+import com.android.solvit.shared.ui.utils.PasswordTextField
+import com.android.solvit.shared.ui.utils.ValidationRegex
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+/**
+ * A composable function that displays the sign-in screen, allowing users to log in using
+ * email/password or Google Sign-In.
+ *
+ * @param navigationActions A set of navigation actions to handle screen transitions.
+ * @param authViewModel The ViewModel managing authentication and user-related data.
+ */
 @SuppressLint("InvalidColorHexValue")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -115,12 +112,6 @@ fun SignInScreen(
   val backgroundColor = colorScheme.background // White background color
 
   Scaffold(
-      topBar = {
-        TopAppBar(
-            title = { Text("") },
-            navigationIcon = { GoBackButton(navigationActions) },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = backgroundColor))
-      },
       content = { padding ->
         val modifier =
             Modifier.fillMaxSize()
@@ -176,27 +167,26 @@ fun SignInScreen(
       })
 }
 
-@Composable
-fun GoBackButton(navigationActions: NavigationActions) {
-  var canGoBack by remember { mutableStateOf(true) }
-  val coroutineScope = rememberCoroutineScope()
-  IconButton(
-      onClick = {
-        if (canGoBack) {
-          canGoBack = false
-          navigationActions.goBack()
-          coroutineScope.launch {
-            delay(500)
-            canGoBack = true
-          }
-        }
-      },
-      modifier = Modifier.testTag("goBackButton"),
-      enabled = canGoBack) {
-        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "goBackButton")
-      }
-}
-
+/**
+ * A composable function that defines the portrait layout for the sign-in screen.
+ *
+ * @param modifier Modifier applied to the root column.
+ * @param context The current context for showing Toast messages.
+ * @param email The user's email address.
+ * @param onEmailChange Lambda to update the email address.
+ * @param password The user's password.
+ * @param onPasswordChange Lambda to update the password.
+ * @param passwordVisible Boolean indicating whether the password is visible.
+ * @param onPasswordVisibilityChange Lambda to toggle password visibility.
+ * @param isChecked Boolean indicating whether "Remember Me" is checked.
+ * @param onCheckedChange Lambda to update the "Remember Me" state.
+ * @param navigationActions A set of navigation actions for transitions.
+ * @param authViewModel The ViewModel managing authentication.
+ * @param onSuccess Callback invoked upon successful login.
+ * @param onFailure Callback invoked upon login failure.
+ * @param launcher Managed activity result launcher for Google Sign-In.
+ * @param token The Google Sign-In client token.
+ */
 @Composable
 fun PortraitLayout(
     modifier: Modifier,
@@ -244,6 +234,26 @@ fun PortraitLayout(
       }
 }
 
+/**
+ * A composable function that defines the landscape layout for the sign-in screen.
+ *
+ * @param modifier Modifier applied to the root row.
+ * @param context The current context for showing Toast messages.
+ * @param email The user's email address.
+ * @param onEmailChange Lambda to update the email address.
+ * @param password The user's password.
+ * @param onPasswordChange Lambda to update the password.
+ * @param passwordVisible Boolean indicating whether the password is visible.
+ * @param onPasswordVisibilityChange Lambda to toggle password visibility.
+ * @param isChecked Boolean indicating whether "Remember Me" is checked.
+ * @param onCheckedChange Lambda to update the "Remember Me" state.
+ * @param navigationActions A set of navigation actions for transitions.
+ * @param authViewModel The ViewModel managing authentication.
+ * @param onSuccess Callback invoked upon successful login.
+ * @param onFailure Callback invoked upon login failure.
+ * @param launcher Managed activity result launcher for Google Sign-In.
+ * @param token The Google Sign-In client token.
+ */
 @Composable
 fun LandscapeLayout(
     modifier: Modifier,
@@ -309,7 +319,7 @@ fun LogoSection() {
     Spacer(modifier = Modifier.height(4.dp))
     Text(
         text = "Welcome!",
-        fontSize = 28.sp,
+        style = Typography.bodyLarge.copy(fontSize = 28.sp),
         fontWeight = FontWeight.Bold,
         color = colorScheme.primary,
         modifier = Modifier.testTag("welcomeText"))
@@ -317,6 +327,25 @@ fun LogoSection() {
   }
 }
 
+/**
+ * A composable function that displays the main form section for user sign-in.
+ *
+ * @param context The current context used for actions like Toast messages.
+ * @param email The email entered by the user.
+ * @param onEmailChange A lambda function to handle updates to the email field.
+ * @param password The password entered by the user.
+ * @param onPasswordChange A lambda function to handle updates to the password field.
+ * @param passwordVisible A boolean indicating whether the password is visible.
+ * @param onPasswordVisibilityChange A lambda function to toggle password visibility.
+ * @param isChecked A boolean indicating whether the "Remember me" checkbox is selected.
+ * @param onCheckedChange A lambda function to handle changes to the "Remember me" checkbox.
+ * @param authViewModel The ViewModel managing authentication and user-related data.
+ * @param onSuccess A lambda function executed upon successful login.
+ * @param onFailure A lambda function executed when login fails.
+ * @param launcher A managed activity result launcher for handling Google Sign-In.
+ * @param token The Google Sign-In client token.
+ * @param navigationActions A set of navigation actions to handle screen transitions.
+ */
 @Composable
 fun FormSection(
     context: Context,
@@ -337,8 +366,8 @@ fun FormSection(
 ) {
   val isFormComplete = email.isNotBlank() && password.isNotBlank()
   val passwordLengthComplete = password.length >= 6
-  val emailRegex = Regex("^[\\w.-]+@[\\w.-]+\\.[a-zA-Z]{2,}$")
-  val goodFormEmail = emailRegex.matches(email)
+
+  val goodFormEmail = ValidationRegex.EMAIL_REGEX.matches(email)
 
   CustomOutlinedTextField(
       value = email,
@@ -367,9 +396,8 @@ fun FormSection(
   Text(
       text = "Your password must have at least 6 characters",
       color = colorScheme.onSurfaceVariant,
-      fontSize = 12.sp,
       textAlign = TextAlign.Start,
-      style = TextStyle(fontSize = 12.sp, lineHeight = 16.sp),
+      style = Typography.bodySmall,
       modifier = Modifier.padding(top = 4.dp).fillMaxWidth())
 
   Spacer(modifier = Modifier.height(8.dp))
@@ -392,7 +420,7 @@ fun FormSection(
           text = "Remember me",
           modifier = Modifier.testTag("rememberMeCheckbox"),
           color = colorScheme.onSurfaceVariant,
-          fontSize = 16.sp)
+          style = Typography.bodyLarge)
     }
 
     // Section Forgot Password
@@ -403,7 +431,7 @@ fun FormSection(
           Text(
               text = "Forgot password?",
               color = colorScheme.onSurfaceVariant,
-              fontSize = 16.sp,
+              style = Typography.bodyLarge,
               textDecoration = TextDecoration.Underline,
               modifier =
                   Modifier.clickable { navigationActions.navigateTo(Screen.FORGOT_PASSWORD) }
@@ -427,7 +455,7 @@ fun FormSection(
 
   Spacer(modifier = Modifier.height(4.dp))
 
-  Text("OR", color = colorScheme.onSurface)
+  Text("OR", color = colorScheme.onSurface, style = Typography.bodyLarge)
 
   Spacer(modifier = Modifier.height(4.dp))
 
@@ -447,6 +475,11 @@ fun FormSection(
       roundedCornerShape = RoundedCornerShape(25.dp))
 }
 
+/**
+ * A composable function that displays a clickable "Sign-Up" section for new users.
+ *
+ * @param navigationActions A set of navigation actions to handle screen transitions.
+ */
 @Composable
 fun SignUpSection(navigationActions: NavigationActions) {
   val annotatedText = buildAnnotatedString {
@@ -467,13 +500,31 @@ fun SignUpSection(navigationActions: NavigationActions) {
     ClickableText(
         text = annotatedText,
         style =
-            TextStyle(
-                color = colorScheme.onSurface, fontSize = 16.sp, textAlign = TextAlign.Center),
+            Typography.bodyLarge.copy(color = colorScheme.onSurface, textAlign = TextAlign.Center),
         onClick = { navigationActions.navigateTo(Screen.SIGN_UP) },
         modifier = Modifier.fillMaxWidth().testTag("signUpLink"))
   }
 }
 
+/**
+ * A composable function that displays a "Sign In" button with validation and login functionality.
+ *
+ * @param email The email entered by the user.
+ * @param password The password entered by the user.
+ * @param isFormComplete Boolean indicating if all required fields are filled.
+ * @param goodFormEmail Boolean indicating if the email format is valid.
+ * @param passwordLengthComplete Boolean indicating if the password meets the length requirement.
+ * @param authViewModel The ViewModel managing authentication and user-related data.
+ * @param onSuccess A lambda function executed upon successful login.
+ * @param onFailure A lambda function executed when the login fails.
+ *
+ * This function:
+ * - Validates the form fields (email and password) before attempting to log in.
+ * - Displays appropriate Toast messages for invalid or incomplete input.
+ * - Updates the `authViewModel` with the email and password and calls the login method.
+ * - Dynamically styles the button based on the validation status.
+ * - Invokes the `onSuccess` or `onFailure` callback based on the login outcome.
+ */
 @Composable
 fun SignInButton(
     email: String,
@@ -524,10 +575,24 @@ fun SignInButton(
             "Sign in",
             color = colorScheme.background,
             fontWeight = FontWeight.Bold,
-            fontSize = 16.sp)
+            style = Typography.bodyLarge)
       }
 }
 
+/**
+ * A composable function that displays a styled button for Google Sign-In.
+ *
+ * @param onClick A lambda function to be executed when the button is clicked.
+ * @param text The text displayed on the button.
+ * @param testTag A test tag for UI testing purposes.
+ * @param roundedCornerShape The shape of the button's corners.
+ *
+ * This function:
+ * - Renders a button styled with a border and a transparent background.
+ * - Displays the Google logo on the left and the provided text centered on the button.
+ * - Ensures responsiveness by adjusting text alignment and handling overflow.
+ * - Triggers the `onClick` action when the button is pressed.
+ */
 @Composable
 fun GoogleButton(
     onClick: () -> Unit,
@@ -550,15 +615,22 @@ fun GoogleButton(
           Text(
               text = text,
               color = colorScheme.onSurface,
-              fontSize = 16.sp,
               maxLines = 2,
               overflow = TextOverflow.Ellipsis,
               modifier = Modifier.weight(1f),
-              textAlign = TextAlign.Center)
+              textAlign = TextAlign.Center,
+              style = Typography.bodyLarge)
         }
       }
 }
 
+/**
+ * A composable function that provides a launcher for handling Google Sign-In.
+ *
+ * @param authViewModel The ViewModel managing authentication and user-related data.
+ * @param onSuccess A lambda function executed when the Google Sign-In process succeeds.
+ * @param onFailure A lambda function executed when the Google Sign-In process fails.
+ */
 @Composable
 fun googleSignInLauncher(
     authViewModel: AuthViewModel,
@@ -577,182 +649,6 @@ fun googleSignInLauncher(
       }
     } catch (e: ApiException) {
       onFailure()
-    }
-  }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun CustomOutlinedTextField(
-    value: String,
-    onValueChange: (String) -> Unit,
-    label: String? = null,
-    placeholder: String,
-    isValueOk: Boolean,
-    @SuppressLint("ModifierParameter") modifier: Modifier = Modifier,
-    errorMessage: String = "Invalid input",
-    leadingIcon: ImageVector? = null,
-    leadingIconDescription: String = "",
-    testTag: String,
-    errorTestTag: String = "errorMessage",
-    maxLines: Int = 1,
-    textAlign: TextAlign = TextAlign.Unspecified
-) {
-  // State to track if the field has been "visited" (focused and then unfocused)
-  var hasBeenFocused by remember { mutableStateOf(false) }
-  var hasLostFocusAfterTyping by remember { mutableStateOf(false) }
-
-  Column(modifier = modifier.fillMaxWidth()) {
-    // Text field with focus management
-    OutlinedTextField(
-        value = value,
-        onValueChange = {
-          onValueChange(it)
-          // Reset the focus-loss tracking when the user starts typing
-          if (it.isNotEmpty()) {
-            hasLostFocusAfterTyping = false
-          }
-        },
-        label = { if (label != null) Text(label, color = colorScheme.onBackground) },
-        placeholder = { Text(placeholder) },
-        leadingIcon = {
-          if (leadingIcon != null) {
-            Icon(
-                leadingIcon,
-                contentDescription = leadingIconDescription,
-                tint = if (isValueOk) colorScheme.secondary else colorScheme.onSurfaceVariant)
-          }
-        },
-        modifier =
-            Modifier.fillMaxWidth().testTag(testTag).wrapContentHeight().onFocusChanged { focusState
-              ->
-              // Mark the field as "visited" as soon as it loses focus after an entry
-              if (!focusState.isFocused && value.isNotBlank()) {
-                hasBeenFocused = true
-                hasLostFocusAfterTyping = true
-              }
-            },
-        shape = RoundedCornerShape(12.dp),
-        colors =
-            TextFieldDefaults.outlinedTextFieldColors(
-                focusedTextColor = colorScheme.onBackground,
-                unfocusedTextColor =
-                    if (value.isEmpty()) colorScheme.onSurfaceVariant
-                    else if (!isValueOk) colorScheme.error else colorScheme.onBackground,
-                focusedBorderColor = if (isValueOk) colorScheme.secondary else colorScheme.primary,
-                unfocusedBorderColor =
-                    when {
-                      value.isEmpty() -> colorScheme.onSurfaceVariant
-                      isValueOk -> colorScheme.secondary
-                      else -> colorScheme.error
-                    }),
-        maxLines = maxLines,
-        textStyle = TextStyle(textAlign = textAlign, color = colorScheme.onBackground))
-
-    // Display the error message if the field has been visited, input is incorrect, and focus was
-    // lost after typing
-    if (!isValueOk && hasBeenFocused && hasLostFocusAfterTyping) {
-      Text(
-          text = errorMessage,
-          color = colorScheme.error,
-          fontSize = 15.sp, // Error text size
-          modifier = Modifier.padding(start = 16.dp, top = 4.dp).testTag(errorTestTag))
-    }
-  }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun PasswordTextField(
-    value: String,
-    onValueChange: (String) -> Unit,
-    label: String,
-    placeholder: String,
-    contentDescription: String = "",
-    testTag: String,
-    passwordLengthComplete: Boolean,
-    errorMessage: String = "Password is too short",
-    testTagErrorPassword: String = "passwordErrorMessage"
-) {
-  var passwordVisible by remember { mutableStateOf(false) }
-
-  // State to track if the field has been focused and then unfocused
-  var hasBeenFocused by remember { mutableStateOf(false) }
-  var hasLostFocusAfterTyping by remember { mutableStateOf(false) }
-
-  Column(modifier = Modifier.fillMaxWidth()) {
-    OutlinedTextField(
-        value = value,
-        onValueChange = {
-          onValueChange(it)
-          // Reset focus-loss tracking when the user starts typing
-          if (it.isNotEmpty()) {
-            hasLostFocusAfterTyping = false
-          }
-        },
-        label = { Text(label, color = colorScheme.onBackground) },
-        singleLine = true,
-        placeholder = { Text(placeholder) },
-        modifier =
-            Modifier.fillMaxWidth().testTag(testTag).onFocusChanged { focusState ->
-              // Mark the field as "visited" if it loses focus after an entry
-              if (!focusState.isFocused && value.isNotBlank()) {
-                hasBeenFocused = true
-                hasLostFocusAfterTyping = true
-              }
-            },
-        enabled = true,
-        shape = RoundedCornerShape(12.dp),
-        visualTransformation =
-            if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-        leadingIcon = {
-          Icon(
-              imageVector = Icons.Filled.Lock,
-              contentDescription = contentDescription,
-              tint =
-                  if (passwordLengthComplete) colorScheme.secondary
-                  else colorScheme.onSurfaceVariant,
-              modifier = Modifier.size(25.dp))
-        },
-        trailingIcon = {
-          val image =
-              if (passwordVisible) painterResource(id = android.R.drawable.ic_menu_view)
-              else painterResource(id = android.R.drawable.ic_secure)
-
-          IconButton(onClick = { passwordVisible = !passwordVisible }) {
-            Icon(
-                painter = image,
-                contentDescription = null,
-                tint =
-                    if (passwordLengthComplete) colorScheme.secondary
-                    else colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(24.dp))
-          }
-        },
-        colors =
-            TextFieldDefaults.outlinedTextFieldColors(
-                focusedTextColor = colorScheme.onBackground,
-                unfocusedTextColor =
-                    if (value.isEmpty()) colorScheme.onSurfaceVariant
-                    else if (!passwordLengthComplete) colorScheme.error
-                    else colorScheme.onBackground,
-                focusedBorderColor =
-                    if (passwordLengthComplete) colorScheme.secondary else colorScheme.primary,
-                unfocusedBorderColor =
-                    when {
-                      value.isEmpty() -> colorScheme.onSurfaceVariant
-                      passwordLengthComplete -> colorScheme.secondary
-                      else -> colorScheme.error
-                    }))
-
-    // Display the error message if the field has been visited, input is incorrect, and focus was
-    // lost after typing
-    if (!passwordLengthComplete && hasBeenFocused && hasLostFocusAfterTyping) {
-      Text(
-          text = errorMessage,
-          color = colorScheme.error,
-          fontSize = 15.sp, // Error text size
-          modifier = Modifier.padding(start = 16.dp, top = 4.dp).testTag(testTagErrorPassword))
     }
   }
 }

@@ -29,14 +29,19 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.compose.rememberNavController
 import com.android.solvit.R
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
+import com.android.solvit.shared.ui.theme.Typography
 
+/**
+ * A composable function that displays the opening screen of the application. The layout dynamically
+ * adjusts based on the device's orientation (portrait or landscape).
+ *
+ * @param navigationActions A set of navigation actions to handle screen transitions.
+ */
 @Composable
 fun OpeningScreen(navigationActions: NavigationActions) {
   val configuration = LocalConfiguration.current
@@ -47,6 +52,11 @@ fun OpeningScreen(navigationActions: NavigationActions) {
   }
 }
 
+/**
+ * A composable function that displays the opening screen in portrait orientation.
+ *
+ * @param navigationActions A set of navigation actions to handle screen transitions.
+ */
 @Composable
 fun OpeningScreenPortrait(navigationActions: NavigationActions) {
   Surface(
@@ -79,7 +89,7 @@ fun OpeningScreenPortrait(navigationActions: NavigationActions) {
                                         color = colorScheme.secondary,
                                         fontWeight = FontWeight.Bold)))
                       },
-                  fontSize = 60.sp,
+                  style = Typography.titleLarge.copy(fontSize = 60.sp),
                   modifier = Modifier.testTag("appNamePortrait"))
               Spacer(modifier = Modifier.height(175.dp))
               Text(
@@ -100,6 +110,11 @@ fun OpeningScreenPortrait(navigationActions: NavigationActions) {
       }
 }
 
+/**
+ * A composable function that displays the opening screen in landscape orientation.
+ *
+ * @param navigationActions A set of navigation actions to handle screen transitions.
+ */
 @Composable
 fun OpeningScreenLandscape(navigationActions: NavigationActions) {
   Surface(
@@ -146,17 +161,17 @@ fun OpeningScreenLandscape(navigationActions: NavigationActions) {
                     // Tagline Text
                     Text(
                         text = "Your Problem, Our Priority",
-                        fontSize = 18.sp,
                         color = colorScheme.onSurface,
                         modifier = Modifier.testTag("taglineLandscape"),
-                        textAlign = TextAlign.Center)
+                        textAlign = TextAlign.Center,
+                        style = Typography.bodyLarge.copy(fontSize = 18.sp))
 
                     Spacer(modifier = Modifier.height(8.dp))
 
                     // Call-to-Action Button
                     Text(
                         text = "Tap to Continue",
-                        fontSize = 18.sp,
+                        style = Typography.bodyLarge.copy(fontSize = 18.sp),
                         textDecoration = TextDecoration.Underline,
                         color = colorScheme.secondary,
                         modifier =
@@ -165,13 +180,4 @@ fun OpeningScreenLandscape(navigationActions: NavigationActions) {
                   }
             }
       }
-}
-
-// Preview function for testing
-@Preview(showBackground = true)
-@Composable
-fun PreviewOpeningScreen() {
-  val navController = rememberNavController()
-  val navigationActions = NavigationActions(navController)
-  OpeningScreenPortrait(navigationActions)
 }

@@ -22,10 +22,6 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScrollableTabRow
@@ -66,10 +62,11 @@ import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.theme.LightBlue
 import com.android.solvit.shared.ui.theme.LightOrange
+import com.android.solvit.shared.ui.utils.TopAppBarInbox
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "SourceLockedOrientationActivity")
 @Composable
 fun RequestsOverviewScreen(
     navigationActions: NavigationActions,
@@ -88,10 +85,11 @@ fun RequestsOverviewScreen(
   Scaffold(
       modifier = Modifier.testTag("requestsOverviewScreen"),
       bottomBar = {
+        val currentRoute = navigationActions.currentRoute()
         BottomNavigationMenu(
-            onTabSelect = { navigationActions.navigateTo(it.route) },
+            onTabSelect = { navigationActions.navigateTo(it) },
             tabList = LIST_TOP_LEVEL_DESTINATION_SEEKER,
-            selectedItem = Route.REQUESTS_OVERVIEW)
+            selectedItem = currentRoute)
       }) {
         val user = authViewModel.user.collectAsState()
         val userId = user.value?.uid ?: "-1"
@@ -102,7 +100,7 @@ fun RequestsOverviewScreen(
         val statusTabs = ServiceRequestStatus.entries.toTypedArray()
 
         Column {
-          TopOrdersSection(navigationActions)
+          TopOrdersSection()
           CategoriesFiltersSection()
 
           // Tabs for filtering by status
@@ -153,36 +151,11 @@ fun RequestsOverviewScreen(
 }
 
 @Composable
-fun TopOrdersSection(navigationActions: NavigationActions) {
-  Row(
-      modifier =
-          Modifier.fillMaxWidth()
-              .padding(horizontal = 20.dp, vertical = 32.dp)
-              .testTag("topOrdersSection"),
-      horizontalArrangement = Arrangement.SpaceBetween,
-      verticalAlignment = Alignment.CenterVertically) {
-        val context = LocalContext.current
-        Row {
-          Icon(
-              imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-              contentDescription = null,
-              modifier = Modifier.clickable { navigationActions.goBack() }.testTag("arrowBack"))
-          Spacer(modifier = Modifier.size(22.dp))
-          Text(
-              text = "Orders",
-              fontSize = 20.sp,
-              fontWeight = FontWeight.Bold,
-          )
-        }
-        Icon(
-            imageVector = Icons.Default.Menu,
-            contentDescription = null,
-            modifier =
-                Modifier.clickable {
-                  Toast.makeText(context, "This feature is not yet implemented", Toast.LENGTH_SHORT)
-                      .show()
-                })
-      }
+fun TopOrdersSection() {
+  TopAppBarInbox(
+      title = "Orders",
+      testTagGeneral = "topOrdersSection",
+  )
 }
 
 @Composable

@@ -22,7 +22,7 @@ class ChatAssistantDialogTest {
   @Before
   fun setup() {
     chatAssistantViewModel = ChatAssistantViewModel()
-    composeTestRule.setContent { ChatAssistantDialog(chatAssistantViewModel, {}, {}) }
+    composeTestRule.setContent { ChatAssistantDialog(chatAssistantViewModel, true, {}, {}) }
   }
 
   @Test
@@ -31,6 +31,23 @@ class ChatAssistantDialogTest {
     composeTestRule.onNodeWithTag("tonesRow").assertIsDisplayed()
     composeTestRule.onNodeWithTag("inputField").assertIsDisplayed()
     composeTestRule.onNodeWithTag("generateButton").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("modeSelectionRow").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("generationText").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("translationText").assertIsDisplayed()
+  }
+
+  @Test
+  fun modeIsSwitchable() {
+    composeTestRule.onNodeWithTag("tonesRow").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("inputField").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("modeSwitch").performClick()
+    composeTestRule.onNodeWithTag("languageSelection").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("languageSelectionFrom").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("languageSelectionTo").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("messageField").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("modeSwitch").performClick()
+    composeTestRule.onNodeWithTag("tonesRow").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("inputField").assertIsDisplayed()
   }
 
   @Test
@@ -50,5 +67,24 @@ class ChatAssistantDialogTest {
     composeTestRule.onNodeWithTag("inputField").performClick()
     composeTestRule.onNodeWithTag("inputField").performTextInput("test")
     composeTestRule.onNodeWithTag("inputField").assertTextContains("test")
+  }
+
+  @Test
+  fun languagesAreSelectable() {
+    composeTestRule.onNodeWithTag("modeSwitch").performClick()
+    composeTestRule.onNodeWithTag("languageSelectionFrom").performClick()
+    composeTestRule.onNodeWithTag("languageItemENGLISH").performClick()
+    composeTestRule.onNodeWithTag("languageSelectionTo").performClick()
+    composeTestRule.onNodeWithTag("languageItemENGLISH").performClick()
+    composeTestRule.onNodeWithTag("modeSwitch").performClick()
+  }
+
+  @Test
+  fun messageFieldIsEditable() {
+    composeTestRule.onNodeWithTag("modeSwitch").performClick()
+    composeTestRule.onNodeWithTag("messageField").performClick()
+    composeTestRule.onNodeWithTag("messageField").performTextInput("test")
+    composeTestRule.onNodeWithTag("messageField").assertTextContains("test")
+    composeTestRule.onNodeWithTag("modeSwitch").performClick()
   }
 }

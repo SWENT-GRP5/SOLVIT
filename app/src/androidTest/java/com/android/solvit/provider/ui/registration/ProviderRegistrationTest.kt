@@ -1,8 +1,6 @@
 package com.android.solvit.provider.ui.registration
 
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertIsEnabled
-import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.isNotDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -12,14 +10,14 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.solvit.provider.ui.profile.ProviderRegistrationScreen
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
-import com.android.solvit.seeker.ui.provider.ProviderRegistrationScreen
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.map.LocationRepository
 import com.android.solvit.shared.model.map.LocationViewModel
 import com.android.solvit.shared.model.provider.ProviderRepository
 import com.android.solvit.shared.ui.navigation.NavigationActions
-import com.android.solvit.shared.ui.navigation.Screen
+import com.android.solvit.shared.ui.navigation.Route
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -59,7 +57,7 @@ class ProviderRegistrationTest {
     locationViewModel = LocationViewModel(locationRepository)
 
     // Mock the current route to be the add todo screen
-    `when`(navigationActions.currentRoute()).thenReturn(Screen.PROVIDER_REGISTRATION_PROFILE)
+    `when`(navigationActions.currentRoute()).thenReturn(Route.PROVIDER_REGISTRATION)
     `when`(locationRepository.search(ArgumentMatchers.anyString(), anyOrNull(), anyOrNull()))
         .thenAnswer { invocation ->
           val onSuccess = invocation.getArgument<(List<Location>) -> Unit>(1)
@@ -76,7 +74,6 @@ class ProviderRegistrationTest {
       )
     }
 
-    composeTestRule.onNodeWithTag("goBackButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("signUpIcon").assertIsDisplayed()
     composeTestRule.onNodeWithTag("signUpProviderTitle").assertIsDisplayed()
     composeTestRule.onNodeWithTag("fullNameInput").assertIsDisplayed()
@@ -117,29 +114,56 @@ class ProviderRegistrationTest {
           navigationActions = navigationActions,
           locationViewModel = locationViewModel)
     }
+
     // Initially, the button should be disabled when fields are empty
-    composeTestRule.onNodeWithTag("completeRegistrationButton").assertIsNotEnabled()
+    composeTestRule.onNodeWithTag("completeRegistrationButton").performClick()
+    composeTestRule.onNodeWithTag("savePreferencesButton").isNotDisplayed()
 
     // Fill out only some of the fields
     composeTestRule.onNodeWithTag("fullNameInput").performTextInput("John Doe")
     composeTestRule.onNodeWithTag("phoneNumberInput").performTextInput("123456789")
 
     // Button should still be disabled as not all fields are filled
-    composeTestRule.onNodeWithTag("completeRegistrationButton").assertIsNotEnabled()
+    composeTestRule.onNodeWithTag("completeRegistrationButton").performClick()
+    composeTestRule.onNodeWithTag("savePreferencesButton").isNotDisplayed()
 
     // Complete the rest of the fields
     composeTestRule.onNodeWithTag("companyNameInput").performTextInput("Company")
     composeTestRule.onNodeWithTag("inputRequestAddress").performTextInput("123 Main St")
 
-    // Now the button should be enabled
-    composeTestRule.onNodeWithTag("completeRegistrationButton").assertIsNotEnabled()
+    // Not enable because the location is not selected
+    composeTestRule.onNodeWithTag("completeRegistrationButton").performClick()
+    composeTestRule.onNodeWithTag("savePreferencesButton").isNotDisplayed()
 
     composeTestRule.onNodeWithTag("inputRequestAddress").performTextClearance()
     composeTestRule.onNodeWithTag("inputRequestAddress").performTextInput("USA")
+    composeTestRule.waitForIdle()
     composeTestRule.waitUntil { locationViewModel.locationSuggestions.value.isNotEmpty() }
     composeTestRule.onAllNodesWithTag("locationResult")[0].performClick()
 
-    composeTestRule.onNodeWithTag("completeRegistrationButton").assertIsEnabled()
+    composeTestRule.onNodeWithTag("completeRegistrationButton").performClick()
+    composeTestRule.onNodeWithTag("savePreferencesButton").isDisplayed()
+
+    // Initially, the button should be disabled when fields are empty
+    composeTestRule.onNodeWithTag("savePreferencesButton").performClick()
+    composeTestRule.onNodeWithTag("enterPackagesButton").isNotDisplayed()
+
+    // Fill out only some of the fields
+    composeTestRule.onNodeWithTag("servicesDropDown").performClick()
+    composeTestRule.onAllNodesWithTag("servicesDropdownMenu")[0].performClick()
+
+    // Button should still be disabled as not all fields are filled
+    composeTestRule.onNodeWithTag("descriptionInputProviderRegistration").performTextInput("ABC")
+    composeTestRule
+        .onNodeWithTag("startingPriceInputProviderRegistration")
+        .performTextInput("1234567")
+
+    // Complete the rest of the fields
+    composeTestRule.onNodeWithTag("languageDropdown").performClick()
+    composeTestRule.onAllNodesWithTag("languageDropdownMenu")[0].performClick()
+
+    composeTestRule.onNodeWithTag("savePreferencesButton").performClick()
+    composeTestRule.onNodeWithTag("enterPackagesButton").isDisplayed()
   }
 
   @Test
@@ -158,6 +182,7 @@ class ProviderRegistrationTest {
     composeTestRule.onNodeWithTag("phoneNumberInput").performTextInput("123456789")
     composeTestRule.onNodeWithTag("companyNameInput").performTextInput("Company")
     composeTestRule.onNodeWithTag("inputRequestAddress").performTextInput("USA")
+    composeTestRule.waitForIdle()
     composeTestRule.waitUntil { locationViewModel.locationSuggestions.value.isNotEmpty() }
     composeTestRule.onAllNodesWithTag("locationResult")[0].performClick()
 
@@ -182,6 +207,7 @@ class ProviderRegistrationTest {
     }
 
     composeTestRule.onNodeWithTag("inputRequestAddress").performTextInput("USA")
+    composeTestRule.waitForIdle()
     composeTestRule.waitUntil { locationViewModel.locationSuggestions.value.isNotEmpty() }
 
     composeTestRule.onAllNodesWithTag("locationResult")[0].assertIsDisplayed()

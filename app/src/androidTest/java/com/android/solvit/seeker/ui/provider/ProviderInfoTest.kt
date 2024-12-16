@@ -11,8 +11,13 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.navigation.NavController
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
+import com.android.solvit.shared.model.authentication.AuthRep
+import com.android.solvit.shared.model.authentication.AuthViewModel
+import com.android.solvit.shared.model.authentication.User
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.packages.PackageProposal
+import com.android.solvit.shared.model.packages.PackageProposalRepository
+import com.android.solvit.shared.model.packages.PackageProposalViewModel
 import com.android.solvit.shared.model.provider.Language
 import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.provider.ProviderRepository
@@ -23,13 +28,14 @@ import com.android.solvit.shared.model.review.ReviewRepository
 import com.android.solvit.shared.model.review.ReviewViewModel
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
-import com.google.firebase.Timestamp
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.`when`
+import org.mockito.kotlin.any
+import org.mockito.kotlin.whenever
 
 class ProviderInfoTest {
   private lateinit var providerRepository: ProviderRepository
@@ -40,6 +46,10 @@ class ProviderInfoTest {
   private lateinit var reviewViewModel: ReviewViewModel
   private lateinit var navController: NavController
   private lateinit var navigationActions: NavigationActions
+  private lateinit var packageRepository: PackageProposalRepository
+  private lateinit var packageProposalViewModel: PackageProposalViewModel
+  private lateinit var authRep: AuthRep
+  private lateinit var authViewModel: AuthViewModel
 
   private val provider =
       Provider(
@@ -54,8 +64,7 @@ class ProviderInfoTest {
           true,
           5.0,
           25.0,
-          Timestamp.now(),
-          listOf(Language.ENGLISH, Language.FRENCH))
+          languages = listOf(Language.ENGLISH, Language.FRENCH))
 
   private val reviews =
       listOf(
@@ -68,6 +77,7 @@ class ProviderInfoTest {
           PackageProposal(
               uid = "1",
               title = "Basic Maintenance",
+              providerId = "1",
               description = "Ideal for minor repairs and maintenance tasks.",
               price = 49.99,
               bulletPoints =
@@ -76,6 +86,7 @@ class ProviderInfoTest {
           PackageProposal(
               uid = "2",
               title = "Standard Service",
+              providerId = "1",
               description = "Comprehensive service for common plumbing needs.",
               price = 89.99,
               bulletPoints =
@@ -89,6 +100,10 @@ class ProviderInfoTest {
 
   @Before
   fun setUp() {
+    authRep = mock(AuthRep::class.java)
+    authViewModel = AuthViewModel(authRep)
+    packageRepository = mock(PackageProposalRepository::class.java)
+    packageProposalViewModel = PackageProposalViewModel(packageRepository)
     providerRepository = mock(ProviderRepository::class.java)
     providerViewModel = ListProviderViewModel(providerRepository)
     reviewRepository = mock(ReviewRepository::class.java)
@@ -98,6 +113,16 @@ class ProviderInfoTest {
     requestRepository = mock(ServiceRequestRepository::class.java)
     requestViewModel = ServiceRequestViewModel(requestRepository)
     providerViewModel.selectProvider(provider)
+
+    val testUser = User("1", "Admin", "Test User", "test@example.com", emptyList())
+    whenever(authRep.init(any())).thenAnswer { invocation ->
+      val callback = invocation.arguments[0] as (User?) -> Unit
+      callback(testUser)
+    }
+    `when`(packageRepository.getPackageProposal(any(), any())).thenAnswer { invocation ->
+      val onSuccess = invocation.getArgument<(List<PackageProposal>) -> Unit>(0)
+      onSuccess(packageProposals)
+    }
   }
 
   @Test
@@ -108,7 +133,7 @@ class ProviderInfoTest {
     composeTestRule.onNodeWithTag("providerHeader").assertIsDisplayed()
     composeTestRule.onNodeWithTag("providerImage").assertIsDisplayed()
     composeTestRule.onNodeWithTag("providerName").assertTextEquals("Hassan")
-    composeTestRule.onNodeWithTag("providerCompanyName").assertTextEquals("")
+    composeTestRule.onNodeWithTag("providerService").assertIsDisplayed()
   }
 
   @Test
@@ -119,7 +144,9 @@ class ProviderInfoTest {
     // Act
     composeTestRule.setContent {
       ProviderTabs(
-          selectedTab = ProviderTab.DETAILS, onTabSelected = { newTab -> selectedTab = newTab })
+          selectedTab = ProviderTab.DETAILS,
+          onTabSelected = { newTab -> selectedTab = newTab },
+          true)
     }
 
     // Assert
@@ -210,25 +237,6 @@ class ProviderInfoTest {
   }
 
   @Test
-  fun providerTopBarDisplaysCorrectly() {
-    composeTestRule.setContent { ProviderTopBar(onBackClick = {}) }
-
-    composeTestRule.onNodeWithTag("ProviderTopBar").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("backButton").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("topBarTitle").assertTextEquals("Provider")
-    composeTestRule.onNodeWithTag("menuButton").assertIsDisplayed()
-  }
-
-  @Test
-  fun backButtonTriggersCallback() {
-    var backClicked = false
-    composeTestRule.setContent { ProviderTopBar(onBackClick = { backClicked = true }) }
-
-    composeTestRule.onNodeWithTag("backButton").performClick()
-    assertTrue(backClicked)
-  }
-
-  @Test
   fun bottomBarDisplaysCorrectly() {
     composeTestRule.setContent {
       BottomBar(
@@ -256,8 +264,15 @@ class ProviderInfoTest {
 
   @Test
   fun providerInfoScreenSwitchesTabsCorrectly() {
+
+    packageProposalViewModel.getPackageProposal()
+
     composeTestRule.setContent {
-      ProviderInfoScreen(navigationActions, providerViewModel, reviewViewModel)
+      ProviderInfoScreen(
+          navigationActions,
+          providerViewModel,
+          reviewViewModel,
+          packageProposalViewModel = packageProposalViewModel)
     }
 
     composeTestRule.onNodeWithTag("detailsTab").performClick()

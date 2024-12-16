@@ -4,6 +4,8 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performTextInput
 import androidx.navigation.NavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
@@ -61,7 +63,7 @@ class BookingScreenTest {
           dueDate = Timestamp(GregorianCalendar(2021, 1, 1, 12, 30).time),
           meetingDate = Timestamp(GregorianCalendar(2021, 1, 1, 12, 30).time),
           location = Location(name = "EPFL", latitude = 0.0, longitude = 0.0),
-          imageUrl = null,
+          imageUrl = "url",
           packageId = "1",
           agreedPrice = 200.15,
           type = Services.PLUMBER,
@@ -118,9 +120,12 @@ class BookingScreenTest {
     composeTestRule.onNodeWithTag("problem_description").assertIsDisplayed()
     composeTestRule.onNodeWithTag("profile_box").assertIsDisplayed()
     composeTestRule.onNodeWithTag("price_appointment_box").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("appointment_date").assertIsDisplayed()
     composeTestRule.onNodeWithTag("address_label").assertIsDisplayed()
     composeTestRule.onNodeWithTag("google_map_container").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("problem_image_label").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("problem_image").performScrollTo()
+    composeTestRule.onNodeWithTag("problem_image").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("edit_button").performScrollTo()
     composeTestRule.onNodeWithTag("edit_button").assertIsDisplayed()
   }
 
@@ -144,9 +149,9 @@ class BookingScreenTest {
     composeTestRule.onNodeWithTag("problem_description_label").assertIsDisplayed()
     composeTestRule.onNodeWithTag("problem_description").assertIsDisplayed()
     composeTestRule.onNodeWithTag("price_appointment_box").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("appointment_date").assertIsDisplayed()
     composeTestRule.onNodeWithTag("address_label").assertIsDisplayed()
     composeTestRule.onNodeWithTag("google_map_container").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("edit_discuss_button").performScrollTo()
     composeTestRule.onNodeWithTag("edit_discuss_button").assertIsDisplayed()
     composeTestRule.onNodeWithTag("edit_button").assertIsDisplayed()
     composeTestRule.onNodeWithTag("chat_button").assertIsDisplayed()
@@ -181,6 +186,7 @@ class BookingScreenTest {
     composeTestRule.setContent {
       ProviderCard(
           provider = provider,
+          isSeeker = true,
           providerViewModel = providerViewModel,
           navigationActions = navigationActions)
     }
@@ -201,5 +207,21 @@ class BookingScreenTest {
     composeTestRule.onNodeWithTag("title").assertIsDisplayed()
     composeTestRule.onNodeWithTag("description").assertIsDisplayed()
     composeTestRule.onNodeWithTag("bullet_points").assertIsDisplayed()
+  }
+
+  @Test
+  fun editPriceDialogFunctionsCorrectly() {
+    composeTestRule.setContent { EditPriceDialog(serviceRequest, serviceRequestViewModel) }
+
+    composeTestRule.onNodeWithTag("edit_price_button").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("edit_price_button").performClick()
+    composeTestRule.onNodeWithTag("edit_price_dialog").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("edit_price_title").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("edit_price_input").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("edit_price_input").performTextInput("100.99")
+    composeTestRule.onNodeWithTag("cancel_button").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("save_button").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("cancel_button").performClick()
+    composeTestRule.onNodeWithTag("edit_price_dialog").assertDoesNotExist()
   }
 }

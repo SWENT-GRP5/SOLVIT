@@ -83,7 +83,12 @@ class AuthRepository(private val auth: FirebaseAuth, private val db: FirebaseFir
     auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener {
       if (it.isSuccessful) {
         Log.d("AuthRepository", "Registration successful")
-        val user = User(it.result!!.user!!.uid, role, email)
+        val user =
+            User(
+                uid = it.result!!.user!!.uid,
+                role = role,
+                email = email,
+                registrationCompleted = false)
         createUserDocument(user, { onSuccess(user) }, onFailure)
       } else {
         Log.w("AuthRepository", "Registration failed", it.exception)
@@ -102,7 +107,12 @@ class AuthRepository(private val auth: FirebaseAuth, private val db: FirebaseFir
     auth.signInWithCredential(credential).addOnCompleteListener {
       if (it.isSuccessful) {
         Log.d("AuthRepository", "Google sign-in successful")
-        val user = User(it.result!!.user!!.uid, role, it.result!!.user!!.email!!)
+        val user =
+            User(
+                it.result!!.user!!.uid,
+                role,
+                email = it.result!!.user!!.email!!,
+                registrationCompleted = false)
         createUserDocument(user, { onSuccess(user) }, onFailure)
       } else {
         Log.w("AuthRepository", "Google sign-in failed", it.exception)
@@ -117,12 +127,13 @@ class AuthRepository(private val auth: FirebaseAuth, private val db: FirebaseFir
   }
 
   override fun updateUserLocations(
+      userId: String,
       locations: List<Location>,
       onSuccess: () -> Unit,
       onFailure: (Exception) -> Unit
   ) {
     db.collection(collectionPath)
-        .document(getUserId())
+        .document(userId)
         .update(
             "locations",
             locations.map {
@@ -131,6 +142,21 @@ class AuthRepository(private val auth: FirebaseAuth, private val db: FirebaseFir
         .addOnSuccessListener { onSuccess() }
         .addOnFailureListener { e ->
           Log.w("AuthRepository", "Failed to update user locations", e)
+          onFailure(e)
+        }
+  }
+
+  override fun completeRegistration(
+      userId: String,
+      onSuccess: () -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    db.collection(collectionPath)
+        .document(userId)
+        .update("registrationCompleted", true)
+        .addOnSuccessListener { onSuccess() }
+        .addOnFailureListener { e ->
+          Log.w("AuthRepository", "Failed to complete registration", e)
           onFailure(e)
         }
   }
@@ -163,6 +189,22 @@ class AuthRepository(private val auth: FirebaseAuth, private val db: FirebaseFir
         }
   }
 
+  override fun setUserName(
+      userName: String,
+      userId: String,
+      onSuccess: () -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    db.collection(collectionPath)
+        .document(userId)
+        .update("userName", userName)
+        .addOnSuccessListener { onSuccess() }
+        .addOnFailureListener { e ->
+          Log.w("AuthRepository", "Failed to update user name", e)
+          onFailure(e)
+        }
+  }
+
   private fun createUserDocument(
       user: User,
       onSuccess: () -> Unit,
@@ -181,6 +223,7 @@ class AuthRepository(private val auth: FirebaseAuth, private val db: FirebaseFir
   private fun docToUser(doc: DocumentSnapshot): User? {
     val uid = doc.getString("uid") ?: return null
     val role = doc.getString("role") ?: return null
+    val username = doc.getString("userName") ?: ""
     val email = doc.getString("email") ?: return null
     val locations =
         (doc.get("locations") as? List<Map<String, Any>> ?: emptyList()).map {
@@ -189,6 +232,7 @@ class AuthRepository(private val auth: FirebaseAuth, private val db: FirebaseFir
               longitude = it["longitude"] as? Double ?: 0.0,
               name = it["name"] as? String ?: "Unknown")
         }
-    return User(uid, role, email, locations)
+    val registrationCompleted = doc.getBoolean("registrationCompleted") ?: true
+    return User(uid, role, username, email, locations, registrationCompleted)
   }
 }

@@ -1,9 +1,6 @@
 package com.android.solvit.seeker.ui.map
 
-import android.content.pm.ActivityInfo
-import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -12,9 +9,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.android.solvit.R
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.seeker.ui.navigation.BottomNavigationMenu
+import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.map.MapScreen
 import com.android.solvit.shared.ui.map.MarkerData
 import com.android.solvit.shared.ui.map.RequestLocationPermission
@@ -25,6 +22,13 @@ import com.android.solvit.shared.ui.navigation.Route
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
 
+/**
+ * Composable function that displays the map screen for the seeker.
+ *
+ * @param providerViewModel ViewModel to fetch the list of providers
+ * @param navigationActions Actions to navigate to different screens
+ * @param requestLocationPermission Flag to request location permission
+ */
 @Composable
 fun SeekerMapScreen(
     providerViewModel: ListProviderViewModel = viewModel(factory = ListProviderViewModel.Factory),
@@ -34,13 +38,6 @@ fun SeekerMapScreen(
 
   // Get the current context
   val context = LocalContext.current
-  // Lock Orientation to Portrait
-  DisposableEffect(Unit) {
-    val activity = context as? ComponentActivity
-    activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-    onDispose { activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED }
-  }
-
   // Initialize the FusedLocationProviderClient
   val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
   // State to hold the user's location
@@ -59,24 +56,28 @@ fun SeekerMapScreen(
   // Create markers with detailed information for each provider
   val providerMarkers = remember { mutableStateOf<List<MarkerData>>(emptyList()) }
 
+  val markersLoading = remember { mutableStateOf(true) }
+
   LaunchedEffect(providers) {
     val markers =
         providers.map { provider ->
           val imageBitmap =
-              imageBitmapFromUrl(context, provider.imageUrl, R.drawable.empty_profile_img)
+              imageBitmapFromUrl(
+                  context, provider.imageUrl, Services.getProfileImage(provider.service))
+          val icon = Services.getIcon(provider.service)
           MarkerData(
               location = LatLng(provider.location.latitude, provider.location.longitude),
               title = provider.name,
-              snippet =
-                  provider.service.toString().replace("_", " ") + "\n" + provider.rating.toString(),
+              icon = icon,
               tag = "providerMarker-${provider.uid}",
               image = imageBitmap,
               onClick = {
                 providerViewModel.selectProvider(provider)
-                navigationActions.navigateTo(Route.PROVIDER_PROFILE)
+                navigationActions.navigateTo(Route.PROVIDER_INFO)
               })
         }
     providerMarkers.value = markers
+    markersLoading.value = false
   }
 
   // Display the map with user location and provider markers
@@ -85,8 +86,9 @@ fun SeekerMapScreen(
       markers = providerMarkers.value,
       bottomBar = {
         BottomNavigationMenu(
-            onTabSelect = { navigationActions.navigateTo(it.route) },
+            onTabSelect = { navigationActions.navigateTo(it) },
             tabList = LIST_TOP_LEVEL_DESTINATION_SEEKER,
             selectedItem = Route.MAP)
-      })
+      },
+      markersLoading = markersLoading.value)
 }

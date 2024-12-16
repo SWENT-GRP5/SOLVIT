@@ -13,6 +13,7 @@ plugins {
     alias(libs.plugins.sonar)
     //id("org.sonarqube") version "5.1.0.4882"
     alias(libs.plugins.gms)
+    kotlin("plugin.serialization") version "2.1.0"
 }
 
 android {
@@ -27,6 +28,7 @@ android {
     }
 
     val mapsApiKey: String = localProperties.getProperty("MAPS_API_KEY") ?: ""
+    val openaiApiKey: String = localProperties.getProperty("OPENAI_API_KEY") ?: ""
     val googleAiApiKey: String = localProperties.getProperty("GOOGLE_AI_API_KEY") ?: ""
 
     defaultConfig {
@@ -36,8 +38,8 @@ android {
         versionCode = 1
         versionName = "1.0"
         manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
+        buildConfigField("String", "OPENAI_API_KEY", "\"$openaiApiKey\"")
         buildConfigField("String", "GOOGLE_AI_API_KEY", "\"$googleAiApiKey\"")
-
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -185,6 +187,7 @@ dependencies {
     implementation(libs.firebase.storage.ktx)
     implementation(libs.play.services.location)
     implementation(libs.androidx.navigation.testing)
+    implementation(libs.androidx.uiautomator)
     testImplementation(libs.testng)
 
 
@@ -218,17 +221,22 @@ dependencies {
     implementation(libs.play.services.auth)
 
     // Firebase
+    implementation(platform(libs.firebase.bom.v3270))
     implementation(libs.firebase.database.ktx)
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.ui.auth)
     implementation(libs.firebase.auth.ktx)
     implementation(libs.firebase.auth)
+    implementation(libs.firebase.messaging.ktx)
 
     // Networking with OkHttp
     implementation(libs.okhttp)
+    implementation(libs.gson)
 
     // Testing Unit
     testImplementation(libs.junit)
+    testImplementation(libs.mockk)
+    testImplementation(libs.mockk.agent)
     androidTestImplementation(libs.mockk)
     androidTestImplementation(libs.mockk.android)
     androidTestImplementation(libs.mockk.agent)
@@ -252,20 +260,44 @@ dependencies {
     androidTestImplementation(libs.mockito.kotlin)
     testImplementation(libs.robolectric)
 
+    // Mockito for unit tests
+    testImplementation("org.mockito:mockito-core:4.6.1")
+    testImplementation("org.mockito:mockito-inline:4.6.1")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:4.0.0")
+
+    // Mockito for Android instrumented tests (if needed)
+    androidTestImplementation("org.mockito:mockito-android:4.6.1")
+    androidTestImplementation("org.mockito.kotlin:mockito-kotlin:4.0.0")
 
     // --------- Kaspresso test framework ----------
     globalTestImplementation(libs.kaspresso)
     globalTestImplementation(libs.kaspresso.compose.support)
     androidTestImplementation(libs.kaspresso.allure.support)
 
+    // --------- Coroutines ----------
+    implementation(libs.okhttp)
+    implementation(libs.okhttp.v4100)
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+
     // ----------       Robolectric     ------------
     testImplementation(libs.robolectric)
 
     // ----------       Load Images from URL     ------------
-    implementation("io.coil-kt:coil-compose:2.4.0")
+    implementation(libs.coil.compose)
 
     // ----------       Google AI     ------------
-    implementation("com.google.ai.client.generativeai:generativeai:0.7.0")
+    implementation(libs.generativeai.v070)
+    implementation(libs.generativeai)
+
+
+    // ----------       Json serialization     ------------
+    implementation(libs.kotlinx.serialization.json.v150)
+
+    // Add Firebase Functions dependency
+    implementation(platform("com.google.firebase:firebase-bom:32.6.0"))
+    implementation("com.google.firebase:firebase-functions-ktx")
 }
 
 tasks.withType<Test> {
@@ -289,6 +321,7 @@ tasks.register("jacocoTestReport", JacocoReport::class) {
         "**/R$*.class",
         "**/BuildConfig.*",
         "**/Manifest*.*",
+        "**/debug/**",
         "**/*Test*.*",
         "android/**/*.*",
     )
@@ -305,4 +338,3 @@ tasks.register("jacocoTestReport", JacocoReport::class) {
         include("outputs/code_coverage/debugAndroidTest/connected/*/coverage.ec")
     })
 }
-

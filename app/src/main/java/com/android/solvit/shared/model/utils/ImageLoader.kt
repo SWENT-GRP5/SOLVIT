@@ -26,14 +26,15 @@ fun uploadImageToStorage(
     onSuccess: (String) -> Unit,
     onFailure: (Exception) -> Unit
 ) {
-  val uniqueFileName = UUID.randomUUID().toString() + ".jpg"
-  val imageRef: StorageReference = storage.reference.child(path + uniqueFileName)
+  val uniqueFileName = "${UUID.randomUUID()}.jpg"
+  val imageRef: StorageReference = storage.reference.child("$path$uniqueFileName")
 
   imageRef
       .putFile(imageUri)
       .addOnSuccessListener {
+        // Construct clean URL
         imageRef.downloadUrl
-            .addOnSuccessListener { downloadUrl -> onSuccess(downloadUrl.toString()) }
+            .addOnSuccessListener { uri -> onSuccess((uri.toString())) }
             .addOnFailureListener { exception -> onFailure(exception) }
       }
       .addOnFailureListener { exception -> onFailure(exception) }

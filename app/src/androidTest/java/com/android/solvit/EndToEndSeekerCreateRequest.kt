@@ -9,6 +9,8 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.test.core.app.ApplicationProvider
+import com.android.solvit.provider.model.ProviderCalendarViewModel
+import com.android.solvit.provider.model.profile.ProviderViewModel
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.seeker.model.profile.UserRepository
 import com.android.solvit.seeker.model.profile.UserRepositoryFirestore
@@ -18,6 +20,7 @@ import com.android.solvit.shared.model.NotificationsRepositoryFirestore
 import com.android.solvit.shared.model.NotificationsViewModel
 import com.android.solvit.shared.model.authentication.AuthRepository
 import com.android.solvit.shared.model.authentication.AuthViewModel
+import com.android.solvit.shared.model.chat.AiSolverViewModel
 import com.android.solvit.shared.model.chat.ChatAssistantViewModel
 import com.android.solvit.shared.model.chat.ChatRepository
 import com.android.solvit.shared.model.chat.ChatRepositoryFirestore
@@ -28,6 +31,7 @@ import com.android.solvit.shared.model.map.LocationViewModel
 import com.android.solvit.shared.model.packages.PackageProposalRepository
 import com.android.solvit.shared.model.packages.PackageProposalRepositoryFirestore
 import com.android.solvit.shared.model.packages.PackageProposalViewModel
+import com.android.solvit.shared.model.packages.PackagesAssistantViewModel
 import com.android.solvit.shared.model.provider.ProviderRepository
 import com.android.solvit.shared.model.provider.ProviderRepositoryFirestore
 import com.android.solvit.shared.model.request.ServiceRequestRepository
@@ -60,6 +64,7 @@ class EndToEndSeekerCreateRequest {
 
   private lateinit var authViewModel: AuthViewModel
   private lateinit var listProviderViewModel: ListProviderViewModel
+  private lateinit var providerViewModel: ProviderViewModel
   private lateinit var seekerProfileViewModel: SeekerProfileViewModel
   private lateinit var serviceRequestViewModel: ServiceRequestViewModel
   private lateinit var locationViewModel: LocationViewModel
@@ -68,6 +73,9 @@ class EndToEndSeekerCreateRequest {
   private lateinit var packageProposalViewModel: PackageProposalViewModel
   private lateinit var chatAssistantViewModel: ChatAssistantViewModel
   private lateinit var notificationsViewModel: NotificationsViewModel
+  private lateinit var calendarViewModel: ProviderCalendarViewModel
+  private lateinit var aiSolverViewModel: AiSolverViewModel
+  private lateinit var packagesAssistantViewModel: PackagesAssistantViewModel
 
   private lateinit var authRepository: AuthRepository
   private lateinit var seekerRepository: UserRepository
@@ -103,17 +111,19 @@ class EndToEndSeekerCreateRequest {
     storage.useEmulator("10.0.2.2", 9199)
 
     authRepository = AuthRepository(Firebase.auth, firestore)
-    seekerRepository = UserRepositoryFirestore(firestore)
+    seekerRepository = UserRepositoryFirestore(firestore, storage)
     providerRepository = ProviderRepositoryFirestore(firestore, storage)
     locationRepository = mock(LocationRepository::class.java)
     serviceRequestRepository = ServiceRequestRepositoryFirebase(firestore, storage)
     reviewRepository = ReviewRepositoryFirestore(firestore)
     packageProposalRepository = PackageProposalRepositoryFirestore(firestore)
-    chatRepository = ChatRepositoryFirestore(database)
+    chatRepository = ChatRepositoryFirestore(database, storage, firestore)
     notificationsRepository = NotificationsRepositoryFirestore(firestore)
+    packagesAssistantViewModel = PackagesAssistantViewModel()
 
     authViewModel = AuthViewModel(authRepository)
     seekerProfileViewModel = SeekerProfileViewModel(seekerRepository)
+    providerViewModel = ProviderViewModel(providerRepository)
     listProviderViewModel = ListProviderViewModel(providerRepository)
     locationViewModel = LocationViewModel(locationRepository)
     serviceRequestViewModel = ServiceRequestViewModel(serviceRequestRepository)
@@ -122,6 +132,9 @@ class EndToEndSeekerCreateRequest {
     chatViewModel = ChatViewModel(chatRepository)
     chatAssistantViewModel = ChatAssistantViewModel()
     notificationsViewModel = NotificationsViewModel(notificationsRepository)
+    calendarViewModel =
+        ProviderCalendarViewModel(providerRepository, authViewModel, serviceRequestViewModel)
+    aiSolverViewModel = AiSolverViewModel()
 
     `when`(locationRepository.search(ArgumentMatchers.anyString(), anyOrNull(), anyOrNull()))
         .thenAnswer { invocation ->
@@ -168,7 +181,8 @@ class EndToEndSeekerCreateRequest {
             listProviderViewModel,
             seekerProfileViewModel,
             locationViewModel,
-            packageProposalViewModel)
+            packageProposalViewModel,
+            packagesAssistantViewModel)
       } else {
         when (user.value!!.role) {
           "seeker" ->
@@ -181,17 +195,22 @@ class EndToEndSeekerCreateRequest {
                   locationViewModel,
                   chatViewModel,
                   chatAssistantViewModel,
-                  notificationsViewModel)
+                  notificationsViewModel,
+                  aiSolverViewModel,
+                  packageProposalViewModel)
           "provider" ->
               ProviderUI(
                   authViewModel,
+                  providerViewModel,
                   listProviderViewModel,
                   serviceRequestViewModel,
                   seekerProfileViewModel,
                   chatViewModel,
                   notificationsViewModel,
                   locationViewModel,
-                  chatAssistantViewModel)
+                  packageProposalViewModel,
+                  chatAssistantViewModel,
+                  calendarViewModel)
         }
       }
     }
@@ -248,14 +267,11 @@ class EndToEndSeekerCreateRequest {
 
     // Assert the requests to be displayed
     composeTestRule.waitUntil(timeoutMillis = 10000) {
-      composeTestRule.onNodeWithTag("requestsList").isDisplayed()
+      composeTestRule.onNodeWithTag("service_booking_screen").isDisplayed()
     }
+    composeTestRule.onNodeWithTag("service_booking_screen").assertIsDisplayed()
 
     // Delete the request
-    composeTestRule.onNodeWithTag("requestListItem").performClick()
-    composeTestRule.waitUntil(timeoutMillis = 10000) {
-      composeTestRule.onNodeWithTag("edit_button").isDisplayed()
-    }
     composeTestRule.onNodeWithTag("edit_button").performClick()
     composeTestRule.waitUntil(timeoutMillis = 10000) {
       composeTestRule.onNodeWithTag("requestScreen").isDisplayed()

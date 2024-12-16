@@ -47,6 +47,12 @@ interface ServiceRequestRepository {
       onFailure: (Exception) -> Unit
   )
 
+  fun getServiceRequestById(
+      id: String,
+      onSuccess: (ServiceRequest) -> Unit,
+      onFailure: (Exception) -> Unit
+  )
+
   // Add a new service request
   fun saveServiceRequest(
       serviceRequest: ServiceRequest,
@@ -62,6 +68,12 @@ interface ServiceRequestRepository {
       serviceRequest: ServiceRequest,
       imageUri: Uri?,
       onSuccess: () -> Unit,
+      onFailure: (Exception) -> Unit
+  )
+
+  fun uploadMultipleImagesToStorage(
+      imageUris: List<Uri>,
+      onSuccess: (List<String>) -> Unit,
       onFailure: (Exception) -> Unit
   )
 }

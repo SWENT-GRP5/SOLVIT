@@ -4,8 +4,14 @@ import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
+import com.android.solvit.shared.model.authentication.AuthViewModel
+import com.android.solvit.shared.model.service.Services
+import com.android.solvit.shared.notifications.FcmTokenManager
+import com.android.solvit.shared.notifications.NotificationManager
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
+import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.storage.storage
 import java.time.LocalDate
 import java.time.ZoneId
@@ -13,8 +19,15 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
-open class ServiceRequestViewModel(private val repository: ServiceRequestRepository) : ViewModel() {
+open class ServiceRequestViewModel(
+    private val repository: ServiceRequestRepository,
+    private val notificationManager: NotificationManager? = null,
+    private val authViewModel: AuthViewModel? = null,
+    private val fcmTokenManager: FcmTokenManager? = null
+) : ViewModel() {
   private val _requests = MutableStateFlow<List<ServiceRequest>>(emptyList())
   val requests: StateFlow<List<ServiceRequest>> = _requests
 
@@ -39,6 +52,12 @@ open class ServiceRequestViewModel(private val repository: ServiceRequestReposit
   private val _archivedRequests = MutableStateFlow<List<ServiceRequest>>(emptyList())
   val archivedRequests: StateFlow<List<ServiceRequest>> = _archivedRequests
 
+  private val _selectedProviderId = MutableStateFlow<String?>(null)
+  val selectedProviderId: StateFlow<String?> = _selectedProviderId
+
+  private val _selectedProviderService = MutableStateFlow<Services?>(null)
+  val selectedProviderService: StateFlow<Services?> = _selectedProviderService
+
   init {
     repository.init { updateAllRequests() }
     repository.addListenerOnServiceRequests(
@@ -46,6 +65,21 @@ open class ServiceRequestViewModel(private val repository: ServiceRequestReposit
         onFailure = { exception ->
           Log.e("ServiceRequestViewModel", "Error listening ServiceRequests", exception)
         })
+    authViewModel?.user?.value?.uid?.let { userId ->
+      fcmTokenManager?.let { updateFcmToken(userId) }
+    }
+  }
+
+  private fun updateFcmToken(userId: String) {
+    viewModelScope.launch {
+      try {
+        val token = FirebaseMessaging.getInstance().token.await()
+        FcmTokenManager.getInstance().updateUserFcmToken(userId, token)
+        Log.d("FCM_DEBUG", "FCM Token updated for user $userId in ViewModel")
+      } catch (e: Exception) {
+        Log.e("FCM_DEBUG", "Error updating FCM token in ViewModel: ${e.message}", e)
+      }
+    }
   }
 
   // Create factory
@@ -55,7 +89,10 @@ open class ServiceRequestViewModel(private val repository: ServiceRequestReposit
           @Suppress("UNCHECKED_CAST")
           override fun <T : ViewModel> create(modelClass: Class<T>): T {
             return ServiceRequestViewModel(
-                ServiceRequestRepositoryFirebase(Firebase.firestore, Firebase.storage))
+                ServiceRequestRepositoryFirebase(Firebase.firestore, Firebase.storage),
+                NotificationManager.getInstance(),
+                null, // AuthViewModel should be injected from the activity/fragment
+                FcmTokenManager.getInstance())
                 as T
           }
         }
@@ -89,7 +126,7 @@ open class ServiceRequestViewModel(private val repository: ServiceRequestReposit
         })
   }
 
-  private fun getScheduledRequests() {
+  fun getScheduledRequests() {
     repository.getScheduledServiceRequests(
         onSuccess = { _scheduledRequests.value = it },
         onFailure = { exception ->
@@ -131,6 +168,15 @@ open class ServiceRequestViewModel(private val repository: ServiceRequestReposit
     getArchivedRequests()
   }
 
+  fun getServiceRequestById(id: String, onSuccess: (ServiceRequest) -> Unit) {
+    repository.getServiceRequestById(
+        id,
+        onSuccess = onSuccess,
+        onFailure = { exception ->
+          Log.e("ServiceRequestViewModel", "Error fetching ServiceRequest", exception)
+        })
+  }
+
   fun saveServiceRequest(serviceRequest: ServiceRequest) {
     repository.saveServiceRequest(
         serviceRequest,
@@ -145,7 +191,11 @@ open class ServiceRequestViewModel(private val repository: ServiceRequestReposit
         })
   }
 
-  fun saveServiceRequestWithImage(serviceRequest: ServiceRequest, imageUri: Uri) {
+  fun saveServiceRequestWithImage(
+      serviceRequest: ServiceRequest,
+      imageUri: Uri,
+      onSuccess: () -> Unit = {}
+  ) {
     repository.saveServiceRequestWithImage(
         serviceRequest,
         imageUri,
@@ -154,9 +204,25 @@ open class ServiceRequestViewModel(private val repository: ServiceRequestReposit
           if (serviceRequest.uid == _selectedRequest.value?.uid) {
             _selectedRequest.value = serviceRequest
           }
+          onSuccess()
         },
         onFailure = { exception ->
           Log.e("ServiceRequestViewModel", "Error saving ServiceRequest", exception)
+        })
+  }
+
+  fun uploadMultipleImages(
+      imageUris: List<Uri>,
+      onSuccess: (List<String>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    repository.uploadMultipleImagesToStorage(
+        imageUris = imageUris,
+        onSuccess = { urls ->
+          onSuccess(urls) // Pass URLs back to the UI
+        },
+        onFailure = { exception ->
+          onFailure(exception) // Pass exception back to the UI
         })
   }
 
@@ -178,12 +244,42 @@ open class ServiceRequestViewModel(private val repository: ServiceRequestReposit
     _selectedRequest.value = serviceRequest
   }
 
+  fun selectProvider(providerId: String, type: Services) {
+    _selectedProviderId.value = providerId
+    _selectedProviderService.value = type
+  }
+
+  fun unSelectProvider() {
+    _selectedProviderId.value = null
+    _selectedProviderService.value = null
+  }
+
   fun unConfirmRequest(serviceRequest: ServiceRequest) {
     saveServiceRequest(serviceRequest.copy(status = ServiceRequestStatus.PENDING))
   }
 
-  fun confirmRequest(serviceRequest: ServiceRequest) {
-    saveServiceRequest(serviceRequest.copy(status = ServiceRequestStatus.ACCEPTED))
+  fun confirmRequest(serviceRequest: ServiceRequest, providerName: String) {
+    try {
+      val updatedRequest = serviceRequest.copy(status = ServiceRequestStatus.ACCEPTED)
+      repository.saveServiceRequest(
+          updatedRequest,
+          onSuccess = {
+            viewModelScope.launch {
+              notificationManager
+                  ?.sendServiceRequestAcceptedNotification(
+                      recipientUserId = serviceRequest.userId,
+                      requestId = serviceRequest.uid,
+                      providerName = providerName)
+                  ?.onFailure { e ->
+                    Log.e("FCM_DEBUG", "Failed to send acceptance notification", e)
+                  }
+            }
+            updateAllRequests()
+          },
+          onFailure = { e -> Log.e("ServiceRequestViewModel", "Error confirming request", e) })
+    } catch (e: Exception) {
+      Log.e("ServiceRequestViewModel", "Error in confirmRequest", e)
+    }
   }
 
   fun scheduleRequest(serviceRequest: ServiceRequest) {
