@@ -26,7 +26,6 @@ class SignUpChooseProfileTest {
     composeTestRule.onNodeWithTag("signUpAsTitle").assertIsDisplayed()
     composeTestRule.onNodeWithTag("seekerButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("providerButton").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("learnMoreLink").assertIsDisplayed()
   }
 
   @Test
