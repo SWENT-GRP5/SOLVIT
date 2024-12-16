@@ -152,43 +152,44 @@ fun TopSection(
       Row(
           modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp).height(45.dp),
           horizontalArrangement = Arrangement.SpaceBetween,
-      ) {
-        AsyncImage(
-            model = userProfile.imageUrl.ifEmpty { R.drawable.ic_user },
-            placeholder = painterResource(id = R.drawable.loading),
-            error = painterResource(id = R.drawable.error),
-            contentDescription = "profile picture",
-            contentScale = ContentScale.Crop,
-            modifier =
-                Modifier.size(40.dp)
-                    .clip(CircleShape)
-                    .clickable { navigationActions.navigateTo(Route.PROFILE) }
-                    .testTag("servicesScreenProfileImage"))
+          verticalAlignment = Alignment.CenterVertically) {
+            AsyncImage(
+                model = userProfile.imageUrl.ifEmpty { R.drawable.ic_user },
+                placeholder = painterResource(id = R.drawable.loading),
+                error = painterResource(id = R.drawable.error),
+                contentDescription = "profile picture",
+                contentScale = ContentScale.Crop,
+                modifier =
+                    Modifier.size(40.dp)
+                        .clip(CircleShape)
+                        .clickable { navigationActions.navigateTo(Route.PROFILE) }
+                        .testTag("servicesScreenProfileImage"))
 
-        Row(
-            modifier = Modifier.testTag("SloganIcon"),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-          Text(
-              text = "Solv",
-              style =
-                  TextStyle(
-                      fontSize = 25.sp,
-                      fontWeight = FontWeight.Bold,
-                      color = colorScheme.onBackground))
-          Text(
-              text = "It",
-              style =
-                  TextStyle(
-                      fontSize = 25.sp,
-                      fontWeight = FontWeight.Bold,
-                      color = colorScheme.secondary))
-        }
+            Row(
+                modifier = Modifier.testTag("SloganIcon"),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+              Text(
+                  text = "Solv",
+                  style =
+                      TextStyle(
+                          fontSize = 25.sp,
+                          fontWeight = FontWeight.Bold,
+                          color = colorScheme.onBackground))
+              Text(
+                  text = "It",
+                  style =
+                      TextStyle(
+                          fontSize = 25.sp,
+                          fontWeight = FontWeight.Bold,
+                          color = colorScheme.secondary))
+            }
 
-        IconButton(onClick = { toast.show() }, modifier = Modifier.testTag("servicesScreenMenu")) {
-          Icon(imageVector = Icons.Default.Menu, contentDescription = null)
-        }
-      }
+            IconButton(
+                onClick = { toast.show() }, modifier = Modifier.testTag("servicesScreenMenu")) {
+                  Icon(imageVector = Icons.Default.Menu, contentDescription = null)
+                }
+          }
       DockedSearchBar(
           query = searchText,
           onQueryChange = searchViewModel::onSearchTextChange,

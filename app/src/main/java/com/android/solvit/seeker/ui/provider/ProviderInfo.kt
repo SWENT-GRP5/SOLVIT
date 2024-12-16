@@ -859,10 +859,12 @@ fun SelectRequestDialog(
                                     verticalAlignment = Alignment.CenterVertically) {
                                       Box(
                                           modifier =
-                                              Modifier.size(48.dp)
+                                              Modifier.fillMaxHeight()
+                                                  .size(48.dp)
                                                   .clip(RoundedCornerShape(8.dp))
                                                   .background(Color.LightGray)) {
                                             AsyncImage(
+                                                modifier = Modifier.fillMaxSize(),
                                                 model =
                                                     if (!request.imageUrl.isNullOrEmpty())
                                                         request.imageUrl
@@ -871,7 +873,7 @@ fun SelectRequestDialog(
                                                     painterResource(id = R.drawable.loading),
                                                 error = painterResource(id = R.drawable.error),
                                                 contentDescription = "Service Image",
-                                                contentScale = ContentScale.Fit)
+                                                contentScale = ContentScale.Crop)
                                           }
 
                                       Spacer(Modifier.width(16.dp))
@@ -880,7 +882,10 @@ fun SelectRequestDialog(
                                             modifier = Modifier.testTag("request_title"),
                                             text = request.title,
                                             style = Typography.titleMedium,
-                                            color = colorScheme.onPrimaryContainer)
+                                            maxLines = 2,
+                                            overflow = TextOverflow.Ellipsis,
+                                            color = colorScheme.onPrimaryContainer,
+                                        )
                                         Text(
                                             modifier = Modifier.testTag("request_description"),
                                             text = request.description,

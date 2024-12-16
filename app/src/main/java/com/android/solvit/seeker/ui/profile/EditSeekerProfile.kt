@@ -156,7 +156,7 @@ fun EditSeekerProfileScreen(
                   screenWidth = screenWidth,
                   verticalSpacing = verticalSpacing)
 
-              Spacer(modifier = Modifier.height(verticalSpacing))
+              Spacer(modifier = Modifier.height(10.dp))
 
               // Full Name Input
               CustomOutlinedTextField(
@@ -172,7 +172,7 @@ fun EditSeekerProfileScreen(
                   errorTestTag = "nameErrorMessage",
                   maxLines = 2)
 
-              Spacer(modifier = Modifier.height(verticalSpacing))
+              Spacer(modifier = Modifier.height(10.dp))
 
               // Username Input
               CustomOutlinedTextField(
@@ -188,7 +188,7 @@ fun EditSeekerProfileScreen(
                   errorTestTag = "newPhoneNumberErrorMessage",
                   maxLines = 1)
 
-              Spacer(modifier = Modifier.height(verticalSpacing))
+              Spacer(modifier = Modifier.height(10.dp))
 
               CustomOutlinedTextField(
                   value = phone,
@@ -203,7 +203,7 @@ fun EditSeekerProfileScreen(
                   errorTestTag = "phoneNumberErrorSeekerRegistration",
                   keyboardType = KeyboardType.Number)
               // Address Input
-              Spacer(modifier = Modifier.height(verticalSpacing))
+              Spacer(modifier = Modifier.height(10.dp))
               LocationDropdown(
                   locationQuery = address!!.name,
                   onLocationQueryChange = { locationViewModel.setQuery(it) },
@@ -220,7 +220,7 @@ fun EditSeekerProfileScreen(
                   isValueOk = okNewLocation,
                   testTag = "profileAddress")
 
-              Spacer(modifier = Modifier.weight(1f))
+              Spacer(modifier = Modifier.height(20.dp))
 
               SaveButton(
                   onClick = {

@@ -559,8 +559,7 @@ fun JobItem(
                       color = colorScheme.onBackground,
                       maxLines = 1,
                       overflow = TextOverflow.Ellipsis,
-                      modifier = Modifier.weight(1f))
-                  Spacer(modifier = Modifier.weight(1f))
+                      modifier = Modifier.weight(1f).padding(end = 8.dp))
                   OnLearnMoreButton(onLearnMore, request)
                 }
               }

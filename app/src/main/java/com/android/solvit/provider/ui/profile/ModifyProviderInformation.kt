@@ -122,7 +122,7 @@ fun ModifyProviderInformationScreen(
                     .background(colorScheme.background)
                     .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceEvenly,
+            verticalArrangement = Arrangement.SpaceBetween,
         ) {
           provider?.let {
             ModifyInput(
@@ -227,6 +227,7 @@ fun ModifyInput(
       errorTestTag = "nameErrorMessage",
       maxLines = 2)
 
+  Spacer(modifier = Modifier.height(10.dp))
   CustomOutlinedTextField(
       value = newCompanyName,
       onValueChange = { newCompanyName = it },
@@ -240,8 +241,10 @@ fun ModifyInput(
       errorTestTag = "companyNameErrorMessage",
       maxLines = 2)
 
+  Spacer(modifier = Modifier.height(10.dp))
   ServiceDropdownMenu(selectedService = newService, onServiceSelected = { newService = it })
 
+  Spacer(modifier = Modifier.height(10.dp))
   CustomOutlinedTextField(
       value = newPhoneNumber,
       onValueChange = { newPhoneNumber = it },
@@ -255,6 +258,7 @@ fun ModifyInput(
       errorTestTag = "newPhoneNumberErrorMessage",
       maxLines = 1)
 
+  Spacer(modifier = Modifier.height(10.dp))
   LocationDropdown(
       locationQuery = newLocation,
       onLocationQueryChange = { locationViewModel.setQuery(it) },
@@ -268,6 +272,7 @@ fun ModifyInput(
       isValueOk = okNewLocation,
       testTag = "newLocationInputField")
 
+  Spacer(modifier = Modifier.height(10.dp))
   LanguageDropdownMenu(
       selectedLanguages = newLanguage,
       onLanguageSelected = { language, isChecked ->
@@ -279,6 +284,7 @@ fun ModifyInput(
             }
       })
 
+  Spacer(modifier = Modifier.height(10.dp))
   CustomOutlinedTextField(
       value = newDescription,
       onValueChange = { newDescription = it },
@@ -293,6 +299,7 @@ fun ModifyInput(
       textAlign = TextAlign.Start,
       maxLines = 7)
 
+  Spacer(modifier = Modifier.height(20.dp))
   SaveButton(
       onClick = {
         if (allIsGood) {

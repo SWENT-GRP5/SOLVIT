@@ -206,7 +206,7 @@ fun TopAppBar(
                       Spacer(modifier = Modifier.height(4.dp))
                       Text(
                           text = "Find the best $serviceName near you",
-                          style = Typography.bodyMedium.copy(color = colorScheme.onPrimary),
+                          style = Typography.bodyMedium.copy(color = serviceItem.color),
                           fontWeight = FontWeight.Medium)
                     }
                   }
@@ -440,7 +440,7 @@ fun ProviderRowCard(
                 navigationActions.navigateTo(Route.PROVIDER_INFO)
               }
               .shadow(4.dp, shape = RoundedCornerShape(12.dp)),
-      border = BorderStroke(1.dp, Services.getColor(provider.service)),
+      // border = BorderStroke(1.dp, Services.getColor(provider.service)),
       shape = RoundedCornerShape(12.dp),
       colors = CardDefaults.cardColors(colorScheme.background)) {
         Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {

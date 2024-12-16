@@ -69,7 +69,7 @@ fun CustomOutlinedTextField(
     errorTestTag: String = "errorMessage",
     maxLines: Int = 1,
     textAlign: TextAlign = TextAlign.Unspecified,
-    keyboardType: KeyboardType = KeyboardType.Text,
+    keyboardType: KeyboardType = KeyboardType.Text
 ) {
   // State to track if the field has been "visited" (focused and then unfocused)
   var hasBeenFocused by remember { mutableStateOf(false) }
