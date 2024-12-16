@@ -35,8 +35,8 @@ class SeekerProfileViewModel(
   private val _cachedLocations = MutableStateFlow<List<Location>>(emptyList())
   val cachedLocations: StateFlow<List<Location>> = _cachedLocations
 
-  private val _locationSearched = MutableStateFlow<Location>(Location(0.0, 0.0, "Unknown"))
-  val locationSearched: StateFlow<Location> = _locationSearched
+  private val _locationSearched = MutableStateFlow<Location?>(null)
+  val locationSearched: StateFlow<Location?> = _locationSearched
 
   private val _userPreferences = MutableStateFlow<List<String>>(emptyList())
   val userPreferences: StateFlow<List<String>> = _userPreferences
@@ -143,5 +143,9 @@ class SeekerProfileViewModel(
 
   fun setLocationSearched(location: Location) {
     _locationSearched.value = location
+  }
+
+  fun clearLocation() {
+    _locationSearched.value = null
   }
 }
