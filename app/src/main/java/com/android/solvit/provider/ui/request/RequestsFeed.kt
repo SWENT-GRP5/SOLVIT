@@ -155,12 +155,9 @@ fun RequestsFeedScreen(
   Scaffold(
       topBar = {
         RequestsTopBar(
-            navigationActions,
-            notificationViewModel,
-            providerId,
-            selectedService,
-            searchQuery
-        ) { selectedService = it }
+            navigationActions, notificationViewModel, providerId, selectedService, searchQuery) {
+              selectedService = it
+            }
       },
       bottomBar = {
         BottomNavigationMenu(
@@ -226,7 +223,6 @@ fun RequestsTopBar(
           modifier = Modifier.fillMaxWidth().testTag("RequestsTopBar").padding(start = 16.dp),
           horizontalArrangement = Arrangement.SpaceBetween,
           verticalAlignment = Alignment.CenterVertically) {
-
             Row(
                 modifier = Modifier.testTag("SloganIcon"),
                 verticalAlignment = Alignment.CenterVertically,
