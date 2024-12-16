@@ -80,7 +80,7 @@ import com.android.solvit.shared.model.review.ReviewViewModel
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
-import com.android.solvit.shared.ui.theme.SecondaryPackage
+import com.android.solvit.shared.ui.theme.SelectedPackage
 import com.android.solvit.shared.ui.theme.Typography
 import com.android.solvit.shared.ui.utils.TopAppBarInbox
 
@@ -117,7 +117,7 @@ fun ProviderInfoScreen(
   val user = authViewModel.user.collectAsState()
   val userId = user.value?.uid ?: "-1"
 
-  val packages = packagesProposal.filter { it.providerId == provider.uid }
+  val packages = packagesProposal.filter { it.providerId == provider.uid }.sortedBy { it.price }
 
   Scaffold(
       containerColor = colorScheme.surface,
@@ -199,7 +199,7 @@ fun PackageCard(
       elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
       colors =
           CardDefaults.cardColors(
-              containerColor = if (!selectedIndex) colorScheme.surface else SecondaryPackage,
+              containerColor = if (!selectedIndex) colorScheme.surface else SelectedPackage,
           )) {
         Box(modifier = Modifier.fillMaxSize()) {
           Column(
@@ -218,14 +218,14 @@ fun PackageCard(
                       style = Typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
                       color =
                           if (!selectedIndex) colorScheme.onPrimaryContainer
-                          else colorScheme.onPrimary)
+                          else colorScheme.onPrimaryContainer)
                   Spacer(modifier = Modifier.width(8.dp)) // Increased space between price and unit
                   Text(
                       text = "/hour",
                       style = Typography.bodySmall,
                       color =
                           if (!selectedIndex) colorScheme.onPrimaryContainer
-                          else colorScheme.onPrimary)
+                          else colorScheme.onPrimaryContainer)
                 }
                 Spacer(modifier = Modifier.height(12.dp))
                 // Title of the Package
@@ -234,7 +234,7 @@ fun PackageCard(
                     style = Typography.titleMedium,
                     color =
                         if (!selectedIndex) colorScheme.onPrimaryContainer
-                        else colorScheme.onPrimary)
+                        else colorScheme.onPrimaryContainer)
                 Spacer(
                     modifier =
                         Modifier.height(12.dp)) // Increased space between title and description
@@ -242,7 +242,7 @@ fun PackageCard(
                 Text(
                     text = packageProposal.description,
                     style = Typography.bodyMedium,
-                    color = if (!selectedIndex) colorScheme.onSurface else colorScheme.onPrimary)
+                    color = if (!selectedIndex) colorScheme.onSurface else colorScheme.onSurface)
                 Spacer(
                     modifier =
                         Modifier.height(12.dp)) // Increased space between description and features
@@ -262,7 +262,7 @@ fun PackageCard(
                           text = feature,
                           style = Typography.bodyMedium,
                           color =
-                              if (!selectedIndex) colorScheme.onSurface else colorScheme.onPrimary)
+                              if (!selectedIndex) colorScheme.onSurface else colorScheme.onSurface)
                     }
                   }
                 }

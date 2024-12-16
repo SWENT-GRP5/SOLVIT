@@ -1,5 +1,6 @@
 package com.android.solvit.provider.ui.request
 
+import android.annotation.SuppressLint
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -75,6 +76,7 @@ import kotlinx.coroutines.launch
  * @param authViewModel ViewModel for managing authentication.
  * @param listProviderViewModel View model for list of providers
  */
+@SuppressLint("SuspiciousIndentation")
 @Composable
 fun RequestsDashboardScreen(
     navigationActions: NavigationActions,
