@@ -523,7 +523,7 @@ fun AiSolverHeader(navigationActions: NavigationActions) {
       },
       colors =
           TopAppBarDefaults.topAppBarColors(
-              containerColor = colorScheme.surface,
+              containerColor = colorScheme.background,
               titleContentColor = colorScheme.onSurface,
               navigationIconContentColor = colorScheme.onSurface,
               actionIconContentColor = colorScheme.onSurface),
