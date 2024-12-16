@@ -49,6 +49,7 @@ import com.android.solvit.seeker.ui.profile.Stepper
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
+import com.android.solvit.shared.ui.navigation.Screen
 import com.android.solvit.shared.ui.theme.Typography
 import com.android.solvit.shared.ui.utils.TopAppBarInbox
 
@@ -113,10 +114,30 @@ fun SignUpChooseProfile(
                     authViewModel.setRole("seeker")
                     if (authViewModel.googleAccount.value == null) {
                       authViewModel.registerWithEmailAndPassword(
-                          { navigationActions.navigateTo(Route.SEEKER_REGISTRATION) }, {})
+                          {
+                            Toast.makeText(context, "You are Signed up!", Toast.LENGTH_SHORT).show()
+                            navigationActions.navigateTo(Route.SEEKER_REGISTRATION)
+                          },
+                          {
+                            if (!authViewModel.userRegistered.value) {
+                              Toast.makeText(
+                                      context, "You already have an account", Toast.LENGTH_SHORT)
+                                  .show()
+                              navigationActions.navigateTo(Screen.SIGN_IN)
+                            } else {
+                              Toast.makeText(context, "Failed to register", Toast.LENGTH_SHORT)
+                                  .show()
+                            }
+                          })
                     } else {
                       authViewModel.registerWithGoogle(
-                          { navigationActions.navigateTo(Route.SEEKER_REGISTRATION) }, {})
+                          {
+                            Toast.makeText(context, "You are Signed up!", Toast.LENGTH_SHORT).show()
+                            navigationActions.navigateTo(Route.SEEKER_REGISTRATION)
+                          },
+                          {
+                            Toast.makeText(context, "Failed to register", Toast.LENGTH_SHORT).show()
+                          })
                     }
                   })
 
@@ -139,7 +160,15 @@ fun SignUpChooseProfile(
                             navigationActions.navigateTo(Route.PROVIDER_REGISTRATION)
                           },
                           {
-                            Toast.makeText(context, "Failed to register", Toast.LENGTH_SHORT).show()
+                            if (!authViewModel.userRegistered.value) {
+                              Toast.makeText(
+                                      context, "You already have an account", Toast.LENGTH_SHORT)
+                                  .show()
+                              navigationActions.navigateTo(Screen.SIGN_IN)
+                            } else {
+                              Toast.makeText(context, "Failed to register", Toast.LENGTH_SHORT)
+                                  .show()
+                            }
                           })
                     } else {
                       authViewModel.registerWithGoogle(
