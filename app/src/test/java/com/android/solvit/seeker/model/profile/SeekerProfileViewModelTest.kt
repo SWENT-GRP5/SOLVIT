@@ -22,7 +22,7 @@ class SeekerProfileViewModelTest {
   private lateinit var authRepository: AuthRepository
   private lateinit var firebaseRepository: UserRepositoryFirestore
 
-  val testProfile =
+  private val testProfile =
       SeekerProfile(
           uid = "12345",
           name = "John Doe",
@@ -67,19 +67,10 @@ class SeekerProfileViewModelTest {
   }
 
   @Test
-  fun addUserProfielCallsRepository() {
-    seekerProfileViewModel.addUserProfile(testProfile)
-    verify(firebaseRepository).addUserProfile(any(), any(), any())
+  fun addUserProfileCallsRepository() {
+    seekerProfileViewModel.addUserProfile(testProfile, mock(android.net.Uri::class.java))
+    verify(firebaseRepository).addUserProfile(any(), any(), any(), any())
   }
-
-  /*
-  @Test
-  fun updateUserProfileUpdatesLocalProfile() {
-
-    seekerProfileViewModel.updateUserProfile(testProfile)
-    val updatedProfile = seekerProfileViewModel.seekerProfile.value
-    assertThat(updatedProfile, `is`(testProfile))
-  }*/
 
   @Test
   fun deleteUserProfileCallsRepository() {

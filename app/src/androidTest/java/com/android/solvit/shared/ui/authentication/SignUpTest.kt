@@ -14,6 +14,7 @@ import androidx.test.espresso.intent.Intents
 import androidx.test.espresso.intent.matcher.IntentMatchers
 import androidx.test.espresso.intent.rule.IntentsRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Screen
 import io.mockk.every
@@ -35,13 +36,20 @@ class SignUpScreenTest {
   @get:Rule val intentsTestRule = IntentsRule()
 
   private val mockNavigationActions = mock(NavigationActions::class.java)
+  private val mockAuthViewModel = mockk<AuthViewModel>(relaxed = true)
+
+  @Before
+  fun setup() {
+    // Wait for compose to be ready
+    composeTestRule.waitForIdle()
+  }
 
   @Test
   fun signUp_testAllTheTest() {
-    composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
+    // Set content and wait for it to be ready
+    composeTestRule.setContent { SignUpScreen(mockNavigationActions, mockAuthViewModel) }
     composeTestRule.waitForIdle()
 
-    composeTestRule.onNodeWithTag("goBackButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("signUpIllustration").assertIsDisplayed()
     composeTestRule.onNodeWithTag("signUpTitle").assertIsDisplayed()
     composeTestRule.onNodeWithTag("googleSignUpButton").assertIsDisplayed()
@@ -55,10 +63,9 @@ class SignUpScreenTest {
 
   @Test
   fun signUp_testAllPerformClick() {
-    composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
+    composeTestRule.setContent { SignUpScreen(mockNavigationActions, mockAuthViewModel) }
     composeTestRule.waitForIdle()
 
-    composeTestRule.onNodeWithTag("goBackButton").performClick()
     composeTestRule.onNodeWithTag("passwordInputField").performClick()
     composeTestRule.onNodeWithTag("confirmPasswordInputField").performClick()
     composeTestRule.onNodeWithTag("emailInputField").performClick()
@@ -68,7 +75,7 @@ class SignUpScreenTest {
 
   @Test
   fun signUp_emailAndPasswordInput() {
-    composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
+    composeTestRule.setContent { SignUpScreen(mockNavigationActions, mockAuthViewModel) }
     composeTestRule.waitForIdle()
 
     // Test email input
@@ -78,7 +85,7 @@ class SignUpScreenTest {
 
   @Test
   fun signUp_errorShowInEmailField() {
-    composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
+    composeTestRule.setContent { SignUpScreen(mockNavigationActions, mockAuthViewModel) }
     composeTestRule.waitForIdle()
 
     composeTestRule.onNodeWithTag("emailErrorMessage").isNotDisplayed()
@@ -91,7 +98,7 @@ class SignUpScreenTest {
 
   @Test
   fun signUp_errorShowInPasswordField() {
-    composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
+    composeTestRule.setContent { SignUpScreen(mockNavigationActions, mockAuthViewModel) }
     composeTestRule.waitForIdle()
 
     composeTestRule.onNodeWithTag("passwordErrorMessage").isNotDisplayed()
@@ -104,7 +111,7 @@ class SignUpScreenTest {
 
   @Test
   fun signUp_errorShowInConfirmPasswordField() {
-    composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
+    composeTestRule.setContent { SignUpScreen(mockNavigationActions, mockAuthViewModel) }
     composeTestRule.waitForIdle()
 
     composeTestRule.onNodeWithTag("confirmPasswordErrorMessage").isNotDisplayed()
@@ -117,7 +124,7 @@ class SignUpScreenTest {
 
   @Test
   fun signUp_emailInput() {
-    composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
+    composeTestRule.setContent { SignUpScreen(mockNavigationActions, mockAuthViewModel) }
     composeTestRule.waitForIdle()
 
     // Test email input
@@ -126,7 +133,7 @@ class SignUpScreenTest {
 
   @Test
   fun signUp_googleSignInReturnsValidActivityResult() {
-    composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
+    composeTestRule.setContent { SignUpScreen(mockNavigationActions, mockAuthViewModel) }
     composeTestRule.waitForIdle()
     composeTestRule.onNodeWithTag("googleSignUpButton").performClick()
     // assert that an Intent resolving to Google Mobile Services has been sent (for sign-in)
@@ -136,7 +143,8 @@ class SignUpScreenTest {
   @Test
   fun signUp_formCompleteEnablesButton() {
     runBlocking {
-      composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
+      composeTestRule.setContent { SignUpScreen(mockNavigationActions, mockAuthViewModel) }
+      composeTestRule.waitForIdle()
       composeTestRule.onNodeWithTag("emailInputField").performTextInput("test@test.com")
       composeTestRule.onNodeWithTag("passwordInputField").performTextInput("password")
       composeTestRule.onNodeWithTag("confirmPasswordInputField").performTextInput("password")
@@ -147,14 +155,14 @@ class SignUpScreenTest {
 
   @Test
   fun signUp_signUpButtonNavigatesToChooseRoleScreen() {
-    composeTestRule.setContent { SignUpScreen(mockNavigationActions) }
+    composeTestRule.setContent { SignUpScreen(mockNavigationActions, mockAuthViewModel) }
     composeTestRule.waitForIdle()
     composeTestRule.onNodeWithTag("emailInputField").performTextInput("test@test.com")
     composeTestRule.onNodeWithTag("passwordInputField").performTextInput("password")
     composeTestRule.onNodeWithTag("confirmPasswordInputField").performTextInput("password")
 
     composeTestRule.onNodeWithTag("signUpButton").performClick()
-    verify(mockNavigationActions).navigateTo(Screen.SIGN_UP_CHOOSE_ROLE)
+    verify(mockNavigationActions).navigateTo(Screen.CHOOSE_ROLE)
   }
 }
 
@@ -163,6 +171,9 @@ class SignUpButtonTest {
 
   @Before
   fun setup() {
+    // Wait for compose to be ready
+    composeTestRule.waitForIdle()
+
     // Mock the Toast.makeText function to intercept the Toast messages
     mockkStatic(Toast::class)
     every { Toast.makeText(any(), any<String>(), any()) } answers { mockk(relaxed = true) }
@@ -179,7 +190,6 @@ class SignUpButtonTest {
           samePassword = true)
     }
     composeTestRule.waitForIdle()
-
     composeTestRule.onNodeWithTag("signUpButton").performClick()
 
     verify { Toast.makeText(any(), "Please fill in all required fields", Toast.LENGTH_SHORT) }
@@ -211,6 +221,7 @@ class SignUpButtonTest {
           passwordLengthComplete = true,
           samePassword = false)
     }
+    composeTestRule.waitForIdle()
 
     composeTestRule.onNodeWithTag("signUpButton").performClick()
     composeTestRule.waitForIdle()

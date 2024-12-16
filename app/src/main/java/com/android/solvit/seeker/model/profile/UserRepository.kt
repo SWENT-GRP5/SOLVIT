@@ -1,5 +1,6 @@
 package com.android.solvit.seeker.model.profile
 
+import android.net.Uri
 import com.android.solvit.shared.model.map.Location
 
 interface UserRepository {
@@ -21,7 +22,12 @@ interface UserRepository {
       onFailure: (Exception) -> Unit
   )
 
-  fun addUserProfile(profile: SeekerProfile, onSuccess: () -> Unit, onFailure: (Exception) -> Unit)
+  fun addUserProfile(
+      profile: SeekerProfile,
+      imageUri: Uri?,
+      onSuccess: () -> Unit,
+      onFailure: (Exception) -> Unit
+  )
 
   fun deleteUserProfile(id: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit)
 

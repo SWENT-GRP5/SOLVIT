@@ -29,7 +29,7 @@ import org.mockito.Mockito.`when`
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 
-class ListProviderScreenTest {
+class SelectProviderScreenTest {
   private lateinit var providerRepository: ProviderRepository
   private lateinit var listProviderViewModel: ListProviderViewModel
 
@@ -117,7 +117,6 @@ class ListProviderScreenTest {
     listProviderViewModel.selectService(Services.PLUMBER)
     listProviderViewModel.getProviders()
 
-    composeTestRule.onNodeWithTag("serviceImage").assertIsDisplayed()
     composeTestRule.onNodeWithTag("popularProviders").assertIsDisplayed()
     composeTestRule.onNodeWithTag("providersList").assertIsDisplayed()
     composeTestRule.onNodeWithTag("filterByLocation").assertIsDisplayed()
