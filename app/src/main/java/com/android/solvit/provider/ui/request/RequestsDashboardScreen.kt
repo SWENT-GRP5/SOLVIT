@@ -508,6 +508,7 @@ fun OnLearnMoreButton(onLearnMore: (() -> Unit)?, request: ServiceRequest) {
  * @param onArchiveRequest Optional callback to archive the job.
  * @param onChat Optional callback to initiate a chat with the customer.
  */
+@SuppressLint("SuspiciousIndentation")
 @Composable
 fun JobItem(
     request: ServiceRequest,
@@ -563,14 +564,16 @@ fun JobItem(
                   OnLearnMoreButton(onLearnMore, request)
                 }
               }
-          if (status == ServiceRequestStatus.SCHEDULED)
-          // Job Title
-          Text(
-                  text = request.title,
-                  style = Typography.titleMedium,
-                  color = colorScheme.onBackground,
-                  maxLines = 1,
-                  overflow = TextOverflow.Ellipsis)
+          if (status == ServiceRequestStatus.SCHEDULED) {
+            // Job Title
+            Text(
+                text = request.title,
+                style = Typography.titleMedium,
+                color = colorScheme.onBackground,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis)
+          }
+
           // Job  Description
           Text(
               request.description,
