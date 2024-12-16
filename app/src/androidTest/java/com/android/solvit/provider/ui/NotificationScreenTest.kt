@@ -112,7 +112,7 @@ class NotificationsScreenTest {
         .onNodeWithTag("notificationMessage_1", useUnmergedTree = true)
         .assertIsDisplayed()
     composeTestRule
-        .onNodeWithTag("notificationTimestamp_1", useUnmergedTree = true)
+        .onNodeWithTag("notificationTimestamp", useUnmergedTree = true)
         .assertIsDisplayed()
 
     composeTestRule.onNodeWithTag("notificationTitle_2", useUnmergedTree = true).assertIsDisplayed()
@@ -120,7 +120,7 @@ class NotificationsScreenTest {
         .onNodeWithTag("notificationMessage_2", useUnmergedTree = true)
         .assertIsDisplayed()
     composeTestRule
-        .onNodeWithTag("notificationTimestamp_2", useUnmergedTree = true)
+        .onNodeWithTag("notificationTimestamp", useUnmergedTree = true)
         .assertIsDisplayed()
   }
 
@@ -142,6 +142,7 @@ class NotificationsScreenTest {
 
     // Verify the empty state
     composeTestRule.onNodeWithTag("noNotificationsText").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("noNotificationsImage").assertIsDisplayed()
   }
 
   @Test
@@ -181,9 +182,9 @@ class NotificationsScreenTest {
     // date, and status
     composeTestRule.onNodeWithTag("dialogTitle").assertIsDisplayed()
     composeTestRule.onNodeWithTag("dialogDescription").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("dialogLocation").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("map_image").assertIsDisplayed()
     composeTestRule.onNodeWithTag("dialogDueDate").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("dialogStatus").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("request_image").assertIsDisplayed()
   }
 
   @Test
@@ -203,24 +204,14 @@ class NotificationsScreenTest {
     composeTestRule.onNodeWithTag("dialogDescription").assertIsDisplayed()
 
     // Verify the text content of the dialog elements matches the service request details
-    composeTestRule
-        .onNodeWithTag("dialogTitle")
-        .assertTextEquals("Title : title") // Matching the title
+    composeTestRule.onNodeWithTag("dialogTitle").assertTextEquals("title") // Matching the title
     composeTestRule
         .onNodeWithTag("dialogDescription")
-        .assertTextEquals("Description: description") // Matching the description
-
-    // For location, check if it displays correctly
-    composeTestRule.onNodeWithTag("dialogLocation").assertTextEquals("San Francisco")
+        .assertTextEquals("description") // Matching the description
 
     // For the due date
-    composeTestRule
-        .onNodeWithTag("dialogDueDate")
-        .assertTextEquals(" 01/02/2024") // Make sure this matches the date format used
-
-    // For the status
-    composeTestRule
-        .onNodeWithTag("dialogStatus")
-        .assertTextEquals("Pending") // Ensure this matches the service request status
+      composeTestRule
+          .onNodeWithTag("dialogDueDate")
+          .assertTextEquals("01/02/2024") //  Matching the date format used
   }
 }
