@@ -47,7 +47,6 @@ object Screen {
   const val SIGN_IN = "SignIn_Screen"
   const val SIGN_UP = "Sign_Up_Screen"
   const val CHOOSE_ROLE = "Choose_Role_Screen"
-  const val FORGOT_PASSWORD = "Forgot_Password_Screen"
 
   // Seeker UI
   const val SEEKER_PROFILE = "Seeker_Profile_Screen"
