@@ -1,6 +1,7 @@
 package com.android.solvit.shared.ui.authentication
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.pm.ActivityInfo
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -111,34 +112,7 @@ fun SignUpChooseProfile(
                   description = "I want to request services.",
                   testTag = "seekerButton",
                   onClickButton = {
-                    authViewModel.setRole("seeker")
-                    if (authViewModel.googleAccount.value == null) {
-                      authViewModel.registerWithEmailAndPassword(
-                          {
-                            Toast.makeText(context, "You are Signed up!", Toast.LENGTH_SHORT).show()
-                            navigationActions.navigateTo(Route.SEEKER_REGISTRATION)
-                          },
-                          {
-                            if (!authViewModel.userRegistered.value) {
-                              Toast.makeText(
-                                      context, "You already have an account", Toast.LENGTH_SHORT)
-                                  .show()
-                              navigationActions.navigateTo(Screen.SIGN_IN)
-                            } else {
-                              Toast.makeText(context, "Failed to register", Toast.LENGTH_SHORT)
-                                  .show()
-                            }
-                          })
-                    } else {
-                      authViewModel.registerWithGoogle(
-                          {
-                            Toast.makeText(context, "You are Signed up!", Toast.LENGTH_SHORT).show()
-                            navigationActions.navigateTo(Route.SEEKER_REGISTRATION)
-                          },
-                          {
-                            Toast.makeText(context, "Failed to register", Toast.LENGTH_SHORT).show()
-                          })
-                    }
+                    handleRoleSelection("seeker", authViewModel, context, navigationActions)
                   })
 
               Spacer(modifier = Modifier.height(16.dp))
@@ -152,34 +126,7 @@ fun SignUpChooseProfile(
                   description = "I want to offer services.",
                   testTag = "providerButton",
                   onClickButton = {
-                    authViewModel.setRole("provider")
-                    if (authViewModel.googleAccount.value == null) {
-                      authViewModel.registerWithEmailAndPassword(
-                          {
-                            Toast.makeText(context, "You are Signed up!", Toast.LENGTH_SHORT).show()
-                            navigationActions.navigateTo(Route.PROVIDER_REGISTRATION)
-                          },
-                          {
-                            if (!authViewModel.userRegistered.value) {
-                              Toast.makeText(
-                                      context, "You already have an account", Toast.LENGTH_SHORT)
-                                  .show()
-                              navigationActions.navigateTo(Screen.SIGN_IN)
-                            } else {
-                              Toast.makeText(context, "Failed to register", Toast.LENGTH_SHORT)
-                                  .show()
-                            }
-                          })
-                    } else {
-                      authViewModel.registerWithGoogle(
-                          {
-                            Toast.makeText(context, "You are Signed up!", Toast.LENGTH_SHORT).show()
-                            navigationActions.navigateTo(Route.PROVIDER_REGISTRATION)
-                          },
-                          {
-                            Toast.makeText(context, "Failed to register", Toast.LENGTH_SHORT).show()
-                          })
-                    }
+                    handleRoleSelection("provider", authViewModel, context, navigationActions)
                   })
 
               Spacer(modifier = Modifier.height(20.dp))
@@ -296,5 +243,44 @@ fun LearnMoreSection() {
               ?.let { Toast.makeText(context, "Not implemented yet", Toast.LENGTH_SHORT).show() }
         },
         modifier = Modifier.fillMaxWidth().testTag("learnMoreLink"))
+  }
+}
+
+fun handleRoleSelection(
+    role: String,
+    authViewModel: AuthViewModel,
+    context: Context,
+    navigationActions: NavigationActions
+) {
+  authViewModel.setRole(role)
+  if (authViewModel.googleAccount.value == null) {
+    authViewModel.registerWithEmailAndPassword(
+        {
+          Toast.makeText(context, "You are Signed up!", Toast.LENGTH_SHORT).show()
+          if (role == "seeker") {
+            navigationActions.navigateTo(Route.SEEKER_REGISTRATION)
+          } else {
+            navigationActions.navigateTo(Route.PROVIDER_REGISTRATION)
+          }
+        },
+        {
+          if (!authViewModel.userRegistered.value) {
+            Toast.makeText(context, "You already have an account", Toast.LENGTH_SHORT).show()
+            navigationActions.navigateTo(Screen.SIGN_IN)
+          } else {
+            Toast.makeText(context, "Failed to register", Toast.LENGTH_SHORT).show()
+          }
+        })
+  } else {
+    authViewModel.registerWithGoogle(
+        {
+          Toast.makeText(context, "You are Signed up!", Toast.LENGTH_SHORT).show()
+          if (role == "seeker") {
+            navigationActions.navigateTo(Route.SEEKER_REGISTRATION)
+          } else {
+            navigationActions.navigateTo(Route.PROVIDER_REGISTRATION)
+          }
+        },
+        { Toast.makeText(context, "Failed to register", Toast.LENGTH_SHORT).show() })
   }
 }
