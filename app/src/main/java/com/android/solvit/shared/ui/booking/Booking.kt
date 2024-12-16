@@ -93,6 +93,7 @@ import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.navigation.Screen
+import com.android.solvit.shared.ui.theme.SelectedPackage
 import com.android.solvit.shared.ui.theme.Typography
 import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.Timestamp
@@ -675,7 +676,7 @@ fun PackageCard(packageProposal: PackageProposal, modifier: Modifier = Modifier)
       modifier = modifier.fillMaxSize(),
       shape = RoundedCornerShape(16.dp),
       elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-      colors = CardDefaults.cardColors(containerColor = colorScheme.surface)) {
+      colors = CardDefaults.cardColors(containerColor = SelectedPackage)) {
         Column(
             modifier = Modifier.padding(20.dp).fillMaxHeight().testTag("package_content"),
             horizontalAlignment = Alignment.Start) {
