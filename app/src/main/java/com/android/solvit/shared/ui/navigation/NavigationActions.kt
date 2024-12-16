@@ -30,6 +30,7 @@ object Route {
   const val BOOKING_DETAILS = "Booking Details"
   const val NOTIFICATIONS = "Notifications Screen"
   const val AI_SOLVER = "Ai Solver Screen"
+  const val BOOKING_CALENDAR = "Booking Calendar"
 }
 
 object Screen {

@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -24,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.solvit.provider.model.ProviderCalendarViewModel
 import com.android.solvit.provider.ui.calendar.components.dialog.DatePickerDialog
@@ -37,142 +39,159 @@ import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SchedulePreferencesSheet(viewModel: ProviderCalendarViewModel, onDismiss: () -> Unit) {
   var selectedTabIndex by remember { mutableIntStateOf(0) }
   val tabs = listOf("Regular Hours", "Exceptions")
-  var showError by remember { mutableStateOf<String?>(null) }
+  val snackbarHostState = remember { SnackbarHostState() }
+  val scope = rememberCoroutineScope()
 
   ModalBottomSheet(
       onDismissRequest = onDismiss,
       modifier = Modifier.fillMaxHeight().testTag("schedulePreferencesSheet"),
       windowInsets = WindowInsets(0)) {
-        Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
-          Text(
-              text = "Schedule Preferences",
-              style = MaterialTheme.typography.titleLarge,
-              modifier = Modifier.padding(vertical = 16.dp).testTag("schedulePreferencesTitle"))
+        Box(modifier = Modifier.fillMaxSize()) {
+          Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+            Text(
+                text = "Schedule Preferences",
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(vertical = 16.dp).testTag("schedulePreferencesTitle"))
 
-          TabRow(selectedTabIndex = selectedTabIndex) {
-            tabs.forEachIndexed { index, title ->
-              Tab(
-                  selected = selectedTabIndex == index,
-                  onClick = { selectedTabIndex = index },
-                  text = { Text(title) })
+            TabRow(selectedTabIndex = selectedTabIndex) {
+              tabs.forEachIndexed { index, title ->
+                Tab(
+                    selected = selectedTabIndex == index,
+                    onClick = { selectedTabIndex = index },
+                    text = { Text(title) },
+                    modifier = Modifier.testTag("schedulePreferencesTab_$title"))
+              }
             }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            when (selectedTabIndex) {
+              0 -> RegularHoursTab(
+                  viewModel = viewModel,
+                  onError = { error ->
+                    scope.launch {
+                      snackbarHostState.showSnackbar(
+                          message = error,
+                          duration = SnackbarDuration.Short,
+                          withDismissAction = true
+                      )
+                    }
+                  })
+              1 -> ExceptionsTab(
+                  viewModel = viewModel,
+                  onError = { error ->
+                    scope.launch {
+                      snackbarHostState.showSnackbar(
+                          message = error,
+                          duration = SnackbarDuration.Short,
+                          withDismissAction = true
+                      )
+                    }
+                  })
+            }
+
+            Spacer(modifier = Modifier.height(80.dp))
           }
 
-          Spacer(modifier = Modifier.height(16.dp))
-
-          // Show error if present
-          showError?.let { error ->
-            Surface(
-                color = MaterialTheme.colorScheme.errorContainer,
-                modifier = Modifier.fillMaxWidth().padding(8.dp)) {
-                  Text(
-                      text = error,
-                      color = MaterialTheme.colorScheme.onErrorContainer,
-                      modifier = Modifier.padding(8.dp))
-                }
-            Spacer(modifier = Modifier.height(8.dp))
+          // Place SnackbarHost above everything else
+          Box(
+              modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 16.dp)
+          ) {
+              SnackbarHost(
+                  hostState = snackbarHostState,
+                  modifier = Modifier.testTag("schedulePreferencesSnackbar"),
+                  snackbar = { data ->
+                      Snackbar(
+                          modifier = Modifier.padding(horizontal = 16.dp),
+                          action = {
+                              IconButton(onClick = { data.dismiss() }) {
+                                  Icon(
+                                      imageVector = Icons.Default.Close,
+                                      contentDescription = "Dismiss",
+                                      tint = MaterialTheme.colorScheme.onSurface
+                                  )
+                              }
+                          }
+                      ) {
+                          Text(data.visuals.message)
+                      }
+                  }
+              )
           }
-
-          when (selectedTabIndex) {
-            0 -> RegularHoursTab(viewModel = viewModel, onError = { showError = it })
-            1 -> ExceptionsTab(viewModel = viewModel, onError = { showError = it })
-          }
-
-          // Add bottom padding to ensure content is not cut off
-          Spacer(modifier = Modifier.height(80.dp))
         }
       }
 }
 
 @SuppressLint("MutableCollectionMutableState")
 @Composable
-private fun RegularHoursTab(viewModel: ProviderCalendarViewModel, onError: (String?) -> Unit) {
-  var expandedDay by remember { mutableStateOf<DayOfWeek?>(null) }
-  var showSuccess by remember { mutableStateOf<String?>(null) }
-  var currentSchedule by remember {
-    mutableStateOf(viewModel.currentProvider.value.schedule.regularHours)
-  }
-
+private fun RegularHoursTab(
+    viewModel: ProviderCalendarViewModel,
+    onError: (String) -> Unit
+) {
   val provider by viewModel.currentProvider.collectAsStateWithLifecycle()
+  var expandedDay by remember { mutableStateOf<DayOfWeek?>(null) }
 
-  // Update currentSchedule when provider changes
-  LaunchedEffect(provider) { currentSchedule = provider.schedule.regularHours }
-
-  // Clear success message after delay
-  LaunchedEffect(showSuccess) {
-    if (showSuccess != null) {
-      delay(3000)
-      showSuccess = null
-    }
+  if (provider.uid.isEmpty()) {
+    Text(
+        "Loading provider information...",
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.testTag("loadingText"))
+    return
   }
 
-  Column(modifier = Modifier.fillMaxWidth().testTag("regularHoursTab")) {
-    showSuccess?.let { message ->
-      Surface(
-          color = MaterialTheme.colorScheme.primaryContainer,
-          modifier = Modifier.fillMaxWidth().testTag("successMessage")) {
-            Text(
-                text = message,
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                modifier = Modifier.padding(16.dp).testTag("successMessageText"))
-          }
-    }
-
-    DayOfWeek.entries.forEach { day ->
-      DayScheduleCard(
-          day = day,
-          currentSchedule = currentSchedule[day.name] ?: emptyList(),
-          isExpanded = expandedDay == day,
-          onExpandClick = { expandedDay = if (expandedDay == day) null else day },
-          onSaveHours = { startTime, endTime ->
-            val timeSlot = TimeSlot(startTime.hour, startTime.minute, endTime.hour, endTime.minute)
-            viewModel.setRegularHours(day.name, listOf(timeSlot)) { success ->
-              if (success) {
-                showSuccess = "Regular hours updated successfully"
-                onError(null)
-                // Update UI immediately
-                currentSchedule =
-                    currentSchedule.toMutableMap().apply {
-                      put(day.name, listOf(timeSlot).toMutableList())
+  LazyColumn(
+      modifier = Modifier.fillMaxWidth().testTag("regularHoursTab"),
+      verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        items(DayOfWeek.values()) { day ->
+          val currentSchedule = provider.schedule.regularHours[day.name] ?: emptyList()
+          DayScheduleCard(
+              day = day,
+              currentSchedule = currentSchedule,
+              isExpanded = expandedDay == day,
+              onExpandClick = { expandedDay = if (expandedDay == day) null else day },
+              onSaveHours = { startTime, endTime ->
+                try {
+                  val timeSlot = TimeSlot(startTime, endTime)
+                  viewModel.setRegularHours(day.name, listOf(timeSlot)) { success ->
+                    if (!success) {
+                      onError("Failed to save hours for ${day.name.lowercase().capitalize()}")
+                    } else {
+                      expandedDay = null
                     }
-                expandedDay = null
-              } else {
-                onError("Failed to update regular hours")
-              }
-            }
-          },
-          onClearHours = {
-            viewModel.clearRegularHours(day.name) { success ->
-              if (success) {
-                showSuccess = "Regular hours cleared successfully"
-                onError(null)
-                // Update UI immediately
-                currentSchedule = currentSchedule.toMutableMap().apply { remove(day.name) }
-              } else {
-                onError("Failed to clear regular hours")
-              }
-            }
-          })
-    }
-  }
+                  }
+                } catch (e: IllegalArgumentException) {
+                  onError(e.message ?: "Invalid time selection")
+                }
+              },
+              onClearHours = {
+                viewModel.clearRegularHours(day.name) { success ->
+                  if (!success) {
+                    onError("Failed to clear hours for ${day.name.lowercase().capitalize()}")
+                  }
+                }
+              })
+        }
+      }
 }
 
 @Composable
-private fun ExceptionsTab(viewModel: ProviderCalendarViewModel, onError: (String?) -> Unit) {
-  var selectedDate by remember { mutableStateOf<LocalDateTime?>(null) }
+private fun ExceptionsTab(
+    viewModel: ProviderCalendarViewModel,
+    onError: (String) -> Unit
+) {
+  var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
   var showDatePicker by remember { mutableStateOf(false) }
-  var showTimePicker by remember { mutableStateOf(false) }
   var isAddingOffTime by remember { mutableStateOf(true) }
-  var startTime by remember { mutableStateOf<LocalTime?>(null) }
-  var endTime by remember { mutableStateOf<LocalTime?>(null) }
-  var timePickerMode by remember { mutableStateOf(TimePickerMode.START) }
-  var showSuccess by remember { mutableStateOf<String?>(null) }
+  var startTime by remember { mutableStateOf(LocalTime.of(9, 0)) }
+  var endTime by remember { mutableStateOf(LocalTime.of(17, 0)) }
 
   val provider by viewModel.currentProvider.collectAsStateWithLifecycle()
 
@@ -182,14 +201,6 @@ private fun ExceptionsTab(viewModel: ProviderCalendarViewModel, onError: (String
           .map { exception -> ExceptionEntry(exception.date, exception) }
           .sortedBy { it.date }
 
-  // Clear success message after delay
-  LaunchedEffect(showSuccess) {
-    if (showSuccess != null) {
-      delay(3000)
-      showSuccess = null
-    }
-  }
-
   Column(
       modifier = Modifier.fillMaxWidth().testTag("exceptionsTab"),
       verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -198,177 +209,156 @@ private fun ExceptionsTab(viewModel: ProviderCalendarViewModel, onError: (String
               "Loading provider information...",
               style = MaterialTheme.typography.bodyMedium,
               color = MaterialTheme.colorScheme.onSurfaceVariant,
-              modifier = Modifier.padding(16.dp).testTag("loadingText"))
-          return
-        }
-
-        // Success message
-        showSuccess?.let { message ->
-          Surface(
-              color = MaterialTheme.colorScheme.primaryContainer,
-              modifier = Modifier.fillMaxWidth().testTag("successMessage")) {
-                Text(
-                    text = message,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    modifier = Modifier.padding(16.dp).testTag("successText"))
-              }
+              modifier = Modifier.testTag("loadingText"))
+          return@Column
         }
 
         Row(
-            modifier = Modifier.fillMaxWidth().testTag("buttonsRow"),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-              FilledTonalButton(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+              Button(
                   onClick = {
                     isAddingOffTime = true
                     showDatePicker = true
                   },
-                  modifier = Modifier.weight(1f).testTag("addOffTimeButton"),
-                  colors =
-                      ButtonDefaults.filledTonalButtonColors(
-                          containerColor = MaterialTheme.colorScheme.errorContainer,
-                          contentColor = MaterialTheme.colorScheme.onErrorContainer)) {
+                  modifier = Modifier.weight(1f).testTag("addOffTimeButton")) {
                     Text("Add Off Time")
                   }
-              FilledTonalButton(
+              Button(
                   onClick = {
                     isAddingOffTime = false
                     showDatePicker = true
                   },
-                  modifier = Modifier.weight(1f).testTag("addExtraTimeButton"),
-                  colors =
-                      ButtonDefaults.filledTonalButtonColors(
-                          containerColor = MaterialTheme.colorScheme.primaryContainer,
-                          contentColor = MaterialTheme.colorScheme.onPrimaryContainer)) {
+                  modifier = Modifier.weight(1f).testTag("addExtraTimeButton")) {
                     Text("Add Extra Time")
                   }
-            }
+        }
 
-        // Show existing exceptions
-        if (exceptions.isEmpty()) {
-          Surface(
-              modifier = Modifier.fillMaxWidth().testTag("noExceptionsSurface"),
-              color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-              shape = MaterialTheme.shapes.medium) {
-                Box(
-                    modifier = Modifier.fillMaxWidth().padding(32.dp).testTag("noExceptionsBox"),
-                    contentAlignment = Alignment.Center) {
-                      Text(
-                          "No exceptions scheduled",
-                          style = MaterialTheme.typography.bodyLarge,
-                          color = MaterialTheme.colorScheme.onSurfaceVariant,
-                          modifier = Modifier.testTag("noExceptionsText"))
+        // Show time selection if date is selected
+        if (selectedDate != null) {
+          Column(
+              modifier = Modifier.fillMaxWidth(),
+              verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                Text(
+                    text = "Select Time for ${selectedDate?.format(DateTimeFormatter.ofPattern("MMM d, yyyy"))}",
+                    style = MaterialTheme.typography.titleMedium)
+
+                TimeSelectionSection(
+                    startTime = startTime,
+                    endTime = endTime,
+                    onStartTimeSelected = { newTime ->
+                      if (selectedDate?.isEqual(LocalDate.now()) == true &&
+                          newTime.isBefore(LocalTime.now())) {
+                        onError("Cannot select a time in the past")
+                        return@TimeSelectionSection
+                      }
+                      startTime = newTime
+                    },
+                    onEndTimeSelected = { newTime ->
+                      endTime = newTime
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End) {
+                      TextButton(
+                          onClick = {
+                            selectedDate = null
+                            startTime = LocalTime.of(9, 0)
+                            endTime = LocalTime.of(17, 0)
+                          }) {
+                            Text("Cancel")
+                          }
+                      Button(
+                          onClick = {
+                            if (selectedDate?.isEqual(LocalDate.now()) == true &&
+                                startTime.isBefore(LocalTime.now())) {
+                              onError("Cannot select a time in the past")
+                              return@Button
+                            }
+
+                            try {
+                              val timeSlot = TimeSlot(startTime, endTime)
+                              val dateTime = selectedDate!!.atStartOfDay()
+
+                              if (isAddingOffTime) {
+                                viewModel.addOffTimeException(
+                                    dateTime,
+                                    listOf(timeSlot)
+                                ) { success, message ->
+                                  if (!success) {
+                                    onError(message)
+                                  } else {
+                                    selectedDate = null
+                                    startTime = LocalTime.of(9, 0)
+                                    endTime = LocalTime.of(17, 0)
+                                  }
+                                }
+                              } else {
+                                viewModel.addExtraTimeException(
+                                    dateTime,
+                                    listOf(timeSlot)
+                                ) { success, message ->
+                                  if (!success) {
+                                    onError(message)
+                                  } else {
+                                    selectedDate = null
+                                    startTime = LocalTime.of(9, 0)
+                                    endTime = LocalTime.of(17, 0)
+                                  }
+                                }
+                              }
+                            } catch (e: IllegalArgumentException) {
+                              onError(e.message ?: "Invalid time selection")
+                            }
+                          },
+                          modifier = Modifier.testTag("addExceptionButton")) {
+                            Text("Add ${if (isAddingOffTime) "Off Time" else "Extra Time"}")
+                          }
                     }
               }
-        } else {
-          LazyColumn(
-              verticalArrangement = Arrangement.spacedBy(8.dp),
-              modifier = Modifier.weight(1f).testTag("exceptionsList")) {
-                items(exceptions) { exception ->
-                  ExceptionCard(
-                      date = exception.date,
-                      type = exception.exception.type,
-                      timeSlots = exception.exception.timeSlots,
-                      onDelete = {
-                        viewModel.deleteException(exception.date) { success ->
-                          if (success) {
-                            showSuccess = "Exception removed successfully"
-                            onError(null)
-                          } else {
-                            onError("Failed to remove exception")
+        }
+
+        // Exceptions list
+        LazyColumn(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(8.dp)) {
+              items(
+                  items = exceptions,
+                  key = { "${it.date}_${it.exception.type}" }) { exceptionEntry ->
+                    ExceptionCard(
+                        date = exceptionEntry.date,
+                        type = exceptionEntry.exception.type,
+                        timeSlots = exceptionEntry.exception.timeSlots,
+                        onDelete = {
+                          viewModel.deleteException(exceptionEntry.date) { success ->
+                            if (!success) {
+                              onError("Failed to delete exception")
+                            }
                           }
-                        }
-                      })
+                        })
+                  }
+            }
+
+        if (showDatePicker) {
+          DatePickerDialog(
+              selectedDate = selectedDate ?: LocalDate.now(),
+              onDismissRequest = {
+                showDatePicker = false
+                selectedDate = null
+              },
+              onDateSelected = { date ->
+                if (date.isBefore(LocalDate.now())) {
+                  onError("Cannot select a date in the past")
+                  return@DatePickerDialog
                 }
-              }
+                selectedDate = date
+                showDatePicker = false
+              })
         }
       }
-
-  if (showDatePicker) {
-    DatePickerDialog(
-        onDismissRequest = { showDatePicker = false },
-        onDateSelected = { date ->
-          selectedDate = LocalDateTime.of(date, LocalTime.MIN)
-          showDatePicker = false
-          showTimePicker = true
-          timePickerMode = TimePickerMode.START
-        },
-        selectedDate = LocalDate.now())
-  }
-
-  if (showTimePicker && selectedDate != null) {
-    val timePickerTitle =
-        when (timePickerMode) {
-          TimePickerMode.START -> "Select Start Time"
-          TimePickerMode.END -> "Select End Time"
-        }
-
-    TimePickerDialog(
-        onDismiss = {
-          showTimePicker = false
-          selectedDate = null
-          startTime = null
-          endTime = null
-        },
-        onTimeSelected = { time ->
-          when (timePickerMode) {
-            TimePickerMode.START -> {
-              startTime = time
-              timePickerMode = TimePickerMode.END
-            }
-            TimePickerMode.END -> {
-              try {
-                val timeSlot =
-                    TimeSlot(
-                        startHour = startTime!!.hour,
-                        startMinute = startTime!!.minute,
-                        endHour = time.hour,
-                        endMinute = time.minute)
-                endTime = time
-                if (isAddingOffTime) {
-                  viewModel.addOffTimeException(selectedDate!!, listOf(timeSlot)) { success, message
-                    ->
-                    if (success) {
-                      showSuccess = message
-                      onError(null)
-                    } else {
-                      onError(message)
-                    }
-                    showTimePicker = false
-                    selectedDate = null
-                    startTime = null
-                    endTime = null
-                  }
-                } else {
-                  viewModel.addExtraTimeException(selectedDate!!, listOf(timeSlot)) {
-                      success,
-                      message ->
-                    if (success) {
-                      showSuccess = message
-                      onError(null)
-                    } else {
-                      onError(message)
-                    }
-                    showTimePicker = false
-                    selectedDate = null
-                    startTime = null
-                    endTime = null
-                  }
-                }
-              } catch (e: IllegalArgumentException) {
-                onError(e.message ?: "Invalid time selection")
-                endTime = null
-                timePickerMode = TimePickerMode.END
-              }
-            }
-          }
-        },
-        initialTime =
-            when (timePickerMode) {
-              TimePickerMode.START -> LocalTime.of(9, 0)
-              TimePickerMode.END -> startTime?.plusHours(1) ?: LocalTime.of(17, 0)
-            },
-        title = timePickerTitle)
-  }
 }
 
 @Composable
@@ -422,8 +412,8 @@ private fun ExceptionCard(
                         tint = MaterialTheme.colorScheme.error)
                   }
             }
-      }
-}
+          }
+        }
 
 @Composable
 private fun DayScheduleCard(
@@ -548,7 +538,7 @@ private fun DayScheduleCard(
               }
         }
       }
-}
+    }
 
 @Composable
 private fun TimeSelectionSection(
@@ -557,7 +547,7 @@ private fun TimeSelectionSection(
     onStartTimeSelected: (LocalTime) -> Unit,
     onEndTimeSelected: (LocalTime) -> Unit,
     modifier: Modifier = Modifier,
-    day: DayOfWeek
+    day: DayOfWeek? = null
 ) {
   Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
     Row(
@@ -565,13 +555,17 @@ private fun TimeSelectionSection(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically) {
           Column(
-              modifier = Modifier.weight(1f).testTag("time_picker_${day.name}_start"),
+              modifier = Modifier.weight(1f).testTag(
+                  if (day != null) "time_picker_${day.name}_start" else "time_picker_start"
+              ),
               horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     text = "Start Time",
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.testTag("time_picker_${day.name}_start_label"))
+                    modifier = Modifier.testTag(
+                        if (day != null) "time_picker_${day.name}_start_label" else "time_picker_start_label"
+                    ))
                 ScrollableTimePickerRow(
                     selectedTime = startTime,
                     onTimeSelected = { newTime ->
@@ -580,17 +574,21 @@ private fun TimeSelectionSection(
                         onStartTimeSelected(newTime)
                       }
                     },
-                    testTagPrefix = "time_picker_${day.name}_start")
+                    testTagPrefix = if (day != null) "time_picker_${day.name}_start" else "time_picker_start")
               }
 
           Column(
-              modifier = Modifier.weight(1f).testTag("time_picker_${day.name}_end"),
+              modifier = Modifier.weight(1f).testTag(
+                  if (day != null) "time_picker_${day.name}_end" else "time_picker_end"
+              ),
               horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     text = "End Time",
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.testTag("time_picker_${day.name}_end_label"))
+                    modifier = Modifier.testTag(
+                        if (day != null) "time_picker_${day.name}_end_label" else "time_picker_end_label"
+                    ))
                 ScrollableTimePickerRow(
                     selectedTime = endTime,
                     onTimeSelected = { newTime ->
@@ -599,7 +597,7 @@ private fun TimeSelectionSection(
                         onEndTimeSelected(newTime)
                       }
                     },
-                    testTagPrefix = "time_picker_${day.name}_end")
+                    testTagPrefix = if (day != null) "time_picker_${day.name}_end" else "time_picker_end")
               }
         }
   }

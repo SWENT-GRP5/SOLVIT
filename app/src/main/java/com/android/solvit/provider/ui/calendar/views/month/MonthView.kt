@@ -12,6 +12,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.android.solvit.provider.ui.calendar.components.header.CalendarDaysHeader
+import com.android.solvit.seeker.ui.booking.components.BookingMonthDayItem
 import com.android.solvit.shared.model.request.ServiceRequest
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -26,7 +27,8 @@ fun MonthView(
     onDateSelected: (LocalDate) -> Unit,
     onHeaderClick: () -> Unit,
     timeSlots: Map<LocalDate, List<ServiceRequest>>,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isBookingView: Boolean = false
 ) {
   val currentMonth = YearMonth.from(viewDate)
 
@@ -51,7 +53,7 @@ fun MonthView(
 
     LazyVerticalGrid(
         columns = GridCells.Fixed(7),
-        modifier = Modifier.fillMaxWidth().testTag("monthViewCalendarGrid")) {
+        modifier = Modifier.fillMaxWidth().testTag("monthDayGrid")) {
           val firstDayOfMonth = currentMonth.atDay(1)
           val lastDayOfMonth = currentMonth.atEndOfMonth()
           val firstDayOfGrid =
@@ -67,13 +69,30 @@ fun MonthView(
 
           items(daysInGrid.size) { index ->
             val date = daysInGrid[index]
-            MonthDayItem(
-                date = date,
-                isCurrentDay = date == LocalDate.now(),
-                isCurrentMonth = YearMonth.from(date) == currentMonth,
-                onDateSelected = onDateSelected,
-                timeSlots = timeSlots[date] ?: emptyList(),
-                modifier = Modifier.testTag("monthDay_${date}"))
+            val isCurrentMonth = YearMonth.from(date) == currentMonth
+            val isCurrentDay = date == LocalDate.now()
+            val dayModifier = Modifier
+                .aspectRatio(1f)
+                .testTag("monthDay_${date}")
+
+            if (isBookingView) {
+                BookingMonthDayItem(
+                    date = date,
+                    isCurrentMonth = isCurrentMonth,
+                    hasAvailabilities = timeSlots[date]?.isNotEmpty() ?: false,
+                    onDateSelected = onDateSelected,
+                    modifier = dayModifier
+                )
+            } else {
+                MonthDayItem(
+                    date = date,
+                    isCurrentDay = isCurrentDay,
+                    isCurrentMonth = isCurrentMonth,
+                    onDateSelected = onDateSelected,
+                    timeSlots = timeSlots[date] ?: emptyList(),
+                    modifier = dayModifier
+                )
+            }
           }
         }
   }

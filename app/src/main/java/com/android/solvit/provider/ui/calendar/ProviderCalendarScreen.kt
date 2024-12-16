@@ -130,12 +130,9 @@ fun ProviderCalendarScreen(
                   when (calendarView) {
                     CalendarView.DAY -> {
                       DayView(
-                          date = date,
-                          onHeaderClick = {
-                            shouldAnimate = false
-                            showDatePicker = true
-                          },
-                          timeSlots = timeSlots,
+                          viewDate = date,
+                          timeSlots = timeSlots[date] ?: emptyList(),
+                          onHeaderClick = { showDatePicker = true },
                           onServiceRequestClick = { request ->
                             viewModel.onServiceRequestClick(request)
                             navigationActions.navigateTo(Route.BOOKING_DETAILS)

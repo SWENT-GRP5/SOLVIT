@@ -79,8 +79,10 @@ import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.android.solvit.R
+import com.android.solvit.seeker.model.SeekerBookingViewModel
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
+import com.android.solvit.seeker.ui.booking.BookingCalendarScreen
 import com.android.solvit.seeker.ui.provider.Note
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.chat.ChatViewModel
@@ -92,6 +94,7 @@ import com.android.solvit.shared.model.request.ServiceRequestStatus
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
+import com.android.solvit.shared.ui.navigation.Route.BOOKING_CALENDAR
 import com.android.solvit.shared.ui.navigation.Screen
 import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.Timestamp
@@ -118,7 +121,8 @@ fun ServiceBookingScreen(
         viewModel(factory = ServiceRequestViewModel.Factory),
     packageViewModel: PackageProposalViewModel =
         viewModel(factory = PackageProposalViewModel.Factory),
-    chatViewModel: ChatViewModel = viewModel(factory = ChatViewModel.Factory)
+    chatViewModel: ChatViewModel = viewModel(factory = ChatViewModel.Factory),
+    seekerBookingViewModel: SeekerBookingViewModel = viewModel(factory = SeekerBookingViewModel.Factory)
 ) {
   // Lock Orientation to Portrait
   val context = LocalContext.current
@@ -378,7 +382,17 @@ fun ServiceBookingScreen(
                                               color = colorScheme.onPrimary)
                                         }
                                     if (acceptedOrScheduled && role == "seeker") {
-                                      DateAndTimePickers(request!!, requestViewModel)
+                                      IconButton(
+                                          onClick = { navigationActions.navigateTo(BOOKING_CALENDAR) },
+                                          modifier = Modifier.testTag("booking_calendar_button")
+                                      ) {
+                                          Icon(
+                                              imageVector = Icons.Default.DateRange,
+                                              contentDescription = "Schedule appointment",
+                                              tint = colorScheme.onPrimary,
+                                              modifier = Modifier.testTag("calendar_icon")
+                                          )
+                                      }
                                     }
                                   }
                                 }
