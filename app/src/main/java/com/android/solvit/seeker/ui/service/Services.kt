@@ -59,6 +59,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.android.solvit.R
+import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.seeker.model.service.SearchServicesViewModel
 import com.android.solvit.seeker.ui.navigation.BottomNavigationMenu
@@ -77,6 +78,7 @@ import com.android.solvit.shared.ui.theme.Typography
 @Composable
 fun ServicesScreen(
     navigationActions: NavigationActions,
+    seekerProfileViewModel: SeekerProfileViewModel,
     listProviderViewModel: ListProviderViewModel
 ) {
 
@@ -105,8 +107,10 @@ fun ServicesScreen(
             LIST_TOP_LEVEL_DESTINATION_SEEKER,
             Route.SEEKER_OVERVIEW)
       },
-      topBar = { TopSection(searchViewModel, listProviderViewModel, navigationActions) }) {
-          innerPadding ->
+      topBar = {
+        TopSection(
+            searchViewModel, seekerProfileViewModel, listProviderViewModel, navigationActions)
+      }) { innerPadding ->
         Column(
             modifier = Modifier.fillMaxSize().padding(innerPadding),
         ) {
@@ -126,12 +130,14 @@ fun ServicesScreen(
 @Composable
 fun TopSection(
     searchViewModel: SearchServicesViewModel,
+    seekerProfileViewModel: SeekerProfileViewModel,
     listProviderViewModel: ListProviderViewModel,
     navigationActions: NavigationActions
 ) {
   val searchText by searchViewModel.searchText.collectAsState()
   val searchResults by searchViewModel.servicesList.collectAsState()
   val isSearching by searchViewModel.isSearching.collectAsState()
+  val userProfile by seekerProfileViewModel.seekerProfile.collectAsState()
 
   Box(modifier = Modifier.fillMaxWidth().testTag("servicesScreenTopSection")) {
     // Background Image
@@ -147,13 +153,17 @@ fun TopSection(
           modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp).height(45.dp),
           horizontalArrangement = Arrangement.SpaceBetween,
       ) {
-        Image(
-            painterResource(id = R.drawable.ic_user),
+        AsyncImage(
+            model = userProfile.imageUrl.ifEmpty { R.drawable.ic_user },
+            placeholder = painterResource(id = R.drawable.loading),
+            error = painterResource(id = R.drawable.error),
             contentDescription = "profile picture",
-            Modifier.size(40.dp)
-                .clip(CircleShape)
-                .clickable { navigationActions.navigateTo(Route.PROFILE) }
-                .testTag("servicesScreenProfileImage"))
+            contentScale = ContentScale.Crop,
+            modifier =
+                Modifier.size(40.dp)
+                    .clip(CircleShape)
+                    .clickable { navigationActions.navigateTo(Route.PROFILE) }
+                    .testTag("servicesScreenProfileImage"))
 
         Row(
             modifier = Modifier.testTag("SloganIcon"),
