@@ -167,8 +167,12 @@ fun TopAppBar(
                           Spacer(modifier = Modifier.width(4.dp))
                           Text(
                               text =
-                                  if (location != null) location!!.name.substring(0, 6) + "..."
-                                  else "Worldwide",
+                                  if (location != null) {
+                                    if (location!!.name.length < 7) location!!.name
+                                    else location!!.name.substring(0, 6) + "..."
+                                  } else {
+                                    "Worldwide"
+                                  },
                               style =
                                   Typography.bodyMedium.copy(
                                       color = colorScheme.onPrimary,
