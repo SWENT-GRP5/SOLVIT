@@ -319,6 +319,7 @@ fun AiSolverWelcomeScreen(
                               screenHeight = screenHeight,
                               title = "Let solve a new problem",
                               onClick = {
+                                chatViewModel.setShouldCreateRequest(false)
                                 navigationActions.navigateTo(Screen.AI_SOLVER_CHAT_SCREEN)
                               })
                         } else {
@@ -334,6 +335,7 @@ fun AiSolverWelcomeScreen(
                               title = "Let solve a new problem",
                               onClick = {
                                 chatViewModel.clearConversation(true)
+                                chatViewModel.setShouldCreateRequest(false)
                                 navigationActions.navigateTo(Screen.AI_SOLVER_CHAT_SCREEN)
                               })
                         }
@@ -566,6 +568,7 @@ fun TypingIndicator() {
 fun ChatHeader(name: String?, picture: String, navigationActions: NavigationActions) {
   TopAppBar(
       modifier = Modifier.testTag("ChatHeader"),
+      colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background),
       title = {
         Row(
             modifier = Modifier,

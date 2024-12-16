@@ -810,7 +810,7 @@ fun SelectRequestDialog(
       Card(
           modifier =
               Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                  .height(400.dp)
+                  .height(550.dp)
                   .testTag("dialog_card"),
           shape = RoundedCornerShape(16.dp),
           colors = CardDefaults.cardColors(containerColor = colorScheme.background)) {
