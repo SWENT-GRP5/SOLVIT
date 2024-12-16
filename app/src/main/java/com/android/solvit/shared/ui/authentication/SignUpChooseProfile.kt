@@ -189,7 +189,16 @@ fun SectionTitle(text: String, testTag: String = "") {
       style = Typography.titleLarge)
 }
 
-
+/**
+ * Handles the role selection for the user during the sign-up process.
+ * This method sets the user's role and initiates the registration process
+ * based on whether the user is signing up with email/password or Google account.
+ *
+ * @param role The role selected by the user ("seeker" or "provider").
+ * @param authViewModel The ViewModel managing authentication and user-related data.
+ * @param context The context in which the method is called.
+ * @param navigationActions A set of navigation actions to handle screen transitions.
+ */
 fun handleRoleSelection(
     role: String,
     authViewModel: AuthViewModel,
