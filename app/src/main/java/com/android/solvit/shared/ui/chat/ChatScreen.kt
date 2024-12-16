@@ -1,7 +1,7 @@
 package com.android.solvit.shared.ui.chat
 
-import android.content.Context
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.pm.ActivityInfo
 import android.graphics.Bitmap
 import android.net.Uri
