@@ -837,7 +837,7 @@ fun MessageInputBar(
                   onValueChange = { message = it },
                   modifier =
                       Modifier.weight(1f)
-                          .heightIn(max = 200.dp) // Matches the height of buttons for alignment
+                          .heightIn(min = 56.dp) // Matches the height of buttons for alignment
                           .padding(end = 8.dp)
                           .testTag("enterText"),
                   placeholder = {
@@ -850,7 +850,8 @@ fun MessageInputBar(
                       OutlinedTextFieldDefaults.colors(
                           unfocusedBorderColor = colorScheme.background,
                           focusedBorderColor = colorScheme.background,
-                          focusedTextColor = colorScheme.onSurface))
+                          focusedTextColor = colorScheme.onSurface),
+                  maxLines = 5)
 
               // Optional AI Chat Assistant Button
               if (!isAiSolverScreen) {
