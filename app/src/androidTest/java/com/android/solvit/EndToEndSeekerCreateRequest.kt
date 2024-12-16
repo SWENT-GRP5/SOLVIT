@@ -111,7 +111,7 @@ class EndToEndSeekerCreateRequest {
     storage.useEmulator("10.0.2.2", 9199)
 
     authRepository = AuthRepository(Firebase.auth, firestore)
-    seekerRepository = UserRepositoryFirestore(firestore)
+    seekerRepository = UserRepositoryFirestore(firestore, storage)
     providerRepository = ProviderRepositoryFirestore(firestore, storage)
     locationRepository = mock(LocationRepository::class.java)
     serviceRequestRepository = ServiceRequestRepositoryFirebase(firestore, storage)

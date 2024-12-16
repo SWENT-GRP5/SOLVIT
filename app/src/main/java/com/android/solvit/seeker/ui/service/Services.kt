@@ -2,7 +2,6 @@ package com.android.solvit.seeker.ui.service
 
 import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -139,7 +138,7 @@ fun TopSection(
   val searchResults by searchViewModel.servicesList.collectAsState()
   val isSearching by searchViewModel.isSearching.collectAsState()
   val userProfile by seekerProfileViewModel.seekerProfile.collectAsState()
-  val address = "EPFL - École Polytechnique Fédérale de Lausanne"
+  val address = "EPFL" // Replace with `userProfile.address`
 
   Box(modifier = Modifier.fillMaxWidth().testTag("servicesScreenTopSection")) {
     // Background Image
@@ -149,55 +148,64 @@ fun TopSection(
         contentScale = ContentScale.Crop,
         modifier = Modifier.matchParentSize())
     Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-      val context = LocalContext.current
-      val toast = Toast.makeText(context, "Not implemented yet", Toast.LENGTH_SHORT)
       Row(
           modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp).height(45.dp),
-          horizontalArrangement = Arrangement.SpaceBetween,
-      ) {
-        Image(
-            painterResource(id = R.drawable.ic_user),
-            contentDescription = "profile picture",
-            Modifier.size(40.dp)
-                .clip(CircleShape)
-                .clickable { navigationActions.navigateTo(Route.PROFILE) }
-                .testTag("servicesScreenProfileImage"))
-        Column(horizontalAlignment = Alignment.Start) {
-          // User's Location
-          Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                imageVector = Icons.Outlined.LocationOn,
-                contentDescription = "Location Icon",
-                tint = OnPrimary,
+          horizontalArrangement = Arrangement.Start,
+          verticalAlignment = Alignment.CenterVertically) {
+            AsyncImage(
+                model = userProfile.imageUrl.ifEmpty { R.drawable.ic_user },
+                placeholder = painterResource(id = R.drawable.loading),
+                error = painterResource(id = R.drawable.error),
+                contentDescription = "profile picture",
+                contentScale = ContentScale.Crop,
                 modifier =
-                    Modifier.size(16.dp).padding(end = 4.dp).testTag("servicesScreenLocationIcon"))
+                    Modifier.size(40.dp)
+                        .clip(CircleShape)
+                        .clickable { navigationActions.navigateTo(Route.PROFILE) }
+                        .testTag("servicesScreenProfileImage"))
+            Spacer(modifier = Modifier.width(16.dp))
+            Column(horizontalAlignment = Alignment.Start) {
+              // User's Location
+              Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Outlined.LocationOn,
+                    contentDescription = "Location Icon",
+                    tint = OnPrimary,
+                    modifier =
+                        Modifier.size(16.dp)
+                            .padding(end = 4.dp)
+                            .testTag("servicesScreenLocationIcon"))
 
-            Text(
-                text =
-                    if (address.length > 27) { // Replace with `userProfile.address`
-                      address.take(27) + "..."
-                    } else {
-                      address
-                    },
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium,
-                color = OnPrimary,
-                modifier = Modifier.testTag("servicesScreenCurrentLocation"))
+                Text(
+                    text =
+                        if (address.length > 27) { // Replace with `userProfile.address`
+                          address.take(27) + "..."
+                        } else {
+                          address
+                        },
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = OnPrimary,
+                    textAlign = TextAlign.Start,
+                    modifier = Modifier.testTag("servicesScreenCurrentLocation"))
+              }
+
+              // User's Name
+              Text(
+                  text = userProfile.name,
+                  modifier = Modifier.testTag("servicesScreenUserName"),
+                  fontSize = 20.sp,
+                  fontWeight = FontWeight.Bold,
+                  color = DarkBlue, // Dark blue for emphasis
+                  textAlign = TextAlign.Start)
+            }
+            Spacer(modifier = Modifier.weight(1f))
+            IconButton(
+                onClick = { navigationActions.navigateTo(Route.REQUESTS_OVERVIEW) },
+                modifier = Modifier.testTag("servicesScreenMenu")) {
+                  Icon(imageVector = Icons.Default.Menu, contentDescription = null)
+                }
           }
-
-          // User's Name
-          Text(
-              text = userProfile.name,
-              modifier = Modifier.testTag("servicesScreenUserName"),
-              fontSize = 20.sp,
-              fontWeight = FontWeight.Bold,
-              color = DarkBlue // Dark blue for emphasis
-              )
-        }
-        IconButton(onClick = { toast.show() }, modifier = Modifier.testTag("servicesScreenMenu")) {
-          Icon(imageVector = Icons.Default.Menu, contentDescription = null)
-        }
-      }
       DockedSearchBar(
           query = searchText,
           onQueryChange = searchViewModel::onSearchTextChange,
