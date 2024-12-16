@@ -33,7 +33,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.colorScheme
@@ -55,6 +54,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -71,7 +71,6 @@ import com.android.solvit.shared.ui.navigation.Screen
 import com.android.solvit.shared.ui.theme.Typography
 import com.android.solvit.shared.ui.utils.TopAppBarInbox
 
-@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter", "SourceLockedOrientationActivity")
 @Composable
 fun SeekerProfileScreen(
@@ -131,6 +130,7 @@ fun SeekerProfileScreen(
             ProfileInfoCard(
                 fullName,
                 email,
+                imageUrl = userProfile.imageUrl,
                 onEdit = { navigationActions.navigateTo(Screen.EDIT_SEEKER_PROFILE) })
           }
 
@@ -235,6 +235,8 @@ fun ProfileInfoCard(
               Row(verticalAlignment = Alignment.CenterVertically) {
                 AsyncImage(
                     model = imageUrl.ifBlank { R.drawable.empty_profile_img },
+                    placeholder = painterResource(R.drawable.loading),
+                    error = painterResource(R.drawable.error),
                     contentDescription = "Profile Picture",
                     modifier =
                         Modifier.size(50.dp)
