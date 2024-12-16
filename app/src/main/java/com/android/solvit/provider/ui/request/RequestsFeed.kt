@@ -57,7 +57,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -160,8 +159,8 @@ fun RequestsFeedScreen(
             notificationViewModel,
             providerId,
             selectedService,
-            searchQuery,
-            { selectedService = it })
+            searchQuery
+        ) { selectedService = it }
       },
       bottomBar = {
         BottomNavigationMenu(
@@ -224,7 +223,7 @@ fun RequestsTopBar(
         modifier = Modifier.matchParentSize())
     Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
       Row(
-          modifier = Modifier.fillMaxWidth().testTag("RequestsTopBar"),
+          modifier = Modifier.fillMaxWidth().testTag("RequestsTopBar").padding(start = 16.dp),
           horizontalArrangement = Arrangement.SpaceBetween,
           verticalAlignment = Alignment.CenterVertically) {
 
