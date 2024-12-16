@@ -173,10 +173,15 @@ class EndToEndMessage {
     authViewModel.setRole("seeker")
     authViewModel.registerWithEmailAndPassword(
         onSuccess = { authViewModel.logout {} }, onFailure = {})
+    listProviderViewModel.addProvider(provider, null)
   }
 
   @After
   fun tearDown() {
+    // Clean up
+    listProviderViewModel.deleteProvider("1")
+    serviceRequestViewModel.deleteServiceRequestById("1")
+
     FirebaseApp.clearInstancesForTest()
     FirebaseApp.initializeApp(ApplicationProvider.getApplicationContext())
     val firestore = FirebaseFirestore.getInstance()
@@ -256,11 +261,10 @@ class EndToEndMessage {
       composeTestRule.onNodeWithTag("servicesScreen").isDisplayed()
     }
 
-    authViewModel.user.value?.locations?.forEach { authViewModel.removeUserLocation(it, {}, {}) }
-
-    listProviderViewModel.addProvider(provider, null)
     serviceRequestViewModel.saveServiceRequest(
         request.copy(userId = authViewModel.user.value!!.uid))
+
+    authViewModel.user.value?.locations?.forEach { authViewModel.removeUserLocation(it, {}, {}) }
 
     // Navigate to the requests overview screen
     composeTestRule.onNodeWithTag(TopLevelDestinations.REQUESTS_OVERVIEW.textId).performClick()
@@ -297,9 +301,5 @@ class EndToEndMessage {
       composeTestRule.onNodeWithText("Hello, how are you?").isDisplayed()
     }
     composeTestRule.onNodeWithText("Hello, how are you?").assertIsDisplayed()
-
-    // Clean up
-    listProviderViewModel.deleteProvider("1")
-    serviceRequestViewModel.deleteServiceRequestById("1")
   }
 }

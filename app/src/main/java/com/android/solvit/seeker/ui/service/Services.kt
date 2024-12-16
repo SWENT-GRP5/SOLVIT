@@ -396,7 +396,7 @@ fun PerformersSection(
     LazyRow(
         modifier = Modifier.fillMaxWidth().testTag("servicesScreenPerformersList"),
         horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-          items(providers.size) { index ->
+          items(topProviders.size) { index ->
             ProviderItem(
                 topProviders[index],
                 onClick = {
