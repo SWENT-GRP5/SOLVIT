@@ -290,7 +290,7 @@ fun AiSolverWelcomeScreen(
                                     SpanStyle(
                                         color = Black,
                                         fontSize = screenHeight.times(0.04f).value.sp)) {
-                                  append("Meet Your Personal ")
+                                  append("Your Personal ")
                                 }
                             withStyle(
                                 style =
@@ -301,7 +301,7 @@ fun AiSolverWelcomeScreen(
                                                 start = Offset.Zero,
                                                 end = Offset.Infinite),
                                         fontSize = screenHeight.times(0.04f).value.sp)) {
-                                  append("AI\n\nProblem Solver")
+                                  append("\n\nAI Problem Solver")
                                 }
                           },
                       textAlign = TextAlign.Center,

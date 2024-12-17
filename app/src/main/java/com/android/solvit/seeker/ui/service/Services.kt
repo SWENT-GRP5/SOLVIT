@@ -2,6 +2,7 @@ package com.android.solvit.seeker.ui.service
 
 import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.BorderStroke
@@ -40,6 +41,8 @@ import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -62,6 +65,7 @@ import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.seeker.model.service.SearchServicesViewModel
 import com.android.solvit.seeker.ui.navigation.BottomNavigationMenu
+import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_SEEKER
@@ -78,7 +82,8 @@ import com.android.solvit.shared.ui.theme.Typography
 fun ServicesScreen(
     navigationActions: NavigationActions,
     seekerProfileViewModel: SeekerProfileViewModel,
-    listProviderViewModel: ListProviderViewModel
+    listProviderViewModel: ListProviderViewModel,
+    authViewModel: AuthViewModel
 ) {
 
   // Lock Orientation to Portrait
@@ -88,6 +93,8 @@ fun ServicesScreen(
     activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
     onDispose { activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED }
   }
+
+  LaunchedEffect(Unit) { listProviderViewModel.clearSelectedService() }
 
   val searchViewModel = SearchServicesViewModel()
 
@@ -101,7 +108,11 @@ fun ServicesScreen(
       },
       topBar = {
         TopSection(
-            searchViewModel, seekerProfileViewModel, listProviderViewModel, navigationActions)
+            searchViewModel,
+            seekerProfileViewModel,
+            listProviderViewModel,
+            authViewModel = authViewModel,
+            navigationActions = navigationActions)
       }) { innerPadding ->
         Column(
             modifier = Modifier.fillMaxSize().padding(innerPadding),
@@ -124,12 +135,16 @@ fun TopSection(
     searchViewModel: SearchServicesViewModel,
     seekerProfileViewModel: SeekerProfileViewModel,
     listProviderViewModel: ListProviderViewModel,
-    navigationActions: NavigationActions
+    navigationActions: NavigationActions,
+    authViewModel: AuthViewModel
 ) {
   val searchText by searchViewModel.searchText.collectAsStateWithLifecycle()
   val searchResults by searchViewModel.servicesList.collectAsStateWithLifecycle()
   val isSearching by searchViewModel.isSearching.collectAsStateWithLifecycle()
   val userProfile by seekerProfileViewModel.seekerProfile.collectAsStateWithLifecycle()
+  val user by authViewModel.user.collectAsState()
+  user?.let { seekerProfileViewModel.getUserProfile(it.uid) }
+  Log.e("TopSection", "$userProfile")
 
   Box(modifier = Modifier.fillMaxWidth().testTag("servicesScreenTopSection")) {
     // Background Image
