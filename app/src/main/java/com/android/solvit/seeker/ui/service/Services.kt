@@ -191,7 +191,7 @@ fun TopSection(
           modifier = Modifier.offset(y = 20.dp).testTag("servicesScreenSearchBar"),
           placeholder = { Text("Find services near you") },
           leadingIcon = { Icon(imageVector = Icons.Default.Search, contentDescription = null) },
-          colors = SearchBarDefaults.colors(containerColor = OnPrimary)) {
+          colors = SearchBarDefaults.colors(containerColor = colorScheme.background)) {
             LazyColumn(
                 modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)) {

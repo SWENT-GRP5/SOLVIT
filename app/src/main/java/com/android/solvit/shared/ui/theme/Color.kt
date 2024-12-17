@@ -6,6 +6,7 @@ val Primary = Color(0xFF0099FF)
 val OnPrimary = Color(0xFFFFFFFF)
 val PrimaryContainer = Color(0xFFB3E5FC)
 val OnPrimaryContainer = Color(0xFF001E2F)
+val OnPrimaryContainerDark = Color(0xFFB0D6FF)
 
 val Secondary = Color(0xFF00C853)
 val OnSecondary = Color(0xFFFFFFFF)

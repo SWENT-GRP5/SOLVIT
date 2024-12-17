@@ -81,6 +81,7 @@ import com.android.solvit.shared.model.review.ReviewViewModel
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
+import com.android.solvit.shared.ui.theme.OnPrimaryContainerDark
 import com.android.solvit.shared.ui.theme.SelectedPackage
 import com.android.solvit.shared.ui.theme.SelectedPackageDark
 import com.android.solvit.shared.ui.theme.Typography
@@ -825,7 +826,9 @@ fun SelectRequestDialog(
                           Modifier.padding(bottom = 16.dp)
                               .testTag("dialog_title")
                               .align(Alignment.CenterHorizontally),
-                      color = colorScheme.onPrimaryContainer)
+                      color =
+                          if (isSystemInDarkTheme()) OnPrimaryContainerDark
+                          else colorScheme.onPrimaryContainer)
 
                   // LazyColumn to display requests
                   LazyColumn(
@@ -883,13 +886,17 @@ fun SelectRequestDialog(
                                             style = Typography.titleMedium,
                                             maxLines = 2,
                                             overflow = TextOverflow.Ellipsis,
-                                            color = colorScheme.onPrimaryContainer,
+                                            color =
+                                                if (isSystemInDarkTheme()) OnPrimaryContainerDark
+                                                else colorScheme.onPrimaryContainer,
                                         )
                                         Text(
                                             modifier = Modifier.testTag("request_description"),
                                             text = request.description,
                                             style = Typography.bodyMedium,
-                                            color = colorScheme.onPrimaryContainer,
+                                            color =
+                                                if (isSystemInDarkTheme()) OnPrimaryContainerDark
+                                                else colorScheme.onPrimaryContainer,
                                             maxLines = 2,
                                             overflow = TextOverflow.Ellipsis)
                                       }
