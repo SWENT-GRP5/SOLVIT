@@ -103,8 +103,8 @@ fun RequestsOverviewScreen(
         var selectedTab by remember { mutableIntStateOf(0) }
         val statusTabs = ServiceRequestStatus.entries.toTypedArray()
 
-        val isSortSelected by requestViewModel.sortSelected.collectAsState()
-        val selectedServices by requestViewModel.selectedServices.collectAsState()
+        val isSortSelected by requestViewModel.sortSelected.collectAsStateWithLifecycle()
+        val selectedServices by requestViewModel.selectedServices.collectAsStateWithLifecycle()
 
         Column {
           TopOrdersSection()
@@ -264,7 +264,7 @@ fun CategoriesFiltersSection(serviceRequestViewModel: ServiceRequestViewModel) {
 
 @Composable
 fun CategoriesFilter(serviceRequestViewModel: ServiceRequestViewModel) {
-  val selectedServices by serviceRequestViewModel.selectedServices.collectAsState()
+  val selectedServices by serviceRequestViewModel.selectedServices.collectAsStateWithLifecycle()
   LazyVerticalGrid(
       columns = GridCells.Fixed(2),
       modifier = Modifier.padding(16.dp).testTag("categoriesFilter")) {
@@ -285,7 +285,7 @@ fun CategoriesFilter(serviceRequestViewModel: ServiceRequestViewModel) {
 
 @Composable
 fun CategoriesSort(serviceRequestViewModel: ServiceRequestViewModel) {
-  val isSortSelected by serviceRequestViewModel.sortSelected.collectAsState()
+  val isSortSelected by serviceRequestViewModel.sortSelected.collectAsStateWithLifecycle()
   LazyVerticalGrid(
       columns = GridCells.Fixed(2),
       modifier = Modifier.padding(16.dp).testTag("categoriesSortFilter")) {
