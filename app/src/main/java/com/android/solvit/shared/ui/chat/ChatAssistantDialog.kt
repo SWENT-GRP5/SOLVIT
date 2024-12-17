@@ -150,9 +150,9 @@ fun ChatAssistantDialog(
                     Text(".".repeat(dotCount), style = Typography.bodyLarge)
                   } else {
                     if (translationMode) {
-                      Text("Translate Message", style = Typography.bodyLarge)
+                      Text("Translate Message", style = Typography.bodyMedium)
                     } else {
-                      Text("Generate Response", style = Typography.bodyLarge)
+                      Text("Generate Response", style = Typography.bodyMedium)
                     }
                   }
                 }
