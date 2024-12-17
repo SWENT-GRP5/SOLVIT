@@ -14,6 +14,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
@@ -32,7 +33,8 @@ fun TopAppBarInbox(
     rightButtonAction: () -> Unit = {},
     rightButtonForm: ImageVector? = null,
     testTagRight: String = "",
-    testTagGeneral: String = ""
+    testTagGeneral: String = "",
+    containerColor: Color = colorScheme.background
 ) {
   var canGoBack by remember { mutableStateOf(true) }
   val coroutineScope = rememberCoroutineScope()
@@ -81,5 +83,6 @@ fun TopAppBarInbox(
               }
         }
       },
-      colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background))
+      colors = TopAppBarDefaults.topAppBarColors(containerColor = containerColor)
+  )
 }

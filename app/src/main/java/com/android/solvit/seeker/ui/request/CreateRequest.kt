@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -95,15 +96,7 @@ fun CreateRequestScreen(
   var currentStep by remember { mutableIntStateOf(1) }
   var selectedImages by remember { mutableStateOf<List<Uri>>(emptyList()) }
 
-  Scaffold(
-      topBar = {
-        TopAppBarInbox(
-            title = "Create a new request",
-            leftButtonForm = Icons.AutoMirrored.Filled.ArrowBack,
-            leftButtonAction = { navigationActions.goBack() },
-            testTagLeft = "CreateRequestBackButton")
-      },
-      content = { // AI Assistant Dialog
+  // AI Assistant Dialog
         if (showAIAssistantDialog) {
           AIAssistantDialog(
               onCancel = { showAIAssistantDialog = false },
@@ -244,6 +237,6 @@ fun CreateRequestScreen(
                       localContext, "Invalid format, date must be DD/MM/YYYY.", Toast.LENGTH_SHORT)
                   .show()
             },
-            submitButtonText = "Submit Request")
-      })
+            submitButtonText = "Submit Request"
+        )
 }

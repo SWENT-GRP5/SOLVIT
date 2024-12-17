@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
@@ -118,7 +119,7 @@ fun ServiceTypeDropdown(
     onServiceTypeSelected: (Services) -> Unit,
     readOnly: Boolean = false
 ) {
-  Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp)) {
+  Box(modifier = Modifier.fillMaxWidth()) {
     OutlinedTextField(
         value =
             typeQuery.replace("_", " ").lowercase(Locale.getDefault()).replaceFirstChar {
@@ -219,7 +220,7 @@ fun LocationDropdown(
   var hasBeenFocused by remember { mutableStateOf(false) }
   var hasLostFocusAfterTyping by remember { mutableStateOf(false) }
 
-  Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp).testTag("addressDropdown")) {
+  Box(modifier = Modifier.fillMaxWidth().testTag("addressDropdown")) {
     OutlinedTextField(
         value = localQuery,
         onValueChange = { query ->
@@ -393,7 +394,6 @@ fun DatePickerFieldToModal(
       modifier =
           modifier
               .fillMaxWidth()
-              .padding(horizontal = 20.dp)
               .testTag("inputRequestDate")
               .pointerInput(selectedDate) {
                 awaitEachGesture {
