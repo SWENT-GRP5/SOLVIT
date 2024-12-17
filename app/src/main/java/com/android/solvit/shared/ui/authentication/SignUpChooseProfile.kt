@@ -1,6 +1,7 @@
 package com.android.solvit.shared.ui.authentication
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.pm.ActivityInfo
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -43,6 +44,7 @@ import com.android.solvit.seeker.ui.profile.Stepper
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
+import com.android.solvit.shared.ui.navigation.Screen
 import com.android.solvit.shared.ui.theme.Typography
 import com.android.solvit.shared.ui.utils.TopAppBarInbox
 
@@ -104,14 +106,7 @@ fun SignUpChooseProfile(
                   description = "I want to request services.",
                   testTag = "seekerButton",
                   onClickButton = {
-                    authViewModel.setRole("seeker")
-                    if (authViewModel.googleAccount.value == null) {
-                      authViewModel.registerWithEmailAndPassword(
-                          { navigationActions.navigateTo(Route.SEEKER_REGISTRATION) }, {})
-                    } else {
-                      authViewModel.registerWithGoogle(
-                          { navigationActions.navigateTo(Route.SEEKER_REGISTRATION) }, {})
-                    }
+                    handleRoleSelection("seeker", authViewModel, context, navigationActions)
                   })
 
               Spacer(modifier = Modifier.height(16.dp))
@@ -125,26 +120,7 @@ fun SignUpChooseProfile(
                   description = "I want to offer services.",
                   testTag = "providerButton",
                   onClickButton = {
-                    authViewModel.setRole("provider")
-                    if (authViewModel.googleAccount.value == null) {
-                      authViewModel.registerWithEmailAndPassword(
-                          {
-                            Toast.makeText(context, "You are Signed up!", Toast.LENGTH_SHORT).show()
-                            navigationActions.navigateTo(Route.PROVIDER_REGISTRATION)
-                          },
-                          {
-                            Toast.makeText(context, "Failed to register", Toast.LENGTH_SHORT).show()
-                          })
-                    } else {
-                      authViewModel.registerWithGoogle(
-                          {
-                            Toast.makeText(context, "You are Signed up!", Toast.LENGTH_SHORT).show()
-                            navigationActions.navigateTo(Route.PROVIDER_REGISTRATION)
-                          },
-                          {
-                            Toast.makeText(context, "Failed to register", Toast.LENGTH_SHORT).show()
-                          })
-                    }
+                    handleRoleSelection("provider", authViewModel, context, navigationActions)
                   })
             }
       })
@@ -211,4 +187,53 @@ fun SectionTitle(text: String, testTag: String = "") {
       color = colorScheme.onBackground,
       modifier = Modifier.testTag(testTag),
       style = Typography.titleLarge)
+}
+
+/**
+ * Handles the role selection for the user during the sign-up process. This method sets the user's
+ * role and initiates the registration process based on whether the user is signing up with
+ * email/password or Google account.
+ *
+ * @param role The role selected by the user ("seeker" or "provider").
+ * @param authViewModel The ViewModel managing authentication and user-related data.
+ * @param context The context in which the method is called.
+ * @param navigationActions A set of navigation actions to handle screen transitions.
+ */
+fun handleRoleSelection(
+    role: String,
+    authViewModel: AuthViewModel,
+    context: Context,
+    navigationActions: NavigationActions
+) {
+  authViewModel.setRole(role)
+  if (authViewModel.googleAccount.value == null) {
+    authViewModel.registerWithEmailAndPassword(
+        {
+          Toast.makeText(context, "You are Signed up!", Toast.LENGTH_SHORT).show()
+          if (role == "seeker") {
+            navigationActions.navigateTo(Route.SEEKER_REGISTRATION)
+          } else {
+            navigationActions.navigateTo(Route.PROVIDER_REGISTRATION)
+          }
+        },
+        {
+          if (!authViewModel.userRegistered.value) {
+            Toast.makeText(context, "You already have an account", Toast.LENGTH_SHORT).show()
+            navigationActions.navigateTo(Screen.SIGN_IN)
+          } else {
+            Toast.makeText(context, "Failed to register", Toast.LENGTH_SHORT).show()
+          }
+        })
+  } else {
+    authViewModel.registerWithGoogle(
+        {
+          Toast.makeText(context, "You are Signed up!", Toast.LENGTH_SHORT).show()
+          if (role == "seeker") {
+            navigationActions.navigateTo(Route.SEEKER_REGISTRATION)
+          } else {
+            navigationActions.navigateTo(Route.PROVIDER_REGISTRATION)
+          }
+        },
+        { Toast.makeText(context, "Failed to register", Toast.LENGTH_SHORT).show() })
+  }
 }

@@ -16,7 +16,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,6 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.solvit.shared.model.Notification
 import com.android.solvit.shared.model.NotificationsViewModel
 import com.android.solvit.shared.model.request.ServiceRequest
@@ -48,7 +48,7 @@ fun NotificationScreen(
 ) {
   LaunchedEffect(providerId) { viewModel.init(providerId) }
 
-  val notifications by viewModel.notifications.collectAsState()
+  val notifications by viewModel.notifications.collectAsStateWithLifecycle()
   var showDialog by remember { mutableStateOf(false) }
   val selectedServiceRequest = remember { mutableStateOf<ServiceRequest?>(null) }
   Scaffold(

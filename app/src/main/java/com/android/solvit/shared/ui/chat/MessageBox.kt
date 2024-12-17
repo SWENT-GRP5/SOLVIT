@@ -23,7 +23,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,6 +36,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.android.solvit.R
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
@@ -65,10 +65,10 @@ fun MessageBox(
     listProviderViewModel: ListProviderViewModel,
     seekerProfileViewModel: SeekerProfileViewModel
 ) {
-  val allMessages by chatViewModel.allMessages.collectAsState()
-  val isReadyToNavigate by chatViewModel.isReadyToNavigate.collectAsState()
-  val user by authViewModel.user.collectAsState()
-  val isLoadingMessageBox by chatViewModel.isLoadingMessageBox.collectAsState()
+  val allMessages by chatViewModel.allMessages.collectAsStateWithLifecycle()
+  val isReadyToNavigate by chatViewModel.isReadyToNavigate.collectAsStateWithLifecycle()
+  val user by authViewModel.user.collectAsStateWithLifecycle()
+  val isLoadingMessageBox by chatViewModel.isLoadingMessageBox.collectAsStateWithLifecycle()
 
   val currentUserUid = user?.uid
   if (currentUserUid != null) {
