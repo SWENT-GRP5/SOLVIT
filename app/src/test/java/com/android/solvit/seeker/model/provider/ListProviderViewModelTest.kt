@@ -2,6 +2,7 @@ package com.android.solvit.seeker.model.provider
 
 import android.net.Uri
 import com.android.solvit.shared.model.map.Location
+import com.android.solvit.shared.model.provider.Language
 import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.provider.ProviderRepository
 import com.android.solvit.shared.model.service.Services
@@ -93,5 +94,93 @@ class ListProviderViewModelTest {
       listProviderViewModel.fetchProviderById("1234")
       verify(providerRepository).returnProvider("1234")
     }
+  }
+
+  @Test
+  fun filterStringFields() = runBlocking {
+    val filterField = "Test Field"
+    val filterAction: (Provider) -> Boolean = { it.service == Services.PLUMBER }
+    val defaultFilterAction: (Provider) -> Boolean = { it.service != Services.PLUMBER }
+
+    listProviderViewModel.filterStringFields(
+        iconPressed = true,
+        filterCondition = false,
+        filterAction = filterAction,
+        defaultFilterAction = defaultFilterAction,
+        filterField = filterField)
+
+    verify(providerRepository).filterProviders(any())
+  }
+
+  @Test
+  fun updateSelectedLanguages() = runBlocking {
+    val newLanguages = setOf(Language.ENGLISH, Language.FRENCH)
+    val languagePressed = Language.ENGLISH
+
+    listProviderViewModel.updateSelectedLanguages(newLanguages, languagePressed)
+
+    MatcherAssert.assertThat(
+        listProviderViewModel.selectedLanguages.value, CoreMatchers.`is`(newLanguages))
+    verify(providerRepository).filterProviders(any())
+  }
+
+  @Test
+  fun clearFilterFields() = runBlocking {
+    listProviderViewModel.clearFilterFields()
+
+    MatcherAssert.assertThat(
+        listProviderViewModel.selectedLanguages.value, CoreMatchers.`is`(emptySet()))
+    MatcherAssert.assertThat(
+        listProviderViewModel.selectedRatings.value, CoreMatchers.`is`(emptySet()))
+    MatcherAssert.assertThat(listProviderViewModel.minPrice.value, CoreMatchers.`is`(""))
+    MatcherAssert.assertThat(listProviderViewModel.maxPrice.value, CoreMatchers.`is`(""))
+  }
+
+  @Test
+  fun updateSelectedRatings() = runBlocking {
+    val newRatings = setOf(4.0, 5.0)
+    val ratingPressed = 5.0
+
+    listProviderViewModel.updateSelectedRatings(newRatings, ratingPressed)
+
+    MatcherAssert.assertThat(
+        listProviderViewModel.selectedRatings.value, CoreMatchers.`is`(newRatings))
+    verify(providerRepository).filterProviders(any())
+  }
+
+  @Test
+  fun updateMinPrice_validInput() = runBlocking {
+    val minPrice = "100"
+    listProviderViewModel.updateMinPrice(minPrice)
+
+    MatcherAssert.assertThat(listProviderViewModel.minPrice.value, CoreMatchers.`is`(minPrice))
+    verify(providerRepository).filterProviders(any())
+  }
+
+  @Test
+  fun updateMinPrice_invalidInput() = runBlocking {
+    val minPrice = "invalid"
+    listProviderViewModel.updateMinPrice(minPrice)
+
+    MatcherAssert.assertThat(listProviderViewModel.minPrice.value, CoreMatchers.`is`(minPrice))
+    verify(providerRepository).filterProviders(any())
+  }
+
+  @Test
+  fun updateMaxPrice_validInput() = runBlocking {
+    val maxPrice = "500"
+    listProviderViewModel.updateMaxPrice(maxPrice)
+
+    MatcherAssert.assertThat(listProviderViewModel.maxPrice.value, CoreMatchers.`is`(maxPrice))
+    verify(providerRepository).filterProviders(any())
+  }
+
+  @Test
+  fun updateMaxPrice_invalidInput() = runBlocking {
+    val maxPrice = "invalid"
+    listProviderViewModel.updateMaxPrice(maxPrice)
+
+    MatcherAssert.assertThat(listProviderViewModel.maxPrice.value, CoreMatchers.`is`(maxPrice))
+    verify(providerRepository).filterProviders(any())
   }
 }

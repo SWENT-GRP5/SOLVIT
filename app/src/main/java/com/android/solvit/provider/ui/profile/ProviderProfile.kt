@@ -104,7 +104,7 @@ fun ProviderProfileScreen(
         TopAppBarInbox(
             title = "Profile",
             testTagTitle = "ProfileTitle",
-            rightButton = { showLogoutDialog = true },
+            rightButtonAction = { showLogoutDialog = true },
             rightButtonForm = Icons.AutoMirrored.Filled.ExitToApp,
             testTagRight = "LogoutButton",
             testTagGeneral = "ProfileTopBar")
@@ -295,7 +295,7 @@ fun InsightsCard(provider: Provider, serviceRequestViewModel: ServiceRequestView
                                     color = colorScheme.primary,
                                     style = Typography.titleLarge.copy(fontSize = 18.sp))
                                 Text(
-                                    text = "${provider.popular}",
+                                    text = if (provider.popular) "Yes" else "Not Yet !",
                                     color = colorScheme.onBackground,
                                     style = Typography.bodyLarge)
                               }

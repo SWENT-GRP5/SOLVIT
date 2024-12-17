@@ -219,7 +219,7 @@ fun LocationDropdown(
   var hasBeenFocused by remember { mutableStateOf(false) }
   var hasLostFocusAfterTyping by remember { mutableStateOf(false) }
 
-  Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp)) {
+  Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp).testTag("addressDropdown")) {
     OutlinedTextField(
         value = localQuery,
         onValueChange = { query ->
