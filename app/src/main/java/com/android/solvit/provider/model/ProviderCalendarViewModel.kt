@@ -14,13 +14,11 @@ import com.android.solvit.shared.model.provider.ProviderRepositoryFirestore
 import com.android.solvit.shared.model.provider.ScheduleException
 import com.android.solvit.shared.model.provider.TimeSlot
 import com.android.solvit.shared.model.request.ServiceRequest
-import com.android.solvit.shared.model.request.ServiceRequestRepositoryFirebase
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
-import com.google.firebase.storage.ktx.storage
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -29,8 +27,8 @@ import java.time.temporal.TemporalAdjusters
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 enum class CalendarView {
@@ -486,14 +484,19 @@ class ProviderCalendarViewModel(
   data class ConflictResult(val hasConflict: Boolean, val reason: String)
 
   companion object {
-    fun provideFactory(serviceRequestViewModel: ServiceRequestViewModel): ViewModelProvider.Factory =
+    fun provideFactory(
+        serviceRequestViewModel: ServiceRequestViewModel
+    ): ViewModelProvider.Factory =
         object : ViewModelProvider.Factory {
           @Suppress("UNCHECKED_CAST")
           override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            val providerRepository = ProviderRepositoryFirestore(Firebase.firestore, FirebaseStorage.getInstance())
+            val providerRepository =
+                ProviderRepositoryFirestore(Firebase.firestore, FirebaseStorage.getInstance())
             val authViewModel = AuthViewModel(AuthRepository(Firebase.auth, Firebase.firestore))
 
-            return ProviderCalendarViewModel(providerRepository, authViewModel, serviceRequestViewModel) as T
+            return ProviderCalendarViewModel(
+                providerRepository, authViewModel, serviceRequestViewModel)
+                as T
           }
         }
   }
