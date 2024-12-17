@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -94,6 +95,7 @@ import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.navigation.Screen
 import com.android.solvit.shared.ui.theme.SelectedPackage
+import com.android.solvit.shared.ui.theme.SelectedPackageDark
 import com.android.solvit.shared.ui.theme.Typography
 import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.Timestamp
@@ -679,7 +681,10 @@ fun PackageCard(packageProposal: PackageProposal, modifier: Modifier = Modifier)
       modifier = modifier.fillMaxSize(),
       shape = RoundedCornerShape(16.dp),
       elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-      colors = CardDefaults.cardColors(containerColor = SelectedPackage)) {
+      colors =
+          CardDefaults.cardColors(
+              containerColor =
+                  if (isSystemInDarkTheme()) SelectedPackageDark else SelectedPackage)) {
         Column(
             modifier = Modifier.padding(20.dp).fillMaxHeight().testTag("package_content"),
             horizontalAlignment = Alignment.Start) {
@@ -689,12 +694,9 @@ fun PackageCard(packageProposal: PackageProposal, modifier: Modifier = Modifier)
                     modifier = Modifier.testTag("price"),
                     text = "CHF${packageProposal.price}",
                     style = Typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-                    color = colorScheme.onPrimaryContainer)
+                    color = colorScheme.onBackground)
                 Spacer(modifier = Modifier.width(8.dp)) // Increased space between price and unit
-                Text(
-                    text = "/hour",
-                    style = Typography.bodySmall,
-                    color = colorScheme.onPrimaryContainer)
+                Text(text = "/hour", style = Typography.bodySmall, color = colorScheme.onBackground)
               }
               Spacer(modifier = Modifier.height(12.dp))
               // Title of the Package
@@ -702,7 +704,7 @@ fun PackageCard(packageProposal: PackageProposal, modifier: Modifier = Modifier)
                   modifier = Modifier.testTag("title"),
                   text = packageProposal.title,
                   style = Typography.titleMedium,
-                  color = colorScheme.onPrimaryContainer)
+                  color = colorScheme.onBackground)
               Spacer(
                   modifier =
                       Modifier.height(12.dp)) // Increased space between title and description

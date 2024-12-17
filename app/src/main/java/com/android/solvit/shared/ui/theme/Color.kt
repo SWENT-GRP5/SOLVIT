@@ -13,6 +13,7 @@ val SecondaryContainer = Color(0xFFB9F6CA)
 val SecondaryPackage = Color(0xFF78C899)
 val OnSecondaryContainer = Color(0xFF00210B)
 val SelectedPackage = Color(0xFFE6F7EC)
+val SelectedPackageDark = Color(0xFF546054)
 
 val Error = Color(0xFFEC5865)
 val OnError = Color(0xFFFFFFFF)
