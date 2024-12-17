@@ -2,12 +2,12 @@ package com.android.solvit.provider.ui.map
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.solvit.R
 import com.android.solvit.seeker.ui.navigation.BottomNavigationMenu
@@ -44,7 +44,7 @@ fun ProviderMapScreen(
   // State to hold the user's location
   var userLocation by remember { mutableStateOf<LatLng?>(null) }
   // Collect the service requests from the ViewModel
-  val requests by serviceRequestViewModel.pendingRequests.collectAsState()
+  val requests by serviceRequestViewModel.pendingRequests.collectAsStateWithLifecycle()
 
   // Allows to bypass location permission for testing
   if (requestLocationPermission) {

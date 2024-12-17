@@ -45,6 +45,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.android.solvit.R
 import com.android.solvit.shared.model.Notification
@@ -56,7 +57,8 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.rememberCameraPositionState
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -67,7 +69,7 @@ fun NotificationScreen(
 ) {
   LaunchedEffect(providerId) { viewModel.init(providerId) }
 
-  val notifications by viewModel.notifications.collectAsState()
+  val notifications by viewModel.notifications.collectAsStateWithLifecycle()
   var showDialog by remember { mutableStateOf(false) }
   val selectedServiceRequest = remember { mutableStateOf<ServiceRequest?>(null) }
   Scaffold(

@@ -1,6 +1,5 @@
 package com.android.solvit
 
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -9,6 +8,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
 import com.android.solvit.provider.model.ProviderCalendarViewModel
@@ -202,8 +202,8 @@ class EndToEndMessage {
   @Test
   fun initializeMessagingSessionWithProvider() {
     composeTestRule.setContent {
-      val user = authViewModel.user.collectAsState()
-      val userRegistered = authViewModel.userRegistered.collectAsState()
+      val user = authViewModel.user.collectAsStateWithLifecycle()
+      val userRegistered = authViewModel.userRegistered.collectAsStateWithLifecycle()
 
       if (!userRegistered.value) {
         SharedUI(

@@ -24,7 +24,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,6 +33,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.solvit.R
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
@@ -47,7 +47,7 @@ fun EditPreferences(
     navigationActions: NavigationActions
 ) {
 
-  val selectedItems by viewModel.userPreferences.collectAsState()
+  val selectedItems by viewModel.userPreferences.collectAsStateWithLifecycle()
   // Fetch preferences when the screen is composed
   LaunchedEffect(Unit) {
     if (selectedItems.isEmpty()) { // Only fetch from Firestore if local state is empty

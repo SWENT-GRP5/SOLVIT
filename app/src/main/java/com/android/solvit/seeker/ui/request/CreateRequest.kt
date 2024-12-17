@@ -13,13 +13,13 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.shared.model.NotificationsViewModel
@@ -67,8 +67,9 @@ fun CreateRequestScreen(
     }
   }
 
-  val selectedProviderId = requestViewModel.selectedProviderId.collectAsState()
-  val selectedProviderService = requestViewModel.selectedProviderService.collectAsState()
+  val selectedProviderId = requestViewModel.selectedProviderId.collectAsStateWithLifecycle()
+  val selectedProviderService =
+      requestViewModel.selectedProviderService.collectAsStateWithLifecycle()
 
   var title by remember { mutableStateOf("") }
   var description by remember { mutableStateOf("") }
@@ -76,11 +77,12 @@ fun CreateRequestScreen(
   var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
   var selectedImageBitmap by remember { mutableStateOf<Bitmap?>(null) }
   var selectedLocation by remember { mutableStateOf<Location?>(null) }
-  val locationQuery by locationViewModel.query.collectAsState()
+  val locationQuery by locationViewModel.query.collectAsStateWithLifecycle()
   var showDropdownLocation by remember { mutableStateOf(false) }
   val locationSuggestions by
-      locationViewModel.locationSuggestions.collectAsState(initial = emptyList<Location?>())
-  val user by authViewModel.user.collectAsState()
+      locationViewModel.locationSuggestions.collectAsStateWithLifecycle(
+          initialValue = emptyList<Location?>())
+  val user by authViewModel.user.collectAsStateWithLifecycle()
   var showDropdownType by remember { mutableStateOf(false) }
   var typeQuery by remember { mutableStateOf("") }
   val filteredServiceTypes =
@@ -104,7 +106,7 @@ fun CreateRequestScreen(
             testTagLeft = "CreateRequestBackButton")
       },
       content = { // AI Assistant Dialog
-        if (showAIAssistantDialog) {
+        if (showAIAssistantDialog && isInternetAvailable(localContext)) {
           AIAssistantDialog(
               onCancel = { showAIAssistantDialog = false },
               onUploadPictures = {
