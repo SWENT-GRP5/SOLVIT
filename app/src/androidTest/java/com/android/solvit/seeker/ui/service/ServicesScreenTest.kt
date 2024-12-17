@@ -72,7 +72,7 @@ class ServicesScreenTest {
           username = "johndoe",
           email = "john.doe@example.com",
           phone = "1234567890",
-          address = "Chemin des Triaudes")
+          address = Location(0.0, 0.0, "Chemin des Triaudes"))
 
   @get:Rule val composeTestRule = createComposeRule()
 
@@ -121,9 +121,7 @@ class ServicesScreenTest {
   fun topSectionHasRequiredComponents() {
     composeTestRule.onNodeWithTag("servicesScreenTopSection").assertIsDisplayed()
     composeTestRule.onNodeWithTag("servicesScreenProfileImage").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("servicesScreenLocationIcon").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("servicesScreenCurrentLocation").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("servicesScreenUserName").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("SloganIcon").assertIsDisplayed()
     composeTestRule.onNodeWithTag("servicesScreenMenu").assertIsDisplayed()
     composeTestRule.onNodeWithTag("servicesScreenSearchBar").assertIsDisplayed()
   }

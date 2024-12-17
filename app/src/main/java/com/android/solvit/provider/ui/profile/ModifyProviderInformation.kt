@@ -36,12 +36,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -53,6 +52,8 @@ import com.android.solvit.shared.model.map.LocationViewModel
 import com.android.solvit.shared.model.provider.Language
 import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.service.Services
+import com.android.solvit.shared.model.utils.EditProfileHeader
+import com.android.solvit.shared.model.utils.SaveButton
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.theme.Typography
 import com.android.solvit.shared.ui.utils.CustomOutlinedTextField
@@ -82,6 +83,12 @@ fun ModifyProviderInformationScreen(
     navigationActions: NavigationActions
 ) {
   val context = LocalContext.current
+  val configuration = LocalConfiguration.current
+  val screenWidth = configuration.screenWidthDp.dp
+  val screenHeight = configuration.screenHeightDp.dp
+  val verticalSpacing = if (screenHeight < 640.dp) 8.dp else 16.dp
+  val horizontalPadding = if (screenWidth < 360.dp) 8.dp else 16.dp
+
   DisposableEffect(Unit) {
     val activity = context as? ComponentActivity
     activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
@@ -93,6 +100,7 @@ fun ModifyProviderInformationScreen(
 
   val user = authViewModel.user.collectAsState()
   val userId = user.value?.uid ?: "-1"
+  val userEmail = user.value?.email ?: ""
   val provider by providerViewModel.userProvider.collectAsState()
 
   LaunchedEffect(user) { providerViewModel.getProvider(userId) }
@@ -109,21 +117,25 @@ fun ModifyProviderInformationScreen(
         Column(
             modifier =
                 Modifier.fillMaxSize()
+                    .padding(horizontalPadding)
                     .padding(padding)
-                    .padding(16.dp)
                     .background(colorScheme.background)
                     .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Top) {
-              provider?.let {
-                ModifyInput(
-                    provider = it,
-                    locationViewModel = locationViewModel,
-                    providerViewModel = providerViewModel,
-                    authViewModel = authViewModel,
-                    navigationActions = navigationActions)
-              }
-            }
+            verticalArrangement = Arrangement.SpaceBetween,
+        ) {
+          provider?.let {
+            ModifyInput(
+                provider = it,
+                providerEmail = userEmail,
+                screenWidth = screenWidth,
+                verticalSpacing = verticalSpacing,
+                locationViewModel = locationViewModel,
+                providerViewModel = providerViewModel,
+                authViewModel = authViewModel,
+                navigationActions = navigationActions)
+          }
+        }
       })
 }
 
@@ -142,6 +154,9 @@ fun ModifyProviderInformationScreen(
 @Composable
 fun ModifyInput(
     provider: Provider,
+    providerEmail: String = "",
+    screenWidth: Dp = 100.dp,
+    verticalSpacing: Dp = 100.dp,
     locationViewModel: LocationViewModel = viewModel(factory = LocationViewModel.Factory),
     providerViewModel: ProviderViewModel = viewModel(factory = ProviderViewModel.Factory),
     authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory),
@@ -191,6 +206,14 @@ fun ModifyInput(
     newDescription = provider.description
   }
 
+  EditProfileHeader(
+      imageUrl = provider.imageUrl,
+      fullName = provider.name,
+      email = providerEmail,
+      screenWidth = screenWidth,
+      verticalSpacing = verticalSpacing)
+  Spacer(modifier = Modifier.height(10.dp))
+
   CustomOutlinedTextField(
       value = newName,
       onValueChange = { newName = it },
@@ -205,7 +228,6 @@ fun ModifyInput(
       maxLines = 2)
 
   Spacer(modifier = Modifier.height(10.dp))
-
   CustomOutlinedTextField(
       value = newCompanyName,
       onValueChange = { newCompanyName = it },
@@ -220,11 +242,9 @@ fun ModifyInput(
       maxLines = 2)
 
   Spacer(modifier = Modifier.height(10.dp))
-
   ServiceDropdownMenu(selectedService = newService, onServiceSelected = { newService = it })
 
   Spacer(modifier = Modifier.height(10.dp))
-
   CustomOutlinedTextField(
       value = newPhoneNumber,
       onValueChange = { newPhoneNumber = it },
@@ -239,7 +259,6 @@ fun ModifyInput(
       maxLines = 1)
 
   Spacer(modifier = Modifier.height(10.dp))
-
   LocationDropdown(
       locationQuery = newLocation,
       onLocationQueryChange = { locationViewModel.setQuery(it) },
@@ -254,7 +273,6 @@ fun ModifyInput(
       testTag = "newLocationInputField")
 
   Spacer(modifier = Modifier.height(10.dp))
-
   LanguageDropdownMenu(
       selectedLanguages = newLanguage,
       onLanguageSelected = { language, isChecked ->
@@ -267,7 +285,6 @@ fun ModifyInput(
       })
 
   Spacer(modifier = Modifier.height(10.dp))
-
   CustomOutlinedTextField(
       value = newDescription,
       onValueChange = { newDescription = it },
@@ -282,9 +299,8 @@ fun ModifyInput(
       textAlign = TextAlign.Start,
       maxLines = 7)
 
-  Spacer(modifier = Modifier.height(10.dp))
-
-  Button(
+  Spacer(modifier = Modifier.height(20.dp))
+  SaveButton(
       onClick = {
         if (allIsGood) {
           val updatedProvider =
@@ -309,33 +325,7 @@ fun ModifyInput(
               .show()
         }
       },
-      modifier =
-          Modifier.fillMaxWidth()
-              .height(50.dp)
-              .background(
-                  brush =
-                      if (allIsGood) {
-                        Brush.horizontalGradient(
-                            colors = listOf(colorScheme.primary, colorScheme.secondary))
-                      } else {
-                        Brush.horizontalGradient(
-                            colors =
-                                listOf(colorScheme.onSurfaceVariant, colorScheme.onSurfaceVariant))
-                      },
-                  shape =
-                      RoundedCornerShape(
-                          25.dp,
-                      )),
-      colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)) {
-        Text(
-            "Save !",
-            modifier = Modifier.testTag("saveButton"),
-            style =
-                Typography.bodyLarge.copy(
-                    color = colorScheme.onPrimary, fontWeight = FontWeight.Bold))
-      }
-
-  Spacer(modifier = Modifier.height(3.dp))
+      allIsGood = allIsGood)
 
   Text(
       text = "Don't forget to save your changes by clicking the button before leaving the page!",

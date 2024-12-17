@@ -306,7 +306,8 @@ fun SeekerUI(
         SeekerProfileScreen(seekerProfileViewModel, navigationActions, authViewModel)
       }
       composable(Screen.EDIT_SEEKER_PROFILE) {
-        EditSeekerProfileScreen(seekerProfileViewModel, navigationActions, authViewModel)
+        EditSeekerProfileScreen(
+            seekerProfileViewModel, navigationActions, locationViewModel, authViewModel)
       }
       composable(Screen.EDIT_PREFERENCES) {
         EditPreferences(user!!.uid, seekerProfileViewModel, navigationActions)
