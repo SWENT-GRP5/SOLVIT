@@ -20,4 +20,5 @@ class GeminiImageAnalyzerTest {
     assertNotNull(result.second)
     assertNotNull(result.third)
   }
+  */
 }
