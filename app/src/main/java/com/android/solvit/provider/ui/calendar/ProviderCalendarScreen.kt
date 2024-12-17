@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -34,6 +36,7 @@ import com.android.solvit.provider.model.ProviderCalendarViewModel
 import com.android.solvit.provider.ui.calendar.components.container.SwipeableCalendarContainer
 import com.android.solvit.provider.ui.calendar.components.dialog.DatePickerDialog
 import com.android.solvit.provider.ui.calendar.components.navigation.CalendarViewToggle
+import com.android.solvit.provider.ui.calendar.components.preferences.SchedulePreferencesSheet
 import com.android.solvit.provider.ui.calendar.components.timeslot.BottomSheetTimeSlots
 import com.android.solvit.provider.ui.calendar.views.day.DayView
 import com.android.solvit.provider.ui.calendar.views.month.MonthView
@@ -61,10 +64,18 @@ fun ProviderCalendarScreen(
 
   var showDatePicker by remember { mutableStateOf(false) }
   var showBottomSheet by remember { mutableStateOf(false) }
+  var showPreferences by remember { mutableStateOf(false) }
   var shouldAnimate by remember { mutableStateOf(true) }
 
   Scaffold(
-      topBar = { TopAppBarInbox(title = "My Calendar", testTagTitle = "calendarTitle") },
+      topBar = {
+        TopAppBarInbox(
+            title = "My Calendar",
+            testTagTitle = "calendarTitle",
+            rightButtonForm = Icons.Default.Settings,
+            rightButtonAction = { showPreferences = true },
+            testTagRight = "settingsButton")
+      },
       bottomBar = {
         BottomNavigationMenu(
             onTabSelect = { navigationActions.navigateTo(it.route) },
@@ -213,5 +224,9 @@ fun ProviderCalendarScreen(
         },
         selectedDate = selectedDate,
         modifier = Modifier.testTag("datePickerDialog"))
+  }
+
+  if (showPreferences) {
+    SchedulePreferencesSheet(viewModel = viewModel, onDismiss = { showPreferences = false })
   }
 }

@@ -28,7 +28,7 @@ open class NotificationService : FirebaseMessagingService() {
     private const val CHANNEL_NAME = "Default"
   }
 
-  private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+  protected open val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
   override fun onCreate() {
     super.onCreate()
