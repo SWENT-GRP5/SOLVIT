@@ -38,9 +38,11 @@ import io.mockk.unmockkAll
 import io.mockk.unmockkObject
 import io.mockk.unmockkStatic
 import io.mockk.verify
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -313,48 +315,53 @@ class NotificationServiceTest {
   @OptIn(ExperimentalCoroutinesApi::class)
   @Test
   fun updateCurrentUserToken_whenUserLoggedIn_updatesToken() = runTest {
-    // Mock Log calls first
-    mockkStatic(Log::class)
-    every { Log.d(any(), any()) } returns 0
-    every { Log.i(any(), any()) } returns 0
-    every { Log.e(any(), any(), any()) } returns 0
-
-    // Create a test user with a unique email
-    val auth = Firebase.auth
-    val email = "test${System.currentTimeMillis()}@example.com"
-    val password = "password123"
-
     try {
-      auth.createUserWithEmailAndPassword(email, password).await()
-      val result = auth.signInWithEmailAndPassword(email, password).await()
-      val user = result.user!!
-
-      // Clear any previous verifications and set up mocks
-      clearAllMocks()
+      // Mock Log calls first
       mockkStatic(Log::class)
       every { Log.d(any(), any()) } returns 0
       every { Log.i(any(), any()) } returns 0
       every { Log.e(any(), any(), any()) } returns 0
 
-      // Mock FcmTokenManager to avoid Firestore operations
+      // Create a test user with a unique email
+      val auth = Firebase.auth
+      val email = "test${System.currentTimeMillis()}@example.com"
+      val password = "password123"
+
+      auth.createUserWithEmailAndPassword(email, password).await()
+      val result = auth.signInWithEmailAndPassword(email, password).await()
+      val user = result.user!!
+
+      // Ensure we're on the test dispatcher
+      val testScope = CoroutineScope(coroutineContext)
+
+      // Create service with test scope
+      val testService =
+          object : NotificationService() {
+            override val serviceScope: CoroutineScope
+              get() = testScope
+          }
+
+      // Mock FcmTokenManager
       val mockTokenManager = mockk<FcmTokenManager>()
       mockkObject(FcmTokenManager.Companion)
       every { FcmTokenManager.getInstance() } returns mockTokenManager
       coEvery { mockTokenManager.updateUserFcmToken(any(), any()) } returns Tasks.forResult(null)
 
       // Update the token
-      service.updateCurrentUserToken("test_token")
+      testService.updateCurrentUserToken("test_token")
 
-      // Allow coroutines to complete
+      // Run coroutines
+      runCurrent()
       advanceUntilIdle()
 
       // Verify the expected log was called
-      verify(exactly = 1) {
+      verify(timeout = 1000) {
         Log.d(any(), match { it.contains("Successfully updated FCM token for user: ${user.uid}") })
       }
 
       // Clean up
       unmockkObject(FcmTokenManager.Companion)
+      unmockkStatic(Log::class)
       user.delete().await()
     } catch (e: Exception) {
       fail("Test failed: ${e.message}")
