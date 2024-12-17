@@ -54,7 +54,6 @@ import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -76,6 +75,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.android.solvit.R
@@ -130,7 +130,7 @@ fun ServiceBookingScreen(
     onDispose { activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED }
   }
 
-  val isReadyToNavigate by chatViewModel.isReadyToNavigate.collectAsState()
+  val isReadyToNavigate by chatViewModel.isReadyToNavigate.collectAsStateWithLifecycle()
   LaunchedEffect(isReadyToNavigate) {
     if (isReadyToNavigate) {
       navigationActions.navigateAndSetBackStack(Screen.CHAT, listOf(Route.INBOX))
@@ -138,17 +138,17 @@ fun ServiceBookingScreen(
     }
   }
 
-  val user = authViewModel.user.collectAsState().value
+  val user = authViewModel.user.collectAsStateWithLifecycle().value
   val role = user?.role ?: "seeker"
   val seekerState = remember { mutableStateOf<Any?>(null) }
 
-  val request by requestViewModel.selectedRequest.collectAsState()
+  val request by requestViewModel.selectedRequest.collectAsStateWithLifecycle()
   if (request == null) return
   val providerId = request!!.providerId
   val provider =
       if (providerId.isNullOrEmpty()) null
       else
-          providerViewModel.providersList.collectAsState().value.firstOrNull {
+          providerViewModel.providersList.collectAsStateWithLifecycle().value.firstOrNull {
             it.uid == providerId
           }
 
@@ -160,7 +160,10 @@ fun ServiceBookingScreen(
   val packageId = request!!.packageId
   val packageProposal =
       if (packageId.isNullOrEmpty()) null
-      else packageViewModel.proposal.collectAsState().value.firstOrNull { it.uid == packageId }
+      else
+          packageViewModel.proposal.collectAsStateWithLifecycle().value.firstOrNull {
+            it.uid == packageId
+          }
 
   val isSeeker = role == "seeker"
 

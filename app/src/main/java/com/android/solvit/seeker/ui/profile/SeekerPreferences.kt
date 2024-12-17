@@ -14,7 +14,6 @@ import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,13 +22,14 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.shared.ui.theme.Typography
 
 @Composable
 fun Preferences(userId: String, viewModel: SeekerProfileViewModel) {
   // State to track selected items
-  val selectedItems by viewModel.userPreferences.collectAsState()
+  val selectedItems by viewModel.userPreferences.collectAsStateWithLifecycle()
 
   Column(
       modifier = Modifier.fillMaxSize().padding(16.dp),

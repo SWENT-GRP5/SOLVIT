@@ -2,12 +2,12 @@ package com.android.solvit.seeker.ui.map
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.seeker.ui.navigation.BottomNavigationMenu
@@ -43,7 +43,7 @@ fun SeekerMapScreen(
   // State to hold the user's location
   var userLocation by remember { mutableStateOf<LatLng?>(null) }
   // Collect the list of providers from the ViewModel
-  val providers by providerViewModel.providersList.collectAsState()
+  val providers by providerViewModel.providersList.collectAsStateWithLifecycle()
 
   // Allows to bypass location permission for testing
   if (requestLocationPermission) {
