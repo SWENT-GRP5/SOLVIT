@@ -174,17 +174,19 @@ class NotificationsScreenTest {
 
     // Simulate a click on the first notification
     composeTestRule.onNodeWithTag("notificationItem_1").performClick()
-
+    composeTestRule.waitForIdle()
     // Check that the dialog is displayed
-    composeTestRule.onNodeWithTag("serviceRequestDialog").assertIsDisplayed()
+    composeTestRule
+        .onNodeWithTag("serviceRequestDialog", useUnmergedTree = true)
+        .assertIsDisplayed()
 
     // Verify that the dialog displays the correct service request title, description, location, due
     // date, and status
-    composeTestRule.onNodeWithTag("dialogTitle").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("dialogDescription").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("map_image").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("dialogDueDate").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("request_image").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("dialogTitle", useUnmergedTree = true).assertIsDisplayed()
+    composeTestRule.onNodeWithTag("dialogDescription", useUnmergedTree = true).assertIsDisplayed()
+    composeTestRule.onNodeWithTag("map_image", useUnmergedTree = true).assertIsDisplayed()
+    composeTestRule.onNodeWithTag("dialogDueDate", useUnmergedTree = true).assertIsDisplayed()
+    composeTestRule.onNodeWithTag("request_image", useUnmergedTree = true).assertIsDisplayed()
   }
 
   @Test
@@ -200,18 +202,20 @@ class NotificationsScreenTest {
     composeTestRule.onNodeWithTag("notificationItem_1").performClick()
 
     // Verify the service request details in the dialog
-    composeTestRule.onNodeWithTag("dialogTitle").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("dialogDescription").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("dialogTitle", useUnmergedTree = true).assertIsDisplayed()
+    composeTestRule.onNodeWithTag("dialogDescription", useUnmergedTree = true).assertIsDisplayed()
 
     // Verify the text content of the dialog elements matches the service request details
-    composeTestRule.onNodeWithTag("dialogTitle").assertTextEquals("title") // Matching the title
     composeTestRule
-        .onNodeWithTag("dialogDescription")
+        .onNodeWithTag("dialogTitle", useUnmergedTree = true)
+        .assertTextEquals("title") // Matching the title
+    composeTestRule
+        .onNodeWithTag("dialogDescription", useUnmergedTree = true)
         .assertTextEquals("description") // Matching the description
 
     // For the due date
     composeTestRule
-        .onNodeWithTag("dialogDueDate")
+        .onNodeWithTag("dialogDueDate", useUnmergedTree = true)
         .assertTextEquals("01/02/2024") //  Matching the date format used
   }
 }
