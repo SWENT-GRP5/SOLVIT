@@ -65,6 +65,13 @@ import com.android.solvit.shared.ui.utils.TopAppBarInbox
 import java.text.SimpleDateFormat
 import java.util.Locale
 
+/**
+ * Screen that displays the list of service requests for the current user.
+ *
+ * @param navigationActions Actions to navigate between screens.
+ * @param requestViewModel ViewModel to manage service requests.
+ * @param authViewModel ViewModel to manage user authentication.
+ */
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "SourceLockedOrientationActivity")
 @Composable
 fun RequestsOverviewScreen(
@@ -107,7 +114,10 @@ fun RequestsOverviewScreen(
         val selectedServices by requestViewModel.selectedServices.collectAsStateWithLifecycle()
 
         Column {
-          TopOrdersSection()
+          TopAppBarInbox(
+              title = "Orders",
+              testTagGeneral = "topOrdersSection",
+          )
           CategoriesFiltersSection(serviceRequestViewModel = requestViewModel)
 
           // Tabs for filtering by status
@@ -164,20 +174,15 @@ fun RequestsOverviewScreen(
                           navigationActions.navigateTo(Route.BOOKING_DETAILS)
                         })
                   }
+                  // Add a spacer at the end to avoid the last item being hidden by the bottom bar
+                  item { Spacer(modifier = Modifier.size(32.dp)) }
                 }
           }
         }
       }
 }
 
-@Composable
-fun TopOrdersSection() {
-  TopAppBarInbox(
-      title = "Orders",
-      testTagGeneral = "topOrdersSection",
-  )
-}
-
+/** Composable that displays a message when there are no service requests. */
 @Composable
 fun NoRequestsText() {
   Column(
@@ -193,6 +198,11 @@ fun NoRequestsText() {
   }
 }
 
+/**
+ * Composable that displays the categories filters section.
+ *
+ * @param serviceRequestViewModel ViewModel to manage service requests.
+ */
 @Composable
 fun CategoriesFiltersSection(serviceRequestViewModel: ServiceRequestViewModel) {
   var showFilters by remember { mutableStateOf(false) }
@@ -262,6 +272,11 @@ fun CategoriesFiltersSection(serviceRequestViewModel: ServiceRequestViewModel) {
   }
 }
 
+/**
+ * Composable that displays the categories filter.
+ *
+ * @param serviceRequestViewModel ViewModel to manage service requests.
+ */
 @Composable
 fun CategoriesFilter(serviceRequestViewModel: ServiceRequestViewModel) {
   val selectedServices by serviceRequestViewModel.selectedServices.collectAsStateWithLifecycle()
@@ -283,6 +298,11 @@ fun CategoriesFilter(serviceRequestViewModel: ServiceRequestViewModel) {
       }
 }
 
+/**
+ * Composable that displays the categories sort filter.
+ *
+ * @param serviceRequestViewModel ViewModel to manage service requests.
+ */
 @Composable
 fun CategoriesSort(serviceRequestViewModel: ServiceRequestViewModel) {
   val isSortSelected by serviceRequestViewModel.sortSelected.collectAsStateWithLifecycle()
@@ -295,6 +315,13 @@ fun CategoriesSort(serviceRequestViewModel: ServiceRequestViewModel) {
       }
 }
 
+/**
+ * Composable that displays a filter item.
+ *
+ * @param text Text to display.
+ * @param isSelected True if the filter is selected, false otherwise.
+ * @param filter Function to call when the filter is clicked.
+ */
 @Composable
 fun FilterItem(text: String, isSelected: Boolean, filter: () -> Unit) {
   var isFilterSelected by remember { mutableStateOf(isSelected) }
@@ -313,6 +340,12 @@ fun FilterItem(text: String, isSelected: Boolean, filter: () -> Unit) {
       }
 }
 
+/**
+ * Composable that displays a row with the information of a service request.
+ *
+ * @param request Service request to display.
+ * @param onClick Function to call when the row is clicked.
+ */
 @Composable
 fun RequestItemRow(request: ServiceRequest, onClick: () -> Unit) {
   // Use a Box to wrap the entire row and the bottom bar
