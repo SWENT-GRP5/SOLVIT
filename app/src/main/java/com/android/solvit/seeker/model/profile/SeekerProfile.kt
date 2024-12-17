@@ -10,7 +10,7 @@ data class SeekerProfile(
     val username: String = "",
     val email: String = "",
     val phone: String = "",
-    val address: String = "",
+    val address: Location = Location(0.0, 0.0, ""),
     val cachedLocations: List<Location> = emptyList(),
     val preferences: List<String> = emptyList()
 )

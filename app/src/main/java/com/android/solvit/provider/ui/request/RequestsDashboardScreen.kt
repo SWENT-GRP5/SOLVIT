@@ -1,5 +1,6 @@
 package com.android.solvit.provider.ui.request
 
+import android.annotation.SuppressLint
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -75,6 +76,7 @@ import kotlinx.coroutines.launch
  * @param authViewModel ViewModel for managing authentication.
  * @param listProviderViewModel View model for list of providers
  */
+@SuppressLint("SuspiciousIndentation")
 @Composable
 fun RequestsDashboardScreen(
     navigationActions: NavigationActions,
@@ -480,6 +482,18 @@ fun ArchivedJobsSection(
   )
 }
 
+@Composable
+fun OnLearnMoreButton(onLearnMore: (() -> Unit)?, request: ServiceRequest) {
+  onLearnMore?.let {
+    Button(
+        onClick = it,
+        colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
+        modifier = Modifier.wrapContentWidth().testTag("LearnMoreButton_${request.uid}")) {
+          Text("Learn More", color = colorScheme.onPrimary)
+        }
+  }
+}
+
 /**
  * JobItem represents a job item in a list. The display changes based on job status: Pending,
  * Accepted, Scheduled, Completed, Canceled, or Archived.
@@ -494,6 +508,7 @@ fun ArchivedJobsSection(
  * @param onArchiveRequest Optional callback to archive the job.
  * @param onChat Optional callback to initiate a chat with the customer.
  */
+@SuppressLint("SuspiciousIndentation")
 @Composable
 fun JobItem(
     request: ServiceRequest,
@@ -523,23 +538,9 @@ fun JobItem(
               horizontalArrangement = Arrangement.SpaceBetween, // Distribute space between children
               verticalAlignment = Alignment.CenterVertically) {
                 // See More Button
-                onLearnMore?.let {
-                  Button(
-                      onClick = it,
-                      colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
-                      modifier =
-                          Modifier.wrapContentWidth().testTag("LearnMoreButton_${request.uid}")) {
-                        Text(
-                            "Learn More",
-                            color = colorScheme.onPrimary,
-                            style = Typography.bodyLarge)
-                      }
-                }
-
-                Spacer(modifier = Modifier.weight(1f)) // Fills the space in between the two buttons
-
-                // Navigate Button for Scheduled Jobs
                 if (status == ServiceRequestStatus.SCHEDULED) {
+                  OnLearnMoreButton(onLearnMore, request)
+                  Spacer(modifier = Modifier.weight(1f))
                   onNavigateToJob?.let {
                     Button(
                         onClick = it,
@@ -551,20 +552,34 @@ fun JobItem(
                               style = Typography.bodyLarge)
                         }
                   }
+                } else {
+                  Text(
+                      text = request.title,
+                      style = Typography.titleMedium,
+                      color = colorScheme.onBackground,
+                      maxLines = 1,
+                      overflow = TextOverflow.Ellipsis,
+                      modifier = Modifier.weight(1f).padding(end = 8.dp))
+                  OnLearnMoreButton(onLearnMore, request)
                 }
               }
-          // Job Title
-          Text(
-              text = request.title,
-              style = Typography.titleMedium,
-              color = colorScheme.onBackground,
-              maxLines = 1,
-              overflow = TextOverflow.Ellipsis)
+          if (status == ServiceRequestStatus.SCHEDULED) {
+            // Job Title
+            Text(
+                text = request.title,
+                style = Typography.titleMedium,
+                color = colorScheme.onBackground,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis)
+          }
+
           // Job  Description
           Text(
               request.description,
               style = Typography.bodyMedium,
               color = colorScheme.onSurface,
+              maxLines = 3,
+              overflow = TextOverflow.Ellipsis,
               textAlign = TextAlign.Start)
           Spacer(modifier = Modifier.height(8.dp))
 
@@ -592,7 +607,12 @@ fun JobItem(
                 contentDescription = "Location",
                 tint = colorScheme.onSurfaceVariant)
             request.location?.let {
-              Text(it.name, style = Typography.bodySmall, color = colorScheme.onSurfaceVariant)
+              Text(
+                  it.name,
+                  style = Typography.bodySmall,
+                  color = colorScheme.onSurfaceVariant,
+                  maxLines = 1,
+                  overflow = TextOverflow.Ellipsis)
             }
           }
           Spacer(modifier = Modifier.height(8.dp))

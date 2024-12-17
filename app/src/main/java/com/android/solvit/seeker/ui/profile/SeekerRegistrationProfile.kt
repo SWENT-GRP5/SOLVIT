@@ -182,7 +182,7 @@ fun SeekerRegistrationScreen(
                     label = "User Name",
                     placeholder = "Enter your user name",
                     isValueOk = isUserNameOk,
-                    errorMessage = "Enter a valid first and last name",
+                    errorMessage = "Enter a valid username",
                     leadingIcon = Icons.Default.Person,
                     leadingIconDescription = "Person Icon",
                     testTag = "userNameInput",
@@ -343,6 +343,7 @@ fun SeekerRegistrationScreen(
                               uid = user!!.uid,
                               name = fullName,
                               username = userName,
+                              address = selectedLocation ?: Location(0.0, 0.0, ""),
                               phone = phone,
                               email = email)
                       viewModel.addUserProfile(newUserProfile, seekerImageUri)

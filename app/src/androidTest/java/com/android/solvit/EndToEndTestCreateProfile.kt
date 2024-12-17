@@ -232,7 +232,7 @@ class EndToEndTestCreateProfile {
     composeTestRule.onNodeWithTag("signUpLink").performClick()
 
     composeTestRule.onNodeWithTag("signUpIllustration").assertIsDisplayed()
-    val email = "e2eTest20@test.com"
+    val email = "e2eTest22@test.com"
     val password = "password"
 
     composeTestRule.onNodeWithTag("emailInputField").performTextInput(email)
@@ -263,7 +263,6 @@ class EndToEndTestCreateProfile {
     composeTestRule.waitUntil(timeoutMillis = 10000) {
       composeTestRule.onNodeWithTag("servicesScreen").isDisplayed()
     }
-    composeTestRule.onNodeWithTag("servicesScreenCurrentLocation").performClick()
 
     composeTestRule.onNodeWithTag("servicesScreenProfileImage").performClick()
     composeTestRule.waitUntil(timeoutMillis = 10000) {
@@ -326,12 +325,13 @@ class EndToEndTestCreateProfile {
     composeTestRule
         .onNodeWithTag("descriptionInputProviderRegistration")
         .performTextInput("No need a description ! I'm the Best Plumber In Town")
-    composeTestRule.onNodeWithTag("startingPriceInputProviderRegistration").performScrollTo()
-    composeTestRule.onNodeWithTag("startingPriceInputProviderRegistration").assertIsDisplayed()
+    composeTestRule
+        .onNodeWithTag("startingPriceInputProviderRegistration")
+        .performScrollTo()
+        .assertIsDisplayed()
     composeTestRule.onNodeWithTag("startingPriceInputProviderRegistration").performTextInput("25")
-    composeTestRule.onNodeWithTag("languageDropdown").performScrollTo()
-    composeTestRule.onNodeWithTag("languageDropdown").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("languageDropdown").performClick()
+    composeTestRule.onNodeWithTag("languageDropdown").performScrollTo().assertIsDisplayed()
+    composeTestRule.onNodeWithTag("languageDropdown").performScrollTo().performClick()
     composeTestRule.onNodeWithTag("FRENCH").performClick() // Set French as language spoken
 
     // Perform click on the provider image button

@@ -64,7 +64,9 @@ import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerComposable
 import com.google.maps.android.compose.MarkerState
@@ -154,6 +156,10 @@ fun MapContent(
   GoogleMap(
       modifier = modifier.fillMaxSize().testTag("googleMap"),
       cameraPositionState = cameraPositionState,
+      properties =
+          MapProperties(
+              mapStyleOptions =
+                  MapStyleOptions.loadRawResourceStyle(LocalContext.current, R.raw.map_style)),
       onMapLoaded = onMapLoaded) {
         markers.forEach { markerData -> MapMarker(markerData) }
 

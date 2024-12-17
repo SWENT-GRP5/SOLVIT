@@ -221,7 +221,7 @@ fun RequestBox(
               horizontalArrangement = Arrangement.SpaceBetween) {
                 request.agreedPrice?.let {
                   Text(
-                      text = "${request.agreedPrice} $",
+                      text = "${request.agreedPrice} CHF",
                       modifier = Modifier.testTag("requestPrice"),
                       style = Typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold))
                 }

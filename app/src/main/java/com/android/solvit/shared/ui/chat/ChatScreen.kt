@@ -70,8 +70,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -104,8 +106,7 @@ import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.navigation.Screen
 import com.android.solvit.shared.ui.theme.Black
-import com.android.solvit.shared.ui.theme.IAButton_blue_color
-import com.android.solvit.shared.ui.theme.IAButton_green_color
+import com.android.solvit.shared.ui.theme.Carpenter
 import com.android.solvit.shared.ui.theme.Typography
 import com.android.solvit.shared.ui.utils.getReceiverImageUrl
 import com.android.solvit.shared.ui.utils.getReceiverName
@@ -286,9 +287,7 @@ fun AiSolverWelcomeScreen(
                                     SpanStyle(
                                         brush =
                                             Brush.linearGradient(
-                                                colors =
-                                                    listOf(
-                                                        colorScheme.secondary, colorScheme.primary),
+                                                colors = listOf(colorScheme.primary, Carpenter),
                                                 start = Offset.Zero,
                                                 end = Offset.Infinite),
                                         fontSize = screenHeight.times(0.04f).value.sp)) {
@@ -321,6 +320,7 @@ fun AiSolverWelcomeScreen(
                               screenHeight = screenHeight,
                               title = "Let solve a new problem",
                               onClick = {
+                                chatViewModel.setShouldCreateRequest(false)
                                 navigationActions.navigateTo(Screen.AI_SOLVER_CHAT_SCREEN)
                               })
                         } else {
@@ -336,6 +336,7 @@ fun AiSolverWelcomeScreen(
                               title = "Let solve a new problem",
                               onClick = {
                                 chatViewModel.clearConversation(true)
+                                chatViewModel.setShouldCreateRequest(false)
                                 navigationActions.navigateTo(Screen.AI_SOLVER_CHAT_SCREEN)
                               })
                         }
@@ -357,13 +358,17 @@ fun AiSolverWelcomeScreen(
 fun AiSolverButton(screenHeight: Dp = 700.dp, title: String, onClick: () -> Unit) {
   Button(
       onClick = { onClick() },
-      colors = ButtonDefaults.buttonColors(containerColor = colorScheme.background),
-      shape = RoundedCornerShape(50),
+      colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
       contentPadding = PaddingValues(),
       modifier =
           Modifier.fillMaxWidth(0.8f)
               .height(screenHeight.times(0.07f))
-              .testTag("getStartedButton")) {
+              .testTag("getStartedButton")
+              .shadow(
+                  elevation = 8.dp,
+                  shape = RoundedCornerShape(16.dp),
+                  ambientColor = colorScheme.primary,
+                  spotColor = Carpenter)) {
         // Gradient background
         Box(
             modifier =
@@ -371,7 +376,7 @@ fun AiSolverButton(screenHeight: Dp = 700.dp, title: String, onClick: () -> Unit
                     .background(
                         brush =
                             Brush.horizontalGradient(
-                                colors = listOf(IAButton_green_color, IAButton_blue_color)),
+                                colors = listOf(colorScheme.primary, Carpenter)),
                         shape = RoundedCornerShape(50)),
             contentAlignment = Alignment.Center) {
               // Button text
@@ -519,7 +524,7 @@ fun AiSolverHeader(navigationActions: NavigationActions) {
       },
       colors =
           TopAppBarDefaults.topAppBarColors(
-              containerColor = colorScheme.surface,
+              containerColor = colorScheme.background,
               titleContentColor = colorScheme.onSurface,
               navigationIconContentColor = colorScheme.onSurface,
               actionIconContentColor = colorScheme.onSurface),
@@ -564,6 +569,7 @@ fun TypingIndicator() {
 fun ChatHeader(name: String?, picture: String, navigationActions: NavigationActions) {
   TopAppBar(
       modifier = Modifier.testTag("ChatHeader"),
+      colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background),
       title = {
         Row(
             modifier = Modifier,
@@ -737,7 +743,7 @@ fun SuggestionToCreateRequest(navigationActions: NavigationActions, onClick: () 
               text = "Continue chatting",
               fontSize = 18.sp,
               textDecoration = TextDecoration.Underline,
-              color = colorScheme.secondary,
+              color = Carpenter,
               modifier = Modifier.clickable { onClick() }.testTag("continueChattingButton"))
         }
   }
