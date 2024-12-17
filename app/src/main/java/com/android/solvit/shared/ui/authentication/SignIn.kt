@@ -12,7 +12,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,7 +22,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -33,9 +31,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CheckboxDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -85,7 +80,6 @@ import kotlinx.coroutines.launch
  * @param authViewModel The ViewModel managing authentication and user-related data.
  */
 @SuppressLint("InvalidColorHexValue")
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SignInScreen(
     navigationActions: NavigationActions,
@@ -97,8 +91,6 @@ fun SignInScreen(
 
   var email by remember { mutableStateOf("") }
   var password by remember { mutableStateOf("") }
-  var passwordVisible by remember { mutableStateOf(false) }
-  var isChecked by remember { mutableStateOf(false) }
 
   val onSuccess: () -> Unit = {
     Toast.makeText(context, "Login successful!", Toast.LENGTH_LONG).show()
@@ -127,13 +119,6 @@ fun SignInScreen(
               onEmailChange = { email = it },
               password = password,
               onPasswordChange = { password = it },
-              passwordVisible = passwordVisible,
-              onPasswordVisibilityChange = { passwordVisible = !passwordVisible },
-              isChecked = isChecked,
-              onCheckedChange = {
-                isChecked = it
-                Toast.makeText(context, "Not yet Implemented", Toast.LENGTH_SHORT).show()
-              },
               navigationActions = navigationActions,
               authViewModel = authViewModel,
               onSuccess = onSuccess,
@@ -149,13 +134,6 @@ fun SignInScreen(
               onEmailChange = { email = it },
               password = password,
               onPasswordChange = { password = it },
-              passwordVisible = passwordVisible,
-              onPasswordVisibilityChange = { passwordVisible = !passwordVisible },
-              isChecked = isChecked,
-              onCheckedChange = {
-                isChecked = it
-                Toast.makeText(context, "Not yet Implemented", Toast.LENGTH_SHORT).show()
-              },
               navigationActions = navigationActions,
               authViewModel = authViewModel,
               onSuccess = onSuccess,
@@ -176,10 +154,6 @@ fun SignInScreen(
  * @param onEmailChange Lambda to update the email address.
  * @param password The user's password.
  * @param onPasswordChange Lambda to update the password.
- * @param passwordVisible Boolean indicating whether the password is visible.
- * @param onPasswordVisibilityChange Lambda to toggle password visibility.
- * @param isChecked Boolean indicating whether "Remember Me" is checked.
- * @param onCheckedChange Lambda to update the "Remember Me" state.
  * @param navigationActions A set of navigation actions for transitions.
  * @param authViewModel The ViewModel managing authentication.
  * @param onSuccess Callback invoked upon successful login.
@@ -195,10 +169,6 @@ fun PortraitLayout(
     onEmailChange: (String) -> Unit,
     password: String,
     onPasswordChange: (String) -> Unit,
-    passwordVisible: Boolean,
-    onPasswordVisibilityChange: () -> Unit,
-    isChecked: Boolean,
-    onCheckedChange: (Boolean) -> Unit,
     navigationActions: NavigationActions,
     authViewModel: AuthViewModel,
     onSuccess: () -> Unit,
@@ -218,16 +188,11 @@ fun PortraitLayout(
             onEmailChange = onEmailChange,
             password = password,
             onPasswordChange = onPasswordChange,
-            passwordVisible = passwordVisible,
-            onPasswordVisibilityChange = onPasswordVisibilityChange,
-            isChecked = isChecked,
-            onCheckedChange = onCheckedChange,
             authViewModel = authViewModel,
             onSuccess = onSuccess,
             onFailure = onFailure,
             launcher = launcher,
-            token = token,
-            navigationActions = navigationActions)
+            token = token)
         Spacer(modifier = Modifier.height(20.dp))
 
         SignUpSection(navigationActions)
@@ -243,10 +208,6 @@ fun PortraitLayout(
  * @param onEmailChange Lambda to update the email address.
  * @param password The user's password.
  * @param onPasswordChange Lambda to update the password.
- * @param passwordVisible Boolean indicating whether the password is visible.
- * @param onPasswordVisibilityChange Lambda to toggle password visibility.
- * @param isChecked Boolean indicating whether "Remember Me" is checked.
- * @param onCheckedChange Lambda to update the "Remember Me" state.
  * @param navigationActions A set of navigation actions for transitions.
  * @param authViewModel The ViewModel managing authentication.
  * @param onSuccess Callback invoked upon successful login.
@@ -262,10 +223,6 @@ fun LandscapeLayout(
     onEmailChange: (String) -> Unit,
     password: String,
     onPasswordChange: (String) -> Unit,
-    passwordVisible: Boolean,
-    onPasswordVisibilityChange: () -> Unit,
-    isChecked: Boolean,
-    onCheckedChange: (Boolean) -> Unit,
     navigationActions: NavigationActions,
     authViewModel: AuthViewModel,
     onSuccess: () -> Unit,
@@ -295,16 +252,11 @@ fun LandscapeLayout(
                   onEmailChange = onEmailChange,
                   password = password,
                   onPasswordChange = onPasswordChange,
-                  passwordVisible = passwordVisible,
-                  onPasswordVisibilityChange = onPasswordVisibilityChange,
-                  isChecked = isChecked,
-                  onCheckedChange = onCheckedChange,
                   authViewModel = authViewModel,
                   onSuccess = onSuccess,
                   onFailure = onFailure,
                   launcher = launcher,
-                  token = token,
-                  navigationActions = navigationActions)
+                  token = token)
             }
       }
 }
@@ -335,16 +287,11 @@ fun LogoSection() {
  * @param onEmailChange A lambda function to handle updates to the email field.
  * @param password The password entered by the user.
  * @param onPasswordChange A lambda function to handle updates to the password field.
- * @param passwordVisible A boolean indicating whether the password is visible.
- * @param onPasswordVisibilityChange A lambda function to toggle password visibility.
- * @param isChecked A boolean indicating whether the "Remember me" checkbox is selected.
- * @param onCheckedChange A lambda function to handle changes to the "Remember me" checkbox.
  * @param authViewModel The ViewModel managing authentication and user-related data.
  * @param onSuccess A lambda function executed upon successful login.
  * @param onFailure A lambda function executed when login fails.
  * @param launcher A managed activity result launcher for handling Google Sign-In.
  * @param token The Google Sign-In client token.
- * @param navigationActions A set of navigation actions to handle screen transitions.
  */
 @Composable
 fun FormSection(
@@ -353,16 +300,11 @@ fun FormSection(
     onEmailChange: (String) -> Unit,
     password: String,
     onPasswordChange: (String) -> Unit,
-    passwordVisible: Boolean,
-    onPasswordVisibilityChange: () -> Unit,
-    isChecked: Boolean,
-    onCheckedChange: (Boolean) -> Unit,
     authViewModel: AuthViewModel,
     onSuccess: () -> Unit,
     onFailure: () -> Unit,
     launcher: ManagedActivityResultLauncher<Intent, ActivityResult>,
     token: String,
-    navigationActions: NavigationActions
 ) {
   val isFormComplete = email.isNotBlank() && password.isNotBlank()
   val passwordLengthComplete = password.length >= 6
@@ -400,47 +342,7 @@ fun FormSection(
       style = Typography.bodySmall,
       modifier = Modifier.padding(top = 4.dp).fillMaxWidth())
 
-  Spacer(modifier = Modifier.height(8.dp))
-
-  // Remember me & Forgot password
-  Row(modifier = Modifier.fillMaxWidth()) {
-    // Section Remember Me
-    Row(modifier = Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
-      Checkbox(
-          checked = isChecked,
-          onCheckedChange = onCheckedChange,
-          modifier = Modifier.size(24.dp),
-          colors =
-              CheckboxDefaults.colors(
-                  checkmarkColor = colorScheme.onSecondary,
-                  uncheckedColor = colorScheme.onSurfaceVariant,
-                  checkedColor = colorScheme.secondary))
-      Spacer(modifier = Modifier.width(4.dp))
-      Text(
-          text = "Remember me",
-          modifier = Modifier.testTag("rememberMeCheckbox"),
-          color = colorScheme.onSurfaceVariant,
-          style = Typography.bodyLarge)
-    }
-
-    // Section Forgot Password
-    Row(
-        modifier = Modifier.weight(1f),
-        horizontalArrangement = Arrangement.End,
-        verticalAlignment = Alignment.CenterVertically) {
-          Text(
-              text = "Forgot password?",
-              color = colorScheme.onSurfaceVariant,
-              style = Typography.bodyLarge,
-              textDecoration = TextDecoration.Underline,
-              modifier =
-                  Modifier.clickable { navigationActions.navigateTo(Screen.FORGOT_PASSWORD) }
-                      .testTag("forgotPasswordLink"),
-              textAlign = TextAlign.End)
-        }
-  }
-
-  Spacer(modifier = Modifier.height(16.dp))
+  Spacer(modifier = Modifier.height(20.dp))
 
   // Sign in button
   SignInButton(

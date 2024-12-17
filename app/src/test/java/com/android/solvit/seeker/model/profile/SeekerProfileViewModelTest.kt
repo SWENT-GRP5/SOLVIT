@@ -2,6 +2,7 @@ package com.android.solvit.seeker.model.profile
 
 import com.android.solvit.shared.model.authentication.AuthRepository
 import com.android.solvit.shared.model.authentication.AuthViewModel
+import com.android.solvit.shared.model.map.Location
 import kotlinx.coroutines.runBlocking
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.MatcherAssert.assertThat
@@ -29,7 +30,7 @@ class SeekerProfileViewModelTest {
           username = "johndoe",
           email = "john.doe@example.com",
           phone = "+1234567890",
-          address = "Chemin des Triaudes")
+          address = Location(0.0, 0.0, "Chemin des Triaudes"))
 
   private val testUserId = "12345"
   private val testPreference = "🔧 Plumbing"

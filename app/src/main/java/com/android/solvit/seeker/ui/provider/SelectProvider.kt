@@ -48,7 +48,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -96,10 +95,6 @@ import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.map.RequestLocationPermission
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
-import com.android.solvit.shared.ui.theme.GradientBlue
-import com.android.solvit.shared.ui.theme.GradientGreen
-import com.android.solvit.shared.ui.theme.OnSurfaceVariant
-import com.android.solvit.shared.ui.theme.SurfaceVariant
 import com.android.solvit.shared.ui.theme.Typography
 import com.android.solvit.shared.ui.theme.Yellow
 import com.google.android.gms.location.LocationServices
@@ -171,7 +166,13 @@ fun TopAppBar(
                               modifier = Modifier.size(20.dp))
                           Spacer(modifier = Modifier.width(4.dp))
                           Text(
-                              text = location.name,
+                              text =
+                                  if (location != null) {
+                                    if (location!!.name.length < 7) location!!.name
+                                    else location!!.name.substring(0, 6) + "..."
+                                  } else {
+                                    "Worldwide"
+                                  },
                               style =
                                   Typography.bodyMedium.copy(
                                       color = colorScheme.onPrimary,
@@ -286,10 +287,7 @@ fun FilterBar(
                     .size(32.dp)
                     .shadow(12.dp, shape = CircleShape)
                     .testTag("filterIcon")
-                    .clickable {
-                      listProviderViewModel.refreshFilters()
-                      display()
-                    },
+                    .clickable { display() },
             tint = colorScheme.onBackground)
       }
 }
@@ -442,7 +440,7 @@ fun ProviderRowCard(
                 navigationActions.navigateTo(Route.PROVIDER_INFO)
               }
               .shadow(4.dp, shape = RoundedCornerShape(12.dp)),
-      border = BorderStroke(1.dp, Services.getColor(provider.service)),
+      // border = BorderStroke(1.dp, Services.getColor(provider.service)),
       shape = RoundedCornerShape(12.dp),
       colors = CardDefaults.cardColors(colorScheme.background)) {
         Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -505,68 +503,54 @@ fun ProviderRowCard(
  */
 @Composable
 fun PriceFilter(listProviderViewModel: ListProviderViewModel) {
-  var minPrice by remember { mutableStateOf("min") }
-  var maxPrice by remember { mutableStateOf("max") }
-  var sliderPosition by remember { mutableStateOf(0f..100f) }
+  val minPrice by listProviderViewModel.minPrice.collectAsState()
+  val maxPrice by listProviderViewModel.maxPrice.collectAsState()
 
   Column {
     Row(
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
-          BasicTextField(
-              value = minPrice,
-              textStyle = TextStyle(color = colorScheme.onSurfaceVariant),
-              onValueChange = {
-                minPrice = it
-                val minPriceValue = it.toDoubleOrNull()
-                if (minPriceValue != null) {
-                  listProviderViewModel.filterProviders(
-                      filter = { provider -> provider.price >= minPriceValue }, "Price")
-                } else {
-                  listProviderViewModel.filterProviders(
-                      filter = { provider -> provider.price >= 0 }, "Price")
-                }
-              },
-              modifier =
-                  Modifier.weight(1f)
-                      .background(color = colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
-                      .padding(16.dp)
-                      .testTag("minPrice"),
-              singleLine = true,
-              keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
-
-          BasicTextField(
-              value = maxPrice,
-              textStyle = TextStyle(color = colorScheme.onSurfaceVariant),
-              onValueChange = {
-                maxPrice = it
-                val maxPriceValue = it.toDoubleOrNull()
-                val minPriceValue = minPrice.toDoubleOrNull()
-                if (maxPriceValue != null &&
-                    minPriceValue != null &&
-                    minPriceValue < maxPriceValue) {
-                  listProviderViewModel.filterProviders(
-                      { provider -> maxPriceValue >= provider.price }, "Price")
-                } else {
-                  listProviderViewModel.filterProviders(
-                      filter = { provider -> provider.price >= 0 }, "Price")
-                }
-              },
+          Box(
               modifier =
                   Modifier.weight(1f)
                       .background(colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
-                      .padding(16.dp)
-                      .testTag("maxPrice"),
-              singleLine = true,
-              keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
-        }
+                      .padding(16.dp)) {
+                if (minPrice!!.isEmpty()) {
+                  Text(
+                      text = "Min Price",
+                      style = TextStyle(color = colorScheme.onSurfaceVariant.copy(alpha = 0.5f)))
+                }
 
-    Spacer(Modifier.height(8.dp))
-    RangeSlider(
-        value = sliderPosition,
-        onValueChange = { sliderPosition = it },
-        valueRange = 0f..100f,
-        modifier = Modifier.fillMaxWidth())
+                BasicTextField(
+                    value = minPrice ?: "",
+                    textStyle = TextStyle(color = colorScheme.onSurfaceVariant),
+                    onValueChange = { listProviderViewModel.updateMinPrice(it) },
+                    modifier = Modifier.fillMaxWidth().testTag("minPrice"),
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
+              }
+
+          // Max Price Text Field
+          Box(
+              modifier =
+                  Modifier.weight(1f)
+                      .background(colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
+                      .padding(16.dp)) {
+                if (maxPrice!!.isEmpty()) {
+                  Text(
+                      text = "Max Price",
+                      style = TextStyle(color = colorScheme.onSurfaceVariant.copy(alpha = 0.5f)))
+                }
+
+                BasicTextField(
+                    value = maxPrice ?: "",
+                    textStyle = TextStyle(color = colorScheme.onSurfaceVariant),
+                    onValueChange = { listProviderViewModel.updateMaxPrice(it) },
+                    modifier = Modifier.fillMaxWidth().testTag("maxPrice"),
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
+              }
+        }
   }
 }
 
@@ -606,37 +590,33 @@ fun FilterSubText(text: String) {
  * @param filterField The name of the filter field (e.g., "Language" or "Rating").
  */
 fun filterStringFields(
-    selectedFields: MutableList<String>,
-    iconsPressed: MutableList<Boolean>,
-    iconsColor: MutableList<Color>,
-    updateStateField: (List<String>) -> Unit,
-    updateStateIconsPressed: (List<Boolean>) -> Unit,
-    updateStateIconsColor: (List<Color>) -> Unit,
+    selectedFields: List<String>,
+    iconsPressed: List<Boolean>,
     idx: Int,
-    elem: String,
     listProviderViewModel: ListProviderViewModel,
     filterAction: (Provider) -> Boolean,
     defaultFilterAction: (Provider) -> Boolean,
     filterField: String
 ) {
 
-  val newIconsPressed = iconsPressed.toMutableList().apply { set(idx, !iconsPressed[idx]) }
+  // val newIconsPressed = iconsPressed.toMutableList().apply { set(idx, !iconsPressed[idx]) }
 
-  val newIconsColor =
-      iconsColor.toMutableList().apply {
-        set(idx, if (newIconsPressed[idx]) OnSurfaceVariant else SurfaceVariant)
-      }
+  /*val newIconsColor =
+  iconsColor.toMutableList().apply {
+    set(idx, if (newIconsPressed[idx]) OnSurfaceVariant else SurfaceVariant)
+  }*/
 
-  val newSelectedFields =
-      selectedFields.toMutableList().apply { if (newIconsPressed[idx]) add(elem) else remove(elem) }
+  // val newSelectedFields =
+  // selectedFields.toMutableList().apply { if (newIconsPressed[idx]) add(elem) else remove(elem) }
 
-  updateStateField(newSelectedFields)
-  updateStateIconsPressed(newIconsPressed)
-  updateStateIconsColor(newIconsColor)
-  if (newIconsPressed[idx]) {
+  // updateStateField(newSelectedFields)
+  // updateStateIconsPressed(newIconsPressed)
+  // updateStateIconsColor(newIconsColor)
+  Log.e("filterStringFields", "${iconsPressed[idx]}")
+  if (iconsPressed[idx]) {
     listProviderViewModel.filterProviders({ provider -> filterAction(provider) }, filterField)
   } else {
-    if (newSelectedFields.isNotEmpty()) {
+    if (selectedFields.isNotEmpty()) {
       listProviderViewModel.filterProviders({ provider -> filterAction(provider) }, filterField)
     } else {
       listProviderViewModel.filterProviders(
@@ -654,9 +634,12 @@ fun filterStringFields(
  */
 @Composable
 fun LanguageFilterField(list: List<String>, listProviderViewModel: ListProviderViewModel) {
-  var selectedFields by remember { mutableStateOf(listOf<String>()) }
-  var iconsPressed by remember { mutableStateOf(List(list.size) { false }) }
-  var iconsColor by remember { mutableStateOf(List(list.size) { SurfaceVariant }) }
+  val selectedLanguages = listProviderViewModel.selectedLanguages.collectAsState().value
+  val languages = list.map { Language.valueOf(it.uppercase()) }
+  val iconsPressed = languages.map { it in selectedLanguages }
+
+  Log.e("selectedLanguages", "$selectedLanguages")
+  Log.e("icons Pressed", "$iconsPressed")
 
   LazyVerticalGrid(
       columns = GridCells.Fixed(list.size / 2),
@@ -664,34 +647,25 @@ fun LanguageFilterField(list: List<String>, listProviderViewModel: ListProviderV
       horizontalArrangement = Arrangement.spacedBy(8.dp),
       verticalArrangement = Arrangement.spacedBy(8.dp)) {
         items(list.size) { idx ->
+          val currentLanguage = languages[idx]
           Box(
               Modifier.fillMaxWidth()
                   .background(
                       color =
-                          if (iconsPressed[idx]) colorScheme.primary
+                          if (currentLanguage in selectedLanguages) colorScheme.primary
                           else colorScheme.surfaceVariant,
                       shape = RoundedCornerShape(size = 8.dp))
                   .testTag("filterAct")
                   .padding(8.dp)
                   .clickable {
-                    filterStringFields(
-                        selectedFields.toMutableList(),
-                        iconsPressed.toMutableList(),
-                        iconsColor.toMutableList(),
-                        { a -> selectedFields = a.toMutableList() },
-                        { b -> iconsPressed = b.toMutableList() },
-                        { c -> iconsColor = c.toMutableList() },
-                        idx,
-                        list[idx],
-                        listProviderViewModel,
-                        { provider ->
-                          selectedFields
-                              .map { u -> Language.valueOf(u.uppercase()) }
-                              .intersect(provider.languages.toSet())
-                              .isNotEmpty()
-                        },
-                        { provider -> provider.languages.isNotEmpty() },
-                        "Language")
+                    val newSet =
+                        if (iconsPressed[idx]) {
+                          selectedLanguages - currentLanguage
+                        } else {
+                          selectedLanguages + currentLanguage
+                        }
+                    listProviderViewModel.updateSelectedLanguages(
+                        newSet, languagePressed = currentLanguage)
                   }) {
                 Text(
                     text = list[idx],
@@ -712,15 +686,16 @@ fun LanguageFilterField(list: List<String>, listProviderViewModel: ListProviderV
  * @param listProviderViewModel ViewModel for managing provider filters.
  */
 @Composable
-fun RatingFilterField(list: List<String>, listProviderViewModel: ListProviderViewModel) {
-  var selectedFields by remember { mutableStateOf(listOf<String>()) }
-  var iconsPressed by remember { mutableStateOf(List(list.size) { false }) }
-  var colors by remember { mutableStateOf(List(list.size) { SurfaceVariant }) }
+fun RatingFilterField(list: List<Double>, listProviderViewModel: ListProviderViewModel) {
+  val selectedRatings = listProviderViewModel.selectedRatings.collectAsState().value
+  val iconsPressed = list.map { it in selectedRatings }
+  Log.e("selectedRating", "$selectedRatings")
+  Log.e("ratingsPressed", "$iconsPressed")
 
   Row(
       modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
       horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        list.asReversed().forEachIndexed { idx, rating ->
+        list.forEachIndexed { idx, rating ->
           Box(
               modifier =
                   Modifier.weight(1f)
@@ -734,21 +709,13 @@ fun RatingFilterField(list: List<String>, listProviderViewModel: ListProviderVie
                 Row(
                     modifier =
                         Modifier.fillMaxSize().clickable {
-                          filterStringFields(
-                              selectedFields.toMutableList(),
-                              iconsPressed.toMutableList(),
-                              colors.toMutableList(),
-                              { a -> selectedFields = a.toMutableList() },
-                              { b -> iconsPressed = b.toMutableList() },
-                              { c -> colors = c.toMutableList() },
-                              idx,
-                              rating,
-                              listProviderViewModel,
-                              { provider ->
-                                selectedFields.map { u -> u.toDouble() }.contains(provider.rating)
-                              },
-                              { provider -> provider.rating >= 1.0 },
-                              "Rating")
+                          val newSet =
+                              if (iconsPressed[idx]) {
+                                selectedRatings - rating
+                              } else {
+                                selectedRatings + rating
+                              }
+                          listProviderViewModel.updateSelectedRatings(newSet, rating)
                         },
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically) {
@@ -758,7 +725,7 @@ fun RatingFilterField(list: List<String>, listProviderViewModel: ListProviderVie
                           modifier = Modifier.size(24.dp).padding(end = 4.dp),
                           tint = Yellow)
                       Text(
-                          text = rating,
+                          text = rating.toInt().toString(),
                           color =
                               if (iconsPressed[idx]) colorScheme.onPrimary
                               else colorScheme.onSurfaceVariant,
@@ -784,25 +751,26 @@ fun ApplyButton(listProviderViewModel: ListProviderViewModel, display: () -> Uni
               .width(249.dp)
               .height(56.dp)
               .background(
-                  brush = Brush.horizontalGradient(colors = listOf(GradientBlue, GradientGreen)),
+                  brush =
+                      Brush.horizontalGradient(
+                          colors = listOf(colorScheme.primary, colorScheme.secondary)),
                   shape = RoundedCornerShape(50))
               .clickable {
-                listProviderViewModel.applyFilters()
+                // listProviderViewModel.applyFilters()
                 display()
               },
   ) {
     Column(
-        horizontalAlignment = Alignment.CenterHorizontally, // Center horizontally
-        verticalArrangement = Arrangement.Center, // Center vertically
-        modifier = Modifier.fillMaxSize() // Ensures the content fills the button
-        ) {
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier.fillMaxSize()) {
           Text(
-              text = "Apply", // TODO()
+              text = "Apply",
               fontWeight = FontWeight.Bold,
               fontSize = 14.sp,
               color = colorScheme.onPrimary)
           Text(
-              text = "${filteredList.size} providers", // TODO()
+              text = "${filteredList.size} providers",
               fontWeight = FontWeight.Bold,
               fontSize = 14.sp,
               color = colorScheme.onPrimary)
@@ -835,10 +803,10 @@ fun FilterComposable(listProviderViewModel: ListProviderViewModel, display: () -
         PriceFilter(listProviderViewModel)
         FilterSubText("Languages")
         LanguageFilterField(
-            listOf("French", "English", "German", "Arabic", "Italian", "Spanish"),
+            listOf("french", "english", "german", "arabic", "italian", "spanish"),
             listProviderViewModel)
         FilterSubText("Rating")
-        RatingFilterField(listOf("5", "4", "3", "2", "1"), listProviderViewModel)
+        RatingFilterField(listOf(1.0, 2.0, 3.0, 4.0, 5.0), listProviderViewModel)
         Spacer(Modifier.height(16.dp))
         ApplyButton(listProviderViewModel, display)
       }
@@ -1107,8 +1075,9 @@ fun SelectProviderScreen(
     activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
     onDispose {
       locationViewModel.clear()
-      listProviderViewModel.clearSelectedService()
+      seekerProfileViewModel.clearLocation()
       listProviderViewModel.refreshFilters()
+      listProviderViewModel.clearFilterFields()
       activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
     }
   }
@@ -1156,7 +1125,7 @@ fun SelectProviderScreen(
                     userId,
                     seekerProfileViewModel,
                     onClick = { location ->
-                      listProviderViewModel.filterProviders(filter = { true }, "location")
+                      // listProviderViewModel.filterProviders(filter = { true }, "location")
                       listProviderViewModel.filterProviders(
                           filter = { provider ->
                             // filter providers within a 25.0 km radius
@@ -1168,6 +1137,7 @@ fun SelectProviderScreen(
                           },
                           "location")
                       Log.e("FILTER PROVIDER BY LOC", "$providers")
+                      // listProviderViewModel.applyFilters()
                       displayByLocation = false
                     },
                     locationViewModel)

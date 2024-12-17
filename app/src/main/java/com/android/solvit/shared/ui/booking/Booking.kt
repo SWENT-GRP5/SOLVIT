@@ -93,6 +93,7 @@ import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.navigation.Screen
+import com.android.solvit.shared.ui.theme.SelectedPackage
 import com.android.solvit.shared.ui.theme.Typography
 import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.Timestamp
@@ -410,7 +411,7 @@ fun ServiceBookingScreen(
               if (packageProposal != null) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = "Your chosen Package",
+                    text = "Chosen Package",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(bottom = 8.dp).testTag("package_label"))
@@ -675,7 +676,7 @@ fun PackageCard(packageProposal: PackageProposal, modifier: Modifier = Modifier)
       modifier = modifier.fillMaxSize(),
       shape = RoundedCornerShape(16.dp),
       elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-      colors = CardDefaults.cardColors(containerColor = colorScheme.primary)) {
+      colors = CardDefaults.cardColors(containerColor = SelectedPackage)) {
         Column(
             modifier = Modifier.padding(20.dp).fillMaxHeight().testTag("package_content"),
             horizontalAlignment = Alignment.Start) {
@@ -683,7 +684,7 @@ fun PackageCard(packageProposal: PackageProposal, modifier: Modifier = Modifier)
               Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     modifier = Modifier.testTag("price"),
-                    text = "$${packageProposal.price}",
+                    text = "CHF${packageProposal.price}",
                     style = Typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
                     color = colorScheme.onPrimaryContainer)
                 Spacer(modifier = Modifier.width(8.dp)) // Increased space between price and unit
@@ -692,6 +693,7 @@ fun PackageCard(packageProposal: PackageProposal, modifier: Modifier = Modifier)
                     style = Typography.bodySmall,
                     color = colorScheme.onPrimaryContainer)
               }
+              Spacer(modifier = Modifier.height(12.dp))
               // Title of the Package
               Text(
                   modifier = Modifier.testTag("title"),
@@ -719,7 +721,7 @@ fun PackageCard(packageProposal: PackageProposal, modifier: Modifier = Modifier)
                     Icon(
                         imageVector = Icons.Default.CheckCircle,
                         contentDescription = null,
-                        tint = colorScheme.onPrimary,
+                        tint = colorScheme.primary,
                         modifier =
                             Modifier.size(18.dp)) // Slightly bigger icon for better visibility
                     Spacer(modifier = Modifier.width(8.dp)) // Increased space between icon and text

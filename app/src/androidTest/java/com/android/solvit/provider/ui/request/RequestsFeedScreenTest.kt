@@ -128,7 +128,6 @@ class RequestsFeedScreenTest {
 
     // Verify the presence of the main screen content
     composeTestRule.onNodeWithTag("ScreenContent")
-    composeTestRule.onNodeWithTag("MenuOption").isDisplayed()
     composeTestRule.onNodeWithTag("SloganIcon").isDisplayed()
 
     // Ensure the search bar is visible
@@ -143,6 +142,7 @@ class RequestsFeedScreenTest {
     // Ensure that filtering bar is displayed
     composeTestRule.onNodeWithTag("FilterBar").isDisplayed()
     composeTestRule.onNodeWithTag("bottomNavigationMenu").isDisplayed()
+    composeTestRule.onNodeWithTag("MenuOption").isDisplayed()
   }
 
   // Test the functionality of the search bar

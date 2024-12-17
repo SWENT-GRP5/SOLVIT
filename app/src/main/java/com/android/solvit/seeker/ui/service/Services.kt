@@ -2,6 +2,7 @@ package com.android.solvit.seeker.ui.service
 
 import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -27,7 +28,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DockedSearchBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -51,6 +51,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -66,14 +67,13 @@ import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_SEEKER
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
-import com.android.solvit.shared.ui.theme.DarkBlue
 import com.android.solvit.shared.ui.theme.LightBlue
 import com.android.solvit.shared.ui.theme.LightOrange
 import com.android.solvit.shared.ui.theme.LightRed
 import com.android.solvit.shared.ui.theme.OnPrimary
 import com.android.solvit.shared.ui.theme.Typography
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "SourceLockedOrientationActivity")
 @Composable
 fun ServicesScreen(
     navigationActions: NavigationActions,
@@ -130,7 +130,6 @@ fun TopSection(
   val searchResults by searchViewModel.servicesList.collectAsState()
   val isSearching by searchViewModel.isSearching.collectAsState()
   val userProfile by seekerProfileViewModel.seekerProfile.collectAsState()
-  val address = "EPFL" // Replace with `userProfile.address`
 
   Box(modifier = Modifier.fillMaxWidth().testTag("servicesScreenTopSection")) {
     // Background Image
@@ -140,9 +139,11 @@ fun TopSection(
         contentScale = ContentScale.Crop,
         modifier = Modifier.matchParentSize())
     Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+      val context = LocalContext.current
+      val toast = Toast.makeText(context, "Not implemented yet", Toast.LENGTH_SHORT)
       Row(
           modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp).height(45.dp),
-          horizontalArrangement = Arrangement.Start,
+          horizontalArrangement = Arrangement.SpaceBetween,
           verticalAlignment = Alignment.CenterVertically) {
             AsyncImage(
                 model = userProfile.imageUrl.ifEmpty { R.drawable.ic_user },
@@ -155,46 +156,29 @@ fun TopSection(
                         .clip(CircleShape)
                         .clickable { navigationActions.navigateTo(Route.PROFILE) }
                         .testTag("servicesScreenProfileImage"))
-            Spacer(modifier = Modifier.width(16.dp))
-            Column(horizontalAlignment = Alignment.Start) {
-              // User's Location
-              Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    imageVector = Icons.Outlined.LocationOn,
-                    contentDescription = "Location Icon",
-                    tint = OnPrimary,
-                    modifier =
-                        Modifier.size(16.dp)
-                            .padding(end = 4.dp)
-                            .testTag("servicesScreenLocationIcon"))
 
-                Text(
-                    text =
-                        if (address.length > 27) { // Replace with `userProfile.address`
-                          address.take(27) + "..."
-                        } else {
-                          address
-                        },
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = OnPrimary,
-                    textAlign = TextAlign.Start,
-                    modifier = Modifier.testTag("servicesScreenCurrentLocation"))
-              }
-
-              // User's Name
+            Row(
+                modifier = Modifier.testTag("SloganIcon"),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
               Text(
-                  text = userProfile.name,
-                  modifier = Modifier.testTag("servicesScreenUserName"),
-                  fontSize = 20.sp,
-                  fontWeight = FontWeight.Bold,
-                  color = DarkBlue, // Dark blue for emphasis
-                  textAlign = TextAlign.Start)
+                  text = "Solv",
+                  style =
+                      TextStyle(
+                          fontSize = 25.sp,
+                          fontWeight = FontWeight.Bold,
+                          color = colorScheme.onBackground))
+              Text(
+                  text = "It",
+                  style =
+                      TextStyle(
+                          fontSize = 25.sp,
+                          fontWeight = FontWeight.Bold,
+                          color = colorScheme.secondary))
             }
-            Spacer(modifier = Modifier.weight(1f))
+
             IconButton(
-                onClick = { navigationActions.navigateTo(Route.REQUESTS_OVERVIEW) },
-                modifier = Modifier.testTag("servicesScreenMenu")) {
+                onClick = { toast.show() }, modifier = Modifier.testTag("servicesScreenMenu")) {
                   Icon(imageVector = Icons.Default.Menu, contentDescription = null)
                 }
           }
@@ -388,7 +372,7 @@ fun PerformersSection(
     LazyRow(
         modifier = Modifier.fillMaxWidth().testTag("servicesScreenPerformersList"),
         horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-          items(providers.size) { index ->
+          items(topProviders.size) { index ->
             ProviderItem(
                 topProviders[index],
                 onClick = {
