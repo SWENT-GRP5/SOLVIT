@@ -336,7 +336,7 @@ fun AiSolverWelcomeScreen(
                         } else {
                           AiSolverButton(
                               screenHeight = screenHeight,
-                              title = "Continue",
+                              title = "Resume Chat",
                               onClick = {
                                 navigationActions.navigateTo(Screen.AI_SOLVER_CHAT_SCREEN)
                               })

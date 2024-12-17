@@ -333,7 +333,7 @@ class ChatRepositoryTest {
         onFailure = { onFailureCalled = true })
 
     // Simulate the onDataChange for the chat rooms query
-    verify(mockQuery).addListenerForSingleValueEvent(valueEventListenerCaptor.capture())
+    verify(mockQuery).addValueEventListener(valueEventListenerCaptor.capture())
     valueEventListenerCaptor.firstValue.onDataChange(mockChatRoomsDataSnapshot)
 
     // Simulate the last messages for each chat room
