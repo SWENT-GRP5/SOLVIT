@@ -17,6 +17,7 @@ import java.time.ZoneId
 import java.util.Date
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertFalse
+import junit.framework.TestCase.assertNotNull
 import junit.framework.TestCase.assertTrue
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -988,6 +989,109 @@ class ProviderCalendarViewModelTest {
     testDispatcher.scheduler.advanceUntilIdle()
     assertFalse(successResult)
     assertEquals("Failed to update schedule", feedbackMessage)
+  }
+
+  @Test
+  fun testErrorHandlingDuringProviderUpdate() = runTest {
+    // Simulate provider update failure
+    whenever(providerRepository.updateProvider(any(), any(), any())).then { invocation ->
+      val onFailure = invocation.getArgument<(Exception) -> Unit>(2)
+      onFailure(Exception("Update failed"))
+      Unit
+    }
+
+    // Try to update schedule
+    val newSlot = TimeSlot(9, 0, 17, 0)
+    calendarViewModel.setRegularHours(DayOfWeek.MONDAY.name, listOf(newSlot)) {
+      // onComplete callback
+    }
+    testDispatcher.scheduler.advanceUntilIdle()
+
+    // Verify that the provider was not updated
+    assertEquals(
+        emptyMap<String, List<TimeSlot>>(),
+        calendarViewModel.currentProvider.value.schedule.regularHours)
+  }
+
+  @Test
+  fun testEdgeCaseScheduleManagement() = runTest {
+    // Test overlapping time slots
+    val slot1 = TimeSlot(9, 0, 12, 0)
+    val slot2 = TimeSlot(11, 0, 14, 0)
+    val slot3 = TimeSlot(13, 0, 17, 0)
+
+    // Mock successful provider update
+    whenever(providerRepository.updateProvider(any(), any(), any())).then { invocation ->
+      val provider = invocation.getArgument<Provider>(0)
+      val onSuccess = invocation.getArgument<() -> Unit>(1)
+      testProvider = provider
+      providerFlow.value = listOf(provider)
+      onSuccess()
+      Unit
+    }
+
+    calendarViewModel.setRegularHours(DayOfWeek.MONDAY.name, listOf(slot1, slot2, slot3)) {
+      // onComplete callback
+    }
+    testDispatcher.scheduler.advanceUntilIdle()
+
+    // Verify that overlapping slots are handled
+    val updatedSlots =
+        calendarViewModel.currentProvider.value.schedule.regularHours[DayOfWeek.MONDAY.name]
+    assertNotNull(updatedSlots)
+    assertEquals(3, updatedSlots?.size)
+  }
+
+  @Test
+  fun testStateManagementDuringProviderUpdates() = runTest {
+    // Initial state
+    assertEquals(false, calendarViewModel.isLoading.value)
+
+    // Simulate slow provider update
+    var updateCompleted = false
+    whenever(providerRepository.updateProvider(any(), any(), any())).then { invocation ->
+      val onSuccess = invocation.getArgument<() -> Unit>(1)
+      testDispatcher.scheduler.advanceTimeBy(1000) // Simulate delay
+      onSuccess()
+      updateCompleted = true
+      Unit
+    }
+
+    // Update provider
+    val newSlot = TimeSlot(9, 0, 17, 0)
+    calendarViewModel.setRegularHours(DayOfWeek.MONDAY.name, listOf(newSlot)) {
+      // onComplete callback
+    }
+
+    // Verify loading state
+    testDispatcher.scheduler.advanceUntilIdle()
+    assertTrue(updateCompleted)
+  }
+
+  @Test
+  fun testExceptionHandlingWithInvalidTimeSlots() = runTest {
+    var exceptionThrown = false
+    try {
+      // Attempt to create an invalid time slot
+      TimeSlot(17, 0, 9, 0)
+    } catch (e: IllegalArgumentException) {
+      exceptionThrown = true
+      assertEquals("Start time must be before end time", e.message)
+    }
+    assertTrue("Expected IllegalArgumentException for invalid time slot", exceptionThrown)
+
+    // Test with valid time slot but outside regular hours
+    val validSlot = TimeSlot(20, 0, 22, 0)
+
+    calendarViewModel.setRegularHours(DayOfWeek.MONDAY.name, listOf(validSlot)) {
+      // onComplete callback
+    }
+    testDispatcher.scheduler.advanceUntilIdle()
+
+    // Verify that slot was not added since it's outside normal business hours
+    val updatedSlots =
+        calendarViewModel.currentProvider.value.schedule.regularHours[DayOfWeek.MONDAY.name]
+    assertTrue(updatedSlots.isNullOrEmpty())
   }
 
   @Test

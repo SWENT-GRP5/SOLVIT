@@ -313,7 +313,6 @@ open class ProviderCalendarViewModel(
         onComplete(success, if (success) feedback else "Failed to update schedule")
       }
     } catch (e: Exception) {
-      Log.e("ProviderCalendarViewModel", "Failed to add off-time exception", e)
       onComplete(false, e.message ?: "Failed to add off-time exception")
     }
   }
@@ -339,7 +338,6 @@ open class ProviderCalendarViewModel(
         onComplete(success, if (success) feedback else "Failed to update schedule")
       }
     } catch (e: Exception) {
-      Log.e("ProviderCalendarViewModel", "Failed to add extra time exception", e)
       onComplete(false, e.message ?: "Failed to add extra time exception")
     }
   }
@@ -365,7 +363,6 @@ open class ProviderCalendarViewModel(
         onComplete(success, if (success) feedback else "Failed to update schedule")
       }
     } catch (e: Exception) {
-      Log.e("ProviderCalendarViewModel", "Failed to update exception", e)
       onComplete(false, e.message ?: "Failed to update exception")
     }
   }
@@ -390,7 +387,6 @@ open class ProviderCalendarViewModel(
             }
           } ?: run { onComplete(false, "Exception not found") }
     } catch (e: Exception) {
-      Log.e("ProviderCalendarViewModel", "Failed to delete exception", e)
       onComplete(false, e.message ?: "Failed to delete exception")
     }
   }
@@ -462,11 +458,9 @@ open class ProviderCalendarViewModel(
             onFailure = { e ->
               // Revert the state if Firestore update fails
               _currentProvider.value = currentProvider.value
-              Log.e("ProviderCalendarViewModel", "Failed to update provider schedule", e)
               onComplete(false)
             })
       } catch (e: Exception) {
-        Log.e("ProviderCalendarViewModel", "Failed to update provider schedule", e)
         onComplete(false)
       }
     }
@@ -499,10 +493,8 @@ open class ProviderCalendarViewModel(
         onComplete(success, feedback)
       }
     } catch (e: IllegalArgumentException) {
-      Log.e("ProviderCalendarViewModel", "Invalid time slots", e)
       onComplete(false, "Invalid time slots: ${e.message}")
     } catch (e: Exception) {
-      Log.e("ProviderCalendarViewModel", "Failed to add exception", e)
       onComplete(false, e.message ?: "Failed to add exception")
     }
   }
@@ -528,12 +520,8 @@ open class ProviderCalendarViewModel(
     val startOfDay = meetingDate.toLocalDate().atStartOfDay()
     val endOfDay = startOfDay.plusDays(1).minusNanos(1)
     val offTimeExceptions = schedule.getExceptions(startOfDay, endOfDay, ExceptionType.OFF_TIME)
-    println("Checking off-time conflicts:")
-    println("- Meeting date: $meetingDate")
-    println("- Off-time exceptions: $offTimeExceptions")
 
     val requestSlot = TimeSlot(meetingDate.toLocalTime(), meetingDate.plusHours(1).toLocalTime())
-    println("- Request slot: $requestSlot")
 
     val hasOffTimeConflict =
         offTimeExceptions.any { exception ->
@@ -542,25 +530,18 @@ open class ProviderCalendarViewModel(
                 TimeSlot(
                     LocalTime.of(slot.startHour, slot.startMinute),
                     LocalTime.of(slot.endHour, slot.endMinute))
-            println("  - Checking against off-time slot: $offTimeSlot")
             // Check if the request slot overlaps with the off-time slot
             val overlaps =
                 !(requestSlot.end <= offTimeSlot.start || requestSlot.start >= offTimeSlot.end)
-            println("  - Overlaps: $overlaps")
             overlaps
           }
         }
     if (hasOffTimeConflict) {
-      println("Found off-time conflict")
       return ConflictResult(true, "This time slot conflicts with your off-time schedule")
     }
 
     // Check if it's outside regular hours
     val regularHours = schedule.regularHours[meetingDate.dayOfWeek.name] ?: emptyList()
-    println("\nChecking regular hours:")
-    println("- Day of week: ${meetingDate.dayOfWeek}")
-    println("- Regular hours: $regularHours")
-    println("- Request slot: $requestSlot")
     val requestSlot2 = TimeSlot(meetingDate.toLocalTime(), meetingDate.plusHours(1).toLocalTime())
     val duringRegularHours =
         regularHours.any { slot ->

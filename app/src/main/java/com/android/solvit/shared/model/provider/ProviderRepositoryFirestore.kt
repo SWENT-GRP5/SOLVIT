@@ -62,7 +62,7 @@ class ProviderRepositoryFirestore(
           languages,
           schedule)
     } catch (e: Exception) {
-      Log.e("ProviderRepositoryFirestore", "failed to convert doc $e")
+      Log.e("ProviderRepositoryFirestore", "Failed to convert doc", e)
       return null
     }
   }
@@ -173,13 +173,10 @@ class ProviderRepositoryFirestore(
       onSuccess: (Provider?) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    Log.e("Get Provider", "Debut $userId")
     db.collection(collectionPath).document(userId).get().addOnCompleteListener { task ->
       if (task.isSuccessful) {
         val doc = task.result
         val provider = convertDoc(doc)
-        Log.e("Let's go", "$provider")
-
         onSuccess(provider)
       } else {
         task.exception?.let { onFailure(it) }
@@ -191,10 +188,9 @@ class ProviderRepositoryFirestore(
     return try {
       val doc = db.collection(collectionPath).document(uid).get().await()
       val provider = convertDoc(doc)
-      Log.e("Get Provider", "Success: $provider")
       provider
     } catch (e: Exception) {
-      Log.e("Get Provider", "Failed to get provider: $e")
+      Log.e("ProviderRepositoryFirestore", "Failed to get provider", e)
       null
     }
   }
@@ -257,7 +253,6 @@ class ProviderRepositoryFirestore(
         }
         @Suppress("UNCHECKED_CAST") val timeSlotsList = timeSlotsAny as? List<Map<String, Any>>
         if (timeSlotsList == null) {
-          Log.w("ProviderRepositoryFirestore", "Invalid time slots format for day: $day")
           continue
         }
         val slots = convertTimeSlots(timeSlotsList)
@@ -271,20 +266,17 @@ class ProviderRepositoryFirestore(
         try {
           val timestamp = exceptionMap["timestamp"] as? Timestamp
           if (timestamp == null) {
-            Log.w("ProviderRepositoryFirestore", "Missing timestamp in exception")
             continue
           }
 
           @Suppress("UNCHECKED_CAST")
           val timeSlotsAnyList = exceptionMap["timeSlots"] as? List<Map<String, Any>>
           if (timeSlotsAnyList == null) {
-            Log.w("ProviderRepositoryFirestore", "Invalid timeSlots format in exception")
             continue
           }
 
           val typeString = exceptionMap["type"] as? String
           if (typeString == null) {
-            Log.w("ProviderRepositoryFirestore", "Missing type in exception")
             continue
           }
 
@@ -292,20 +284,17 @@ class ProviderRepositoryFirestore(
               try {
                 ExceptionType.valueOf(typeString)
               } catch (e: IllegalArgumentException) {
-                Log.w("ProviderRepositoryFirestore", "Invalid exception type: $typeString")
                 continue
               }
 
           val timeSlots = convertTimeSlots(timeSlotsAnyList)
           if (timeSlots.isEmpty()) {
-            Log.w("ProviderRepositoryFirestore", "No valid time slots in exception")
             continue
           }
 
           val date = timestamp.toDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
           exceptions.add(ScheduleException(date, timeSlots.toMutableList(), type))
         } catch (e: Exception) {
-          Log.e("ProviderRepositoryFirestore", "Error converting exception: $e")
           continue
         }
       }
