@@ -14,21 +14,23 @@ import com.android.solvit.shared.model.provider.ProviderRepositoryFirestore
 import com.android.solvit.shared.model.provider.ScheduleException
 import com.android.solvit.shared.model.provider.TimeSlot
 import com.android.solvit.shared.model.request.ServiceRequest
-import com.android.solvit.shared.model.request.ServiceRequestRepositoryFirebase
 import com.android.solvit.shared.model.request.ServiceRequestStatus
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
-import com.google.firebase.storage.ktx.storage
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 enum class CalendarView {
@@ -188,6 +190,16 @@ open class ProviderCalendarViewModel(
   }
 
   /**
+   * Checks if the provider is available for a one-hour appointment starting at the given time.
+   *
+   * @param startTime Start time of the proposed appointment
+   * @return True if available for the full hour, false otherwise
+   */
+  fun isAvailableForOneHour(startTime: LocalDateTime): Boolean {
+    return currentProvider.value.schedule.isAvailableForOneHour(startTime)
+  }
+
+  /**
    * Sets regular working hours for a specific day of the week. Validates and updates the time
    * slots, then persists changes to the repository.
    *
@@ -196,12 +208,42 @@ open class ProviderCalendarViewModel(
    * @param onComplete Callback with success status
    */
   fun setRegularHours(dayOfWeek: String, timeSlots: List<TimeSlot>, onComplete: (Boolean) -> Unit) {
-    try {
-      currentProvider.value.schedule.setRegularHours(dayOfWeek, timeSlots)
-      updateProviderSchedule(onComplete)
-    } catch (e: Exception) {
-      Log.e("ProviderCalendarViewModel", "Failed to set regular hours", e)
-      onComplete(false)
+    viewModelScope.launch {
+      try {
+        val currentProvider = _currentProvider.value
+        if (currentProvider.uid.isEmpty()) {
+          onComplete(false)
+          return@launch
+        }
+
+        // Update provider schedule
+        val updatedProvider =
+            currentProvider.copy(
+                schedule =
+                    currentProvider.schedule.copy(
+                        regularHours =
+                            currentProvider.schedule.regularHours.toMutableMap().apply {
+                              put(dayOfWeek, timeSlots.toMutableList())
+                            }))
+
+        // Save to repository
+        providerRepository.updateProvider(
+            provider = updatedProvider,
+            onSuccess = {
+              _currentProvider.value = updatedProvider
+              onComplete(true)
+            },
+            onFailure = { e ->
+              Log.e("ProviderCalendarViewModel", "Error setting regular hours", e)
+              onComplete(false)
+            })
+      } catch (e: IllegalArgumentException) {
+        Log.e("ProviderCalendarViewModel", "Invalid time range", e)
+        onComplete(false)
+      } catch (e: Exception) {
+        Log.e("ProviderCalendarViewModel", "Error setting regular hours", e)
+        onComplete(false)
+      }
     }
   }
 
@@ -212,12 +254,39 @@ open class ProviderCalendarViewModel(
    * @param onComplete Callback with success status
    */
   fun clearRegularHours(dayOfWeek: String, onComplete: (Boolean) -> Unit) {
-    try {
-      currentProvider.value.schedule.clearRegularHours(dayOfWeek)
-      updateProviderSchedule(onComplete)
-    } catch (e: Exception) {
-      Log.e("ProviderCalendarViewModel", "Failed to clear regular hours", e)
-      onComplete(false)
+    viewModelScope.launch {
+      try {
+        val currentProvider = _currentProvider.value
+        if (currentProvider.uid.isEmpty()) {
+          onComplete(false)
+          return@launch
+        }
+
+        // Update provider schedule
+        val updatedProvider =
+            currentProvider.copy(
+                schedule =
+                    currentProvider.schedule.copy(
+                        regularHours =
+                            currentProvider.schedule.regularHours.toMutableMap().apply {
+                              remove(dayOfWeek)
+                            }))
+
+        // Save to repository
+        providerRepository.updateProvider(
+            provider = updatedProvider,
+            onSuccess = {
+              _currentProvider.value = updatedProvider
+              onComplete(true)
+            },
+            onFailure = { e ->
+              Log.e("ProviderCalendarViewModel", "Error clearing regular hours", e)
+              onComplete(false)
+            })
+      } catch (e: Exception) {
+        Log.e("ProviderCalendarViewModel", "Error clearing regular hours", e)
+        onComplete(false)
+      }
     }
   }
 
@@ -242,7 +311,6 @@ open class ProviderCalendarViewModel(
         onComplete(success, if (success) feedback else "Failed to update schedule")
       }
     } catch (e: Exception) {
-      Log.e("ProviderCalendarViewModel", "Failed to add off-time exception", e)
       onComplete(false, e.message ?: "Failed to add off-time exception")
     }
   }
@@ -268,7 +336,6 @@ open class ProviderCalendarViewModel(
         onComplete(success, if (success) feedback else "Failed to update schedule")
       }
     } catch (e: Exception) {
-      Log.e("ProviderCalendarViewModel", "Failed to add extra time exception", e)
       onComplete(false, e.message ?: "Failed to add extra time exception")
     }
   }
@@ -294,7 +361,6 @@ open class ProviderCalendarViewModel(
         onComplete(success, if (success) feedback else "Failed to update schedule")
       }
     } catch (e: Exception) {
-      Log.e("ProviderCalendarViewModel", "Failed to update exception", e)
       onComplete(false, e.message ?: "Failed to update exception")
     }
   }
@@ -303,20 +369,23 @@ open class ProviderCalendarViewModel(
    * Deletes an exception from the schedule.
    *
    * @param date The date of the exception to delete
-   * @param onComplete Callback with success status
+   * @param onComplete Callback with success status and feedback message
    */
-  fun deleteException(date: LocalDateTime, onComplete: (Boolean) -> Unit) {
+  fun deleteException(date: LocalDateTime, onComplete: (Boolean, String) -> Unit) {
     try {
       val exceptions = currentProvider.value.schedule.exceptions
       exceptions
           .find { it.date.toLocalDate() == date.toLocalDate() }
           ?.let { exception ->
             exceptions.remove(exception)
-            updateProviderSchedule(onComplete)
-          } ?: run { onComplete(false) }
+            updateProviderSchedule { success ->
+              onComplete(
+                  success,
+                  if (success) "Exception deleted successfully" else "Failed to delete exception")
+            }
+          } ?: run { onComplete(false, "Exception not found") }
     } catch (e: Exception) {
-      Log.e("ProviderCalendarViewModel", "Failed to delete exception", e)
-      onComplete(false)
+      onComplete(false, e.message ?: "Failed to delete exception")
     }
   }
 
@@ -387,11 +456,9 @@ open class ProviderCalendarViewModel(
             onFailure = { e ->
               // Revert the state if Firestore update fails
               _currentProvider.value = currentProvider.value
-              Log.e("ProviderCalendarViewModel", "Failed to update provider schedule", e)
               onComplete(false)
             })
       } catch (e: Exception) {
-        Log.e("ProviderCalendarViewModel", "Failed to update provider schedule", e)
         onComplete(false)
       }
     }
@@ -424,10 +491,8 @@ open class ProviderCalendarViewModel(
         onComplete(success, feedback)
       }
     } catch (e: IllegalArgumentException) {
-      Log.e("ProviderCalendarViewModel", "Invalid time slots", e)
       onComplete(false, "Invalid time slots: ${e.message}")
     } catch (e: Exception) {
-      Log.e("ProviderCalendarViewModel", "Failed to add exception", e)
       onComplete(false, e.message ?: "Failed to add exception")
     }
   }
@@ -447,83 +512,86 @@ open class ProviderCalendarViewModel(
     val meetingDate =
         LocalDateTime.ofInstant(meetingTimestamp.toDate().toInstant(), ZoneId.systemDefault())
 
-    // Create a TimeSlot for the 1-hour service duration
-    val timeSlot =
-        TimeSlot(
-            meetingDate.hour,
-            meetingDate.minute,
-            meetingDate.plusHours(1).hour,
-            meetingDate.plusHours(1).minute)
+    val schedule = currentProvider.value.schedule
 
-    val dayOfWeek = meetingDate.dayOfWeek.name
+    // Check for off-time conflicts first
+    val startOfDay = meetingDate.toLocalDate().atStartOfDay()
+    val endOfDay = startOfDay.plusDays(1).minusNanos(1)
+    val offTimeExceptions = schedule.getExceptions(startOfDay, endOfDay, ExceptionType.OFF_TIME)
 
-    println("Checking conflict for date: $meetingDate ($dayOfWeek)")
-    println("Time slot: $timeSlot")
-
-    // Check if it's during regular hours
-    val regularHours = currentProvider.value.schedule.regularHours[dayOfWeek] ?: emptyList()
-    println("Regular hours for $dayOfWeek: $regularHours")
-
-    val duringRegularHours =
-        regularHours.any { slot -> timeSlot.start >= slot.start && timeSlot.end <= slot.end }
-    println("During regular hours: $duringRegularHours")
-
-    // Check exceptions
-    val exceptions =
-        currentProvider.value.schedule.exceptions.filter {
-          it.date.toLocalDate() == meetingDate.toLocalDate()
-        }
-    println("Relevant exceptions: $exceptions")
+    val requestSlot = TimeSlot(meetingDate.toLocalTime(), meetingDate.plusHours(1).toLocalTime())
 
     val hasOffTimeConflict =
-        exceptions
-            .filter { it.type == ExceptionType.OFF_TIME }
-            .any { exception -> exception.timeSlots.any { it.overlaps(timeSlot) } }
-    println("Has off-time conflict: $hasOffTimeConflict")
+        offTimeExceptions.any { exception ->
+          exception.timeSlots.any { slot ->
+            val offTimeSlot =
+                TimeSlot(
+                    LocalTime.of(slot.startHour, slot.startMinute),
+                    LocalTime.of(slot.endHour, slot.endMinute))
+            // Check if the request slot overlaps with the off-time slot
+            val overlaps =
+                !(requestSlot.end <= offTimeSlot.start || requestSlot.start >= offTimeSlot.end)
+            overlaps
+          }
+        }
+    if (hasOffTimeConflict) {
+      return ConflictResult(true, "This time slot conflicts with your off-time schedule")
+    }
 
-    // If outside regular hours, check for EXTRA_TIME exception
-    val hasExtraTimeException =
-        if (!duringRegularHours) {
-          exceptions
-              .filter { it.type == ExceptionType.EXTRA_TIME }
-              .any { exception ->
-                exception.timeSlots.any { slot ->
-                  timeSlot.start >= slot.start && timeSlot.end <= slot.end
-                }
-              }
-        } else true // During regular hours, so no need for EXTRA_TIME
-    println("Has extra time exception: $hasExtraTimeException")
+    // Check if it's outside regular hours
+    val regularHours = schedule.regularHours[meetingDate.dayOfWeek.name] ?: emptyList()
+    val requestSlot2 = TimeSlot(meetingDate.toLocalTime(), meetingDate.plusHours(1).toLocalTime())
+    val duringRegularHours =
+        regularHours.any { slot ->
+          val slotStart = LocalTime.of(slot.startHour, slot.startMinute)
+          val slotEnd = LocalTime.of(slot.endHour, slot.endMinute)
+          requestSlot2.start >= slotStart && requestSlot2.end <= slotEnd
+        }
 
-    // Check other service requests
+    if (!duringRegularHours) {
+      // Check for extra time exceptions
+      val extraTimeExceptions =
+          schedule.getExceptions(meetingDate, meetingDate, ExceptionType.EXTRA_TIME)
+      val hasExtraTime =
+          extraTimeExceptions.any { exception ->
+            exception.timeSlots.any { slot ->
+              val slotStart = LocalTime.of(slot.startHour, slot.startMinute)
+              val slotEnd = LocalTime.of(slot.endHour, slot.endMinute)
+              requestSlot2.start >= slotStart && requestSlot2.end <= slotEnd
+            }
+          }
+      if (!hasExtraTime) {
+        return ConflictResult(true, "This time slot is outside your regular working hours")
+      }
+    }
+
+    // Check for conflicts with other service requests
     val acceptedRequests = serviceRequestViewModel.acceptedRequests.value
-    println("Accepted requests: $acceptedRequests")
-
     val hasServiceRequestConflict =
         acceptedRequests
             .filter { request ->
+              request.uid != serviceRequest.uid && // Don't conflict with self
+                  request.meetingDate?.let { timestamp ->
+                    LocalDateTime.ofInstant(timestamp.toDate().toInstant(), ZoneId.systemDefault())
+                        .toLocalDate() == meetingDate.toLocalDate()
+                  } ?: false
+            }
+            .any { request ->
               request.meetingDate?.let { timestamp ->
-                LocalDateTime.ofInstant(timestamp.toDate().toInstant(), ZoneId.systemDefault())
-                    .toLocalDate() == meetingDate.toLocalDate()
+                val otherDate =
+                    LocalDateTime.ofInstant(timestamp.toDate().toInstant(), ZoneId.systemDefault())
+                val requestSlot3 =
+                    TimeSlot(meetingDate.toLocalTime(), meetingDate.plusHours(1).toLocalTime())
+                val otherSlot =
+                    TimeSlot(otherDate.toLocalTime(), otherDate.plusHours(1).toLocalTime())
+                requestSlot3.overlaps(otherSlot)
               } ?: false
             }
-            .mapNotNull { request ->
-              request.meetingDate?.let { timestamp ->
-                val date =
-                    LocalDateTime.ofInstant(timestamp.toDate().toInstant(), ZoneId.systemDefault())
-                TimeSlot(date.hour, date.minute, date.plusHours(1).hour, date.plusHours(1).minute)
-              }
-            }
-            .any { it.overlaps(timeSlot) }
-    println("Has service request conflict: $hasServiceRequestConflict")
 
-    return when {
-      hasOffTimeConflict ->
-          ConflictResult(true, "This time slot conflicts with your off-time schedule")
-      hasServiceRequestConflict ->
-          ConflictResult(true, "This time slot conflicts with another accepted service request")
-      !duringRegularHours && !hasExtraTimeException ->
-          ConflictResult(true, "This time slot is outside your regular working hours")
-      else -> ConflictResult(false, "No conflicts")
+    return if (hasServiceRequestConflict) {
+      ConflictResult(true, "This time slot conflicts with another accepted service request")
+    } else {
+      ConflictResult(false, "No conflicts")
     }
   }
 
@@ -569,19 +637,21 @@ open class ProviderCalendarViewModel(
    */
   data class ConflictResult(val hasConflict: Boolean, val reason: String)
 
-  companion object Factory : ViewModelProvider.Factory {
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-      // Creates dependencies inline during ViewModel instantiation
-      val providerRepository =
-          ProviderRepositoryFirestore(Firebase.firestore, FirebaseStorage.getInstance())
-      val authViewModel = AuthViewModel(AuthRepository(Firebase.auth, Firebase.firestore))
-      val serviceRequestViewModel =
-          ServiceRequestViewModel(
-              ServiceRequestRepositoryFirebase(Firebase.firestore, Firebase.storage))
+  companion object {
+    fun provideFactory(
+        serviceRequestViewModel: ServiceRequestViewModel
+    ): ViewModelProvider.Factory =
+        object : ViewModelProvider.Factory {
+          @Suppress("UNCHECKED_CAST")
+          override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            val providerRepository =
+                ProviderRepositoryFirestore(Firebase.firestore, FirebaseStorage.getInstance())
+            val authViewModel = AuthViewModel(AuthRepository(Firebase.auth, Firebase.firestore))
 
-      return ProviderCalendarViewModel(providerRepository, authViewModel, serviceRequestViewModel)
-          as T
-    }
+            return ProviderCalendarViewModel(
+                providerRepository, authViewModel, serviceRequestViewModel)
+                as T
+          }
+        }
   }
 }

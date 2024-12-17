@@ -8,7 +8,6 @@ import com.android.solvit.shared.model.service.Services
 import com.google.android.gms.tasks.TaskCompletionSource
 import com.google.firebase.FirebaseApp
 import com.google.firebase.Timestamp
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
@@ -34,10 +33,8 @@ import org.robolectric.RobolectricTestRunner
 class NotificationsRepositoryTest {
 
   @Mock private lateinit var mockFirestore: FirebaseFirestore
-  @Mock private lateinit var mockAuth: FirebaseAuth
   @Mock private lateinit var mockDocumentReference: DocumentReference
   @Mock private lateinit var mockCollectionReference: CollectionReference
-  @Mock private lateinit var mockQuerySnapshot: QuerySnapshot
   private lateinit var notificationsRepository: NotificationsRepositoryFirestore
 
   private val providerId = "provider123"
@@ -72,13 +69,11 @@ class NotificationsRepositoryTest {
   }
 
   @Test
-  fun init_doesNotCallOnSuccessWhenUserIsNotAuthenticated() {
-    `when`(mockAuth.currentUser).thenReturn(null)
-
+  fun init_callOnSuccess() {
     var onSuccessCalled = false
     notificationsRepository.init { onSuccessCalled = true }
 
-    Assert.assertFalse(onSuccessCalled)
+    Assert.assertTrue(onSuccessCalled)
   }
 
   @Test
@@ -105,7 +100,6 @@ class NotificationsRepositoryTest {
         matchingProvider,
         {
           // On success
-          println("Notification sent successfully")
         },
         { exception ->
           // On failure

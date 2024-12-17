@@ -1,7 +1,5 @@
 package com.android.solvit.seeker.ui.provider
 
-import android.widget.Toast
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -17,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -29,23 +28,20 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.colorScheme
-import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -54,23 +50,28 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.android.solvit.R
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.packages.PackageProposal
+import com.android.solvit.shared.model.packages.PackageProposalViewModel
 import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
@@ -79,7 +80,20 @@ import com.android.solvit.shared.model.review.ReviewViewModel
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
+import com.android.solvit.shared.ui.theme.SelectedPackage
+import com.android.solvit.shared.ui.theme.Typography
+import com.android.solvit.shared.ui.utils.TopAppBarInbox
 
+/**
+ * Main screen to display detailed information about a provider.
+ *
+ * @param navigationActions Actions for navigating between screens.
+ * @param providerViewModel ViewModel for provider data.
+ * @param reviewsViewModel ViewModel for reviews data.
+ * @param requestViewModel ViewModel for service requests.
+ * @param authViewModel ViewModel for user authentication.
+ * @param packageProposalViewModel ViewModel for package proposals.
+ */
 @Composable
 fun ProviderInfoScreen(
     navigationActions: NavigationActions,
@@ -87,59 +101,44 @@ fun ProviderInfoScreen(
     reviewsViewModel: ReviewViewModel = viewModel(factory = ReviewViewModel.Factory),
     requestViewModel: ServiceRequestViewModel =
         viewModel(factory = ServiceRequestViewModel.Factory),
-    authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory)
+    authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory),
+    packageProposalViewModel: PackageProposalViewModel =
+        viewModel(factory = PackageProposalViewModel.Factory)
 ) {
-  val provider = providerViewModel.selectedProvider.collectAsState().value ?: return
+  val provider = providerViewModel.selectedProvider.collectAsStateWithLifecycle().value ?: return
   val reviews =
-      reviewsViewModel.reviews.collectAsState().value.filter { it.providerId == provider.uid }
+      reviewsViewModel.reviews.collectAsStateWithLifecycle().value.filter {
+        it.providerId == provider.uid
+      }
 
   var selectedTab by remember { mutableStateOf(ProviderTab.DETAILS) }
   val selectedPackage = remember { mutableStateOf<PackageProposal?>(null) }
   val showDialog = remember { mutableStateOf(false) }
 
-  val user = authViewModel.user.collectAsState()
+  val packagesProposal by packageProposalViewModel.proposal.collectAsStateWithLifecycle()
+  val user = authViewModel.user.collectAsStateWithLifecycle()
   val userId = user.value?.uid ?: "-1"
 
-  // Since We still don't give the possibility to provider to add packages (for the moment we're use
-  // a default list of packages for all providers)
-  val packages =
-      listOf(
-          PackageProposal(
-              uid = "1",
-              title = "Basic Maintenance",
-              description = "Ideal for minor repairs and maintenance tasks.",
-              price = 49.99,
-              bulletPoints =
-                  listOf(
-                      "Fix leaky faucets", "Unclog drains", "Inspect plumbing for minor issues")),
-          PackageProposal(
-              uid = "2",
-              title = "Standard Service",
-              description = "Comprehensive service for common plumbing needs.",
-              price = 89.99,
-              bulletPoints =
-                  listOf(
-                      "Repair leaks and clogs",
-                      "Replace faucets and fixtures",
-                      "Inspect and clear drain pipes")),
-          PackageProposal(
-              uid = "3",
-              title = "Premium Installation",
-              description = "For extensive plumbing work, including installations.",
-              price = 149.99,
-              bulletPoints =
-                  listOf(
-                      "Install new water heater",
-                      "Full pipe installation or replacement",
-                      "Advanced leak detection and repair")))
+  val packages = packagesProposal.filter { it.providerId == provider.uid }.sortedBy { it.price }
 
   Scaffold(
       containerColor = colorScheme.surface,
-      topBar = { ProviderTopBar(onBackClick = { navigationActions.goBack() }) },
+      topBar = {
+        TopAppBarInbox(
+            title = "Provider",
+            testTagTitle = "topBarTitle",
+            leftButtonAction = { navigationActions.goBack() },
+            leftButtonForm = Icons.AutoMirrored.Filled.ArrowBack,
+            testTagLeft = "backButton",
+            testTagGeneral = "ProviderTopBar")
+      },
       content = { padding ->
-        Column(modifier = Modifier.background(colorScheme.surface).padding(padding)) {
+        Column(modifier = Modifier.background(colorScheme.surface).fillMaxSize().padding(padding)) {
           ProviderHeader(provider)
-          ProviderTabs(selectedTab = selectedTab) { newTab -> selectedTab = newTab }
+          ProviderTabs(
+              selectedTab = selectedTab,
+              displayPackages = packages.isNotEmpty(),
+              onTabSelected = { newTab -> selectedTab = newTab })
           // Display content based on the selected tab
           when (selectedTab) {
             ProviderTab.DETAILS ->
@@ -168,105 +167,143 @@ fun ProviderInfoScreen(
                     showDialog,
                     requestViewModel,
                     userId,
-                    navigationActions)
+                    navigationActions,
+                )
           }
         }
       },
       bottomBar = { BottomBar(showDialog = showDialog) })
 }
 
+/**
+ * Card to display package details, including price, description, and features.
+ *
+ * @param packageProposal The package proposal to display.
+ * @param selectedIndex Whether this package is currently selected.
+ * @param onIsSelectedChange Callback for when the selection state changes.
+ * @param modifier Modifier to style the card.
+ * @param selectedPackage Mutable state for the selected package.
+ */
 @Composable
 fun PackageCard(
     packageProposal: PackageProposal,
-    isSelected: Boolean,
+    selectedIndex: Boolean,
+    onIsSelectedChange: () -> Unit,
     modifier: Modifier,
-    selectedPackage: MutableState<PackageProposal?> = remember { mutableStateOf(null) }
+    selectedPackage: MutableState<PackageProposal?> = remember { mutableStateOf(null) },
 ) {
+  val screenHeight = LocalConfiguration.current.screenHeightDp.dp
+  val dynamicBottomPadding = screenHeight * 0.1f
+
   Card(
-      modifier = modifier.fillMaxHeight(),
+      modifier = modifier,
       shape = RoundedCornerShape(16.dp),
       elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
       colors =
           CardDefaults.cardColors(
-              containerColor = if (!isSelected) colorScheme.surface else colorScheme.secondary,
+              containerColor = if (!selectedIndex) colorScheme.surface else SelectedPackage,
           )) {
-        Column(
-            modifier =
-                Modifier.padding(20.dp)
-                    .fillMaxHeight()
-                    .verticalScroll(rememberScrollState())
-                    .testTag("PackageContent"),
-            horizontalAlignment = Alignment.Start) {
-              // Price of the Package
-              Row(verticalAlignment = Alignment.CenterVertically) {
+        Box(modifier = Modifier.fillMaxSize()) {
+          Column(
+              modifier =
+                  Modifier.padding(
+                          start = 20.dp, end = 20.dp, top = 20.dp, bottom = dynamicBottomPadding)
+                      .fillMaxHeight()
+                      .verticalScroll(rememberScrollState())
+                      .testTag("PackageContent"),
+              horizontalAlignment = Alignment.Start) {
+                // Price of the Package
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                  Text(
+                      modifier = Modifier.testTag("price"),
+                      text = "CHF${packageProposal.price}",
+                      style = Typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                      color =
+                          if (!selectedIndex) colorScheme.onPrimaryContainer
+                          else colorScheme.onPrimaryContainer)
+                  Spacer(modifier = Modifier.width(8.dp)) // Increased space between price and unit
+                  Text(
+                      text = "/hour",
+                      style = Typography.bodySmall,
+                      color =
+                          if (!selectedIndex) colorScheme.onPrimaryContainer
+                          else colorScheme.onPrimaryContainer)
+                }
+                Spacer(modifier = Modifier.height(12.dp))
+                // Title of the Package
                 Text(
-                    modifier = Modifier.testTag("price"),
-                    text = "$${packageProposal.price}",
-                    style = typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                    text = packageProposal.title,
+                    style = Typography.titleMedium,
                     color =
-                        if (!isSelected) colorScheme.onPrimaryContainer else colorScheme.onPrimary)
-                Spacer(modifier = Modifier.width(8.dp)) // Increased space between price and unit
+                        if (!selectedIndex) colorScheme.onPrimaryContainer
+                        else colorScheme.onPrimaryContainer)
+                Spacer(
+                    modifier =
+                        Modifier.height(12.dp)) // Increased space between title and description
+                // Description of the Package
                 Text(
-                    text = "/hour",
-                    style = typography.bodySmall,
-                    color =
-                        if (!isSelected) colorScheme.onPrimaryContainer else colorScheme.onPrimary)
-              }
-              // Title of the Package
-              Text(
-                  text = packageProposal.title,
-                  style = typography.titleMedium,
-                  color =
-                      if (!isSelected) colorScheme.onPrimaryContainer else colorScheme.onPrimary)
-              Spacer(
-                  modifier =
-                      Modifier.height(12.dp)) // Increased space between title and description
-              // Description of the Package
-              Text(
-                  text = packageProposal.description,
-                  style = typography.bodyMedium,
-                  color = if (!isSelected) colorScheme.onSurface else colorScheme.onPrimary)
-              Spacer(
-                  modifier =
-                      Modifier.height(12.dp)) // Increased space between description and features
-              // Important infos about the package
-              Column {
-                packageProposal.bulletPoints.forEach { feature ->
-                  Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Default.CheckCircle,
-                        contentDescription = null,
-                        tint = colorScheme.primary,
-                        modifier =
-                            Modifier.size(18.dp)) // Slightly bigger icon for better visibility
-                    Spacer(modifier = Modifier.width(8.dp)) // Increased space between icon and text
-                    Text(
-                        text = feature,
-                        style = typography.bodyMedium,
-                        color = if (!isSelected) colorScheme.onSurface else colorScheme.onPrimary)
+                    text = packageProposal.description,
+                    style = Typography.bodyMedium,
+                    color = if (!selectedIndex) colorScheme.onSurface else colorScheme.onSurface)
+                Spacer(
+                    modifier =
+                        Modifier.height(12.dp)) // Increased space between description and features
+                // Important infos about the package
+                Column {
+                  packageProposal.bulletPoints.forEach { feature ->
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                      Icon(
+                          imageVector = Icons.Default.CheckCircle,
+                          contentDescription = null,
+                          tint = colorScheme.primary,
+                          modifier =
+                              Modifier.size(18.dp)) // Slightly bigger icon for better visibility
+                      Spacer(
+                          modifier = Modifier.width(8.dp)) // Increased space between icon and text
+                      Text(
+                          text = feature,
+                          style = Typography.bodyMedium,
+                          color =
+                              if (!selectedIndex) colorScheme.onSurface else colorScheme.onSurface)
+                    }
                   }
                 }
+                Spacer(modifier = Modifier.weight(1f)) // Pushes the button to the bottom
+          }
+          Button(
+              onClick = {
+                // Toggle the selected package: if already selected, unselect it
+                selectedPackage.value =
+                    if (selectedPackage.value == packageProposal) null else packageProposal
+                onIsSelectedChange()
+              },
+              colors =
+                  if (!selectedIndex)
+                      ButtonDefaults.buttonColors(
+                          containerColor = colorScheme.primary.copy(alpha = 0.6f))
+                  else ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
+              modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 16.dp)) {
+                // Update the button text based on the selection state
+                Text(
+                    text =
+                        if (selectedPackage.value == packageProposal) "Unselect package"
+                        else "Select package",
+                )
               }
-              Spacer(modifier = Modifier.weight(1f)) // Pushes the button to the bottom
-              Button(
-                  enabled = isSelected,
-                  onClick = {
-                    // Toggle the selected package: if already selected, unselect it
-                    selectedPackage.value =
-                        if (selectedPackage.value == packageProposal) null else packageProposal
-                  },
-                  colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
-                  modifier = Modifier.align(Alignment.CenterHorizontally)) {
-                    // Update the button text based on the selection state
-                    Text(
-                        text =
-                            if (selectedPackage.value == packageProposal) "Unselect package"
-                            else "Choose package")
-                  }
-            }
+        }
       }
 }
-
+/**
+ * Screen displaying the list of packages offered by the provider.
+ *
+ * @param provider The provider object.
+ * @param packages List of packages proposed by the provider.
+ * @param selectedPackage Mutable state for the selected package.
+ * @param showDialog Mutable state controlling the display of the dialog.
+ * @param requestViewModel ViewModel for handling service requests.
+ * @param userId Current user's ID.
+ * @param navigationActions Navigation actions for navigating to different screens.
+ */
 @Composable
 fun ProviderPackages(
     provider: Provider,
@@ -278,32 +315,43 @@ fun ProviderPackages(
     navigationActions: NavigationActions
 ) {
   var selectedIndex by remember { mutableIntStateOf(-1) }
+  var boxHeightPx by remember { mutableIntStateOf(0) }
   Box(
-      modifier = Modifier.fillMaxSize(), // Fills the entire available space
+      modifier =
+          Modifier.fillMaxSize() // Fills the entire available space
+              .onSizeChanged { size ->
+                boxHeightPx = size.height // Get height of box
+              },
       contentAlignment = Alignment.Center // Centers the LazyRow within the Box
       ) {
         // Horizontal scrollable list
         LazyRow(
-            modifier = Modifier.fillMaxWidth().testTag("packagesScrollableList"),
+            modifier =
+                Modifier.fillMaxSize().testTag("packagesScrollableList").align(Alignment.Center),
             horizontalArrangement = Arrangement.spacedBy(20.dp), // Adjusted for spacing
             contentPadding =
                 PaddingValues(top = 40.dp, start = 12.dp, end = 12.dp), // Increased padding
         ) {
           items(packages.size) { index ->
             // If package is selected, we display it bigger
-            val isSelected = selectedIndex == index
-            val size by
-                animateDpAsState(
-                    targetValue = if (isSelected) 350.dp else 320.dp, label = "PackageCardSize")
+            val size = if (selectedIndex == index) boxHeightPx * 1f else boxHeightPx * 0.3f
+
+            // we calculate the height difference that we then divide by 2
+            val offset = if (selectedIndex == index) (-(size * 0.025f)).dp else 0.dp
+
             PackageCard(
                 packageProposal = packages[index],
-                isSelected = isSelected,
+                selectedIndex = (selectedIndex == index),
                 modifier =
-                    Modifier.width(260.dp) // Slightly wider for better touch targets
-                        .height(size)
-                        .clickable { selectedIndex = if (isSelected) -1 else index }
-                        .testTag("PackageCard"),
-                selectedPackage = selectedPackage)
+                    Modifier.width(260.dp)
+                        .height(size.dp) // Slightly wider for better touch targets
+                        .testTag("PackageCard")
+                        .offset(y = offset)
+                        .shadow(
+                            if (selectedIndex == index) 16.dp else 4.dp, RoundedCornerShape(16.dp)),
+                selectedPackage = selectedPackage,
+                onIsSelectedChange = { selectedIndex = if (selectedIndex == index) -1 else index },
+            )
           }
         }
         if (showDialog.value) {
@@ -319,45 +367,11 @@ fun ProviderPackages(
       }
 }
 
-@Composable
-fun ProviderTopBar(onBackClick: () -> Unit) {
-  val context = LocalContext.current
-  Row(
-      modifier =
-          Modifier.fillMaxWidth()
-              .background(color = colorScheme.background)
-              .testTag("ProviderTopBar"),
-      verticalAlignment = Alignment.CenterVertically) {
-        // Back button on the left
-        IconButton(onClick = onBackClick, modifier = Modifier.testTag("backButton")) {
-          Icon(
-              Icons.AutoMirrored.Filled.ArrowBack,
-              contentDescription = "Back",
-              tint = colorScheme.onBackground)
-        }
-
-        // Title in the center
-        Text(
-            text = "Provider",
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.weight(1f).testTag("topBarTitle"),
-            textAlign = TextAlign.Start,
-            color = colorScheme.onBackground)
-
-        // Menu icon on the right
-        IconButton(
-            onClick = { Toast.makeText(context, "Not implemented", Toast.LENGTH_SHORT).show() },
-            modifier = Modifier.testTag("menuButton")) {
-              Icon(
-                  painter = painterResource(id = R.drawable.menu_icon),
-                  contentDescription = "Menu",
-                  modifier = Modifier.size(24.dp),
-                  tint = colorScheme.onBackground)
-            }
-      }
-}
-
+/**
+ * Header section displaying provider details such as name and service type.
+ *
+ * @param provider The provider object containing details.
+ */
 @Composable
 fun ProviderHeader(provider: Provider) {
   Box(
@@ -367,7 +381,6 @@ fun ProviderHeader(provider: Provider) {
             modifier = Modifier.fillMaxWidth().padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween) {
-              val context = LocalContext.current
               Row(verticalAlignment = Alignment.CenterVertically) {
                 AsyncImage(
                     model =
@@ -388,50 +401,55 @@ fun ProviderHeader(provider: Provider) {
                       modifier = Modifier.testTag("providerName"),
                       color = colorScheme.onBackground)
                   Text(
-                      text = provider.companyName,
+                      text = Services.format(provider.service),
                       color = colorScheme.onSurfaceVariant,
-                      modifier = Modifier.testTag("providerCompanyName"))
+                      modifier = Modifier.testTag("providerService"))
                 }
               }
-
-              // Share icon on the right
-              IconButton(
-                  onClick = {
-                    Toast.makeText(context, "Not implemented", Toast.LENGTH_SHORT).show()
-                  },
-                  modifier = Modifier.testTag("shareButton")) {
-                    Icon(
-                        Icons.Default.Share,
-                        contentDescription = "Share",
-                        tint = colorScheme.onBackground)
-                  }
             }
       }
 }
 
+/**
+ * Tab navigation for provider details, packages, and reviews.
+ *
+ * @param selectedTab Currently selected tab.
+ * @param onTabSelected Callback when a tab is selected.
+ * @param displayPackages Whether the "Packages" tab should be displayed.
+ */
 @Composable
-fun ProviderTabs(selectedTab: ProviderTab, onTabSelected: (ProviderTab) -> Unit) {
+fun ProviderTabs(
+    selectedTab: ProviderTab,
+    onTabSelected: (ProviderTab) -> Unit,
+    displayPackages: Boolean
+) {
+  val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+  val dynamicFontSize = (screenWidth.value * 0.03).sp
   TabRow(
       selectedTabIndex = selectedTab.ordinal,
       modifier = Modifier.fillMaxWidth().testTag("providerTabs"),
       containerColor = colorScheme.primary,
       contentColor = colorScheme.onPrimary,
   ) {
-    ProviderTab.entries.forEach { tab ->
-      Tab(
-          modifier = Modifier.testTag(tab.name.lowercase() + "Tab"),
-          text = {
-            Text(
-                text = tab.title,
-                modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
-                color =
-                    if (selectedTab == tab) colorScheme.onPrimary
-                    else colorScheme.onPrimary.copy(alpha = 0.6f),
-                fontWeight = if (selectedTab == tab) FontWeight.Bold else FontWeight.Normal)
-          },
-          selected = selectedTab == tab,
-          onClick = { onTabSelected(tab) })
-    }
+    ProviderTab.entries
+        .filter { if (!displayPackages) it != ProviderTab.PACKAGES else true }
+        .forEach { tab ->
+          Tab(
+              modifier = Modifier.testTag(tab.name.lowercase() + "Tab"),
+              text = {
+                Text(
+                    text = tab.title,
+                    style = Typography.titleMedium.copy(fontSize = dynamicFontSize),
+                    maxLines = 1,
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
+                    color =
+                        if (selectedTab == tab) colorScheme.onPrimary
+                        else colorScheme.onPrimary.copy(alpha = 0.6f),
+                    fontWeight = if (selectedTab == tab) FontWeight.Bold else FontWeight.Normal)
+              },
+              selected = selectedTab == tab,
+              onClick = { onTabSelected(tab) })
+        }
   }
 }
 
@@ -441,6 +459,17 @@ enum class ProviderTab(val title: String) {
   REVIEWS("Reviews")
 }
 
+/**
+ * Screen displaying provider details such as rating, description, and contact information.
+ *
+ * @param provider The provider object.
+ * @param selectedPackage Currently selected package.
+ * @param reviews List of reviews for the provider.
+ * @param showDialog Mutable state controlling the display of the dialog.
+ * @param requestViewModel ViewModel for handling service requests.
+ * @param userId Current user's ID.
+ * @param navigationActions Navigation actions for navigating to different screens.
+ */
 @Composable
 fun ProviderDetails(
     provider: Provider,
@@ -449,14 +478,16 @@ fun ProviderDetails(
     showDialog: MutableState<Boolean>,
     requestViewModel: ServiceRequestViewModel,
     userId: String,
-    navigationActions: NavigationActions
+    navigationActions: NavigationActions,
 ) {
+  val nbrOfJobs = provider.nbrOfJobs.toInt()
   Column(
       modifier =
           Modifier.padding(16.dp)
               .fillMaxWidth()
               .background(color = colorScheme.surface, shape = RoundedCornerShape(16.dp))
-              .testTag("providerDetails")) {
+              .testTag("providerDetails")
+              .verticalScroll(rememberScrollState())) {
         Rubric(modifier = Modifier.testTag("detailsSection")) {
           Row(
               verticalAlignment = Alignment.CenterVertically,
@@ -464,11 +495,13 @@ fun ProviderDetails(
               modifier = Modifier.fillMaxWidth()) {
                 RatingStars(provider.rating.toInt())
                 Text(
-                    text = "${reviews.size} Reviews",
+                    text = if (reviews.size > 100) "+100 Reviews" else "${reviews.size} Reviews",
                     color = colorScheme.onSurfaceVariant,
                     modifier = Modifier.testTag("reviewsCount"))
                 Text(
-                    text = "15 Jobs", // Replace with actual job count
+                    text =
+                        if (nbrOfJobs <= 1) "$nbrOfJobs Job"
+                        else if (nbrOfJobs <= 100) "$nbrOfJobs Jobs" else "+100 Jobs",
                     color = colorScheme.onSurfaceVariant,
                     modifier = Modifier.testTag("jobsCount"))
               }
@@ -476,10 +509,11 @@ fun ProviderDetails(
           Spacer(modifier = Modifier.height(8.dp))
 
           Text(
-              "Refrigerator repair",
+              provider.companyName,
               fontSize = 18.sp,
               fontWeight = FontWeight.Bold,
-              color = colorScheme.onBackground)
+              color = colorScheme.onBackground,
+              modifier = Modifier.testTag("providerCompanyName"))
           Text(
               text = "CHF ${provider.price}/hour",
               fontSize = 16.sp,
@@ -547,6 +581,12 @@ fun ProviderDetails(
       }
 }
 
+/**
+ * Reusable component to display a rounded background section with customizable content.
+ *
+ * @param modifier Modifier to style the component.
+ * @param content Composable content to display inside the rubric.
+ */
 @Composable
 fun Rubric(modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
   Column(
@@ -560,6 +600,17 @@ fun Rubric(modifier: Modifier = Modifier, content: @Composable ColumnScope.() ->
       }
 }
 
+/**
+ * Screen displaying reviews for the provider.
+ *
+ * @param provider The provider object.
+ * @param selectedPackage Currently selected package.
+ * @param reviews List of reviews for the provider.
+ * @param showDialog Mutable state controlling the display of the dialog.
+ * @param requestViewModel ViewModel for handling service requests.
+ * @param userId Current user's ID.
+ * @param navigationActions Navigation actions for navigating to different screens.
+ */
 @Composable
 fun ProviderReviews(
     provider: Provider,
@@ -568,14 +619,15 @@ fun ProviderReviews(
     showDialog: MutableState<Boolean>,
     requestViewModel: ServiceRequestViewModel,
     userId: String,
-    navigationActions: NavigationActions
+    navigationActions: NavigationActions,
 ) {
   Column(
       modifier =
           Modifier.padding(16.dp)
               .fillMaxWidth()
               .background(color = colorScheme.surface, shape = RoundedCornerShape(16.dp))
-              .testTag("providerReviews")) {
+              .testTag("providerReviews")
+              .verticalScroll(rememberScrollState())) {
         Column(
             Modifier.fillMaxWidth()
                 .background(color = colorScheme.background, shape = RoundedCornerShape(16.dp))
@@ -621,17 +673,13 @@ fun ProviderReviews(
             color = colorScheme.onBackground)
 
         Spacer(modifier = Modifier.height(8.dp))
-
-        LazyColumn {
-          if (reviews.isEmpty()) {
-            item {
-              Text(
-                  "No reviews yet",
-                  modifier = Modifier.padding(16.dp),
-                  color = colorScheme.onSurfaceVariant)
-            }
-          }
-          items(reviews) { review -> ReviewRow(review) }
+        if (reviews.isEmpty()) {
+          Text(
+              "No reviews yet",
+              modifier = Modifier.padding(16.dp),
+              color = colorScheme.onSurfaceVariant)
+        } else {
+          reviews.forEach { ReviewRow(it) }
         }
 
         if (showDialog.value) {
@@ -647,6 +695,11 @@ fun ProviderReviews(
       }
 }
 
+/**
+ * Component to display a single review, including rating and comments.
+ *
+ * @param review The review object to display.
+ */
 @Composable
 fun ReviewRow(review: Review) {
   Column(
@@ -678,6 +731,11 @@ fun ReviewRow(review: Review) {
       }
 }
 
+/**
+ * Component to display a star rating.
+ *
+ * @param rating The rating value (out of 5).
+ */
 @Composable
 fun RatingStars(rating: Int) {
   Row(
@@ -693,6 +751,11 @@ fun RatingStars(rating: Int) {
   }
 }
 
+/**
+ * Bottom bar with a "Book Now" button.
+ *
+ * @param showDialog Mutable state controlling the display of the booking dialog.
+ */
 @Composable
 fun BottomBar(showDialog: MutableState<Boolean>) {
   Row(
@@ -716,6 +779,17 @@ fun BottomBar(showDialog: MutableState<Boolean>) {
       }
 }
 
+/**
+ * Dialog to select a service request or create a new one.
+ *
+ * @param providerId ID of the provider.
+ * @param providerType Type of service provided.
+ * @param selectedPackage Currently selected package.
+ * @param showDialog Mutable state controlling the display of the dialog.
+ * @param requestViewModel ViewModel for handling service requests.
+ * @param userId Current user's ID.
+ * @param navigationActions Navigation actions for navigating to different screens.
+ */
 @Composable
 fun SelectRequestDialog(
     providerId: String,
@@ -727,144 +801,164 @@ fun SelectRequestDialog(
     navigationActions: NavigationActions
 ) {
   val requests =
-      requestViewModel.pendingRequests.collectAsState().value.filter {
+      requestViewModel.pendingRequests.collectAsStateWithLifecycle().value.filter {
         it.userId == userId && it.type == providerType
       }
 
   val selectedRequest = remember { mutableStateOf<ServiceRequest?>(null) }
 
   Dialog(onDismissRequest = { showDialog.value = false }) {
-    Card(
-        modifier =
-            Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                .height(400.dp)
-                .testTag("dialog_card"),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = colorScheme.surface)) {
-          Column(
-              modifier = Modifier.padding(16.dp),
-              verticalArrangement = Arrangement.Top,
-              horizontalAlignment = Alignment.CenterHorizontally) {
-                // Title
-                Text(
-                    text = "Choose the concerned service request:",
-                    style = typography.titleMedium,
-                    modifier = Modifier.padding(bottom = 16.dp).testTag("dialog_title"),
-                    color = colorScheme.onSurface)
+    Surface(shape = RoundedCornerShape(16.dp), color = colorScheme.background) {
+      Card(
+          modifier =
+              Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                  .height(550.dp)
+                  .testTag("dialog_card"),
+          shape = RoundedCornerShape(16.dp),
+          colors = CardDefaults.cardColors(containerColor = colorScheme.background)) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.CenterHorizontally) {
+                  // Title
+                  Text(
+                      text = "Select request to assign",
+                      style = Typography.titleLarge,
+                      modifier =
+                          Modifier.padding(bottom = 16.dp)
+                              .testTag("dialog_title")
+                              .align(Alignment.CenterHorizontally),
+                      color = colorScheme.onPrimaryContainer)
 
-                // LazyColumn to display requests
-                LazyColumn(
-                    modifier =
-                        Modifier.testTag("requests_column")
-                            .fillMaxWidth()
-                            .weight(
-                                1f), // Allows the list to scroll properly when content overflows
-                    verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                      items(requests) { request ->
-                        Card(
+                  // LazyColumn to display requests
+                  LazyColumn(
+                      modifier =
+                          Modifier.testTag("requests_column")
+                              .fillMaxWidth()
+                              .weight(
+                                  1f), // Allows the list to scroll properly when content overflows
+                      verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        items(requests) { request ->
+                          Card(
+                              modifier =
+                                  Modifier.fillMaxWidth()
+                                      .testTag("request_card")
+                                      .border(
+                                          2.dp,
+                                          if (selectedRequest.value == request)
+                                              colorScheme.secondary
+                                          else colorScheme.background,
+                                          RoundedCornerShape(12.dp))
+                                      .shadow(elevation = 5.dp, shape = RoundedCornerShape(12.dp))
+                                      .clickable { selectedRequest.value = request },
+                              shape = RoundedCornerShape(12.dp),
+                              colors =
+                                  CardDefaults.cardColors(
+                                      containerColor = colorScheme.background)) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth().padding(12.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    verticalAlignment = Alignment.CenterVertically) {
+                                      Box(
+                                          modifier =
+                                              Modifier.fillMaxHeight()
+                                                  .size(48.dp)
+                                                  .clip(RoundedCornerShape(8.dp))
+                                                  .background(Color.LightGray)) {
+                                            AsyncImage(
+                                                modifier = Modifier.fillMaxSize(),
+                                                model =
+                                                    if (!request.imageUrl.isNullOrEmpty())
+                                                        request.imageUrl
+                                                    else R.drawable.no_photo,
+                                                placeholder =
+                                                    painterResource(id = R.drawable.loading),
+                                                error = painterResource(id = R.drawable.error),
+                                                contentDescription = "Service Image",
+                                                contentScale = ContentScale.Crop)
+                                          }
+
+                                      Spacer(Modifier.width(16.dp))
+                                      Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                        Text(
+                                            modifier = Modifier.testTag("request_title"),
+                                            text = request.title,
+                                            style = Typography.titleMedium,
+                                            maxLines = 2,
+                                            overflow = TextOverflow.Ellipsis,
+                                            color = colorScheme.onPrimaryContainer,
+                                        )
+                                        Text(
+                                            modifier = Modifier.testTag("request_description"),
+                                            text = request.description,
+                                            style = Typography.bodyMedium,
+                                            color = colorScheme.onPrimaryContainer,
+                                            maxLines = 2,
+                                            overflow = TextOverflow.Ellipsis)
+                                      }
+                                    }
+                              }
+                        }
+                      }
+
+                  // Action Buttons
+                  Row(
+                      modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+                      horizontalArrangement = Arrangement.SpaceEvenly) {
+                        TextButton(
+                            onClick = { showDialog.value = false },
                             modifier =
-                                Modifier.fillMaxWidth()
-                                    .testTag("request_card")
-                                    .border(
-                                        2.dp,
-                                        if (selectedRequest.value == request) colorScheme.primary
-                                        else colorScheme.surface,
-                                        RoundedCornerShape(12.dp))
-                                    .clickable { selectedRequest.value = request },
-                            shape = RoundedCornerShape(12.dp),
-                            colors =
-                                CardDefaults.cardColors(
-                                    containerColor = colorScheme.primaryContainer)) {
-                              Column(
-                                  modifier = Modifier.padding(12.dp),
-                                  verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                          Text(
-                                              text = "Title:",
-                                              style = typography.bodyMedium,
-                                              color = colorScheme.onPrimaryContainer)
-                                          Text(
-                                              modifier = Modifier.testTag("request_title"),
-                                              text = request.title,
-                                              style = typography.bodyMedium,
-                                              color = colorScheme.onPrimaryContainer)
-                                        }
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                          Text(
-                                              text = "Description:",
-                                              style = typography.bodyMedium,
-                                              color = colorScheme.onPrimaryContainer)
-                                          Text(
-                                              modifier = Modifier.testTag("request_description"),
-                                              text = request.description,
-                                              style = typography.bodyMedium,
-                                              color = colorScheme.onPrimaryContainer,
-                                              maxLines = 2,
-                                              overflow = TextOverflow.Ellipsis)
-                                        }
-                                  }
+                                Modifier.padding(horizontal = 8.dp).testTag("dismiss_button")) {
+                              Text(
+                                  text = "Dismiss",
+                                  style = Typography.labelLarge,
+                                  color = colorScheme.primary)
+                            }
+
+                        Button(
+                            modifier =
+                                Modifier.padding(horizontal = 8.dp).testTag("confirm_button"),
+                            enabled = selectedRequest.value != null,
+                            onClick = {
+                              selectedRequest.value?.let {
+                                var request = it.copy(providerId = providerId)
+                                val packageProposal = selectedPackage.value
+                                if (packageProposal != null) {
+                                  request =
+                                      request.copy(
+                                          packageId = packageProposal.uid,
+                                          agreedPrice = packageProposal.price)
+                                }
+                                requestViewModel.saveServiceRequest(request)
+                                requestViewModel.selectRequest(request)
+                                navigationActions.navigateAndSetBackStack(
+                                    Route.BOOKING_DETAILS, listOf(Route.REQUESTS_OVERVIEW))
+                              }
+                              showDialog.value = false
+                            },
+                            shape = RoundedCornerShape(8.dp)) {
+                              Text(
+                                  text = "Confirm",
+                                  style = Typography.labelLarge,
+                                  color = colorScheme.onPrimary)
                             }
                       }
-                    }
 
-                TextButton(
-                    onClick = {
-                      requestViewModel.selectProvider(providerId, providerType)
-                      navigationActions.navigateTo(Route.CREATE_REQUEST)
-                    },
-                    modifier = Modifier.testTag("clear_selection_button")) {
-                      Text(
-                          textAlign = TextAlign.Center,
-                          text = "Create a new request with this provider assigned",
-                          style = typography.bodyMedium,
-                          color = colorScheme.primary)
-                    }
-
-                // Action Buttons
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceEvenly) {
-                      TextButton(
-                          onClick = { showDialog.value = false },
-                          modifier =
-                              Modifier.padding(horizontal = 8.dp).testTag("dismiss_button")) {
-                            Text(
-                                text = "Dismiss",
-                                style = typography.labelLarge,
-                                color = colorScheme.primary)
-                          }
-
-                      Button(
-                          modifier = Modifier.padding(horizontal = 8.dp).testTag("confirm_button"),
-                          enabled = selectedRequest.value != null,
-                          onClick = {
-                            selectedRequest.value?.let {
-                              var request = it.copy(providerId = providerId)
-                              val packageProposal = selectedPackage.value
-                              if (packageProposal != null) {
-                                request =
-                                    request.copy(
-                                        packageId = packageProposal.uid,
-                                        agreedPrice = packageProposal.price)
-                              }
-                              requestViewModel.saveServiceRequest(request)
-                              requestViewModel.selectRequest(request)
-                              navigationActions.navigateTo(Route.BOOKING_DETAILS)
-                            }
-                            showDialog.value = false
-                          },
-                          shape = RoundedCornerShape(8.dp)) {
-                            Text(
-                                text = "Confirm",
-                                style = typography.labelLarge,
-                                color = colorScheme.onPrimary)
-                          }
-                    }
-              }
-        }
+                  TextButton(
+                      onClick = {
+                        requestViewModel.selectProvider(providerId, providerType)
+                        navigationActions.navigateTo(Route.CREATE_REQUEST)
+                      },
+                      modifier = Modifier.testTag("clear_selection_button")) {
+                        Text(
+                            textAlign = TextAlign.Center,
+                            textDecoration = TextDecoration.Underline,
+                            text = "Create a new request with this provider assigned",
+                            style = Typography.bodyMedium,
+                            color = colorScheme.primary)
+                      }
+                }
+          }
+    }
   }
 }

@@ -2,6 +2,7 @@ package com.android.solvit.seeker.model.profile
 
 import com.android.solvit.shared.model.authentication.AuthRepository
 import com.android.solvit.shared.model.authentication.AuthViewModel
+import com.android.solvit.shared.model.map.Location
 import kotlinx.coroutines.runBlocking
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.MatcherAssert.assertThat
@@ -22,14 +23,14 @@ class SeekerProfileViewModelTest {
   private lateinit var authRepository: AuthRepository
   private lateinit var firebaseRepository: UserRepositoryFirestore
 
-  val testProfile =
+  private val testProfile =
       SeekerProfile(
           uid = "12345",
           name = "John Doe",
           username = "johndoe",
           email = "john.doe@example.com",
           phone = "+1234567890",
-          address = "Chemin des Triaudes")
+          address = Location(0.0, 0.0, "Chemin des Triaudes"))
 
   private val testUserId = "12345"
   private val testPreference = "🔧 Plumbing"
@@ -67,19 +68,10 @@ class SeekerProfileViewModelTest {
   }
 
   @Test
-  fun addUserProfielCallsRepository() {
-    seekerProfileViewModel.addUserProfile(testProfile)
-    verify(firebaseRepository).addUserProfile(any(), any(), any())
+  fun addUserProfileCallsRepository() {
+    seekerProfileViewModel.addUserProfile(testProfile, mock(android.net.Uri::class.java))
+    verify(firebaseRepository).addUserProfile(any(), any(), any(), any())
   }
-
-  /*
-  @Test
-  fun updateUserProfileUpdatesLocalProfile() {
-
-    seekerProfileViewModel.updateUserProfile(testProfile)
-    val updatedProfile = seekerProfileViewModel.seekerProfile.value
-    assertThat(updatedProfile, `is`(testProfile))
-  }*/
 
   @Test
   fun deleteUserProfileCallsRepository() {

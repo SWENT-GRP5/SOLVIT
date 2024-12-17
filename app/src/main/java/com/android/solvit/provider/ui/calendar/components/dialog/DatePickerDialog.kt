@@ -10,6 +10,7 @@ import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import com.android.solvit.shared.ui.theme.Typography
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -38,12 +39,12 @@ fun DatePickerDialog(
               }
             },
             modifier = Modifier.testTag("confirmDateButton")) {
-              Text("OK", color = colorScheme.primary)
+              Text("OK", color = colorScheme.primary, style = Typography.bodyLarge)
             }
       },
       dismissButton = {
         TextButton(onClick = onDismissRequest, modifier = Modifier.testTag("cancelDateButton")) {
-          Text("Cancel", color = colorScheme.primary)
+          Text("Cancel", color = colorScheme.primary, style = Typography.bodyLarge)
         }
       },
       modifier = modifier.testTag("datePickerDialog")) {

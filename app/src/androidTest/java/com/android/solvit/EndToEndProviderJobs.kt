@@ -1,13 +1,14 @@
 package com.android.solvit
 
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.test.core.app.ApplicationProvider
 import com.android.solvit.provider.model.ProviderCalendarViewModel
+import com.android.solvit.provider.model.profile.ProviderViewModel
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.seeker.model.profile.UserRepository
 import com.android.solvit.seeker.model.profile.UserRepositoryFirestore
@@ -67,6 +68,7 @@ class EndToEndProviderJobs {
   private lateinit var authViewModel: AuthViewModel
   private lateinit var listProviderViewModel: ListProviderViewModel
   private lateinit var seekerProfileViewModel: SeekerProfileViewModel
+  private lateinit var providerViewModel: ProviderViewModel
   private lateinit var serviceRequestViewModel: ServiceRequestViewModel
   private lateinit var locationViewModel: LocationViewModel
   private lateinit var reviewViewModel: ReviewViewModel
@@ -129,7 +131,7 @@ class EndToEndProviderJobs {
     storage.useEmulator("10.0.2.2", 9199)
 
     authRepository = AuthRepository(Firebase.auth, firestore)
-    seekerRepository = UserRepositoryFirestore(firestore)
+    seekerRepository = UserRepositoryFirestore(firestore, storage)
     providerRepository = ProviderRepositoryFirestore(firestore, storage)
     locationRepository = mock(LocationRepository::class.java)
     serviceRequestRepository = ServiceRequestRepositoryFirebase(firestore, storage)
@@ -140,6 +142,7 @@ class EndToEndProviderJobs {
 
     authViewModel = AuthViewModel(authRepository)
     seekerProfileViewModel = SeekerProfileViewModel(seekerRepository)
+    providerViewModel = ProviderViewModel(providerRepository)
     listProviderViewModel = ListProviderViewModel(providerRepository)
     locationViewModel = LocationViewModel(locationRepository)
     serviceRequestViewModel = ServiceRequestViewModel(serviceRequestRepository)
@@ -184,8 +187,8 @@ class EndToEndProviderJobs {
   @Test
   fun navigateJobDashboard() {
     composeTestRule.setContent {
-      val user = authViewModel.user.collectAsState()
-      val userRegistered = authViewModel.userRegistered.collectAsState()
+      val user = authViewModel.user.collectAsStateWithLifecycle()
+      val userRegistered = authViewModel.userRegistered.collectAsStateWithLifecycle()
 
       if (!userRegistered.value) {
         SharedUI(
@@ -213,6 +216,7 @@ class EndToEndProviderJobs {
           "provider" ->
               ProviderUI(
                   authViewModel,
+                  providerViewModel,
                   listProviderViewModel,
                   serviceRequestViewModel,
                   seekerProfileViewModel,
@@ -245,10 +249,10 @@ class EndToEndProviderJobs {
     // Navigate to the calendar screen
     composeTestRule.onNodeWithTag(TopLevelDestinations.CALENDAR.textId).performClick()
     composeTestRule.waitUntil { composeTestRule.onNodeWithTag("calendarTitle").isDisplayed() }
-    composeTestRule.onNodeWithTag("backButton").performClick()
+    // composeTestRule.onNodeWithTag("backButton").performClick()
 
     // Navigate to the job dashboard
-    composeTestRule.onNodeWithTag(TopLevelDestinations.CREATE_REQUEST.toString()).performClick()
+    composeTestRule.onNodeWithTag("MyJobsTestTag", useUnmergedTree = true).performClick()
 
     request = request.copy(providerId = authViewModel.user.value!!.uid)
     serviceRequestViewModel.saveServiceRequest(request)

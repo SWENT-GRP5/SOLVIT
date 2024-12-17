@@ -1,5 +1,6 @@
 package com.android.solvit.shared.ui.chat
 
+import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -17,20 +18,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,19 +36,27 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.android.solvit.R
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
+import com.android.solvit.seeker.ui.navigation.BottomNavigationMenu
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.chat.ChatMessage
 import com.android.solvit.shared.model.chat.ChatViewModel
+import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_PROVIDER
+import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_SEEKER
 import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.navigation.Screen
+import com.android.solvit.shared.ui.theme.Typography
+import com.android.solvit.shared.ui.utils.TopAppBarInbox
 import com.android.solvit.shared.ui.utils.formatTimestamp
 import com.android.solvit.shared.ui.utils.getReceiverImageUrl
 import com.android.solvit.shared.ui.utils.getReceiverName
 
+@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun MessageBox(
     chatViewModel: ChatViewModel,
@@ -65,16 +65,14 @@ fun MessageBox(
     listProviderViewModel: ListProviderViewModel,
     seekerProfileViewModel: SeekerProfileViewModel
 ) {
-  val allMessages by chatViewModel.allMessages.collectAsState()
-  val isReadyToNavigate by chatViewModel.isReadyToNavigate.collectAsState()
-  val user by authViewModel.user.collectAsState()
-  val isLoadingMessageBox by chatViewModel.isLoadingMessageBox.collectAsState()
+  val allMessages by chatViewModel.allMessages.collectAsStateWithLifecycle()
+  val isReadyToNavigate by chatViewModel.isReadyToNavigate.collectAsStateWithLifecycle()
+  val user by authViewModel.user.collectAsStateWithLifecycle()
+  val isLoadingMessageBox by chatViewModel.isLoadingMessageBox.collectAsStateWithLifecycle()
 
-  LaunchedEffect(user?.uid) {
-    val currentUserUid = user?.uid
-    if (currentUserUid != null) {
-      chatViewModel.getAllLastMessages(currentUserUid)
-    }
+  val currentUserUid = user?.uid
+  if (currentUserUid != null) {
+    chatViewModel.getAllLastMessages(currentUserUid)
   }
 
   LaunchedEffect(isReadyToNavigate) {
@@ -91,8 +89,18 @@ fun MessageBox(
     }
   } else {
     Scaffold(
-        topBar = { ChatListTopBar(navigationActions, chatViewModel, authViewModel) },
-        bottomBar = {}) { paddingValues ->
+        topBar = { TopAppBarInbox(title = "Inbox", testTagGeneral = "InboxTopAppBar") },
+        bottomBar = {
+          BottomNavigationMenu(
+              onTabSelect = { navigationActions.navigateTo(it.route) },
+              tabList =
+                  if (authViewModel.user.value?.role == "seeker") {
+                    LIST_TOP_LEVEL_DESTINATION_SEEKER
+                  } else {
+                    LIST_TOP_LEVEL_DESTINATION_PROVIDER
+                  },
+              selectedItem = Route.INBOX)
+        }) { paddingValues ->
           if (allMessages.isNotEmpty()) {
             LazyColumn(
                 modifier = Modifier.padding(paddingValues).fillMaxSize(),
@@ -114,49 +122,6 @@ fun MessageBox(
           }
         }
   }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun ChatListTopBar(
-    navigationActions: NavigationActions,
-    chatViewModel: ChatViewModel,
-    authViewModel: AuthViewModel
-) {
-
-  TopAppBar(
-      modifier = Modifier.testTag("InboxTopAppBar"),
-      title = {
-        Box(
-            modifier = Modifier.fillMaxWidth(),
-            // Allow the title to center
-            contentAlignment = Alignment.Center) {
-              Text(text = "Inbox", style = MaterialTheme.typography.headlineLarge)
-            }
-      },
-      navigationIcon = {
-        IconButton(onClick = { navigationActions.goBack() }) {
-          Icon(Icons.Default.ArrowBack, contentDescription = "Back")
-        }
-      },
-      actions = {
-        IconButton(
-            onClick = {
-              // Toast.makeText(context, "Not Yet Implemented", Toast.LENGTH_LONG).show()
-            }) {
-              Image(
-                  painter = painterResource(id = R.drawable.new_message),
-                  contentDescription = "Action",
-                  modifier = Modifier.size(24.dp))
-            }
-      },
-      colors =
-          TopAppBarDefaults.topAppBarColors(
-              containerColor = Color.White,
-              titleContentColor = Color.Black,
-              navigationIconContentColor = Color.Black,
-              actionIconContentColor = Color.Black),
-  )
 }
 
 @Composable
@@ -214,7 +179,7 @@ fun ChatListItem(
         Column(modifier = Modifier.weight(1f)) {
           Text(
               text = receiverName ?: "",
-              style = MaterialTheme.typography.titleMedium,
+              style = Typography.titleMedium,
               fontWeight = FontWeight.Bold)
           Text(
               text =
@@ -223,7 +188,7 @@ fun ChatListItem(
                     is ChatMessage.ImageMessage -> "image"
                     is ChatMessage.TextImageMessage -> message.text
                   },
-              style = MaterialTheme.typography.bodyLarge,
+              style = Typography.bodyLarge,
               color = Color.Gray,
               maxLines = 1,
               overflow = TextOverflow.Ellipsis)
@@ -231,7 +196,7 @@ fun ChatListItem(
         Spacer(modifier = Modifier.width(8.dp))
         Text(
             text = formatTimestamp(message.timestamp),
-            style = MaterialTheme.typography.bodyLarge,
+            style = Typography.bodyLarge,
             color = Color.Gray)
       }
 }
@@ -251,14 +216,8 @@ fun NoMessagesSent(modifier: Modifier) {
             modifier = Modifier.size(200.dp) // Adjust size as needed
             )
 
-        Text(
-            text = "No messages yet",
-            style = MaterialTheme.typography.bodyLarge,
-            color = Color.Black)
+        Text(text = "No messages yet", style = Typography.bodyLarge, color = Color.Black)
 
-        Text(
-            text = "Send your first message",
-            style = MaterialTheme.typography.bodySmall,
-            color = Color.Gray)
+        Text(text = "Send your first message", style = Typography.bodySmall, color = Color.Gray)
       }
 }

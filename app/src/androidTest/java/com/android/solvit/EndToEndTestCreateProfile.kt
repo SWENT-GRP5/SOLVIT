@@ -1,6 +1,9 @@
 package com.android.solvit
 
-import androidx.compose.runtime.collectAsState
+import android.app.Activity
+import android.app.Instrumentation
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -10,9 +13,14 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.rememberNavController
 import androidx.test.core.app.ApplicationProvider
+import androidx.test.espresso.intent.Intents
+import androidx.test.espresso.intent.Intents.intending
+import androidx.test.espresso.intent.matcher.IntentMatchers
 import com.android.solvit.provider.model.ProviderCalendarViewModel
+import com.android.solvit.provider.model.profile.ProviderViewModel
 import com.android.solvit.provider.ui.profile.ProviderRegistrationScreen
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.seeker.model.profile.UserRepository
@@ -72,6 +80,7 @@ class EndToEndTestCreateProfile {
   private lateinit var authViewModel: AuthViewModel
   private lateinit var authViewModel2: AuthViewModel
   private lateinit var listProviderViewModel: ListProviderViewModel
+  private lateinit var providerViewModel: ProviderViewModel
   private lateinit var seekerProfileViewModel: SeekerProfileViewModel
   private lateinit var serviceRequestViewModel: ServiceRequestViewModel
   private lateinit var locationViewModel: LocationViewModel
@@ -119,7 +128,7 @@ class EndToEndTestCreateProfile {
     storage.useEmulator("10.0.2.2", 9199)
 
     authRepository = AuthRepository(Firebase.auth, firestore)
-    seekerRepository = UserRepositoryFirestore(firestore)
+    seekerRepository = UserRepositoryFirestore(firestore, storage)
     providerRepository = ProviderRepositoryFirestore(firestore, storage)
     locationRepository = mock(LocationRepository::class.java)
     serviceRequestRepository = ServiceRequestRepositoryFirebase(firestore, storage)
@@ -131,6 +140,7 @@ class EndToEndTestCreateProfile {
 
     authViewModel = AuthViewModel(authRepository)
     seekerProfileViewModel = SeekerProfileViewModel(seekerRepository)
+    providerViewModel = ProviderViewModel(providerRepository)
     listProviderViewModel = ListProviderViewModel(providerRepository)
     locationViewModel = LocationViewModel(locationRepository)
     serviceRequestViewModel = ServiceRequestViewModel(serviceRequestRepository)
@@ -148,6 +158,9 @@ class EndToEndTestCreateProfile {
           val onSuccess = invocation.getArgument<(List<Location>) -> Unit>(1)
           onSuccess(locations)
         }
+
+    // Initialize Intents in your test
+    Intents.init()
   }
 
   @After
@@ -161,6 +174,8 @@ class EndToEndTestCreateProfile {
                 true) // Set to true or false as needed for your production environment
             .build()
 
+    Intents.release()
+
     // Reinitialize FirebaseAuth without the emulator
     FirebaseAuth.getInstance().signOut()
   }
@@ -168,8 +183,8 @@ class EndToEndTestCreateProfile {
   @Test
   fun createSeekerProfile() {
     composeTestRule.setContent {
-      val userRegistered = authViewModel.userRegistered.collectAsState()
-      val user = authViewModel.user.collectAsState()
+      val userRegistered = authViewModel.userRegistered.collectAsStateWithLifecycle()
+      val user = authViewModel.user.collectAsStateWithLifecycle()
 
       if (!userRegistered.value) {
         SharedUI(
@@ -197,6 +212,7 @@ class EndToEndTestCreateProfile {
           "provider" ->
               ProviderUI(
                   authViewModel,
+                  providerViewModel,
                   listProviderViewModel,
                   serviceRequestViewModel,
                   seekerProfileViewModel,
@@ -216,7 +232,7 @@ class EndToEndTestCreateProfile {
     composeTestRule.onNodeWithTag("signUpLink").performClick()
 
     composeTestRule.onNodeWithTag("signUpIllustration").assertIsDisplayed()
-    val email = "e2eTest20@test.com"
+    val email = "e2eTest22@test.com"
     val password = "password"
 
     composeTestRule.onNodeWithTag("emailInputField").performTextInput(email)
@@ -247,7 +263,6 @@ class EndToEndTestCreateProfile {
     composeTestRule.waitUntil(timeoutMillis = 10000) {
       composeTestRule.onNodeWithTag("servicesScreen").isDisplayed()
     }
-    composeTestRule.onNodeWithTag("servicesScreenCurrentLocation").performClick()
 
     composeTestRule.onNodeWithTag("servicesScreenProfileImage").performClick()
     composeTestRule.waitUntil(timeoutMillis = 10000) {
@@ -260,7 +275,16 @@ class EndToEndTestCreateProfile {
   @Test
   fun setProviderInfoDetails() {
 
-    val sizeBefore = listProviderViewModel.providersList.value.size
+    // Create a simulated image Uri
+    val fakeImageUri = Uri.parse("content://com.android.test/fake_image.jpg")
+
+    // Create a mock intent result
+    val resultData = Intent().apply { data = fakeImageUri }
+    val result = Instrumentation.ActivityResult(Activity.RESULT_OK, resultData)
+
+    // Stub the intent to return the fake result
+    intending(IntentMatchers.hasAction(Intent.ACTION_GET_CONTENT)).respondWith(result)
+
     authRepository2 = mock(AuthRep::class.java)
 
     // Mock the `init` method
@@ -301,11 +325,21 @@ class EndToEndTestCreateProfile {
     composeTestRule
         .onNodeWithTag("descriptionInputProviderRegistration")
         .performTextInput("No need a description ! I'm the Best Plumber In Town")
-    composeTestRule.onNodeWithTag("startingPriceInputProviderRegistration").assertIsDisplayed()
+    composeTestRule
+        .onNodeWithTag("startingPriceInputProviderRegistration")
+        .performScrollTo()
+        .assertIsDisplayed()
     composeTestRule.onNodeWithTag("startingPriceInputProviderRegistration").performTextInput("25")
-    composeTestRule.onNodeWithTag("languageDropdown").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("languageDropdown").performClick()
+    composeTestRule.onNodeWithTag("languageDropdown").performScrollTo().assertIsDisplayed()
+    composeTestRule.onNodeWithTag("languageDropdown").performScrollTo().performClick()
     composeTestRule.onNodeWithTag("FRENCH").performClick() // Set French as language spoken
+
+    // Perform click on the provider image button
+    composeTestRule.onNodeWithTag("uploadImage").performClick()
+
+    // Simulate choosing an image
+    intending(IntentMatchers.hasAction(Intent.ACTION_GET_CONTENT))
+        .respondWith(Instrumentation.ActivityResult(Activity.RESULT_OK, resultData))
 
     composeTestRule.onNodeWithTag("savePreferencesButton").performScrollTo().performClick()
 

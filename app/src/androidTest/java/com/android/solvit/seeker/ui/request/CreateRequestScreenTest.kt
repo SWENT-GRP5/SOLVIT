@@ -108,7 +108,7 @@ class CreateRequestScreenTest {
 
     `when`(serviceRequestRepository.getNewUid()).thenAnswer { "1" }
 
-    `when`(authRepository.updateUserLocations(any(), any(), any())).thenAnswer {
+    `when`(authRepository.updateUserLocations(any(), any(), any(), any())).thenAnswer {
       val onSuccess = it.getArgument<() -> Unit>(1)
       onSuccess()
     }

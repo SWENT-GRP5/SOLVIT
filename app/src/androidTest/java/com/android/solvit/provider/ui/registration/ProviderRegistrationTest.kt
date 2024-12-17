@@ -17,7 +17,7 @@ import com.android.solvit.shared.model.map.LocationRepository
 import com.android.solvit.shared.model.map.LocationViewModel
 import com.android.solvit.shared.model.provider.ProviderRepository
 import com.android.solvit.shared.ui.navigation.NavigationActions
-import com.android.solvit.shared.ui.navigation.Screen
+import com.android.solvit.shared.ui.navigation.Route
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -57,7 +57,7 @@ class ProviderRegistrationTest {
     locationViewModel = LocationViewModel(locationRepository)
 
     // Mock the current route to be the add todo screen
-    `when`(navigationActions.currentRoute()).thenReturn(Screen.PROVIDER_REGISTRATION_PROFILE)
+    `when`(navigationActions.currentRoute()).thenReturn(Route.PROVIDER_REGISTRATION)
     `when`(locationRepository.search(ArgumentMatchers.anyString(), anyOrNull(), anyOrNull()))
         .thenAnswer { invocation ->
           val onSuccess = invocation.getArgument<(List<Location>) -> Unit>(1)
@@ -74,7 +74,6 @@ class ProviderRegistrationTest {
       )
     }
 
-    composeTestRule.onNodeWithTag("goBackButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("signUpIcon").assertIsDisplayed()
     composeTestRule.onNodeWithTag("signUpProviderTitle").assertIsDisplayed()
     composeTestRule.onNodeWithTag("fullNameInput").assertIsDisplayed()
@@ -138,6 +137,7 @@ class ProviderRegistrationTest {
 
     composeTestRule.onNodeWithTag("inputRequestAddress").performTextClearance()
     composeTestRule.onNodeWithTag("inputRequestAddress").performTextInput("USA")
+    composeTestRule.waitForIdle()
     composeTestRule.waitUntil { locationViewModel.locationSuggestions.value.isNotEmpty() }
     composeTestRule.onAllNodesWithTag("locationResult")[0].performClick()
 
@@ -182,6 +182,7 @@ class ProviderRegistrationTest {
     composeTestRule.onNodeWithTag("phoneNumberInput").performTextInput("123456789")
     composeTestRule.onNodeWithTag("companyNameInput").performTextInput("Company")
     composeTestRule.onNodeWithTag("inputRequestAddress").performTextInput("USA")
+    composeTestRule.waitForIdle()
     composeTestRule.waitUntil { locationViewModel.locationSuggestions.value.isNotEmpty() }
     composeTestRule.onAllNodesWithTag("locationResult")[0].performClick()
 
@@ -206,6 +207,7 @@ class ProviderRegistrationTest {
     }
 
     composeTestRule.onNodeWithTag("inputRequestAddress").performTextInput("USA")
+    composeTestRule.waitForIdle()
     composeTestRule.waitUntil { locationViewModel.locationSuggestions.value.isNotEmpty() }
 
     composeTestRule.onAllNodesWithTag("locationResult")[0].assertIsDisplayed()
