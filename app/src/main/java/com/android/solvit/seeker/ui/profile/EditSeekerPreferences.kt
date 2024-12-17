@@ -17,14 +17,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -40,8 +36,8 @@ import com.android.solvit.R
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.theme.Typography
+import com.android.solvit.shared.ui.utils.TopAppBarInbox
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditPreferences(
     userId: String,
@@ -59,21 +55,12 @@ fun EditPreferences(
 
   Scaffold(
       topBar = {
-        TopAppBar(
-            title = {
-              Row(
-                  modifier = Modifier.fillMaxWidth().testTag("edit_preferences_title"),
-                  horizontalArrangement = Arrangement.Start) {
-                    Text("Edit Preferences", style = Typography.titleLarge)
-                  }
-            },
-            navigationIcon = {
-              IconButton(
-                  onClick = { navigationActions.goBack() },
-                  modifier = Modifier.testTag("goBackButton")) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                  }
-            })
+        TopAppBarInbox(
+            title = "Edit Preferences",
+            testTagTitle = "edit_preferences_title",
+            leftButtonAction = { navigationActions.goBack() },
+            leftButtonForm = Icons.AutoMirrored.Filled.ArrowBack,
+            testTagLeft = "goBackButton")
       }) { paddingValues ->
         // Main content of the screen with padding
         Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {

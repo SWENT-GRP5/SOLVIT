@@ -74,7 +74,7 @@ import com.android.solvit.shared.ui.theme.LightRed
 import com.android.solvit.shared.ui.theme.OnPrimary
 import com.android.solvit.shared.ui.theme.Typography
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "SourceLockedOrientationActivity")
 @Composable
 fun ServicesScreen(
     navigationActions: NavigationActions,

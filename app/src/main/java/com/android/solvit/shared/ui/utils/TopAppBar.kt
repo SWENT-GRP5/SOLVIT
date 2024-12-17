@@ -29,7 +29,7 @@ fun TopAppBarInbox(
     leftButtonAction: () -> Unit = {},
     leftButtonForm: ImageVector? = null,
     testTagLeft: String = "",
-    rightButton: () -> Unit = {},
+    rightButtonAction: () -> Unit = {},
     rightButtonForm: ImageVector? = null,
     testTagRight: String = "",
     testTagGeneral: String = ""
@@ -57,22 +57,28 @@ fun TopAppBarInbox(
                     canGoBack = true
                   }
                 }
-              }) {
-                Icon(
-                    leftButtonForm,
-                    contentDescription = "Back",
-                    modifier = Modifier.testTag(testTagLeft))
+              },
+              modifier = Modifier.testTag(testTagLeft)) {
+                Icon(leftButtonForm, contentDescription = "Back", tint = colorScheme.onSurface)
               }
         }
       },
       actions = {
         if (rightButtonForm != null) {
-          IconButton(onClick = { rightButton() }) {
-            Icon(
-                rightButtonForm,
-                contentDescription = "Back",
-                modifier = Modifier.testTag(testTagRight))
-          }
+          IconButton(
+              onClick = {
+                if (canGoBack) {
+                  canGoBack = false
+                  rightButtonAction()
+                  coroutineScope.launch {
+                    delay(500)
+                    canGoBack = true
+                  }
+                }
+              },
+              modifier = Modifier.testTag(testTagRight)) {
+                Icon(rightButtonForm, contentDescription = "Back", tint = colorScheme.onSurface)
+              }
         }
       },
       colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background))

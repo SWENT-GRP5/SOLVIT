@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -34,13 +33,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -152,10 +146,6 @@ fun SignUpChooseProfile(
                           })
                     }
                   })
-
-              Spacer(modifier = Modifier.height(20.dp))
-
-              LearnMoreSection()
             }
       })
 }
@@ -221,51 +211,4 @@ fun SectionTitle(text: String, testTag: String = "") {
       color = colorScheme.onBackground,
       modifier = Modifier.testTag(testTag),
       style = Typography.titleLarge)
-}
-
-/**
- * A composable function that displays a "Learn More" section with an annotated clickable text. The
- * section provides additional guidance for users who are unsure about their role selection.
- *
- * This function:
- * - Displays an interactive text with a clickable "Learn more" link.
- * - Triggers a Toast message when the link is clicked (functionality not yet implemented).
- * - Adapts the text style to match the application's theme.
- */
-@Composable
-fun LearnMoreSection() {
-  val context = LocalContext.current
-
-  val annotatedText = buildAnnotatedString {
-    append("Not sure? ")
-
-    pushStringAnnotation(tag = "URL", annotation = "learn_more")
-    withStyle(
-        style = SpanStyle(color = colorScheme.primary, textDecoration = TextDecoration.Underline)) {
-          append("Learn more")
-        }
-    pop()
-
-    append(" about becoming a Customer or Provider.")
-  }
-
-  Box(
-      modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
-      contentAlignment = Alignment.Center,
-  ) {
-    ClickableText(
-        text = annotatedText,
-        style =
-            TextStyle(
-                color = colorScheme.onSurfaceVariant,
-                fontSize = 16.sp,
-                textAlign = TextAlign.Center),
-        onClick = { offset ->
-          annotatedText
-              .getStringAnnotations(tag = "URL", start = offset, end = offset)
-              .firstOrNull()
-              ?.let { Toast.makeText(context, "Not implemented yet", Toast.LENGTH_SHORT).show() }
-        },
-        modifier = Modifier.fillMaxWidth().testTag("learnMoreLink"))
-  }
 }

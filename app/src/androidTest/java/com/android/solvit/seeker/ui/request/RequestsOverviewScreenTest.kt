@@ -1,6 +1,5 @@
 package com.android.solvit.seeker.ui.request
 
-import android.widget.Toast
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -16,12 +15,11 @@ import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
 import com.google.firebase.Timestamp
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.mockkStatic
 import java.text.SimpleDateFormat
 import java.util.GregorianCalendar
 import java.util.Locale
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -128,13 +126,12 @@ class RequestsOverviewScreenTest {
       RequestsOverviewScreen(navigationActions, serviceRequestViewModel)
     }
 
-    mockkStatic(Toast::class)
-    val toastMock = mockk<Toast>(relaxed = true)
-    every { Toast.makeText(any(), any<String>(), any()) } returns toastMock
+    assert(serviceRequestViewModel.selectedServices.value.isEmpty())
 
     composeTestRule.onNodeWithTag("categoriesSettings").performClick()
     composeTestRule.onNodeWithTag("Plumber FilterItem").performClick()
-    io.mockk.verify { toastMock.show() }
+
+    assert(serviceRequestViewModel.selectedServices.value == listOf(Services.PLUMBER))
   }
 
   @Test
@@ -143,13 +140,12 @@ class RequestsOverviewScreenTest {
       RequestsOverviewScreen(navigationActions, serviceRequestViewModel)
     }
 
-    mockkStatic(Toast::class)
-    val toastMock = mockk<Toast>(relaxed = true)
-    every { Toast.makeText(any(), any<String>(), any()) } returns toastMock
+    assertFalse(serviceRequestViewModel.sortSelected.value)
 
     composeTestRule.onNodeWithTag("categoriesSort").performClick()
     composeTestRule.onNodeWithTag("Sort by date FilterItem").performClick()
-    io.mockk.verify { toastMock.show() }
+
+    assertTrue(serviceRequestViewModel.sortSelected.value)
   }
 
   @Test

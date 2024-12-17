@@ -2,7 +2,6 @@ package com.android.solvit.seeker.ui.request
 
 import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -79,7 +78,10 @@ fun RequestsOverviewScreen(
   DisposableEffect(Unit) {
     val activity = context as? ComponentActivity
     activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-    onDispose { activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED }
+    onDispose {
+      activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+      requestViewModel.clearFilters()
+    }
   }
 
   Scaffold(
@@ -101,9 +103,12 @@ fun RequestsOverviewScreen(
         var selectedTab by remember { mutableIntStateOf(0) }
         val statusTabs = ServiceRequestStatus.entries.toTypedArray()
 
+        val isSortSelected by requestViewModel.sortSelected.collectAsState()
+        val selectedServices by requestViewModel.selectedServices.collectAsState()
+
         Column {
           TopOrdersSection()
-          CategoriesFiltersSection()
+          CategoriesFiltersSection(serviceRequestViewModel = requestViewModel)
 
           // Tabs for filtering by status
           ScrollableTabRow(
@@ -132,13 +137,26 @@ fun RequestsOverviewScreen(
                 allRequests
               }
 
-          if (filteredRequests.isEmpty()) {
+          val sortedRequests =
+              if (selectedServices.isNotEmpty() && isSortSelected) {
+                filteredRequests
+                    .filter { selectedServices.contains(it.type) }
+                    .sortedBy { it.dueDate }
+              } else if (selectedServices.isNotEmpty()) {
+                filteredRequests.filter { selectedServices.contains(it.type) }
+              } else if (isSortSelected) {
+                filteredRequests.sortedBy { it.dueDate }
+              } else {
+                filteredRequests
+              }
+
+          if (sortedRequests.isEmpty()) {
             NoRequestsText()
           } else {
             LazyColumn(
                 modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("requestsList"),
                 verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                  items(filteredRequests) { request ->
+                  items(sortedRequests) { request ->
                     RequestItemRow(
                         request = request,
                         onClick = {
@@ -176,7 +194,7 @@ fun NoRequestsText() {
 }
 
 @Composable
-fun CategoriesFiltersSection() {
+fun CategoriesFiltersSection(serviceRequestViewModel: ServiceRequestViewModel) {
   var showFilters by remember { mutableStateOf(false) }
   var showSort by remember { mutableStateOf(false) }
   Column {
@@ -236,54 +254,51 @@ fun CategoriesFiltersSection() {
         }
 
     if (showFilters) {
-      CategoriesFilter()
+      CategoriesFilter(serviceRequestViewModel)
     }
     if (showSort) {
-      CategoriesSort()
+      CategoriesSort(serviceRequestViewModel)
     }
   }
 }
 
 @Composable
-fun CategoriesFilter() {
-  val context = LocalContext.current
+fun CategoriesFilter(serviceRequestViewModel: ServiceRequestViewModel) {
+  val selectedServices by serviceRequestViewModel.selectedServices.collectAsState()
   LazyVerticalGrid(
       columns = GridCells.Fixed(2),
       modifier = Modifier.padding(16.dp).testTag("categoriesFilter")) {
-        items(SERVICES_LIST.size) {
-          FilterItem(Services.format(SERVICES_LIST[it].service)) {
-            Toast.makeText(context, "This feature is not yet implemented", Toast.LENGTH_SHORT)
-                .show()
+        for (service in SERVICES_LIST) {
+          val isSelected = selectedServices.contains(service.service)
+          item {
+            FilterItem(Services.format(service.service), isSelected) {
+              if (isSelected) {
+                serviceRequestViewModel.unSelectService(service.service)
+              } else {
+                serviceRequestViewModel.selectService(service.service)
+              }
+            }
           }
         }
       }
 }
 
 @Composable
-fun CategoriesSort() {
-  val context = LocalContext.current
+fun CategoriesSort(serviceRequestViewModel: ServiceRequestViewModel) {
+  val isSortSelected by serviceRequestViewModel.sortSelected.collectAsState()
   LazyVerticalGrid(
       columns = GridCells.Fixed(2),
       modifier = Modifier.padding(16.dp).testTag("categoriesSortFilter")) {
         item {
-          FilterItem("Sort by date") {
-            Toast.makeText(context, "This feature is not yet implemented", Toast.LENGTH_SHORT)
-                .show()
-          }
-        }
-        item {
-          FilterItem("Sort by status") {
-            Toast.makeText(context, "This feature is not yet implemented", Toast.LENGTH_SHORT)
-                .show()
-          }
+          FilterItem("Sort by date", isSortSelected) { serviceRequestViewModel.sortSelected() }
         }
       }
 }
 
 @Composable
-fun FilterItem(text: String, filter: () -> Unit) {
-  var isFilterSelected by remember { mutableStateOf(false) }
-  val borderColor = if (isFilterSelected) colorScheme.onBackground else colorScheme.onSurfaceVariant
+fun FilterItem(text: String, isSelected: Boolean, filter: () -> Unit) {
+  var isFilterSelected by remember { mutableStateOf(isSelected) }
+  val borderColor = if (isFilterSelected) colorScheme.primary else colorScheme.onSurfaceVariant
   Box(
       modifier =
           Modifier.padding(8.dp)
@@ -294,7 +309,7 @@ fun FilterItem(text: String, filter: () -> Unit) {
               }
               .testTag("$text FilterItem"),
       contentAlignment = Alignment.Center) {
-        Text(text = text)
+        Text(text = text, color = borderColor)
       }
 }
 

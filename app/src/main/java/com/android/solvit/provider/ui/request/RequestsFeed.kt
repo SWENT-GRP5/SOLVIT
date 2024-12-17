@@ -1,6 +1,5 @@
 package com.android.solvit.provider.ui.request
 
-import android.widget.Toast
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -58,7 +57,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -159,12 +157,9 @@ fun RequestsFeedScreen(
   Scaffold(
       topBar = {
         RequestsTopBar(
-            navigationActions,
-            notificationViewModel,
-            providerId,
-            selectedService,
-            searchQuery,
-            { selectedService = it })
+            navigationActions, notificationViewModel, providerId, selectedService, searchQuery) {
+              selectedService = it
+            }
       },
       bottomBar = {
         BottomNavigationMenu(
@@ -213,7 +208,6 @@ fun RequestsTopBar(
     searchQuery: MutableState<String>,
     onServiceSelected: (String) -> Unit
 ) {
-  val context = LocalContext.current
   // Fetch notifications and check for unread ones
   LaunchedEffect(providerId) { notificationsViewModel.init(providerId) }
   val notifications by notificationsViewModel.notifications.collectAsStateWithLifecycle()
@@ -231,16 +225,12 @@ fun RequestsTopBar(
           modifier = Modifier.fillMaxWidth().testTag("RequestsTopBar"),
           horizontalArrangement = Arrangement.SpaceBetween,
           verticalAlignment = Alignment.CenterVertically) {
-            IconButton(
-                modifier = Modifier.testTag("MenuOption"),
-                onClick = {
-                  Toast.makeText(context, "Not Yet Implemented", Toast.LENGTH_LONG).show()
-                }) {
-                  Icon(
-                      imageVector = Icons.Default.Menu,
-                      contentDescription = "Menu Option",
-                      tint = colorScheme.onBackground)
-                }
+            IconButton(onClick = { navigationActions.navigateTo(Route.NOTIFICATIONS) }) {
+              Icon(
+                  imageVector = Icons.Default.Notifications,
+                  tint = if (hasUnreadNotifications) Color.Red else colorScheme.onBackground,
+                  contentDescription = "Notifications")
+            }
 
             Row(
                 modifier = Modifier.testTag("SloganIcon"),
@@ -262,12 +252,14 @@ fun RequestsTopBar(
                           color = colorScheme.secondary))
             }
 
-            IconButton(onClick = { navigationActions.navigateTo(Route.NOTIFICATIONS) }) {
-              Icon(
-                  imageVector = Icons.Default.Notifications,
-                  tint = if (hasUnreadNotifications) Color.Red else colorScheme.onBackground,
-                  contentDescription = "Notifications")
-            }
+            IconButton(
+                modifier = Modifier.testTag("MenuOption"),
+                onClick = { navigationActions.navigateTo(Route.JOBS) }) {
+                  Icon(
+                      imageVector = Icons.Default.Menu,
+                      contentDescription = "Menu Option",
+                      tint = colorScheme.onBackground)
+                }
           }
 
       // Search Bar and Service Type Filter

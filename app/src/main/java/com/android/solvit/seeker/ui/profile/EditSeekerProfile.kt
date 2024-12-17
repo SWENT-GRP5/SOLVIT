@@ -110,8 +110,7 @@ fun EditSeekerProfileScreen(
       topBar = {
         TopAppBarInbox(
             title = "Bio-data",
-            testTagTitle = "goBackButton",
-            testTagGeneral = "notifications_title",
+            testTagTitle = "notifications_title",
             leftButtonForm = Icons.AutoMirrored.Filled.ArrowBack,
             leftButtonAction = { navigationActions.goBack() },
             testTagLeft = "goBackButton")
