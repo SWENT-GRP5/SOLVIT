@@ -54,7 +54,6 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -78,6 +77,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.android.solvit.R
@@ -117,7 +117,7 @@ fun TopAppBar(
     onClickAction: () -> Unit,
     seekerProfileViewModel: SeekerProfileViewModel
 ) {
-  val location by seekerProfileViewModel.locationSearched.collectAsState()
+  val location by seekerProfileViewModel.locationSearched.collectAsStateWithLifecycle()
   val serviceName = selectedService?.let { Services.format(it) } ?: "Service Providers"
   val serviceIcon = serviceItem.icon
 
@@ -503,8 +503,8 @@ fun ProviderRowCard(
  */
 @Composable
 fun PriceFilter(listProviderViewModel: ListProviderViewModel) {
-  val minPrice by listProviderViewModel.minPrice.collectAsState()
-  val maxPrice by listProviderViewModel.maxPrice.collectAsState()
+  val minPrice by listProviderViewModel.minPrice.collectAsStateWithLifecycle()
+  val maxPrice by listProviderViewModel.maxPrice.collectAsStateWithLifecycle()
 
   Column {
     Row(
@@ -634,7 +634,8 @@ fun filterStringFields(
  */
 @Composable
 fun LanguageFilterField(list: List<String>, listProviderViewModel: ListProviderViewModel) {
-  val selectedLanguages = listProviderViewModel.selectedLanguages.collectAsState().value
+  val selectedLanguages =
+      listProviderViewModel.selectedLanguages.collectAsStateWithLifecycle().value
   val languages = list.map { Language.valueOf(it.uppercase()) }
   val iconsPressed = languages.map { it in selectedLanguages }
 
@@ -687,7 +688,7 @@ fun LanguageFilterField(list: List<String>, listProviderViewModel: ListProviderV
  */
 @Composable
 fun RatingFilterField(list: List<Double>, listProviderViewModel: ListProviderViewModel) {
-  val selectedRatings = listProviderViewModel.selectedRatings.collectAsState().value
+  val selectedRatings = listProviderViewModel.selectedRatings.collectAsStateWithLifecycle().value
   val iconsPressed = list.map { it in selectedRatings }
   Log.e("selectedRating", "$selectedRatings")
   Log.e("ratingsPressed", "$iconsPressed")
@@ -744,7 +745,7 @@ fun RatingFilterField(list: List<Double>, listProviderViewModel: ListProviderVie
  */
 @Composable
 fun ApplyButton(listProviderViewModel: ListProviderViewModel, display: () -> Unit) {
-  val filteredList by listProviderViewModel.providersListFiltered.collectAsState()
+  val filteredList by listProviderViewModel.providersListFiltered.collectAsStateWithLifecycle()
   Box(
       modifier =
           Modifier.testTag("applyFilterButton")
@@ -928,9 +929,9 @@ fun FilterByLocation(
   // Represent the address user is searching
   var searchedAddress by remember { mutableStateOf("") }
   // List of location suggestions given the searched address
-  val locationSuggestions by locationViewModel.locationSuggestions.collectAsState()
+  val locationSuggestions by locationViewModel.locationSuggestions.collectAsStateWithLifecycle()
   // List of saved locations of user
-  val cachedLocations by seekerProfileViewModel.cachedLocations.collectAsState()
+  val cachedLocations by seekerProfileViewModel.cachedLocations.collectAsStateWithLifecycle()
   // User current location
   var userLocation by remember { mutableStateOf<LatLng?>(null) }
   // Get the current context
@@ -1082,9 +1083,9 @@ fun SelectProviderScreen(
     }
   }
 
-  val selectedService by listProviderViewModel.selectedService.collectAsState()
+  val selectedService by listProviderViewModel.selectedService.collectAsStateWithLifecycle()
   listProviderViewModel.getProviders()
-  val providers by listProviderViewModel.providersListFiltered.collectAsState()
+  val providers by listProviderViewModel.providersListFiltered.collectAsStateWithLifecycle()
 
   var displayFilters by remember { mutableStateOf(false) }
   var displayByLocation by remember { mutableStateOf(false) }

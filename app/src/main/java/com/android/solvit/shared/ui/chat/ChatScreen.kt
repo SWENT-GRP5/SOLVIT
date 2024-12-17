@@ -64,7 +64,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -91,6 +90,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
@@ -143,16 +143,16 @@ fun ChatScreen(
   }
   chatAssistantViewModel.clear()
 
-  val messages by chatViewModel.coMessage.collectAsState()
-  val receiver by chatViewModel.receiver.collectAsState()
+  val messages by chatViewModel.coMessage.collectAsStateWithLifecycle()
+  val receiver by chatViewModel.receiver.collectAsStateWithLifecycle()
   val receiverName = getReceiverName(receiver)
   val receiverPicture = getReceiverImageUrl(receiver)
-  val user by authViewModel.user.collectAsState()
+  val user by authViewModel.user.collectAsStateWithLifecycle()
   val isSeeker = user?.role == "seeker"
   chatViewModel.getChatRequest { id ->
     serviceRequestViewModel.getServiceRequestById(id) { chatViewModel.setChatRequest(it) }
   }
-  val request by chatViewModel.chatRequest.collectAsState()
+  val request by chatViewModel.chatRequest.collectAsStateWithLifecycle()
   chatAssistantViewModel.setContext(messages, user?.userName ?: "", receiverName, request)
 
   // To send Image Messages
@@ -237,11 +237,11 @@ fun AiSolverWelcomeScreen(
     onDispose { activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED }
   }
 
-  val user by authViewModel.user.collectAsState()
+  val user by authViewModel.user.collectAsStateWithLifecycle()
   val iaBotUserId = "JL36T8yHjWDYkuq4u6S4" // The default Id of the IA Bot created
   // Fetch conversation
-  val isLoading by chatViewModel.isLoading.collectAsState()
-  val conversation by chatViewModel.coMessage.collectAsState()
+  val isLoading by chatViewModel.isLoading.collectAsStateWithLifecycle()
+  val conversation by chatViewModel.coMessage.collectAsStateWithLifecycle()
 
   LaunchedEffect(Unit) { chatViewModel.prepareForIaChat(true, user?.uid, iaBotUserId, "IaBot") }
 
@@ -430,11 +430,11 @@ fun AiSolverScreen(
   var imageBitmap by remember { mutableStateOf<Bitmap?>(null) }
   var reply by remember { mutableStateOf("") }
   val localContext = LocalContext.current
-  val conversation by chatViewModel.coMessage.collectAsState()
-  val user by authViewModel.user.collectAsState()
+  val conversation by chatViewModel.coMessage.collectAsStateWithLifecycle()
+  val user by authViewModel.user.collectAsStateWithLifecycle()
   var isTyping by remember { mutableStateOf(false) }
   // Boolean indicating if given the problem of the user he should create a request to solve it
-  val shouldCreateRequest by chatViewModel.shouldCreateRequest.collectAsState()
+  val shouldCreateRequest by chatViewModel.shouldCreateRequest.collectAsStateWithLifecycle()
   aiSolverViewModel.setMessageContext(conversation)
 
   val lazyListState = rememberLazyListState()
@@ -983,7 +983,7 @@ fun AssistantSuggestions(
     context: Context,
     onSuggestionSelect: (String) -> Unit
 ) {
-  val suggestions by chatAssistantViewModel.suggestions.collectAsState()
+  val suggestions by chatAssistantViewModel.suggestions.collectAsStateWithLifecycle()
   Row(
       modifier =
           Modifier.fillMaxWidth()

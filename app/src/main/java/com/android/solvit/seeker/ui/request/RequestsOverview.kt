@@ -28,7 +28,6 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -45,6 +44,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.android.solvit.R
@@ -93,16 +93,18 @@ fun RequestsOverviewScreen(
             tabList = LIST_TOP_LEVEL_DESTINATION_SEEKER,
             selectedItem = currentRoute)
       }) {
-        val user = authViewModel.user.collectAsState()
+        val user = authViewModel.user.collectAsStateWithLifecycle()
         val userId = user.value?.uid ?: "-1"
         val allRequests =
-            requestViewModel.requests.collectAsState().value.filter { it.userId == userId }
+            requestViewModel.requests.collectAsStateWithLifecycle().value.filter {
+              it.userId == userId
+            }
 
         var selectedTab by remember { mutableIntStateOf(0) }
         val statusTabs = ServiceRequestStatus.entries.toTypedArray()
 
-        val isSortSelected by requestViewModel.sortSelected.collectAsState()
-        val selectedServices by requestViewModel.selectedServices.collectAsState()
+        val isSortSelected by requestViewModel.sortSelected.collectAsStateWithLifecycle()
+        val selectedServices by requestViewModel.selectedServices.collectAsStateWithLifecycle()
 
         Column {
           TopOrdersSection()
@@ -262,7 +264,7 @@ fun CategoriesFiltersSection(serviceRequestViewModel: ServiceRequestViewModel) {
 
 @Composable
 fun CategoriesFilter(serviceRequestViewModel: ServiceRequestViewModel) {
-  val selectedServices by serviceRequestViewModel.selectedServices.collectAsState()
+  val selectedServices by serviceRequestViewModel.selectedServices.collectAsStateWithLifecycle()
   LazyVerticalGrid(
       columns = GridCells.Fixed(2),
       modifier = Modifier.padding(16.dp).testTag("categoriesFilter")) {
@@ -283,7 +285,7 @@ fun CategoriesFilter(serviceRequestViewModel: ServiceRequestViewModel) {
 
 @Composable
 fun CategoriesSort(serviceRequestViewModel: ServiceRequestViewModel) {
-  val isSortSelected by serviceRequestViewModel.sortSelected.collectAsState()
+  val isSortSelected by serviceRequestViewModel.sortSelected.collectAsStateWithLifecycle()
   LazyVerticalGrid(
       columns = GridCells.Fixed(2),
       modifier = Modifier.padding(16.dp).testTag("categoriesSortFilter")) {
