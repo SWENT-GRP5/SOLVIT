@@ -19,7 +19,6 @@ import androidx.compose.ui.unit.dp
 import com.android.solvit.provider.model.CalendarView
 import com.android.solvit.provider.ui.calendar.components.grid.TimeGrid
 import com.android.solvit.provider.ui.calendar.components.timeslot.ServiceRequestTimeSlot
-import com.android.solvit.seeker.ui.booking.components.AvailableTimeSlot
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.ui.theme.Typography
 import java.time.LocalDate
@@ -75,20 +74,12 @@ fun DayView(
                       ?: return@forEach
 
               if (startTime.hour == hour) {
-                if (isBookingView) {
-                  AvailableTimeSlot(
-                      startTime = startTime,
-                      isSelected = false,
-                      onClick = { onServiceRequestClick(request) },
-                      modifier = Modifier.testTag("dayViewAvailableSlot_${request.uid}"))
-                } else {
-                  ServiceRequestTimeSlot(
-                      request = request,
-                      hourHeight = 60.dp,
-                      onClick = onServiceRequestClick,
-                      calendarView = CalendarView.DAY,
-                      modifier = Modifier.testTag("dayViewServiceRequest_${request.uid}"))
-                }
+                ServiceRequestTimeSlot(
+                    request = request,
+                    hourHeight = 60.dp,
+                    onClick = onServiceRequestClick,
+                    calendarView = CalendarView.DAY,
+                    modifier = Modifier.testTag("dayViewServiceRequest_${request.uid}"))
               }
             }
           }

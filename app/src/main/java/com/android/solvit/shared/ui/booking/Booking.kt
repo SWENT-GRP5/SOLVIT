@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -156,6 +157,25 @@ fun ServiceBookingScreen(
             it.uid == providerId
           }
 
+  // Add a LaunchedEffect to handle initial request loading
+  LaunchedEffect(Unit) {
+    request?.uid?.let { requestId ->
+      requestViewModel.getServiceRequestById(requestId) { updatedRequest ->
+        requestViewModel.setSelectedRequest(updatedRequest)
+      }
+    }
+  }
+
+  // Add a LaunchedEffect to handle provider loading
+  LaunchedEffect(providerId) {
+    if (!providerId.isNullOrEmpty()) {
+      val fetchedProvider = providerViewModel.fetchProviderById(providerId)
+      if (fetchedProvider != null) {
+        providerViewModel.selectProvider(fetchedProvider)
+      }
+    }
+  }
+
   LaunchedEffect(request) {
     val seeker = request?.userId?.let { seekerProfileViewModel.fetchUserById(it) }
     seekerState.value = seeker
@@ -177,6 +197,7 @@ fun ServiceBookingScreen(
   val isCompleted = request!!.status == ServiceRequestStatus.COMPLETED
   val acceptedOrScheduled = isAccepted || isScheduled
   val pendingOrAcceptedOrScheduled = isPending || acceptedOrScheduled
+
   // Scaffold provides the basic structure for the screen with a top bar and content
   Scaffold(
       modifier = Modifier.testTag("service_booking_screen"),
@@ -304,74 +325,126 @@ fun ServiceBookingScreen(
                                 Text(
                                     text = "Price agreed on:",
                                     fontWeight = FontWeight.Medium,
+                                    fontSize = 16.sp,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.fillMaxWidth(),
                                     color = colorScheme.secondaryContainer)
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                  Text(
-                                      text = price,
-                                      fontWeight = FontWeight.Bold,
-                                      fontSize = 20.sp,
-                                      textAlign = TextAlign.Center,
-                                      color = colorScheme.onPrimary,
-                                      modifier =
-                                          if (acceptedOrScheduled) Modifier.weight(1f)
-                                          else Modifier)
-                                  if (acceptedOrScheduled && !isSeeker) {
-                                    // Edit button for the price
-                                    EditPriceDialog(request!!, requestViewModel)
-                                  }
-                                }
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.Center,
+                                    modifier = Modifier.fillMaxWidth()) {
+                                      Text(
+                                          text = price,
+                                          fontWeight = FontWeight.Bold,
+                                          fontSize = 24.sp,
+                                          textAlign = TextAlign.Center,
+                                          color = colorScheme.onPrimary,
+                                          modifier =
+                                              if (acceptedOrScheduled) Modifier.weight(1f)
+                                              else Modifier)
+                                      if (acceptedOrScheduled && !isSeeker) {
+                                        EditPriceDialog(request!!, requestViewModel)
+                                      }
+                                    }
 
-                                val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-                                val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
-                                var date = "Not set"
-                                var time = "Not set"
-                                request!!.meetingDate.let {
-                                  if (it != null) {
-                                    date = dateFormat.format(it.toDate())
-                                    time = timeFormat.format(it.toDate())
-                                  }
-                                }
-                                // Appointment date and time
+                                Spacer(modifier = Modifier.height(16.dp))
+
                                 Text(
-                                    modifier = Modifier.testTag("appointment_date"),
+                                    modifier = Modifier.fillMaxWidth().testTag("appointment_date"),
                                     text = "Your appointment:",
                                     fontWeight = FontWeight.Medium,
+                                    fontSize = 16.sp,
+                                    textAlign = TextAlign.Center,
                                     color = colorScheme.secondaryContainer)
-                                Spacer(
-                                    modifier =
-                                        Modifier.height(8.dp)) // Space between the text and date
-                                Row {
-                                  Column(
-                                      modifier =
-                                          if (acceptedOrScheduled) Modifier.weight(1f)
-                                          else Modifier) {
-                                        Text(
-                                            text = date,
-                                            fontWeight = FontWeight.Bold,
-                                            fontSize = 18.sp,
-                                            textAlign = TextAlign.Center,
-                                            color = colorScheme.onPrimary)
-                                        Text(
-                                            text = time,
-                                            fontWeight = FontWeight.Bold,
-                                            fontSize = 15.sp,
-                                            textAlign = TextAlign.Center,
-                                            color = colorScheme.onPrimary)
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Row(
+                                    horizontalArrangement = Arrangement.Center,
+                                    modifier = Modifier.fillMaxWidth()) {
+                                      Column(
+                                          horizontalAlignment = Alignment.CenterHorizontally,
+                                          modifier =
+                                              if (acceptedOrScheduled) Modifier.weight(1f)
+                                              else Modifier) {
+                                            Text(
+                                                text =
+                                                    request!!.meetingDate.let {
+                                                      if (it != null) {
+                                                        SimpleDateFormat(
+                                                                "dd/MM/yyyy", Locale.getDefault())
+                                                            .format(it.toDate())
+                                                      } else {
+                                                        "Not set"
+                                                      }
+                                                    },
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = 24.sp,
+                                                textAlign = TextAlign.Center,
+                                                color = colorScheme.onPrimary)
+                                            Text(
+                                                text =
+                                                    request!!.meetingDate.let {
+                                                      if (it != null) {
+                                                        SimpleDateFormat(
+                                                                "HH:mm", Locale.getDefault())
+                                                            .format(it.toDate())
+                                                      } else {
+                                                        "Not set"
+                                                      }
+                                                    },
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = 20.sp,
+                                                textAlign = TextAlign.Center,
+                                                color = colorScheme.onPrimary)
+                                          }
+                                      if (isSeeker && isAccepted) {
+                                        Row(
+                                            horizontalArrangement = Arrangement.Center,
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            modifier =
+                                                Modifier.fillMaxWidth().padding(top = 16.dp)) {
+                                              Button(
+                                                  onClick = {
+                                                    provider?.let { prov ->
+                                                      seekerBookingViewModel.prepareForBooking(
+                                                          prov, request!!)
+                                                      navigationActions.navigateTo(BOOKING_CALENDAR)
+                                                    }
+                                                  },
+                                                  colors =
+                                                      ButtonDefaults.buttonColors(
+                                                          containerColor = Color.White,
+                                                          contentColor = colorScheme.primary),
+                                                  shape = RoundedCornerShape(24.dp),
+                                                  elevation =
+                                                      ButtonDefaults.buttonElevation(
+                                                          defaultElevation = 0.dp,
+                                                          pressedElevation = 2.dp),
+                                                  modifier =
+                                                      Modifier.testTag("scheduleButton")
+                                                          .heightIn(min = 40.dp)
+                                                          .widthIn(min = 140.dp)) {
+                                                    Row(
+                                                        horizontalArrangement = Arrangement.Center,
+                                                        verticalAlignment =
+                                                            Alignment.CenterVertically,
+                                                        modifier =
+                                                            Modifier.padding(horizontal = 12.dp)) {
+                                                          Icon(
+                                                              imageVector = Icons.Default.DateRange,
+                                                              contentDescription = "Book",
+                                                              modifier = Modifier.size(18.dp),
+                                                              tint = colorScheme.primary)
+                                                          Spacer(modifier = Modifier.width(6.dp))
+                                                          Text(
+                                                              "Book Now",
+                                                              fontSize = 15.sp,
+                                                              fontWeight = FontWeight.Medium,
+                                                              color = colorScheme.primary)
+                                                        }
+                                                  }
+                                            }
                                       }
-                                  if (acceptedOrScheduled && isSeeker) {
-                                    IconButton(
-                                        onClick = {
-                                          navigationActions.navigateTo(BOOKING_CALENDAR)
-                                        },
-                                        modifier = Modifier.testTag("booking_calendar_button")) {
-                                          Icon(
-                                              imageVector = Icons.Default.DateRange,
-                                              contentDescription = "Schedule appointment",
-                                              tint = colorScheme.onPrimary,
-                                              modifier = Modifier.testTag("calendar_icon"))
-                                        }
-                                  }
-                                }
+                                    }
                               }
                         }
                   }

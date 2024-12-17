@@ -1,5 +1,6 @@
 package com.android.solvit.seeker.ui.booking.components
 
+import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -8,79 +9,113 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
 @Composable
 fun AvailableTimeSlot(
+    date: LocalDate,
     startTime: LocalTime,
-    isSelected: Boolean,
-    onClick: () -> Unit,
+    endTime: LocalTime,
+    onBook: (LocalDate, LocalTime) -> Unit,
+    onCancel: () -> Unit,
+    serviceColor: Color,
     modifier: Modifier = Modifier
 ) {
-    var showCheck by remember { mutableStateOf(false) }
-    val scale by animateFloatAsState(
-        targetValue = if (showCheck) 1f else 0f,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessLow
-        )
-    )
+  var showConfirmation by remember { mutableStateOf(false) }
+  var isBooked by remember { mutableStateOf(false) }
 
-    LaunchedEffect(isSelected) {
-        showCheck = isSelected
-    }
+  val transition = updateTransition(showConfirmation, label = "confirmationTransition")
 
-    val backgroundColor = if (isSelected) {
-        MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f)
-    } else {
-        MaterialTheme.colorScheme.surface
-    }
+  val bookButtonWidth by
+      transition.animateFloat(label = "bookButtonWidth", transitionSpec = { tween(300) }) {
+          confirmed ->
+        if (confirmed) 56f else 120f
+      }
 
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(72.dp)
-            .background(backgroundColor, RoundedCornerShape(8.dp))
-            .border(
-                1.dp,
-                MaterialTheme.colorScheme.tertiary,
-                RoundedCornerShape(8.dp)
-            )
-            .clickable(enabled = !isSelected) { onClick() }
-            .padding(16.dp)
-            .testTag("availableTimeSlot_${startTime}")
-    ) {
+  Row(
+      modifier =
+          modifier
+              .fillMaxWidth()
+              .height(60.dp)
+              .clip(RoundedCornerShape(12.dp))
+              .background(serviceColor.copy(alpha = 0.1f))
+              .border(1.dp, serviceColor, RoundedCornerShape(12.dp))
+              .padding(horizontal = 16.dp),
+      horizontalArrangement = Arrangement.SpaceBetween,
+      verticalAlignment = Alignment.CenterVertically) {
+        // Time slot details
+        Text(
+            text =
+                "${startTime.format(DateTimeFormatter.ofPattern("HH:mm"))} - ${endTime.format(DateTimeFormatter.ofPattern("HH:mm"))}",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Medium,
+            color = colorScheme.onSurface)
+
+        // Buttons
         Row(
-            modifier = Modifier.fillMaxSize(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = startTime.format(DateTimeFormatter.ofPattern("HH:mm")),
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.width(120.dp)) {
+              // Cancel button
+              androidx.compose.animation.AnimatedVisibility(
+                  visible = showConfirmation,
+                  enter = fadeIn() + expandHorizontally(expandFrom = Alignment.End),
+                  exit = fadeOut() + shrinkHorizontally(shrinkTowards = Alignment.End)) {
+                    Box(
+                        modifier =
+                            Modifier.width(56.dp)
+                                .height(40.dp)
+                                .background(colorScheme.error, RoundedCornerShape(8.dp))
+                                .clickable {
+                                  showConfirmation = false
+                                  onCancel()
+                                },
+                        contentAlignment = Alignment.Center) {
+                          Icon(
+                              Icons.Default.Close,
+                              contentDescription = "Cancel booking",
+                              tint = Color.White)
+                        }
+                  }
 
-            if (isSelected) {
-                Icon(
-                    imageVector = Icons.Default.Check,
-                    contentDescription = "Selected",
-                    tint = MaterialTheme.colorScheme.tertiary,
-                    modifier = Modifier
-                        .scale(scale)
-                        .size(24.dp)
-                )
+              Spacer(modifier = Modifier.width(8.dp))
+
+              // Book/Confirm button
+              Box(
+                  modifier =
+                      Modifier.width(bookButtonWidth.dp)
+                          .height(40.dp)
+                          .background(colorScheme.secondary, RoundedCornerShape(8.dp))
+                          .clickable {
+                            if (!showConfirmation) {
+                              showConfirmation = true
+                            } else {
+                              isBooked = true
+                              onBook(date, startTime)
+                            }
+                          },
+                  contentAlignment = Alignment.Center) {
+                    if (!showConfirmation) {
+                      Text("Book", style = MaterialTheme.typography.labelLarge, color = Color.White)
+                    } else {
+                      Icon(
+                          Icons.Default.Check,
+                          contentDescription = "Confirm booking",
+                          tint = Color.White)
+                    }
+                  }
             }
-        }
-    }
+      }
 }

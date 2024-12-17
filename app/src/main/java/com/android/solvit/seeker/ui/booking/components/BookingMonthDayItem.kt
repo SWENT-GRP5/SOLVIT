@@ -12,57 +12,56 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.android.solvit.shared.model.provider.TimeSlot
 import java.time.LocalDate
-import java.time.LocalTime
 
 @Composable
 fun BookingMonthDayItem(
     date: LocalDate,
     isCurrentMonth: Boolean,
-    hasAvailabilities: Boolean,
+    timeSlots: List<TimeSlot>,
     onDateSelected: (LocalDate) -> Unit,
+    serviceColor: Color = colorScheme.secondary,
     modifier: Modifier = Modifier
 ) {
-    val now = LocalDate.now()
-    val isSelectable = date.isEqual(now) || date.isAfter(now)
-    
-    val backgroundColor = when {
-        hasAvailabilities && isSelectable -> colorScheme.tertiary.copy(alpha = 0.2f)
+  val now = LocalDate.now()
+  val isSelectable = date.isEqual(now) || date.isAfter(now)
+  val hasAvailabilities = timeSlots.isNotEmpty()
+
+  val backgroundColor =
+      when {
+        hasAvailabilities && isSelectable -> {
+          if (isCurrentMonth) {
+            serviceColor.copy(alpha = 0.2f)
+          } else {
+            serviceColor.copy(alpha = 0.1f)
+          }
+        }
         else -> Color.Transparent
-    }
+      }
 
-    val textColor = when {
-        !isCurrentMonth || !isSelectable -> colorScheme.onSurface.copy(alpha = 0.5f)
-        else -> colorScheme.onSurface
-    }
+  val textColor =
+      when {
+        date == now -> colorScheme.primary
+        !isCurrentMonth || !isSelectable -> colorScheme.onBackground.copy(alpha = 0.5f)
+        else -> colorScheme.onBackground
+      }
 
-    Column(
-        modifier = modifier
-            .aspectRatio(1f)
-            .padding(2.dp)
-            .background(backgroundColor, RoundedCornerShape(8.dp))
-            .clickable(enabled = isSelectable && hasAvailabilities) { onDateSelected(date) }
-            .padding(4.dp)
-            .testTag("bookingMonthDayItem_${date}"),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
+  Column(
+      modifier =
+          modifier
+              .aspectRatio(1f)
+              .padding(2.dp)
+              .background(backgroundColor, RoundedCornerShape(8.dp))
+              .clickable(enabled = isSelectable && hasAvailabilities) { onDateSelected(date) }
+              .padding(4.dp)
+              .testTag("bookingMonthDayItem_${date}"),
+      horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = date.dayOfMonth.toString(),
             style = MaterialTheme.typography.bodyMedium,
             color = textColor,
-            modifier = Modifier.testTag("bookingMonthDayNumber_${date}")
-        )
-
-        if (hasAvailabilities && isSelectable) {
-            Box(
-                modifier = Modifier
-                    .padding(top = 4.dp)
-                    .size(6.dp)
-                    .background(colorScheme.tertiary, RoundedCornerShape(50))
-                    .testTag("bookingMonthDayIndicator_${date}")
-            )
-        }
-    }
+            modifier = Modifier.testTag("bookingMonthDayNumber_${date}"))
+      }
 }
