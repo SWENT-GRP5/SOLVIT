@@ -325,14 +325,11 @@ class NotificationServiceTest {
     val password = "password123"
 
     try {
-      println("Creating test user...")
       auth.createUserWithEmailAndPassword(email, password).await()
       val result = auth.signInWithEmailAndPassword(email, password).await()
       val user = result.user!!
-      println("Test user created and signed in with UID: ${user.uid}")
 
       // Clear any previous verifications and set up mocks
-      println("Setting up mocks...")
       clearAllMocks()
       mockkStatic(Log::class)
       every { Log.d(any(), any()) } returns 0
@@ -340,34 +337,26 @@ class NotificationServiceTest {
       every { Log.e(any(), any(), any()) } returns 0
 
       // Mock FcmTokenManager to avoid Firestore operations
-      println("Setting up FcmTokenManager mock...")
       val mockTokenManager = mockk<FcmTokenManager>()
       mockkObject(FcmTokenManager.Companion)
       every { FcmTokenManager.getInstance() } returns mockTokenManager
       coEvery { mockTokenManager.updateUserFcmToken(any(), any()) } returns Tasks.forResult(null)
-      println("FcmTokenManager mock set up")
 
       // Update the token
-      println("Calling updateCurrentUserToken...")
       service.updateCurrentUserToken("test_token")
 
       // Allow coroutines to complete
-      println("Waiting for coroutines...")
       advanceUntilIdle()
 
       // Verify the expected log was called
-      println("Verifying log calls...")
       verify(exactly = 1) {
         Log.d(any(), match { it.contains("Successfully updated FCM token for user: ${user.uid}") })
       }
 
       // Clean up
-      println("Cleaning up...")
       unmockkObject(FcmTokenManager.Companion)
       user.delete().await()
-      println("Test completed")
     } catch (e: Exception) {
-      println("Test failed with error: ${e.message}")
       fail("Test failed: ${e.message}")
     }
   }

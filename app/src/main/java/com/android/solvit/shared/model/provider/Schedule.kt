@@ -135,7 +135,7 @@ data class Schedule(
     val exception = exceptions.find { it.date.toLocalDate() == dateTime.toLocalDate() }
     if (exception?.type == ExceptionType.OFF_TIME) {
       // Not available if there's an overlapping off-time slot
-      if (exception.timeSlots.any { slot -> TimeSlot(time, time).overlaps(slot) }) {
+      if (exception.timeSlots.any { slot -> TimeSlot(time, time.plusHours(1)).overlaps(slot) }) {
         return false
       }
     }
@@ -145,16 +145,17 @@ data class Schedule(
     if (daySlots == null || daySlots.isEmpty()) {
       // If no regular hours, check for extra time exceptions
       return exception?.type == ExceptionType.EXTRA_TIME &&
-          exception.timeSlots.any { slot -> TimeSlot(time, time).overlaps(slot) }
+          exception.timeSlots.any { slot -> TimeSlot(time, time.plusHours(1)).overlaps(slot) }
     }
 
     // Check if time is within regular hours
-    val withinRegularHours = daySlots.any { slot -> TimeSlot(time, time).overlaps(slot) }
+    val withinRegularHours =
+        daySlots.any { slot -> TimeSlot(time, time.plusHours(1)).overlaps(slot) }
 
     // If not within regular hours, check for extra time exceptions
     if (!withinRegularHours) {
       return exception?.type == ExceptionType.EXTRA_TIME &&
-          exception.timeSlots.any { slot -> TimeSlot(time, time).overlaps(slot) }
+          exception.timeSlots.any { slot -> TimeSlot(time, time.plusHours(1)).overlaps(slot) }
     }
 
     return true

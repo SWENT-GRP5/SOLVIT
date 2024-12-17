@@ -145,7 +145,6 @@ class ProviderCalendarViewModelTest {
     whenever(serviceRequestViewModel.acceptedRequests).thenReturn(acceptedRequestsFlow)
     whenever(providerRepository.getProvider(eq(testUserId), any(), any())).then { invocation ->
       val onSuccess = invocation.getArgument<(Provider?) -> Unit>(1)
-      println("Providing test provider with schedule: ${testProvider.schedule}")
       onSuccess(testProvider)
       Unit
     }
@@ -209,16 +208,11 @@ class ProviderCalendarViewModelTest {
     // Wait for the view model to initialize
     testDispatcher.scheduler.advanceUntilIdle()
 
-    // Log the current schedule state for debugging
-    println("Current provider schedule:")
-    println("Regular hours: ${calendarViewModel.currentProvider.value.schedule.regularHours}")
-    println("Exceptions: ${calendarViewModel.currentProvider.value.schedule.exceptions}")
-
     // Test cases
     val testCases =
         listOf(
             Triple(
-                LocalDateTime.of(2024, 1, 1, 9, 30), // During regular hours, no exception
+                LocalDateTime.of(2024, 1, 1, 9, 0), // During regular hours, no exception
                 true,
                 "Provider should be available during regular hours with no exception"),
             Triple(
@@ -240,11 +234,7 @@ class ProviderCalendarViewModelTest {
 
     // Test each case
     testCases.forEach { (dateTime, expectedAvailable, message) ->
-      println("\nTesting availability for: $dateTime")
-      println("Day of week: ${dateTime.dayOfWeek}")
-      println("Current schedule: ${calendarViewModel.currentProvider.value.schedule}")
       val isAvailable = calendarViewModel.isAvailable(dateTime)
-      println("Is available: $isAvailable (expected: $expectedAvailable)")
       if (expectedAvailable) {
         assertTrue(message, isAvailable)
       } else {
@@ -299,8 +289,6 @@ class ProviderCalendarViewModelTest {
       Unit
     }
     whenever(serviceRequestViewModel.acceptedRequests).thenReturn(MutableStateFlow(emptyList()))
-    println("\nInitializing test with regular hours: ${testProvider.schedule.regularHours}")
-    println("Provider schedule initialized: ${testProvider.schedule}")
     testDispatcher.scheduler.advanceUntilIdle() // Important: advance scheduler
 
     // Make sure the provider is initialized
@@ -318,11 +306,6 @@ class ProviderCalendarViewModelTest {
                         .epochSecond,
                     0))
     val result1 = calendarViewModel.checkServiceRequestConflict(mondayRequest)
-    println("\nTesting service request for: 2024-01-01T10:00")
-    println(
-        "Day of week: ${LocalDateTime.ofInstant(mondayRequest.meetingDate?.toDate()?.toInstant(), ZoneId.systemDefault()).dayOfWeek}")
-    println("Current provider schedule: ${testProvider.schedule}")
-    println("Conflict result: $result1")
     assertFalse(result1.hasConflict)
     assertEquals("No conflicts", result1.reason)
 
@@ -350,18 +333,9 @@ class ProviderCalendarViewModelTest {
       onSuccess(testProvider)
       Unit
     }
-    println("\nAdded off-time exception: ${testProvider.schedule.exceptions}")
-    println("Current provider schedule after adding off-time: ${testProvider.schedule}")
     testDispatcher.scheduler.advanceUntilIdle() // Important: advance scheduler
 
     val result3 = calendarViewModel.checkServiceRequestConflict(mondayRequest)
-    println("\nTesting off-time conflict for: 2024-01-01T10:00")
-    println(
-        "Day of week: ${LocalDateTime.ofInstant(mondayRequest.meetingDate?.toDate()?.toInstant(), ZoneId.systemDefault()).dayOfWeek}")
-    println("Current provider schedule: ${testProvider.schedule}")
-    println(
-        "Off-time exceptions: ${testProvider.schedule.getExceptions(offTimeDate, offTimeDate, ExceptionType.OFF_TIME)}")
-    println("Conflict result: $result3")
     assertTrue(result3.hasConflict)
     assertEquals("This time slot conflicts with your off-time schedule", result3.reason)
   }
@@ -382,8 +356,6 @@ class ProviderCalendarViewModelTest {
       Unit
     }
     whenever(serviceRequestViewModel.acceptedRequests).thenReturn(MutableStateFlow(emptyList()))
-    println("\nInitializing test with regular hours: ${testProvider.schedule.regularHours}")
-    println("Provider schedule initialized: ${testProvider.schedule}")
     testDispatcher.scheduler.advanceUntilIdle() // Important: advance scheduler
 
     // Make sure the provider is initialized
@@ -401,11 +373,6 @@ class ProviderCalendarViewModelTest {
                         .epochSecond,
                     0))
     val result1 = calendarViewModel.checkServiceRequestConflict(mondayRequest)
-    println("\nTesting service request for: 2024-01-01T10:00")
-    println(
-        "Day of week: ${LocalDateTime.ofInstant(mondayRequest.meetingDate?.toDate()?.toInstant(), ZoneId.systemDefault()).dayOfWeek}")
-    println("Current provider schedule: ${testProvider.schedule}")
-    println("Conflict result: $result1")
     assertFalse(result1.hasConflict)
     assertEquals("No conflicts", result1.reason)
 
@@ -420,11 +387,6 @@ class ProviderCalendarViewModelTest {
                         .epochSecond,
                     0))
     val result2 = calendarViewModel.checkServiceRequestConflict(earlyRequest)
-    println("\nTesting service request for: 2024-01-01T08:00")
-    println(
-        "Day of week: ${LocalDateTime.ofInstant(earlyRequest.meetingDate?.toDate()?.toInstant(), ZoneId.systemDefault()).dayOfWeek}")
-    println("Current provider schedule: ${testProvider.schedule}")
-    println("Conflict result: $result2")
     assertTrue(result2.hasConflict)
     assertEquals("This time slot is outside your regular working hours", result2.reason)
 
@@ -438,18 +400,9 @@ class ProviderCalendarViewModelTest {
       onSuccess(testProvider)
       Unit
     }
-    println("\nAdded off-time exception: ${testProvider.schedule.exceptions}")
-    println("Current provider schedule after adding off-time: ${testProvider.schedule}")
     testDispatcher.scheduler.advanceUntilIdle() // Important: advance scheduler
 
     val result3 = calendarViewModel.checkServiceRequestConflict(mondayRequest)
-    println("\nTesting off-time conflict for: 2024-01-01T10:00")
-    println(
-        "Day of week: ${LocalDateTime.ofInstant(mondayRequest.meetingDate?.toDate()?.toInstant(), ZoneId.systemDefault()).dayOfWeek}")
-    println("Current provider schedule: ${testProvider.schedule}")
-    println(
-        "Off-time exceptions: ${testProvider.schedule.getExceptions(offTimeDate, offTimeDate, ExceptionType.OFF_TIME)}")
-    println("Conflict result: $result3")
     assertTrue(result3.hasConflict)
     assertEquals("This time slot conflicts with your off-time schedule", result3.reason)
   }
@@ -725,10 +678,6 @@ class ProviderCalendarViewModelTest {
     val startDate = testDate
     val endDate = testDate.plusDays(1)
     val exceptions = calendarViewModel.getExceptions(startDate, endDate)
-
-    println("Test date: $testDate")
-    println("Provider schedule: ${calendarViewModel.currentProvider.value.schedule}")
-    println("Found exceptions: $exceptions")
 
     assertEquals(1, exceptions.size, "Expected one exception in the date range")
     assertEquals(testException.type, exceptions[0].type, "Exception type should match")
