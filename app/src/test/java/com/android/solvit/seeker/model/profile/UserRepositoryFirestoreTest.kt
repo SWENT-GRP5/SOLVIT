@@ -12,6 +12,7 @@ import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
+import com.google.firebase.storage.FirebaseStorage
 import junit.framework.TestCase
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNull
@@ -36,11 +37,11 @@ import org.robolectric.Shadows
 class UserRepositoryFirestoreTest {
 
   @Mock private lateinit var mockFirestore: FirebaseFirestore
+  @Mock private lateinit var mockStorage: FirebaseStorage
   @Mock private lateinit var mockDocumentReference: DocumentReference
   @Mock private lateinit var mockCollectionReference: CollectionReference
   @Mock private lateinit var mockDocumentSnapshot: DocumentSnapshot
   @Mock private lateinit var mockQuerySnapshot: QuerySnapshot
-  @Mock private lateinit var mockTaskUser: Task<UserRepository>
   @Mock private lateinit var mockTaskDoc: Task<DocumentSnapshot>
 
   private lateinit var firebaseRepository: UserRepositoryFirestore
@@ -52,10 +53,10 @@ class UserRepositoryFirestoreTest {
           username = "johndoe",
           email = "john.doe@example.com",
           phone = "+1234567890",
-          address = "Chemin des Triaudes")
+          address = Location(0.0, 0.0, "Chemin des Triaudes"))
 
-  private val testLocation1 = Location(46.5197, 6.6323, "Location1")
-  private val testLocation2 = Location(47.3769, 8.5417, "Location2")
+  private val testLocation1 = Location(0.0, 0.0, "Location1")
+  private val testLocation2 = Location(0.0, 0.0, "Location2")
   private val testUserId = "12345"
   private val mockPreferences = listOf("⚡ Electrical Work", "📚 Tutoring")
 
@@ -67,16 +68,16 @@ class UserRepositoryFirestoreTest {
       FirebaseApp.initializeApp(ApplicationProvider.getApplicationContext())
     }
 
-    firebaseRepository = UserRepositoryFirestore(mockFirestore)
+    firebaseRepository = UserRepositoryFirestore(mockFirestore, mockStorage)
 
-    Mockito.`when`(mockFirestore.collection(any())).thenReturn(mockCollectionReference)
-    Mockito.`when`(mockCollectionReference.document(any())).thenReturn(mockDocumentReference)
-    Mockito.`when`(mockCollectionReference.document()).thenReturn(mockDocumentReference)
+    `when`(mockFirestore.collection(any())).thenReturn(mockCollectionReference)
+    `when`(mockCollectionReference.document(any())).thenReturn(mockDocumentReference)
+    `when`(mockCollectionReference.document()).thenReturn(mockDocumentReference)
   }
 
   @Test
   fun getNewUid_returnsDocumentId() {
-    Mockito.`when`(mockDocumentReference.id).thenReturn("12345")
+    `when`(mockDocumentReference.id).thenReturn("12345")
     val newUid = firebaseRepository.getNewUid()
     assert(newUid == "12345")
   }
@@ -86,10 +87,10 @@ class UserRepositoryFirestoreTest {
 
     // For success
 
-    Mockito.`when`(mockDocumentReference.get()).thenReturn(mockTaskDoc)
-    Mockito.`when`(mockTaskDoc.isSuccessful).thenReturn(true)
-    Mockito.`when`(mockTaskDoc.result).thenReturn(mockDocumentSnapshot)
-    Mockito.`when`(mockDocumentSnapshot.exists()).thenReturn(true)
+    `when`(mockDocumentReference.get()).thenReturn(mockTaskDoc)
+    `when`(mockTaskDoc.isSuccessful).thenReturn(true)
+    `when`(mockTaskDoc.result).thenReturn(mockDocumentSnapshot)
+    `when`(mockDocumentSnapshot.exists()).thenReturn(true)
     `when`(mockTaskDoc.addOnCompleteListener(Mockito.any())).thenAnswer {
       val listener = it.arguments[0] as OnCompleteListener<DocumentSnapshot>
       listener.onComplete(mockTaskDoc)
@@ -98,13 +99,12 @@ class UserRepositoryFirestoreTest {
 
     // Mock the document snapshot to return data
 
-    Mockito.`when`(mockDocumentSnapshot.id).thenReturn(testSeekerProfile.uid)
-    Mockito.`when`(mockDocumentSnapshot.getString("name")).thenReturn(testSeekerProfile.name)
-    Mockito.`when`(mockDocumentSnapshot.getString("username"))
-        .thenReturn(testSeekerProfile.username)
-    Mockito.`when`(mockDocumentSnapshot.getString("email")).thenReturn(testSeekerProfile.email)
-    Mockito.`when`(mockDocumentSnapshot.getString("phone")).thenReturn(testSeekerProfile.phone)
-    Mockito.`when`(mockDocumentSnapshot.getString("address")).thenReturn(testSeekerProfile.address)
+    `when`(mockDocumentSnapshot.id).thenReturn(testSeekerProfile.uid)
+    `when`(mockDocumentSnapshot.getString("name")).thenReturn(testSeekerProfile.name)
+    `when`(mockDocumentSnapshot.getString("username")).thenReturn(testSeekerProfile.username)
+    `when`(mockDocumentSnapshot.getString("email")).thenReturn(testSeekerProfile.email)
+    `when`(mockDocumentSnapshot.getString("phone")).thenReturn(testSeekerProfile.phone)
+    `when`(mockDocumentSnapshot.getString("address")).thenReturn(testSeekerProfile.address.name)
     val onFailure: () -> Unit = mock()
 
     firebaseRepository.getUserProfile(
@@ -118,30 +118,9 @@ class UserRepositoryFirestoreTest {
     Mockito.verify(mockTaskDoc).addOnCompleteListener(Mockito.any())
   }
 
-  /*@Test
-  fun getUserProfileFail() {
-    // Mocking a failed task scenario
-    val mockException = Exception("Firestore error")
-
-    // Simulate failure by setting isSuccessful to false and providing an exception
-    Mockito.`when`(mockTaskFailure.isSuccessful).thenReturn(false)
-    Mockito.`when`(mockTaskFailure.exception).thenReturn(mockException)
-
-    Mockito.`when`(mockDocumentReference.get()).thenReturn(mockTaskFailure)
-
-    // Call the method and verify failure callback is invoked
-    firebaseRepository.getUserProfile(
-        uid = "12345",
-        onSuccess = { TestCase.fail("Success callback should not be called") },
-        onFailure = { e ->
-          assertEquals(
-              mockException, e) // Ensure the failure callback is called with the right exception
-        })
-  }*/
-
   @Test
   fun updateUserProfileTest() {
-    Mockito.`when`(mockDocumentReference.set(any())).thenReturn(Tasks.forResult(null))
+    `when`(mockDocumentReference.set(any())).thenReturn(Tasks.forResult(null))
     firebaseRepository.updateUserProfile(
         profile = testSeekerProfile, onSuccess = {}, onFailure = {})
     Shadows.shadowOf(Looper.getMainLooper()).idle()
@@ -150,8 +129,9 @@ class UserRepositoryFirestoreTest {
 
   @Test
   fun addUserProfileTest() {
-    Mockito.`when`(mockDocumentReference.set(any())).thenReturn(Tasks.forResult(null))
-    firebaseRepository.addUserProfile(profile = testSeekerProfile, onSuccess = {}, onFailure = {})
+    `when`(mockDocumentReference.set(any())).thenReturn(Tasks.forResult(null))
+    firebaseRepository.addUserProfile(
+        profile = testSeekerProfile, imageUri = null, onSuccess = {}, onFailure = {})
     Shadows.shadowOf(Looper.getMainLooper()).idle()
     verify(mockDocumentReference).set(testSeekerProfile)
   }
@@ -159,9 +139,9 @@ class UserRepositoryFirestoreTest {
   @Test
   fun getUsersProfile_callsFirestoreCollection() {
 
-    Mockito.`when`(mockCollectionReference.get()).thenReturn(Tasks.forResult(mockQuerySnapshot))
+    `when`(mockCollectionReference.get()).thenReturn(Tasks.forResult(mockQuerySnapshot))
 
-    Mockito.`when`(mockQuerySnapshot.documents).thenReturn(listOf())
+    `when`(mockQuerySnapshot.documents).thenReturn(listOf())
 
     firebaseRepository.getUsersProfile(
         onSuccess = {
@@ -174,7 +154,7 @@ class UserRepositoryFirestoreTest {
 
   @Test
   fun updateUserProfile_callsFirestoreSet() {
-    Mockito.`when`(mockDocumentReference.set(any())).thenReturn(Tasks.forResult(null))
+    `when`(mockDocumentReference.set(any())).thenReturn(Tasks.forResult(null))
 
     firebaseRepository.updateUserProfile(
         testSeekerProfile,
@@ -189,7 +169,7 @@ class UserRepositoryFirestoreTest {
   @Test
   fun deleteUserProfile_callsFirestoreDelete() {
 
-    Mockito.`when`(mockDocumentReference.delete()).thenReturn(Tasks.forResult(null))
+    `when`(mockDocumentReference.delete()).thenReturn(Tasks.forResult(null))
 
     firebaseRepository.deleteUserProfile(
         "12345",
@@ -203,8 +183,8 @@ class UserRepositoryFirestoreTest {
 
   @Test
   fun `getLocations returns parsed locations from document`() {
-    val locationMap1 = mapOf("latitude" to 46.5197, "longitude" to 6.6323, "name" to "Location1")
-    val locationMap2 = mapOf("latitude" to 47.3769, "longitude" to 8.5417, "name" to "Location2")
+    val locationMap1 = mapOf("latitude" to 0.0, "longitude" to 0.0, "name" to "Location1")
+    val locationMap2 = mapOf("latitude" to 0.0, "longitude" to 0.0, "name" to "Location2")
 
     `when`(mockDocumentSnapshot.get("cachedLocations"))
         .thenReturn(listOf(locationMap1, locationMap2))
@@ -220,12 +200,11 @@ class UserRepositoryFirestoreTest {
   fun `updateUserLocations updates cachedLocations with new location added first`() {
     val newLocation = Location(48.8566, 2.3522, "New Location")
     val locations = mutableListOf(testLocation1, testLocation2)
-    val updatedLocations = mutableListOf(newLocation, testLocation1)
 
-    Mockito.`when`(mockDocumentReference.get()).thenReturn(mockTaskDoc)
-    Mockito.`when`(mockTaskDoc.isSuccessful).thenReturn(true)
-    Mockito.`when`(mockTaskDoc.result).thenReturn(mockDocumentSnapshot)
-    Mockito.`when`(mockDocumentSnapshot.exists()).thenReturn(true)
+    `when`(mockDocumentReference.get()).thenReturn(mockTaskDoc)
+    `when`(mockTaskDoc.isSuccessful).thenReturn(true)
+    `when`(mockTaskDoc.result).thenReturn(mockDocumentSnapshot)
+    `when`(mockDocumentSnapshot.exists()).thenReturn(true)
     `when`(mockDocumentSnapshot.get("cachedLocations")).thenReturn(locations)
 
     // Mock update call to return a completed task
@@ -249,8 +228,8 @@ class UserRepositoryFirestoreTest {
     `when`(mockDocumentReference.get()).thenReturn(Tasks.forResult(mockDocumentSnapshot))
 
     // Mock the locations data
-    val locationMap1 = mapOf("latitude" to 46.5197, "longitude" to 6.6323, "name" to "Location1")
-    val locationMap2 = mapOf("latitude" to 47.3769, "longitude" to 8.5417, "name" to "Location2")
+    val locationMap1 = mapOf("latitude" to 0.0, "longitude" to 0.0, "name" to "Location1")
+    val locationMap2 = mapOf("latitude" to 0.0, "longitude" to 0.0, "name" to "Location2")
     `when`(mockDocumentSnapshot.get("cachedLocations"))
         .thenReturn(listOf(locationMap1, locationMap2))
 
@@ -269,12 +248,11 @@ class UserRepositoryFirestoreTest {
   fun testAddUserPreferenceSuccess() {
     // Mock existing preferences in Firestore document
     val existingPreferences = mutableListOf("⚡ Electrical Work", "📚 Tutoring")
-    Mockito.`when`(mockDocumentSnapshot.get("preferences")).thenReturn(existingPreferences)
+    `when`(mockDocumentSnapshot.get("preferences")).thenReturn(existingPreferences)
 
     // Mock successful document retrieval and set operation
-    Mockito.`when`(mockDocumentReference.get()).thenReturn(Tasks.forResult(mockDocumentSnapshot))
-    Mockito.`when`(mockDocumentReference.set(any<Map<String, Any>>()))
-        .thenReturn(Tasks.forResult(null))
+    `when`(mockDocumentReference.get()).thenReturn(Tasks.forResult(mockDocumentSnapshot))
+    `when`(mockDocumentReference.set(any<Map<String, Any>>())).thenReturn(Tasks.forResult(null))
 
     // Test adding new preference
     firebaseRepository.addUserPreference(
@@ -303,7 +281,7 @@ class UserRepositoryFirestoreTest {
   fun testAddUserPreferenceFailure() {
     // Mock a failure scenario
     val mockException = Exception("Firestore error")
-    Mockito.`when`(mockDocumentReference.get()).thenReturn(Tasks.forException(mockException))
+    `when`(mockDocumentReference.get()).thenReturn(Tasks.forException(mockException))
 
     firebaseRepository.addUserPreference(
         userId = testUserId,
@@ -317,12 +295,11 @@ class UserRepositoryFirestoreTest {
   fun testDeleteUserPreferenceSuccess() {
     // Mock existing preferences
     val existingPreferences = mutableListOf("⚡ Electrical Work", "📚 Tutoring", "🔧 Plumbing")
-    Mockito.`when`(mockDocumentSnapshot.get("preferences")).thenReturn(existingPreferences)
+    `when`(mockDocumentSnapshot.get("preferences")).thenReturn(existingPreferences)
 
     // Mock successful document retrieval and update
-    Mockito.`when`(mockDocumentReference.get()).thenReturn(Tasks.forResult(mockDocumentSnapshot))
-    Mockito.`when`(mockDocumentReference.update(eq("preferences"), any()))
-        .thenReturn(Tasks.forResult(null))
+    `when`(mockDocumentReference.get()).thenReturn(Tasks.forResult(mockDocumentSnapshot))
+    `when`(mockDocumentReference.update(eq("preferences"), any())).thenReturn(Tasks.forResult(null))
     // Test removing a preference
     firebaseRepository.deleteUserPreference(
         userId = testUserId,
@@ -340,7 +317,7 @@ class UserRepositoryFirestoreTest {
   fun testDeleteUserPreferenceFailure() {
     // Mock a failure scenario
     val mockException = Exception("Firestore error")
-    Mockito.`when`(mockDocumentReference.get()).thenReturn(Tasks.forException(mockException))
+    `when`(mockDocumentReference.get()).thenReturn(Tasks.forException(mockException))
 
     firebaseRepository.deleteUserPreference(
         userId = testUserId,
@@ -353,13 +330,13 @@ class UserRepositoryFirestoreTest {
   @Test
   fun `getUserPreferences should return user preferences on success`() {
     // Mock Firestore document retrieval to return a successful task
-    Mockito.`when`(mockDocumentReference.get()).thenReturn(mockTaskDoc)
-    Mockito.`when`(mockTaskDoc.isSuccessful).thenReturn(true)
-    Mockito.`when`(mockTaskDoc.result).thenReturn(mockDocumentSnapshot)
-    Mockito.`when`(mockDocumentSnapshot.get("preferences")).thenReturn(mockPreferences)
+    `when`(mockDocumentReference.get()).thenReturn(mockTaskDoc)
+    `when`(mockTaskDoc.isSuccessful).thenReturn(true)
+    `when`(mockTaskDoc.result).thenReturn(mockDocumentSnapshot)
+    `when`(mockDocumentSnapshot.get("preferences")).thenReturn(mockPreferences)
 
     // Simulate adding a listener and calling onSuccess
-    Mockito.`when`(mockTaskDoc.addOnCompleteListener(Mockito.any())).thenAnswer {
+    `when`(mockTaskDoc.addOnCompleteListener(any())).thenAnswer {
       val listener = it.arguments[0] as OnCompleteListener<DocumentSnapshot>
       listener.onComplete(mockTaskDoc)
       mockTaskDoc
@@ -381,12 +358,12 @@ class UserRepositoryFirestoreTest {
   fun `getUserPreferences should call onFailure on Firestore error`() {
     // Mock a failure scenario
     val mockException = Exception("Firestore error")
-    Mockito.`when`(mockTaskDoc.isSuccessful).thenReturn(false)
-    Mockito.`when`(mockTaskDoc.exception).thenReturn(mockException)
-    Mockito.`when`(mockDocumentReference.get()).thenReturn(mockTaskDoc)
+    `when`(mockTaskDoc.isSuccessful).thenReturn(false)
+    `when`(mockTaskDoc.exception).thenReturn(mockException)
+    `when`(mockDocumentReference.get()).thenReturn(mockTaskDoc)
 
     // Simulate adding a listener and calling onFailure
-    Mockito.`when`(mockTaskDoc.addOnCompleteListener(Mockito.any())).thenAnswer {
+    `when`(mockTaskDoc.addOnCompleteListener(any())).thenAnswer {
       val listener = it.arguments[0] as OnCompleteListener<DocumentSnapshot>
       listener.onComplete(mockTaskDoc)
       mockTaskDoc
@@ -399,7 +376,7 @@ class UserRepositoryFirestoreTest {
         onFailure = { e -> assertEquals(mockException, e) })
 
     verify(mockDocumentReference).get()
-    Mockito.verify(mockTaskDoc).addOnCompleteListener(Mockito.any())
+    verify(mockTaskDoc).addOnCompleteListener(any())
   }
 
   @Test
@@ -412,7 +389,9 @@ class UserRepositoryFirestoreTest {
     `when`(mockDocumentSnapshot.getString("username")).thenReturn("johndoe")
     `when`(mockDocumentSnapshot.getString("email")).thenReturn("john.doe@example.com")
     `when`(mockDocumentSnapshot.getString("phone")).thenReturn("+1234567890")
-    `when`(mockDocumentSnapshot.getString("address")).thenReturn("Chemin des Triaudes")
+    val locationMap =
+        mapOf("latitude" to 46.5197, "longitude" to 6.6323, "name" to "Chemin des Triaudes")
+    `when`(mockDocumentSnapshot.get("address")).thenReturn(locationMap)
     `when`(mockDocumentSnapshot.getString("imageUrl")).thenReturn("")
 
     // Call the helper method
@@ -424,7 +403,7 @@ class UserRepositoryFirestoreTest {
     assertEquals("johndoe", profile?.username)
     assertEquals("john.doe@example.com", profile?.email)
     assertEquals("+1234567890", profile?.phone)
-    assertEquals("Chemin des Triaudes", profile?.address)
+    assertEquals("Chemin des Triaudes", profile?.address?.name)
     assertEquals("", profile?.imageUrl)
   }
 
@@ -440,7 +419,8 @@ class UserRepositoryFirestoreTest {
     `when`(mockDocumentSnapshot.getString("username")).thenReturn("johndoe")
     `when`(mockDocumentSnapshot.getString("email")).thenReturn("john.doe@example.com")
     `when`(mockDocumentSnapshot.getString("phone")).thenReturn("+1234567890")
-    `when`(mockDocumentSnapshot.getString("address")).thenReturn("Chemin des Triaudes")
+    val locationMap = mapOf("latitude" to 0.0, "longitude" to 0.0, "name" to "Chemin des Triaudes")
+    `when`(mockDocumentSnapshot.get("address")).thenReturn(locationMap)
     `when`(mockDocumentSnapshot.getString("imageUrl")).thenReturn("")
     `when`(mockDocumentSnapshot.get("preferences")).thenReturn(mockPreferences)
 
@@ -455,7 +435,7 @@ class UserRepositoryFirestoreTest {
             username = "johndoe",
             email = "john.doe@example.com",
             phone = "+1234567890",
-            address = "Chemin des Triaudes",
+            address = Location(0.0, 0.0, "Chemin des Triaudes"),
             preferences = mockPreferences),
         result)
   }

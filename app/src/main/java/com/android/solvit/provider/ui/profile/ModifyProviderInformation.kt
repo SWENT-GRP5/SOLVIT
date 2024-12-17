@@ -17,6 +17,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Phone
@@ -25,29 +26,25 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.android.solvit.seeker.model.provider.ListProviderViewModel
+import com.android.solvit.provider.model.profile.ProviderViewModel
 import com.android.solvit.seeker.ui.request.LocationDropdown
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.map.Location
@@ -55,17 +52,20 @@ import com.android.solvit.shared.model.map.LocationViewModel
 import com.android.solvit.shared.model.provider.Language
 import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.service.Services
-import com.android.solvit.shared.ui.authentication.CustomOutlinedTextField
-import com.android.solvit.shared.ui.authentication.GoBackButton
-import com.android.solvit.shared.ui.authentication.ValidationRegex
+import com.android.solvit.shared.model.utils.EditProfileHeader
+import com.android.solvit.shared.model.utils.SaveButton
 import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.android.solvit.shared.ui.theme.Typography
+import com.android.solvit.shared.ui.utils.CustomOutlinedTextField
+import com.android.solvit.shared.ui.utils.TopAppBarInbox
+import com.android.solvit.shared.ui.utils.ValidationRegex
 
 /**
  * A composable function that displays the screen for modifying a provider's profile information. It
  * includes a form to update details such as name, company name, service, phone number, location,
  * languages, and description.
  *
- * @param listProviderViewModel The ViewModel used to manage and update the list of providers.
+ * @param providerViewModel The ViewModel used to manage and update the provider profile.
  * @param authViewModel The ViewModel managing authentication and user-related data.
  * @param locationViewModel The ViewModel used to fetch and manage location suggestions.
  * @param navigationActions A set of navigation actions to handle screen transitions.
@@ -77,13 +77,18 @@ import com.android.solvit.shared.ui.navigation.NavigationActions
     "SuspiciousIndentation")
 @Composable
 fun ModifyProviderInformationScreen(
-    listProviderViewModel: ListProviderViewModel =
-        viewModel(factory = ListProviderViewModel.Factory),
+    providerViewModel: ProviderViewModel = viewModel(factory = ProviderViewModel.Factory),
     authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory),
     locationViewModel: LocationViewModel = viewModel(factory = LocationViewModel.Factory),
     navigationActions: NavigationActions
 ) {
   val context = LocalContext.current
+  val configuration = LocalConfiguration.current
+  val screenWidth = configuration.screenWidthDp.dp
+  val screenHeight = configuration.screenHeightDp.dp
+  val verticalSpacing = if (screenHeight < 640.dp) 8.dp else 16.dp
+  val horizontalPadding = if (screenWidth < 360.dp) 8.dp else 16.dp
+
   DisposableEffect(Unit) {
     val activity = context as? ComponentActivity
     activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
@@ -93,41 +98,44 @@ fun ModifyProviderInformationScreen(
     }
   }
 
+  val user = authViewModel.user.collectAsStateWithLifecycle()
+  val userId = user.value?.uid ?: "-1"
+  val userEmail = user.value?.email ?: ""
+  val provider by providerViewModel.userProvider.collectAsStateWithLifecycle()
+
+  LaunchedEffect(user) { providerViewModel.getProvider(userId) }
+
   Scaffold(
       topBar = {
-        TopAppBar(
-            title = {
-              Text(
-                  "Modify your profile information",
-                  modifier = Modifier.testTag("titleModifyProvider"))
-            },
-            navigationIcon = { GoBackButton(navigationActions) },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background))
+        TopAppBarInbox(
+            title = "Modify your profile information",
+            testTagTitle = "titleModifyProvider",
+            leftButtonForm = Icons.AutoMirrored.Filled.ArrowBack,
+            leftButtonAction = { navigationActions.goBack() })
       },
       content = { padding ->
         Column(
             modifier =
                 Modifier.fillMaxSize()
+                    .padding(horizontalPadding)
                     .padding(padding)
-                    .padding(16.dp)
                     .background(colorScheme.background)
                     .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Top) {
-              val user = authViewModel.user.collectAsState()
-              val userId = user.value?.uid ?: "-1"
-              val provider =
-                  listProviderViewModel.providersList.collectAsState().value.find {
-                    it.uid == userId
-                  } ?: return@Column
-
-              ModifyInput(
-                  provider = provider,
-                  locationViewModel = locationViewModel,
-                  listProviderViewModel = listProviderViewModel,
-                  authViewModel = authViewModel,
-                  navigationActions = navigationActions)
-            }
+            verticalArrangement = Arrangement.SpaceBetween,
+        ) {
+          provider?.let {
+            ModifyInput(
+                provider = it,
+                providerEmail = userEmail,
+                screenWidth = screenWidth,
+                verticalSpacing = verticalSpacing,
+                locationViewModel = locationViewModel,
+                providerViewModel = providerViewModel,
+                authViewModel = authViewModel,
+                navigationActions = navigationActions)
+          }
+        }
       })
 }
 
@@ -139,16 +147,18 @@ fun ModifyProviderInformationScreen(
  *
  * @param provider The current provider whose details are being modified.
  * @param locationViewModel The ViewModel used to fetch and manage location suggestions.
- * @param listProviderViewModel The ViewModel used to update the provider's details.
+ * @param providerViewModel The ViewModel used to update the provider's details.
  * @param authViewModel The ViewModel managing authentication and user-related data.
  * @param navigationActions A set of navigation actions to handle screen transitions.
  */
 @Composable
 fun ModifyInput(
     provider: Provider,
+    providerEmail: String = "",
+    screenWidth: Dp = 100.dp,
+    verticalSpacing: Dp = 100.dp,
     locationViewModel: LocationViewModel = viewModel(factory = LocationViewModel.Factory),
-    listProviderViewModel: ListProviderViewModel =
-        viewModel(factory = ListProviderViewModel.Factory),
+    providerViewModel: ProviderViewModel = viewModel(factory = ProviderViewModel.Factory),
     authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory),
     navigationActions: NavigationActions
 ) {
@@ -171,11 +181,12 @@ fun ModifyInput(
   var showDropdown by remember { mutableStateOf(false) }
 
   val locationSuggestions by
-      locationViewModel.locationSuggestions.collectAsState(initial = emptyList<Location?>())
+      locationViewModel.locationSuggestions.collectAsStateWithLifecycle(
+          initialValue = emptyList<Location?>())
   var selectedLocation by remember { mutableStateOf<Location?>(provider.location) }
   val okNewLocation = selectedLocation != null
 
-  val user by authViewModel.user.collectAsState()
+  val user by authViewModel.user.collectAsStateWithLifecycle()
 
   var newLanguage by remember { mutableStateOf(provider.languages) }
 
@@ -196,6 +207,14 @@ fun ModifyInput(
     newDescription = provider.description
   }
 
+  EditProfileHeader(
+      imageUrl = provider.imageUrl,
+      fullName = provider.name,
+      email = providerEmail,
+      screenWidth = screenWidth,
+      verticalSpacing = verticalSpacing)
+  Spacer(modifier = Modifier.height(10.dp))
+
   CustomOutlinedTextField(
       value = newName,
       onValueChange = { newName = it },
@@ -210,7 +229,6 @@ fun ModifyInput(
       maxLines = 2)
 
   Spacer(modifier = Modifier.height(10.dp))
-
   CustomOutlinedTextField(
       value = newCompanyName,
       onValueChange = { newCompanyName = it },
@@ -225,11 +243,9 @@ fun ModifyInput(
       maxLines = 2)
 
   Spacer(modifier = Modifier.height(10.dp))
-
   ServiceDropdownMenu(selectedService = newService, onServiceSelected = { newService = it })
 
   Spacer(modifier = Modifier.height(10.dp))
-
   CustomOutlinedTextField(
       value = newPhoneNumber,
       onValueChange = { newPhoneNumber = it },
@@ -244,7 +260,6 @@ fun ModifyInput(
       maxLines = 1)
 
   Spacer(modifier = Modifier.height(10.dp))
-
   LocationDropdown(
       locationQuery = newLocation,
       onLocationQueryChange = { locationViewModel.setQuery(it) },
@@ -259,7 +274,6 @@ fun ModifyInput(
       testTag = "newLocationInputField")
 
   Spacer(modifier = Modifier.height(10.dp))
-
   LanguageDropdownMenu(
       selectedLanguages = newLanguage,
       onLanguageSelected = { language, isChecked ->
@@ -272,7 +286,6 @@ fun ModifyInput(
       })
 
   Spacer(modifier = Modifier.height(10.dp))
-
   CustomOutlinedTextField(
       value = newDescription,
       onValueChange = { newDescription = it },
@@ -287,9 +300,8 @@ fun ModifyInput(
       textAlign = TextAlign.Start,
       maxLines = 7)
 
-  Spacer(modifier = Modifier.height(10.dp))
-
-  Button(
+  Spacer(modifier = Modifier.height(20.dp))
+  SaveButton(
       onClick = {
         if (allIsGood) {
           val updatedProvider =
@@ -302,7 +314,7 @@ fun ModifyInput(
                   languages = newLanguage,
                   description = newDescription)
 
-          listProviderViewModel.updateProvider(provider = updatedProvider)
+          providerViewModel.updateProvider(provider = updatedProvider)
           authViewModel.setUserName(newName)
 
           navigationActions.goBack()
@@ -314,40 +326,14 @@ fun ModifyInput(
               .show()
         }
       },
-      modifier =
-          Modifier.fillMaxWidth()
-              .height(50.dp)
-              .background(
-                  brush =
-                      if (allIsGood) {
-                        Brush.horizontalGradient(
-                            colors = listOf(colorScheme.primary, colorScheme.secondary))
-                      } else {
-                        Brush.horizontalGradient(
-                            colors =
-                                listOf(colorScheme.onSurfaceVariant, colorScheme.onSurfaceVariant))
-                      },
-                  shape =
-                      RoundedCornerShape(
-                          25.dp,
-                      )),
-      colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)) {
-        Text(
-            "Save !",
-            color = colorScheme.onPrimary,
-            fontWeight = FontWeight.Bold,
-            fontSize = 16.sp,
-            modifier = Modifier.testTag("saveButton"))
-      }
-
-  Spacer(modifier = Modifier.height(3.dp))
+      allIsGood = allIsGood)
 
   Text(
       text = "Don't forget to save your changes by clicking the button before leaving the page!",
       color = colorScheme.onSurfaceVariant,
       fontSize = 12.sp,
       textAlign = TextAlign.Center,
-      style = TextStyle(fontSize = 12.sp, lineHeight = 16.sp),
+      style = Typography.bodySmall.copy(fontSize = 12.sp, lineHeight = 16.sp),
       modifier = Modifier.padding(top = 4.dp).fillMaxWidth())
 }
 
@@ -461,7 +447,7 @@ fun LanguageDropdownMenu(
                 val isSelected = language in selectedLanguages
 
                 DropdownMenuItem(
-                    text = { Text(language.name) },
+                    text = { Text(language.name, style = Typography.bodyLarge) },
                     onClick = {},
                     leadingIcon = {
                       Checkbox(

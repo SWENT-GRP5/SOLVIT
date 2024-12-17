@@ -8,7 +8,6 @@ import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.model.utils.uploadImageToStorage
 import com.google.android.gms.tasks.Task
 import com.google.firebase.Timestamp
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
@@ -35,13 +34,13 @@ class ProviderRepositoryFirestore(
       val description = (doc.getString("description")) ?: return null
       val locationDoc = doc.get("location") as? Map<*, *>
       val latitude = locationDoc?.get("latitude") as? Double ?: return null
-      val longitude = locationDoc?.get("longitude") as? Double ?: return null
-      val nameLoc = locationDoc?.get("name") as? String ?: return null
+      val longitude = locationDoc["longitude"] as? Double ?: return null
+      val nameLoc = locationDoc["name"] as? String ?: return null
       val location = Location(latitude, longitude, nameLoc)
       val rating = doc.getDouble("rating") ?: return null
       val popular = doc.getBoolean("popular") ?: return null
       val price = doc.getDouble("price") ?: return null
-      val deliveryTime = doc.getTimestamp("deliveryTime") ?: return null
+      val nbrOfJobs = doc.getDouble("nbrOfJobs") ?: return null
       val languages = (doc.get("languages") as List<*>).map { Language.valueOf(it as String) }
       val companyName = doc.getString("companyName") ?: ""
       val phone = doc.getString("phone") ?: ""
@@ -63,17 +62,17 @@ class ProviderRepositoryFirestore(
           popular,
           rating,
           price,
-          deliveryTime,
+          nbrOfJobs = nbrOfJobs,
           languages,
           schedule)
     } catch (e: Exception) {
-      Log.e("ProviderRepositoryFirestore", "failed to convert doc $e")
+      Log.e("ProviderRepositoryFirestore", "Failed to convert doc", e)
       return null
     }
   }
 
   override fun init(onSuccess: () -> Unit) {
-    FirebaseAuth.getInstance().addAuthStateListener { onSuccess() }
+    onSuccess()
   }
 
   override fun addListenerOnProviders(
@@ -179,19 +178,25 @@ class ProviderRepositoryFirestore(
       onSuccess: () -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    var providerWithImage = provider
+
     if (imageUri != null) {
       uploadImageToStorage(
           storage,
           providersImagesPath,
           imageUri,
-          onSuccess = { imageUrl -> providerWithImage = provider.copy(imageUrl = imageUrl) },
+          onSuccess = { imageUrl ->
+            Log.e("UploadImageTo Storage", imageUrl)
+            val providerWithImage = provider.copy(imageUrl = imageUrl)
+            performFirestoreOperation(
+                db.collection(collectionPath).document(provider.uid).set(providerWithImage),
+                onSuccess,
+                onFailure)
+          },
           onFailure = { Log.e("add Provider", "Failed to add provider $it") })
+    } else {
+      performFirestoreOperation(
+          db.collection(collectionPath).document(provider.uid).set(provider), onSuccess, onFailure)
     }
-    performFirestoreOperation(
-        db.collection(collectionPath).document(provider.uid).set(providerWithImage),
-        onSuccess,
-        onFailure)
   }
 
   override fun deleteProvider(uid: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
@@ -249,13 +254,10 @@ class ProviderRepositoryFirestore(
       onSuccess: (Provider?) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    Log.e("Get Provider", "Debut $userId")
     db.collection(collectionPath).document(userId).get().addOnCompleteListener { task ->
       if (task.isSuccessful) {
         val doc = task.result
         val provider = convertDoc(doc)
-        Log.e("Let's go", "$provider")
-
         onSuccess(provider)
       } else {
         task.exception?.let { onFailure(it) }
@@ -267,10 +269,9 @@ class ProviderRepositoryFirestore(
     return try {
       val doc = db.collection(collectionPath).document(uid).get().await()
       val provider = convertDoc(doc)
-      Log.e("Get Provider", "Success: $provider")
       provider
     } catch (e: Exception) {
-      Log.e("Get Provider", "Failed to get provider: $e")
+      Log.e("ProviderRepositoryFirestore", "Failed to get provider", e)
       null
     }
   }
@@ -333,7 +334,6 @@ class ProviderRepositoryFirestore(
         }
         @Suppress("UNCHECKED_CAST") val timeSlotsList = timeSlotsAny as? List<Map<String, Any>>
         if (timeSlotsList == null) {
-          Log.w("ProviderRepositoryFirestore", "Invalid time slots format for day: $day")
           continue
         }
         val slots = convertTimeSlots(timeSlotsList)
@@ -347,20 +347,17 @@ class ProviderRepositoryFirestore(
         try {
           val timestamp = exceptionMap["timestamp"] as? Timestamp
           if (timestamp == null) {
-            Log.w("ProviderRepositoryFirestore", "Missing timestamp in exception")
             continue
           }
 
           @Suppress("UNCHECKED_CAST")
           val timeSlotsAnyList = exceptionMap["timeSlots"] as? List<Map<String, Any>>
           if (timeSlotsAnyList == null) {
-            Log.w("ProviderRepositoryFirestore", "Invalid timeSlots format in exception")
             continue
           }
 
           val typeString = exceptionMap["type"] as? String
           if (typeString == null) {
-            Log.w("ProviderRepositoryFirestore", "Missing type in exception")
             continue
           }
 
@@ -368,20 +365,17 @@ class ProviderRepositoryFirestore(
               try {
                 ExceptionType.valueOf(typeString)
               } catch (e: IllegalArgumentException) {
-                Log.w("ProviderRepositoryFirestore", "Invalid exception type: $typeString")
                 continue
               }
 
           val timeSlots = convertTimeSlots(timeSlotsAnyList)
           if (timeSlots.isEmpty()) {
-            Log.w("ProviderRepositoryFirestore", "No valid time slots in exception")
             continue
           }
 
           val date = timestamp.toDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
           exceptions.add(ScheduleException(date, timeSlots.toMutableList(), type))
         } catch (e: Exception) {
-          Log.e("ProviderRepositoryFirestore", "Error converting exception: $e")
           continue
         }
       }

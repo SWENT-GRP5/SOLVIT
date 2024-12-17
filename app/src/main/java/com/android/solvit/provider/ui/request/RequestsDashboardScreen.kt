@@ -1,5 +1,7 @@
 package com.android.solvit.provider.ui.request
 
+import android.annotation.SuppressLint
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -11,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -23,19 +26,14 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.colorScheme
-import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -46,9 +44,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.android.solvit.seeker.model.provider.ListProviderViewModel
+import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestStatus
 import com.android.solvit.shared.model.request.ServiceRequestStatus.Companion.format
@@ -57,30 +60,50 @@ import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.utils.isInternetAvailable
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
-import com.google.firebase.Firebase
-import com.google.firebase.auth.auth
+import com.android.solvit.shared.ui.theme.Typography
+import com.android.solvit.shared.ui.utils.TopAppBarInbox
 import java.text.SimpleDateFormat
 import java.util.Locale
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 /**
  * Composable function that displays the Requests Dashboard screen.
  *
  * @param navigationActions Actions for navigation.
  * @param serviceRequestViewModel ViewModel for managing service requests.
+ * @param authViewModel ViewModel for managing authentication.
+ * @param listProviderViewModel View model for list of providers
  */
+@SuppressLint("SuspiciousIndentation")
 @Composable
 fun RequestsDashboardScreen(
     navigationActions: NavigationActions,
     serviceRequestViewModel: ServiceRequestViewModel =
-        viewModel(factory = ServiceRequestViewModel.Factory)
+        viewModel(factory = ServiceRequestViewModel.Factory),
+    authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory),
+    listProviderViewModel: ListProviderViewModel =
+        viewModel(factory = ListProviderViewModel.Factory)
 ) {
+  val user by authViewModel.user.collectAsStateWithLifecycle()
   // Selected tab index
   var selectedTab by remember { mutableIntStateOf(2) }
   val statusTabs = ServiceRequestStatus.entries.toTypedArray()
 
   Scaffold(
       topBar = {
-        RequestsTopBar(title = "Job Dashboard", onBackClicked = { navigationActions.goBack() })
+        TopAppBarInbox(
+            title = "Job Dashboard",
+            testTagTitle = "JobDashboardTitle",
+            leftButtonForm = Icons.AutoMirrored.Filled.ArrowBack,
+            leftButtonAction = { navigationActions.goBack() },
+            testTagLeft = "JobDashboardBackButton")
+      },
+      bottomBar = {
+        val currentRoute = navigationActions.currentRoute()
+        Log.e(
+            "ProviderCalendarScreen", "Current route passed to BottomNavigationMenu: $currentRoute")
       },
       content = { innerPadding ->
         Column(
@@ -92,39 +115,13 @@ fun RequestsDashboardScreen(
                   onTabSelected = { selectedTab = it })
               JobSectionContent(
                   selectedTab = selectedTab,
+                  providerId = user?.uid ?: "-1",
                   serviceRequestViewModel = serviceRequestViewModel,
-                  navigationActions = navigationActions)
+                  navigationActions = navigationActions,
+                  listProviderViewModel = listProviderViewModel,
+              )
             }
       })
-}
-
-/**
- * Composable function that displays the top app bar for the Requests Dashboard screen.
- *
- * @param title Title of the screen.
- * @param onBackClicked Callback to handle back button click.
- */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun RequestsTopBar(title: String, onBackClicked: () -> Unit) {
-  TopAppBar(
-      title = {
-        Text(
-            text = title,
-            style = typography.titleLarge,
-            color = colorScheme.onBackground,
-            modifier = Modifier.testTag("JobDashboardTitle"))
-      },
-      navigationIcon = {
-        IconButton(onClick = onBackClicked, modifier = Modifier.testTag("JobDashboardBackButton")) {
-          Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Go back")
-        }
-      },
-      colors =
-          TopAppBarDefaults.centerAlignedTopAppBarColors(
-              containerColor = colorScheme.background,
-              navigationIconContentColor = colorScheme.onBackground,
-              titleContentColor = colorScheme.onBackground))
 }
 
 /**
@@ -150,9 +147,8 @@ fun StatusTabs(selectedTab: Int, tabs: Array<ServiceRequestStatus>, onTabSelecte
               text = {
                 Text(
                     text = ServiceRequestStatus.format(status),
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = getStatusColor(status))
+                    color = getStatusColor(status),
+                    style = Typography.bodyMedium.copy(fontWeight = FontWeight.Bold))
               })
         }
       }
@@ -162,22 +158,29 @@ fun StatusTabs(selectedTab: Int, tabs: Array<ServiceRequestStatus>, onTabSelecte
  * Composable function that displays the content of the selected tab in the Requests Dashboard
  * screen.
  *
+ * @param providerId ID of the current provider.
+ * @param listProviderViewModel view model to fetch infos of the provider
  * @param selectedTab Index of the selected tab.
  * @param serviceRequestViewModel ViewModel for managing service requests.
+ * @param navigationActions Actions for navigation.
  */
 @Composable
 fun JobSectionContent(
     selectedTab: Int,
+    listProviderViewModel: ListProviderViewModel,
+    providerId: String,
     serviceRequestViewModel: ServiceRequestViewModel,
     navigationActions: NavigationActions
 ) {
   when (selectedTab) {
-    0 -> PendingJobsSection(serviceRequestViewModel, navigationActions)
-    1 -> AcceptedJobSection(serviceRequestViewModel, navigationActions)
-    2 -> ScheduledJobsSection(serviceRequestViewModel)
-    3 -> CompletedJobsSection(serviceRequestViewModel)
-    4 -> CanceledJobsSection(serviceRequestViewModel)
-    5 -> ArchivedJobsSection(serviceRequestViewModel)
+    0 -> PendingJobsSection(providerId, serviceRequestViewModel, navigationActions)
+    1 -> AcceptedJobSection(providerId, serviceRequestViewModel, navigationActions)
+    2 ->
+        ScheduledJobsSection(
+            providerId, serviceRequestViewModel, navigationActions, listProviderViewModel)
+    3 -> CompletedJobsSection(providerId, serviceRequestViewModel, navigationActions)
+    4 -> CanceledJobsSection(providerId, serviceRequestViewModel, navigationActions)
+    5 -> ArchivedJobsSection(providerId, serviceRequestViewModel, navigationActions)
   }
 }
 
@@ -185,8 +188,10 @@ fun JobSectionContent(
  * Composable function that displays a list of jobs based on the status.
  *
  * @param title Title of the section.
+ * @param providerId ID of the current provider.
  * @param requests List of ServiceRequest objects.
  * @param emptyMessage Message to display when the list is empty.
+ * @param onLearnMore Optional callback to learn more about a job.
  * @param onNavigateToJob Optional callback to navigate to the job's location.
  * @param onContactCustomer Optional callback to contact the customer.
  * @param onMarkAsCompleted Optional callback to mark the job as completed.
@@ -198,6 +203,7 @@ fun JobSectionContent(
 @Composable
 fun JobListSection(
     title: String,
+    providerId: String,
     requests: List<ServiceRequest>,
     emptyMessage: String,
     onLearnMore: ((ServiceRequest) -> Unit)? = null,
@@ -210,7 +216,6 @@ fun JobListSection(
     onChat: ((ServiceRequest) -> Unit)? = null
 ) {
   // Filter requests based on the current user's ID
-  val providerId = Firebase.auth.currentUser?.uid ?: "-1"
   val filteredRequests = requests.filter { it.providerId == providerId }
   LazyColumn(
       modifier = Modifier.fillMaxSize().padding(16.dp).testTag("${title}Section"),
@@ -222,8 +227,7 @@ fun JobListSection(
           if (filteredRequests.isEmpty()) {
             Text(
                 text = emptyMessage,
-                style = typography.titleLarge,
-                color = colorScheme.onSurfaceVariant,
+                style = Typography.titleLarge.copy(color = colorScheme.onSurfaceVariant),
                 modifier = Modifier.testTag("${title}EmptyText"))
           } else {
             // Display a list of job items
@@ -247,15 +251,22 @@ fun JobListSection(
 /**
  * Composable functions for displaying the pending requests on the Requests Dashboard screen.
  *
+ * @param providerId ID of the current provider.
  * @param viewModel ViewModel for managing service requests.
+ * @param navigationActions Actions for navigation.
  */
 @Composable
-fun PendingJobsSection(viewModel: ServiceRequestViewModel, navigationActions: NavigationActions) {
+fun PendingJobsSection(
+    providerId: String,
+    viewModel: ServiceRequestViewModel,
+    navigationActions: NavigationActions
+) {
   val context = LocalContext.current
-  val pendingRequests by viewModel.pendingRequests.collectAsState()
+  val pendingRequests by viewModel.pendingRequests.collectAsStateWithLifecycle()
 
   JobListSection(
       title = "Pending",
+      providerId = providerId,
       requests = pendingRequests,
       emptyMessage = "No pending jobs",
       onLearnMore = {
@@ -265,22 +276,31 @@ fun PendingJobsSection(viewModel: ServiceRequestViewModel, navigationActions: Na
       onContactCustomer = {
         Toast.makeText(context, "Contact Not yet Implemented", Toast.LENGTH_SHORT).show()
       },
-      onConfirmRequest = { request -> viewModel.confirmRequest(request) },
+      onConfirmRequest = { request ->
+        viewModel.viewModelScope.launch { viewModel.confirmRequest(request, "test provider name") }
+      },
       onChat = { Toast.makeText(context, "Chat Not yet Implemented", Toast.LENGTH_SHORT).show() })
 }
 
 /**
  * Composable functions for displaying the accepted requests on the Requests Dashboard screen.
  *
+ * @param providerId ID of the current provider.
  * @param viewModel ViewModel for managing service requests.
+ * @param navigationActions Actions for navigation.
  */
 @Composable
-fun AcceptedJobSection(viewModel: ServiceRequestViewModel, navigationActions: NavigationActions) {
+fun AcceptedJobSection(
+    providerId: String,
+    viewModel: ServiceRequestViewModel,
+    navigationActions: NavigationActions
+) {
   val context = LocalContext.current
-  val acceptedRequests by viewModel.acceptedRequests.collectAsState()
+  val acceptedRequests by viewModel.acceptedRequests.collectAsStateWithLifecycle()
 
   JobListSection(
       title = "Accepted",
+      providerId = providerId,
       requests = acceptedRequests,
       emptyMessage = "No accepted jobs",
       onLearnMore = {
@@ -296,12 +316,20 @@ fun AcceptedJobSection(viewModel: ServiceRequestViewModel, navigationActions: Na
 /**
  * Composable functions for displaying the scheduled requests on the Requests Dashboard screen.
  *
+ * @param providerId ID of the current provider.
  * @param viewModel ViewModel for managing service requests.
+ * @param listProviderViewModel ViewModel
+ * @param navigationActions Actions for navigation.
  */
 @Composable
-fun ScheduledJobsSection(viewModel: ServiceRequestViewModel) {
+fun ScheduledJobsSection(
+    providerId: String,
+    viewModel: ServiceRequestViewModel,
+    navigationActions: NavigationActions,
+    listProviderViewModel: ListProviderViewModel
+) {
   val context = LocalContext.current
-  val scheduledRequests by viewModel.scheduledRequests.collectAsState()
+  val scheduledRequests by viewModel.scheduledRequests.collectAsStateWithLifecycle()
 
   Column(Modifier.fillMaxSize().padding(16.dp)) {
     // "Navigate to All Jobs of the Day" button
@@ -312,11 +340,14 @@ fun ScheduledJobsSection(viewModel: ServiceRequestViewModel) {
         colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)) {
           Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
-                imageVector = Icons.Outlined.Place,
+                Icons.Outlined.Place,
                 contentDescription = "NavigateIcon",
                 tint = colorScheme.onPrimary)
             Spacer(modifier = Modifier.width(8.dp))
-            Text("Navigate to All Jobs of the Day", color = colorScheme.onPrimary)
+            Text(
+                "Navigate to All Jobs of the Day",
+                color = colorScheme.onPrimary,
+                style = Typography.bodyLarge)
           }
         }
 
@@ -324,15 +355,32 @@ fun ScheduledJobsSection(viewModel: ServiceRequestViewModel) {
 
     JobListSection(
         title = "Scheduled",
+        providerId = providerId,
         requests = scheduledRequests,
         emptyMessage = "No scheduled jobs",
+        onLearnMore = {
+          viewModel.selectRequest(it)
+          navigationActions.navigateTo(Route.BOOKING_DETAILS)
+        },
         onNavigateToJob = { request ->
           request.location?.let { navigateToSingleJob(context, it.latitude, it.longitude) }
         },
         onContactCustomer = {
           Toast.makeText(context, "Contact Not yet Implemented", Toast.LENGTH_SHORT).show()
         },
-        onMarkAsCompleted = { request -> viewModel.completeRequest(request) },
+        onMarkAsCompleted = { request ->
+          CoroutineScope(Dispatchers.Main).launch {
+            viewModel.completeRequest(request)
+            val provider = listProviderViewModel.fetchProviderById(providerId)
+            // Update nbr of jobs completed of provider
+            if (provider != null) {
+              listProviderViewModel.updateProvider(
+                  provider.copy(nbrOfJobs = provider.nbrOfJobs + 1))
+            } else {
+              Log.e("JobsSection", "Failed to fetch provider")
+            }
+          }
+        },
         onCancelRequest = { request -> viewModel.cancelRequest(request) },
         onChat = { Toast.makeText(context, "Chat Not yet Implemented", Toast.LENGTH_SHORT).show() })
   }
@@ -341,17 +389,28 @@ fun ScheduledJobsSection(viewModel: ServiceRequestViewModel) {
 /**
  * Composable functions for displaying the completed requests on the Requests Dashboard screen.
  *
+ * @param providerId ID of the current provider.
  * @param viewModel ViewModel for managing service requests.
+ * @param navigationActions Actions for navigation.
  */
 @Composable
-fun CompletedJobsSection(viewModel: ServiceRequestViewModel) {
+fun CompletedJobsSection(
+    providerId: String,
+    viewModel: ServiceRequestViewModel,
+    navigationActions: NavigationActions
+) {
   val context = LocalContext.current
-  val completedRequests by viewModel.completedRequests.collectAsState()
+  val completedRequests by viewModel.completedRequests.collectAsStateWithLifecycle()
 
   JobListSection(
       title = "Completed",
+      providerId = providerId,
       requests = completedRequests,
       emptyMessage = "No completed jobs",
+      onLearnMore = {
+        viewModel.selectRequest(it)
+        navigationActions.navigateTo(Route.BOOKING_DETAILS)
+      },
       onContactCustomer = {
         Toast.makeText(context, "Contact Not yet Implemented", Toast.LENGTH_SHORT).show()
       },
@@ -362,18 +421,29 @@ fun CompletedJobsSection(viewModel: ServiceRequestViewModel) {
 /**
  * Composable functions for displaying the canceled requests on the Requests Dashboard screen.
  *
+ * @param providerId ID of the current provider.
  * @param viewModel ViewModel for managing service requests.
+ * @param navigationActions Actions for navigation.
  */
 @Composable
-fun CanceledJobsSection(viewModel: ServiceRequestViewModel) {
+fun CanceledJobsSection(
+    providerId: String,
+    viewModel: ServiceRequestViewModel,
+    navigationActions: NavigationActions
+) {
   val context = LocalContext.current
-  val canceledRequests by viewModel.cancelledRequests.collectAsState()
+  val canceledRequests by viewModel.cancelledRequests.collectAsStateWithLifecycle()
 
   JobListSection(
       title = "Canceled",
+      providerId = providerId,
       requests = canceledRequests,
       emptyMessage = "No canceled jobs",
       onChat = { Toast.makeText(context, "Chat Not yet Implemented", Toast.LENGTH_SHORT).show() },
+      onLearnMore = {
+        viewModel.selectRequest(it)
+        navigationActions.navigateTo(Route.BOOKING_DETAILS)
+      },
       onContactCustomer = {
         Toast.makeText(context, "Contact Not yet Implemented", Toast.LENGTH_SHORT).show()
       },
@@ -383,17 +453,28 @@ fun CanceledJobsSection(viewModel: ServiceRequestViewModel) {
 /**
  * Composable functions for displaying the archived requests on the Requests Dashboard screen.
  *
+ * @param providerId ID of the current provider.
  * @param viewModel ViewModel for managing service requests.
+ * @param navigationActions Actions for navigation.
  */
 @Composable
-fun ArchivedJobsSection(viewModel: ServiceRequestViewModel) {
+fun ArchivedJobsSection(
+    providerId: String,
+    viewModel: ServiceRequestViewModel,
+    navigationActions: NavigationActions
+) {
   val context = LocalContext.current
-  val archivedRequests by viewModel.archivedRequests.collectAsState()
+  val archivedRequests by viewModel.archivedRequests.collectAsStateWithLifecycle()
 
   JobListSection(
       title = "Archived",
+      providerId = providerId,
       requests = archivedRequests,
       emptyMessage = "No archived jobs",
+      onLearnMore = {
+        viewModel.selectRequest(it)
+        navigationActions.navigateTo(Route.BOOKING_DETAILS)
+      },
       onChat = { Toast.makeText(context, "Chat Not yet Implemented", Toast.LENGTH_SHORT).show() },
       onContactCustomer = {
         Toast.makeText(context, "Contact Not yet Implemented", Toast.LENGTH_SHORT).show()
@@ -401,18 +482,33 @@ fun ArchivedJobsSection(viewModel: ServiceRequestViewModel) {
   )
 }
 
+@Composable
+fun OnLearnMoreButton(onLearnMore: (() -> Unit)?, request: ServiceRequest) {
+  onLearnMore?.let {
+    Button(
+        onClick = it,
+        colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
+        modifier = Modifier.wrapContentWidth().testTag("LearnMoreButton_${request.uid}")) {
+          Text("Learn More", color = colorScheme.onPrimary)
+        }
+  }
+}
+
 /**
  * JobItem represents a job item in a list. The display changes based on job status: Pending,
  * Accepted, Scheduled, Completed, Canceled, or Archived.
  *
  * @param request ServiceRequest object containing job details.
+ * @param onLearnMore Optional callback to learn more about a job.
  * @param onNavigateToJob Optional callback to navigate to the job's location.
  * @param onContactCustomer Optional callback to contact the customer.
  * @param onMarkAsCompleted Optional callback to mark the job as completed.
  * @param onConfirmRequest Optional callback to confirm a job request (for pending jobs).
  * @param onCancelRequest Optional callback to cancel the job.
+ * @param onArchiveRequest Optional callback to archive the job.
  * @param onChat Optional callback to initiate a chat with the customer.
  */
+@SuppressLint("SuspiciousIndentation")
 @Composable
 fun JobItem(
     request: ServiceRequest,
@@ -436,44 +532,54 @@ fun JobItem(
       colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
       shape = RoundedCornerShape(12.dp)) {
         Column(modifier = Modifier.padding(16.dp)) {
-          // Title and Navigate Button
+          // Learn More and Navigate Button
           Row(
               modifier = Modifier.fillMaxWidth(),
-              horizontalArrangement = Arrangement.SpaceBetween,
+              horizontalArrangement = Arrangement.SpaceBetween, // Distribute space between children
               verticalAlignment = Alignment.CenterVertically) {
-                // Job Title
-                Text(
-                    request.title, style = typography.titleMedium, color = colorScheme.onBackground)
-
-                // See more button
-                if (status == ServiceRequestStatus.PENDING ||
-                    status == ServiceRequestStatus.ACCEPTED) {
-                  onLearnMore?.let {
-                    Button(
-                        onClick = it,
-                        colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
-                        modifier = Modifier.testTag("LearnMoreButton_${request.uid}")) {
-                          Text("Learn More", color = colorScheme.onPrimary)
-                        }
-                  }
-                }
-                // Navigate Button for Scheduled Jobs
+                // See More Button
                 if (status == ServiceRequestStatus.SCHEDULED) {
+                  OnLearnMoreButton(onLearnMore, request)
+                  Spacer(modifier = Modifier.weight(1f))
                   onNavigateToJob?.let {
                     Button(
                         onClick = it,
                         colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
                         modifier = Modifier.testTag("NavigateButton_${request.uid}")) {
-                          Text("Navigate", color = colorScheme.onPrimary)
+                          Text(
+                              "Navigate",
+                              color = colorScheme.onPrimary,
+                              style = Typography.bodyLarge)
                         }
                   }
+                } else {
+                  Text(
+                      text = request.title,
+                      style = Typography.titleMedium,
+                      color = colorScheme.onBackground,
+                      maxLines = 1,
+                      overflow = TextOverflow.Ellipsis,
+                      modifier = Modifier.weight(1f).padding(end = 8.dp))
+                  OnLearnMoreButton(onLearnMore, request)
                 }
               }
+          if (status == ServiceRequestStatus.SCHEDULED) {
+            // Job Title
+            Text(
+                text = request.title,
+                style = Typography.titleMedium,
+                color = colorScheme.onBackground,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis)
+          }
+
           // Job  Description
           Text(
               request.description,
-              style = typography.bodyMedium,
+              style = Typography.bodyMedium,
               color = colorScheme.onSurface,
+              maxLines = 3,
+              overflow = TextOverflow.Ellipsis,
               textAlign = TextAlign.Start)
           Spacer(modifier = Modifier.height(8.dp))
 
@@ -488,8 +594,8 @@ fun JobItem(
                 contentDescription = "Scheduled Time",
                 tint = colorScheme.onSurfaceVariant)
             Text(
-                "Scheduled: $date at $time",
-                style = typography.bodySmall,
+                if (request.meetingDate == null) "Deadline: $date" else "Scheduled: $date at $time",
+                style = Typography.bodySmall,
                 color = colorScheme.onSurfaceVariant)
           }
           Spacer(modifier = Modifier.height(8.dp))
@@ -501,7 +607,12 @@ fun JobItem(
                 contentDescription = "Location",
                 tint = colorScheme.onSurfaceVariant)
             request.location?.let {
-              Text(it.name, style = typography.bodySmall, color = colorScheme.onSurfaceVariant)
+              Text(
+                  it.name,
+                  style = Typography.bodySmall,
+                  color = colorScheme.onSurfaceVariant,
+                  maxLines = 1,
+                  overflow = TextOverflow.Ellipsis)
             }
           }
           Spacer(modifier = Modifier.height(8.dp))
@@ -565,7 +676,10 @@ fun JobItem(
                               ButtonDefaults.buttonColors(
                                   containerColor = colorScheme.errorContainer),
                           modifier = Modifier.testTag("CancelButton_${request.uid}")) {
-                            Text("Cancel", color = colorScheme.error, fontSize = 10.sp)
+                            Text(
+                                "Cancel",
+                                color = colorScheme.error,
+                                style = Typography.bodySmall.copy(fontSize = 10.sp))
                           }
                     }
                     Spacer(modifier = Modifier.width(2.dp))
@@ -598,14 +712,14 @@ fun JobItem(
                     Text(
                         text = format(ServiceRequestStatus.ARCHIVED),
                         color = getStatusColor(ServiceRequestStatus.ARCHIVED),
-                        style = typography.bodySmall,
+                        style = Typography.bodySmall,
                         modifier = Modifier.testTag("StatusText_${request.uid}"))
                   }
                   ServiceRequestStatus.CANCELED -> {
                     Text(
                         text = format(ServiceRequestStatus.CANCELED),
                         color = getStatusColor(ServiceRequestStatus.CANCELED),
-                        style = typography.bodySmall,
+                        style = Typography.bodySmall,
                         modifier = Modifier.testTag("StatusText_${request.uid}"))
                   }
                   ServiceRequestStatus.ACCEPTED -> {
@@ -613,7 +727,7 @@ fun JobItem(
                     Text(
                         text = format(ServiceRequestStatus.ACCEPTED),
                         color = getStatusColor(ServiceRequestStatus.ACCEPTED),
-                        style = typography.bodySmall,
+                        style = Typography.bodySmall,
                         modifier = Modifier.testTag("StatusText_${request.uid}"))
                   }
                   ServiceRequestStatus.COMPLETED -> {
@@ -621,7 +735,7 @@ fun JobItem(
                     Text(
                         text = format(ServiceRequestStatus.COMPLETED),
                         color = getStatusColor(ServiceRequestStatus.COMPLETED),
-                        style = typography.bodySmall,
+                        style = Typography.bodySmall,
                         modifier = Modifier.testTag("StatusText_${request.uid}"))
                     // Archive Button
                     onArchiveRequest?.let {
@@ -630,7 +744,10 @@ fun JobItem(
                           colors =
                               ButtonDefaults.buttonColors(containerColor = colorScheme.secondary),
                           modifier = Modifier.testTag("ArchiveButton_${request.uid}")) {
-                            Text("Archive", color = colorScheme.onSecondary)
+                            Text(
+                                "Archive",
+                                color = colorScheme.onSecondary,
+                                style = Typography.bodyLarge)
                           }
                     }
                   }

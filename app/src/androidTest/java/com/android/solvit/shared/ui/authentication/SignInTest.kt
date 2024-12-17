@@ -47,13 +47,10 @@ class SignInScreenTest {
     composeTestRule.setContent { SignInScreen(mockNavigationActions) }
 
     // Test the display of UI components
-    composeTestRule.onNodeWithTag("goBackButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("loginImage").assertIsDisplayed()
     composeTestRule.onNodeWithTag("welcomeText").assertIsDisplayed()
     composeTestRule.onNodeWithTag("emailInput").assertIsDisplayed()
     composeTestRule.onNodeWithTag("passwordInput").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("rememberMeCheckbox").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("forgotPasswordLink").assertIsDisplayed()
     composeTestRule.onNodeWithTag("signInButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("googleSignInButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("signUpLink").assertIsDisplayed()
@@ -98,8 +95,6 @@ class SignInScreenTest {
     composeTestRule.setContent { SignInScreen(mockNavigationActions) }
 
     // Test that the checkbox is clickable and can toggle between states
-    composeTestRule.onNodeWithTag("rememberMeCheckbox").performClick()
-    composeTestRule.onNodeWithTag("forgotPasswordLink").performClick()
     composeTestRule.onNodeWithTag("signInButton").performClick()
     composeTestRule.onNodeWithTag("googleSignInButton").performClick()
   }

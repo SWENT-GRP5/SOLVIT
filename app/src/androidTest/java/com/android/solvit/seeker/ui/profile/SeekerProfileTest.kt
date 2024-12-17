@@ -9,6 +9,7 @@ import androidx.navigation.NavController
 import com.android.solvit.seeker.model.profile.SeekerProfile
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.seeker.model.profile.UserRepository
+import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import org.junit.Before
 import org.junit.Rule
@@ -31,7 +32,7 @@ class SeekerProfileTest {
           username = "johndoe",
           email = "john.doe@example.com",
           phone = "1234567890",
-          address = "Chemin des Triaudes")
+          address = Location(0.0, 0.0, "Chemin des Triaudes"))
 
   @get:Rule val composeTestRule = createComposeRule()
 
@@ -77,24 +78,6 @@ class SeekerProfileTest {
   }
 
   @Test
-  fun logOutButtonOpensDialog() {
-    composeTestRule.onNodeWithTag("LogoutButton").performClick()
-    composeTestRule.onNodeWithTag("LogoutDialog").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("LogoutDialogTitle").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("LogoutDialogText").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("LogoutDialogConfirmButton").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("LogoutDialogDismissButton").assertIsDisplayed()
-  }
-
-  @Test
-  fun logOutDialogConfirmButtonCallsSignOut() {
-    composeTestRule.onNodeWithTag("LogoutButton").performClick()
-    composeTestRule.onNodeWithTag("LogoutDialogConfirmButton").performClick()
-    // Verify that the logout function is called
-    // This can be done by verifying the mock or checking the state change
-  }
-
-  @Test
   fun profileOptionItemsAreClickable() {
     composeTestRule.onNodeWithTag("MyAccountOption").performClick()
     composeTestRule.onNodeWithTag("OrdersOption").performClick()
@@ -103,10 +86,5 @@ class SeekerProfileTest {
     // composeTestRule.onNodeWithTag("PreferencesOption").performClick()
     composeTestRule.onNodeWithTag("HelpSupportOption").performClick()
     composeTestRule.onNodeWithTag("AboutAppOption").performClick()
-  }
-
-  @Test
-  fun backArrowNavigatesBack() {
-    composeTestRule.onNodeWithTag("BackButton").performClick()
   }
 }

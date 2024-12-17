@@ -9,7 +9,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.navigation.NavController
-import com.android.solvit.seeker.model.provider.ListProviderViewModel
+import com.android.solvit.provider.model.profile.ProviderViewModel
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.map.LocationRepository
 import com.android.solvit.shared.model.map.LocationViewModel
@@ -28,7 +28,7 @@ import org.mockito.kotlin.anyOrNull
 class ProfessionalProfileScreenTest {
 
   private lateinit var providerRepository: ProviderRepository
-  private lateinit var listProviderViewModel: ListProviderViewModel
+  private lateinit var providerViewModel: ProviderViewModel
 
   private lateinit var navController: NavController
   private lateinit var navigationActions: NavigationActions
@@ -59,7 +59,7 @@ class ProfessionalProfileScreenTest {
   @Before
   fun setUp() {
     providerRepository = mock(ProviderRepository::class.java)
-    listProviderViewModel = ListProviderViewModel(providerRepository)
+    providerViewModel = ProviderViewModel(providerRepository)
 
     navController = mock(NavController::class.java)
     navigationActions = NavigationActions(navController)
@@ -79,11 +79,10 @@ class ProfessionalProfileScreenTest {
 
     composeTestRule.setContent {
       ModifyProviderInformationScreen(
-          listProviderViewModel = listProviderViewModel,
+          providerViewModel = providerViewModel,
           locationViewModel = locationViewModel,
           navigationActions = navigationActions)
     }
-    composeTestRule.onNodeWithTag("goBackButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("titleModifyProvider").assertIsDisplayed()
   }
 
@@ -133,7 +132,8 @@ class ProfessionalProfileScreenTest {
   fun modifyProviderInformationScreen_errorIsDisplayInThePhoneNumberContent() {
 
     composeTestRule.setContent {
-      ModifyInput(provider, locationViewModel, navigationActions = navigationActions)
+      ModifyInput(
+          provider, locationViewModel = locationViewModel, navigationActions = navigationActions)
     }
     composeTestRule.onNodeWithTag("newPhoneNumberInputField").assertIsDisplayed()
     composeTestRule.onNodeWithTag("newPhoneNumberErrorMessage").assertIsNotDisplayed()
@@ -150,7 +150,8 @@ class ProfessionalProfileScreenTest {
   fun modifyProviderInformationScreen_errorIsDisplayInTheDescriptionContent() {
 
     composeTestRule.setContent {
-      ModifyInput(provider, locationViewModel, navigationActions = navigationActions)
+      ModifyInput(
+          provider, locationViewModel = locationViewModel, navigationActions = navigationActions)
     }
     composeTestRule.onNodeWithTag("newDescriptionInputField").assertIsDisplayed()
     composeTestRule.onNodeWithTag("newDescriptionErrorMessage").assertIsNotDisplayed()
@@ -164,7 +165,8 @@ class ProfessionalProfileScreenTest {
   @Test
   fun modifyProviderInformationScreen_errorIsDisplayInTheLocationContent() {
     composeTestRule.setContent {
-      ModifyInput(provider, locationViewModel, navigationActions = navigationActions)
+      ModifyInput(
+          provider, locationViewModel = locationViewModel, navigationActions = navigationActions)
     }
     composeTestRule.onNodeWithTag("newLocationInputField").performTextClearance()
     composeTestRule.onNodeWithTag("newLocationInputField").performTextInput("USA")

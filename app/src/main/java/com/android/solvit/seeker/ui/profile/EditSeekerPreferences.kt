@@ -2,13 +2,28 @@ package com.android.solvit.seeker.ui.profile
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.*
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme.colorScheme
-import androidx.compose.runtime.*
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -16,11 +31,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.solvit.R
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.android.solvit.shared.ui.theme.Typography
+import com.android.solvit.shared.ui.utils.TopAppBarInbox
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditPreferences(
     userId: String,
@@ -28,7 +45,7 @@ fun EditPreferences(
     navigationActions: NavigationActions
 ) {
 
-  val selectedItems by viewModel.userPreferences.collectAsState()
+  val selectedItems by viewModel.userPreferences.collectAsStateWithLifecycle()
   // Fetch preferences when the screen is composed
   LaunchedEffect(Unit) {
     if (selectedItems.isEmpty()) { // Only fetch from Firestore if local state is empty
@@ -38,22 +55,12 @@ fun EditPreferences(
 
   Scaffold(
       topBar = {
-        TopAppBar(
-            title = {
-              Row(
-                  modifier = Modifier.fillMaxWidth().testTag("edit_preferences_title"),
-                  horizontalArrangement = Arrangement.Start // Align text to the start (left)
-                  ) {
-                    Text("Edit Preferences")
-                  }
-            },
-            navigationIcon = {
-              IconButton(
-                  onClick = { navigationActions.goBack() },
-                  modifier = Modifier.testTag("goBackButton")) {
-                    Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
-                  }
-            })
+        TopAppBarInbox(
+            title = "Edit Preferences",
+            testTagTitle = "edit_preferences_title",
+            leftButtonAction = { navigationActions.goBack() },
+            leftButtonForm = Icons.AutoMirrored.Filled.ArrowBack,
+            testTagLeft = "goBackButton")
       }) { paddingValues ->
         // Main content of the screen with padding
         Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
@@ -89,10 +96,13 @@ fun EditPreferences(
 
                 Text(
                     text = "Selected preferences:",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
                     modifier =
-                        Modifier.align(Alignment.Start).testTag("selected_preferences_title"))
+                        Modifier.align(Alignment.Start).testTag("selected_preferences_title"),
+                    style =
+                        Typography.bodyLarge.copy(
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                        ))
                 Spacer(modifier = Modifier.height(8.dp))
 
                 SuggestionsGrid(
@@ -106,10 +116,13 @@ fun EditPreferences(
 
                 Text(
                     text = "You might like:",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
                     modifier =
-                        Modifier.align(Alignment.Start).testTag("available_preferences_title"))
+                        Modifier.align(Alignment.Start).testTag("available_preferences_title"),
+                    style =
+                        Typography.bodyLarge.copy(
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                        ))
                 Spacer(modifier = Modifier.height(8.dp))
 
                 SuggestionsGrid2(
@@ -127,8 +140,8 @@ fun EditPreferences(
                   Modifier.align(Alignment.BottomCenter) // Correct alignment here
                       .height(60.dp)
                       .testTag("updatePreferencesButton"),
-              colors = ButtonDefaults.buttonColors(colorScheme.secondary)) {
-                Text(text = "Update Preferences")
+              colors = ButtonDefaults.buttonColors(colorScheme.primary)) {
+                Text(text = "Update Preferences", style = Typography.bodyLarge)
               }
         }
       }
@@ -167,7 +180,7 @@ fun SuggestionButton2(text: String, isSelected: Boolean, onClick: () -> Unit) {
       color = backgroundColor) {
         Text(
             text = text,
-            style = MaterialTheme.typography.bodyMedium,
+            style = Typography.bodyMedium,
             modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp),
             color = contentColor)
       }

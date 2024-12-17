@@ -16,7 +16,6 @@ import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.navigation.TopLevelDestinations
-import com.google.firebase.Timestamp
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -46,7 +45,6 @@ class SeekerMapScreenTest {
               price = 10.0,
               description = "Test Description 1",
               languages = listOf(Language.ARABIC, Language.ENGLISH),
-              deliveryTime = Timestamp(0, 0),
               popular = true),
           Provider(
               uid = "2",
@@ -58,7 +56,6 @@ class SeekerMapScreenTest {
               price = 10.0,
               description = "Test Description 2",
               languages = listOf(Language.ARABIC, Language.ENGLISH),
-              deliveryTime = Timestamp(0, 0),
               popular = true))
 
   @Before
@@ -107,7 +104,7 @@ class SeekerMapScreenTest {
   fun onTabSelect_navigatesToCorrectRoute() {
     composeTestRule.setContent { SeekerMapScreen(listProviderViewModel, navigationActions, false) }
 
-    composeTestRule.onNodeWithTag(TopLevelDestinations.SERVICES.textId).assertIsDisplayed()
-    composeTestRule.onNodeWithTag(TopLevelDestinations.SERVICES.textId).performClick()
+    composeTestRule.onNodeWithTag(TopLevelDestinations.SEEKER_OVERVIEW.textId).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(TopLevelDestinations.SEEKER_OVERVIEW.textId).performClick()
   }
 }

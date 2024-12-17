@@ -1,5 +1,6 @@
 package com.android.solvit.seeker.model.profile
 
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -8,6 +9,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.android.solvit.shared.model.map.Location
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
+import com.google.firebase.storage.storage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -18,14 +20,14 @@ class SeekerProfileViewModel(
   // private val _userProfile = MutableStateFlow<List<UserProfile>>(emptyList())
   // hardcode
   private val _seekerProfile =
-      MutableStateFlow<SeekerProfile>(
+      MutableStateFlow(
           SeekerProfile(
               uid = "", // Hardcoded UID
               name = "", // Hardcoded Name
               username = "", // Hardcoded username
               email = "", // Hardcoded Email
               phone = "", // Hardcoded Phone Number
-              address = "" // Hardcoded Address
+              address = Location(0.0, 0.0, "") // Hardcoded Address
               ))
   val seekerProfile: StateFlow<SeekerProfile> = _seekerProfile
 
@@ -35,8 +37,8 @@ class SeekerProfileViewModel(
   private val _cachedLocations = MutableStateFlow<List<Location>>(emptyList())
   val cachedLocations: StateFlow<List<Location>> = _cachedLocations
 
-  private val _locationSearched = MutableStateFlow<Location>(Location(0.0, 0.0, "Unknown"))
-  val locationSearched: StateFlow<Location> = _locationSearched
+  private val _locationSearched = MutableStateFlow<Location?>(null)
+  val locationSearched: StateFlow<Location?> = _locationSearched
 
   private val _userPreferences = MutableStateFlow<List<String>>(emptyList())
   val userPreferences: StateFlow<List<String>> = _userPreferences
@@ -48,7 +50,9 @@ class SeekerProfileViewModel(
           @Suppress("UNCHECKED_CAST")
           override fun <T : ViewModel> create(modelClass: Class<T>): T {
 
-            return SeekerProfileViewModel(UserRepositoryFirestore(Firebase.firestore)) as T
+            return SeekerProfileViewModel(
+                UserRepositoryFirestore(Firebase.firestore, Firebase.storage))
+                as T
           }
         }
   }
@@ -85,8 +89,8 @@ class SeekerProfileViewModel(
     repository.getUsersProfile(onSuccess = { _seekerProfileList.value = it }, onFailure = {})
   }
 
-  fun addUserProfile(profile: SeekerProfile) {
-    repository.addUserProfile(profile, onSuccess = { getUsersProfile() }, onFailure = {})
+  fun addUserProfile(profile: SeekerProfile, imageUri: Uri?) {
+    repository.addUserProfile(profile, imageUri, onSuccess = { getUsersProfile() }, onFailure = {})
   }
 
   fun updateUserProfile(profile: SeekerProfile) {
@@ -143,5 +147,9 @@ class SeekerProfileViewModel(
 
   fun setLocationSearched(location: Location) {
     _locationSearched.value = location
+  }
+
+  fun clearLocation() {
+    _locationSearched.value = null
   }
 }
