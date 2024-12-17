@@ -87,7 +87,8 @@ fun EditSeekerProfileScreen(
   }
 
   val locationSuggestions by
-      locationViewModel.locationSuggestions.collectAsState(initial = emptyList<Location?>())
+      locationViewModel.locationSuggestions.collectAsStateWithLifecycle(
+          initialValue = emptyList<Location?>())
   var selectedLocation by remember { mutableStateOf<Location?>(null) }
 
   val configuration = LocalConfiguration.current

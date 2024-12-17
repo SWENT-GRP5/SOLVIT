@@ -503,8 +503,8 @@ fun ProviderRowCard(
  */
 @Composable
 fun PriceFilter(listProviderViewModel: ListProviderViewModel) {
-  val minPrice by listProviderViewModel.minPrice.collectAsState()
-  val maxPrice by listProviderViewModel.maxPrice.collectAsState()
+  val minPrice by listProviderViewModel.minPrice.collectAsStateWithLifecycle()
+  val maxPrice by listProviderViewModel.maxPrice.collectAsStateWithLifecycle()
 
   Column {
     Row(
@@ -634,7 +634,8 @@ fun filterStringFields(
  */
 @Composable
 fun LanguageFilterField(list: List<String>, listProviderViewModel: ListProviderViewModel) {
-  val selectedLanguages = listProviderViewModel.selectedLanguages.collectAsState().value
+  val selectedLanguages =
+      listProviderViewModel.selectedLanguages.collectAsStateWithLifecycle().value
   val languages = list.map { Language.valueOf(it.uppercase()) }
   val iconsPressed = languages.map { it in selectedLanguages }
 
@@ -687,7 +688,7 @@ fun LanguageFilterField(list: List<String>, listProviderViewModel: ListProviderV
  */
 @Composable
 fun RatingFilterField(list: List<Double>, listProviderViewModel: ListProviderViewModel) {
-  val selectedRatings = listProviderViewModel.selectedRatings.collectAsState().value
+  val selectedRatings = listProviderViewModel.selectedRatings.collectAsStateWithLifecycle().value
   val iconsPressed = list.map { it in selectedRatings }
   Log.e("selectedRating", "$selectedRatings")
   Log.e("ratingsPressed", "$iconsPressed")
