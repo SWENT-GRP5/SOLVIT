@@ -684,7 +684,7 @@ private fun ExceptionCard(
 
               Surface(
                   onClick = onDelete,
-                  modifier = Modifier.size(32.dp),
+                  modifier = Modifier.size(32.dp).testTag("deleteExceptionButton"),
                   shape = MaterialTheme.shapes.small,
                   color = MaterialTheme.colorScheme.background,
                   border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.5f))) {

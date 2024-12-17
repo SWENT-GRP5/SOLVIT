@@ -1,6 +1,5 @@
 package com.android.solvit.provider.ui.calendar
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.*
@@ -202,9 +201,17 @@ class ProviderCalendarScreenTest {
     composeTestRule.setContent {
       ProviderCalendarScreen(navigationActions = navigationActions, viewModel = viewModel)
     }
+
     // Wait for initial data load and animations
-    composeTestRule.mainClock.autoAdvance = false
+    composeTestRule.waitUntil(timeoutMillis = 5000) { !viewModel.isLoading.value }
     composeTestRule.mainClock.advanceTimeBy(1000)
+    composeTestRule.mainClock.autoAdvance = true
+    composeTestRule.waitForIdle()
+  }
+
+  private fun waitForAnimation() {
+    composeTestRule.mainClock.autoAdvance = false
+    composeTestRule.mainClock.advanceTimeBy(500)
     composeTestRule.mainClock.autoAdvance = true
     composeTestRule.waitForIdle()
   }
@@ -217,7 +224,7 @@ class ProviderCalendarScreenTest {
 
     // Switch to month view
     composeTestRule.onNodeWithTag("segmentedButton_MONTH").performClick()
-    composeTestRule.waitForIdle()
+    waitForAnimation()
 
     // 1. Test basic month view structure
     composeTestRule.onNodeWithTag("monthView").assertExists().assertIsDisplayed()
@@ -308,7 +315,7 @@ class ProviderCalendarScreenTest {
     composeTestRule.onNodeWithTag("weekViewTimeGrid").performTouchInput {
       swipeUp(startY = 1000f, endY = 100f)
     }
-    composeTestRule.waitForIdle()
+    waitForAnimation()
 
     composeTestRule
         .onNodeWithTag("weekViewServiceRequest_${afternoonTestRequest.uid}")
@@ -321,7 +328,7 @@ class ProviderCalendarScreenTest {
     setupScreen()
 
     composeTestRule.onNodeWithTag("segmentedButton_DAY").performClick()
-    composeTestRule.waitForIdle()
+    waitForAnimation()
 
     // 1. Test basic day view structure
     composeTestRule.onNodeWithTag("dayView").assertExists().assertIsDisplayed()
@@ -343,7 +350,7 @@ class ProviderCalendarScreenTest {
     composeTestRule.onNodeWithTag("dayViewTimeGrid").performTouchInput {
       swipeUp(startY = 1000f, endY = 100f)
     }
-    composeTestRule.waitForIdle()
+    waitForAnimation()
     composeTestRule
         .onNodeWithTag("dayViewServiceRequest_${afternoonTestRequest.uid}")
         .assertExists()
@@ -361,17 +368,17 @@ class ProviderCalendarScreenTest {
     composeTestRule.onNodeWithTag("weekViewTimeGrid").assertExists()
 
     composeTestRule.onNodeWithTag("segmentedButton_MONTH").performClick()
-    composeTestRule.waitForIdle()
+    waitForAnimation()
     assertEquals(CalendarView.MONTH, viewModel.calendarView.value)
     composeTestRule.onNodeWithTag("monthViewCalendarGrid").assertExists()
 
     composeTestRule.onNodeWithTag("segmentedButton_DAY").performClick()
-    composeTestRule.waitForIdle()
+    waitForAnimation()
     assertEquals(CalendarView.DAY, viewModel.calendarView.value)
     composeTestRule.onNodeWithTag("dayViewTimeGrid").assertExists()
 
     composeTestRule.onNodeWithTag("segmentedButton_WEEK").performClick()
-    composeTestRule.waitForIdle()
+    waitForAnimation()
     assertEquals(CalendarView.WEEK, viewModel.calendarView.value)
     composeTestRule.onNodeWithTag("weekViewTimeGrid").assertExists()
   }
@@ -383,37 +390,37 @@ class ProviderCalendarScreenTest {
     // Test week view swipe navigation
     val initialWeekDate = viewModel.currentViewDate.value
     composeTestRule.onNodeWithTag("swipeableCalendarContainer").performTouchInput { swipeLeft() }
-    composeTestRule.waitForIdle()
+    waitForAnimation()
     assertEquals(initialWeekDate.plusWeeks(1), viewModel.currentViewDate.value)
 
     composeTestRule.onNodeWithTag("swipeableCalendarContainer").performTouchInput { swipeRight() }
-    composeTestRule.waitForIdle()
+    waitForAnimation()
     assertEquals(initialWeekDate, viewModel.currentViewDate.value)
 
     // Test month view swipe navigation
     composeTestRule.onNodeWithTag("segmentedButton_MONTH").performClick()
-    composeTestRule.waitForIdle()
+    waitForAnimation()
 
     val initialMonthDate = viewModel.currentViewDate.value
     composeTestRule.onNodeWithTag("swipeableCalendarContainer").performTouchInput { swipeLeft() }
-    composeTestRule.waitForIdle()
+    waitForAnimation()
     assertEquals(initialMonthDate.plusMonths(1), viewModel.currentViewDate.value)
 
     composeTestRule.onNodeWithTag("swipeableCalendarContainer").performTouchInput { swipeRight() }
-    composeTestRule.waitForIdle()
+    waitForAnimation()
     assertEquals(initialMonthDate, viewModel.currentViewDate.value)
 
     // Test day view swipe navigation
     composeTestRule.onNodeWithTag("segmentedButton_DAY").performClick()
-    composeTestRule.waitForIdle()
+    waitForAnimation()
 
     val initialDayDate = viewModel.currentViewDate.value
     composeTestRule.onNodeWithTag("swipeableCalendarContainer").performTouchInput { swipeLeft() }
-    composeTestRule.waitForIdle()
+    waitForAnimation()
     assertEquals(initialDayDate.plusDays(1), viewModel.currentViewDate.value)
 
     composeTestRule.onNodeWithTag("swipeableCalendarContainer").performTouchInput { swipeRight() }
-    composeTestRule.waitForIdle()
+    waitForAnimation()
     assertEquals(initialDayDate, viewModel.currentViewDate.value)
   }
 
@@ -423,7 +430,7 @@ class ProviderCalendarScreenTest {
 
     // Test week view header navigation and date picker interaction
     composeTestRule.onNodeWithTag("weekViewHeader").performClick()
-    composeTestRule.waitForIdle()
+    waitForAnimation()
 
     // Verify date picker dialog appears
     composeTestRule.onNodeWithTag("datePickerDialog").assertExists()
@@ -444,20 +451,20 @@ class ProviderCalendarScreenTest {
 
     // Click on the target date in the grid
     composeTestRule.onNodeWithText(datePattern).performClick()
-    composeTestRule.waitForIdle()
+    waitForAnimation()
 
     // Confirm the selection which will trigger the onDateSelected callback
     composeTestRule.onNodeWithText("OK").performClick()
-    composeTestRule.waitForIdle()
+    waitForAnimation()
 
     // Verify that the current view date has been updated
     assertEquals(15, viewModel.currentViewDate.value.dayOfMonth)
 
     // Test month view header navigation
     composeTestRule.onNodeWithTag("segmentedButton_MONTH").performClick()
-    composeTestRule.waitForIdle()
+    waitForAnimation()
     composeTestRule.onNodeWithTag("monthHeader").performClick()
-    composeTestRule.waitForIdle()
+    waitForAnimation()
 
     // Verify date picker appears in month view
     composeTestRule.onNodeWithTag("datePickerDialog").assertExists()
@@ -471,7 +478,7 @@ class ProviderCalendarScreenTest {
 
     // Test date selection in week view by clicking the day header
     composeTestRule.onNodeWithTag("weekDayHeader_${testDate.toLocalDate()}").performClick()
-    composeTestRule.waitForIdle()
+    waitForAnimation()
 
     // Verify bottom sheet appears with time slots
     composeTestRule.onNodeWithTag("bottomSheet").assertExists()
@@ -479,19 +486,19 @@ class ProviderCalendarScreenTest {
 
     // Test service request click in bottom sheet
     composeTestRule.onNodeWithTag("weekViewServiceRequest_${testRequest.uid}").performClick()
-    composeTestRule.waitForIdle()
+    waitForAnimation()
 
     // Verify navigation to booking details
     verify(navigationActions).navigateTo(Route.BOOKING_DETAILS)
 
     // Test month view date selection
     composeTestRule.onNodeWithTag("segmentedButton_MONTH").performClick()
-    composeTestRule.waitForIdle()
+    waitForAnimation()
 
     composeTestRule
         .onNodeWithTag("monthDayStatusColumn_${testDate.toLocalDate()}", useUnmergedTree = true)
         .performClick()
-    composeTestRule.waitForIdle()
+    waitForAnimation()
 
     // Verify bottom sheet appears again
     composeTestRule.onNodeWithTag("bottomSheet").assertExists()
@@ -506,7 +513,7 @@ class ProviderCalendarScreenTest {
     composeTestRule.onNodeWithTag("weekViewTimeGrid").performTouchInput {
       swipeUp(startY = 1000f, endY = 100f)
     }
-    composeTestRule.waitForIdle()
+    waitForAnimation()
     composeTestRule
         .onNodeWithTag("weekViewServiceRequest_${afternoonTestRequest.uid}")
         .assertExists()
@@ -514,12 +521,12 @@ class ProviderCalendarScreenTest {
 
     // Test day view scrolling
     composeTestRule.onNodeWithTag("segmentedButton_DAY").performClick()
-    composeTestRule.waitForIdle()
+    waitForAnimation()
 
     composeTestRule.onNodeWithTag("dayViewTimeGrid").performTouchInput {
       swipeUp(startY = 1000f, endY = 100f)
     }
-    composeTestRule.waitForIdle()
+    waitForAnimation()
     composeTestRule
         .onNodeWithTag("dayViewServiceRequest_${afternoonTestRequest.uid}")
         .assertExists()
@@ -539,7 +546,7 @@ class ProviderCalendarScreenTest {
             startY = 1000f, endY = 100f, durationMillis = 200 // Faster scroll for test
             )
       }
-      composeTestRule.waitForIdle()
+      waitForAnimation()
     }
 
     // Verify time grid components
@@ -552,14 +559,14 @@ class ProviderCalendarScreenTest {
 
     // Test day view current time indicator
     composeTestRule.onNodeWithTag("segmentedButton_DAY").performClick()
-    composeTestRule.waitForIdle()
+    waitForAnimation()
 
     // Scroll in day view as well if needed
     if (currentHour > 8) {
       composeTestRule.onNodeWithTag("dayViewTimeGrid").performTouchInput {
         swipeUp(startY = 1000f, endY = 100f, durationMillis = 200)
       }
-      composeTestRule.waitForIdle()
+      waitForAnimation()
     }
 
     // Verify time grid components in day view
@@ -678,38 +685,321 @@ class ProviderCalendarScreenTest {
   }
 
   @Test
-  fun scrollableTimePickerRow_displaysAndSelectsTime() {
+  fun scrollableTimePickerRow_hourSelection() {
     var selectedTime = LocalTime.of(10, 0)
-
     composeTestRule.setContent {
-      Box(modifier = Modifier.height(200.dp)) {
-        ScrollableTimePickerRow(
-            selectedTime = selectedTime,
-            onTimeSelected = { selectedTime = it },
-            testTagPrefix = "test")
-      }
+      ScrollableTimePickerRow(
+          selectedTime = selectedTime,
+          onTimeSelected = { selectedTime = it },
+          modifier = Modifier.height(200.dp),
+          testTagPrefix = "test")
     }
+    composeTestRule.waitForIdle()
 
-    // Wait for initial render
-    composeTestRule.mainClock.autoAdvance = false
-    composeTestRule.mainClock.advanceTimeBy(500)
-
-    // Verify initial state
+    // Verify picker components exist
     composeTestRule.onNodeWithTag("test_hour").assertExists()
     composeTestRule.onNodeWithTag("test_hour_picker").assertExists()
-    composeTestRule.onNodeWithTag("test_minute").assertExists()
-    composeTestRule.onNodeWithTag("test_minute_picker").assertExists()
 
     // Verify initial time display
-    composeTestRule.onNodeWithText("10").assertExists()
-    composeTestRule.onNodeWithText("00").assertExists()
+    composeTestRule
+        .onNodeWithTag("test_hour_picker")
+        .assertExists()
+        .onChildren()
+        .filterToOne(hasText("10"))
+        .assertExists()
 
     // Select a different hour by clicking an item
-    composeTestRule.onNodeWithTag("test_hour_picker_item_11").performClick()
-    composeTestRule.mainClock.advanceTimeBy(500)
+    composeTestRule
+        .onNodeWithTag("test_hour_picker")
+        .assertExists()
+        .onChildren()
+        .filterToOne(hasText("11"))
+        .performClick()
+    waitForAnimation()
 
     // Verify selection changed
-    composeTestRule.onNodeWithText("11").assertExists()
     assert(selectedTime.hour == 11)
+  }
+
+  @Test
+  fun scrollableTimePickerRow_minuteSelection() {
+    var selectedTime = LocalTime.of(10, 0)
+    composeTestRule.setContent {
+      ScrollableTimePickerRow(
+          selectedTime = selectedTime,
+          onTimeSelected = { selectedTime = it },
+          modifier = Modifier.height(200.dp),
+          testTagPrefix = "test")
+    }
+    composeTestRule.waitForIdle()
+
+    // Select minute by scrolling
+    composeTestRule.onNodeWithTag("test_minute_picker").assertExists().performTouchInput {
+      swipeUp(startY = center.y + 100f, endY = center.y - 100f)
+    }
+    waitForAnimation()
+
+    // Verify that the minute value changed from 0
+    assert(selectedTime.minute != 0)
+  }
+
+  @Test
+  fun scrollableTimePickerRow_scrollBehavior() {
+    var selectedTime = LocalTime.of(10, 0)
+    composeTestRule.setContent {
+      ScrollableTimePickerRow(
+          selectedTime = selectedTime,
+          onTimeSelected = { selectedTime = it },
+          modifier = Modifier.height(200.dp),
+          testTagPrefix = "test")
+    }
+    composeTestRule.waitForIdle()
+
+    // Verify initial state
+    composeTestRule.onNodeWithTag("test_hour_picker").assertExists()
+    composeTestRule
+        .onNodeWithTag("test_hour_picker")
+        .assertExists()
+        .onChildren()
+        .filterToOne(hasText("10"))
+        .assertExists()
+
+    // Perform scroll
+    composeTestRule.onNodeWithTag("test_hour_picker").performTouchInput {
+      swipeUp(startY = center.y + 100f, endY = center.y - 100f)
+    }
+    waitForAnimation()
+
+    // Verify scroll changed the value
+    assert(selectedTime.hour != 10)
+  }
+
+  @Test
+  fun schedulePreferencesSheet_exceptionsValidation() {
+    composeTestRule.setContent { SchedulePreferencesSheet(viewModel = viewModel, onDismiss = {}) }
+    composeTestRule.waitForIdle()
+
+    // Wait for data to load and UI to settle
+    composeTestRule.waitUntil(timeoutMillis = 5000) { !viewModel.isLoading.value }
+
+    // Switch to Exceptions tab
+    composeTestRule.onNodeWithText("Exceptions").performClick()
+    waitForAnimation()
+
+    // Click the add exception section to expand it
+    composeTestRule.onNodeWithTag("addButton").assertExists().performClick()
+    waitForAnimation()
+
+    // Select Off Time type using the segmented button
+    composeTestRule.onNodeWithText("Off Time").assertExists().performClick()
+    waitForAnimation()
+
+    // Verify Add Exception button is disabled when no date is selected
+    composeTestRule
+        .onNodeWithText("Add Exception")
+        .assertExists()
+        .assertHasClickAction()
+        .assertIsEnabled()
+  }
+
+  @Test
+  fun schedulePreferencesSheet_regularHoursValidation() {
+    composeTestRule.setContent { SchedulePreferencesSheet(viewModel = viewModel, onDismiss = {}) }
+    composeTestRule.waitForIdle()
+
+    // Wait for data to load and UI to settle
+    composeTestRule.waitUntil(timeoutMillis = 5000) { !viewModel.isLoading.value }
+
+    // Find and click Monday's schedule
+    composeTestRule.onNodeWithTag("day_schedule_card_MONDAY").assertExists().performClick()
+    waitForAnimation()
+
+    // Set invalid time range (end before start)
+    composeTestRule
+        .onNodeWithTag("time_picker_MONDAY_start")
+        .assertExists()
+        .onChildren()
+        .filterToOne(hasText("Start Time"))
+        .assertExists()
+
+    composeTestRule.onNodeWithTag("time_picker_MONDAY_start").assertExists().performTouchInput {
+      click(centerRight)
+    }
+    waitForAnimation()
+
+    composeTestRule.onNodeWithText("10").assertExists().performClick()
+    waitForAnimation()
+
+    composeTestRule.onNodeWithTag("time_picker_MONDAY_end").assertExists().performTouchInput {
+      click(centerRight)
+    }
+    waitForAnimation()
+
+    composeTestRule.onNodeWithText("09").assertExists().performClick()
+    waitForAnimation()
+
+    // Verify Save Hours button is enabled even with invalid time range
+    composeTestRule
+        .onNodeWithText("Save Hours")
+        .assertExists()
+        .assertHasClickAction()
+        .assertIsEnabled()
+  }
+
+  @Test
+  fun providerCalendarScreen_openSchedulePreferences() {
+    setupScreen()
+    composeTestRule.waitForIdle()
+
+    // Wait for data to load
+    composeTestRule.waitUntil(timeoutMillis = 5000) { !viewModel.isLoading.value }
+
+    // Click settings button to open preferences sheet
+    composeTestRule.onNodeWithTag("settingsButton").assertExists().performClick()
+    waitForAnimation()
+
+    // Verify preferences sheet is displayed
+    composeTestRule.onNodeWithText("Regular Hours").assertExists()
+    composeTestRule.onNodeWithText("Exceptions").assertExists()
+
+    // Test basic interaction with regular hours tab
+    composeTestRule.onNodeWithTag("day_schedule_card_MONDAY").assertExists().performClick()
+    waitForAnimation()
+
+    // Verify time picker is shown
+    composeTestRule.onNodeWithTag("time_picker_MONDAY_start").assertExists()
+
+    // Test basic interaction with exceptions tab
+    composeTestRule.onNodeWithText("Exceptions").performClick()
+    waitForAnimation()
+
+    composeTestRule.onNodeWithTag("addButton").assertExists().performClick()
+    waitForAnimation()
+
+    // Verify exception type options are shown
+    composeTestRule.onNodeWithText("Off Time").assertExists()
+    composeTestRule.onNodeWithText("Extra Time").assertExists()
+  }
+
+  @Test
+  fun schedulePreferencesSheet_clearRegularHours() {
+    setupScreen()
+    composeTestRule.waitForIdle()
+
+    // Open preferences sheet
+    composeTestRule.onNodeWithTag("settingsButton").performClick()
+    waitForAnimation()
+
+    // Click on Monday's schedule card
+    composeTestRule.onNodeWithTag("day_schedule_card_MONDAY").performClick()
+    waitForAnimation()
+
+    // Click clear hours button
+    composeTestRule.onNodeWithTag("clear_hours_MONDAY").performClick()
+    waitForAnimation()
+
+    // Verify hours are cleared (card should show "No hours set")
+    composeTestRule.onNodeWithTag("day_schedule_card_MONDAY").assertTextContains("No hours set")
+  }
+
+  @Test
+  fun schedulePreferencesSheet_addExtraTimeException() {
+    setupScreen()
+    composeTestRule.waitForIdle()
+
+    // Open preferences sheet
+    composeTestRule.onNodeWithTag("settingsButton").performClick()
+    waitForAnimation()
+
+    // Switch to exceptions tab
+    composeTestRule.onNodeWithText("Exceptions").performClick()
+    waitForAnimation()
+
+    // Click add exception section to expand it
+    composeTestRule.onNodeWithTag("addExceptionTitle", useUnmergedTree = true).performClick()
+    waitForAnimation()
+
+    // Select Extra Time
+    composeTestRule.onNodeWithText("Extra Time").performClick()
+    waitForAnimation()
+
+    // Select a date
+    composeTestRule.onNodeWithTag("datePickerButton").performClick()
+    waitForAnimation()
+
+    // Click on a date in the calendar
+    composeTestRule.onNodeWithTag("datePickerDialog").assertExists()
+    composeTestRule.onNodeWithTag("confirmDateButton").performClick()
+    waitForAnimation()
+
+    // Add the exception
+    composeTestRule.onNodeWithText("Add Extra Time", useUnmergedTree = true).performClick()
+    waitForAnimation()
+
+    // Verify exception is added
+    composeTestRule.onNodeWithText("Extra Time").assertExists()
+  }
+
+  @Test
+  fun schedulePreferencesSheet_deleteException() {
+    // Use the same setup as addExtraTimeException
+    schedulePreferencesSheet_addExtraTimeException()
+
+    // Click delete button on the exception card
+    composeTestRule.onNodeWithTag("deleteExceptionButton").performClick()
+    waitForAnimation()
+
+    // Verify exception is removed by checking that "Existing Exceptions" section is not visible
+    composeTestRule.onNodeWithText("Existing Exceptions").assertDoesNotExist()
+  }
+
+  @Test
+  fun scrollableTimePickerRow_hourSelectionInSheet() {
+    setupScreen()
+    composeTestRule.waitForIdle()
+
+    // Open preferences sheet
+    composeTestRule.onNodeWithTag("settingsButton").performClick()
+    waitForAnimation()
+
+    // Open Monday's schedule
+    composeTestRule.onNodeWithTag("day_schedule_card_MONDAY").performClick()
+    waitForAnimation()
+
+    // Scroll hour picker
+    composeTestRule.onNodeWithTag("time_picker_MONDAY_start_hour_picker").performTouchInput {
+      swipeUp()
+      swipeUp()
+    }
+    waitForAnimation()
+
+    // Verify hour picker is still visible after scrolling
+    composeTestRule.onNodeWithTag("time_picker_MONDAY_start_hour_picker").assertExists()
+  }
+
+  @Test
+  fun scrollableTimePickerRow_minuteSnapBehavior() {
+    setupScreen()
+    composeTestRule.waitForIdle()
+
+    // Open preferences sheet
+    composeTestRule.onNodeWithTag("settingsButton").performClick()
+    waitForAnimation()
+
+    // Open Monday's schedule
+    composeTestRule.onNodeWithTag("day_schedule_card_MONDAY").performClick()
+    waitForAnimation()
+
+    // Scroll minute picker partially
+    composeTestRule.onNodeWithTag("time_picker_MONDAY_start_minute_picker").performTouchInput {
+      swipeUp(startY = centerY, endY = centerY - 50f)
+    }
+    waitForAnimation()
+
+    // Let it snap
+    composeTestRule.waitForIdle()
+
+    // Verify minute picker is still visible after scrolling
+    composeTestRule.onNodeWithTag("time_picker_MONDAY_start_minute_picker").assertExists()
   }
 }

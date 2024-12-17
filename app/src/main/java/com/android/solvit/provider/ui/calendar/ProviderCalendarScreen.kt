@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -66,7 +68,14 @@ fun ProviderCalendarScreen(
   var shouldAnimate by remember { mutableStateOf(true) }
 
   Scaffold(
-      topBar = { TopAppBarInbox(title = "My Calendar", testTagTitle = "calendarTitle") },
+      topBar = {
+        TopAppBarInbox(
+            title = "My Calendar",
+            testTagTitle = "calendarTitle",
+            rightButtonForm = Icons.Default.Settings,
+            rightButtonAction = { showPreferences = true },
+            testTagRight = "settingsButton")
+      },
       bottomBar = {
         BottomNavigationMenu(
             onTabSelect = { navigationActions.navigateTo(it.route) },
