@@ -356,11 +356,8 @@ fun Notifications_Dialog(onDismiss: () -> Unit, serviceRequest: ServiceRequest) 
                 modifier =
                     Modifier.size(64.dp)
                         .align(Alignment.TopCenter)
-                        .offset(
-                            y =
-                                (-20)
-                                    .dp), // Negative offset to overlap the icon on top of the
-                                          // dialog
+                        .offset(y = (-20).dp), // Negative offset to overlap the icon on top of the
+                // dialog
                 contentAlignment = Alignment.Center) {
                   Icon(
                       imageVector = Icons.Filled.Notifications,
