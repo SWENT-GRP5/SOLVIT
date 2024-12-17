@@ -34,6 +34,7 @@ import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -50,6 +51,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.android.solvit.provider.model.profile.ProviderViewModel
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.request.ServiceRequest
@@ -173,7 +175,12 @@ fun JobSectionContent(
     navigationActions: NavigationActions
 ) {
   when (selectedTab) {
-    0 -> PendingJobsSection(providerId, serviceRequestViewModel, navigationActions)
+    0 ->
+        PendingJobsSection(
+            providerId = providerId,
+            viewModel = serviceRequestViewModel,
+            navigationActions = navigationActions,
+            providerViewModel = viewModel(factory = ProviderViewModel.Factory))
     1 -> AcceptedJobSection(providerId, serviceRequestViewModel, navigationActions)
     2 ->
         ScheduledJobsSection(
@@ -254,30 +261,38 @@ fun JobListSection(
  * @param providerId ID of the current provider.
  * @param viewModel ViewModel for managing service requests.
  * @param navigationActions Actions for navigation.
+ * @param providerViewModel ProviderViewModel
  */
 @Composable
 fun PendingJobsSection(
     providerId: String,
     viewModel: ServiceRequestViewModel,
-    navigationActions: NavigationActions
+    navigationActions: NavigationActions,
+    providerViewModel: ProviderViewModel = viewModel(factory = ProviderViewModel.Factory)
 ) {
   val context = LocalContext.current
   val pendingRequests by viewModel.pendingRequests.collectAsState()
+  val provider by providerViewModel.userProvider.collectAsState()
+
+  // Fetch provider data when component is first created
+  LaunchedEffect(providerId) { providerViewModel.getProvider(providerId) }
 
   JobListSection(
       title = "Pending",
       providerId = providerId,
       requests = pendingRequests,
       emptyMessage = "No pending jobs",
-      onLearnMore = {
-        viewModel.selectRequest(it)
+      onLearnMore = { request ->
+        viewModel.selectRequest(request)
         navigationActions.navigateTo(Route.BOOKING_DETAILS)
       },
       onContactCustomer = {
         Toast.makeText(context, "Contact Not yet Implemented", Toast.LENGTH_SHORT).show()
       },
       onConfirmRequest = { request ->
-        viewModel.viewModelScope.launch { viewModel.confirmRequest(request, "test provider name") }
+        provider?.let { p ->
+          viewModel.viewModelScope.launch { viewModel.confirmRequest(request, p.name) }
+        }
       },
       onChat = { Toast.makeText(context, "Chat Not yet Implemented", Toast.LENGTH_SHORT).show() })
 }
