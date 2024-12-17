@@ -2,6 +2,8 @@ package com.android.solvit.seeker.ui.profile
 
 import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
+import android.graphics.Bitmap
+import android.net.Uri
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
@@ -26,16 +28,10 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ButtonDefaults.buttonColors
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
@@ -54,15 +50,18 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.solvit.R
+import com.android.solvit.provider.ui.profile.UploadImage
 import com.android.solvit.seeker.model.profile.SeekerProfile
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.seeker.ui.request.LocationDropdown
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.map.LocationViewModel
+import com.android.solvit.shared.model.utils.loadBitmapFromUri
 import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.android.solvit.shared.ui.theme.Typography
 import com.android.solvit.shared.ui.utils.CustomOutlinedTextField
-import com.android.solvit.shared.ui.utils.GoBackButton
+import com.android.solvit.shared.ui.utils.TopAppBarInbox
 import com.android.solvit.shared.ui.utils.ValidationRegex
 
 /**
@@ -75,7 +74,6 @@ import com.android.solvit.shared.ui.utils.ValidationRegex
  * @param locationViewModel The `LocationViewModel` to fetch and manage location suggestions.
  * @param authViewModel The `AuthViewModel` to manage authentication and user-related data.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter", "SourceLockedOrientationActivity")
 @Composable
 fun SeekerRegistrationScreen(
@@ -100,10 +98,12 @@ fun SeekerRegistrationScreen(
   var userName by remember { mutableStateOf("") }
   var phone by remember { mutableStateOf("") }
   val locationQuery by locationViewModel.query.collectAsState()
+  var seekerImageUri by remember { mutableStateOf<Uri?>(null) }
+  var seekerImageBitmap by remember { mutableStateOf<Bitmap?>(null) }
 
-  // represent the current authentified user
+  // Represents the current authenticated user
   val user by authViewModel.user.collectAsState()
-  // represent the email of the current user
+  // Represents the email of the current user
   val email by authViewModel.email.collectAsState()
 
   var showDropdown by remember { mutableStateOf(false) }
@@ -117,29 +117,22 @@ fun SeekerRegistrationScreen(
   val backgroundColor = colorScheme.background
 
   val isFullNameOk = ValidationRegex.FULL_NAME_REGEX.matches(fullName)
-
   val isUserNameOk = userName.isNotBlank() && userName.length > 2
-
   val isPhoneOk = ValidationRegex.PHONE_REGEX.matches(phone)
-
   val isLocationOK = selectedLocation != null
-
   val isFormComplete = isFullNameOk && isUserNameOk && isPhoneOk && isLocationOK
 
   Scaffold(
       topBar = {
-        TopAppBar(
-            title = { Text("Seeker Registration") },
-            navigationIcon = {
-              if (currentStep > 1) {
-                IconButton(onClick = { currentStep -= 1 }) {
-                  Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                }
-              } else {
-                GoBackButton(navigationActions)
-              }
-            },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = backgroundColor))
+        TopAppBarInbox(
+            "Seeker Registration",
+            leftButtonAction =
+                if (currentStep > 1) {
+                  { currentStep -= 1 }
+                } else {
+                  { navigationActions.goBack() }
+                },
+            leftButtonForm = Icons.AutoMirrored.Filled.ArrowBack)
       },
       content = { padding ->
         Column(
@@ -162,7 +155,7 @@ fun SeekerRegistrationScreen(
                             .align(Alignment.CenterHorizontally))
                 Text(
                     text = "Sign Up as a Seeker",
-                    style = MaterialTheme.typography.titleLarge,
+                    style = Typography.titleLarge,
                     modifier =
                         Modifier.testTag("signUpSeekerTitle").align(Alignment.CenterHorizontally))
 
@@ -228,15 +221,32 @@ fun SeekerRegistrationScreen(
 
                 Spacer(modifier = Modifier.height(30.dp))
 
+                UploadImage(seekerImageUri, null) { uri: Uri? ->
+                  seekerImageUri = uri
+                  uri?.let { seekerImageBitmap = loadBitmapFromUri(context, it) }
+                }
+
+                Spacer(modifier = Modifier.height(30.dp))
+
                 Button(
-                    onClick = { currentStep = 2 },
+                    onClick = {
+                      if (isFormComplete) {
+                        currentStep = 2
+                      } else {
+                        Toast.makeText(context, "Please fill in all fields", Toast.LENGTH_SHORT)
+                            .show()
+                      }
+                    },
                     modifier =
                         Modifier.fillMaxWidth().height(60.dp).testTag("completeRegistrationButton"),
-                    enabled = isFormComplete,
                     shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(colorScheme.secondary) // Green button
-                    ) {
-                      Text("Complete registration", color = colorScheme.onSecondary)
+                    colors =
+                        if (isFormComplete) buttonColors(colorScheme.secondary)
+                        else buttonColors(colorScheme.onSurfaceVariant)) {
+                      Text(
+                          "Complete registration",
+                          color = colorScheme.onSecondary,
+                          style = Typography.bodyLarge)
                     }
               }
               // Preferences Step
@@ -247,7 +257,7 @@ fun SeekerRegistrationScreen(
                             .padding(16.dp)) {
                       Text(
                           text = "Set Your Preferences",
-                          style = MaterialTheme.typography.titleLarge,
+                          style = Typography.titleLarge,
                           modifier =
                               Modifier.align(Alignment.CenterHorizontally)
                                   .testTag("preferencesTitle"),
@@ -269,7 +279,7 @@ fun SeekerRegistrationScreen(
                         Text(
                             text = "User not authenticated. Please sign in again.",
                             color = colorScheme.error,
-                            style = MaterialTheme.typography.bodyMedium,
+                            style = Typography.bodyMedium,
                             modifier =
                                 Modifier.align(Alignment.CenterHorizontally)
                                     .testTag("userNotAuthenticatedError"))
@@ -278,12 +288,12 @@ fun SeekerRegistrationScreen(
                       Button(
                           onClick = { currentStep = 3 },
                           modifier = Modifier.fillMaxWidth().testTag("savePreferencesButton"),
-                          colors = ButtonDefaults.buttonColors(colorScheme.secondary)) {
+                          colors = buttonColors(colorScheme.secondary)) {
                             Text("Save Preferences", color = colorScheme.onSecondary)
                           }
                       Text(
                           text = "You can always update your preferences in your profile settings.",
-                          style = MaterialTheme.typography.bodyLarge,
+                          style = Typography.bodyLarge,
                           modifier =
                               Modifier.align(Alignment.CenterHorizontally).testTag("footerText"),
                           textAlign = TextAlign.Center)
@@ -295,7 +305,7 @@ fun SeekerRegistrationScreen(
                 // Completion screen
                 Text(
                     text = "You're All Set!",
-                    style = MaterialTheme.typography.titleLarge,
+                    style = Typography.titleLarge,
                     modifier =
                         Modifier.align(Alignment.CenterHorizontally).testTag("confirmationTitle"))
 
@@ -316,7 +326,7 @@ fun SeekerRegistrationScreen(
                         "Your profile has been successfully created. " +
                             "You're ready to explore the best services tailored to your needs. " +
                             "Start browsing through available services, connect with experts, and solve any challenge.",
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = Typography.bodyLarge,
                     modifier =
                         Modifier.align(Alignment.CenterHorizontally)
                             .testTag("successMessageText"), // Add horizontal padding
@@ -334,7 +344,7 @@ fun SeekerRegistrationScreen(
                               username = userName,
                               phone = phone,
                               email = email)
-                      viewModel.addUserProfile(newUserProfile)
+                      viewModel.addUserProfile(newUserProfile, seekerImageUri)
                       authViewModel.setUserName(userName)
                       authViewModel.registered()
                       authViewModel.completeRegistration(
@@ -353,7 +363,7 @@ fun SeekerRegistrationScreen(
                       // navigationActions.goBack() // Navigate after saving
                     },
                     modifier = Modifier.fillMaxWidth().testTag("exploreServicesButton"),
-                    colors = ButtonDefaults.buttonColors(colorScheme.secondary) // Green button
+                    colors = buttonColors(colorScheme.secondary) // Green button
                     ) {
                       Text("Continue to Explore Services", color = colorScheme.onSecondary)
                     }
@@ -413,14 +423,14 @@ fun StepCircle(stepNumber: Int, isCompleted: Boolean, label: String) {
               Text(
                   text = if (isCompleted) "✔" else stepNumber.toString(),
                   color = colorScheme.onSecondary,
-                  style = MaterialTheme.typography.titleLarge)
+                  style = Typography.titleLarge)
             }
 
         // Display the label below the circle
         Text(
             text = label,
             color = colorScheme.onBackground,
-            style = MaterialTheme.typography.bodyMedium,
+            style = Typography.bodyMedium,
             modifier = Modifier.padding(top = 4.dp) // Add space between circle and label
             )
       }

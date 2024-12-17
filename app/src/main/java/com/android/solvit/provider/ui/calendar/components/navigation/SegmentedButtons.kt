@@ -3,10 +3,19 @@ package com.android.solvit.provider.ui.calendar.components.navigation
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -19,6 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.android.solvit.provider.model.CalendarView
+import com.android.solvit.shared.ui.theme.Typography
 import java.util.Locale
 import kotlin.math.roundToInt
 
@@ -82,7 +92,7 @@ fun SegmentedButtons(
                       Text(
                           text = view.name.replaceFirstChar { it.uppercase(Locale.getDefault()) },
                           style =
-                              MaterialTheme.typography.bodyMedium.copy(
+                              Typography.bodyMedium.copy(
                                   fontWeight =
                                       if (isSelected) FontWeight.SemiBold else FontWeight.Normal),
                           modifier = Modifier.testTag("segmentedButtonText_${view.name}"))

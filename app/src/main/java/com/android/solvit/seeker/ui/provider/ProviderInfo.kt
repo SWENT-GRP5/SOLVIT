@@ -33,9 +33,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.colorScheme
-import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
@@ -57,7 +55,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -81,6 +78,8 @@ import com.android.solvit.shared.model.review.ReviewViewModel
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
+import com.android.solvit.shared.ui.theme.Typography
+import com.android.solvit.shared.ui.utils.TopAppBarInbox
 
 /**
  * Main screen to display detailed information about a provider.
@@ -119,7 +118,15 @@ fun ProviderInfoScreen(
 
   Scaffold(
       containerColor = colorScheme.surface,
-      topBar = { ProviderTopBar(onBackClick = { navigationActions.goBack() }) },
+      topBar = {
+        TopAppBarInbox(
+            title = "Provider",
+            testTagTitle = "topBarTitle",
+            leftButtonAction = { navigationActions.goBack() },
+            leftButtonForm = Icons.AutoMirrored.Filled.ArrowBack,
+            testTagLeft = "backButton",
+            testTagGeneral = "ProviderTopBar")
+      },
       content = { padding ->
         Column(modifier = Modifier.background(colorScheme.surface).fillMaxSize().padding(padding)) {
           ProviderHeader(provider)
@@ -205,14 +212,14 @@ fun PackageCard(
                   Text(
                       modifier = Modifier.testTag("price"),
                       text = "CHF${packageProposal.price}",
-                      style = typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                      style = Typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
                       color =
                           if (!selectedIndex) colorScheme.onPrimaryContainer
                           else colorScheme.onPrimary)
                   Spacer(modifier = Modifier.width(8.dp)) // Increased space between price and unit
                   Text(
                       text = "/hour",
-                      style = typography.bodySmall,
+                      style = Typography.bodySmall,
                       color =
                           if (!selectedIndex) colorScheme.onPrimaryContainer
                           else colorScheme.onPrimary)
@@ -221,7 +228,7 @@ fun PackageCard(
                 // Title of the Package
                 Text(
                     text = packageProposal.title,
-                    style = typography.titleMedium,
+                    style = Typography.titleMedium,
                     color =
                         if (!selectedIndex) colorScheme.onPrimaryContainer
                         else colorScheme.onPrimary)
@@ -231,7 +238,7 @@ fun PackageCard(
                 // Description of the Package
                 Text(
                     text = packageProposal.description,
-                    style = typography.bodyMedium,
+                    style = Typography.bodyMedium,
                     color = if (!selectedIndex) colorScheme.onSurface else colorScheme.onPrimary)
                 Spacer(
                     modifier =
@@ -250,7 +257,7 @@ fun PackageCard(
                           modifier = Modifier.width(8.dp)) // Increased space between icon and text
                       Text(
                           text = feature,
-                          style = typography.bodyMedium,
+                          style = Typography.bodyMedium,
                           color =
                               if (!selectedIndex) colorScheme.onSurface else colorScheme.onPrimary)
                     }
@@ -303,7 +310,7 @@ fun ProviderPackages(
     navigationActions: NavigationActions
 ) {
   var selectedIndex by remember { mutableIntStateOf(-1) }
-  var boxHeightPx by remember { mutableStateOf(0) }
+  var boxHeightPx by remember { mutableIntStateOf(0) }
   Box(
       modifier =
           Modifier.fillMaxSize() // Fills the entire available space
@@ -352,38 +359,6 @@ fun ProviderPackages(
               userId,
               navigationActions)
         }
-      }
-}
-/**
- * Top bar for the provider details screen, with a back button.
- *
- * @param onBackClick Callback when the back button is clicked.
- */
-@Composable
-fun ProviderTopBar(onBackClick: () -> Unit) {
-  val context = LocalContext.current
-  Row(
-      modifier =
-          Modifier.fillMaxWidth()
-              .background(color = colorScheme.background)
-              .testTag("ProviderTopBar"),
-      verticalAlignment = Alignment.CenterVertically) {
-        // Back button on the left
-        IconButton(onClick = onBackClick, modifier = Modifier.testTag("backButton")) {
-          Icon(
-              Icons.AutoMirrored.Filled.ArrowBack,
-              contentDescription = "Back",
-              tint = colorScheme.onBackground)
-        }
-
-        // Title in the center
-        Text(
-            text = "Provider",
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.weight(1f).testTag("topBarTitle"),
-            textAlign = TextAlign.Start,
-            color = colorScheme.onBackground)
       }
 }
 
@@ -459,7 +434,7 @@ fun ProviderTabs(
               text = {
                 Text(
                     text = tab.title,
-                    style = typography.titleMedium.copy(fontSize = dynamicFontSize),
+                    style = Typography.titleMedium.copy(fontSize = dynamicFontSize),
                     maxLines = 1,
                     modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
                     color =
@@ -842,7 +817,7 @@ fun SelectRequestDialog(
                 // Title
                 Text(
                     text = "Choose the concerned service request:",
-                    style = typography.titleMedium,
+                    style = Typography.titleMedium,
                     modifier = Modifier.padding(bottom = 16.dp).testTag("dialog_title"),
                     color = colorScheme.onSurface)
 
@@ -877,12 +852,12 @@ fun SelectRequestDialog(
                                         horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                           Text(
                                               text = "Title:",
-                                              style = typography.bodyMedium,
+                                              style = Typography.bodyMedium,
                                               color = colorScheme.onPrimaryContainer)
                                           Text(
                                               modifier = Modifier.testTag("request_title"),
                                               text = request.title,
-                                              style = typography.bodyMedium,
+                                              style = Typography.bodyMedium,
                                               color = colorScheme.onPrimaryContainer)
                                         }
                                     Row(
@@ -890,12 +865,12 @@ fun SelectRequestDialog(
                                         horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                           Text(
                                               text = "Description:",
-                                              style = typography.bodyMedium,
+                                              style = Typography.bodyMedium,
                                               color = colorScheme.onPrimaryContainer)
                                           Text(
                                               modifier = Modifier.testTag("request_description"),
                                               text = request.description,
-                                              style = typography.bodyMedium,
+                                              style = Typography.bodyMedium,
                                               color = colorScheme.onPrimaryContainer,
                                               maxLines = 2,
                                               overflow = TextOverflow.Ellipsis)
@@ -914,7 +889,7 @@ fun SelectRequestDialog(
                       Text(
                           textAlign = TextAlign.Center,
                           text = "Create a new request with this provider assigned",
-                          style = typography.bodyMedium,
+                          style = Typography.bodyMedium,
                           color = colorScheme.primary)
                     }
 
@@ -928,7 +903,7 @@ fun SelectRequestDialog(
                               Modifier.padding(horizontal = 8.dp).testTag("dismiss_button")) {
                             Text(
                                 text = "Dismiss",
-                                style = typography.labelLarge,
+                                style = Typography.labelLarge,
                                 color = colorScheme.primary)
                           }
 
@@ -947,14 +922,15 @@ fun SelectRequestDialog(
                               }
                               requestViewModel.saveServiceRequest(request)
                               requestViewModel.selectRequest(request)
-                              navigationActions.navigateTo(Route.BOOKING_DETAILS)
+                              navigationActions.navigateAndSetBackStack(
+                                  Route.BOOKING_DETAILS, listOf(Route.REQUESTS_OVERVIEW))
                             }
                             showDialog.value = false
                           },
                           shape = RoundedCornerShape(8.dp)) {
                             Text(
                                 text = "Confirm",
-                                style = typography.labelLarge,
+                                style = Typography.labelLarge,
                                 color = colorScheme.onPrimary)
                           }
                     }

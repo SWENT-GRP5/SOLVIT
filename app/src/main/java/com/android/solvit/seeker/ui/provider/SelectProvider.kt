@@ -8,13 +8,11 @@ import android.location.Geocoder
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -40,15 +38,16 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -77,7 +76,6 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -86,6 +84,9 @@ import coil.compose.AsyncImage
 import com.android.solvit.R
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
+import com.android.solvit.seeker.ui.service.ProviderItem
+import com.android.solvit.seeker.ui.service.SERVICES_LIST
+import com.android.solvit.seeker.ui.service.ServicesListItem
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.map.LocationViewModel
 import com.android.solvit.shared.model.map.haversineDistance
@@ -99,6 +100,7 @@ import com.android.solvit.shared.ui.theme.GradientBlue
 import com.android.solvit.shared.ui.theme.GradientGreen
 import com.android.solvit.shared.ui.theme.OnSurfaceVariant
 import com.android.solvit.shared.ui.theme.SurfaceVariant
+import com.android.solvit.shared.ui.theme.Typography
 import com.android.solvit.shared.ui.theme.Yellow
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
@@ -113,64 +115,104 @@ import java.util.Locale
  * @param seekerProfileViewModel ViewModel for accessing and managing seeker profile data.
  */
 @Composable
-fun SpTopAppBar(
+fun TopAppBar(
     navigationActions: NavigationActions,
     selectedService: Services?,
+    serviceItem: ServicesListItem,
     onClickAction: () -> Unit,
-    seekerProfileViewModel: SeekerProfileViewModel,
+    seekerProfileViewModel: SeekerProfileViewModel
 ) {
-
   val location by seekerProfileViewModel.locationSearched.collectAsState()
-  Box(modifier = Modifier.fillMaxWidth().testTag("topAppBar")) {
-    Image(
-        modifier = Modifier.fillMaxWidth().height(200.dp).testTag("serviceImage"),
-        painter =
-            painterResource(
-                id = ServicesImages().serviceMap[selectedService] ?: R.drawable.cleaner_image),
-        contentDescription = "image description",
-        contentScale = ContentScale.FillBounds)
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically) {
-          IconButton(onClick = { navigationActions.goBack() }) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Go Back Option")
-          }
+  val serviceName = selectedService?.let { Services.format(it) } ?: "Service Providers"
+  val serviceIcon = serviceItem.icon
 
-          Spacer(Modifier.weight(1f))
+  Box(
+      modifier =
+          Modifier.fillMaxWidth()
+              .height(180.dp)
+              .background(
+                  brush =
+                      Brush.verticalGradient(
+                          colors =
+                              listOf(
+                                  serviceItem.color.copy(alpha = 0.85f), // Darker at the top
+                                  serviceItem.color.copy(alpha = 0.5f), // Lighter at the center
+                                  Color.Transparent // Transparent at the bottom
+                                  )))
+              .testTag("topAppBar")) {
+        // Content
+        Column(
+            modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp, vertical = 16.dp),
+            verticalArrangement = Arrangement.SpaceBetween) {
+              // Top Row: Navigation and Location
+              Row(
+                  modifier = Modifier.fillMaxWidth(),
+                  verticalAlignment = Alignment.CenterVertically) {
+                    // Back Button
+                    IconButton(onClick = { navigationActions.goBack() }) {
+                      Icon(
+                          imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                          contentDescription = "Navigate Back",
+                          tint = colorScheme.onPrimary)
+                    }
 
-          Row(
-              modifier = Modifier.wrapContentSize().height(IntrinsicSize.Min),
-              horizontalArrangement = Arrangement.spacedBy(3.dp, Alignment.CenterHorizontally),
-              verticalAlignment = Alignment.CenterVertically,
-          ) {
-            Image(
-                modifier = Modifier.padding(1.dp).height(16.dp).width(16.dp),
-                painter = painterResource(id = R.drawable.location),
-                contentDescription = "image description",
-                contentScale = ContentScale.Crop)
-            Text(
-                text = location.name,
-                style =
-                    TextStyle(
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight(400),
-                        color = colorScheme.onSurfaceVariant,
-                    ))
-            Image(
-                modifier =
-                    Modifier.clickable { onClickAction() }
-                        .padding(1.dp)
-                        .width(16.dp)
-                        .height(16.dp)
-                        .testTag("filterByLocation"),
-                painter = painterResource(id = R.drawable.arrowdown),
-                contentDescription = "image description",
-                contentScale = ContentScale.Crop)
-          }
-        }
-  }
+                    Spacer(modifier = Modifier.weight(1f))
+
+                    // Location
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier =
+                            Modifier.clickable(onClick = onClickAction)
+                                .testTag("filterByLocation")) {
+                          Icon(
+                              imageVector = Icons.Outlined.LocationOn,
+                              contentDescription = "Location Icon",
+                              tint = colorScheme.onPrimary,
+                              modifier = Modifier.size(20.dp))
+                          Spacer(modifier = Modifier.width(4.dp))
+                          Text(
+                              text = location.name,
+                              style =
+                                  Typography.bodyMedium.copy(
+                                      color = colorScheme.onPrimary,
+                                      fontWeight = FontWeight.Medium),
+                              maxLines = 1,
+                              overflow = TextOverflow.Ellipsis)
+                        }
+                  }
+
+              Spacer(modifier = Modifier.height(8.dp))
+
+              // Service Display
+              Row(
+                  modifier = Modifier.fillMaxWidth(),
+                  verticalAlignment = Alignment.CenterVertically,
+                  horizontalArrangement = Arrangement.Start) {
+                    Icon(
+                        painter = painterResource(id = serviceIcon),
+                        contentDescription = "$serviceName Icon",
+                        tint = Color.Unspecified,
+                        modifier =
+                            Modifier.size(60.dp) // Larger for better visibility
+                                .padding(end = 16.dp))
+
+                    Column {
+                      Text(
+                          text = serviceName,
+                          style =
+                              Typography.headlineMedium.copy(
+                                  color = colorScheme.onPrimary, fontWeight = FontWeight.Bold))
+                      Spacer(modifier = Modifier.height(4.dp))
+                      Text(
+                          text = "Find the best $serviceName near you",
+                          style = Typography.bodyMedium.copy(color = serviceItem.color),
+                          fontWeight = FontWeight.Medium)
+                    }
+                  }
+
+              Spacer(modifier = Modifier.height(16.dp))
+            }
+      }
 }
 
 /**
@@ -181,7 +223,11 @@ fun SpTopAppBar(
  * @param listProviderViewModel ViewModel for managing provider data and filters.
  */
 @Composable
-fun SpFilterBar(display: () -> Unit, listProviderViewModel: ListProviderViewModel) {
+fun FilterBar(
+    display: () -> Unit,
+    listProviderViewModel: ListProviderViewModel,
+    serviceItem: ServicesListItem
+) {
 
   val filters = listOf("Top Rates", "Top Prices", "Highest Activity")
 
@@ -209,8 +255,7 @@ fun SpFilterBar(display: () -> Unit, listProviderViewModel: ListProviderViewMode
                             .shadow(
                                 elevation = 8.dp,
                                 shape = RoundedCornerShape(16.dp),
-                                ambientColor = Color.Yellow,
-                                spotColor = Color(0xFF6D29F6))
+                                spotColor = serviceItem.color)
                             .testTag("filterOption"),
                     elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
                     colors = CardDefaults.cardColors(containerColor = colorScheme.background),
@@ -221,11 +266,11 @@ fun SpFilterBar(display: () -> Unit, listProviderViewModel: ListProviderViewMode
                         else null) {
                       Text(
                           text = filter,
-                          fontSize = MaterialTheme.typography.bodySmall.fontSize,
+                          fontSize = Typography.bodySmall.fontSize,
                           lineHeight = 34.sp,
                           fontFamily = FontFamily(Font(R.font.roboto)),
                           fontWeight = FontWeight(400),
-                          color = colorScheme.primary,
+                          color = serviceItem.color,
                           modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp))
                     }
               }
@@ -273,12 +318,14 @@ fun Title(title: String) {
  * Displays a rating bubble with a star icon and a rating value.
  *
  * @param note The rating value to display (default is "5").
+ * @param modifier Modifier for the rating bubble.
  */
 @Composable
-fun Note(note: String = "5") {
+fun Note(note: String = "5", modifier: Modifier = Modifier) {
   Box(
       modifier =
-          Modifier.width(46.dp)
+          modifier
+              .width(46.dp)
               .height(24.dp)
               .background(color = colorScheme.onSurface, shape = RoundedCornerShape(size = 59.dp))
               .testTag("Rating")) {
@@ -317,61 +364,16 @@ fun DisplayPopularProviders(
     navigationActions: NavigationActions
 ) {
   LazyRow(
-      modifier = Modifier.fillMaxWidth().padding(16.dp).testTag("popularProviders"),
+      modifier = Modifier.fillMaxWidth().testTag("popularProviders"),
       horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.Start),
       verticalAlignment = Alignment.Top,
       userScrollEnabled = true,
   ) {
     items(providers.filter { it.popular }) { provider ->
-      Card(
-          modifier =
-              Modifier.width(141.dp).height(172.dp).clickable {
-                listProviderViewModel.selectProvider(provider)
-                navigationActions.navigateTo(Route.PROVIDER_PROFILE)
-              },
-          elevation =
-              CardDefaults.cardElevation(
-                  defaultElevation = 8.dp, pressedElevation = 4.dp, focusedElevation = 10.dp),
-          shape = RoundedCornerShape(16.dp)) {
-            Box(modifier = Modifier.fillMaxSize()) {
-              AsyncImage(
-                  modifier = Modifier.fillMaxSize(),
-                  model = provider.imageUrl.ifEmpty { R.drawable.empty_profile_img },
-                  placeholder = painterResource(id = R.drawable.loading),
-                  error = painterResource(id = R.drawable.error),
-                  contentDescription = "provider image",
-                  contentScale = ContentScale.Crop)
-
-              // Add gradient overlay
-              Box(
-                  modifier =
-                      Modifier.fillMaxWidth()
-                          .height(72.dp)
-                          .align(Alignment.BottomCenter)
-                          .background(
-                              brush =
-                                  Brush.verticalGradient(
-                                      colors = listOf(Color.Transparent, colorScheme.background))))
-
-              Row(
-                  modifier = Modifier.align(Alignment.BottomStart).fillMaxWidth().padding(8.dp),
-                  horizontalArrangement = Arrangement.SpaceBetween,
-                  verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = provider.name.uppercase(),
-                        style =
-                            TextStyle(
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight(400),
-                                color = colorScheme.onBackground),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f))
-                    Spacer(Modifier.width(8.dp))
-                    Note(provider.rating.toInt().toString())
-                  }
-            }
-          }
+      ProviderItem(provider, false) {
+        listProviderViewModel.selectProvider(provider)
+        navigationActions.navigateTo(Route.PROVIDER_INFO)
+      }
     }
   }
 }
@@ -390,75 +392,110 @@ fun ListProviders(
     navigationActions: NavigationActions
 ) {
   LazyColumn(
-      modifier = Modifier.fillMaxSize().testTag("providersList"),
-      verticalArrangement = Arrangement.spacedBy(16.dp),
-      userScrollEnabled = true,
-  ) {
-    item { Title("Popular") }
-    item { DisplayPopularProviders(providers, listProviderViewModel, navigationActions) }
-    item { Title("See All") }
-    items(providers) { provider ->
-      Row(
-          modifier = Modifier.fillMaxWidth(),
-          horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.Start)) {
-            Card(
-                modifier = Modifier.padding(horizontal = 16.dp).fillMaxWidth(),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.Transparent)) {
-                  Row(
-                      modifier =
-                          Modifier.fillMaxWidth()
-                              .background(
-                                  color = colorScheme.background,
-                                  shape = RoundedCornerShape(size = 16.dp))
-                              .clickable {
-                                listProviderViewModel.selectProvider(provider)
-                                navigationActions.navigateTo(Route.PROVIDER_PROFILE)
-                              },
-                      horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.Start)) {
-                        AsyncImage(
-                            modifier =
-                                Modifier.width(116.dp)
-                                    .height(85.dp)
-                                    .clip(RoundedCornerShape(12.dp)),
-                            model = provider.imageUrl.ifEmpty { R.drawable.empty_profile_img },
-                            placeholder = painterResource(id = R.drawable.loading),
-                            error = painterResource(id = R.drawable.error),
-                            contentDescription = "provider image",
-                            contentScale = ContentScale.Crop)
-                        Column(modifier = Modifier.weight(1f).padding(10.dp)) {
-                          Row {
-                            Text(
-                                text = provider.name,
-                                style =
-                                    TextStyle(
-                                        fontSize = 16.sp,
-                                        lineHeight = 24.sp,
-                                        fontWeight = FontWeight(400),
-                                        color = colorScheme.onBackground,
-                                        textAlign = TextAlign.Center,
-                                    ))
-                            Spacer(Modifier.weight(1f))
-                            Note(provider.rating.toInt().toString())
-                          }
-                          Spacer(Modifier.height(12.dp))
-                          Text(
-                              text = provider.description,
-                              style =
-                                  TextStyle(
-                                      fontSize = 14.sp,
-                                      lineHeight = 15.sp,
-                                      fontWeight = FontWeight(400),
-                                      color = colorScheme.onBackground.copy(alpha = 0.6f),
-                                  ),
-                              maxLines = 2,
-                              overflow = TextOverflow.Ellipsis)
-                        }
-                      }
-                }
+      modifier =
+          Modifier.fillMaxSize()
+              .background(colorScheme.background)
+              .padding(horizontal = 16.dp)
+              .testTag("providersList"),
+      verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        // Popular providers section
+        item {
+          Text(
+              text = "Popular",
+              style = Typography.titleMedium,
+              modifier = Modifier.padding(vertical = 8.dp))
+        }
+        item { DisplayPopularProviders(providers, listProviderViewModel, navigationActions) }
+
+        // All providers section
+        item {
+          Text(
+              text = "See All",
+              style = Typography.titleMedium,
+              modifier = Modifier.padding(vertical = 8.dp))
+        }
+        items(providers) { provider ->
+          ProviderRowCard(provider, listProviderViewModel, navigationActions)
+        }
+        item { Spacer(modifier = Modifier.height(16.dp)) }
+      }
+}
+
+/**
+ * Displays a card for a single provider, with their image, name, description, and rating.
+ *
+ * @param provider The provider to display.
+ * @param listProviderViewModel ViewModel for managing provider data and interactions.
+ * @param navigationActions Actions for navigating between screens.
+ */
+@Composable
+fun ProviderRowCard(
+    provider: Provider,
+    listProviderViewModel: ListProviderViewModel,
+    navigationActions: NavigationActions
+) {
+  OutlinedCard(
+      modifier =
+          Modifier.fillMaxWidth()
+              .clickable {
+                listProviderViewModel.selectProvider(provider)
+                navigationActions.navigateTo(Route.PROVIDER_INFO)
+              }
+              .shadow(4.dp, shape = RoundedCornerShape(12.dp)),
+      border = BorderStroke(1.dp, Services.getColor(provider.service)),
+      shape = RoundedCornerShape(12.dp),
+      colors = CardDefaults.cardColors(colorScheme.background)) {
+        Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+          // Provider Image
+          AsyncImage(
+              model = provider.imageUrl.ifEmpty { R.drawable.empty_profile_img },
+              placeholder = painterResource(id = R.drawable.loading),
+              contentDescription = "Provider Image",
+              contentScale = ContentScale.Crop,
+              modifier =
+                  Modifier.size(60.dp).clip(CircleShape).background(colorScheme.surfaceVariant))
+
+          Spacer(modifier = Modifier.width(16.dp))
+
+          Column(modifier = Modifier.weight(1f)) {
+            // Provider Name
+            Text(
+                text = provider.name,
+                style = Typography.bodyLarge,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis)
+
+            // Provider Description with Progressive Disclosure
+            var isExpanded by remember { mutableStateOf(false) }
+            var textOverflow by remember { mutableStateOf(false) }
+            Text(
+                text = provider.description,
+                style = Typography.bodySmall.copy(color = colorScheme.onSurfaceVariant),
+                maxLines = if (isExpanded) Int.MAX_VALUE else 2,
+                overflow = TextOverflow.Ellipsis,
+                onTextLayout = { textLayoutResult ->
+                  if (!isExpanded) {
+                    textOverflow = textLayoutResult.hasVisualOverflow
+                  }
+                })
+
+            // "Read More" or "Read Less" Link
+            if (textOverflow) {
+              Text(
+                  text = if (isExpanded) "Read Less" else "Read More",
+                  modifier = Modifier.clickable { isExpanded = !isExpanded }.padding(top = 4.dp),
+                  style =
+                      Typography.bodySmall.copy(
+                          color = colorScheme.primary, fontWeight = FontWeight.Bold))
+            }
           }
-    }
-  }
+
+          // Provider Rating
+          Note(
+              note = provider.rating.toInt().toString(),
+              modifier = Modifier.align(Alignment.CenterVertically))
+        }
+      }
 }
 
 /**
@@ -1083,17 +1120,20 @@ fun SelectProviderScreen(
   var displayByLocation by remember { mutableStateOf(false) }
   val sheetStateFilter = rememberModalBottomSheetState()
   val sheetStateLocation = rememberModalBottomSheetState()
+  val servicesListItem =
+      SERVICES_LIST.find { it.service == selectedService } ?: SERVICES_LIST.last()
   Scaffold(
       modifier = Modifier.fillMaxSize(),
       topBar = {
-        SpTopAppBar(
+        TopAppBar(
             navigationActions,
             selectedService,
-            onClickAction = { displayByLocation = true },
+            servicesListItem,
+            { displayByLocation = true },
             seekerProfileViewModel)
       }) { paddingValues ->
         Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
-          SpFilterBar(display = { displayFilters = true }, listProviderViewModel)
+          FilterBar(display = { displayFilters = true }, listProviderViewModel, servicesListItem)
           ListProviders(providers, listProviderViewModel, navigationActions)
         }
         if (displayFilters) {

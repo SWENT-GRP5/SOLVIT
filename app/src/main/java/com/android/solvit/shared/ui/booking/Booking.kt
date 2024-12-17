@@ -40,7 +40,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme.colorScheme
-import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -94,6 +93,7 @@ import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.navigation.Screen
+import com.android.solvit.shared.ui.theme.Typography
 import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.Timestamp
 import com.google.maps.android.compose.GoogleMap
@@ -132,7 +132,7 @@ fun ServiceBookingScreen(
   val isReadyToNavigate by chatViewModel.isReadyToNavigate.collectAsState()
   LaunchedEffect(isReadyToNavigate) {
     if (isReadyToNavigate) {
-      navigationActions.navigateTo(Screen.CHAT)
+      navigationActions.navigateAndSetBackStack(Screen.CHAT, listOf(Route.INBOX))
       chatViewModel.resetIsReadyToNavigate()
     }
   }
@@ -244,12 +244,12 @@ fun ServiceBookingScreen(
                                     onClick = {
                                       if (isSeeker) {
                                         providerViewModel.selectService(request!!.type)
-                                        navigationActions.navigateTo(Route.PROVIDERS)
+                                        navigationActions.navigateTo(Route.PROVIDERS_LIST)
                                       }
                                     })) {
                           if (provider != null) {
                             // Render provider card when provider is selected
-                            ProviderCard(provider, providerViewModel, navigationActions)
+                            ProviderCard(provider, isSeeker, providerViewModel, navigationActions)
                           } else {
                             // Render placeholder when no provider is selected
                             Column(
@@ -499,14 +499,17 @@ fun ServiceBookingScreen(
 @Composable
 fun ProviderCard(
     provider: Provider,
+    isSeeker: Boolean,
     providerViewModel: ListProviderViewModel,
     navigationActions: NavigationActions
 ) {
   Card(
       modifier =
           Modifier.testTag("provider_card").clickable {
-            providerViewModel.selectProvider(provider)
-            navigationActions.navigateTo(Route.PROVIDER_PROFILE)
+            if (isSeeker) {
+              providerViewModel.selectProvider(provider)
+              navigationActions.navigateTo(Route.PROVIDER_INFO)
+            }
           },
       elevation =
           CardDefaults.cardElevation(
@@ -577,7 +580,7 @@ fun EditButton(
                   ButtonDefaults.buttonColors(
                       containerColor = colorScheme.primary, contentColor = colorScheme.onPrimary),
               shape = RoundedCornerShape(8.dp)) {
-                Text(text = "Edit details", style = typography.labelLarge)
+                Text(text = "Edit details", style = Typography.labelLarge)
               }
         }
   }
@@ -603,7 +606,7 @@ fun ChatButton(
                 ButtonDefaults.buttonColors(
                     containerColor = colorScheme.primary, contentColor = colorScheme.onPrimary),
             shape = RoundedCornerShape(8.dp)) {
-              Text(text = "Discuss", style = typography.labelLarge)
+              Text(text = "Discuss", style = Typography.labelLarge)
             }
       }
 }
@@ -651,12 +654,12 @@ fun ReviewButton(navigationActions: NavigationActions) {
       modifier = Modifier.fillMaxWidth().padding(top = 16.dp).testTag("review_button"),
       contentAlignment = Alignment.Center) {
         Button(
-            onClick = { navigationActions.navigateTo(Screen.REVIEW_SCREEN) },
+            onClick = { navigationActions.navigateTo(Route.REVIEW) },
             colors =
                 ButtonDefaults.buttonColors(
                     containerColor = colorScheme.primary, contentColor = colorScheme.onPrimary),
             shape = RoundedCornerShape(8.dp)) {
-              Text(text = "Leave a review", style = typography.labelLarge)
+              Text(text = "Leave a review", style = Typography.labelLarge)
             }
       }
 }
@@ -681,19 +684,19 @@ fun PackageCard(packageProposal: PackageProposal, modifier: Modifier = Modifier)
                 Text(
                     modifier = Modifier.testTag("price"),
                     text = "$${packageProposal.price}",
-                    style = typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                    style = Typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
                     color = colorScheme.onPrimaryContainer)
                 Spacer(modifier = Modifier.width(8.dp)) // Increased space between price and unit
                 Text(
                     text = "/hour",
-                    style = typography.bodySmall,
+                    style = Typography.bodySmall,
                     color = colorScheme.onPrimaryContainer)
               }
               // Title of the Package
               Text(
                   modifier = Modifier.testTag("title"),
                   text = packageProposal.title,
-                  style = typography.titleMedium,
+                  style = Typography.titleMedium,
                   color = colorScheme.onPrimaryContainer)
               Spacer(
                   modifier =
@@ -702,7 +705,7 @@ fun PackageCard(packageProposal: PackageProposal, modifier: Modifier = Modifier)
               Text(
                   modifier = Modifier.testTag("description"),
                   text = packageProposal.description,
-                  style = typography.bodyMedium,
+                  style = Typography.bodyMedium,
                   color = colorScheme.onSurface)
               Spacer(
                   modifier =
@@ -722,7 +725,7 @@ fun PackageCard(packageProposal: PackageProposal, modifier: Modifier = Modifier)
                     Spacer(modifier = Modifier.width(8.dp)) // Increased space between icon and text
                     Text(
                         text = feature,
-                        style = typography.bodyMedium,
+                        style = Typography.bodyMedium,
                         color = colorScheme.onSurface)
                   }
                 }
@@ -791,7 +794,7 @@ fun DateAndTimePickers(request: ServiceRequest, requestViewModel: ServiceRequest
                         if (!isSelectingDate) {
                           Text(
                               text = "Select Time",
-                              style = typography.titleMedium,
+                              style = Typography.titleMedium,
                               color = colorScheme.onBackground,
                               modifier = Modifier.testTag("select_time_text"))
                         }
@@ -801,7 +804,7 @@ fun DateAndTimePickers(request: ServiceRequest, requestViewModel: ServiceRequest
                               title = {
                                 Text(
                                     "Select Date",
-                                    style = typography.titleMedium,
+                                    style = Typography.titleMedium,
                                     color = colorScheme.onBackground)
                               },
                               modifier = Modifier.testTag("date_picker"))
@@ -891,14 +894,14 @@ fun EditPriceDialog(
           Text(
               modifier = Modifier.testTag("edit_price_title"),
               text = "Edit Price",
-              style = typography.titleMedium,
+              style = Typography.titleMedium,
               color = colorScheme.onBackground)
         },
         text = {
           Column {
             Text(
                 text = "Enter the agreed price for the service",
-                style = typography.bodyMedium,
+                style = Typography.bodyMedium,
                 color = colorScheme.onBackground)
             Spacer(modifier = Modifier.height(8.dp))
             var containsInvalidChars by remember { mutableStateOf(false) }

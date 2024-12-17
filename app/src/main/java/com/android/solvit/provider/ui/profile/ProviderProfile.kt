@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocationOn
@@ -42,7 +43,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -54,7 +54,6 @@ import com.android.solvit.seeker.ui.navigation.BottomNavigationMenu
 import com.android.solvit.seeker.ui.profile.AboutAppCard
 import com.android.solvit.seeker.ui.profile.LogoutDialog
 import com.android.solvit.seeker.ui.profile.ProfileInfoCard
-import com.android.solvit.seeker.ui.profile.ProfileTopBar
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.request.ServiceRequestStatus
@@ -63,7 +62,10 @@ import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_PROVIDER
 import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.navigation.Screen
+import com.android.solvit.shared.ui.theme.Typography
+import com.android.solvit.shared.ui.utils.TopAppBarInbox
 
 /**
  * A composable function that displays the provider's profile screen. It includes the profile header
@@ -98,12 +100,20 @@ fun ProviderProfileScreen(
 
   // Display the profile information if it's available
   Scaffold(
-      topBar = { ProfileTopBar(navigationActions, onLogout = { showLogoutDialog = true }) },
+      topBar = {
+        TopAppBarInbox(
+            title = "Profile",
+            testTagTitle = "ProfileTitle",
+            rightButtonAction = { showLogoutDialog = true },
+            rightButtonForm = Icons.AutoMirrored.Filled.ExitToApp,
+            testTagRight = "LogoutButton",
+            testTagGeneral = "ProfileTopBar")
+      },
       bottomBar = {
         BottomNavigationMenu(
-            onTabSelect = { navigationActions.navigateTo(it.route) },
+            onTabSelect = { navigationActions.navigateTo(it) },
             tabList = LIST_TOP_LEVEL_DESTINATION_PROVIDER,
-            selectedItem = Screen.PROVIDER_PROFILE)
+            selectedItem = Route.PROFILE)
       },
       containerColor = Color.Transparent,
   ) { paddingValues ->
@@ -122,7 +132,7 @@ fun ProviderProfileScreen(
               fullName = provider?.name ?: "",
               email = provider?.companyName ?: "",
               imageUrl = provider?.imageUrl ?: "",
-              onEdit = { navigationActions.navigateTo(Screen.PROVIDER_MODIFY_PROFILE) })
+              onEdit = { navigationActions.navigateTo(Screen.EDIT_PROVIDER_PROFILE) })
 
           // additional infos cards
           Card(
@@ -217,7 +227,8 @@ fun ProviderItem(
             color = colorScheme.onBackground,
             maxLines = if (expanded) Int.MAX_VALUE else maxLines,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.clickable { expanded = !expanded })
+            modifier = Modifier.clickable { expanded = !expanded },
+            style = Typography.bodyLarge)
       }
 }
 
@@ -254,9 +265,8 @@ fun InsightsCard(provider: Provider, serviceRequestViewModel: ServiceRequestView
               Text(
                   text = "Insights",
                   color = colorScheme.primary,
-                  fontWeight = FontWeight.Bold,
-                  fontSize = 24.sp,
-                  modifier = Modifier.testTag("InsightsTitle"))
+                  modifier = Modifier.testTag("InsightsTitle"),
+                  style = Typography.titleLarge.copy(fontSize = 24.sp))
               Row(
                   verticalAlignment = Alignment.CenterVertically,
                   modifier = Modifier.fillMaxWidth()) {
@@ -275,7 +285,7 @@ fun InsightsCard(provider: Provider, serviceRequestViewModel: ServiceRequestView
                                 Text(
                                     text = "${provider.rating}",
                                     color = colorScheme.onBackground,
-                                )
+                                    style = Typography.bodyLarge)
                               }
                           Row(
                               horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -283,9 +293,11 @@ fun InsightsCard(provider: Provider, serviceRequestViewModel: ServiceRequestView
                                 Text(
                                     text = "Popular",
                                     color = colorScheme.primary,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 18.sp)
-                                Text(text = "${provider.popular}", color = colorScheme.onBackground)
+                                    style = Typography.titleLarge.copy(fontSize = 18.sp))
+                                Text(
+                                    text = "${provider.popular}",
+                                    color = colorScheme.onBackground,
+                                    style = Typography.bodyLarge)
                               }
                           Row(
                               horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -295,7 +307,10 @@ fun InsightsCard(provider: Provider, serviceRequestViewModel: ServiceRequestView
                                     contentDescription = "Earnings",
                                     tint = colorScheme.primary,
                                     modifier = Modifier.size(32.dp))
-                                Text(text = "$earnings CHF", color = colorScheme.onBackground)
+                                Text(
+                                    text = "$earnings CHF",
+                                    color = colorScheme.onBackground,
+                                    style = Typography.bodyLarge)
                               }
                         }
                     Column(
@@ -304,8 +319,7 @@ fun InsightsCard(provider: Provider, serviceRequestViewModel: ServiceRequestView
                           Text(
                               text = "Jobs",
                               color = colorScheme.primary,
-                              fontWeight = FontWeight.Bold,
-                              fontSize = 18.sp)
+                              style = Typography.titleLarge.copy(fontSize = 18.sp))
                           Column {
                             for (status in ServiceRequestStatus.entries) {
                               val size =
@@ -320,7 +334,8 @@ fun InsightsCard(provider: Provider, serviceRequestViewModel: ServiceRequestView
                               Text(
                                   text = "$size ${status.name.lowercase()}",
                                   color = getStatusColor(status),
-                                  modifier = Modifier.testTag("${status.name}Tasks"))
+                                  modifier = Modifier.testTag("${status.name}Tasks"),
+                                  style = Typography.bodyLarge)
                             }
                           }
                         }

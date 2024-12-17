@@ -1,7 +1,8 @@
 package com.android.solvit.provider.ui.request
 
-import android.widget.Toast
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -53,9 +55,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -83,6 +85,7 @@ import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.LIST_TOP_LEVEL_DESTINATION_PROVIDER
 import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.navigation.Screen
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -151,10 +154,15 @@ fun RequestsFeedScreen(
   }
 
   Scaffold(
-      topBar = { RequestsTopBar(navigationActions, notificationViewModel, providerId) },
+      topBar = {
+        RequestsTopBar(
+            navigationActions, notificationViewModel, providerId, selectedService, searchQuery) {
+              selectedService = it
+            }
+      },
       bottomBar = {
         BottomNavigationMenu(
-            onTabSelect = { navigationActions.navigateTo(it.route) },
+            onTabSelect = { navigationActions.navigateTo(it) },
             tabList = LIST_TOP_LEVEL_DESTINATION_PROVIDER,
             selectedItem = navigationActions.currentRoute())
       }) { paddingValues ->
@@ -166,20 +174,6 @@ fun RequestsFeedScreen(
                     .testTag("ScreenContent"),
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally) {
-              Spacer(modifier = Modifier.height(8.dp))
-
-              // Search Bar and Service Type Filter
-              Row(
-                  modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                  horizontalArrangement = Arrangement.spacedBy(8.dp),
-                  verticalAlignment = Alignment.CenterVertically) {
-                    SearchBar(searchQuery, Modifier.weight(1f))
-                    ServiceTypeFilter(
-                        selectedService = selectedService,
-                        onServiceSelected = { selectedService = it },
-                    )
-                  }
-
               ListRequests(filteredRequests, showDialog, selectedRequest, repliedClicked)
 
               selectedRequest.value?.let {
@@ -200,59 +194,86 @@ fun RequestsFeedScreen(
  * @param navigationActions The navigation actions
  * @param notificationsViewModel The notification view model
  * @param providerId The provider's ID
+ * @param selectedService The selected service
+ * @param searchQuery The search query
+ * @param onServiceSelected The onServiceSelected action
  */
 @Composable
 fun RequestsTopBar(
     navigationActions: NavigationActions,
     notificationsViewModel: NotificationsViewModel,
-    providerId: String
+    providerId: String,
+    selectedService: String,
+    searchQuery: MutableState<String>,
+    onServiceSelected: (String) -> Unit
 ) {
-  val context = LocalContext.current
   // Fetch notifications and check for unread ones
   LaunchedEffect(providerId) { notificationsViewModel.init(providerId) }
   val notifications by notificationsViewModel.notifications.collectAsState()
   val hasUnreadNotifications = notifications.any { !it.isRead }
 
-  Row(
-      modifier =
-          Modifier.fillMaxWidth().background(colorScheme.background).testTag("RequestsTopBar"),
-      horizontalArrangement = Arrangement.SpaceBetween,
-      verticalAlignment = Alignment.CenterVertically) {
-        IconButton(
-            modifier = Modifier.testTag("MenuOption"),
-            onClick = {
-              Toast.makeText(context, "Not Yet Implemented", Toast.LENGTH_LONG).show()
-            }) {
-              Icon(imageVector = Icons.Default.Menu, contentDescription = "Menu Option")
+  Box(modifier = Modifier.fillMaxWidth().testTag("servicesScreenTopSection")) {
+    // Background Image
+    Image(
+        painter = painterResource(id = R.drawable.top_background),
+        contentDescription = null,
+        contentScale = ContentScale.Crop,
+        modifier = Modifier.matchParentSize())
+    Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+      Row(
+          modifier = Modifier.fillMaxWidth().testTag("RequestsTopBar"),
+          horizontalArrangement = Arrangement.SpaceBetween,
+          verticalAlignment = Alignment.CenterVertically) {
+            IconButton(onClick = { navigationActions.navigateTo(Route.NOTIFICATIONS) }) {
+              Icon(
+                  imageVector = Icons.Default.Notifications,
+                  tint = if (hasUnreadNotifications) Color.Red else colorScheme.onBackground,
+                  contentDescription = "Notifications")
             }
 
-        Row(
-            modifier = Modifier.testTag("SloganIcon"),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-          Text(
-              text = "Solv",
-              style =
-                  TextStyle(
-                      fontSize = 20.sp,
-                      fontWeight = FontWeight.Bold,
-                      color = colorScheme.onSurface))
-          Text(
-              text = "It",
-              style =
-                  TextStyle(
-                      fontSize = 20.sp,
-                      fontWeight = FontWeight.Bold,
-                      color = colorScheme.secondary))
-        }
+            Row(
+                modifier = Modifier.testTag("SloganIcon"),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+              Text(
+                  text = "Solv",
+                  style =
+                      TextStyle(
+                          fontSize = 20.sp,
+                          fontWeight = FontWeight.Bold,
+                          color = colorScheme.onBackground))
+              Text(
+                  text = "It",
+                  style =
+                      TextStyle(
+                          fontSize = 20.sp,
+                          fontWeight = FontWeight.Bold,
+                          color = colorScheme.secondary))
+            }
 
-        IconButton(onClick = { navigationActions.navigateTo(Screen.NOTIFICATIONS) }) {
-          Icon(
-              imageVector = Icons.Default.Notifications,
-              tint = if (hasUnreadNotifications) Color.Red else colorScheme.onSurface,
-              contentDescription = "Notifications")
-        }
-      }
+            IconButton(
+                modifier = Modifier.testTag("MenuOption"),
+                onClick = { navigationActions.navigateTo(Route.JOBS) }) {
+                  Icon(
+                      imageVector = Icons.Default.Menu,
+                      contentDescription = "Menu Option",
+                      tint = colorScheme.onBackground)
+                }
+          }
+
+      // Search Bar and Service Type Filter
+      Row(
+          modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).offset(y = 20.dp),
+          horizontalArrangement = Arrangement.SpaceBetween,
+          verticalAlignment = Alignment.CenterVertically) {
+            SearchBar(searchQuery, Modifier.weight(1f))
+            ServiceTypeFilter(
+                selectedService = selectedService,
+                onServiceSelected = onServiceSelected,
+            )
+          }
+    }
+  }
 }
 
 /**
@@ -264,7 +285,7 @@ fun RequestsTopBar(
 @Composable
 fun SearchBar(searchQuery: MutableState<String>, modifier: Modifier = Modifier) {
   Box(
-      modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+      modifier = modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 8.dp),
       contentAlignment = Alignment.Center) {
         // Floating Search Bar with rounded corners
         Row(
@@ -329,10 +350,9 @@ fun ListRequests(
 ) {
   LazyColumn(
       modifier =
-          Modifier.fillMaxSize()
-              .padding(start = 16.dp, end = 16.dp)
-              .background(colorScheme.background),
+          Modifier.fillMaxSize().padding(horizontal = 16.dp).background(colorScheme.background),
       verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        item { Spacer(modifier = Modifier.size(20.dp)) }
         items(requests) { request ->
           ServiceRequestItem(request, showDialog, selectedRequest, repliedClicked)
         }
@@ -358,30 +378,46 @@ fun ServiceRequestItem(
       modifier = Modifier.fillMaxWidth().padding(8.dp).testTag("ServiceRequest"),
       shape = RoundedCornerShape(16.dp),
       elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-      colors = CardDefaults.cardColors(containerColor = colorScheme.surface)) {
+      border = BorderStroke(4.dp, color = Services.getColor(request.type)),
+      colors = CardDefaults.cardColors(containerColor = colorScheme.background)) {
         Column(modifier = Modifier.fillMaxWidth()) {
           // Header Image
-          val imageUrl = request.imageUrl
-          if (!imageUrl.isNullOrEmpty()) {
-            AsyncImage(
-                model = imageUrl,
-                placeholder = painterResource(id = R.drawable.loading),
-                error = painterResource(id = R.drawable.error),
-                contentDescription = "Service Image",
-                modifier = Modifier.fillMaxWidth().height(140.dp),
-                contentScale = ContentScale.Crop)
-          } else {
-            Box(
-                modifier = Modifier.fillMaxWidth().height(140.dp).background(Color.LightGray),
-                contentAlignment = Alignment.Center) {
-                  Text(
-                      text = "No Image Provided",
-                      style =
-                          TextStyle(
-                              color = Color.DarkGray,
-                              fontSize = 14.sp,
-                              fontWeight = FontWeight.Bold))
-                }
+          Box {
+            val imageUrl = request.imageUrl
+            if (!imageUrl.isNullOrEmpty()) {
+              AsyncImage(
+                  model = imageUrl,
+                  placeholder = painterResource(id = R.drawable.loading),
+                  error = painterResource(id = R.drawable.error),
+                  contentDescription = "Service Image",
+                  modifier = Modifier.fillMaxWidth().height(140.dp),
+                  contentScale = ContentScale.Crop)
+            } else {
+              Box(
+                  modifier = Modifier.fillMaxWidth().height(140.dp).background(Color.LightGray),
+                  contentAlignment = Alignment.Center) {
+                    Text(
+                        text = "No Image Provided",
+                        style =
+                            TextStyle(
+                                color = Color.DarkGray,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold))
+                  }
+            }
+            Icon(
+                painter = painterResource(id = Services.getIcon(request.type)),
+                contentDescription = null,
+                tint = Color.Unspecified,
+                modifier =
+                    Modifier.padding(16.dp)
+                        .size(40.dp)
+                        .align(Alignment.TopEnd)
+                        .shadow(
+                            ambientColor = Services.getColor(request.type),
+                            spotColor = Services.getColor(request.type),
+                            elevation = 8.dp,
+                            shape = RoundedCornerShape(8.dp)))
           }
 
           // Content Section
@@ -703,7 +739,7 @@ fun ServiceTypeFilter(
 ) {
   var expanded by remember { mutableStateOf(false) }
 
-  Box(modifier = modifier.wrapContentWidth()) {
+  Box(modifier = modifier.wrapContentWidth().padding(horizontal = 8.dp, vertical = 8.dp)) {
     Button(
         onClick = { expanded = !expanded },
         shape = RoundedCornerShape(50),

@@ -1,0 +1,26 @@
+{
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@typescript-eslint/eslint-plugin": "^8.18.0",
+    "@typescript-eslint/parser": "^8.18.0",
+    "eslint": "^9.16.0",
+    "eslint-config-google": "^0.14.0",
+    "eslint-plugin-import": "^2.31.0",
+    "firebase-functions-test": "^3.3.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2"
+  },
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "serve": "npm run build && firebase emulators:start --only functions",
+    "shell": "npm run build && firebase functions:shell",
+    "start": "npm run shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test": "jest",
+    "test:watch": "jest --watch"
+  }
+}

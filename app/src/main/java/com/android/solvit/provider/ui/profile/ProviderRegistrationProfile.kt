@@ -50,8 +50,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -59,8 +57,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.MutableState
@@ -86,7 +82,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.android.solvit.R
@@ -105,8 +100,9 @@ import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.model.utils.loadBitmapFromUri
 import com.android.solvit.shared.ui.booking.PackageCard
 import com.android.solvit.shared.ui.navigation.NavigationActions
+import com.android.solvit.shared.ui.theme.Typography
 import com.android.solvit.shared.ui.utils.CustomOutlinedTextField
-import com.android.solvit.shared.ui.utils.GoBackButton
+import com.android.solvit.shared.ui.utils.TopAppBarInbox
 import com.android.solvit.shared.ui.utils.ValidationRegex
 
 /**
@@ -119,7 +115,6 @@ import com.android.solvit.shared.ui.utils.ValidationRegex
  * @param packageViewModel the [PackageProposalViewModel] to handle the package proposals
  * @param assistantViewModel the [PackagesAssistantViewModel] to handle generate packages
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint(
     "UnusedMaterialScaffoldPaddingParameter",
     "UnusedMaterial3ScaffoldPaddingParameter",
@@ -200,18 +195,16 @@ fun ProviderRegistrationScreen(
 
   Scaffold(
       topBar = {
-        TopAppBar(
-            title = { Text("Provider Registration") },
-            navigationIcon = {
-              if (currentStep > 1) {
-                IconButton(onClick = { currentStep -= 1 }) {
-                  Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                }
-              } else {
-                GoBackButton(navigationActions)
-              }
-            },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = backgroundColor))
+        TopAppBarInbox(
+            "Provider Registration",
+            leftButtonAction =
+                if (currentStep > 1) {
+                  { currentStep -= 1 }
+                } else {
+                  { navigationActions.goBack() }
+                },
+            leftButtonForm = Icons.AutoMirrored.Filled.ArrowBack,
+            testTagLeft = "goBackButton")
       },
       content = { padding ->
         Column(
@@ -234,7 +227,7 @@ fun ProviderRegistrationScreen(
                             .align(Alignment.CenterHorizontally))
                 Text(
                     text = "Sign Up as a Provider",
-                    style = MaterialTheme.typography.titleLarge,
+                    style = Typography.titleLarge,
                     modifier =
                         Modifier.testTag("signUpProviderTitle").align(Alignment.CenterHorizontally))
 
@@ -346,7 +339,7 @@ fun ProviderRegistrationScreen(
                     ) {
                       Text(
                           text = "Finish Your Inscription",
-                          style = MaterialTheme.typography.titleLarge,
+                          style = Typography.titleLarge,
                           modifier =
                               Modifier.align(Alignment.CenterHorizontally)
                                   .testTag("preferencesTitle"),
@@ -379,7 +372,7 @@ fun ProviderRegistrationScreen(
                       Text(
                           text =
                               "You can always update your informations in your profile settings.",
-                          style = MaterialTheme.typography.bodyLarge,
+                          style = Typography.bodyLarge,
                           modifier =
                               Modifier.align(Alignment.CenterHorizontally).testTag("footerText"),
                           textAlign = TextAlign.Center)
@@ -397,7 +390,7 @@ fun ProviderRegistrationScreen(
                     ) {
                       Text(
                           text = "Offer Service Packages",
-                          style = MaterialTheme.typography.titleLarge,
+                          style = Typography.titleLarge,
                           modifier =
                               Modifier.align(Alignment.CenterHorizontally)
                                   .testTag("preferencesTitle"),
@@ -430,7 +423,7 @@ fun ProviderRegistrationScreen(
                       Text(
                           text =
                               "You can always update your informations in your profile settings.",
-                          style = MaterialTheme.typography.bodyLarge,
+                          style = Typography.bodyLarge,
                           modifier =
                               Modifier.align(Alignment.CenterHorizontally).testTag("footer2Text"),
                           textAlign = TextAlign.Center)
@@ -442,7 +435,7 @@ fun ProviderRegistrationScreen(
                 // Completion screen
                 Text(
                     text = "You're All Set!",
-                    style = MaterialTheme.typography.titleLarge,
+                    style = Typography.titleLarge,
                     modifier =
                         Modifier.align(Alignment.CenterHorizontally).testTag("confirmationTitle"))
 
@@ -464,7 +457,7 @@ fun ProviderRegistrationScreen(
                         "Your profile has been successfully created. " +
                             "You're ready to start offering your services to customers." +
                             "Start connecting with customers, respond to requests, and grow your business on Solvit.",
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = Typography.bodyLarge,
                     modifier =
                         Modifier.align(Alignment.CenterHorizontally)
                             .testTag("successMessageText"), // Add horizontal padding
@@ -720,7 +713,7 @@ fun ProviderDetails(
                   "Complete Registration",
                   color = colorScheme.onPrimary,
                   fontWeight = FontWeight.Bold,
-                  fontSize = 16.sp,
+                  style = Typography.bodyLarge,
                   modifier = Modifier.testTag("saveButton"))
             }
       }
@@ -765,9 +758,7 @@ fun UploadImage(selectedImageUri: Uri?, imageUrl: String?, onImageSelected: (Uri
                     Modifier.testTag("uploadImage").clickable {
                       imagePickerLauncher.launch("image/*")
                     },
-                style =
-                    MaterialTheme.typography.bodyLarge.copy(
-                        textDecoration = TextDecoration.Underline))
+                style = Typography.bodyLarge.copy(textDecoration = TextDecoration.Underline))
           }
         } else {
           Box(modifier = Modifier.fillMaxSize()) {
@@ -881,7 +872,7 @@ fun ProviderPackages(
             if (it.isNotEmpty()) {
               Text(
                   text = "Here are the packages we generated for you:",
-                  style = MaterialTheme.typography.bodyLarge,
+                  style = Typography.bodyLarge,
                   modifier = Modifier.testTag("generatedPackagesTitle"))
               // Display the generated packages
               LazyRow(
@@ -970,7 +961,7 @@ fun PackageInputSection(
                 .clickable { onToggleVisibility(!expanded) }) {
           Text(
               text = "Package $packageNumber",
-              style = MaterialTheme.typography.bodyLarge,
+              style = Typography.bodyLarge,
               modifier = Modifier.weight(1f))
           Icon(
               imageVector =
@@ -979,7 +970,7 @@ fun PackageInputSection(
         }
     if (expanded) {
       // Package Inputs
-      Text("Package Name", style = MaterialTheme.typography.bodyLarge)
+      Text("Package Name", style = Typography.bodyLarge)
       Spacer(modifier = Modifier.height(8.dp))
       CustomOutlinedTextField(
           value = packageName,
@@ -991,7 +982,7 @@ fun PackageInputSection(
           errorTestTag = "packageNameError")
       Spacer(modifier = Modifier.height(8.dp))
 
-      Text("Set Your Price", style = MaterialTheme.typography.bodyLarge)
+      Text("Set Your Price", style = Typography.bodyLarge)
       Spacer(modifier = Modifier.height(8.dp))
       CustomOutlinedTextField(
           value = packagePrice,
@@ -1003,7 +994,7 @@ fun PackageInputSection(
           errorTestTag = "packagePriceError")
       Spacer(modifier = Modifier.height(8.dp))
 
-      Text("Package Details", style = MaterialTheme.typography.bodyLarge)
+      Text("Package Details", style = Typography.bodyLarge)
       Spacer(modifier = Modifier.height(8.dp))
       CustomOutlinedTextField(
           value = packageDetails,
@@ -1016,7 +1007,7 @@ fun PackageInputSection(
 
       Spacer(modifier = Modifier.height(8.dp))
 
-      Text("Key Features", style = MaterialTheme.typography.bodyLarge)
+      Text("Key Features", style = Typography.bodyLarge)
       Spacer(modifier = Modifier.height(8.dp))
       repeat(3) { featureNumber ->
         CustomOutlinedTextField(
@@ -1071,7 +1062,7 @@ fun PackageProposalDialog(
         Text(
             modifier = Modifier.testTag("packageProposalDialogTitle"),
             text = "Generate Packages with AI",
-            style = MaterialTheme.typography.titleLarge,
+            style = Typography.titleLarge,
             textAlign = TextAlign.Center)
       },
       text = {

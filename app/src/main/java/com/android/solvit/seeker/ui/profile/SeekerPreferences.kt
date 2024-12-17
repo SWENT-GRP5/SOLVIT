@@ -1,12 +1,21 @@
 package com.android.solvit.seeker.ui.profile
 
-import androidx.compose.animation.*
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
 import androidx.compose.material3.MaterialTheme.colorScheme
-import androidx.compose.runtime.*
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -15,6 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
+import com.android.solvit.shared.ui.theme.Typography
 
 @Composable
 fun Preferences(userId: String, viewModel: SeekerProfileViewModel) {
@@ -27,9 +37,12 @@ fun Preferences(userId: String, viewModel: SeekerProfileViewModel) {
       horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = "You might like;",
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.align(Alignment.Start).testTag("preferences_title"))
+            modifier = Modifier.align(Alignment.Start).testTag("preferences_title"),
+            style =
+                Typography.bodyLarge.copy(
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                ))
         Spacer(modifier = Modifier.height(8.dp))
 
         // Suggestion Grid
@@ -91,8 +104,7 @@ fun SuggestionButton(text: String, isSelected: Boolean, onClick: () -> Unit) {
       color = backgroundColor) {
         Text(
             text = text,
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp),
-            color = contentColor)
+            style = Typography.bodyMedium.copy(color = contentColor),
+            modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp))
       }
 }
