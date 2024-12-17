@@ -35,7 +35,6 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.State
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -53,6 +52,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.solvit.R
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.seeker.ui.service.ProviderItem
@@ -86,7 +86,7 @@ fun CreateReviewScreen(
     listProviderViewModel: ListProviderViewModel,
     navigationActions: NavigationActions
 ) {
-  val requestState = serviceRequestViewModel.selectedRequest.collectAsState()
+  val requestState = serviceRequestViewModel.selectedRequest.collectAsStateWithLifecycle()
   if (requestState.value == null || requestState.value!!.status != ServiceRequestStatus.COMPLETED) {
     navigationActions.goBack()
   }
@@ -192,7 +192,7 @@ fun RequestBox(
     navigationActions: NavigationActions
 ) {
   val request = requestState.value ?: return
-  val providerListState = listProviderViewModel.providersList.collectAsState()
+  val providerListState = listProviderViewModel.providersList.collectAsStateWithLifecycle()
   val provider = providerListState.value.find { it.uid == request.providerId }
   val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
   OutlinedCard(
