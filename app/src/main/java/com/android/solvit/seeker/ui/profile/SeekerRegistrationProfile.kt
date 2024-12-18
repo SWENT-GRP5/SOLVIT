@@ -168,7 +168,7 @@ fun SeekerRegistrationScreen(
                     label = "Full Name",
                     placeholder = "Enter your full name",
                     isValueOk = isFullNameOk,
-                    errorMessage = "Your full name must be at least 3 characters",
+                    errorMessage = "Please enter your full name (e.g., John Smith).",
                     leadingIcon = Icons.Default.Person,
                     leadingIconDescription = "Person Icon",
                     testTag = "fullNameInput",
