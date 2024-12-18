@@ -147,7 +147,6 @@ class FcmTokenManagerTest {
             check { data: Map<String, Any> ->
               assertEquals(testToken, data["token"])
               assertTrue(data.containsKey("updatedAt"))
-              true
             })
   }
 
@@ -246,7 +245,6 @@ class FcmTokenManagerTest {
               val timestamp = data["updatedAt"] as Long
               assertTrue(timestamp >= beforeTime)
               assertTrue(timestamp <= System.currentTimeMillis())
-              true
             })
   }
 }

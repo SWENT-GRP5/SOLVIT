@@ -1,6 +1,5 @@
 package com.android.solvit.provider.model
 
-import com.android.solvit.shared.model.authentication.AuthRepository
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.authentication.User
 import com.android.solvit.shared.model.map.Location
@@ -53,7 +52,6 @@ class ProviderCalendarViewModelTest {
   private lateinit var testDispatcher: TestDispatcher
 
   // Test dates
-  private val testDate = LocalDateTime.of(2024, 1, 1, 0, 0)
   private val testDateTime = LocalDateTime.of(2024, 1, 1, 10, 0)
 
   // Create a test schedule with regular hours and exceptions
@@ -104,12 +102,7 @@ class ProviderCalendarViewModelTest {
           location = testLocation,
           status = ServiceRequestStatus.PENDING)
 
-  private val unassignedRequest = assignedRequest.copy(uid = "request2", providerId = null)
-  private val otherProviderRequest =
-      assignedRequest.copy(uid = "request3", providerId = "other_provider_id")
-
   // Dependencies
-  private lateinit var authRepository: AuthRepository
   private lateinit var providerRepository: ProviderRepository
   private lateinit var authViewModel: AuthViewModel
   private lateinit var serviceRequestViewModel: ServiceRequestViewModel
@@ -160,12 +153,10 @@ class ProviderCalendarViewModelTest {
     whenever(providerRepository.getProvider(eq(testUserId), any(), any())).then { invocation ->
       val onSuccess = invocation.getArgument<(Provider?) -> Unit>(1)
       onSuccess(testProvider)
-      Unit
     }
     whenever(providerRepository.addListenerOnProviders(any(), any())).thenAnswer { invocation ->
       val onSuccess = invocation.getArgument<(List<Provider>) -> Unit>(0)
       onSuccess(providerFlow.value)
-      Unit
     }
 
     // Create view model
@@ -272,7 +263,6 @@ class ProviderCalendarViewModelTest {
         .then { invocation ->
           val onSuccess = invocation.getArgument<() -> Unit>(1)
           onSuccess()
-          Unit
         }
 
     // When
@@ -300,7 +290,6 @@ class ProviderCalendarViewModelTest {
     whenever(providerRepository.getProvider(eq(testUserId), any(), any())).then { invocation ->
       val onSuccess = invocation.getArgument<(Provider?) -> Unit>(1)
       onSuccess(testProvider)
-      Unit
     }
     whenever(serviceRequestViewModel.acceptedRequests).thenReturn(MutableStateFlow(emptyList()))
     testDispatcher.scheduler.advanceUntilIdle() // Important: advance scheduler
@@ -345,7 +334,6 @@ class ProviderCalendarViewModelTest {
     whenever(providerRepository.getProvider(eq(testUserId), any(), any())).then { invocation ->
       val onSuccess = invocation.getArgument<(Provider?) -> Unit>(1)
       onSuccess(testProvider)
-      Unit
     }
     testDispatcher.scheduler.advanceUntilIdle() // Important: advance scheduler
 
@@ -367,7 +355,6 @@ class ProviderCalendarViewModelTest {
     whenever(providerRepository.getProvider(eq(testUserId), any(), any())).then { invocation ->
       val onSuccess = invocation.getArgument<(Provider?) -> Unit>(1)
       onSuccess(testProvider)
-      Unit
     }
     whenever(serviceRequestViewModel.acceptedRequests).thenReturn(MutableStateFlow(emptyList()))
     testDispatcher.scheduler.advanceUntilIdle() // Important: advance scheduler
@@ -412,7 +399,6 @@ class ProviderCalendarViewModelTest {
     whenever(providerRepository.getProvider(eq(testUserId), any(), any())).then { invocation ->
       val onSuccess = invocation.getArgument<(Provider?) -> Unit>(1)
       onSuccess(testProvider)
-      Unit
     }
     testDispatcher.scheduler.advanceUntilIdle() // Important: advance scheduler
 
@@ -501,7 +487,6 @@ class ProviderCalendarViewModelTest {
         .then { invocation ->
           val onSuccess = invocation.getArgument<() -> Unit>(1)
           onSuccess()
-          Unit
         }
 
     // When
@@ -529,7 +514,6 @@ class ProviderCalendarViewModelTest {
         .then { invocation ->
           val onSuccess = invocation.getArgument<() -> Unit>(1)
           onSuccess()
-          Unit
         }
 
     calendarViewModel.addExtraTimeException(
@@ -548,7 +532,6 @@ class ProviderCalendarViewModelTest {
         .then { invocation ->
           val onFailure = invocation.getArgument<(Exception) -> Unit>(2)
           onFailure(Exception("Update failed"))
-          Unit
         }
 
     calendarViewModel.addOffTimeException(
@@ -629,7 +612,6 @@ class ProviderCalendarViewModelTest {
         .then { invocation ->
           val onSuccess = invocation.getArgument<() -> Unit>(1)
           onSuccess()
-          Unit
         }
 
     // When
@@ -651,7 +633,6 @@ class ProviderCalendarViewModelTest {
         .then { invocation ->
           val onFailure = invocation.getArgument<(Exception) -> Unit>(2)
           onFailure(Exception("Update failed"))
-          Unit
         }
 
     calendarViewModel.updateException(date, timeSlots, ExceptionType.EXTRA_TIME) { success, feedback
@@ -724,7 +705,6 @@ class ProviderCalendarViewModelTest {
         .then { invocation ->
           val onSuccess = invocation.getArgument<() -> Unit>(1)
           onSuccess()
-          Unit
         }
 
     // Test add without merging
@@ -751,7 +731,6 @@ class ProviderCalendarViewModelTest {
         .then { invocation ->
           val onFailure = invocation.getArgument<(Exception) -> Unit>(2)
           onFailure(Exception("Update failed"))
-          Unit
         }
 
     calendarViewModel.addExtraTimeException(date, timeSlots) { _, feedback ->
@@ -849,7 +828,6 @@ class ProviderCalendarViewModelTest {
         .then { invocation ->
           val onSuccess = invocation.getArgument<() -> Unit>(1)
           onSuccess()
-          Unit
         }
 
     // When
@@ -871,7 +849,6 @@ class ProviderCalendarViewModelTest {
         .then { invocation ->
           val onFailure = invocation.getArgument<(Exception) -> Unit>(2)
           onFailure(Exception("Update failed"))
-          Unit
         }
 
     calendarViewModel.updateException(date, timeSlots, ExceptionType.EXTRA_TIME) { success, feedback
@@ -899,7 +876,6 @@ class ProviderCalendarViewModelTest {
         .then { invocation ->
           val onSuccess = invocation.getArgument<() -> Unit>(1)
           onSuccess()
-          Unit
         }
 
     // When
@@ -920,7 +896,6 @@ class ProviderCalendarViewModelTest {
         .then { invocation ->
           val onFailure = invocation.getArgument<(Exception) -> Unit>(2)
           onFailure(Exception("Update failed"))
-          Unit
         }
 
     calendarViewModel.addExtraTimeException(date, timeSlots) { success, feedback ->
@@ -947,7 +922,6 @@ class ProviderCalendarViewModelTest {
         .then { invocation ->
           val onSuccess = invocation.getArgument<() -> Unit>(1)
           onSuccess()
-          Unit
         }
 
     // When
@@ -968,7 +942,6 @@ class ProviderCalendarViewModelTest {
         .then { invocation ->
           val onFailure = invocation.getArgument<(Exception) -> Unit>(2)
           onFailure(Exception("Update failed"))
-          Unit
         }
 
     calendarViewModel.addOffTimeException(date, timeSlots) { success, feedback ->
@@ -986,7 +959,6 @@ class ProviderCalendarViewModelTest {
     whenever(providerRepository.updateProvider(any(), any(), any())).then { invocation ->
       val onFailure = invocation.getArgument<(Exception) -> Unit>(2)
       onFailure(Exception("Update failed"))
-      Unit
     }
 
     // Try to update schedule
@@ -1016,7 +988,6 @@ class ProviderCalendarViewModelTest {
       testProvider = provider
       providerFlow.value = listOf(provider)
       onSuccess()
-      Unit
     }
 
     calendarViewModel.setRegularHours(DayOfWeek.MONDAY.name, listOf(slot1, slot2, slot3)) {
@@ -1041,9 +1012,8 @@ class ProviderCalendarViewModelTest {
     whenever(providerRepository.updateProvider(any(), any(), any())).then { invocation ->
       val onSuccess = invocation.getArgument<() -> Unit>(1)
       testDispatcher.scheduler.advanceTimeBy(1000) // Simulate delay
-      onSuccess()
       updateCompleted = true
-      Unit
+      onSuccess()
     }
 
     // Update provider
@@ -1093,7 +1063,6 @@ class ProviderCalendarViewModelTest {
     doAnswer {
           val onFailure = it.getArgument<(Exception) -> Unit>(2)
           onFailure(Exception("Test failure"))
-          Unit
         }
         .`when`(providerRepository)
         .updateProvider(any(), any(), any())
@@ -1112,7 +1081,6 @@ class ProviderCalendarViewModelTest {
     doAnswer {
           val onSuccess = it.getArgument<() -> Unit>(1)
           onSuccess()
-          Unit
         }
         .`when`(providerRepository)
         .updateProvider(any(), any(), any())
@@ -1122,7 +1090,6 @@ class ProviderCalendarViewModelTest {
     whenever(providerRepository.getProvider(eq(testUserId), any(), any())).then { invocation ->
       val onSuccess = invocation.getArgument<(Provider?) -> Unit>(1)
       onSuccess(testProvider)
-      Unit
     }
 
     // Test invalid time slots
@@ -1155,7 +1122,6 @@ class ProviderCalendarViewModelTest {
     doAnswer {
           val onSuccess = it.getArgument<() -> Unit>(1)
           onSuccess()
-          Unit
         }
         .`when`(providerRepository)
         .updateProvider(any(), any(), any())
@@ -1166,7 +1132,6 @@ class ProviderCalendarViewModelTest {
     whenever(providerRepository.getProvider(eq(testUserId), any(), any())).then { invocation ->
       val onSuccess = invocation.getArgument<(Provider?) -> Unit>(1)
       onSuccess(testProvider)
-      Unit
     }
 
     // Test successful addition

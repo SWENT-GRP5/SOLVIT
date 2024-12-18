@@ -4,6 +4,7 @@ import com.android.solvit.shared.model.chat.ChatRepository
 import com.android.solvit.shared.model.chat.ChatViewModel
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -24,6 +25,7 @@ class ChatViewModelTest {
   private lateinit var chatRepository: ChatRepository
   private lateinit var chatViewModel: ChatViewModel
 
+  @OptIn(ExperimentalCoroutinesApi::class)
   @Before
   fun setUp() {
     Dispatchers.setMain(StandardTestDispatcher())
@@ -31,6 +33,7 @@ class ChatViewModelTest {
     chatViewModel = ChatViewModel(chatRepository)
   }
 
+  @OptIn(ExperimentalCoroutinesApi::class)
   @After
   fun tearDown() {
     Dispatchers.resetMain()
@@ -91,6 +94,7 @@ class ChatViewModelTest {
     verify(chatRepository).listenForMessages(eq(false), eq("testChatId"), any(), any())
   }
 
+  @OptIn(ExperimentalCoroutinesApi::class)
   @Test
   fun `getAllMessages calls repository listenForLastMessages`() = runTest {
     whenever(chatRepository.listenForLastMessages(any(), any(), any())).doAnswer {

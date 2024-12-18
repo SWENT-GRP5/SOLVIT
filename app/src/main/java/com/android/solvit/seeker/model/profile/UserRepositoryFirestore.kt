@@ -287,8 +287,8 @@ open class UserRepositoryFirestore(
       val phone = document.getString("phone") ?: return null
       val address = document.get("address") as? Map<*, *>
       val latitude = address?.get("latitude") as? Double ?: return null
-      val longitude = address?.get("longitude") as? Double ?: return null
-      val nameLoc = address?.get("name") as? String ?: return null
+      val longitude = address["longitude"] as? Double ?: return null
+      val nameLoc = address["name"] as? String ?: return null
       val preferences = document.get("preferences") as? List<String> ?: emptyList()
       Log.e(
           "DocumentToUser",
