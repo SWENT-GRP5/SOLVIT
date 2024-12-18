@@ -71,6 +71,7 @@ fun ProviderCalendarScreen(
       topBar = {
         TopAppBarInbox(
             title = "My Calendar",
+            showAppIcon = true,
             testTagTitle = "calendarTitle",
             rightButtonForm = Icons.Default.Settings,
             rightButtonAction = { showPreferences = true },

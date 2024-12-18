@@ -2,8 +2,6 @@ package com.android.solvit.seeker.ui.service
 
 import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
-import android.widget.Toast
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
