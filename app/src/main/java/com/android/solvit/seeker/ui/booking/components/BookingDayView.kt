@@ -27,19 +27,24 @@ fun BookingDayView(
     onHeaderClick: () -> Unit,
     onTimeSlotSelected: (TimeSlot) -> Unit,
     serviceColor: Color = colorScheme.secondary,
+    deadlineDate: LocalDate? = null,
     modifier: Modifier = Modifier
 ) {
   val today = LocalDate.now()
   val currentTime = LocalTime.now()
   val listState = rememberLazyListState()
 
-  // Filter out past time slots
+  // Filter out past time slots and slots after deadline
   val availableTimeSlots =
-      timeSlots.filter { timeSlot ->
-        when {
-          viewDate.isAfter(today) -> true
-          viewDate.isBefore(today) -> false
-          else -> !timeSlot.start.isBefore(currentTime)
+      if (deadlineDate != null && viewDate.isAfter(deadlineDate)) {
+        emptyList()
+      } else {
+        timeSlots.filter { timeSlot ->
+          when {
+            viewDate.isAfter(today) -> true
+            viewDate.isBefore(today) -> false
+            else -> !timeSlot.start.isBefore(currentTime)
+          }
         }
       }
 
@@ -95,6 +100,7 @@ fun BookingDayView(
                     onBook = { _, _ -> onTimeSlotSelected(timeSlot) },
                     onCancel = { /* Do nothing */},
                     serviceColor = serviceColor,
+                    deadlineDate = deadlineDate,
                     modifier =
                         Modifier.testTag(
                             "dayViewTimeSlot_${timeSlot.start.hour}_${timeSlot.start.minute}"))

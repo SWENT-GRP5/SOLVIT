@@ -124,12 +124,25 @@ class SeekerBookingViewModel(
     }
   }
 
-  /** Prepares the booking view with the selected provider and service request */
-  fun prepareForBooking(provider: Provider, serviceRequest: ServiceRequest) {
+  /** Prepares the view model for a new booking */
+  fun prepareForBooking(providerId: String, request: ServiceRequest) {
     viewModelScope.launch {
-      _currentProvider.value = provider
-      serviceRequestViewModel.setSelectedRequest(serviceRequest)
-      updateAvailableTimeSlots()
+      providerRepository.getProvider(
+          providerId,
+          onSuccess = { provider ->
+            provider?.let {
+              _currentProvider.value = it
+              serviceRequestViewModel.selectProvider(providerId, request.type)
+              serviceRequestViewModel.setSelectedRequest(request)
+              _selectedDate.value = LocalDate.now()
+              _selectedTimeSlot.value = null
+              _showDayView.value = false
+              updateAvailableTimeSlots()
+            }
+          },
+          onFailure = { exception ->
+            Log.e("SeekerBookingViewModel", "Error fetching provider", exception)
+          })
     }
   }
 

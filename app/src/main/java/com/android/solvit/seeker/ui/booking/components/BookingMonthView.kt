@@ -29,7 +29,6 @@ fun BookingMonthView(
     onHeaderClick: () -> Unit,
     timeSlots: Map<LocalDate, List<TimeSlot>>,
     serviceColor: Color = colorScheme.secondary,
-    selectedDate: LocalDate? = null,
     deadlineDate: LocalDate? = null,
     modifier: Modifier = Modifier
 ) {
@@ -76,10 +75,11 @@ fun BookingMonthView(
             BookingMonthDayItem(
                 date = date,
                 isCurrentMonth = isCurrentMonth,
-                timeSlots = timeSlots[date] ?: emptyList(),
+                timeSlots =
+                    if (deadlineDate != null && date.isAfter(deadlineDate)) emptyList()
+                    else timeSlots[date] ?: emptyList(),
                 onDateSelected = onDateSelected,
                 serviceColor = serviceColor,
-                selectedDate = selectedDate,
                 deadlineDate = deadlineDate,
                 modifier = dayModifier)
           }

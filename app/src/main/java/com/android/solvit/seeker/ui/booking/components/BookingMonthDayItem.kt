@@ -25,19 +25,17 @@ fun BookingMonthDayItem(
     timeSlots: List<TimeSlot>,
     onDateSelected: (LocalDate) -> Unit,
     serviceColor: Color = colorScheme.secondary,
-    selectedDate: LocalDate? = null,
     deadlineDate: LocalDate? = null,
     modifier: Modifier = Modifier
 ) {
   val now = LocalDate.now()
   val isSelectable = date.isEqual(now) || date.isAfter(now)
   val hasAvailabilities = timeSlots.isNotEmpty()
-  val isSelected = date == selectedDate
 
   val backgroundColor =
       when {
-        isSelected -> serviceColor.copy(alpha = 0.8f)
         date == deadlineDate -> colorScheme.error.copy(alpha = 0.15f)
+        date == now -> colorScheme.primary.copy(alpha = 0.15f)
         hasAvailabilities && isSelectable -> {
           if (isCurrentMonth) {
             serviceColor.copy(alpha = 0.2f)
@@ -50,7 +48,6 @@ fun BookingMonthDayItem(
 
   val textColor =
       when {
-        isSelected -> Color.White
         date == deadlineDate -> colorScheme.error
         date == now -> colorScheme.primary
         !isCurrentMonth || !isSelectable -> colorScheme.onBackground.copy(alpha = 0.5f)
@@ -60,6 +57,7 @@ fun BookingMonthDayItem(
   val borderColor =
       when {
         date == deadlineDate -> colorScheme.error
+        date == now -> colorScheme.primary
         else -> Color.Transparent
       }
 
@@ -70,7 +68,7 @@ fun BookingMonthDayItem(
               .padding(2.dp)
               .background(backgroundColor, RoundedCornerShape(8.dp))
               .border(
-                  width = if (date == deadlineDate) 2.dp else 0.dp,
+                  width = if (date == deadlineDate || date == now) 2.dp else 0.dp,
                   color = borderColor,
                   shape = RoundedCornerShape(8.dp))
               .clickable(enabled = isSelectable && hasAvailabilities) { onDateSelected(date) }

@@ -106,7 +106,6 @@ fun BookingCalendarScreen(navigationActions: NavigationActions, viewModel: Seeke
                             },
                             onHeaderClick = {}, // No date picker needed for booking
                             serviceColor = serviceColor,
-                            selectedDate = selectedDate,
                             deadlineDate =
                                 selectedRequest?.dueDate?.let { timestamp ->
                                   Instant.ofEpochMilli(timestamp.seconds * 1000)
@@ -135,7 +134,13 @@ fun BookingCalendarScreen(navigationActions: NavigationActions, viewModel: Seeke
                           viewModel.onTimeSlotSelected(timeSlot)
                           navigationActions.navigateTo(Route.BOOKING_DETAILS)
                         },
-                        serviceColor = serviceColor)
+                        serviceColor = serviceColor,
+                        deadlineDate =
+                            selectedRequest?.dueDate?.let { timestamp ->
+                              Instant.ofEpochMilli(timestamp.seconds * 1000)
+                                  .atZone(ZoneId.systemDefault())
+                                  .toLocalDate()
+                            })
                   }
             }
           }

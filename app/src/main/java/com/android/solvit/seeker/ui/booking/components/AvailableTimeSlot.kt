@@ -33,8 +33,14 @@ fun AvailableTimeSlot(
     onBook: (LocalDate, LocalTime) -> Unit,
     onCancel: () -> Unit,
     serviceColor: Color,
+    deadlineDate: LocalDate? = null,
     modifier: Modifier = Modifier
 ) {
+  // If date is after deadline, don't show the time slot
+  if (deadlineDate != null && date.isAfter(deadlineDate)) {
+    return
+  }
+
   var showConfirmation by remember { mutableStateOf(false) }
   var isBooked by remember { mutableStateOf(false) }
 

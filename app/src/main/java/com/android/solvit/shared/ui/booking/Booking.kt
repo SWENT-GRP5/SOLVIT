@@ -420,7 +420,8 @@ fun ServiceBookingScreen(
                                   Button(
                                       onClick = {
                                         provider?.let { prov ->
-                                          seekerBookingViewModel.prepareForBooking(prov, request!!)
+                                          seekerBookingViewModel.prepareForBooking(
+                                              prov.uid, request!!)
                                           navigationActions.navigateTo(BOOKING_CALENDAR)
                                         }
                                       },
