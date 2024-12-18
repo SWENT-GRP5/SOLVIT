@@ -374,41 +374,49 @@ fun ServiceBookingScreen(
                                           fontSize = 13.sp,
                                           textAlign = TextAlign.Center,
                                           color = colorScheme.secondaryContainer)
-                                      Text(
-                                          text =
-                                              request!!.meetingDate?.let {
-                                                try {
-                                                  SimpleDateFormat("MMM d", Locale.getDefault())
-                                                      .format(it.toDate())
-                                                } catch (e: Exception) {
-                                                  "Not set"
-                                                }
-                                              } ?: "Not set",
-                                          fontWeight = FontWeight.Bold,
-                                          fontSize = 18.sp,
-                                          textAlign = TextAlign.Center,
-                                          maxLines = 1,
-                                          overflow = TextOverflow.Ellipsis,
-                                          color = colorScheme.onPrimary)
-                                      Text(
-                                          text =
-                                              request!!.meetingDate?.let {
-                                                try {
-                                                  SimpleDateFormat("HH:mm", Locale.getDefault())
-                                                      .format(it.toDate())
-                                                } catch (e: Exception) {
-                                                  ""
-                                                }
-                                              } ?: "",
-                                          fontWeight = FontWeight.Bold,
-                                          fontSize = 16.sp,
-                                          textAlign = TextAlign.Center,
-                                          maxLines = 1,
-                                          overflow = TextOverflow.Ellipsis,
-                                          color = colorScheme.onPrimary)
+                                      Row(
+                                          horizontalArrangement = Arrangement.Center,
+                                          verticalAlignment = Alignment.CenterVertically,
+                                          modifier = Modifier.fillMaxWidth()) {
+                                            Text(
+                                                text =
+                                                    request!!.meetingDate?.let {
+                                                      try {
+                                                        SimpleDateFormat(
+                                                                "MMM d", Locale.getDefault())
+                                                            .format(it.toDate())
+                                                      } catch (e: Exception) {
+                                                        "Not set"
+                                                      }
+                                                    } ?: "Not set",
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = 18.sp,
+                                                textAlign = TextAlign.Center,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis,
+                                                color = colorScheme.onPrimary)
+                                            Spacer(modifier = Modifier.width(8.dp))
+                                            Text(
+                                                text =
+                                                    request!!.meetingDate?.let {
+                                                      try {
+                                                        SimpleDateFormat(
+                                                                "HH:mm", Locale.getDefault())
+                                                            .format(it.toDate())
+                                                      } catch (e: Exception) {
+                                                        ""
+                                                      }
+                                                    } ?: "",
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = 16.sp,
+                                                textAlign = TextAlign.Center,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis,
+                                                color = colorScheme.onPrimary)
+                                          }
                                     }
 
-                                if (isSeeker && isAccepted) {
+                                if (isSeeker && acceptedOrScheduled) {
                                   Button(
                                       onClick = {
                                         provider?.let { prov ->
@@ -440,7 +448,7 @@ fun ServiceBookingScreen(
                                                   tint = colorScheme.primary)
                                               Spacer(modifier = Modifier.width(4.dp))
                                               Text(
-                                                  "Book Now",
+                                                  "Set Date",
                                                   fontSize = 14.sp,
                                                   fontWeight = FontWeight.Medium,
                                                   color = colorScheme.primary)
