@@ -118,7 +118,7 @@ fun ServiceTypeDropdown(
     onServiceTypeSelected: (Services) -> Unit,
     readOnly: Boolean = false
 ) {
-  Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp)) {
+  Box(modifier = Modifier.fillMaxWidth()) {
     OutlinedTextField(
         value =
             typeQuery.replace("_", " ").lowercase(Locale.getDefault()).replaceFirstChar {
@@ -219,7 +219,7 @@ fun LocationDropdown(
   var hasBeenFocused by remember { mutableStateOf(false) }
   var hasLostFocusAfterTyping by remember { mutableStateOf(false) }
 
-  Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp).testTag("addressDropdown")) {
+  Box(modifier = Modifier.fillMaxWidth().testTag("addressDropdown")) {
     OutlinedTextField(
         value = localQuery,
         onValueChange = { query ->
@@ -391,19 +391,15 @@ fun DatePickerFieldToModal(
       trailingIcon = { Icon(Icons.Default.DateRange, contentDescription = "Select date") },
       shape = RoundedCornerShape(12.dp),
       modifier =
-          modifier
-              .fillMaxWidth()
-              .padding(horizontal = 20.dp)
-              .testTag("inputRequestDate")
-              .pointerInput(selectedDate) {
-                awaitEachGesture {
-                  awaitFirstDown(pass = PointerEventPass.Initial)
-                  val upEvent = waitForUpOrCancellation(pass = PointerEventPass.Initial)
-                  if (upEvent != null) {
-                    showModal = true
-                  }
-                }
-              },
+          modifier.fillMaxWidth().testTag("inputRequestDate").pointerInput(selectedDate) {
+            awaitEachGesture {
+              awaitFirstDown(pass = PointerEventPass.Initial)
+              val upEvent = waitForUpOrCancellation(pass = PointerEventPass.Initial)
+              if (upEvent != null) {
+                showModal = true
+              }
+            }
+          },
       colors =
           OutlinedTextFieldDefaults.colors(
               unfocusedContainerColor = Color.Transparent,

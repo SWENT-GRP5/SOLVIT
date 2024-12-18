@@ -189,14 +189,14 @@ fun TopSection(
                   style =
                       TextStyle(
                           fontSize = 25.sp,
-                          fontWeight = FontWeight.Bold,
+                          fontWeight = FontWeight.Black,
                           color = colorScheme.onBackground))
               Text(
                   text = "It",
                   style =
                       TextStyle(
-                          fontSize = 25.sp,
-                          fontWeight = FontWeight.Bold,
+                          fontSize = 35.sp,
+                          fontWeight = FontWeight.Black,
                           color = colorScheme.secondary))
             }
 
@@ -474,7 +474,7 @@ fun ProviderItem(provider: Provider, showIcon: Boolean = true, onClick: () -> Un
                     Modifier.padding(8.dp)
                         .size(40.dp)
                         .clip(RoundedCornerShape(8.dp))
-                        .background(OnPrimary) // Choose a color that fits your theme
+                        .background(OnPrimary)
                         .align(Alignment.TopStart),
                 contentAlignment = Alignment.Center) {
                   Icon(

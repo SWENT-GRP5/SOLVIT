@@ -134,7 +134,7 @@ class CreateRequestScreenTest {
           listProviderViewModel)
     }
 
-    composeTestRule.onNodeWithTag("screenTitle").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("requestBackground").assertIsDisplayed()
     composeTestRule.onNodeWithTag("screenTitle").assertIsDisplayed()
     composeTestRule.onNodeWithTag("screenTitle").assertTextEquals("Create a new request")
     composeTestRule.onNodeWithTag("requestSubmit").assertIsDisplayed()
