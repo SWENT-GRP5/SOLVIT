@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
@@ -392,18 +391,15 @@ fun DatePickerFieldToModal(
       trailingIcon = { Icon(Icons.Default.DateRange, contentDescription = "Select date") },
       shape = RoundedCornerShape(12.dp),
       modifier =
-          modifier
-              .fillMaxWidth()
-              .testTag("inputRequestDate")
-              .pointerInput(selectedDate) {
-                awaitEachGesture {
-                  awaitFirstDown(pass = PointerEventPass.Initial)
-                  val upEvent = waitForUpOrCancellation(pass = PointerEventPass.Initial)
-                  if (upEvent != null) {
-                    showModal = true
-                  }
-                }
-              },
+          modifier.fillMaxWidth().testTag("inputRequestDate").pointerInput(selectedDate) {
+            awaitEachGesture {
+              awaitFirstDown(pass = PointerEventPass.Initial)
+              val upEvent = waitForUpOrCancellation(pass = PointerEventPass.Initial)
+              if (upEvent != null) {
+                showModal = true
+              }
+            }
+          },
       colors =
           OutlinedTextFieldDefaults.colors(
               unfocusedContainerColor = Color.Transparent,

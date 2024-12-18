@@ -11,13 +11,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -26,19 +23,14 @@ import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -59,7 +51,6 @@ import com.android.solvit.shared.ui.utils.TopAppBarInbox
 
 @SuppressLint("SourceLockedOrientationActivity")
 @OptIn(ExperimentalMaterial3Api::class)
-
 @Composable
 fun RequestScreen(
     navigationActions: NavigationActions,
@@ -99,103 +90,92 @@ fun RequestScreen(
     activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
     onDispose { activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED }
   }
-    Box(modifier = Modifier.fillMaxSize()) {
-        // Background Image
-        Image(
-            painter = painterResource(id = R.drawable.bg_request),
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize()
-        )
-        Scaffold(
-            modifier = Modifier.padding(16.dp).testTag("requestScreen"),
-            containerColor = Color.Transparent,
-            topBar = {
-                TopAppBarInbox(
-                    title = screenTitle,
-                    testTagTitle = "screenTitle",
-                    leftButtonAction = {
-                        navigationActions.goBack()
-                        requestViewModel.unSelectProvider()
-                    },
-                    leftButtonForm = Icons.AutoMirrored.Outlined.ArrowBack,
-                    testTagLeft = "goBackButton",
-                    containerColor =  Color.Transparent
-                )
-            },
-            content = { paddingValues ->
-                Column(
-                    modifier =
-                    Modifier.fillMaxSize()
-                        .padding(10.dp)
-                        .padding(paddingValues)
-                        .verticalScroll(rememberScrollState()),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    ImagePicker(selectedImageUri, imageUrl, onImageSelected)
-                    TitleInput(title, onTitleChange)
-                    DescriptionInput(description, onDescriptionChange)
-                    ServiceTypeDropdown(
-                        typeQuery,
-                        onTypeQueryChange,
-                        showDropdownType,
-                        onShowDropdownTypeChange,
-                        filteredServiceTypes,
-                        onServiceTypeSelected
-                    )
-                    LocationDropdown(
-                        locationQuery = locationQuery,
-                        onLocationQueryChange = onLocationQueryChange,
-                        showDropdownLocation = showDropdownLocation,
-                        onShowDropdownLocationChange = onShowDropdownLocationChange,
-                        locationSuggestions = locationSuggestions,
-                        userLocations = userLocations,
-                        onLocationSelected = onLocationSelected,
-                        requestLocation = selectedRequest?.location,
-                        isValueOk = selectedLocation != null
-                    )
-                    DatePickerFieldToModal(dueDate = dueDate, onDateChange = onDueDateChange)
-                    Button(
-                        onClick = onSubmit,
-                        modifier = Modifier.height(50.dp).testTag("requestSubmit"),
-                        shape = RoundedCornerShape(25.dp),
-                        enabled =
+  Box(modifier = Modifier.fillMaxSize()) {
+    // Background Image
+    Image(
+        painter = painterResource(id = R.drawable.bg_request),
+        contentDescription = null,
+        contentScale = ContentScale.Crop,
+        modifier = Modifier.fillMaxSize())
+    Scaffold(
+        modifier = Modifier.padding(16.dp).testTag("requestScreen"),
+        containerColor = Color.Transparent,
+        topBar = {
+          TopAppBarInbox(
+              title = screenTitle,
+              testTagTitle = "screenTitle",
+              leftButtonAction = {
+                navigationActions.goBack()
+                requestViewModel.unSelectProvider()
+              },
+              leftButtonForm = Icons.AutoMirrored.Outlined.ArrowBack,
+              testTagLeft = "goBackButton",
+              containerColor = Color.Transparent)
+        },
+        content = { paddingValues ->
+          Column(
+              modifier =
+                  Modifier.fillMaxSize()
+                      .padding(10.dp)
+                      .padding(paddingValues)
+                      .verticalScroll(rememberScrollState()),
+              verticalArrangement = Arrangement.spacedBy(8.dp),
+              horizontalAlignment = Alignment.CenterHorizontally) {
+                ImagePicker(selectedImageUri, imageUrl, onImageSelected)
+                TitleInput(title, onTitleChange)
+                DescriptionInput(description, onDescriptionChange)
+                ServiceTypeDropdown(
+                    typeQuery,
+                    onTypeQueryChange,
+                    showDropdownType,
+                    onShowDropdownTypeChange,
+                    filteredServiceTypes,
+                    onServiceTypeSelected)
+                LocationDropdown(
+                    locationQuery = locationQuery,
+                    onLocationQueryChange = onLocationQueryChange,
+                    showDropdownLocation = showDropdownLocation,
+                    onShowDropdownLocationChange = onShowDropdownLocationChange,
+                    locationSuggestions = locationSuggestions,
+                    userLocations = userLocations,
+                    onLocationSelected = onLocationSelected,
+                    requestLocation = selectedRequest?.location,
+                    isValueOk = selectedLocation != null)
+                DatePickerFieldToModal(dueDate = dueDate, onDateChange = onDueDateChange)
+                Button(
+                    onClick = onSubmit,
+                    modifier = Modifier.height(50.dp).testTag("requestSubmit"),
+                    shape = RoundedCornerShape(25.dp),
+                    enabled =
                         title.isNotBlank() &&
-                                description.isNotBlank() &&
-                                dueDate.isNotBlank() &&
-                                selectedLocation != null,
-                        colors =
+                            description.isNotBlank() &&
+                            dueDate.isNotBlank() &&
+                            selectedLocation != null,
+                    colors =
                         ButtonDefaults.buttonColors(
                             containerColor = colorScheme.primary,
                             disabledContainerColor = colorScheme.primaryContainer,
                             contentColor = colorScheme.onPrimary,
-                            disabledContentColor = colorScheme.onPrimaryContainer
-                        )
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center,
-                            modifier = Modifier.fillMaxSize()
-                        ) {
+                            disabledContentColor = colorScheme.onPrimaryContainer)) {
+                      Row(
+                          verticalAlignment = Alignment.CenterVertically,
+                          horizontalArrangement = Arrangement.Center,
+                          modifier = Modifier.fillMaxSize()) {
                             Icon(
                                 imageVector = Icons.Default.Done,
                                 contentDescription = null,
-                                modifier = Modifier.size(24.dp)
-                            )
+                                modifier = Modifier.size(24.dp))
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(submitButtonText, style = Typography.bodyLarge)
-                        }
+                          }
                     }
-                    if (selectedRequest != null) {
-                        DeleteButton(
-                            request = selectedRequest,
-                            requestViewModel = requestViewModel,
-                            navigationActions
-                        )
-                    }
+                if (selectedRequest != null) {
+                  DeleteButton(
+                      request = selectedRequest,
+                      requestViewModel = requestViewModel,
+                      navigationActions)
                 }
-            }
-        )
-    }
+              }
+        })
+  }
 }

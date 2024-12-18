@@ -83,6 +83,5 @@ fun TopAppBarInbox(
               }
         }
       },
-      colors = TopAppBarDefaults.topAppBarColors(containerColor = containerColor)
-  )
+      colors = TopAppBarDefaults.topAppBarColors(containerColor = containerColor))
 }

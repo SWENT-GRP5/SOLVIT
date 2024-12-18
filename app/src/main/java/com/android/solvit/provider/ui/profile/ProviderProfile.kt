@@ -31,7 +31,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,6 +45,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.solvit.R
 import com.android.solvit.provider.model.profile.ProviderViewModel
@@ -91,8 +91,8 @@ fun ProviderProfileScreen(
     onDispose { activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED }
   }
 
-  val user by authViewModel.user.collectAsState()
-  val provider by providerViewModel.userProvider.collectAsState()
+  val user by authViewModel.user.collectAsStateWithLifecycle()
+  val provider by providerViewModel.userProvider.collectAsStateWithLifecycle()
   LaunchedEffect(user) { user?.uid?.let { providerViewModel.getProvider(it) } }
 
   // State for logout dialog
@@ -241,17 +241,17 @@ fun ProviderItem(
  */
 @Composable
 fun InsightsCard(provider: Provider, serviceRequestViewModel: ServiceRequestViewModel) {
-  val pendingTasks by serviceRequestViewModel.pendingRequests.collectAsState()
+  val pendingTasks by serviceRequestViewModel.pendingRequests.collectAsStateWithLifecycle()
   val filteredPendingTasks = pendingTasks.filter { it.providerId == provider.uid }
-  val acceptedTasks by serviceRequestViewModel.acceptedRequests.collectAsState()
+  val acceptedTasks by serviceRequestViewModel.acceptedRequests.collectAsStateWithLifecycle()
   val filteredAcceptedTasks = acceptedTasks.filter { it.providerId == provider.uid }
-  val scheduledTasks by serviceRequestViewModel.scheduledRequests.collectAsState()
+  val scheduledTasks by serviceRequestViewModel.scheduledRequests.collectAsStateWithLifecycle()
   val filteredScheduledTasks = scheduledTasks.filter { it.providerId == provider.uid }
-  val completedTasks by serviceRequestViewModel.completedRequests.collectAsState()
+  val completedTasks by serviceRequestViewModel.completedRequests.collectAsStateWithLifecycle()
   val filteredCompletedTasks = completedTasks.filter { it.providerId == provider.uid }
-  val canceledTasks by serviceRequestViewModel.cancelledRequests.collectAsState()
+  val canceledTasks by serviceRequestViewModel.cancelledRequests.collectAsStateWithLifecycle()
   val filteredCanceledTasks = canceledTasks.filter { it.providerId == provider.uid }
-  val archivedTasks by serviceRequestViewModel.archivedRequests.collectAsState()
+  val archivedTasks by serviceRequestViewModel.archivedRequests.collectAsStateWithLifecycle()
   val filteredArchivedTasks = archivedTasks.filter { it.providerId == provider.uid }
 
   val earnings = filteredCompletedTasks.sumOf { it.agreedPrice ?: 0.0 }

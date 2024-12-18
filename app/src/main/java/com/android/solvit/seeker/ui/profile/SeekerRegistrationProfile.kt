@@ -34,7 +34,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -48,6 +47,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.solvit.R
 import com.android.solvit.provider.ui.profile.UploadImage
@@ -97,18 +97,19 @@ fun SeekerRegistrationScreen(
   var fullName by remember { mutableStateOf("") }
   var userName by remember { mutableStateOf("") }
   var phone by remember { mutableStateOf("") }
-  val locationQuery by locationViewModel.query.collectAsState()
+  val locationQuery by locationViewModel.query.collectAsStateWithLifecycle()
   var seekerImageUri by remember { mutableStateOf<Uri?>(null) }
   var seekerImageBitmap by remember { mutableStateOf<Bitmap?>(null) }
 
   // Represents the current authenticated user
-  val user by authViewModel.user.collectAsState()
+  val user by authViewModel.user.collectAsStateWithLifecycle()
   // Represents the email of the current user
-  val email by authViewModel.email.collectAsState()
+  val email by authViewModel.email.collectAsStateWithLifecycle()
 
   var showDropdown by remember { mutableStateOf(false) }
   val locationSuggestions by
-      locationViewModel.locationSuggestions.collectAsState(initial = emptyList<Location?>())
+      locationViewModel.locationSuggestions.collectAsStateWithLifecycle(
+          initialValue = emptyList<Location?>())
   var selectedLocation by remember { mutableStateOf<Location?>(null) }
 
   // Step tracking: Role, Details, Preferences

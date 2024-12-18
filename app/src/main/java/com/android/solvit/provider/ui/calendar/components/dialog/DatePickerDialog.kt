@@ -47,7 +47,7 @@ fun DatePickerDialog(
           Text("Cancel", color = colorScheme.primary, style = Typography.bodyLarge)
         }
       },
-      modifier = modifier) {
+      modifier = modifier.testTag("datePickerDialog")) {
         DatePicker(state = datePickerState, modifier = Modifier.testTag("datePicker"))
       }
 }

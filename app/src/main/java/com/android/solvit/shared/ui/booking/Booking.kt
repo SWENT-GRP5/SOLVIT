@@ -54,7 +54,6 @@ import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -76,6 +75,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.android.solvit.R
@@ -130,7 +130,7 @@ fun ServiceBookingScreen(
     onDispose { activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED }
   }
 
-  val isReadyToNavigate by chatViewModel.isReadyToNavigate.collectAsState()
+  val isReadyToNavigate by chatViewModel.isReadyToNavigate.collectAsStateWithLifecycle()
   LaunchedEffect(isReadyToNavigate) {
     if (isReadyToNavigate) {
       navigationActions.navigateAndSetBackStack(Screen.CHAT, listOf(Route.INBOX))
@@ -138,17 +138,17 @@ fun ServiceBookingScreen(
     }
   }
 
-  val user = authViewModel.user.collectAsState().value
+  val user = authViewModel.user.collectAsStateWithLifecycle().value
   val role = user?.role ?: "seeker"
   val seekerState = remember { mutableStateOf<Any?>(null) }
 
-  val request by requestViewModel.selectedRequest.collectAsState()
+  val request by requestViewModel.selectedRequest.collectAsStateWithLifecycle()
   if (request == null) return
   val providerId = request!!.providerId
   val provider =
       if (providerId.isNullOrEmpty()) null
       else
-          providerViewModel.providersList.collectAsState().value.firstOrNull {
+          providerViewModel.providersList.collectAsStateWithLifecycle().value.firstOrNull {
             it.uid == providerId
           }
 
@@ -160,7 +160,10 @@ fun ServiceBookingScreen(
   val packageId = request!!.packageId
   val packageProposal =
       if (packageId.isNullOrEmpty()) null
-      else packageViewModel.proposal.collectAsState().value.firstOrNull { it.uid == packageId }
+      else
+          packageViewModel.proposal.collectAsStateWithLifecycle().value.firstOrNull {
+            it.uid == packageId
+          }
 
   val isSeeker = role == "seeker"
 
@@ -576,12 +579,15 @@ fun EditButton(
         modifier = modifier.fillMaxWidth().padding(top = 8.dp).testTag("edit_button"),
         contentAlignment = Alignment.Center) {
           Button(
+              modifier = Modifier.height(50.dp),
               onClick = { navigationActions.navigateTo(Route.EDIT_REQUEST) },
               colors =
                   ButtonDefaults.buttonColors(
                       containerColor = colorScheme.primary, contentColor = colorScheme.onPrimary),
-              shape = RoundedCornerShape(8.dp)) {
+              shape = RoundedCornerShape(25.dp)) {
                 Text(text = "Edit details", style = Typography.labelLarge)
+                Spacer(modifier = Modifier.width(8.dp))
+                Icon(Icons.Default.Edit, contentDescription = null)
               }
         }
   }
@@ -600,13 +606,14 @@ fun ChatButton(
       modifier = modifier.fillMaxWidth().padding(top = 8.dp).testTag("chat_button"),
       contentAlignment = Alignment.Center) {
         Button(
+            modifier = Modifier.fillMaxWidth().height(50.dp),
             onClick = {
               chatViewModel.prepareForChat(false, currentUserId, receiverId, receiver, requestId)
             },
             colors =
                 ButtonDefaults.buttonColors(
                     containerColor = colorScheme.primary, contentColor = colorScheme.onPrimary),
-            shape = RoundedCornerShape(8.dp)) {
+            shape = RoundedCornerShape(25.dp)) {
               Text(text = "Discuss", style = Typography.labelLarge)
             }
       }
@@ -655,11 +662,12 @@ fun ReviewButton(navigationActions: NavigationActions) {
       modifier = Modifier.fillMaxWidth().padding(top = 16.dp).testTag("review_button"),
       contentAlignment = Alignment.Center) {
         Button(
+            modifier = Modifier.fillMaxWidth().height(50.dp),
             onClick = { navigationActions.navigateTo(Route.REVIEW) },
             colors =
                 ButtonDefaults.buttonColors(
                     containerColor = colorScheme.primary, contentColor = colorScheme.onPrimary),
-            shape = RoundedCornerShape(8.dp)) {
+            shape = RoundedCornerShape(25.dp)) {
               Text(text = "Leave a review", style = Typography.labelLarge)
             }
       }
