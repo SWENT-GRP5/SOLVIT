@@ -8,8 +8,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
@@ -42,6 +44,29 @@ fun WeekView(
   val weekDates = (0..6).map { startOfWeek.plusDays(it.toLong()) }
   val today = LocalDate.now()
   val todayIndex = weekDates.indexOf(today).takeIf { it >= 0 }
+  val listState = rememberLazyListState()
+
+  // Calculate initial scroll position
+  LaunchedEffect(date, timeSlots) {
+    val scrollHour =
+        when {
+          timeSlots.isNotEmpty() -> {
+            timeSlots.values
+                .flatten()
+                .mapNotNull { request ->
+                  request.meetingDate
+                      ?.toInstant()
+                      ?.atZone(ZoneId.systemDefault())
+                      ?.toLocalTime()
+                      ?.hour
+                }
+                .minOrNull() ?: 9
+          }
+          todayIndex != null -> LocalTime.now().hour
+          else -> 9 // Default to 9 AM
+        }
+    listState.scrollToItem(maxOf(0, scrollHour - 1)) // Scroll one hour earlier for context
+  }
 
   Column(modifier = modifier.fillMaxSize()) {
     Row(
@@ -78,7 +103,8 @@ fun WeekView(
         currentTime = if (todayIndex != null) LocalTime.now() else null,
         showCurrentTimeLine = todayIndex != null,
         todayIndex = todayIndex,
-        numberOfColumns = 7) { hour, dayIndex, contentModifier ->
+        numberOfColumns = 7,
+        listState = listState) { hour, dayIndex, contentModifier ->
           Box(
               modifier =
                   contentModifier.zIndex(1f).testTag("weekViewHour_${hour}_Day_${dayIndex}")) {

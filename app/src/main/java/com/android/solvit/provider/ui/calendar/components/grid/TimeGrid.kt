@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
@@ -40,6 +41,7 @@ fun TimeGrid(
     showCurrentTimeLine: Boolean = false,
     todayIndex: Int? = null,
     numberOfColumns: Int = 1,
+    listState: LazyListState = rememberLazyListState(),
     content: @Composable (hour: Int, dayIndex: Int, contentModifier: Modifier) -> Unit
 ) {
   val hours = (0..23).toList()
@@ -71,7 +73,7 @@ fun TimeGrid(
       }
     }
 
-    LazyColumn(modifier = Modifier.fillMaxSize(), state = rememberLazyListState()) {
+    LazyColumn(modifier = Modifier.fillMaxSize(), state = listState) {
       items(hours) { hour ->
         Box(
             modifier =

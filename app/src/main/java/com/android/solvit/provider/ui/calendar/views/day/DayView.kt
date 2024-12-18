@@ -9,9 +9,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
@@ -37,6 +39,28 @@ fun DayView(
     isBookingView: Boolean = false
 ) {
   val today = LocalDate.now()
+  val listState = rememberLazyListState()
+
+  // Calculate initial scroll position
+  LaunchedEffect(viewDate, timeSlots) {
+    val scrollHour =
+        when {
+          timeSlots.isNotEmpty() -> {
+            timeSlots
+                .mapNotNull { request ->
+                  request.meetingDate
+                      ?.toInstant()
+                      ?.atZone(ZoneId.systemDefault())
+                      ?.toLocalTime()
+                      ?.hour
+                }
+                .minOrNull() ?: 9
+          }
+          viewDate == today -> LocalTime.now().hour
+          else -> 9 // Default to 9 AM
+        }
+    listState.scrollToItem(maxOf(0, scrollHour - 1)) // Scroll one hour earlier for context
+  }
 
   Column(modifier = modifier.fillMaxSize()) {
     Row(
@@ -66,7 +90,8 @@ fun DayView(
         hourHeight = 60.dp,
         currentTime = if (viewDate == today) LocalTime.now() else null,
         showCurrentTimeLine = viewDate == today && !isBookingView,
-        numberOfColumns = 1) { hour, _, contentModifier ->
+        numberOfColumns = 1,
+        listState = listState) { hour, _, contentModifier ->
           Box(modifier = contentModifier) {
             timeSlots.forEach { request ->
               val startTime =
