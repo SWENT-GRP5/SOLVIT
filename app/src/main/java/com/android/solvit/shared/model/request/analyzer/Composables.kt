@@ -60,7 +60,6 @@ import androidx.compose.ui.window.Dialog
 import coil.compose.AsyncImage
 import com.android.solvit.R
 import com.android.solvit.shared.model.utils.loadBitmapFromUri
-import com.android.solvit.shared.ui.theme.Background
 import com.android.solvit.shared.ui.theme.Error
 import com.android.solvit.shared.ui.theme.OnBackground
 import com.android.solvit.shared.ui.theme.OnErrorContainer
@@ -80,7 +79,7 @@ fun AIAssistantDialog(onCancel: () -> Unit, onUploadPictures: () -> Unit) {
         modifier =
             Modifier.fillMaxWidth(0.9f) // Adjust width as 90% of the screen
                 .wrapContentHeight()
-                .background(Background, shape = RoundedCornerShape(16.dp))
+                .background(colorScheme.background, shape = RoundedCornerShape(16.dp))
                 .padding(16.dp) // Padding around the dialog content
                 .testTag("aIAssistantDialog")) {
           Column(
@@ -135,7 +134,7 @@ fun AIAssistantDialog(onCancel: () -> Unit, onUploadPictures: () -> Unit) {
                         "Would you like to use the AI assistant to create your request by uploading pictures of your issue?",
                     style = Typography.bodyMedium,
                     textAlign = TextAlign.Center,
-                    color = OnBackground,
+                    color = colorScheme.onBackground,
                     modifier = Modifier.padding(vertical = 16.dp).testTag("aiAssistantDescription"))
 
                 // Buttons
@@ -330,8 +329,8 @@ fun MultiStepDialog(
     Dialog(onDismissRequest = { onClose() }) {
       Surface(
           shape = RoundedCornerShape(16.dp),
-          color = Background,
-          contentColor = OnBackground,
+          color = colorScheme.background,
+          contentColor = colorScheme.onBackground,
           modifier = Modifier.padding(16.dp).testTag("multiStepDialog")) {
             when (currentStep) {
               1 ->

@@ -240,15 +240,15 @@ fun RequestsTopBar(
                   text = "Solv",
                   style =
                       TextStyle(
-                          fontSize = 20.sp,
-                          fontWeight = FontWeight.Bold,
+                          fontSize = 25.sp,
+                          fontWeight = FontWeight.Black,
                           color = colorScheme.onBackground))
               Text(
                   text = "It",
                   style =
                       TextStyle(
-                          fontSize = 20.sp,
-                          fontWeight = FontWeight.Bold,
+                          fontSize = 35.sp,
+                          fontWeight = FontWeight.Black,
                           color = colorScheme.secondary))
             }
 

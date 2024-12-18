@@ -581,7 +581,7 @@ fun EditButton(
         modifier = modifier.fillMaxWidth().padding(top = 8.dp).testTag("edit_button"),
         contentAlignment = Alignment.Center) {
           Button(
-              modifier = Modifier.height(50.dp),
+              modifier = Modifier.fillMaxWidth().height(50.dp),
               onClick = { navigationActions.navigateTo(Route.EDIT_REQUEST) },
               colors =
                   ButtonDefaults.buttonColors(
@@ -645,7 +645,7 @@ fun EditAndChatButton(
 ) {
   Row(
       modifier = Modifier.fillMaxWidth().padding(top = 16.dp).testTag("edit_discuss_button"),
-      horizontalArrangement = Arrangement.SpaceEvenly,
+      horizontalArrangement = Arrangement.spacedBy(16.dp),
       verticalAlignment = Alignment.CenterVertically,
   ) {
     EditButton(navigationActions, isPending, isSeeker, modifier)

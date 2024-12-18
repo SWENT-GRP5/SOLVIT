@@ -193,23 +193,29 @@ fun ChatScreen(
             },
             context = context)
       }) { paddingValues ->
-        LazyColumn(
-            modifier = Modifier.padding(paddingValues).imePadding().testTag("conversation")) {
-              if (request != null) {
-                // Display the request details
-                item { RequestDetails(request!!, serviceRequestViewModel, navigationActions) }
-              }
-              items(messages) { message ->
-                if (message.senderId == user?.uid) {
-                  // Item for messages authenticated user send
-                  SentMessage(message, true)
-                } else {
-                  // Item for messages authenticated user receive
-                  SentMessage(
-                      message, isSentByUser = false, showProfilePicture = true, receiverPicture)
-                }
+        Column(
+            modifier = Modifier.padding(paddingValues),
+        ) {
+          if (request != null) {
+            // Display the request details
+            RequestDetails(request!!, serviceRequestViewModel, navigationActions)
+          }
+
+          val listState = rememberLazyListState()
+          LaunchedEffect(messages) { listState.animateScrollToItem(messages.size) }
+          LazyColumn(state = listState, modifier = Modifier.imePadding().testTag("conversation")) {
+            items(messages) { message ->
+              if (message.senderId == user?.uid) {
+                // Item for messages authenticated user send
+                SentMessage(message, true)
+              } else {
+                // Item for messages authenticated user receive
+                SentMessage(
+                    message, isSentByUser = false, showProfilePicture = true, receiverPicture)
               }
             }
+          }
+        }
       }
 }
 

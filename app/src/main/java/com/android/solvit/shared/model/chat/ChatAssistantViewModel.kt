@@ -274,7 +274,8 @@ class ChatAssistantViewModel : ViewModel() {
       languageTo: String,
       onResponse: (String) -> Unit
   ) {
-    val prompt = "Translate the following message: $message, from $languageFrom to $languageTo"
+    val prompt =
+        "Translate the following message: $message, from $languageFrom to $languageTo, give a single translation that could be sent without modifications."
     Log.d("ChatAssistantViewModel", "model prompted")
     viewModelScope.launch {
       try {

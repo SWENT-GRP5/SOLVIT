@@ -160,7 +160,9 @@ fun MapContent(
       properties =
           MapProperties(
               mapStyleOptions =
-                  MapStyleOptions.loadRawResourceStyle(LocalContext.current, if (isSystemInDarkTheme()) R.raw.map_style_dark else R.raw.map_style)),
+                  MapStyleOptions.loadRawResourceStyle(
+                      LocalContext.current,
+                      if (isSystemInDarkTheme()) R.raw.map_style_dark else R.raw.map_style)),
       onMapLoaded = onMapLoaded) {
         markers.forEach { markerData -> MapMarker(markerData) }
 

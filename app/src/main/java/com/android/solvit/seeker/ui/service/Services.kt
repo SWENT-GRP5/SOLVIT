@@ -2,7 +2,6 @@ package com.android.solvit.seeker.ui.service
 
 import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.BorderStroke
@@ -152,7 +151,6 @@ fun TopSection(
   val userProfile by seekerProfileViewModel.seekerProfile.collectAsStateWithLifecycle()
   val user by authViewModel.user.collectAsState()
   user?.let { seekerProfileViewModel.getUserProfile(it.uid) }
-  Log.e("TopSection", "$userProfile")
 
   Box(modifier = Modifier.fillMaxWidth().testTag("servicesScreenTopSection")) {
     // Background Image
