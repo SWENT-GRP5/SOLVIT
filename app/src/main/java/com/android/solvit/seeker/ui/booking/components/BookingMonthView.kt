@@ -29,6 +29,8 @@ fun BookingMonthView(
     onHeaderClick: () -> Unit,
     timeSlots: Map<LocalDate, List<TimeSlot>>,
     serviceColor: Color = colorScheme.secondary,
+    selectedDate: LocalDate? = null,
+    deadlineDate: LocalDate? = null,
     modifier: Modifier = Modifier
 ) {
   val currentMonth = YearMonth.from(viewDate)
@@ -77,6 +79,8 @@ fun BookingMonthView(
                 timeSlots = timeSlots[date] ?: emptyList(),
                 onDateSelected = onDateSelected,
                 serviceColor = serviceColor,
+                selectedDate = selectedDate,
+                deadlineDate = deadlineDate,
                 modifier = dayModifier)
           }
         }

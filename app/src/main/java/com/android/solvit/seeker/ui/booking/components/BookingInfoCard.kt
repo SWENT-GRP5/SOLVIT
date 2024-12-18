@@ -10,15 +10,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.material3.MaterialTheme.colorScheme
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,6 +28,8 @@ import coil.compose.AsyncImage
 import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.service.Services
+import java.time.LocalDate
+import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -41,9 +38,23 @@ import java.util.Locale
 fun BookingInfoCard(
     provider: Provider?,
     serviceRequest: ServiceRequest?,
+    selectedDate: LocalDate?,
+    selectedTime: LocalTime? = null,
+    showDayView: Boolean,
+    onBackToMonthView: () -> Unit,
     modifier: Modifier = Modifier
 ) {
   var expanded by remember { mutableStateOf(false) }
+
+  // Format the meeting date and time
+  val formattedDate =
+      remember(selectedDate) {
+        selectedDate?.format(DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.getDefault()))
+      }
+  val formattedTime =
+      remember(selectedTime) {
+        selectedTime?.format(DateTimeFormatter.ofPattern("h:mm a", Locale.getDefault()))
+      }
 
   // Format the due date
   val formattedDueDate =
@@ -81,88 +92,80 @@ fun BookingInfoCard(
 
     AnimatedContent(targetState = expanded, label = "expand_animation") { isExpanded ->
       if (!isExpanded) {
-        // Collapsed state - basic info with deadline
+        // Collapsed state - show meeting info
         Card(
             modifier = Modifier.fillMaxWidth().wrapContentHeight().clickable { expanded = true },
-            colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+            colors = CardDefaults.cardColors(containerColor = Services.getColor(provider.service)),
             shape = RoundedCornerShape(16.dp)) {
-              Box(
-                  modifier =
-                      Modifier.fillMaxWidth()
-                          .background(
-                              brush =
-                                  Brush.horizontalGradient(
-                                      colors =
-                                          listOf(
-                                              Services.getColor(provider.service),
-                                              Services.getColor(provider.service)
-                                                  .copy(alpha = 0.1f))),
-                              shape = RoundedCornerShape(16.dp))) {
+              Row(
+                  modifier = Modifier.fillMaxWidth().padding(12.dp),
+                  horizontalArrangement = Arrangement.SpaceBetween,
+                  verticalAlignment = Alignment.CenterVertically) {
                     Row(
-                        modifier = Modifier.fillMaxWidth().padding(12.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically) {
-                          Row(
-                              horizontalArrangement = Arrangement.spacedBy(12.dp),
-                              verticalAlignment = Alignment.CenterVertically,
-                              modifier = Modifier.weight(1f)) {
-                                // Provider profile picture with border
-                                Box(
-                                    modifier =
-                                        Modifier.size(44.dp)
-                                            .border(
-                                                width = 2.dp,
-                                                color = Color.White,
-                                                shape = CircleShape)) {
-                                      AsyncImage(
-                                          model = provider.imageUrl,
-                                          placeholder =
-                                              painterResource(
-                                                  id = Services.getProfileImage(provider.service)),
-                                          error =
-                                              painterResource(
-                                                  id = Services.getProfileImage(provider.service)),
-                                          contentDescription = null,
-                                          contentScale = ContentScale.Crop,
-                                          modifier = Modifier.fillMaxSize().clip(CircleShape))
-                                    }
-
-                                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                                  Text(
-                                      text = serviceRequest.title,
-                                      style = MaterialTheme.typography.titleMedium,
-                                      fontWeight = FontWeight.Bold,
-                                      maxLines = 1,
-                                      overflow = TextOverflow.Ellipsis,
-                                      color = Color.White)
-                                  Text(
-                                      text = provider.name,
-                                      style = MaterialTheme.typography.bodyMedium,
-                                      color = Color.White.copy(alpha = 0.9f))
-                                }
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.weight(1f)) {
+                          // Provider profile picture with border
+                          Box(
+                              modifier =
+                                  Modifier.size(44.dp)
+                                      .border(
+                                          width = 2.dp, color = Color.White, shape = CircleShape)) {
+                                AsyncImage(
+                                    model = provider.imageUrl,
+                                    placeholder =
+                                        painterResource(
+                                            id = Services.getProfileImage(provider.service)),
+                                    error =
+                                        painterResource(
+                                            id = Services.getProfileImage(provider.service)),
+                                    contentDescription = null,
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier.fillMaxSize().clip(CircleShape))
                               }
 
-                          Row(
-                              verticalAlignment = Alignment.CenterVertically,
-                              horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                Column(horizontalAlignment = Alignment.End) {
-                                  Text(
-                                      text = "Due by",
-                                      style = MaterialTheme.typography.labelSmall,
-                                      color = colorScheme.onBackground.copy(alpha = 0.7f))
-                                  Text(
-                                      text = formattedDueDate ?: "No date",
-                                      style = MaterialTheme.typography.bodyMedium,
-                                      fontWeight = FontWeight.Medium,
-                                      color = colorScheme.error)
-                                }
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                                    contentDescription = "Show details",
-                                    tint = colorScheme.onBackground,
-                                    modifier = Modifier.size(24.dp))
-                              }
+                          Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                            Text(
+                                text = serviceRequest.title,
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                color = Color.White)
+                            Text(
+                                text = provider.name,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.White.copy(alpha = 0.9f))
+                          }
                         }
+
+                    if (showDayView) {
+                      // Day view: Show selected date and right arrow
+                      Row(
+                          verticalAlignment = Alignment.CenterVertically,
+                          horizontalArrangement = Arrangement.spacedBy(12.dp),
+                          modifier =
+                              Modifier.clickable { onBackToMonthView() }.padding(vertical = 4.dp)) {
+                            if (selectedDate != null) {
+                              Text(
+                                  text = formattedDate ?: "",
+                                  style = MaterialTheme.typography.bodyMedium,
+                                  fontWeight = FontWeight.Medium,
+                                  color = Color.White)
+                            }
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                                contentDescription = "Back to calendar",
+                                tint = Color.White,
+                                modifier = Modifier.size(24.dp))
+                          }
+                    } else {
+                      // Month view: Show "Click to see more"
+                      Text(
+                          text = "Click to see more",
+                          style = MaterialTheme.typography.bodyMedium,
+                          color = Color.White.copy(alpha = 0.9f))
+                    }
                   }
             }
       } else {

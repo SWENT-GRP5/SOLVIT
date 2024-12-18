@@ -16,6 +16,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -38,10 +40,31 @@ fun AvailableTimeSlot(
 
   val transition = updateTransition(showConfirmation, label = "confirmationTransition")
 
+  // Animate background gradient
+  val gradientAlpha by
+      transition.animateFloat(label = "gradientAlpha", transitionSpec = { tween(500) }) { confirmed
+        ->
+        if (confirmed) 1f else 0f
+      }
+
+  // Animate button width
   val bookButtonWidth by
       transition.animateFloat(label = "bookButtonWidth", transitionSpec = { tween(300) }) {
           confirmed ->
         if (confirmed) 56f else 120f
+      }
+
+  // Animate confirm button position
+  val confirmButtonOffset by
+      transition.animateFloat(label = "confirmButtonOffset", transitionSpec = { tween(300) }) {
+          confirmed ->
+        if (confirmed) 64f else 0f
+      }
+
+  // Animate text color
+  val textColor by
+      transition.animateColor(label = "textColor", transitionSpec = { tween(500) }) { confirmed ->
+        if (confirmed) Color.White else colorScheme.onSurface
       }
 
   Row(
@@ -50,7 +73,16 @@ fun AvailableTimeSlot(
               .fillMaxWidth()
               .height(60.dp)
               .clip(RoundedCornerShape(12.dp))
-              .background(serviceColor.copy(alpha = 0.1f))
+              .drawBehind {
+                // Draw animated gradient background
+                drawRect(
+                    brush =
+                        Brush.horizontalGradient(
+                            colors =
+                                listOf(
+                                    serviceColor.copy(alpha = 0.1f + (0.8f * gradientAlpha)),
+                                    serviceColor.copy(alpha = 0.05f + (0.05f * gradientAlpha)))))
+              }
               .border(1.dp, serviceColor, RoundedCornerShape(12.dp))
               .padding(horizontal = 16.dp),
       horizontalArrangement = Arrangement.SpaceBetween,
@@ -61,7 +93,7 @@ fun AvailableTimeSlot(
                 "${startTime.format(DateTimeFormatter.ofPattern("HH:mm"))} - ${endTime.format(DateTimeFormatter.ofPattern("HH:mm"))}",
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Medium,
-            color = colorScheme.onSurface)
+            color = textColor)
 
         // Buttons
         Row(
@@ -69,7 +101,7 @@ fun AvailableTimeSlot(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.width(120.dp)) {
               // Cancel button
-              androidx.compose.animation.AnimatedVisibility(
+              AnimatedVisibility(
                   visible = showConfirmation,
                   enter = fadeIn() + expandHorizontally(expandFrom = Alignment.End),
                   exit = fadeOut() + shrinkHorizontally(shrinkTowards = Alignment.End)) {
@@ -97,7 +129,9 @@ fun AvailableTimeSlot(
                   modifier =
                       Modifier.width(bookButtonWidth.dp)
                           .height(40.dp)
-                          .background(colorScheme.secondary, RoundedCornerShape(8.dp))
+                          .background(
+                              if (showConfirmation) colorScheme.secondary else serviceColor,
+                              RoundedCornerShape(8.dp))
                           .clickable {
                             if (!showConfirmation) {
                               showConfirmation = true

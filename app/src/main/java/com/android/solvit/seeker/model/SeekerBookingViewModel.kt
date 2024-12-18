@@ -93,15 +93,6 @@ class SeekerBookingViewModel(
     viewModelScope.launch {
       _selectedDate.value = date
       updateAvailableTimeSlots()
-
-      // Update the service request in Firestore
-      selectedRequest.value?.let { request ->
-        val updatedRequest =
-            request.copy(
-                meetingDate =
-                    Timestamp(Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant())))
-        serviceRequestViewModel.saveServiceRequest(updatedRequest)
-      }
     }
   }
 

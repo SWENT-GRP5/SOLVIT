@@ -18,10 +18,11 @@ import com.android.solvit.seeker.model.SeekerBookingViewModel
 import com.android.solvit.seeker.ui.booking.components.BookingDayView
 import com.android.solvit.seeker.ui.booking.components.BookingInfoCard
 import com.android.solvit.seeker.ui.booking.components.BookingMonthView
-import com.android.solvit.seeker.ui.booking.components.BookingStepper
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
+import java.time.Instant
+import java.time.ZoneId
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -39,6 +40,9 @@ fun BookingCalendarScreen(navigationActions: NavigationActions, viewModel: Seeke
   LaunchedEffect(currentProvider, selectedDate) {
     currentProvider?.let { viewModel.updateAvailableTimeSlots() }
   }
+
+  // Reset animation flag after view date changes
+  LaunchedEffect(selectedDate) { shouldAnimate = true }
 
   Scaffold(
       topBar = {
@@ -69,67 +73,71 @@ fun BookingCalendarScreen(navigationActions: NavigationActions, viewModel: Seeke
                     containerColor = MaterialTheme.colorScheme.background,
                     titleContentColor = MaterialTheme.colorScheme.onBackground))
       }) { padding ->
-        Column(modifier = Modifier.fillMaxSize().padding(padding)) {
-          BookingStepper(
-              currentStep = if (showDayView) 2 else 1,
-              onStepSelected = { step ->
-                if (step == 1) {
-                  viewModel.setShowDayView(false)
-                }
-              },
-              serviceColor = serviceColor)
+        Box(modifier = Modifier.fillMaxSize()) {
+          Column(modifier = Modifier.fillMaxSize().padding(padding)) {
+            // BookingInfoCard at the top
+            BookingInfoCard(
+                provider = currentProvider,
+                serviceRequest = selectedRequest,
+                selectedDate = selectedDate,
+                selectedTime = if (showDayView) null else null, // We'll add time selection later
+                showDayView = showDayView,
+                onBackToMonthView = { viewModel.setShowDayView(false) },
+                modifier = Modifier.padding(vertical = 8.dp))
 
-          if (!showDayView) {
-            Column(modifier = Modifier.fillMaxSize()) {
-              // Calendar takes up available space
-              Box(modifier = Modifier.weight(1f)) {
-                SwipeableCalendarContainer(
-                    currentViewDate = selectedDate,
-                    onViewDateChanged = { date ->
-                      shouldAnimate = true
-                      viewModel.onDateSelected(date)
-                    },
-                    calendarView = CalendarView.MONTH,
-                    shouldAnimate = shouldAnimate,
-                    modifier = Modifier.testTag("swipeableMonthView")) { date ->
-                      BookingMonthView(
-                          viewDate = date,
-                          onDateSelected = { selectedDate ->
-                            viewModel.onDateSelected(selectedDate)
-                            viewModel.setShowDayView(true)
-                          },
-                          onHeaderClick = {}, // No date picker needed for booking
-                          serviceColor = serviceColor,
-                          timeSlots = viewModel.getMonthAvailabilities(date))
-                    }
-              }
-
-              // Place the BookingInfoCard at the bottom with no weight
-              BookingInfoCard(
-                  provider = currentProvider,
-                  serviceRequest = selectedRequest,
-                  modifier = Modifier.padding(vertical = 16.dp))
-            }
-          } else {
-            SwipeableCalendarContainer(
-                currentViewDate = selectedDate,
-                onViewDateChanged = { date ->
-                  shouldAnimate = true
-                  viewModel.onDateSelected(date)
-                },
-                calendarView = CalendarView.DAY,
-                shouldAnimate = shouldAnimate,
-                modifier = Modifier.testTag("swipeableDayView")) { date ->
-                  BookingDayView(
-                      viewDate = date,
-                      timeSlots = availableTimeSlots,
-                      onHeaderClick = { viewModel.setShowDayView(false) },
-                      onTimeSlotSelected = { timeSlot ->
-                        viewModel.onTimeSlotSelected(timeSlot)
-                        navigationActions.navigateTo(Route.BOOKING_DETAILS)
+            if (!showDayView) {
+              Column(modifier = Modifier.fillMaxSize()) {
+                // Calendar takes up available space
+                Box(modifier = Modifier.weight(1f)) {
+                  SwipeableCalendarContainer(
+                      currentViewDate = selectedDate,
+                      onViewDateChanged = { date ->
+                        shouldAnimate = true
+                        viewModel.onDateSelected(date)
                       },
-                      serviceColor = serviceColor)
+                      calendarView = CalendarView.MONTH,
+                      shouldAnimate = shouldAnimate,
+                      modifier = Modifier.testTag("swipeableMonthView")) { date ->
+                        BookingMonthView(
+                            viewDate = date,
+                            onDateSelected = { selectedDate ->
+                              viewModel.onDateSelected(selectedDate)
+                              viewModel.setShowDayView(true)
+                            },
+                            onHeaderClick = {}, // No date picker needed for booking
+                            serviceColor = serviceColor,
+                            selectedDate = selectedDate,
+                            deadlineDate =
+                                selectedRequest?.dueDate?.let { timestamp ->
+                                  Instant.ofEpochMilli(timestamp.seconds * 1000)
+                                      .atZone(ZoneId.systemDefault())
+                                      .toLocalDate()
+                                },
+                            timeSlots = viewModel.getMonthAvailabilities(date))
+                      }
                 }
+              }
+            } else {
+              SwipeableCalendarContainer(
+                  currentViewDate = selectedDate,
+                  onViewDateChanged = { date ->
+                    shouldAnimate = false // Disable animation during swipe
+                    viewModel.onDateSelected(date)
+                  },
+                  calendarView = CalendarView.DAY,
+                  shouldAnimate = shouldAnimate,
+                  modifier = Modifier.testTag("swipeableDayView")) { date ->
+                    BookingDayView(
+                        viewDate = date,
+                        timeSlots = availableTimeSlots,
+                        onHeaderClick = { viewModel.setShowDayView(false) },
+                        onTimeSlotSelected = { timeSlot ->
+                          viewModel.onTimeSlotSelected(timeSlot)
+                          navigationActions.navigateTo(Route.BOOKING_DETAILS)
+                        },
+                        serviceColor = serviceColor)
+                  }
+            }
           }
         }
       }
