@@ -61,8 +61,8 @@ data class AcceptedTimeSlot(
 /**
  * Represents an exception to the regular schedule
  *
- * @param date The date of the exception
- * @param timeSlots The time slots for this specific date
+ * @param _timestamp The timestamp of the exception
+ * @param _timeSlots The time slots affected by the exception
  * @param type The type of exception (OFF_TIME or EXTRA_TIME)
  */
 data class ScheduleException(
@@ -267,13 +267,13 @@ data class Schedule(
 
   /** Sets regular working hours for a specific day */
   fun setRegularHours(dayOfWeek: String, timeSlots: List<TimeSlot>) {
-    require(dayOfWeek in DayOfWeek.values().map { it.name }) { "Invalid day of week" }
+    require(dayOfWeek in DayOfWeek.entries.map { it.name }) { "Invalid day of week" }
     regularHours[dayOfWeek] = mergeOverlappingSlots(timeSlots).toMutableList()
   }
 
   /** Removes all regular working hours for a specific day */
   fun clearRegularHours(dayOfWeek: String) {
-    require(dayOfWeek in DayOfWeek.values().map { it.name }) { "Invalid day of week" }
+    require(dayOfWeek in DayOfWeek.entries.map { it.name }) { "Invalid day of week" }
     regularHours.remove(dayOfWeek)
   }
 

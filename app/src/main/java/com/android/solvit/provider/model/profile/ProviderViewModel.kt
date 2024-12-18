@@ -20,6 +20,7 @@ class ProviderViewModel(private val repository: ProviderRepository) : ViewModel(
 
   // represent cost of route of provider to go to bookings
   var minCost = Double.MAX_VALUE
+
   // represent the best route given location of different bookings
   val bestRoute = mutableListOf<Int>()
 

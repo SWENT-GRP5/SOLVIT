@@ -7,7 +7,6 @@ import com.android.solvit.shared.model.service.Services
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
-import com.google.android.gms.tasks.Tasks.forResult
 import com.google.firebase.FirebaseApp
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.CollectionReference
@@ -17,7 +16,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.Transaction
 import com.google.firebase.storage.FirebaseStorage
-import com.google.type.DayOfWeek
 import java.time.LocalDate
 import java.time.ZoneId
 import junit.framework.TestCase.assertEquals

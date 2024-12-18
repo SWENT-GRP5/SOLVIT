@@ -11,7 +11,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Edit
@@ -19,12 +18,10 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.*
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -58,7 +55,6 @@ import com.google.maps.android.compose.rememberCameraPositionState
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotificationScreen(
     viewModel: NotificationsViewModel,
@@ -247,7 +243,7 @@ fun Notifications_Dialog(onDismiss: () -> Unit, serviceRequest: ServiceRequest) 
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween) {
                               // Image 1
-                              val imageUrl1 = serviceRequest!!.imageUrl
+                              val imageUrl1 = serviceRequest.imageUrl
                               if (!imageUrl1.isNullOrEmpty()) {
                                 AsyncImage(
                                     model = imageUrl1,
@@ -330,7 +326,7 @@ fun Notifications_Dialog(onDismiss: () -> Unit, serviceRequest: ServiceRequest) 
                                   tint = Color.Black,
                                   modifier = Modifier.size(24.dp))
                               Spacer(modifier = Modifier.width(8.dp))
-                              serviceRequest.dueDate?.toDate()?.let { date ->
+                              serviceRequest.dueDate.toDate().let { date ->
                                 val formattedDate =
                                     SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(date)
                                 Text(

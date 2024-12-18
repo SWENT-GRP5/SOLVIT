@@ -4,15 +4,17 @@ import com.google.firebase.Timestamp
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.Month
 import java.time.ZoneId
 import java.util.Date
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertThrows
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class ScheduleTest {
-  private val dec3 = LocalDateTime.of(2023, Month.DECEMBER, 3, 0, 0)
-
   @Test
   fun `time slots merge correctly when overlapping`() {
     val slot1 = TimeSlot(13, 0, 15, 0)

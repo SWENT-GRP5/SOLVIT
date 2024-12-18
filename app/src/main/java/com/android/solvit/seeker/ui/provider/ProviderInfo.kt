@@ -1,6 +1,5 @@
 package com.android.solvit.seeker.ui.provider
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -22,7 +21,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -56,7 +54,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -70,6 +67,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.android.solvit.R
+import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.packages.PackageProposal
@@ -96,6 +94,7 @@ import com.android.solvit.shared.ui.utils.TopAppBarInbox
  * @param requestViewModel ViewModel for service requests.
  * @param authViewModel ViewModel for user authentication.
  * @param packageProposalViewModel ViewModel for package proposals.
+ * @param seekerProfileViewModel ViewModel for seeker profile data.
  */
 @Composable
 fun ProviderInfoScreen(
@@ -106,7 +105,9 @@ fun ProviderInfoScreen(
         viewModel(factory = ServiceRequestViewModel.Factory),
     authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory),
     packageProposalViewModel: PackageProposalViewModel =
-        viewModel(factory = PackageProposalViewModel.Factory)
+        viewModel(factory = PackageProposalViewModel.Factory),
+    seekerProfileViewModel: SeekerProfileViewModel =
+        viewModel(factory = SeekerProfileViewModel.Factory)
 ) {
   val provider = providerViewModel.selectedProvider.collectAsStateWithLifecycle().value ?: return
   val reviews =
@@ -123,9 +124,6 @@ fun ProviderInfoScreen(
   val userId = user.value?.uid ?: "-1"
 
   val packages = packagesProposal.filter { it.providerId == provider.uid }.sortedBy { it.price }
-
-  val lazyListState = rememberLazyListState()
-  val density = LocalDensity.current
 
   Scaffold(
       containerColor = colorScheme.surface,
@@ -174,7 +172,7 @@ fun ProviderInfoScreen(
                     requestViewModel,
                     userId,
                     navigationActions,
-                )
+                    seekerProfileViewModel)
           }
         }
       },
@@ -299,6 +297,7 @@ fun PackageCard(
         }
       }
 }
+
 /**
  * Screen displaying the list of packages offered by the provider.
  *
@@ -642,6 +641,7 @@ fun Rubric(modifier: Modifier = Modifier, content: @Composable ColumnScope.() ->
  * @param requestViewModel ViewModel for handling service requests.
  * @param userId Current user's ID.
  * @param navigationActions Navigation actions for navigating to different screens.
+ * @param seekerProfileViewModel ViewModel for seeker profile data.
  */
 @Composable
 fun ProviderReviews(
@@ -652,6 +652,7 @@ fun ProviderReviews(
     requestViewModel: ServiceRequestViewModel,
     userId: String,
     navigationActions: NavigationActions,
+    seekerProfileViewModel: SeekerProfileViewModel
 ) {
   Column(
       modifier =
@@ -711,7 +712,7 @@ fun ProviderReviews(
               modifier = Modifier.padding(16.dp),
               color = colorScheme.onSurfaceVariant)
         } else {
-          reviews.forEach { ReviewRow(it) }
+          reviews.forEach { ReviewRow(it, seekerProfileViewModel) }
         }
 
         if (showDialog.value) {
@@ -731,9 +732,12 @@ fun ProviderReviews(
  * Component to display a single review, including rating and comments.
  *
  * @param review The review object to display.
+ * @param seekerProfileViewModel ViewModel for seeker profile data.
  */
 @Composable
-fun ReviewRow(review: Review) {
+fun ReviewRow(review: Review, seekerProfileViewModel: SeekerProfileViewModel) {
+  val seekerProfile by seekerProfileViewModel.seekerProfileList.collectAsStateWithLifecycle()
+  val imageUrl = seekerProfile.find { it.uid == review.authorId }?.imageUrl ?: ""
   Column(
       Modifier.fillMaxWidth()
           .padding(top = 16.dp)
@@ -742,14 +746,17 @@ fun ReviewRow(review: Review) {
           .padding(4.dp)
           .testTag("reviewRow")) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-          Image(
-              painter = painterResource(id = R.drawable.default_pdp),
+          AsyncImage(
+              model = imageUrl.ifEmpty { R.drawable.default_pdp },
               contentDescription = "Profile Picture",
+              contentScale = ContentScale.Crop,
               modifier =
                   Modifier.size(64.dp)
                       .border(2.dp, Color.Transparent, RoundedCornerShape(16.dp))
                       .clip(RoundedCornerShape(16.dp))
                       .testTag("reviewerImage"))
+
+          Spacer(modifier = Modifier.width(16.dp))
 
           RatingStars(review.rating)
         }
