@@ -8,7 +8,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -23,7 +22,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
@@ -126,7 +124,7 @@ private fun RegularHoursTab(viewModel: ProviderCalendarViewModel, onError: (Stri
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f))
 
-        DayOfWeek.values().forEach { day ->
+        DayOfWeek.entries.forEach { day ->
           val schedule = provider.schedule
           val currentSchedule = schedule.regularHours[day.name] ?: emptyList()
           var isExpanded by remember { mutableStateOf(false) }
@@ -165,8 +163,7 @@ private fun RegularHoursTab(viewModel: ProviderCalendarViewModel, onError: (Stri
                           onError("Failed to clear hours")
                         }
                       }
-                    },
-                    hasError = hasError)
+                    })
               }
         }
 
@@ -479,8 +476,7 @@ fun DayScheduleCard(
     isExpanded: Boolean,
     onExpandClick: () -> Unit,
     onSaveHours: (LocalTime, LocalTime) -> Unit,
-    onClearHours: () -> Unit,
-    hasError: Boolean
+    onClearHours: () -> Unit
 ) {
   Column(modifier = Modifier.fillMaxWidth()) {
     Row(
@@ -605,7 +601,7 @@ fun TimeSelectionSection(
                     selectedTime = startTime,
                     onTimeSelected = { newTime ->
                       // Ensure start time is not after end time
-                      if (newTime.isBefore(endTime) || newTime.equals(endTime)) {
+                      if (newTime.isBefore(endTime) || newTime == endTime) {
                         onStartTimeSelected(newTime)
                       }
                     },
@@ -624,7 +620,7 @@ fun TimeSelectionSection(
                     selectedTime = endTime,
                     onTimeSelected = { newTime ->
                       // Ensure end time is not before start time
-                      if (newTime.isAfter(startTime) || newTime.equals(startTime)) {
+                      if (newTime.isAfter(startTime) || newTime == startTime) {
                         onEndTimeSelected(newTime)
                       }
                     },
@@ -708,8 +704,3 @@ private fun ExceptionCard(
 }
 
 private data class ExceptionEntry(val date: LocalDateTime, val exception: ScheduleException)
-
-private enum class TimePickerMode {
-  START,
-  END
-}

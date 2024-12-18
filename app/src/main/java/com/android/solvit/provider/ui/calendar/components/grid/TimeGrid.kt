@@ -30,6 +30,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.android.solvit.shared.model.provider.ExceptionType
+import com.android.solvit.shared.model.provider.Schedule
+import java.time.LocalDate
 import java.time.LocalTime
 import java.util.Locale
 
@@ -42,6 +45,8 @@ fun TimeGrid(
     todayIndex: Int? = null,
     numberOfColumns: Int = 1,
     listState: LazyListState = rememberLazyListState(),
+    schedule: Schedule? = null,
+    dates: List<LocalDate>? = null,
     content: @Composable (hour: Int, dayIndex: Int, contentModifier: Modifier) -> Unit
 ) {
   val hours = (0..23).toList()
@@ -101,6 +106,45 @@ fun TimeGrid(
                                 Modifier.weight(1f)
                                     .fillMaxHeight()
                                     .testTag("dayColumn_${column}_hour_$hour")) {
+                              // Add schedule background if schedule and dates are provided
+                              if (schedule != null && dates != null && column < dates.size) {
+                                val date = dates[column]
+                                val isRegularHour =
+                                    schedule.regularHours[date.dayOfWeek.name]?.any { slot ->
+                                      hour >= slot.startHour && hour < slot.endHour
+                                    } ?: false
+
+                                val exception =
+                                    schedule.exceptions.find { it.date.toLocalDate() == date }
+
+                                val isAvailable =
+                                    when {
+                                      // Check if there's an off-time exception
+                                      exception?.type == ExceptionType.OFF_TIME &&
+                                          exception.timeSlots.any { slot ->
+                                            hour >= slot.startHour && hour < slot.endHour
+                                          } -> false
+
+                                      // Check if there's an extra-time exception
+                                      exception?.type == ExceptionType.EXTRA_TIME &&
+                                          exception.timeSlots.any { slot ->
+                                            hour >= slot.startHour && hour < slot.endHour
+                                          } -> true
+
+                                      // Check regular hours
+                                      else -> isRegularHour
+                                    }
+
+                                val backgroundColor =
+                                    if (isAvailable) {
+                                      colorScheme.primary.copy(alpha = 0.05f)
+                                    } else {
+                                      colorScheme.onSurface.copy(alpha = 0.03f)
+                                    }
+
+                                Box(modifier = Modifier.fillMaxSize().background(backgroundColor))
+                              }
+
                               content(
                                   hour, column, Modifier.fillMaxSize().padding(horizontal = 2.dp))
 

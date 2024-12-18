@@ -21,6 +21,7 @@ import com.android.solvit.provider.model.CalendarView
 import com.android.solvit.provider.ui.calendar.components.grid.TimeGrid
 import com.android.solvit.provider.ui.calendar.components.header.WeekDayHeader
 import com.android.solvit.provider.ui.calendar.components.timeslot.ServiceRequestTimeSlot
+import com.android.solvit.shared.model.provider.Schedule
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.ui.theme.Typography
 import java.time.DayOfWeek
@@ -38,6 +39,7 @@ fun WeekView(
     timeSlots: Map<LocalDate, List<ServiceRequest>>,
     onServiceRequestClick: (ServiceRequest) -> Unit = {},
     onDateSelected: (LocalDate) -> Unit,
+    schedule: Schedule? = null,
     modifier: Modifier = Modifier
 ) {
   val startOfWeek = date.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
@@ -62,8 +64,8 @@ fun WeekView(
                 }
                 .minOrNull() ?: 9
           }
-          todayIndex != null -> LocalTime.now().hour
-          else -> 9 // Default to 9 AM
+          weekDates.contains(startOfWeek) -> LocalTime.now().hour
+          else -> schedule?.regularHours?.get(date.dayOfWeek.name)?.firstOrNull()?.startHour ?: 9
         }
     listState.scrollToItem(maxOf(0, scrollHour - 1)) // Scroll one hour earlier for context
   }
@@ -104,6 +106,8 @@ fun WeekView(
         showCurrentTimeLine = todayIndex != null,
         todayIndex = todayIndex,
         numberOfColumns = 7,
+        schedule = schedule,
+        dates = weekDates,
         listState = listState) { hour, dayIndex, contentModifier ->
           Box(
               modifier =

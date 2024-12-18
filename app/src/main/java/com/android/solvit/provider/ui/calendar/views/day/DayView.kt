@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import com.android.solvit.provider.model.CalendarView
 import com.android.solvit.provider.ui.calendar.components.grid.TimeGrid
 import com.android.solvit.provider.ui.calendar.components.timeslot.ServiceRequestTimeSlot
+import com.android.solvit.shared.model.provider.Schedule
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.ui.theme.Typography
 import java.time.LocalDate
@@ -35,8 +36,8 @@ fun DayView(
     timeSlots: List<ServiceRequest>,
     onHeaderClick: () -> Unit = {},
     onServiceRequestClick: (ServiceRequest) -> Unit = {},
+    schedule: Schedule? = null,
     @SuppressLint("ModifierParameter") modifier: Modifier = Modifier,
-    isBookingView: Boolean = false
 ) {
   val today = LocalDate.now()
   val listState = rememberLazyListState()
@@ -57,7 +58,8 @@ fun DayView(
                 .minOrNull() ?: 9
           }
           viewDate == today -> LocalTime.now().hour
-          else -> 9 // Default to 9 AM
+          else ->
+              schedule?.regularHours?.get(viewDate.dayOfWeek.name)?.firstOrNull()?.startHour ?: 9
         }
     listState.scrollToItem(maxOf(0, scrollHour - 1)) // Scroll one hour earlier for context
   }
@@ -67,7 +69,7 @@ fun DayView(
         modifier =
             Modifier.fillMaxWidth()
                 .padding(8.dp)
-                .clickable(enabled = !isBookingView) { onHeaderClick() }
+                .clickable { onHeaderClick() }
                 .testTag("dayViewHeader"),
         horizontalArrangement = Arrangement.Center) {
           Text(
@@ -76,7 +78,7 @@ fun DayView(
                       DateTimeFormatter.ofPattern("EEEE d MMMM yyyy", Locale.getDefault())),
               style = Typography.titleMedium.copy(fontWeight = FontWeight.Bold),
               color =
-                  if (viewDate == today && !isBookingView) {
+                  if (viewDate == today) {
                     colorScheme.primary
                   } else {
                     colorScheme.onBackground
@@ -89,9 +91,11 @@ fun DayView(
         modifier = Modifier.weight(1f).testTag("dayViewTimeGrid"),
         hourHeight = 60.dp,
         currentTime = if (viewDate == today) LocalTime.now() else null,
-        showCurrentTimeLine = viewDate == today && !isBookingView,
+        showCurrentTimeLine = viewDate == today,
         numberOfColumns = 1,
-        listState = listState) { hour, _, contentModifier ->
+        listState = listState,
+        schedule = schedule,
+        dates = listOf(viewDate)) { hour, _, contentModifier ->
           Box(modifier = contentModifier) {
             timeSlots.forEach { request ->
               val startTime =
