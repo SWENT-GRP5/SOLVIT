@@ -2,7 +2,6 @@ package com.android.solvit.seeker.ui.service
 
 import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -168,7 +167,6 @@ fun TopSection(
   val userProfile by seekerProfileViewModel.seekerProfile.collectAsStateWithLifecycle()
   val user by authViewModel.user.collectAsState()
   user?.let { seekerProfileViewModel.getUserProfile(it.uid) }
-  Log.e("TopSection", "$userProfile")
 
   Box(modifier = Modifier.fillMaxWidth().testTag("servicesScreenTopSection")) {
     // Background Image
@@ -229,7 +227,7 @@ fun TopSection(
           modifier = Modifier.offset(y = 20.dp).testTag("servicesScreenSearchBar"),
           placeholder = { Text("Find services near you") },
           leadingIcon = { Icon(imageVector = Icons.Default.Search, contentDescription = null) },
-          colors = SearchBarDefaults.colors(containerColor = OnPrimary)) {
+          colors = SearchBarDefaults.colors(containerColor = colorScheme.background)) {
             LazyColumn(
                 modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)) {

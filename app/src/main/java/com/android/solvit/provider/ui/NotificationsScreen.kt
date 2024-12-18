@@ -97,7 +97,6 @@ fun NotificationScreen(
                               fontSize = 20.sp,
                               lineHeight = 30.44.sp,
                               textAlign = TextAlign.Center),
-                      color = Color.Black,
                       modifier =
                           Modifier.testTag("noNotificationsText").width(209.dp).height(30.dp))
                 }
@@ -156,7 +155,7 @@ fun NotificationItem(
               .clickable(onClick = onClick)
               .testTag("notificationItem_${notification.uid}"),
       shape = RoundedCornerShape(12.dp),
-      colors = CardDefaults.cardColors(containerColor = Color.White),
+      colors = CardDefaults.cardColors(containerColor = colorScheme.background),
       elevation = CardDefaults.cardElevation(8.dp),
   ) {
     Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -203,7 +202,7 @@ fun Notifications_Dialog(onDismiss: () -> Unit, serviceRequest: ServiceRequest) 
                           Icon(
                               imageVector = Icons.Filled.Edit,
                               contentDescription = "Title Icon",
-                              tint = Color.Black,
+                              tint = colorScheme.onBackground,
                               modifier = Modifier.size(24.dp))
                           Spacer(modifier = Modifier.width(8.dp))
                           Text(
@@ -217,7 +216,7 @@ fun Notifications_Dialog(onDismiss: () -> Unit, serviceRequest: ServiceRequest) 
                           Icon(
                               imageVector = Icons.Filled.Build,
                               contentDescription = "Description Icon",
-                              tint = Color.Black,
+                              tint = colorScheme.onBackground,
                               modifier = Modifier.size(24.dp))
                           Spacer(modifier = Modifier.width(8.dp))
                           Column {
@@ -323,7 +322,7 @@ fun Notifications_Dialog(onDismiss: () -> Unit, serviceRequest: ServiceRequest) 
                               Icon(
                                   imageVector = Icons.Filled.DateRange,
                                   contentDescription = "Calendar Icon",
-                                  tint = Color.Black,
+                                  tint = colorScheme.onBackground,
                                   modifier = Modifier.size(24.dp))
                               Spacer(modifier = Modifier.width(8.dp))
                               serviceRequest.dueDate.toDate().let { date ->
@@ -340,7 +339,7 @@ fun Notifications_Dialog(onDismiss: () -> Unit, serviceRequest: ServiceRequest) 
                                     style =
                                         MaterialTheme.typography.bodyMedium.copy(
                                             fontWeight = FontWeight.Bold),
-                                    color = Color.Black,
+                                    color = colorScheme.onBackground,
                                     modifier = Modifier.testTag("dialogDueDate"))
                               }
                             }

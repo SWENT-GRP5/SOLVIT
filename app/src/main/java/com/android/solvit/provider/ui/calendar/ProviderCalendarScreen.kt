@@ -71,6 +71,7 @@ fun ProviderCalendarScreen(
       topBar = {
         TopAppBarInbox(
             title = "My Calendar",
+            showAppIcon = true,
             testTagTitle = "calendarTitle",
             rightButtonForm = Icons.Default.Settings,
             rightButtonAction = { showPreferences = true },
@@ -78,7 +79,7 @@ fun ProviderCalendarScreen(
       },
       bottomBar = {
         BottomNavigationMenu(
-            onTabSelect = { navigationActions.navigateTo(it.route) },
+            onTabSelect = { navigationActions.navigateTo(it) },
             tabList = LIST_TOP_LEVEL_DESTINATION_PROVIDER,
             selectedItem = Route.CALENDAR)
       }) { paddingValues ->

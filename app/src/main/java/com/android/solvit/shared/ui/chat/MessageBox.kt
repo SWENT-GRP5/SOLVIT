@@ -94,7 +94,7 @@ fun MessageBox(
         },
         bottomBar = {
           BottomNavigationMenu(
-              onTabSelect = { navigationActions.navigateTo(it.route) },
+              onTabSelect = { navigationActions.navigateTo(it) },
               tabList =
                   if (authViewModel.user.value?.role == "seeker") {
                     LIST_TOP_LEVEL_DESTINATION_SEEKER

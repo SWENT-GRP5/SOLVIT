@@ -3,6 +3,7 @@ package com.android.solvit.seeker.ui.provider
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -81,7 +82,9 @@ import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.theme.OnPrimary
+import com.android.solvit.shared.ui.theme.OnPrimaryContainerDark
 import com.android.solvit.shared.ui.theme.SelectedPackage
+import com.android.solvit.shared.ui.theme.SelectedPackageDark
 import com.android.solvit.shared.ui.theme.Typography
 import com.android.solvit.shared.ui.utils.TopAppBarInbox
 
@@ -205,7 +208,9 @@ fun PackageCard(
       elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
       colors =
           CardDefaults.cardColors(
-              containerColor = if (!selectedIndex) colorScheme.surface else SelectedPackage,
+              containerColor =
+                  if (!selectedIndex) colorScheme.surface
+                  else if (isSystemInDarkTheme()) SelectedPackageDark else SelectedPackage,
           )) {
         Box(modifier = Modifier.fillMaxSize()) {
           Column(
@@ -222,25 +227,19 @@ fun PackageCard(
                       modifier = Modifier.testTag("price"),
                       text = "CHF${packageProposal.price}",
                       style = Typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-                      color =
-                          if (!selectedIndex) colorScheme.onPrimaryContainer
-                          else colorScheme.onPrimaryContainer)
+                      color = colorScheme.onBackground)
                   Spacer(modifier = Modifier.width(8.dp)) // Increased space between price and unit
                   Text(
                       text = "/hour",
                       style = Typography.bodySmall,
-                      color =
-                          if (!selectedIndex) colorScheme.onPrimaryContainer
-                          else colorScheme.onPrimaryContainer)
+                      color = colorScheme.onBackground)
                 }
                 Spacer(modifier = Modifier.height(12.dp))
                 // Title of the Package
                 Text(
                     text = packageProposal.title,
                     style = Typography.titleMedium,
-                    color =
-                        if (!selectedIndex) colorScheme.onPrimaryContainer
-                        else colorScheme.onPrimaryContainer)
+                    color = colorScheme.onBackground)
                 Spacer(
                     modifier =
                         Modifier.height(12.dp)) // Increased space between title and description
@@ -248,7 +247,7 @@ fun PackageCard(
                 Text(
                     text = packageProposal.description,
                     style = Typography.bodyMedium,
-                    color = if (!selectedIndex) colorScheme.onSurface else colorScheme.onSurface)
+                    color = colorScheme.onSurface)
                 Spacer(
                     modifier =
                         Modifier.height(12.dp)) // Increased space between description and features
@@ -267,8 +266,7 @@ fun PackageCard(
                       Text(
                           text = feature,
                           style = Typography.bodyMedium,
-                          color =
-                              if (!selectedIndex) colorScheme.onSurface else colorScheme.onSurface)
+                          color = colorScheme.onSurface)
                     }
                   }
                 }
@@ -867,7 +865,9 @@ fun SelectRequestDialog(
                           Modifier.padding(bottom = 16.dp)
                               .testTag("dialog_title")
                               .align(Alignment.CenterHorizontally),
-                      color = colorScheme.onPrimaryContainer)
+                      color =
+                          if (isSystemInDarkTheme()) OnPrimaryContainerDark
+                          else colorScheme.onPrimaryContainer)
 
                   // LazyColumn to display requests
                   LazyColumn(
@@ -925,13 +925,17 @@ fun SelectRequestDialog(
                                             style = Typography.titleMedium,
                                             maxLines = 2,
                                             overflow = TextOverflow.Ellipsis,
-                                            color = colorScheme.onPrimaryContainer,
+                                            color =
+                                                if (isSystemInDarkTheme()) OnPrimaryContainerDark
+                                                else colorScheme.onPrimaryContainer,
                                         )
                                         Text(
                                             modifier = Modifier.testTag("request_description"),
                                             text = request.description,
                                             style = Typography.bodyMedium,
-                                            color = colorScheme.onPrimaryContainer,
+                                            color =
+                                                if (isSystemInDarkTheme()) OnPrimaryContainerDark
+                                                else colorScheme.onPrimaryContainer,
                                             maxLines = 2,
                                             overflow = TextOverflow.Ellipsis)
                                       }
