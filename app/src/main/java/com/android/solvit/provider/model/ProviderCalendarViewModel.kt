@@ -14,6 +14,7 @@ import com.android.solvit.shared.model.provider.ProviderRepositoryFirestore
 import com.android.solvit.shared.model.provider.ScheduleException
 import com.android.solvit.shared.model.provider.TimeSlot
 import com.android.solvit.shared.model.request.ServiceRequest
+import com.android.solvit.shared.model.request.ServiceRequestStatus
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
@@ -591,6 +592,40 @@ open class ProviderCalendarViewModel(
       ConflictResult(true, "This time slot conflicts with another accepted service request")
     } else {
       ConflictResult(false, "No conflicts")
+    }
+  }
+
+  /**
+   * Add an accepted request to the schedule of a provider
+   *
+   * @param request provider has to complete
+   */
+  fun addAcceptedRequest(request: ServiceRequest) {
+    providerRepository.addAcceptedRequest(request)
+  }
+
+  /**
+   * Remove a request that was completed or canceled
+   *
+   * @param request provider completed or canceled
+   */
+  fun removeAcceptedRequest(request: ServiceRequest) {
+    providerRepository.removeAcceptedRequest(request)
+  }
+
+  /** Add listener for automatic cleanup of requests */
+  fun startServiceRequestListener() {
+    serviceRequestViewModel.addListenerOnServiceRequests { requests ->
+      requests.forEach { request ->
+        when (request.status) {
+          ServiceRequestStatus.CANCELED,
+          ServiceRequestStatus.COMPLETED -> removeAcceptedRequest(request)
+          ServiceRequestStatus.ACCEPTED -> addAcceptedRequest(request)
+          else -> {
+            /* ignore */
+          }
+        }
+      }
     }
   }
 

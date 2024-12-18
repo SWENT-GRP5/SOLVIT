@@ -351,4 +351,9 @@ open class ServiceRequestViewModel(
           time.format(timeFormatter)
         }
   }
+
+  fun addListenerOnServiceRequests(onSuccess: (List<ServiceRequest>) -> Unit) {
+    repository.addListenerOnServiceRequests(
+        onSuccess = { onSuccess(requests.value) }, onFailure = {})
+  }
 }
