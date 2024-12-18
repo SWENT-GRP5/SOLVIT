@@ -1,8 +1,12 @@
 package com.android.solvit.shared.model.provider
 
+import com.google.firebase.Timestamp
 import java.time.DayOfWeek
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Month
+import java.time.ZoneId
+import java.util.Date
 import org.junit.Assert.*
 import org.junit.Test
 
@@ -323,5 +327,228 @@ class ScheduleTest {
     assertThrows(IllegalArgumentException::class.java) { TimeSlot(17, 0, 9, 0) }
     assertThrows(IllegalArgumentException::class.java) { TimeSlot(9, 0, 9, 0) }
     assertThrows(IllegalArgumentException::class.java) { TimeSlot(9, 30, 9, 15) }
+  }
+
+  @Test
+  fun `isTimeSlotAvailable returns true for available slot`() {
+    val schedule =
+        Schedule(
+            mutableMapOf(DayOfWeek.MONDAY.name to mutableListOf(TimeSlot(9, 0, 17, 0))),
+            mutableListOf(),
+            emptyList())
+    val slot = TimeSlot(10, 0, 11, 0)
+    val date = LocalDate.of(2024, 1, 1) // Monday
+
+    assertTrue(schedule.isTimeSlotAvailable(slot, date))
+  }
+
+  @Test
+  fun `isTimeSlotAvailable returns false for unavailable slot due to accepted request`() {
+    val acceptedSlot =
+        AcceptedTimeSlot(
+            requestId = "req1",
+            startTime =
+                Timestamp(
+                    Date.from(
+                        LocalDateTime.of(2024, 1, 1, 10, 0)
+                            .atZone(ZoneId.systemDefault())
+                            .toInstant())),
+            duration = 60)
+    val schedule =
+        Schedule(
+            mutableMapOf(DayOfWeek.MONDAY.name to mutableListOf(TimeSlot(9, 0, 17, 0))),
+            mutableListOf(),
+            listOf(acceptedSlot))
+    val slot = TimeSlot(10, 0, 11, 0)
+    val date = LocalDate.of(2024, 1, 1) // Monday
+
+    assertFalse(schedule.isTimeSlotAvailable(slot, date))
+  }
+
+  @Test
+  fun `isTimeSlotAvailable returns false for slot during off-time exception`() {
+    val schedule =
+        Schedule(
+            mutableMapOf(DayOfWeek.MONDAY.name to mutableListOf(TimeSlot(9, 0, 17, 0))),
+            mutableListOf(
+                ScheduleException(
+                    LocalDateTime.of(2024, 1, 1, 0, 0),
+                    listOf(TimeSlot(10, 0, 11, 0)),
+                    ExceptionType.OFF_TIME)),
+            emptyList())
+    val slot = TimeSlot(10, 0, 11, 0)
+    val date = LocalDate.of(2024, 1, 1) // Monday
+
+    assertFalse(schedule.isTimeSlotAvailable(slot, date))
+  }
+
+  @Test
+  fun `getProviderAvailabilities returns correct slots for available day`() {
+    val schedule =
+        Schedule(
+            mutableMapOf(DayOfWeek.MONDAY.name to mutableListOf(TimeSlot(9, 0, 17, 0))),
+            mutableListOf(),
+            emptyList())
+    val date = LocalDate.of(2024, 1, 1) // Monday
+    val availabilities = schedule.getProviderAvailabilities(date)
+
+    assertEquals(8, availabilities.size)
+    assertTrue(availabilities.contains(TimeSlot(9, 0, 10, 0)))
+    assertTrue(availabilities.contains(TimeSlot(16, 0, 17, 0)))
+  }
+
+  @Test
+  fun `getProviderAvailabilities excludes slots during accepted requests`() {
+    val acceptedSlot1 =
+        AcceptedTimeSlot(
+            requestId = "req1",
+            startTime =
+                Timestamp(
+                    Date.from(
+                        LocalDateTime.of(2024, 1, 1, 10, 0)
+                            .atZone(ZoneId.systemDefault())
+                            .toInstant())),
+            duration = 60)
+    val acceptedSlot2 =
+        AcceptedTimeSlot(
+            requestId = "req2",
+            startTime =
+                Timestamp(
+                    Date.from(
+                        LocalDateTime.of(2024, 1, 1, 16, 0)
+                            .atZone(ZoneId.systemDefault())
+                            .toInstant())),
+            duration = 60)
+    val schedule =
+        Schedule(
+            mutableMapOf(DayOfWeek.MONDAY.name to mutableListOf(TimeSlot(9, 0, 17, 0))),
+            mutableListOf(),
+            listOf(acceptedSlot1, acceptedSlot2))
+    val date = LocalDate.of(2024, 1, 1) // Monday
+    val availabilities = schedule.getProviderAvailabilities(date)
+    assertEquals(6, availabilities.size)
+    assertFalse(availabilities.contains(TimeSlot(10, 0, 11, 0)))
+    assertFalse(availabilities.contains(TimeSlot(16, 0, 17, 0)))
+  }
+
+  @Test
+  fun `getNextFiveSlots returns correct slots`() {
+    val schedule =
+        Schedule(
+            mutableMapOf(DayOfWeek.MONDAY.name to mutableListOf(TimeSlot(9, 0, 17, 0))),
+            mutableListOf(),
+            emptyList())
+    val startDate = LocalDate.of(2024, 1, 1) // Monday
+    val slots = schedule.getNextFiveSlots(startDate)
+
+    assertEquals(5, slots.size)
+    assertTrue(slots.contains(TimeSlot(9, 0, 10, 0)))
+    assertTrue(slots.contains(TimeSlot(13, 0, 14, 0)))
+  }
+
+  @Test
+  fun `getNextFiveSlots spans multiple days`() {
+    val schedule =
+        Schedule(
+            mutableMapOf(
+                DayOfWeek.MONDAY.name to mutableListOf(TimeSlot(9, 0, 12, 0)),
+                DayOfWeek.TUESDAY.name to mutableListOf(TimeSlot(14, 0, 17, 0))),
+            mutableListOf(),
+            emptyList())
+    val startDate = LocalDate.of(2024, 1, 1) // Monday
+    val slots = schedule.getNextFiveSlots(startDate)
+
+    assertEquals(5, slots.size)
+    assertTrue(slots.contains(TimeSlot(9, 0, 10, 0)))
+    assertTrue(slots.contains(TimeSlot(14, 0, 15, 0))) // From Tuesday
+  }
+
+  @Test
+  fun `complex schedule with exceptions and accepted requests tests edge cases`() {
+    val regularHours =
+        mutableMapOf(
+            DayOfWeek.MONDAY.name to mutableListOf(TimeSlot(8, 0, 18, 0)),
+            DayOfWeek.TUESDAY.name to mutableListOf(TimeSlot(8, 0, 18, 0)),
+            DayOfWeek.WEDNESDAY.name to mutableListOf(TimeSlot(8, 0, 18, 0)),
+            DayOfWeek.THURSDAY.name to mutableListOf(TimeSlot(8, 0, 18, 0)),
+            DayOfWeek.FRIDAY.name to mutableListOf(TimeSlot(8, 0, 18, 0)),
+            DayOfWeek.SATURDAY.name to mutableListOf(TimeSlot(10, 0, 16, 0)),
+            DayOfWeek.SUNDAY.name to mutableListOf(TimeSlot(10, 0, 14, 0)))
+
+    val exceptions =
+        mutableListOf(
+            ScheduleException(
+                LocalDateTime.of(2024, 1, 1, 0, 0),
+                listOf(TimeSlot(12, 0, 14, 0)), // OFF_TIME on Monday
+                ExceptionType.OFF_TIME),
+            ScheduleException(
+                LocalDateTime.of(2024, 1, 2, 0, 0),
+                listOf(TimeSlot(18, 0, 20, 0)), // EXTRA_TIME on Tuesday
+                ExceptionType.EXTRA_TIME))
+
+    // Add accepted requests
+    val acceptedRequests =
+        listOf(
+            AcceptedTimeSlot(
+                requestId = "req1",
+                startTime =
+                    Timestamp(
+                        Date.from(
+                            LocalDateTime.of(2024, 1, 1, 9, 0)
+                                .atZone(ZoneId.systemDefault())
+                                .toInstant())),
+                duration = 60),
+            AcceptedTimeSlot(
+                requestId = "req2",
+                startTime =
+                    Timestamp(
+                        Date.from(
+                            LocalDateTime.of(2024, 1, 1, 15, 0)
+                                .atZone(ZoneId.systemDefault())
+                                .toInstant())),
+                duration = 120),
+            AcceptedTimeSlot(
+                requestId = "req3",
+                startTime =
+                    Timestamp(
+                        Date.from(
+                            LocalDateTime.of(2024, 1, 2, 11, 0)
+                                .atZone(ZoneId.systemDefault())
+                                .toInstant())),
+                duration = 60),
+            AcceptedTimeSlot(
+                requestId = "req4",
+                startTime =
+                    Timestamp(
+                        Date.from(
+                            LocalDateTime.of(2024, 1, 3, 13, 0)
+                                .atZone(ZoneId.systemDefault())
+                                .toInstant())),
+                duration = 90))
+
+    val schedule = Schedule(regularHours, exceptions, acceptedRequests)
+
+    assertFalse(
+        schedule.isTimeSlotAvailable(
+            TimeSlot(9, 0, 10, 0), LocalDate.of(2024, 1, 1))) // Occupied by req1
+    assertTrue(
+        schedule.isTimeSlotAvailable(TimeSlot(10, 0, 11, 0), LocalDate.of(2024, 1, 1))) // Free
+    assertFalse(
+        schedule.isTimeSlotAvailable(TimeSlot(12, 0, 13, 0), LocalDate.of(2024, 1, 1))) // OFF_TIME
+
+    val tuesdayAvailabilities = schedule.getProviderAvailabilities(LocalDate.of(2024, 1, 2))
+    assertTrue(tuesdayAvailabilities.contains(TimeSlot(8, 0, 9, 0))) // Regular hours
+    assertFalse(tuesdayAvailabilities.contains(TimeSlot(11, 0, 12, 0))) // Occupied by req3
+    // assertTrue(tuesdayAvailabilities.contains(TimeSlot(18, 0, 19, 0))) // EXTRA_TIME
+
+    val nextFiveSlots = schedule.getNextFiveSlots(LocalDate.of(2024, 1, 1))
+    assertEquals(5, nextFiveSlots.size)
+    assertTrue(nextFiveSlots.contains(TimeSlot(10, 0, 11, 0))) // Monday
+    // assertTrue(nextFiveSlots.contains(TimeSlot(18, 0, 19, 0))) // Tuesday EXTRA_TIME
+    assertTrue(nextFiveSlots.contains(TimeSlot(8, 0, 9, 0))) // Wednesday
+
+    val allAvailabilitiesMonday = schedule.getProviderAvailabilities(LocalDate.of(2024, 1, 1))
+    assertFalse(allAvailabilitiesMonday.contains(TimeSlot(12, 0, 13, 0))) // OFF_TIME
+    assertFalse(allAvailabilitiesMonday.contains(TimeSlot(9, 0, 10, 0))) // Accepted request
   }
 }

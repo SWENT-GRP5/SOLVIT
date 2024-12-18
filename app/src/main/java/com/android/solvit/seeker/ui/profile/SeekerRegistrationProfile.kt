@@ -168,7 +168,7 @@ fun SeekerRegistrationScreen(
                     label = "Full Name",
                     placeholder = "Enter your full name",
                     isValueOk = isFullNameOk,
-                    errorMessage = "Your full name must be at least 3 characters",
+                    errorMessage = "Please enter your full name (e.g., John Smith).",
                     leadingIcon = Icons.Default.Person,
                     leadingIconDescription = "Person Icon",
                     testTag = "fullNameInput",
@@ -255,7 +255,7 @@ fun SeekerRegistrationScreen(
                 Column(
                     modifier =
                         Modifier.fillMaxWidth() // Ensure content takes up full width
-                            .padding(16.dp)) {
+                            .padding(start = 0.dp, top = 16.dp, end = 16.dp, bottom = 16.dp)) {
                       Text(
                           text = "Set Your Preferences",
                           style = Typography.titleLarge,
