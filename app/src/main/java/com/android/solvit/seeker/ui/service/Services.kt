@@ -40,7 +40,6 @@ import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -84,13 +83,6 @@ fun ServicesScreen(
 
   // Lock Orientation to Portrait
   val localContext = LocalContext.current
-  LaunchedEffect(navigationActions.currentRoute()) {
-    // Clear the selected service when this screen is entered
-    if (navigationActions.currentRoute() == Route.SEEKER_OVERVIEW) {
-      listProviderViewModel.clearSelectedService()
-      listProviderViewModel.refreshFilters()
-    }
-  }
   DisposableEffect(Unit) {
     val activity = localContext as? ComponentActivity
     activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT

@@ -1093,6 +1093,7 @@ fun SelectProviderScreen(
   val sheetStateLocation = rememberModalBottomSheetState()
   val servicesListItem =
       SERVICES_LIST.find { it.service == selectedService } ?: SERVICES_LIST.last()
+  Log.d("SelectProvider", "$selectedService")
   Scaffold(
       modifier = Modifier.fillMaxSize(),
       topBar = {

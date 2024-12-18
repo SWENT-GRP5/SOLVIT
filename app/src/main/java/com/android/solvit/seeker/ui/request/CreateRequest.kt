@@ -106,7 +106,7 @@ fun CreateRequestScreen(
             testTagLeft = "CreateRequestBackButton")
       },
       content = { // AI Assistant Dialog
-        if (showAIAssistantDialog) {
+        if (showAIAssistantDialog && isInternetAvailable(localContext)) {
           AIAssistantDialog(
               onCancel = { showAIAssistantDialog = false },
               onUploadPictures = {
