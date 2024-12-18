@@ -10,18 +10,7 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -29,26 +18,8 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -507,6 +478,21 @@ fun DayScheduleCard(
     onSaveHours: (LocalTime, LocalTime) -> Unit,
     onClearHours: () -> Unit
 ) {
+  var startTime by
+      remember(currentSchedule) {
+        mutableStateOf(
+            if (currentSchedule.isNotEmpty())
+                LocalTime.of(currentSchedule.first().startHour, currentSchedule.first().startMinute)
+            else LocalTime.of(9, 0))
+      }
+  var endTime by
+      remember(currentSchedule) {
+        mutableStateOf(
+            if (currentSchedule.isNotEmpty())
+                LocalTime.of(currentSchedule.first().endHour, currentSchedule.first().endMinute)
+            else LocalTime.of(17, 0))
+      }
+
   Column(modifier = Modifier.fillMaxWidth()) {
     Row(
         modifier =
@@ -532,9 +518,7 @@ fun DayScheduleCard(
               Text(
                   text =
                       currentSchedule.first().let {
-                        "${it.startHour}:${
-                                it.startMinute.toString().padStart(2, '0')
-                            } - ${it.endHour}:${it.endMinute.toString().padStart(2, '0')}"
+                        "${it.startHour}:${it.startMinute.toString().padStart(2, '0')} - ${it.endHour}:${it.endMinute.toString().padStart(2, '0')}"
                       },
                   style = MaterialTheme.typography.bodyMedium,
                   color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
@@ -576,18 +560,6 @@ fun DayScheduleCard(
           Column(
               modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
               verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                var startTime by remember { mutableStateOf(LocalTime.of(9, 0)) }
-                var endTime by remember { mutableStateOf(LocalTime.of(17, 0)) }
-
-                if (currentSchedule.isNotEmpty()) {
-                  startTime =
-                      LocalTime.of(
-                          currentSchedule.first().startHour, currentSchedule.first().startMinute)
-                  endTime =
-                      LocalTime.of(
-                          currentSchedule.first().endHour, currentSchedule.first().endMinute)
-                }
-
                 TimeSelectionSection(
                     startTime = startTime,
                     endTime = endTime,
@@ -702,9 +674,7 @@ private fun ExceptionCard(
                 Text(
                     text =
                         timeSlots.first().let {
-                          "${it.startHour}:${
-                            it.startMinute.toString().padStart(2, '0')
-                        } - ${it.endHour}:${it.endMinute.toString().padStart(2, '0')}"
+                          "${it.startHour}:${it.startMinute.toString().padStart(2, '0')} - ${it.endHour}:${it.endMinute.toString().padStart(2, '0')}"
                         },
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f))
