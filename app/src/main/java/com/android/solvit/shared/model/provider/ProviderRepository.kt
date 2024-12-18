@@ -1,6 +1,7 @@
 package com.android.solvit.shared.model.provider
 
 import android.net.Uri
+import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.service.Services
 
 interface ProviderRepository {
@@ -31,6 +32,10 @@ interface ProviderRepository {
   fun filterProviders(filter: () -> Unit)
 
   fun getProvider(userId: String, onSuccess: (Provider?) -> Unit, onFailure: (Exception) -> Unit)
+
+  fun addAcceptedRequest(request: ServiceRequest)
+
+  fun removeAcceptedRequest(request: ServiceRequest)
 
   suspend fun returnProvider(uid: String): Provider?
 }
