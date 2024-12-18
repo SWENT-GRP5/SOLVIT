@@ -34,7 +34,10 @@ fun BookingCalendarScreen(navigationActions: NavigationActions, viewModel: Seeke
   val selectedRequest by viewModel.selectedRequest.collectAsState()
   var shouldAnimate by remember { mutableStateOf(true) }
 
-  val serviceColor = Services.getColor(selectedRequest?.type!!)
+  // Early return if selectedRequest is null
+  val request = selectedRequest ?: return
+
+  val serviceColor = Services.getColor(request.type)
 
   // Trigger initial load of time slots
   LaunchedEffect(currentProvider, selectedDate) {
@@ -78,7 +81,7 @@ fun BookingCalendarScreen(navigationActions: NavigationActions, viewModel: Seeke
             // BookingInfoCard at the top
             BookingInfoCard(
                 provider = currentProvider,
-                serviceRequest = selectedRequest,
+                serviceRequest = request,
                 selectedDate = selectedDate,
                 selectedTime = if (showDayView) null else null, // We'll add time selection later
                 showDayView = showDayView,
@@ -107,7 +110,7 @@ fun BookingCalendarScreen(navigationActions: NavigationActions, viewModel: Seeke
                             onHeaderClick = {}, // No date picker needed for booking
                             serviceColor = serviceColor,
                             deadlineDate =
-                                selectedRequest?.dueDate?.let { timestamp ->
+                                request.dueDate?.let { timestamp ->
                                   Instant.ofEpochMilli(timestamp.seconds * 1000)
                                       .atZone(ZoneId.systemDefault())
                                       .toLocalDate()
@@ -136,7 +139,7 @@ fun BookingCalendarScreen(navigationActions: NavigationActions, viewModel: Seeke
                         },
                         serviceColor = serviceColor,
                         deadlineDate =
-                            selectedRequest?.dueDate?.let { timestamp ->
+                            request.dueDate?.let { timestamp ->
                               Instant.ofEpochMilli(timestamp.seconds * 1000)
                                   .atZone(ZoneId.systemDefault())
                                   .toLocalDate()
