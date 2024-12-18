@@ -235,7 +235,7 @@ class ChatRepositoryFirestore(
     chatNode
         .orderByChild("users/${currentUserUid}")
         .equalTo(true)
-        .addListenerForSingleValueEvent(
+        .addValueEventListener(
             object : ValueEventListener {
               override fun onDataChange(p0: DataSnapshot) {
 
