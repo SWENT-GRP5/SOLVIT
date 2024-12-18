@@ -135,7 +135,8 @@ fun SolvitApp() {
       viewModel<ChatAssistantViewModel>(factory = ChatAssistantViewModel.Factory)
   val calendarViewModel =
       viewModel<ProviderCalendarViewModel>(
-          factory = ProviderCalendarViewModel.provideFactory(serviceRequestViewModel))
+          factory =
+              ProviderCalendarViewModel.provideFactory(authViewModel, serviceRequestViewModel))
   val seekerBookingViewModel =
       viewModel<SeekerBookingViewModel>(factory = SeekerBookingViewModel.Factory)
 
