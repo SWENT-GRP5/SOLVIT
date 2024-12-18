@@ -202,7 +202,7 @@ fun ChatScreen(
           }
 
           val listState = rememberLazyListState()
-          LaunchedEffect(messages) { listState.animateScrollToItem(messages.size) }
+          LaunchedEffect(messages, request) { listState.animateScrollToItem(messages.size) }
           LazyColumn(state = listState, modifier = Modifier.imePadding().testTag("conversation")) {
             items(messages) { message ->
               if (message.senderId == user?.uid) {
