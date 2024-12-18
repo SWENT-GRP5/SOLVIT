@@ -99,6 +99,7 @@ fun ServicesScreen(
   val navController = rememberNavController()
   val navBackStackEntry = navController.currentBackStackEntryAsState()
 
+  // Fetch providers when reentering the screen
   LaunchedEffect(navBackStackEntry.value) {
     listProviderViewModel.clearSelectedService()
     listProviderViewModel.getProviders()
