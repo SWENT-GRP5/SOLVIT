@@ -22,9 +22,6 @@ import com.android.solvit.seeker.ui.booking.components.BookingStepper
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
-import com.google.firebase.Timestamp
-import java.time.ZoneId
-import java.util.Date
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -128,16 +125,8 @@ fun BookingCalendarScreen(navigationActions: NavigationActions, viewModel: Seeke
                       timeSlots = availableTimeSlots,
                       onHeaderClick = { viewModel.setShowDayView(false) },
                       onTimeSlotSelected = { timeSlot ->
-                        val selectedRequest = viewModel.selectedRequest.value
-                        if (selectedRequest != null) {
-                          val meetingDateTime = date.atTime(timeSlot.start)
-                          val meetingDate =
-                              Date.from(meetingDateTime.atZone(ZoneId.systemDefault()).toInstant())
-                          val updatedRequest =
-                              selectedRequest.copy(meetingDate = Timestamp(meetingDate))
-                          viewModel.onTimeSlotSelected(updatedRequest)
-                          navigationActions.navigateTo(Route.BOOKING_DETAILS)
-                        }
+                        viewModel.onTimeSlotSelected(timeSlot)
+                        navigationActions.navigateTo(Route.BOOKING_DETAILS)
                       },
                       serviceColor = serviceColor)
                 }

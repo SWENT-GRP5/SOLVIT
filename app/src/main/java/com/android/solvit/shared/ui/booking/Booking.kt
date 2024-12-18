@@ -149,6 +149,17 @@ fun ServiceBookingScreen(
 
   val request by requestViewModel.selectedRequest.collectAsStateWithLifecycle()
   if (request == null) return
+
+  // Set up real-time updates for the service request
+  LaunchedEffect(Unit) {
+    requestViewModel.addListenerOnServiceRequests { updatedRequests ->
+      // Find and update the current request if it exists in the updated list
+      updatedRequests
+          .find { it.uid == request?.uid }
+          ?.let { updatedRequest -> requestViewModel.setSelectedRequest(updatedRequest) }
+    }
+  }
+
   val providerId = request!!.providerId
   val provider =
       if (providerId.isNullOrEmpty()) null
@@ -253,22 +264,16 @@ fun ServiceBookingScreen(
 
               // A row containing two parallel sections: Profile/Rating and Price/Appointment
               Row(
-                  modifier =
-                      Modifier.fillMaxWidth() // Occupies full width of the screen
-                          .height(220.dp) // Fixed height for uniformity
-                          // Padding between the row and other components
-                          .padding(vertical = 16.dp),
-                  horizontalArrangement = Arrangement.SpaceBetween // Space between the boxes
-                  ) {
+                  modifier = Modifier.fillMaxWidth().height(200.dp).padding(vertical = 8.dp),
+                  horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     // Left box: Provider card
                     Box(
                         modifier =
-                            Modifier.weight(1f) // Equal space
+                            Modifier.weight(1f)
                                 .testTag("profile_box")
                                 .fillMaxHeight()
-                                .background(
-                                    colorScheme.onSurface.copy(alpha = 0.8f),
-                                    RoundedCornerShape(16.dp))
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(colorScheme.onSurface.copy(alpha = 0.8f))
                                 .clickable(
                                     onClick = {
                                       if (isSeeker) {
@@ -286,165 +291,162 @@ fun ServiceBookingScreen(
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.Center) {
                                   Icon(
-                                      imageVector =
-                                          Icons.Default.AccountCircle, // Use an outline person icon
+                                      imageVector = Icons.Default.AccountCircle,
                                       contentDescription = null,
                                       tint = colorScheme.onPrimary,
-                                      modifier = Modifier.size(64.dp) // Larger icon for visibility
+                                      modifier = Modifier.size(48.dp) // Slightly smaller icon
                                       )
-                                  Spacer(modifier = Modifier.height(8.dp))
+                                  Spacer(modifier = Modifier.height(4.dp))
                                   Text(
                                       text =
                                           if (isSeeker) "Select a Provider"
                                           else "No Provider Assigned",
                                       fontWeight = FontWeight.Bold,
-                                      fontSize = 20.sp,
-                                      color = colorScheme.onPrimary,
-                                      textAlign = TextAlign.Center)
+                                      fontSize = 16.sp, // Smaller font size
+                                      textAlign = TextAlign.Center,
+                                      modifier = Modifier.padding(horizontal = 8.dp),
+                                      color = colorScheme.onPrimary)
                                 }
                           }
                         }
-                    Spacer(modifier = Modifier.width(16.dp)) // Space between the two boxes
 
                     // Right box: Price and appointment information
                     Box(
                         modifier =
                             Modifier.weight(1f)
                                 .fillMaxHeight()
-                                .background(colorScheme.primary, RoundedCornerShape(16.dp))
-                                .padding(16.dp)
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(colorScheme.primary)
+                                .padding(horizontal = 8.dp, vertical = 12.dp)
                                 .testTag("price_appointment_box")) {
                           Column(
-                              // Center the text inside the column
                               horizontalAlignment = Alignment.CenterHorizontally,
-                              // Ensure the column takes up the full width
-                              modifier = Modifier.fillMaxWidth()) {
+                              verticalArrangement = Arrangement.SpaceEvenly,
+                              modifier = Modifier.fillMaxSize()) {
                                 var price = "Not set"
-                                request!!.agreedPrice?.let { price = "$it CHF" }
-                                // Price agreed upon
-                                Text(
-                                    text = "Price agreed on:",
-                                    fontWeight = FontWeight.Medium,
-                                    fontSize = 16.sp,
-                                    textAlign = TextAlign.Center,
-                                    modifier = Modifier.fillMaxWidth(),
-                                    color = colorScheme.secondaryContainer)
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.Center,
-                                    modifier = Modifier.fillMaxWidth()) {
+                                request!!.agreedPrice?.let { price = String.format("%.0f CHF", it) }
+
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.Center,
+                                    modifier = Modifier.weight(1f)) {
                                       Text(
-                                          text = price,
-                                          fontWeight = FontWeight.Bold,
-                                          fontSize = 24.sp,
+                                          text = "Price agreed on",
+                                          fontWeight = FontWeight.Medium,
+                                          fontSize = 13.sp,
                                           textAlign = TextAlign.Center,
-                                          color = colorScheme.onPrimary,
-                                          modifier =
-                                              if (acceptedOrScheduled) Modifier.weight(1f)
-                                              else Modifier)
-                                      if (acceptedOrScheduled && !isSeeker) {
-                                        EditPriceDialog(request!!, requestViewModel)
-                                      }
+                                          color = colorScheme.secondaryContainer)
+                                      Row(
+                                          verticalAlignment = Alignment.CenterVertically,
+                                          horizontalArrangement = Arrangement.Center,
+                                          modifier = Modifier.fillMaxWidth()) {
+                                            Text(
+                                                text = price,
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = 18.sp,
+                                                textAlign = TextAlign.Center,
+                                                color = colorScheme.onPrimary,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis,
+                                                modifier =
+                                                    Modifier.weight(1f).padding(horizontal = 4.dp))
+                                            if (acceptedOrScheduled && !isSeeker) {
+                                              IconButton(
+                                                  onClick = { /* your existing click handler */},
+                                                  modifier = Modifier.size(24.dp)) {
+                                                    Icon(
+                                                        imageVector = Icons.Default.Edit,
+                                                        contentDescription = "Edit price",
+                                                        tint = colorScheme.onPrimary,
+                                                        modifier = Modifier.size(16.dp))
+                                                  }
+                                            }
+                                          }
                                     }
 
-                                Spacer(modifier = Modifier.height(16.dp))
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.Center,
+                                    modifier = Modifier.weight(1f)) {
+                                      Text(
+                                          text = "Your appointment",
+                                          fontWeight = FontWeight.Medium,
+                                          fontSize = 13.sp,
+                                          textAlign = TextAlign.Center,
+                                          color = colorScheme.secondaryContainer)
+                                      Text(
+                                          text =
+                                              request!!.meetingDate?.let {
+                                                try {
+                                                  SimpleDateFormat("MMM d", Locale.getDefault())
+                                                      .format(it.toDate())
+                                                } catch (e: Exception) {
+                                                  "Not set"
+                                                }
+                                              } ?: "Not set",
+                                          fontWeight = FontWeight.Bold,
+                                          fontSize = 18.sp,
+                                          textAlign = TextAlign.Center,
+                                          maxLines = 1,
+                                          overflow = TextOverflow.Ellipsis,
+                                          color = colorScheme.onPrimary)
+                                      Text(
+                                          text =
+                                              request!!.meetingDate?.let {
+                                                try {
+                                                  SimpleDateFormat("HH:mm", Locale.getDefault())
+                                                      .format(it.toDate())
+                                                } catch (e: Exception) {
+                                                  ""
+                                                }
+                                              } ?: "",
+                                          fontWeight = FontWeight.Bold,
+                                          fontSize = 16.sp,
+                                          textAlign = TextAlign.Center,
+                                          maxLines = 1,
+                                          overflow = TextOverflow.Ellipsis,
+                                          color = colorScheme.onPrimary)
+                                    }
 
-                                Text(
-                                    modifier = Modifier.fillMaxWidth().testTag("appointment_date"),
-                                    text = "Your appointment:",
-                                    fontWeight = FontWeight.Medium,
-                                    fontSize = 16.sp,
-                                    textAlign = TextAlign.Center,
-                                    color = colorScheme.secondaryContainer)
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Row(
-                                    horizontalArrangement = Arrangement.Center,
-                                    modifier = Modifier.fillMaxWidth()) {
-                                      Column(
-                                          horizontalAlignment = Alignment.CenterHorizontally,
-                                          modifier =
-                                              if (acceptedOrScheduled) Modifier.weight(1f)
-                                              else Modifier) {
-                                            Text(
-                                                text =
-                                                    request!!.meetingDate.let {
-                                                      if (it != null) {
-                                                        SimpleDateFormat(
-                                                                "dd/MM/yyyy", Locale.getDefault())
-                                                            .format(it.toDate())
-                                                      } else {
-                                                        "Not set"
-                                                      }
-                                                    },
-                                                fontWeight = FontWeight.Bold,
-                                                fontSize = 24.sp,
-                                                textAlign = TextAlign.Center,
-                                                color = colorScheme.onPrimary)
-                                            Text(
-                                                text =
-                                                    request!!.meetingDate.let {
-                                                      if (it != null) {
-                                                        SimpleDateFormat(
-                                                                "HH:mm", Locale.getDefault())
-                                                            .format(it.toDate())
-                                                      } else {
-                                                        "Not set"
-                                                      }
-                                                    },
-                                                fontWeight = FontWeight.Bold,
-                                                fontSize = 20.sp,
-                                                textAlign = TextAlign.Center,
-                                                color = colorScheme.onPrimary)
-                                          }
-                                      if (isSeeker && isAccepted) {
+                                if (isSeeker && isAccepted) {
+                                  Button(
+                                      onClick = {
+                                        provider?.let { prov ->
+                                          seekerBookingViewModel.prepareForBooking(prov, request!!)
+                                          navigationActions.navigateTo(BOOKING_CALENDAR)
+                                        }
+                                      },
+                                      colors =
+                                          ButtonDefaults.buttonColors(
+                                              containerColor = Color.White,
+                                              contentColor = colorScheme.primary),
+                                      shape = RoundedCornerShape(24.dp),
+                                      elevation =
+                                          ButtonDefaults.buttonElevation(
+                                              defaultElevation = 0.dp, pressedElevation = 2.dp),
+                                      modifier =
+                                          Modifier.testTag("scheduleButton")
+                                              .heightIn(min = 32.dp)
+                                              .widthIn(min = 120.dp)
+                                              .padding(top = 4.dp)) {
                                         Row(
                                             horizontalArrangement = Arrangement.Center,
                                             verticalAlignment = Alignment.CenterVertically,
-                                            modifier =
-                                                Modifier.fillMaxWidth().padding(top = 16.dp)) {
-                                              Button(
-                                                  onClick = {
-                                                    provider?.let { prov ->
-                                                      seekerBookingViewModel.prepareForBooking(
-                                                          prov, request!!)
-                                                      navigationActions.navigateTo(BOOKING_CALENDAR)
-                                                    }
-                                                  },
-                                                  colors =
-                                                      ButtonDefaults.buttonColors(
-                                                          containerColor = Color.White,
-                                                          contentColor = colorScheme.primary),
-                                                  shape = RoundedCornerShape(24.dp),
-                                                  elevation =
-                                                      ButtonDefaults.buttonElevation(
-                                                          defaultElevation = 0.dp,
-                                                          pressedElevation = 2.dp),
-                                                  modifier =
-                                                      Modifier.testTag("scheduleButton")
-                                                          .heightIn(min = 40.dp)
-                                                          .widthIn(min = 140.dp)) {
-                                                    Row(
-                                                        horizontalArrangement = Arrangement.Center,
-                                                        verticalAlignment =
-                                                            Alignment.CenterVertically,
-                                                        modifier =
-                                                            Modifier.padding(horizontal = 12.dp)) {
-                                                          Icon(
-                                                              imageVector = Icons.Default.DateRange,
-                                                              contentDescription = "Book",
-                                                              modifier = Modifier.size(18.dp),
-                                                              tint = colorScheme.primary)
-                                                          Spacer(modifier = Modifier.width(6.dp))
-                                                          Text(
-                                                              "Book Now",
-                                                              fontSize = 15.sp,
-                                                              fontWeight = FontWeight.Medium,
-                                                              color = colorScheme.primary)
-                                                        }
-                                                  }
+                                            modifier = Modifier.padding(horizontal = 8.dp)) {
+                                              Icon(
+                                                  imageVector = Icons.Default.DateRange,
+                                                  contentDescription = "Book",
+                                                  modifier = Modifier.size(16.dp),
+                                                  tint = colorScheme.primary)
+                                              Spacer(modifier = Modifier.width(4.dp))
+                                              Text(
+                                                  "Book Now",
+                                                  fontSize = 14.sp,
+                                                  fontWeight = FontWeight.Medium,
+                                                  color = colorScheme.primary)
                                             }
                                       }
-                                    }
+                                }
                               }
                         }
                   }

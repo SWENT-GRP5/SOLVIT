@@ -10,6 +10,7 @@ import com.android.solvit.shared.model.provider.ProviderRepositoryFirestore
 import com.android.solvit.shared.model.provider.TimeSlot
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestRepositoryFirebase
+import com.android.solvit.shared.model.request.ServiceRequestStatus
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.ktx.firestore
@@ -52,6 +53,8 @@ class SeekerBookingViewModel(
 
   val selectedRequest: StateFlow<ServiceRequest?> = serviceRequestViewModel.selectedRequest
 
+  private val repository = ServiceRequestRepositoryFirebase(Firebase.firestore, Firebase.storage)
+
   init {
     viewModelScope.launch {
       _isLoading.value = true
@@ -90,6 +93,36 @@ class SeekerBookingViewModel(
     viewModelScope.launch {
       _selectedDate.value = date
       updateAvailableTimeSlots()
+
+      // Update the service request in Firestore
+      selectedRequest.value?.let { request ->
+        val updatedRequest =
+            request.copy(
+                meetingDate =
+                    Timestamp(Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant())))
+        serviceRequestViewModel.saveServiceRequest(updatedRequest)
+      }
+    }
+  }
+
+  /** Updates the selected time slot and updates the service request */
+  fun onTimeSlotSelected(timeSlot: TimeSlot) {
+    viewModelScope.launch {
+      _selectedTimeSlot.value = timeSlot
+
+      // Update the service request in Firestore with both date and time
+      selectedRequest.value?.let { request ->
+        val dateTime =
+            selectedDate.value
+                .atTime(timeSlot.startHour, timeSlot.startMinute)
+                .atZone(ZoneId.systemDefault())
+
+        val updatedRequest =
+            request.copy(
+                meetingDate = Timestamp(Date.from(dateTime.toInstant())),
+                status = ServiceRequestStatus.SCHEDULED)
+        serviceRequestViewModel.saveServiceRequest(updatedRequest)
+      }
     }
   }
 
