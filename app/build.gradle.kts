@@ -298,6 +298,10 @@ dependencies {
     // Add Firebase Functions dependency
     implementation(platform("com.google.firebase:firebase-bom:32.6.0"))
     implementation("com.google.firebase:firebase-functions-ktx")
+
+    // Compose Material Icons
+    implementation("androidx.compose.material:material-icons-core:1.5.4")
+    implementation("androidx.compose.material:material-icons-extended:1.5.4")
 }
 
 tasks.withType<Test> {

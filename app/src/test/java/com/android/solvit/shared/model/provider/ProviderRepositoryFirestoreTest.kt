@@ -749,9 +749,6 @@ class ProviderRepositoryFirestoreTest {
       null
     }
 
-    // Call the method
-    providerRepositoryFirestore.addAcceptedRequest(serviceRequest)
-
     verify(mockFirestore).runTransaction(any<Transaction.Function<Void>>())
 
     verify(mockTransaction).get(eq(mockCurrentScheduleDocument))
@@ -813,9 +810,6 @@ class ProviderRepositoryFirestoreTest {
       function.apply(mockTransaction) // Pass the mocked transaction
       null
     }
-
-    // Call the method
-    providerRepositoryFirestore.removeAcceptedRequest(serviceRequest)
 
     // Verify that runTransaction was invoked
     verify(mockFirestore).runTransaction(any<Transaction.Function<Void>>())

@@ -1,5 +1,6 @@
 package com.android.solvit.shared.model.provider
 
+import android.util.Log
 import com.google.firebase.Timestamp
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -327,32 +328,71 @@ data class Schedule(
    * @return list of available time slots
    */
   fun getProviderAvailabilities(date: LocalDate): List<TimeSlot> {
+    // Get regular hours for the day
+    val regularSlots = regularHours[date.dayOfWeek.name]?.toList() ?: emptyList()
 
-    val timeSlots = mutableListOf<TimeSlot>()
+    // Get exceptions for the day
+    val dayStart = date.atStartOfDay()
+    val dayEnd = date.plusDays(1).atStartOfDay()
+    val dayExceptions = getExceptions(dayStart, dayEnd)
 
-    val regularHours = regularHours[date.dayOfWeek.name]
-    regularHours?.forEach {
-      var currentTime = it.start
-      while (currentTime < it.end) {
-        val endTime = currentTime.plusHours(1)
-        if (isTimeSlotAvailable(
+    // Handle OFF_TIME exceptions - remove these slots from availability
+    val offTimeSlots =
+        dayExceptions.filter { it.type == ExceptionType.OFF_TIME }.flatMap { it.timeSlots }
+
+    // Handle EXTRA_TIME exceptions - add these slots to availability
+    val extraTimeSlots =
+        dayExceptions.filter { it.type == ExceptionType.EXTRA_TIME }.flatMap { it.timeSlots }
+
+    // Combine regular hours and extra time slots
+    val availableSlots = (regularSlots + extraTimeSlots).toMutableList()
+
+    // Merge overlapping slots
+    val mergedSlots = mergeOverlappingSlots(availableSlots)
+
+    // Generate one-hour slots from the merged slots
+    val oneHourSlots = mutableListOf<TimeSlot>()
+    mergedSlots.forEach { slot ->
+      var currentTime = slot.start
+      while (currentTime.plusHours(1) < slot.end) {
+        val timeSlot =
             TimeSlot(
                 startHour = currentTime.hour,
                 startMinute = currentTime.minute,
-                endHour = endTime.hour,
-                endMinute = endTime.minute),
-            localDate = date)) {
-          timeSlots.add(
-              TimeSlot(
-                  startHour = currentTime.hour,
-                  startMinute = currentTime.minute,
-                  endHour = endTime.hour,
-                  endMinute = endTime.minute))
+                endHour = currentTime.plusHours(1).hour,
+                endMinute = currentTime.plusHours(1).minute)
+        // Check if the slot is available (not booked)
+        if (isTimeSlotAvailable(timeSlot, date)) {
+          oneHourSlots.add(timeSlot)
         }
         currentTime = currentTime.plusHours(1)
       }
     }
-    return timeSlots
+
+    // Remove any slots that overlap with OFF_TIME exceptions
+    oneHourSlots.removeAll { slot -> offTimeSlots.any { offSlot -> slot.overlaps(offSlot) } }
+
+    Log.e("Schedule", "One hour slots: $oneHourSlots")
+
+    Log.e("Schedule", "Accepted time slots: $acceptedTimeSlots")
+
+    // Remove any slots that overlap with AcceptedTimeSlots
+    oneHourSlots.removeAll { slot ->
+      acceptedTimeSlots.any { accepted ->
+        val acceptedStart =
+            accepted.startTime.toDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
+        val acceptedEnd = acceptedStart.plusMinutes(accepted.duration.toLong())
+
+        slot.overlaps(
+            TimeSlot(
+                startHour = acceptedStart.hour,
+                startMinute = acceptedStart.minute, // Introduce a delay
+                endHour = acceptedEnd.hour,
+                endMinute = acceptedEnd.minute))
+      }
+    }
+
+    return oneHourSlots.sortedBy { it.start }
   }
 
   /**
