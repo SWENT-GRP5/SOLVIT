@@ -106,6 +106,7 @@ class AiSolverViewModel : ViewModel() {
   fun updateMessageContext(message: ChatMessage) {
     _messageContext.value += message
   }
+
   /**
    * Build prompt for the AI problem's solver
    *
@@ -116,12 +117,12 @@ class AiSolverViewModel : ViewModel() {
     val conversationHistory =
         messageContext.value.joinToString("\n") { message ->
           "${message.senderName} : ${
-                when (message){
-                    is ChatMessage.TextMessage -> message.message
-                    is ChatMessage.ImageMessage -> "sent image"
-                    is ChatMessage.TextImageMessage -> message.text
-                }
-             }"
+                    when (message) {
+                        is ChatMessage.TextMessage -> message.message
+                        is ChatMessage.ImageMessage -> "sent image"
+                        is ChatMessage.TextImageMessage -> message.text
+                    }
+                }"
         }
 
     var prompt =

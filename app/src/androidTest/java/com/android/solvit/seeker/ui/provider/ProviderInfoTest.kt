@@ -10,6 +10,8 @@ import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.navigation.NavController
+import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
+import com.android.solvit.seeker.model.profile.UserRepository
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.shared.model.authentication.AuthRep
 import com.android.solvit.shared.model.authentication.AuthViewModel
@@ -50,6 +52,8 @@ class ProviderInfoTest {
   private lateinit var packageProposalViewModel: PackageProposalViewModel
   private lateinit var authRep: AuthRep
   private lateinit var authViewModel: AuthViewModel
+  private lateinit var userRepository: UserRepository
+  private lateinit var seekerProfileViewModel: SeekerProfileViewModel
 
   private val provider =
       Provider(
@@ -113,6 +117,8 @@ class ProviderInfoTest {
     requestRepository = mock(ServiceRequestRepository::class.java)
     requestViewModel = ServiceRequestViewModel(requestRepository)
     providerViewModel.selectProvider(provider)
+    userRepository = mock(UserRepository::class.java)
+    seekerProfileViewModel = SeekerProfileViewModel(userRepository)
 
     val testUser = User("1", "Admin", "Test User", "test@example.com", emptyList())
     whenever(authRep.init(any())).thenAnswer { invocation ->
@@ -203,7 +209,7 @@ class ProviderInfoTest {
           userId = "1",
           navigationActions = navigationActions,
           selectedPackage = mutableStateOf(null),
-      )
+          seekerProfileViewModel = seekerProfileViewModel)
     }
 
     // Assert

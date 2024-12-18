@@ -53,8 +53,16 @@ fun WeekView(
         horizontalArrangement = Arrangement.Center) {
           Text(
               text =
-                  "${startOfWeek.format(DateTimeFormatter.ofPattern("d MMMM", Locale.getDefault()))} - ${
-                    startOfWeek.plusDays(6).format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.getDefault()))
+                  "${
+                    startOfWeek.format(
+                        DateTimeFormatter.ofPattern(
+                            "d MMMM",
+                            Locale.getDefault()
+                        )
+                    )
+                } - ${
+                    startOfWeek.plusDays(6)
+                        .format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.getDefault()))
                 }",
               style = Typography.titleMedium.copy(fontWeight = FontWeight.Bold),
               modifier = Modifier.testTag("weekViewHeaderText"))

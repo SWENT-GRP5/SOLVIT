@@ -22,6 +22,7 @@ class GeminiImageAnalyzer(private val generativeModel: GenerativeModel = default
             Schema.str(
                 name = "description",
                 description = "A detailed description of the analyzed images"))
+
     // Initialize the generative model with a JSON response schema
     val defaultGenerativeModel =
         GenerativeModel(

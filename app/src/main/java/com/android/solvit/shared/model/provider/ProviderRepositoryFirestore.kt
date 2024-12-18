@@ -11,7 +11,6 @@ import com.google.firebase.Timestamp
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
-import com.google.firebase.firestore.toObject
 import com.google.firebase.storage.FirebaseStorage
 import java.time.LocalDate
 import java.time.ZoneId
@@ -323,6 +322,7 @@ class ProviderRepositoryFirestore(
     try {
       @Suppress("UNCHECKED_CAST")
       val regularHoursMap = (scheduleMap["regularHours"] as? Map<String, Any>) ?: mapOf()
+
       @Suppress("UNCHECKED_CAST")
       val exceptionsList = (scheduleMap["exceptions"] as? List<Map<String, Any>>) ?: listOf()
 

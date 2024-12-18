@@ -758,6 +758,7 @@ fun FilterComposable(listProviderViewModel: ListProviderViewModel, display: () -
         ApplyButton(listProviderViewModel, display)
       }
 }
+
 /**
  * Retrieves a human-readable location name from latitude and longitude coordinates.
  *

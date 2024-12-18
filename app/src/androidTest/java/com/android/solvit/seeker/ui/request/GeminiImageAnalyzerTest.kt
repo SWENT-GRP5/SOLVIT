@@ -1,8 +1,5 @@
 package com.android.solvit.seeker.ui.request
 
-import io.mockk.*
-import org.junit.Assert.*
-
 class GeminiImageAnalyzerTest {
 
   // TODO uncomment test when project is finished to not loose queries on multiple ci runs

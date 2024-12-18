@@ -86,7 +86,11 @@ fun ServiceRequestTimeSlot(
                     StatusIndicator(request.status)
                     Text(
                         text =
-                            "${startTime.format(DateTimeFormatter.ofPattern("H:mm"))} - ${endTime.format(DateTimeFormatter.ofPattern("H:mm"))}",
+                            "${startTime.format(DateTimeFormatter.ofPattern("H:mm"))} - ${
+                                endTime.format(
+                                    DateTimeFormatter.ofPattern("H:mm")
+                                )
+                            }",
                         style = Typography.bodyMedium,
                         color = colorScheme.onSurface,
                         modifier = Modifier.testTag("serviceRequestTime_${request.uid}"))

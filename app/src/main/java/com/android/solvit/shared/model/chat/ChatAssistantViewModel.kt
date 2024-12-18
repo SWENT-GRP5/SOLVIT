@@ -16,7 +16,7 @@ import com.google.ai.client.generativeai.type.generationConfig
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.*
+import kotlinx.serialization.json.Json
 
 class ChatAssistantViewModel : ViewModel() {
 
