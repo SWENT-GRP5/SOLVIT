@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -55,6 +56,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -120,6 +122,9 @@ fun ProviderInfoScreen(
   val userId = user.value?.uid ?: "-1"
 
   val packages = packagesProposal.filter { it.providerId == provider.uid }.sortedBy { it.price }
+
+  val lazyListState = rememberLazyListState()
+  val density = LocalDensity.current
 
   Scaffold(
       containerColor = colorScheme.surface,
@@ -312,10 +317,14 @@ fun ProviderPackages(
     showDialog: MutableState<Boolean>,
     requestViewModel: ServiceRequestViewModel,
     userId: String,
-    navigationActions: NavigationActions
+    navigationActions: NavigationActions,
 ) {
   var selectedIndex by remember { mutableIntStateOf(-1) }
   var boxHeightPx by remember { mutableIntStateOf(0) }
+  val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+  val itemWidth = 260.dp
+  val startPadding = (screenWidth - itemWidth) / 2
+
   Box(
       modifier =
           Modifier.fillMaxSize() // Fills the entire available space
@@ -324,13 +333,15 @@ fun ProviderPackages(
               },
       contentAlignment = Alignment.Center // Centers the LazyRow within the Box
       ) {
+
         // Horizontal scrollable list
         LazyRow(
             modifier =
                 Modifier.fillMaxSize().testTag("packagesScrollableList").align(Alignment.Center),
             horizontalArrangement = Arrangement.spacedBy(20.dp), // Adjusted for spacing
             contentPadding =
-                PaddingValues(top = 40.dp, start = 12.dp, end = 12.dp), // Increased padding
+                PaddingValues(
+                    top = 40.dp, start = startPadding, end = startPadding), // Increased padding
         ) {
           items(packages.size) { index ->
             // If package is selected, we display it bigger

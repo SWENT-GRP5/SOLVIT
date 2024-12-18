@@ -88,8 +88,8 @@ class ServicesScreenTest {
     seekerProfileViewModel = SeekerProfileViewModel(userRepository)
     navController = mock(NavController::class.java)
     navigationActions = mock(NavigationActions::class.java)
-      authRep = mock(AuthRep::class.java)
-      authViewModel = AuthViewModel(authRep)
+    authRep = mock(AuthRep::class.java)
+    authViewModel = AuthViewModel(authRep)
     `when`(navigationActions.currentRoute()).thenReturn(Route.SEEKER_OVERVIEW)
 
     // Mock successful data loading
@@ -110,7 +110,11 @@ class ServicesScreenTest {
     `when`(navigationActions.currentRoute()).thenReturn(Route.SEEKER_OVERVIEW)
 
     composeTestRule.setContent {
-      ServicesScreen(navigationActions, seekerProfileViewModel, authViewModel = authViewModel, listProviderViewModel =   listProviderViewModel)
+      ServicesScreen(
+          navigationActions,
+          seekerProfileViewModel,
+          authViewModel = authViewModel,
+          listProviderViewModel = listProviderViewModel)
     }
   }
 

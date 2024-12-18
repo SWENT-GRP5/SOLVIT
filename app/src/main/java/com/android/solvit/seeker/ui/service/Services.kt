@@ -59,6 +59,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.android.solvit.R
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
@@ -94,7 +96,13 @@ fun ServicesScreen(
     onDispose { activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED }
   }
 
-  LaunchedEffect(Unit) { listProviderViewModel.clearSelectedService() }
+  val navController = rememberNavController()
+  val navBackStackEntry = navController.currentBackStackEntryAsState()
+
+  LaunchedEffect(navBackStackEntry.value) {
+    listProviderViewModel.clearSelectedService()
+    listProviderViewModel.getProviders()
+  }
 
   val searchViewModel = SearchServicesViewModel()
 
