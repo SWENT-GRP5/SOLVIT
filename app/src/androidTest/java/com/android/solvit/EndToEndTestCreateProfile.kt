@@ -22,6 +22,7 @@ import androidx.test.espresso.intent.matcher.IntentMatchers
 import com.android.solvit.provider.model.ProviderCalendarViewModel
 import com.android.solvit.provider.model.profile.ProviderViewModel
 import com.android.solvit.provider.ui.profile.ProviderRegistrationScreen
+import com.android.solvit.seeker.model.SeekerBookingViewModel
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.seeker.model.profile.UserRepository
 import com.android.solvit.seeker.model.profile.UserRepositoryFirestore
@@ -92,6 +93,7 @@ class EndToEndTestCreateProfile {
   private lateinit var calendarViewModel: ProviderCalendarViewModel
   private lateinit var aiSolverViewModel: AiSolverViewModel
   private lateinit var packagesAssistantViewModel: PackagesAssistantViewModel
+  private lateinit var seekerBookingViewModel: SeekerBookingViewModel
 
   private lateinit var authRepository: AuthRepository
   private lateinit var authRepository2: AuthRep
@@ -152,6 +154,7 @@ class EndToEndTestCreateProfile {
     calendarViewModel =
         ProviderCalendarViewModel(providerRepository, authViewModel, serviceRequestViewModel)
     aiSolverViewModel = AiSolverViewModel()
+    seekerBookingViewModel = SeekerBookingViewModel(providerRepository, serviceRequestViewModel)
 
     `when`(locationRepository.search(ArgumentMatchers.anyString(), anyOrNull(), anyOrNull()))
         .thenAnswer { invocation ->
@@ -208,7 +211,8 @@ class EndToEndTestCreateProfile {
                   chatAssistantViewModel,
                   notificationsViewModel,
                   aiSolverViewModel,
-                  packageProposalViewModel)
+                  packageProposalViewModel,
+                  seekerBookingViewModel)
           "provider" ->
               ProviderUI(
                   authViewModel,
