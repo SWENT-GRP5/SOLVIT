@@ -55,7 +55,8 @@ fun MonthView(
     CalendarDaysHeader(modifier = Modifier.testTag("calendarDaysHeader"))
 
     LazyVerticalGrid(
-        columns = GridCells.Fixed(7), modifier = Modifier.fillMaxWidth().testTag("monthDayGrid")) {
+        columns = GridCells.Fixed(7),
+        modifier = Modifier.fillMaxWidth().testTag("monthViewCalendarGrid")) {
           val firstDayOfMonth = currentMonth.atDay(1)
           val lastDayOfMonth = currentMonth.atEndOfMonth()
           val firstDayOfGrid =

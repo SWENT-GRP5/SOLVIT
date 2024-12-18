@@ -64,54 +64,52 @@ fun DayView(
     listState.scrollToItem(maxOf(0, scrollHour - 1)) // Scroll one hour earlier for context
   }
 
-  Column(modifier = modifier.fillMaxSize()) {
-    Row(
-        modifier =
-            Modifier.fillMaxWidth()
-                .padding(8.dp)
-                .clickable { onHeaderClick() }
-                .testTag("dayViewHeader"),
-        horizontalArrangement = Arrangement.Center) {
-          Text(
-              text =
-                  viewDate.format(
-                      DateTimeFormatter.ofPattern("EEEE d MMMM yyyy", Locale.getDefault())),
-              style = Typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-              color =
-                  if (viewDate == today) {
-                    colorScheme.primary
-                  } else {
-                    colorScheme.onBackground
-                  },
-              fontWeight = FontWeight.Bold,
-              modifier = Modifier.testTag("dayViewHeaderText"))
-        }
+  Box(modifier = modifier.fillMaxSize().testTag("dayView")) {
+    Column(modifier = Modifier.fillMaxSize()) {
+      // Day header
+      Row(
+          modifier =
+              Modifier.fillMaxWidth()
+                  .padding(horizontal = 16.dp)
+                  .clickable { onHeaderClick() }
+                  .testTag("dayHeader"),
+          horizontalArrangement = Arrangement.SpaceBetween) {
+            Text(
+                text =
+                    viewDate.format(
+                        DateTimeFormatter.ofPattern("EEEE d MMMM yyyy", Locale.getDefault())),
+                style = Typography.titleMedium,
+                fontWeight = FontWeight.Medium,
+                color = colorScheme.onSurface)
+          }
 
-    TimeGrid(
-        modifier = Modifier.weight(1f).testTag("dayViewTimeGrid"),
-        hourHeight = 60.dp,
-        currentTime = if (viewDate == today) LocalTime.now() else null,
-        showCurrentTimeLine = viewDate == today,
-        numberOfColumns = 1,
-        listState = listState,
-        schedule = schedule,
-        dates = listOf(viewDate)) { hour, _, contentModifier ->
-          Box(modifier = contentModifier) {
-            timeSlots.forEach { request ->
-              val startTime =
-                  request.meetingDate?.toInstant()?.atZone(ZoneId.systemDefault())?.toLocalTime()
-                      ?: return@forEach
+      // Time grid
+      TimeGrid(
+          modifier = Modifier.weight(1f).testTag("dayViewTimeGrid"),
+          hourHeight = 60.dp,
+          currentTime = if (viewDate == today) LocalTime.now(ZoneId.systemDefault()) else null,
+          showCurrentTimeLine = viewDate == today,
+          numberOfColumns = 1,
+          listState = listState,
+          schedule = schedule,
+          dates = listOf(viewDate)) { hour, _, contentModifier ->
+            Box(modifier = contentModifier) {
+              timeSlots.forEach { request ->
+                val startTime =
+                    request.meetingDate?.toInstant()?.atZone(ZoneId.systemDefault())?.toLocalTime()
+                        ?: return@forEach
 
-              if (startTime.hour == hour) {
-                ServiceRequestTimeSlot(
-                    request = request,
-                    hourHeight = 60.dp,
-                    onClick = onServiceRequestClick,
-                    calendarView = CalendarView.DAY,
-                    modifier = Modifier.testTag("dayViewServiceRequest_${request.uid}"))
+                if (startTime.hour == hour) {
+                  ServiceRequestTimeSlot(
+                      request = request,
+                      hourHeight = 60.dp,
+                      onClick = onServiceRequestClick,
+                      calendarView = CalendarView.DAY,
+                      modifier = Modifier.testTag("dayViewServiceRequest_${request.uid}"))
+                }
               }
             }
           }
-        }
+    }
   }
 }
