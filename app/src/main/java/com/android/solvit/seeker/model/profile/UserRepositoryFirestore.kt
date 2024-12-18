@@ -292,15 +292,18 @@ open class UserRepositoryFirestore(
       val preferences = document.get("preferences") as? List<String> ?: emptyList()
       Log.e(
           "DocumentToUser",
-          "${SeekerProfile(
-            uid = uid,
-            name = name,
-            username = username,
-            imageUrl = imageUrl,
-            email = email,
-            phone = phone,
-            address = Location(latitude, longitude, nameLoc),
-            preferences = preferences)}")
+          "${
+                    SeekerProfile(
+                        uid = uid,
+                        name = name,
+                        username = username,
+                        imageUrl = imageUrl,
+                        email = email,
+                        phone = phone,
+                        address = Location(latitude, longitude, nameLoc),
+                        preferences = preferences
+                    )
+                }")
       SeekerProfile(
           uid = uid,
           name = name,

@@ -3,14 +3,18 @@
     "featureType": "administrative.country",
     "elementType": "geometry",
     "stylers": [
-      { "visibility": "off" }
+      {
+        "visibility": "off"
+      }
     ]
   },
   {
     "featureType": "administrative.country",
     "elementType": "labels",
     "stylers": [
-      { "visibility": "off" }
+      {
+        "visibility": "off"
+      }
     ]
   }
 ]

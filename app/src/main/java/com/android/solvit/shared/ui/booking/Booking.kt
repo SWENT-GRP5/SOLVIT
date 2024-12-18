@@ -579,12 +579,15 @@ fun EditButton(
         modifier = modifier.fillMaxWidth().padding(top = 8.dp).testTag("edit_button"),
         contentAlignment = Alignment.Center) {
           Button(
+              modifier = Modifier.height(50.dp),
               onClick = { navigationActions.navigateTo(Route.EDIT_REQUEST) },
               colors =
                   ButtonDefaults.buttonColors(
                       containerColor = colorScheme.primary, contentColor = colorScheme.onPrimary),
-              shape = RoundedCornerShape(8.dp)) {
+              shape = RoundedCornerShape(25.dp)) {
                 Text(text = "Edit details", style = Typography.labelLarge)
+                Spacer(modifier = Modifier.width(8.dp))
+                Icon(Icons.Default.Edit, contentDescription = null)
               }
         }
   }
@@ -603,13 +606,14 @@ fun ChatButton(
       modifier = modifier.fillMaxWidth().padding(top = 8.dp).testTag("chat_button"),
       contentAlignment = Alignment.Center) {
         Button(
+            modifier = Modifier.fillMaxWidth().height(50.dp),
             onClick = {
               chatViewModel.prepareForChat(false, currentUserId, receiverId, receiver, requestId)
             },
             colors =
                 ButtonDefaults.buttonColors(
                     containerColor = colorScheme.primary, contentColor = colorScheme.onPrimary),
-            shape = RoundedCornerShape(8.dp)) {
+            shape = RoundedCornerShape(25.dp)) {
               Text(text = "Discuss", style = Typography.labelLarge)
             }
       }
@@ -658,11 +662,12 @@ fun ReviewButton(navigationActions: NavigationActions) {
       modifier = Modifier.fillMaxWidth().padding(top = 16.dp).testTag("review_button"),
       contentAlignment = Alignment.Center) {
         Button(
+            modifier = Modifier.fillMaxWidth().height(50.dp),
             onClick = { navigationActions.navigateTo(Route.REVIEW) },
             colors =
                 ButtonDefaults.buttonColors(
                     containerColor = colorScheme.primary, contentColor = colorScheme.onPrimary),
-            shape = RoundedCornerShape(8.dp)) {
+            shape = RoundedCornerShape(25.dp)) {
               Text(text = "Leave a review", style = Typography.labelLarge)
             }
       }

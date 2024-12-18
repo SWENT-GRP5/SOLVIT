@@ -137,6 +137,7 @@ class MessageBoxTest {
     composeTestRule.onNodeWithText("No messages yet").assertIsDisplayed()
     composeTestRule.onNodeWithText("Send your first message").assertIsDisplayed()
   }
+
   // Check that overview of all user messages is well displayed
   @Test
   fun messagesAreDisplayedCorrectly() {

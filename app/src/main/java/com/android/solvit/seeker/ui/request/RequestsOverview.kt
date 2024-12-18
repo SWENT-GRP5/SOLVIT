@@ -116,6 +116,7 @@ fun RequestsOverviewScreen(
         Column {
           TopAppBarInbox(
               title = "Orders",
+              showAppIcon = true,
               testTagGeneral = "topOrdersSection",
           )
           CategoriesFiltersSection(serviceRequestViewModel = requestViewModel)
@@ -182,7 +183,6 @@ fun RequestsOverviewScreen(
       }
 }
 
-/** Composable that displays a message when there are no service requests. */
 @Composable
 fun NoRequestsText() {
   Column(

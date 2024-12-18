@@ -9,6 +9,8 @@ import com.android.solvit.seeker.model.profile.SeekerProfile
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.seeker.model.profile.UserRepository
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
+import com.android.solvit.shared.model.authentication.AuthRep
+import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.map.Location
 import com.android.solvit.shared.model.provider.Language
 import com.android.solvit.shared.model.provider.Provider
@@ -28,6 +30,8 @@ import org.mockito.kotlin.verify
 class ServicesScreenTest {
   private lateinit var providerRepository: ProviderRepository
   private lateinit var userRepository: UserRepository
+  private lateinit var authRep: AuthRep
+  private lateinit var authViewModel: AuthViewModel
   private lateinit var navigationActions: NavigationActions
   private lateinit var navController: NavController
   private lateinit var listProviderViewModel: ListProviderViewModel
@@ -84,6 +88,8 @@ class ServicesScreenTest {
     seekerProfileViewModel = SeekerProfileViewModel(userRepository)
     navController = mock(NavController::class.java)
     navigationActions = mock(NavigationActions::class.java)
+    authRep = mock(AuthRep::class.java)
+    authViewModel = AuthViewModel(authRep)
     `when`(navigationActions.currentRoute()).thenReturn(Route.SEEKER_OVERVIEW)
 
     // Mock successful data loading
@@ -104,7 +110,11 @@ class ServicesScreenTest {
     `when`(navigationActions.currentRoute()).thenReturn(Route.SEEKER_OVERVIEW)
 
     composeTestRule.setContent {
-      ServicesScreen(navigationActions, seekerProfileViewModel, listProviderViewModel)
+      ServicesScreen(
+          navigationActions,
+          seekerProfileViewModel,
+          authViewModel = authViewModel,
+          listProviderViewModel = listProviderViewModel)
     }
   }
 

@@ -2,6 +2,7 @@ package com.android.solvit.shared.model.provider
 
 import com.google.firebase.Timestamp
 import java.time.DayOfWeek
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
@@ -49,6 +50,13 @@ data class TimeSlot(
         end = if (this.end.isAfter(other.end)) this.end else other.end)
   }
 }
+
+/** New data class for storing essential service request info */
+data class AcceptedTimeSlot(
+    val requestId: String,
+    val startTime: Timestamp,
+    val duration: Int = 60 // minutes, fixed at 1 hour
+)
 
 /**
  * Represents an exception to the regular schedule
@@ -125,43 +133,41 @@ data class ExceptionUpdateResult(
 /** Represents the working schedule of a provider */
 data class Schedule(
     val regularHours: MutableMap<String, MutableList<TimeSlot>> = mutableMapOf(),
-    val exceptions: MutableList<ScheduleException> = mutableListOf()
+    val exceptions: MutableList<ScheduleException> = mutableListOf(),
+    val acceptedTimeSlots: List<AcceptedTimeSlot> = emptyList()
 ) {
   /** Checks if the provider is available at a specific date and time */
   fun isAvailable(dateTime: LocalDateTime): Boolean {
     val time = dateTime.toLocalTime()
 
-    // Check for exceptions first
+    // Check for off-time exceptions first, as they override all other availability
     val exception = exceptions.find { it.date.toLocalDate() == dateTime.toLocalDate() }
-    if (exception != null) {
-      when (exception.type) {
-        ExceptionType.OFF_TIME -> {
-          // If there's an off-time exception overlapping with the time, provider is not available
-          if (exception.timeSlots.any { slot ->
-            (time.equals(slot.start) || time.isAfter(slot.start)) &&
-                (time.equals(slot.end) || time.isBefore(slot.end))
-          }) {
-            return false
-          }
-        }
-        ExceptionType.EXTRA_TIME -> {
-          // If there's an extra-time exception overlapping with the time, provider is available
-          if (exception.timeSlots.any { slot ->
-            (time.equals(slot.start) || time.isAfter(slot.start)) &&
-                (time.equals(slot.end) || time.isBefore(slot.end))
-          }) {
-            return true
-          }
-        }
+    if (exception?.type == ExceptionType.OFF_TIME) {
+      // Not available if there's an overlapping off-time slot
+      if (exception.timeSlots.any { slot -> TimeSlot(time, time.plusHours(1)).overlaps(slot) }) {
+        return false
       }
     }
 
     // Check regular hours
-    val daySlots = regularHours[dateTime.dayOfWeek.name] ?: return false
-    return daySlots.any { slot ->
-      (time.equals(slot.start) || time.isAfter(slot.start)) &&
-          (time.equals(slot.end) || time.isBefore(slot.end))
+    val daySlots = regularHours[dateTime.dayOfWeek.name]
+    if (daySlots == null || daySlots.isEmpty()) {
+      // If no regular hours, check for extra time exceptions
+      return exception?.type == ExceptionType.EXTRA_TIME &&
+          exception.timeSlots.any { slot -> TimeSlot(time, time.plusHours(1)).overlaps(slot) }
     }
+
+    // Check if time is within regular hours
+    val withinRegularHours =
+        daySlots.any { slot -> TimeSlot(time, time.plusHours(1)).overlaps(slot) }
+
+    // If not within regular hours, check for extra time exceptions
+    if (!withinRegularHours) {
+      return exception?.type == ExceptionType.EXTRA_TIME &&
+          exception.timeSlots.any { slot -> TimeSlot(time, time.plusHours(1)).overlaps(slot) }
+    }
+
+    return true
   }
 
   /** Checks if the provider is available for a one-hour slot starting at the given time */
@@ -293,5 +299,84 @@ data class Schedule(
   private fun hasConflict(date: LocalDateTime, timeSlots: List<TimeSlot>): Boolean {
     val regularSlots = regularHours[date.dayOfWeek.name] ?: return false
     return timeSlots.any { newSlot -> regularSlots.any { it.overlaps(newSlot) } }
+  }
+
+  /** Check if a timeslot is available */
+  fun isTimeSlotAvailable(timeSlot: TimeSlot, localDate: LocalDate): Boolean {
+    if (!isAvailable(LocalDateTime.of(localDate, timeSlot.start))) return false
+
+    // Check Conflicts with accepted requests
+    return acceptedTimeSlots.none { accepted ->
+      val acceptedStart =
+          accepted.startTime.toDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
+      val acceptedEnd = acceptedStart.plusMinutes(accepted.duration.toLong())
+
+      timeSlot.overlaps(
+          TimeSlot(
+              startHour = acceptedStart.hour,
+              startMinute = acceptedStart.minute, // Introduce a delay
+              endHour = acceptedEnd.hour,
+              endMinute = acceptedEnd.minute))
+    }
+  }
+
+  /**
+   * Retrieve availabilities of a provider within a day
+   *
+   * @param date the day within we want to check provider availabilities
+   * @return list of available time slots
+   */
+  fun getProviderAvailabilities(date: LocalDate): List<TimeSlot> {
+
+    val timeSlots = mutableListOf<TimeSlot>()
+
+    val regularHours = regularHours[date.dayOfWeek.name]
+    regularHours?.forEach {
+      var currentTime = it.start
+      while (currentTime < it.end) {
+        val endTime = currentTime.plusHours(1)
+        if (isTimeSlotAvailable(
+            TimeSlot(
+                startHour = currentTime.hour,
+                startMinute = currentTime.minute,
+                endHour = endTime.hour,
+                endMinute = endTime.minute),
+            localDate = date)) {
+          timeSlots.add(
+              TimeSlot(
+                  startHour = currentTime.hour,
+                  startMinute = currentTime.minute,
+                  endHour = endTime.hour,
+                  endMinute = endTime.minute))
+        }
+        currentTime = currentTime.plusHours(1)
+      }
+    }
+    return timeSlots
+  }
+
+  /**
+   * Retrieve the next availabilities within the next days
+   *
+   * @return the next five available slots of a provider
+   */
+  fun getNextFiveSlots(startDate: LocalDate): List<TimeSlot> {
+    var date = startDate
+    val nextFivePossibleSlots = mutableListOf<TimeSlot>()
+    var currentSize = 0
+    while (currentSize < 5) {
+      val timeSlots = getProviderAvailabilities(date)
+      if (timeSlots.size + currentSize >= 5) {
+        nextFivePossibleSlots.addAll(currentSize, timeSlots.subList(0, 5 - currentSize))
+        currentSize = 5
+      } else {
+        if (timeSlots.isNotEmpty()) {
+          nextFivePossibleSlots.addAll(currentSize, timeSlots)
+          currentSize += timeSlots.size
+        }
+        date = date.plusDays(1)
+      }
+    }
+    return nextFivePossibleSlots
   }
 }
