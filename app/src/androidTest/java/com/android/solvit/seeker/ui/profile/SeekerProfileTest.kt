@@ -1,9 +1,9 @@
 package com.android.solvit.seeker.ui.profile
 
+import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.navigation.NavController
 import com.android.solvit.seeker.model.profile.SeekerProfile
@@ -79,12 +79,12 @@ class SeekerProfileTest {
 
   @Test
   fun profileOptionItemsAreClickable() {
-    composeTestRule.onNodeWithTag("MyAccountOption").performClick()
-    composeTestRule.onNodeWithTag("OrdersOption").performClick()
-    composeTestRule.onNodeWithTag("PrivacySettingsOption").performClick()
-    composeTestRule.onNodeWithTag("BillingOption").performClick()
+    composeTestRule.onNodeWithTag("MyAccountOption").assertHasClickAction()
+    composeTestRule.onNodeWithTag("OrdersOption").assertHasClickAction()
+    composeTestRule.onNodeWithTag("PrivacySettingsOption").assertHasClickAction()
+    composeTestRule.onNodeWithTag("BillingOption").assertHasClickAction()
     // composeTestRule.onNodeWithTag("PreferencesOption").performClick()
-    composeTestRule.onNodeWithTag("HelpSupportOption").performClick()
-    composeTestRule.onNodeWithTag("AboutAppOption").performClick()
+    composeTestRule.onNodeWithTag("HelpSupportOption").assertHasClickAction()
+    composeTestRule.onNodeWithTag("AboutAppOption").assertHasClickAction()
   }
 }
