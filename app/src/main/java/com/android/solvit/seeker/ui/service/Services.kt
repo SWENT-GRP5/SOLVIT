@@ -2,8 +2,6 @@ package com.android.solvit.seeker.ui.service
 
 import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
-import android.util.Log
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -79,6 +77,15 @@ import com.android.solvit.shared.ui.theme.LightRed
 import com.android.solvit.shared.ui.theme.OnPrimary
 import com.android.solvit.shared.ui.theme.Typography
 
+/**
+ * Services Screen This screen displays the main screen of the app, where the user can search for
+ * services, view top categories, top performers, and shortcuts to other screens.
+ *
+ * @param navigationActions Navigation actions to navigate to other screens
+ * @param seekerProfileViewModel ViewModel for the seeker's profile
+ * @param listProviderViewModel ViewModel for the list of providers
+ * @param authViewModel ViewModel for the authentication process
+ */
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "SourceLockedOrientationActivity")
 @Composable
 fun ServicesScreen(
@@ -138,6 +145,14 @@ fun ServicesScreen(
       }
 }
 
+/**
+ * Top Section This section contains the profile picture, the app's name, and the search bar.
+ *
+ * @param searchViewModel ViewModel for the search services
+ * @param seekerProfileViewModel ViewModel for the seeker's profile
+ * @param listProviderViewModel ViewModel for the list of providers
+ * @param navigationActions Navigation actions to navigate to other screens
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopSection(
@@ -153,7 +168,6 @@ fun TopSection(
   val userProfile by seekerProfileViewModel.seekerProfile.collectAsStateWithLifecycle()
   val user by authViewModel.user.collectAsState()
   user?.let { seekerProfileViewModel.getUserProfile(it.uid) }
-  Log.e("TopSection", "$userProfile")
 
   Box(modifier = Modifier.fillMaxWidth().testTag("servicesScreenTopSection")) {
     // Background Image
@@ -163,8 +177,6 @@ fun TopSection(
         contentScale = ContentScale.Crop,
         modifier = Modifier.matchParentSize())
     Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-      val context = LocalContext.current
-      val toast = Toast.makeText(context, "Not implemented yet", Toast.LENGTH_SHORT)
       Row(
           modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp).height(45.dp),
           horizontalArrangement = Arrangement.SpaceBetween,
@@ -190,19 +202,20 @@ fun TopSection(
                   style =
                       TextStyle(
                           fontSize = 25.sp,
-                          fontWeight = FontWeight.Bold,
+                          fontWeight = FontWeight.Black,
                           color = colorScheme.onBackground))
               Text(
                   text = "It",
                   style =
                       TextStyle(
-                          fontSize = 25.sp,
-                          fontWeight = FontWeight.Bold,
+                          fontSize = 35.sp,
+                          fontWeight = FontWeight.Black,
                           color = colorScheme.secondary))
             }
 
             IconButton(
-                onClick = { toast.show() }, modifier = Modifier.testTag("servicesScreenMenu")) {
+                onClick = { navigationActions.navigateTo(Route.REQUESTS_OVERVIEW) },
+                modifier = Modifier.testTag("servicesScreenMenu")) {
                   Icon(imageVector = Icons.Default.Menu, contentDescription = null)
                 }
           }
@@ -215,7 +228,7 @@ fun TopSection(
           modifier = Modifier.offset(y = 20.dp).testTag("servicesScreenSearchBar"),
           placeholder = { Text("Find services near you") },
           leadingIcon = { Icon(imageVector = Icons.Default.Search, contentDescription = null) },
-          colors = SearchBarDefaults.colors(containerColor = OnPrimary)) {
+          colors = SearchBarDefaults.colors(containerColor = colorScheme.background)) {
             LazyColumn(
                 modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -234,6 +247,12 @@ fun TopSection(
   }
 }
 
+/**
+ * Discount Section This section displays a discount announcement.
+ *
+ * @param navigationActions Navigation actions to navigate to other screens
+ * @param listProviderViewModel ViewModel for the list of providers
+ */
 @Composable
 fun DiscountSection(
     navigationActions: NavigationActions,
@@ -259,6 +278,11 @@ fun DiscountSection(
       }
 }
 
+/**
+ * Shortcuts Section This section displays shortcuts to other screens.
+ *
+ * @param navigationActions Navigation actions to navigate to other screens
+ */
 @Composable
 fun ShortcutsSection(
     navigationActions: NavigationActions,
@@ -344,6 +368,13 @@ fun ShortcutsSection(
       }
 }
 
+/**
+ * Categories Section This section displays the top categories.
+ *
+ * @param searchServicesViewModel ViewModel for the search services
+ * @param listProviderViewModel ViewModel for the list of providers
+ * @param navigationActions Navigation actions to navigate to other screens
+ */
 @Composable
 fun CategoriesSection(
     searchServicesViewModel: SearchServicesViewModel,
@@ -377,6 +408,12 @@ fun CategoriesSection(
   }
 }
 
+/**
+ * Performers Section This section displays the top performers.
+ *
+ * @param listProviderViewModel ViewModel for the list of providers
+ * @param navigationActions Navigation actions to navigate to other screens
+ */
 @Composable
 fun PerformersSection(
     listProviderViewModel: ListProviderViewModel,
@@ -408,6 +445,14 @@ fun PerformersSection(
   }
 }
 
+/**
+ * Service Item This item displays a service with its icon, name, and the number of workers
+ * available.
+ *
+ * @param service Service to display
+ * @param workerCount Number of workers available for the service
+ * @param onClick Action to perform when the item is clicked
+ */
 @Composable
 fun ServiceItem(service: ServicesListItem, workerCount: Int, onClick: () -> Unit) {
   OutlinedCard(
@@ -449,6 +494,13 @@ fun ServiceItem(service: ServicesListItem, workerCount: Int, onClick: () -> Unit
       }
 }
 
+/**
+ * Provider Item This item displays a provider with its image, rating, name, and service.
+ *
+ * @param provider Provider to display
+ * @param showIcon Whether to show the service icon
+ * @param onClick Action to perform when the item is clicked
+ */
 @Composable
 fun ProviderItem(provider: Provider, showIcon: Boolean = true, onClick: () -> Unit) {
   OutlinedCard(
@@ -475,7 +527,7 @@ fun ProviderItem(provider: Provider, showIcon: Boolean = true, onClick: () -> Un
                     Modifier.padding(8.dp)
                         .size(40.dp)
                         .clip(RoundedCornerShape(8.dp))
-                        .background(OnPrimary) // Choose a color that fits your theme
+                        .background(OnPrimary)
                         .align(Alignment.TopStart),
                 contentAlignment = Alignment.Center) {
                   Icon(

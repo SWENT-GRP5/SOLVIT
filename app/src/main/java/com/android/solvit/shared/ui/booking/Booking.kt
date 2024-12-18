@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -97,6 +98,7 @@ import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.navigation.Route.BOOKING_CALENDAR
 import com.android.solvit.shared.ui.navigation.Screen
 import com.android.solvit.shared.ui.theme.SelectedPackage
+import com.android.solvit.shared.ui.theme.SelectedPackageDark
 import com.android.solvit.shared.ui.theme.Typography
 import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.Timestamp
@@ -677,12 +679,15 @@ fun EditButton(
         modifier = modifier.fillMaxWidth().padding(top = 8.dp).testTag("edit_button"),
         contentAlignment = Alignment.Center) {
           Button(
+              modifier = Modifier.fillMaxWidth().height(50.dp),
               onClick = { navigationActions.navigateTo(Route.EDIT_REQUEST) },
               colors =
                   ButtonDefaults.buttonColors(
                       containerColor = colorScheme.primary, contentColor = colorScheme.onPrimary),
-              shape = RoundedCornerShape(8.dp)) {
+              shape = RoundedCornerShape(25.dp)) {
                 Text(text = "Edit details", style = Typography.labelLarge)
+                Spacer(modifier = Modifier.width(8.dp))
+                Icon(Icons.Default.Edit, contentDescription = null)
               }
         }
   }
@@ -701,13 +706,14 @@ fun ChatButton(
       modifier = modifier.fillMaxWidth().padding(top = 8.dp).testTag("chat_button"),
       contentAlignment = Alignment.Center) {
         Button(
+            modifier = Modifier.fillMaxWidth().height(50.dp),
             onClick = {
               chatViewModel.prepareForChat(false, currentUserId, receiverId, receiver, requestId)
             },
             colors =
                 ButtonDefaults.buttonColors(
                     containerColor = colorScheme.primary, contentColor = colorScheme.onPrimary),
-            shape = RoundedCornerShape(8.dp)) {
+            shape = RoundedCornerShape(25.dp)) {
               Text(text = "Discuss", style = Typography.labelLarge)
             }
       }
@@ -737,7 +743,7 @@ fun EditAndChatButton(
 ) {
   Row(
       modifier = Modifier.fillMaxWidth().padding(top = 16.dp).testTag("edit_discuss_button"),
-      horizontalArrangement = Arrangement.SpaceEvenly,
+      horizontalArrangement = Arrangement.spacedBy(16.dp),
       verticalAlignment = Alignment.CenterVertically,
   ) {
     EditButton(navigationActions, isPending, isSeeker, modifier)
@@ -756,11 +762,12 @@ fun ReviewButton(navigationActions: NavigationActions) {
       modifier = Modifier.fillMaxWidth().padding(top = 16.dp).testTag("review_button"),
       contentAlignment = Alignment.Center) {
         Button(
+            modifier = Modifier.fillMaxWidth().height(50.dp),
             onClick = { navigationActions.navigateTo(Route.REVIEW) },
             colors =
                 ButtonDefaults.buttonColors(
                     containerColor = colorScheme.primary, contentColor = colorScheme.onPrimary),
-            shape = RoundedCornerShape(8.dp)) {
+            shape = RoundedCornerShape(25.dp)) {
               Text(text = "Leave a review", style = Typography.labelLarge)
             }
       }
@@ -777,7 +784,10 @@ fun PackageCard(packageProposal: PackageProposal, modifier: Modifier = Modifier)
       modifier = modifier.fillMaxSize(),
       shape = RoundedCornerShape(16.dp),
       elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-      colors = CardDefaults.cardColors(containerColor = SelectedPackage)) {
+      colors =
+          CardDefaults.cardColors(
+              containerColor =
+                  if (isSystemInDarkTheme()) SelectedPackageDark else SelectedPackage)) {
         Column(
             modifier = Modifier.padding(20.dp).fillMaxHeight().testTag("package_content"),
             horizontalAlignment = Alignment.Start) {
@@ -787,12 +797,9 @@ fun PackageCard(packageProposal: PackageProposal, modifier: Modifier = Modifier)
                     modifier = Modifier.testTag("price"),
                     text = "CHF${packageProposal.price}",
                     style = Typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-                    color = colorScheme.onPrimaryContainer)
+                    color = colorScheme.onBackground)
                 Spacer(modifier = Modifier.width(8.dp)) // Increased space between price and unit
-                Text(
-                    text = "/hour",
-                    style = Typography.bodySmall,
-                    color = colorScheme.onPrimaryContainer)
+                Text(text = "/hour", style = Typography.bodySmall, color = colorScheme.onBackground)
               }
               Spacer(modifier = Modifier.height(12.dp))
               // Title of the Package
@@ -800,7 +807,7 @@ fun PackageCard(packageProposal: PackageProposal, modifier: Modifier = Modifier)
                   modifier = Modifier.testTag("title"),
                   text = packageProposal.title,
                   style = Typography.titleMedium,
-                  color = colorScheme.onPrimaryContainer)
+                  color = colorScheme.onBackground)
               Spacer(
                   modifier =
                       Modifier.height(12.dp)) // Increased space between title and description

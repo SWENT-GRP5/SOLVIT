@@ -16,7 +16,7 @@ import com.google.ai.client.generativeai.type.generationConfig
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.*
+import kotlinx.serialization.json.Json
 
 class ChatAssistantViewModel : ViewModel() {
 
@@ -274,7 +274,8 @@ class ChatAssistantViewModel : ViewModel() {
       languageTo: String,
       onResponse: (String) -> Unit
   ) {
-    val prompt = "Translate the following message: $message, from $languageFrom to $languageTo"
+    val prompt =
+        "Translate the following message: $message, from $languageFrom to $languageTo, give a single translation that could be sent without modifications."
     Log.d("ChatAssistantViewModel", "model prompted")
     viewModelScope.launch {
       try {

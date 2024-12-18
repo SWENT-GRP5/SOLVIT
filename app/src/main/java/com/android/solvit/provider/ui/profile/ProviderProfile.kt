@@ -103,6 +103,7 @@ fun ProviderProfileScreen(
       topBar = {
         TopAppBarInbox(
             title = "Profile",
+            showAppIcon = true,
             testTagTitle = "ProfileTitle",
             rightButtonAction = { showLogoutDialog = true },
             rightButtonForm = Icons.AutoMirrored.Filled.ExitToApp,

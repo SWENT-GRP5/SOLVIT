@@ -278,7 +278,8 @@ fun SeekerUI(
           reviewViewModel,
           serviceRequestViewModel,
           authViewModel,
-          packageProposalViewModel)
+          packageProposalViewModel,
+          seekerProfileViewModel)
     }
 
     // Service Requests

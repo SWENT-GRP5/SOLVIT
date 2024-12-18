@@ -325,9 +325,13 @@ class EndToEndTestCreateProfile {
     composeTestRule.onNodeWithTag("servicesDropDown").performClick()
     composeTestRule.onNodeWithTag("PLUMBER").performClick() // choose plumber as Service
     composeTestRule.onNodeWithTag("providerImageButton").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("descriptionInputProviderRegistration").assertIsDisplayed()
     composeTestRule
         .onNodeWithTag("descriptionInputProviderRegistration")
+        .performScrollTo()
+        .assertIsDisplayed()
+    composeTestRule
+        .onNodeWithTag("descriptionInputProviderRegistration")
+        .performScrollTo()
         .performTextInput("No need a description ! I'm the Best Plumber In Town")
     composeTestRule
         .onNodeWithTag("startingPriceInputProviderRegistration")

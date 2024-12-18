@@ -271,7 +271,7 @@ class ChatRepositoryFirestore(
               }
 
               override fun onCancelled(error: DatabaseError) {
-                TODO("Not yet implemented")
+                Log.e("listenForLastMessages", "Error: $error")
               }
             })
   }
@@ -375,7 +375,7 @@ class ChatRepositoryFirestore(
               }
 
               override fun onCancelled(error: DatabaseError) {
-                TODO("Not yet implemented")
+                Log.e("getLastMessageForChatRoom", "Error: $error")
               }
             })
   }

@@ -2,7 +2,9 @@ package com.android.solvit.seeker.ui.profile
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.content.pm.ActivityInfo
+import android.net.Uri
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.border
@@ -106,6 +108,7 @@ fun SeekerProfileScreen(
       topBar = {
         TopAppBarInbox(
             title = "Profile",
+            showAppIcon = true,
             testTagTitle = "ProfileTitle",
             rightButtonAction = { showLogoutDialog = true },
             rightButtonForm = Icons.AutoMirrored.Filled.ExitToApp,
@@ -114,7 +117,7 @@ fun SeekerProfileScreen(
       },
       bottomBar = {
         BottomNavigationMenu(
-            onTabSelect = { navigationActions.navigateTo(it.route) },
+            onTabSelect = { navigationActions.navigateTo(it) },
             tabList = LIST_TOP_LEVEL_DESTINATION_SEEKER,
             selectedItem = Route.PROFILE)
       },
@@ -326,14 +329,18 @@ fun AboutAppCard(context: Context) {
                   icon = Icons.Default.Notifications,
                   optionName = "Help & Support",
                   onClick = {
-                    Toast.makeText(context, "Not implemented yet", Toast.LENGTH_SHORT).show()
+                    val url =
+                        "https://github.com/SWENT-GRP5/SOLVIT/wiki/Help-&-Support#help--support"
+                    openWebPage(context, url)
                   },
                   modifier = Modifier.testTag("HelpSupportOption"))
               ProfileOptionItem(
                   icon = Icons.Default.Settings,
-                  optionName = "About App",
+                  optionName = "Read More on GitHub",
                   onClick = {
-                    Toast.makeText(context, "Not implemented yet", Toast.LENGTH_SHORT).show()
+                    val url =
+                        "https://github.com/SWENT-GRP5/SOLVIT?tab=readme-ov-file#solvit---connecting-you-to-trusted-service-providers"
+                    openWebPage(context, url)
                   },
                   modifier = Modifier.testTag("AboutAppOption"))
             }
@@ -373,4 +380,14 @@ fun LogoutDialog(onLogout: () -> Unit, onDismiss: () -> Unit) {
         }
       },
       modifier = Modifier.testTag("LogoutDialog"))
+}
+
+fun openWebPage(context: Context, url: String) {
+  try {
+    val webIntent =
+        Intent(Intent.ACTION_VIEW, Uri.parse(url)).apply { flags = Intent.FLAG_ACTIVITY_NEW_TASK }
+    context.startActivity(webIntent)
+  } catch (e: Exception) {
+    Toast.makeText(context, "Unable to open link", Toast.LENGTH_SHORT).show()
+  }
 }

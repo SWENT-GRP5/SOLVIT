@@ -253,7 +253,6 @@ class EndToEndProviderJobs {
     // Navigate to the calendar screen
     composeTestRule.onNodeWithTag(TopLevelDestinations.CALENDAR.textId).performClick()
     composeTestRule.waitUntil { composeTestRule.onNodeWithTag("calendarTitle").isDisplayed() }
-    // composeTestRule.onNodeWithTag("backButton").performClick()
 
     // Navigate to the job dashboard
     composeTestRule.onNodeWithTag("MyJobsTestTag", useUnmergedTree = true).performClick()

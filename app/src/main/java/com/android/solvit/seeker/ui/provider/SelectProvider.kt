@@ -10,6 +10,7 @@ import androidx.activity.ComponentActivity
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,6 +29,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -239,7 +241,7 @@ fun FilterBar(
       horizontalArrangement = Arrangement.SpaceBetween,
       verticalAlignment = Alignment.CenterVertically) {
         Row(
-            modifier = Modifier.fillMaxWidth().weight(1f),
+            modifier = Modifier.fillMaxWidth().weight(1f).horizontalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.SpaceEvenly) {
               filters.forEach { filter ->
                 Card(
@@ -756,6 +758,7 @@ fun FilterComposable(listProviderViewModel: ListProviderViewModel, display: () -
         ApplyButton(listProviderViewModel, display)
       }
 }
+
 /**
  * Retrieves a human-readable location name from latitude and longitude coordinates.
  *
