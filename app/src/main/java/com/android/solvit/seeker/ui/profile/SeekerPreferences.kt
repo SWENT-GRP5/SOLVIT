@@ -17,7 +17,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -34,7 +33,7 @@ fun Preferences(userId: String, viewModel: SeekerProfileViewModel) {
   Column(
       modifier = Modifier.fillMaxSize().padding(16.dp),
       verticalArrangement = Arrangement.Top,
-      horizontalAlignment = Alignment.CenterHorizontally) {
+      horizontalAlignment = Alignment.Start) {
         Text(
             text = "You might like;",
             modifier = Modifier.align(Alignment.Start).testTag("preferences_title"),
@@ -44,21 +43,22 @@ fun Preferences(userId: String, viewModel: SeekerProfileViewModel) {
                     fontWeight = FontWeight.Bold,
                 ))
         Spacer(modifier = Modifier.height(8.dp))
+        val allSuggestions =
+            listOf(
+                "🔧 Plumbing",
+                "⚡ Electrical Work",
+                "📚 Tutoring",
+                "🎉 Event Planning",
+                "💇 Hair Styling",
+                "🧹 Cleaning",
+                "🪚 Carpentry",
+                "📸 Photography",
+                "🏋️ Personal Training",
+                "✍️ Writing")
 
         // Suggestion Grid
         SuggestionsGrid(
-            suggestions =
-                listOf(
-                    "🔧 Plumbing",
-                    "⚡ Electrical Work",
-                    "📚 Tutoring",
-                    "🎉 Event Planning",
-                    "💇 Hair Styling",
-                    "🧹 Cleaning",
-                    "🪚 Carpentry",
-                    "📸 Photography",
-                    "🏋️ Personal Training",
-                    "✍️ Writing"),
+            suggestions = allSuggestions,
             selectedItems = selectedItems.toSet(),
             onSuggestionClick = { suggestion ->
               if (selectedItems.contains(suggestion)) {
@@ -96,8 +96,9 @@ fun SuggestionsGrid(
 @Composable
 fun SuggestionButton(text: String, isSelected: Boolean, onClick: () -> Unit) {
   // Update color based on selection state
-  val backgroundColor = if (isSelected) colorScheme.secondary else Color(0xFFF1F1F1)
-  val contentColor = if (isSelected) colorScheme.onSecondary else Color.Black
+  val backgroundColor = if (isSelected) colorScheme.secondary else colorScheme.surfaceVariant
+  val contentColor = if (isSelected) colorScheme.onSecondary else colorScheme.onBackground
+
   Surface(
       modifier = Modifier.padding(8.dp).clickable { onClick() },
       shape = RoundedCornerShape(16.dp),
