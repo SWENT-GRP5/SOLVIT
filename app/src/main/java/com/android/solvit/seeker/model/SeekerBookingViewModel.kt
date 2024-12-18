@@ -4,9 +4,11 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.android.solvit.shared.model.provider.AcceptedTimeSlot
 import com.android.solvit.shared.model.provider.Provider
 import com.android.solvit.shared.model.provider.ProviderRepository
 import com.android.solvit.shared.model.provider.ProviderRepositoryFirestore
+import com.android.solvit.shared.model.provider.Schedule
 import com.android.solvit.shared.model.provider.TimeSlot
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestRepositoryFirebase
@@ -235,6 +237,29 @@ class SeekerBookingViewModel(
       }
     }
     return availabilitiesByDate
+  }
+
+  fun addAcceptedRequest(request: ServiceRequest, timeSlot: TimeSlot, date: LocalDate) {
+    val meetingDate =
+        Timestamp(Date.from(date.atTime(timeSlot.start).atZone(ZoneId.systemDefault()).toInstant()))
+    val acceptedServiceRequest = AcceptedTimeSlot(request.uid, meetingDate)
+
+    Log.e(TAG, "Accepted provider Time slot: ${currentProvider.value?.schedule?.acceptedTimeSlots}")
+    Log.e(TAG, "Accepted request: $acceptedServiceRequest")
+
+    val newSchedule =
+        Schedule(
+            acceptedTimeSlots =
+                currentProvider.value?.schedule?.acceptedTimeSlots?.plus(acceptedServiceRequest)
+                    ?: emptyList(),
+            regularHours = currentProvider.value?.schedule?.regularHours!!,
+            exceptions = currentProvider.value?.schedule?.exceptions!!)
+
+    val updatedProvider = currentProvider.value?.copy(schedule = newSchedule)
+    providerRepository.updateProvider(
+        updatedProvider!!,
+        onSuccess = { Log.d(TAG, "Successfully added accepted request") },
+        onFailure = { Log.e(TAG, "Failed to add accepted request", it) })
   }
 
   companion object Factory : ViewModelProvider.Factory {

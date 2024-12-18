@@ -13,7 +13,9 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.android.solvit.provider.ui.calendar.components.grid.TimeGrid
+import com.android.solvit.seeker.model.SeekerBookingViewModel
 import com.android.solvit.shared.model.provider.TimeSlot
+import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.ui.theme.Typography
 import java.time.LocalDate
 import java.time.LocalTime
@@ -28,6 +30,8 @@ fun BookingDayView(
     onTimeSlotSelected: (TimeSlot) -> Unit,
     serviceColor: Color = colorScheme.secondary,
     deadlineDate: LocalDate? = null,
+    serviceRequest: ServiceRequest,
+    viewModel: SeekerBookingViewModel,
     modifier: Modifier = Modifier
 ) {
   val today = LocalDate.now()
@@ -97,7 +101,10 @@ fun BookingDayView(
                     date = viewDate,
                     startTime = timeSlot.start,
                     endTime = timeSlot.end,
-                    onBook = { _, _ -> onTimeSlotSelected(timeSlot) },
+                    onBook = { _, _ ->
+                      viewModel.addAcceptedRequest(serviceRequest, timeSlot, viewDate)
+                      onTimeSlotSelected(timeSlot)
+                    },
                     onCancel = { /* Do nothing */},
                     serviceColor = serviceColor,
                     deadlineDate = deadlineDate,

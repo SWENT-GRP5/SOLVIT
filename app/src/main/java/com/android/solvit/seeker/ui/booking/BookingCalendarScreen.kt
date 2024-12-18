@@ -138,6 +138,8 @@ fun BookingCalendarScreen(navigationActions: NavigationActions, viewModel: Seeke
                           navigationActions.navigateTo(Route.BOOKING_DETAILS)
                         },
                         serviceColor = serviceColor,
+                        viewModel = viewModel,
+                        serviceRequest = request,
                         deadlineDate =
                             request.dueDate?.let { timestamp ->
                               Instant.ofEpochMilli(timestamp.seconds * 1000)

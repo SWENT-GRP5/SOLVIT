@@ -232,9 +232,11 @@ fun CreateRequestScreen(
                         }
                   } else {
                     requestViewModel.saveServiceRequest(serviceRequest)
-                    requestViewModel.selectRequest(serviceRequest)
-                    navigationActions.navigateAndSetBackStack(
-                        Route.BOOKING_DETAILS, listOf(Route.REQUESTS_OVERVIEW))
+                    requestViewModel.getServiceRequestById(serviceRequest.uid) { serviceRequest ->
+                      requestViewModel.selectRequest(serviceRequest)
+                      navigationActions.navigateAndSetBackStack(
+                          Route.BOOKING_DETAILS, listOf(Route.REQUESTS_OVERVIEW))
+                    }
                   }
                   requestViewModel.unSelectProvider()
                   notificationViewModel.sendNotifications(

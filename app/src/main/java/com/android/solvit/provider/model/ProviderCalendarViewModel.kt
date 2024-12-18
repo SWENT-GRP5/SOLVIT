@@ -595,32 +595,14 @@ open class ProviderCalendarViewModel(
     }
   }
 
-  /**
-   * Add an accepted request to the schedule of a provider
-   *
-   * @param request provider has to complete
-   */
-  fun addAcceptedRequest(request: ServiceRequest) {
-    providerRepository.addAcceptedRequest(request)
-  }
-
-  /**
-   * Remove a request that was completed or canceled
-   *
-   * @param request provider completed or canceled
-   */
-  fun removeAcceptedRequest(request: ServiceRequest) {
-    providerRepository.removeAcceptedRequest(request)
-  }
-
   /** Add listener for automatic cleanup of requests */
   fun startServiceRequestListener() {
     serviceRequestViewModel.addListenerOnServiceRequests { requests ->
       requests.forEach { request ->
         when (request.status) {
           ServiceRequestStatus.CANCELED,
-          ServiceRequestStatus.COMPLETED -> removeAcceptedRequest(request)
-          ServiceRequestStatus.ACCEPTED -> addAcceptedRequest(request)
+          ServiceRequestStatus.COMPLETED,
+          ServiceRequestStatus.ACCEPTED -> {}
           else -> {
             /* ignore */
           }
