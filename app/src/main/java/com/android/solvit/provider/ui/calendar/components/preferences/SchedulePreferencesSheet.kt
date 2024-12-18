@@ -12,6 +12,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.DateRange
@@ -105,9 +107,10 @@ fun SchedulePreferencesSheet(viewModel: ProviderCalendarViewModel, onDismiss: ()
 private fun RegularHoursTab(viewModel: ProviderCalendarViewModel, onError: (String?) -> Unit) {
   val provider by viewModel.currentProvider.collectAsStateWithLifecycle()
   var hasError by remember { mutableStateOf(false) }
+  val scrollState = rememberScrollState()
 
   Column(
-      modifier = Modifier.fillMaxWidth().testTag("regularHoursTab"),
+      modifier = Modifier.fillMaxWidth().verticalScroll(scrollState).testTag("regularHoursTab"),
       verticalArrangement = Arrangement.spacedBy(16.dp)) {
         if (provider.uid.isEmpty()) {
           Text(
@@ -145,6 +148,7 @@ private fun RegularHoursTab(viewModel: ProviderCalendarViewModel, onError: (Stri
                         if (success) {
                           hasError = false
                           onError(null)
+                          isExpanded = false
                         } else {
                           hasError = true
                           onError("Failed to set hours")
@@ -165,6 +169,9 @@ private fun RegularHoursTab(viewModel: ProviderCalendarViewModel, onError: (Stri
                     hasError = hasError)
               }
         }
+
+        // Add bottom padding to ensure content is not cut off
+        Spacer(modifier = Modifier.height(40.dp))
       }
 }
 
