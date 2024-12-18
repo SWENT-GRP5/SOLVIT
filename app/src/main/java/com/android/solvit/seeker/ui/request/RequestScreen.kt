@@ -96,7 +96,8 @@ fun RequestScreen(
         painter = painterResource(id = R.drawable.bg_request),
         contentDescription = null,
         contentScale = ContentScale.Crop,
-        modifier = Modifier.fillMaxSize())
+        modifier = Modifier.fillMaxSize().testTag("requestBackground"))
+
     Scaffold(
         modifier = Modifier.padding(16.dp).testTag("requestScreen"),
         containerColor = Color.Transparent,

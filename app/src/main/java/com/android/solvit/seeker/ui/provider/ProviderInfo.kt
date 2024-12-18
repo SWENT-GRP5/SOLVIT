@@ -80,6 +80,7 @@ import com.android.solvit.shared.model.review.ReviewViewModel
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
+import com.android.solvit.shared.ui.theme.OnPrimary
 import com.android.solvit.shared.ui.theme.SelectedPackage
 import com.android.solvit.shared.ui.theme.Typography
 import com.android.solvit.shared.ui.utils.TopAppBarInbox
@@ -382,16 +383,36 @@ fun ProviderHeader(provider: Provider) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween) {
               Row(verticalAlignment = Alignment.CenterVertically) {
-                AsyncImage(
-                    model =
-                        if (provider.imageUrl != "") provider.imageUrl else R.drawable.default_pdp,
-                    contentDescription = "Profile Picture",
-                    contentScale = ContentScale.Crop,
-                    modifier =
-                        Modifier.size(128.dp)
-                            .border(2.dp, Color.Transparent, RoundedCornerShape(16.dp))
-                            .clip(RoundedCornerShape(16.dp))
-                            .testTag("providerImage"))
+                Box {
+                  AsyncImage(
+                      model =
+                          if (provider.imageUrl != "") provider.imageUrl
+                          else R.drawable.default_pdp,
+                      contentDescription = "Profile Picture",
+                      contentScale = ContentScale.Crop,
+                      modifier =
+                          Modifier.size(128.dp)
+                              .border(2.dp, Color.Transparent, RoundedCornerShape(16.dp))
+                              .clip(RoundedCornerShape(16.dp))
+                              .testTag("providerImage"))
+                  Box(
+                      modifier =
+                          Modifier.padding(4.dp)
+                              .size(30.dp)
+                              .clip(RoundedCornerShape(8.dp))
+                              .background(OnPrimary)
+                              .align(Alignment.TopStart),
+                      contentAlignment = Alignment.Center) {
+                        Icon(
+                            painter = painterResource(id = Services.getIcon(provider.service)),
+                            contentDescription = null,
+                            tint = Color.Unspecified,
+                            modifier =
+                                Modifier.size(25.dp)
+                                    .testTag(
+                                        Services.getIcon(provider.service).toString() + "Icon"))
+                      }
+                }
                 Spacer(modifier = Modifier.width(16.dp))
                 Column {
                   Text(

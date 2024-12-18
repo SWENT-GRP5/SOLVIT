@@ -132,6 +132,7 @@ class ProviderInfoTest {
     // Assert
     composeTestRule.onNodeWithTag("providerHeader").assertIsDisplayed()
     composeTestRule.onNodeWithTag("providerImage").assertIsDisplayed()
+    composeTestRule.onNodeWithTag(provider.service.toString() + "Icon").assertIsDisplayed()
     composeTestRule.onNodeWithTag("providerName").assertTextEquals("Hassan")
     composeTestRule.onNodeWithTag("providerService").assertIsDisplayed()
   }

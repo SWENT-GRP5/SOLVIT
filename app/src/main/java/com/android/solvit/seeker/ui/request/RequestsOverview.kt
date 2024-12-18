@@ -174,6 +174,7 @@ fun RequestsOverviewScreen(
 fun TopOrdersSection() {
   TopAppBarInbox(
       title = "Orders",
+      showAppIcon = true,
       testTagGeneral = "topOrdersSection",
   )
 }

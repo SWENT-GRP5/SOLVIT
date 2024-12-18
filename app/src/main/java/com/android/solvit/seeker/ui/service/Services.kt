@@ -451,7 +451,7 @@ fun ProviderItem(provider: Provider, showIcon: Boolean = true, onClick: () -> Un
                     Modifier.padding(8.dp)
                         .size(40.dp)
                         .clip(RoundedCornerShape(8.dp))
-                        .background(OnPrimary) // Choose a color that fits your theme
+                        .background(OnPrimary)
                         .align(Alignment.TopStart),
                 contentAlignment = Alignment.Center) {
                   Icon(
