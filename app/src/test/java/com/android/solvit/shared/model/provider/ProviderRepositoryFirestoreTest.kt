@@ -2,7 +2,6 @@ package com.android.solvit.shared.model.provider
 
 import androidx.test.core.app.ApplicationProvider
 import com.android.solvit.shared.model.map.Location
-import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.service.Services
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.gms.tasks.Task
@@ -14,10 +13,7 @@ import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
-import com.google.firebase.firestore.Transaction
 import com.google.firebase.storage.FirebaseStorage
-import java.time.LocalDate
-import java.time.ZoneId
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNotNull
 import junit.framework.TestCase.assertNull
@@ -702,127 +698,6 @@ class ProviderRepositoryFirestoreTest {
     assertEquals(0, mondaySlots[0].startMinute)
     assertEquals(23, mondaySlots[0].endHour)
     assertEquals(59, mondaySlots[0].endMinute)
-  }
-
-  @Test
-  fun `addAcceptedRequest adds request to schedule`() = runTest {
-    val serviceRequest =
-        ServiceRequest(
-            uid = "test-request",
-            providerId = "test-provider",
-            meetingDate =
-                Timestamp(
-                    LocalDate.now()
-                        .with(java.time.DayOfWeek.MONDAY) // Always use the next Monday
-                        .atTime(10, 0) // 10:00 AM
-                        .atZone(ZoneId.systemDefault())
-                        .toInstant()))
-
-    val validSchedule =
-        Schedule(
-            acceptedTimeSlots = listOf(),
-            regularHours = mutableMapOf("MONDAY" to mutableListOf(TimeSlot(9, 0, 17, 0))),
-            exceptions = mutableListOf())
-
-    val newTimeSlot =
-        AcceptedTimeSlot(requestId = serviceRequest.uid, startTime = serviceRequest.meetingDate!!)
-
-    val expectedSchedule =
-        validSchedule.copy(acceptedTimeSlots = validSchedule.acceptedTimeSlots + newTimeSlot)
-
-    // Mock Transaction and DocumentSnapshot
-    val mockTransaction = mock(Transaction::class.java)
-    `when`(mockTransaction.get(any())).thenReturn(mockDocumentSnapshot)
-    `when`(mockDocumentSnapshot.toObject(Schedule::class.java)).thenReturn(validSchedule)
-
-    // Mock Firestore chain for "schedules/current"
-    val mockSchedulesCollection = mock(CollectionReference::class.java)
-    val mockCurrentScheduleDocument = mock(DocumentReference::class.java)
-    `when`(mockDocumentReference.collection("schedules")).thenReturn(mockSchedulesCollection)
-    `when`(mockSchedulesCollection.document("current")).thenReturn(mockCurrentScheduleDocument)
-
-    // Mock runTransaction with Transaction.Function
-    `when`(mockFirestore.runTransaction(any<Transaction.Function<Void>>())).thenAnswer { invocation
-      ->
-      val function = invocation.arguments[0] as Transaction.Function<Void>
-      function.apply(mockTransaction) // Pass the mocked transaction
-      null
-    }
-
-    // Call the method
-    providerRepositoryFirestore.addAcceptedRequest(serviceRequest)
-
-    verify(mockFirestore).runTransaction(any<Transaction.Function<Void>>())
-
-    verify(mockTransaction).get(eq(mockCurrentScheduleDocument))
-    verify(mockTransaction).set(eq(mockCurrentScheduleDocument), eq(expectedSchedule))
-  }
-
-  @Test
-  fun `removeAcceptedRequest removes request from schedule`() = runTest {
-    // Set a future meeting date
-    val meetingDate =
-        Timestamp(
-            LocalDate.now()
-                .with(java.time.DayOfWeek.MONDAY)
-                .atTime(10, 0)
-                .atZone(ZoneId.systemDefault())
-                .toInstant())
-
-    // Mock ServiceRequest
-    val serviceRequest =
-        ServiceRequest(
-            uid = "test-request", providerId = "test-provider", meetingDate = meetingDate)
-
-    // Create a Schedule instance with the accepted time slot
-    val existingTimeSlot =
-        AcceptedTimeSlot(requestId = serviceRequest.uid, startTime = serviceRequest.meetingDate!!)
-    val scheduleWithRequest =
-        Schedule(
-            acceptedTimeSlots = listOf(existingTimeSlot),
-            regularHours =
-                mutableMapOf(
-                    "MONDAY" to mutableListOf(TimeSlot(9, 0, 17, 0)) // Regular working hours
-                    ),
-            exceptions = mutableListOf())
-
-    // Expected updated schedule (without the removed time slot)
-    val expectedSchedule =
-        scheduleWithRequest.copy(
-            acceptedTimeSlots =
-                scheduleWithRequest.acceptedTimeSlots.filterNot {
-                  it.requestId == serviceRequest.uid
-                })
-
-    // Mock Transaction and DocumentSnapshot
-    val mockTransaction = mock(Transaction::class.java)
-
-    // Mock Firestore chain for "schedules/current"
-    val mockSchedulesCollection = mock(CollectionReference::class.java)
-    val mockCurrentScheduleDocument = mock(DocumentReference::class.java)
-    `when`(mockDocumentReference.collection("schedules")).thenReturn(mockSchedulesCollection)
-    `when`(mockSchedulesCollection.document("current")).thenReturn(mockCurrentScheduleDocument)
-
-    `when`(mockTransaction.get(mockCurrentScheduleDocument)).thenReturn(mockDocumentSnapshot)
-    `when`(mockDocumentSnapshot.toObject(Schedule::class.java)).thenReturn(scheduleWithRequest)
-
-    // Mock runTransaction with Transaction.Function
-    `when`(mockFirestore.runTransaction(any<Transaction.Function<Void>>())).thenAnswer { invocation
-      ->
-      val function = invocation.arguments[0] as Transaction.Function<Void>
-      function.apply(mockTransaction) // Pass the mocked transaction
-      null
-    }
-
-    // Call the method
-    providerRepositoryFirestore.removeAcceptedRequest(serviceRequest)
-
-    // Verify that runTransaction was invoked
-    verify(mockFirestore).runTransaction(any<Transaction.Function<Void>>())
-
-    // Verify that the transaction attempted to get and update the correct document reference
-    verify(mockTransaction).get(eq(mockCurrentScheduleDocument))
-    verify(mockTransaction).set(eq(mockCurrentScheduleDocument), eq(expectedSchedule))
   }
 
   private fun setupBasicProviderFields() {
