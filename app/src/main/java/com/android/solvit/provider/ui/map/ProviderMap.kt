@@ -24,11 +24,32 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
 
 /**
- * Composable function that displays the map screen for the provider.
+ * A composable function that displays the provider map screen, showing service request locations
+ * and the provider's current location on a map. It also includes navigation actions and permission
+ * requests for location access.
  *
- * @param serviceRequestViewModel ViewModel to fetch the service requests
- * @param navigationActions Actions to navigate to different screens
- * @param requestLocationPermission Flag to request location permission
+ * @param serviceRequestViewModel ViewModel responsible for managing and fetching service requests.
+ * @param navigationActions Provides navigation actions for switching between app screens.
+ * @param requestLocationPermission Flag indicating whether location permission should be requested.
+ *   Defaults to `true`.
+ *
+ * **Features:**
+ * - **Location Tracking:**
+ *     - Requests location permission and retrieves the provider's current location using
+ *       `FusedLocationProviderClient`.
+ *     - Supports a mocked location if permission is bypassed (for testing).
+ * - **Service Request Markers:**
+ *     - Displays service requests as interactive map markers.
+ *     - Loads marker icons and images asynchronously.
+ *     - Handles marker clicks, navigating to service request details when clicked.
+ * - **Map Display:**
+ *     - Displays the provider's current location and service request locations on the map.
+ *     - Shows a loading indicator while markers are being processed.
+ * - **Bottom Navigation Bar:** Allows switching between app sections.
+ *
+ * **State Management:**
+ * - Collects service request data reactively using `collectAsStateWithLifecycle()`.
+ * - Manages loading indicators and location permissions dynamically.
  */
 @Composable
 fun ProviderMapScreen(

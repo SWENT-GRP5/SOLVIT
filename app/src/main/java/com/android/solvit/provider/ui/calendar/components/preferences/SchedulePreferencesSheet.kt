@@ -67,6 +67,22 @@ import java.time.format.TextStyle
 import java.util.Locale
 import kotlinx.coroutines.delay
 
+/**
+ * A composable function that displays a modal bottom sheet for managing provider schedule
+ * preferences, including regular working hours and time exceptions such as off-time and extra
+ * working hours.
+ *
+ * @param viewModel ViewModel responsible for managing provider calendar data.
+ * @param onDismiss Callback invoked when the sheet is dismissed.
+ *
+ * This function contains two primary tabs:
+ * - **Regular Hours Tab:** Allows setting default working hours for each day of the week.
+ * - **Exceptions Tab:** Allows managing specific date-based time exceptions, including off-time and
+ *   extra hours.
+ *
+ * Both tabs provide intuitive interfaces for selecting times, viewing current settings, and adding
+ * or removing time entries with appropriate error handling and feedback.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SchedulePreferencesSheet(viewModel: ProviderCalendarViewModel, onDismiss: () -> Unit) {
@@ -127,6 +143,16 @@ fun SchedulePreferencesSheet(viewModel: ProviderCalendarViewModel, onDismiss: ()
       }
 }
 
+/**
+ * A composable function representing the "Regular Hours" tab for setting default working hours for
+ * each day of the week.
+ *
+ * @param viewModel ViewModel responsible for managing calendar data.
+ * @param onError Callback invoked when an error occurs while updating regular hours.
+ *
+ * The function displays each day of the week with current working hours. Users can add, edit, and
+ * clear specific hours. Provides visual feedback on success or failure during data updates.
+ */
 @SuppressLint("MutableCollectionMutableState")
 @Composable
 private fun RegularHoursTab(viewModel: ProviderCalendarViewModel, onError: (String?) -> Unit) {
@@ -195,6 +221,16 @@ private fun RegularHoursTab(viewModel: ProviderCalendarViewModel, onError: (Stri
       }
 }
 
+/**
+ * A composable function representing the "Exceptions" tab for managing date-based schedule
+ * exceptions. Users can add off-time or extra working hours for specific dates.
+ *
+ * @param viewModel ViewModel responsible for managing provider schedule data.
+ * @param onError Callback invoked when an error occurs while managing time exceptions.
+ *
+ * The function provides interfaces for selecting dates, time ranges, and specifying the exception
+ * type (off-time or extra time). It also lists existing exceptions with delete functionality.
+ */
 @Composable
 private fun ExceptionsTab(viewModel: ProviderCalendarViewModel, onError: (String?) -> Unit) {
   var selectedDate by remember { mutableStateOf<LocalDateTime?>(null) }
@@ -492,6 +528,20 @@ private fun ExceptionsTab(viewModel: ProviderCalendarViewModel, onError: (String
       }
 }
 
+/**
+ * A composable function that displays a day’s schedule card for managing working hours on a
+ * specific day of the week.
+ *
+ * @param day The day of the week to be displayed.
+ * @param currentSchedule The current working hours set for the day.
+ * @param isExpanded Whether the card is expanded to allow editing the schedule.
+ * @param onExpandClick Callback invoked when the card is clicked to expand or collapse.
+ * @param onSaveHours Callback invoked when working hours are saved.
+ * @param onClearHours Callback invoked when working hours are cleared.
+ * @param hasError Indicates whether an error occurred while updating the schedule.
+ *
+ * This function supports viewing, editing, and clearing working hours with clear UI indicators.
+ */
 @Composable
 fun DayScheduleCard(
     day: DayOfWeek,
@@ -600,7 +650,20 @@ fun DayScheduleCard(
         }
   }
 }
-
+/**
+ * A composable function that displays a time selection UI with start and end time pickers for a
+ * specific day of the week.
+ *
+ * @param startTime The currently selected start time.
+ * @param endTime The currently selected end time.
+ * @param onStartTimeSelected Callback invoked when the start time is updated.
+ * @param onEndTimeSelected Callback invoked when the end time is updated.
+ * @param modifier Modifier for customizing the layout.
+ * @param day The day of the week for which time is being selected.
+ *
+ * The function ensures that time selection stays logically valid, preventing the end time from
+ * being before the start time.
+ */
 @Composable
 fun TimeSelectionSection(
     startTime: LocalTime,
@@ -656,6 +719,18 @@ fun TimeSelectionSection(
   }
 }
 
+/**
+ * A composable function that displays a summary card for a specific time exception entry with
+ * options to delete the entry.
+ *
+ * @param date The date of the exception entry.
+ * @param type The type of the exception (Off-Time or Extra-Time).
+ * @param timeSlots A list of time slots associated with the exception entry.
+ * @param onDelete Callback invoked when the delete action is triggered.
+ *
+ * The card shows detailed information about the exception, including its date, time range, and
+ * type. It provides a delete button for removing the entry.
+ */
 @Composable
 private fun ExceptionCard(
     date: LocalDateTime,

@@ -19,12 +19,24 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 
+/**
+ * ViewModel responsible for managing AI-powered problem-solving using a generative AI model. It
+ * handles building prompts, managing chat conversations, and generating responses that help users
+ * solve problems or guide them to create service requests when needed.
+ */
 class AiSolverViewModel : ViewModel() {
 
+  /**
+   * **State Variables:**
+   * - **Message Context:** Tracks the ongoing conversation with the AI assistant.
+   */
   private val _messageContext = MutableStateFlow<List<ChatMessage>>(emptyList())
   val messageContext: StateFlow<List<ChatMessage>> = _messageContext
 
-  // Schema for the AiSolverResponse
+  /**
+   * **Schema Definition:** Defines the expected structure of AI responses, including the response
+   * text and whether a service request should be created.
+   */
   private val schema =
       Schema(
           name = "AiSolverResponse",
@@ -45,6 +57,11 @@ class AiSolverViewModel : ViewModel() {
                           description =
                               "A flag indicating whether the user should create a request or not")))
 
+  /**
+   * **Model Configuration:** Sets up the generative AI model with necessary parameters such as
+   * temperature, token limit, response schema, and safety settings to ensure appropriate content
+   * generation.
+   */
   private val model =
       GenerativeModel(
           modelName = "gemini-1.5-flash",
@@ -65,6 +82,7 @@ class AiSolverViewModel : ViewModel() {
                   SafetySetting(HarmCategory.SEXUALLY_EXPLICIT, BlockThreshold.MEDIUM_AND_ABOVE),
                   SafetySetting(HarmCategory.DANGEROUS_CONTENT, BlockThreshold.MEDIUM_AND_ABOVE)))
 
+  /** **Factory for ViewModel Creation:** Creates and provides instances of `AiSolverViewModel`. */
   companion object {
     val Factory: ViewModelProvider.Factory =
         object : ViewModelProvider.Factory {
@@ -75,6 +93,7 @@ class AiSolverViewModel : ViewModel() {
         }
   }
 
+  /** **Data Class:** Represents user input containing text and an optional image. */
   data class UserInput(val description: String, val bitmap: Bitmap?)
 
   /**

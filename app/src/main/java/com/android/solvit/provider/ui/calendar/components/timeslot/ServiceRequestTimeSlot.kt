@@ -34,6 +34,28 @@ import java.time.Duration
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
+/**
+ * A composable function that displays a scheduled service request as a time slot in a calendar
+ * view. It adjusts its height and position based on the service request's start time and duration.
+ *
+ * @param request The `ServiceRequest` object containing the details of the scheduled service.
+ * @param hourHeight The height of an hour row in the calendar view, used for scaling.
+ * @param modifier Modifier for customizing the appearance and layout of the time slot.
+ * @param onClick Callback invoked when the service request time slot is clicked.
+ * @param calendarView The type of calendar view (Day or Week) determining the slot's display style.
+ *
+ * **Display Details:**
+ * - **Positioning:** The time slot's vertical position and height are calculated based on its start
+ *   time and duration.
+ * - **Content:**
+ *     - **Title:** The name of the service request.
+ *     - **Time Range:** Start and end times of the request.
+ *     - **Description:** Optional description, displayed only in the Day view.
+ *     - **Status Indicator:** Visual indicator representing the service request's status.
+ *
+ * Background and border colors are dynamically assigned based on the service request's status using
+ * `ServiceRequestStatus.getStatusColor()`. The component supports clickable interactions.
+ */
 @Composable
 fun ServiceRequestTimeSlot(
     request: ServiceRequest,

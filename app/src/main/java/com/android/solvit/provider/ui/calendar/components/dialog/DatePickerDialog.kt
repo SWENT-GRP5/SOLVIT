@@ -15,6 +15,16 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 
+/**
+ * A composable function that displays a date picker dialog with customizable actions for confirming
+ * or dismissing the selection. It leverages Material Design components for modern UI.
+ *
+ * @param onDismissRequest Callback triggered when the dialog is dismissed without selection.
+ * @param onDateSelected Callback invoked when a date is selected and confirmed.
+ * @param selectedDate The initially selected date displayed in the date picker.
+ * @param modifier Modifier for customizing the appearance and layout of the dialog.
+ * @OptIn(ExperimentalMaterial3Api::class) Indicates usage of experimental Material 3 API features.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DatePickerDialog(

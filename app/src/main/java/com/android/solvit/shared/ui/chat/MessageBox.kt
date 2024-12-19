@@ -56,6 +56,15 @@ import com.android.solvit.shared.ui.utils.formatTimestamp
 import com.android.solvit.shared.ui.utils.getReceiverImageUrl
 import com.android.solvit.shared.ui.utils.getReceiverName
 
+/**
+ * Composable function displaying the message inbox screen.
+ *
+ * @param chatViewModel ViewModel managing chat interactions.
+ * @param navigationActions Actions for navigation between screens.
+ * @param authViewModel ViewModel managing authentication data.
+ * @param listProviderViewModel ViewModel managing provider data.
+ * @param seekerProfileViewModel ViewModel managing seeker profile data.
+ */
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun MessageBox(
@@ -126,6 +135,18 @@ fun MessageBox(
   }
 }
 
+/**
+ * Composable function displaying a chat list item with the latest message.
+ *
+ * @param message Latest chat message exchanged.
+ * @param currentUserId Current user's unique identifier.
+ * @param receiverId Receiver's unique identifier.
+ * @param role Current user's role ("seeker" or "provider").
+ * @param listProviderViewModel ViewModel managing provider data.
+ * @param seekerProfileViewModel ViewModel managing seeker profile data.
+ * @param navigationActions Actions for navigation between screens.
+ * @param chatViewModel ViewModel managing chat interactions.
+ */
 @Composable
 fun ChatListItem(
     message: ChatMessage,
@@ -203,6 +224,11 @@ fun ChatListItem(
       }
 }
 
+/**
+ * Composable function displaying a placeholder screen when no messages are present.
+ *
+ * @param modifier Modifier applied to the entire screen.
+ */
 @Composable
 fun NoMessagesSent(modifier: Modifier) {
   // Screen for user that has never sent messages

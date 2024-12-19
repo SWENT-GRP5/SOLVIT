@@ -10,9 +10,21 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 
+/**
+ * Class responsible for analyzing images using the Gemini AI model.
+ *
+ * @property generativeModel The generative AI model used for content generation.
+ */
 class GeminiImageAnalyzer(private val generativeModel: GenerativeModel = defaultGenerativeModel) {
   companion object {
-    // Define the response schema using Schema.obj
+    /**
+     * Defines the JSON schema expected in the image analysis response.
+     *
+     * Response Fields:
+     * - title: The generated title for the issue.
+     * - type: The generated category of the service request.
+     * - description: A detailed explanation of the identified problem.
+     */
     private val jsonSchema =
         Schema.obj(
             name = "ImageAnalysisResponse",
@@ -23,7 +35,15 @@ class GeminiImageAnalyzer(private val generativeModel: GenerativeModel = default
                 name = "description",
                 description = "A detailed description of the analyzed images"))
 
-    // Initialize the generative model with a JSON response schema
+    /**
+     * Default generative model for performing AI-based image analysis.
+     *
+     * Configurations:
+     * - Model name: gemini-1.5-flash
+     * - API key: Uses Google AI API Key from build configuration.
+     * - Response MIME type: application/json
+     * - Response schema: Predefined using jsonSchema
+     */
     val defaultGenerativeModel =
         GenerativeModel(
             modelName = "gemini-1.5-flash",
@@ -35,7 +55,18 @@ class GeminiImageAnalyzer(private val generativeModel: GenerativeModel = default
                 })
   }
 
-  // Function to analyze images using the Gemini model
+  /**
+   * Analyzes a list of images using the Gemini AI model.
+   *
+   * The AI model:
+   * - Classifies each image into a relevant category.
+   * - Generates a title reflecting the nature of the problem.
+   * - Creates a meaningful description as if the service seeker is describing the issue.
+   *
+   * @param images The list of bitmaps representing the uploaded images.
+   * @return A triple containing the generated title, type (category), and description.
+   * @throws Exception If any error occurs during the image analysis process.
+   */
   suspend fun analyzeImages(images: List<Bitmap>): Triple<String, String, String> {
     return withContext(Dispatchers.IO) {
       try {

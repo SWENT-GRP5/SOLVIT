@@ -15,6 +15,15 @@ import java.time.DayOfWeek
 import java.time.format.TextStyle
 import java.util.Locale
 
+/**
+ * A composable function that displays a header showing the days of the week from Monday to Sunday.
+ * It arranges the days horizontally, with equal spacing and centered text alignment.
+ *
+ * @param modifier Modifier for customizing the appearance and layout of the header row.
+ *
+ * Each day is displayed using its localized narrow display name (e.g., "M", "T", "W"), ensuring
+ * language support based on the user's device settings.
+ */
 @Composable
 fun CalendarDaysHeader(modifier: Modifier = Modifier) {
   Row(

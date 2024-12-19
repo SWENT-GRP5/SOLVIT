@@ -50,6 +50,33 @@ import com.android.solvit.shared.ui.utils.TopAppBarInbox
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
+/**
+ * A composable function that displays the provider calendar screen, allowing providers to manage
+ * their schedule, view service requests, and navigate through calendar views (Day, Week, Month).
+ * The screen includes calendar navigation, date selection, and service request details, integrating
+ * with a ViewModel for data management.
+ *
+ * @param navigationActions Provides navigation actions for moving between screens.
+ * @param viewModel The `ProviderCalendarViewModel` responsible for managing the provider's calendar
+ *   data.
+ *
+ * **Features:**
+ * - **Top App Bar:** Displays the screen title and a settings button for opening preferences.
+ * - **Bottom Navigation Bar:** Allows navigation to different sections of the app.
+ * - **Calendar View Toggle:** Switches between Day, Week, and Month views.
+ * - **Calendar Container:**
+ *     - **Day View:** Displays a detailed daily schedule.
+ *     - **Week View:** Shows an overview of the current week with service requests.
+ *     - **Month View:** Displays the entire month with service request indicators.
+ * - **Bottom Sheet:** Shows service requests for a selected date (Week/Month view).
+ * - **Date Picker Dialog:** Allows selecting a specific date using a calendar picker.
+ * - **Preferences Sheet:** Allows configuring scheduling preferences.
+ *
+ * **State Management:**
+ * - Collects state using `collectAsStateWithLifecycle()` for reactive updates.
+ * - Manages UI visibility states such as loading indicators, bottom sheet display, and preferences
+ *   dialogs.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProviderCalendarScreen(

@@ -8,9 +8,23 @@ import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 
+/**
+ * Implementation of the `AuthRep` interface that manages user authentication, registration, and
+ * profile updates using Firebase Authentication and Firestore. This repository handles operations
+ * like login, registration, user data retrieval, and updates.
+ *
+ * @param auth Firebase Authentication instance for managing authentication tasks.
+ * @param db Firestore database instance for user data storage and retrieval.
+ */
 class AuthRepository(private val auth: FirebaseAuth, private val db: FirebaseFirestore) : AuthRep {
   private val collectionPath = "users"
 
+  /**
+   * Initializes the repository by checking if a user is already authenticated. If authenticated,
+   * retrieves the user's data from Firestore.
+   *
+   * @param onSuccess Callback triggered with the authenticated user or `null` if not found.
+   */
   override fun init(onSuccess: (user: User?) -> Unit) {
     if (auth.currentUser != null) {
       val userId = auth.currentUser?.uid ?: return onSuccess(null)
@@ -27,10 +41,23 @@ class AuthRepository(private val auth: FirebaseAuth, private val db: FirebaseFir
     }
   }
 
+  /**
+   * Retrieves the currently authenticated user's ID.
+   *
+   * @return The user's unique ID as a `String`, or an empty string if not authenticated.
+   */
   override fun getUserId(): String {
     return auth.currentUser?.uid ?: ""
   }
 
+  /**
+   * Logs in the user using email and password credentials.
+   *
+   * @param email The email address of the user.
+   * @param password The password of the user.
+   * @param onSuccess Callback triggered upon successful login with the authenticated user.
+   * @param onFailure Callback triggered with an exception if login fails.
+   */
   override fun loginWithEmailAndPassword(
       email: String,
       password: String,
@@ -52,6 +79,13 @@ class AuthRepository(private val auth: FirebaseAuth, private val db: FirebaseFir
     }
   }
 
+  /**
+   * Logs in the user using a Google account.
+   *
+   * @param account The user's `GoogleSignInAccount`.
+   * @param onSuccess Callback triggered upon successful login with the authenticated user.
+   * @param onFailure Callback triggered with an exception if login fails.
+   */
   override fun signInWithGoogle(
       account: GoogleSignInAccount,
       onSuccess: (user: User) -> Unit,
@@ -69,6 +103,15 @@ class AuthRepository(private val auth: FirebaseAuth, private val db: FirebaseFir
     }
   }
 
+  /**
+   * Registers a new user with email and password credentials.
+   *
+   * @param role The role assigned to the user (e.g., provider, client).
+   * @param email The user's email address.
+   * @param password The user's password.
+   * @param onSuccess Callback triggered upon successful registration with the new user details.
+   * @param onFailure Callback triggered with an exception if registration fails.
+   */
   override fun registerWithEmailAndPassword(
       role: String,
       email: String,
@@ -97,6 +140,14 @@ class AuthRepository(private val auth: FirebaseAuth, private val db: FirebaseFir
     }
   }
 
+  /**
+   * Registers a new user using a Google account.
+   *
+   * @param account The `GoogleSignInAccount` representing the user.
+   * @param role The role assigned to the user.
+   * @param onSuccess Callback triggered upon successful registration with the new user details.
+   * @param onFailure Callback triggered with an exception if registration fails.
+   */
   override fun registerWithGoogle(
       account: GoogleSignInAccount,
       role: String,
@@ -121,11 +172,24 @@ class AuthRepository(private val auth: FirebaseAuth, private val db: FirebaseFir
     }
   }
 
+  /**
+   * Logs out the currently authenticated user.
+   *
+   * @param onSuccess Callback triggered upon successful logout.
+   */
   override fun logout(onSuccess: () -> Unit) {
     auth.signOut()
     onSuccess()
   }
 
+  /**
+   * Updates the user's stored locations in the Firestore database.
+   *
+   * @param userId The unique identifier of the user.
+   * @param locations A list of user locations to be updated.
+   * @param onSuccess Callback triggered upon successful update.
+   * @param onFailure Callback triggered with an exception if the update fails.
+   */
   override fun updateUserLocations(
       userId: String,
       locations: List<Location>,
@@ -146,6 +210,14 @@ class AuthRepository(private val auth: FirebaseAuth, private val db: FirebaseFir
         }
   }
 
+  /**
+   * Completes the user's registration process by updating the `registrationCompleted` field in
+   * Firestore.
+   *
+   * @param userId The unique identifier of the user.
+   * @param onSuccess Callback triggered upon successful completion.
+   * @param onFailure Callback triggered with an exception if the update fails.
+   */
   override fun completeRegistration(
       userId: String,
       onSuccess: () -> Unit,
@@ -189,6 +261,14 @@ class AuthRepository(private val auth: FirebaseAuth, private val db: FirebaseFir
         }
   }
 
+  /**
+   * Sets the user's display name in Firestore.
+   *
+   * @param userName The new display name for the user.
+   * @param userId The unique identifier of the user.
+   * @param onSuccess Callback triggered upon successful update.
+   * @param onFailure Callback triggered with an exception if the update fails.
+   */
   override fun setUserName(
       userName: String,
       userId: String,
@@ -205,6 +285,13 @@ class AuthRepository(private val auth: FirebaseAuth, private val db: FirebaseFir
         }
   }
 
+  /**
+   * Creates a new user document in Firestore after registration.
+   *
+   * @param user The `User` object containing the user's data.
+   * @param onSuccess Callback triggered upon successful creation.
+   * @param onFailure Callback triggered with an exception if creation fails.
+   */
   private fun createUserDocument(
       user: User,
       onSuccess: () -> Unit,
@@ -220,6 +307,12 @@ class AuthRepository(private val auth: FirebaseAuth, private val db: FirebaseFir
         }
   }
 
+  /**
+   * Converts a Firestore document to a `User` object.
+   *
+   * @param doc The `DocumentSnapshot` containing the user's data.
+   * @return The converted `User` object or `null` if conversion fails.
+   */
   private fun docToUser(doc: DocumentSnapshot): User? {
     val uid = doc.getString("uid") ?: return null
     val role = doc.getString("role") ?: return null
