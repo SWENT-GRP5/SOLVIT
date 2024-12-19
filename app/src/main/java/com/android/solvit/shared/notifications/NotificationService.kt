@@ -11,6 +11,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.android.solvit.BuildConfig
 import com.android.solvit.MainActivity
+import com.android.solvit.R
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.FirebaseMessagingService
@@ -88,7 +89,7 @@ open class NotificationService : FirebaseMessagingService() {
     try {
       val builder =
           NotificationCompat.Builder(applicationContext, CHANNEL_ID)
-              .setSmallIcon(android.R.drawable.ic_dialog_info)
+              .setSmallIcon(R.drawable.logosolvit_firstpage)
               .setContentTitle(title)
               .setContentText(message)
               .setPriority(NotificationCompat.PRIORITY_HIGH)
