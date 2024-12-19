@@ -10,6 +10,7 @@ import androidx.activity.ComponentActivity
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,6 +29,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -239,7 +241,7 @@ fun FilterBar(
       horizontalArrangement = Arrangement.SpaceBetween,
       verticalAlignment = Alignment.CenterVertically) {
         Row(
-            modifier = Modifier.fillMaxWidth().weight(1f),
+            modifier = Modifier.fillMaxWidth().weight(1f).horizontalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.SpaceEvenly) {
               filters.forEach { filter ->
                 Card(
@@ -573,59 +575,6 @@ fun FilterSubText(text: String) {
 }
 
 /**
- * Helper function for filtering providers based on string fields, such as languages or ratings.
- *
- * @param selectedFields Currently selected filter fields.
- * @param iconsPressed List of boolean values indicating which icons are pressed.
- * @param iconsColor List of colors for the icons.
- * @param updateStateField Callback to update the selectedFields state.
- * @param updateStateIconsPressed Callback to update the iconsPressed state.
- * @param updateStateIconsColor Callback to update the iconsColor state.
- * @param idx Index of the current element.
- * @param elem The current element being filtered.
- * @param listProviderViewModel ViewModel for managing provider filters.
- * @param filterAction Action to filter providers based on the current field.
- * @param defaultFilterAction Action to apply a default filter when no specific filters are
- *   selected.
- * @param filterField The name of the filter field (e.g., "Language" or "Rating").
- */
-fun filterStringFields(
-    selectedFields: List<String>,
-    iconsPressed: List<Boolean>,
-    idx: Int,
-    listProviderViewModel: ListProviderViewModel,
-    filterAction: (Provider) -> Boolean,
-    defaultFilterAction: (Provider) -> Boolean,
-    filterField: String
-) {
-
-  // val newIconsPressed = iconsPressed.toMutableList().apply { set(idx, !iconsPressed[idx]) }
-
-  /*val newIconsColor =
-  iconsColor.toMutableList().apply {
-    set(idx, if (newIconsPressed[idx]) OnSurfaceVariant else SurfaceVariant)
-  }*/
-
-  // val newSelectedFields =
-  // selectedFields.toMutableList().apply { if (newIconsPressed[idx]) add(elem) else remove(elem) }
-
-  // updateStateField(newSelectedFields)
-  // updateStateIconsPressed(newIconsPressed)
-  // updateStateIconsColor(newIconsColor)
-  Log.e("filterStringFields", "${iconsPressed[idx]}")
-  if (iconsPressed[idx]) {
-    listProviderViewModel.filterProviders({ provider -> filterAction(provider) }, filterField)
-  } else {
-    if (selectedFields.isNotEmpty()) {
-      listProviderViewModel.filterProviders({ provider -> filterAction(provider) }, filterField)
-    } else {
-      listProviderViewModel.filterProviders(
-          { provider -> defaultFilterAction(provider) }, filterField)
-    }
-  }
-}
-
-/**
  * Displays a list of language filter options, allowing users to filter providers by their supported
  * languages.
  *
@@ -756,10 +705,7 @@ fun ApplyButton(listProviderViewModel: ListProviderViewModel, display: () -> Uni
                       Brush.horizontalGradient(
                           colors = listOf(colorScheme.primary, colorScheme.secondary)),
                   shape = RoundedCornerShape(50))
-              .clickable {
-                // listProviderViewModel.applyFilters()
-                display()
-              },
+              .clickable { display() },
   ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -812,6 +758,7 @@ fun FilterComposable(listProviderViewModel: ListProviderViewModel, display: () -
         ApplyButton(listProviderViewModel, display)
       }
 }
+
 /**
  * Retrieves a human-readable location name from latitude and longitude coordinates.
  *
@@ -1093,6 +1040,7 @@ fun SelectProviderScreen(
   val sheetStateLocation = rememberModalBottomSheetState()
   val servicesListItem =
       SERVICES_LIST.find { it.service == selectedService } ?: SERVICES_LIST.last()
+  Log.d("SelectProvider", "$selectedService")
   Scaffold(
       modifier = Modifier.fillMaxSize(),
       topBar = {

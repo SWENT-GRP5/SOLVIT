@@ -2,8 +2,6 @@ package com.android.solvit.seeker.ui.request
 
 import android.content.Context
 import android.net.Uri
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
@@ -114,11 +112,11 @@ class CreateRequestScreenTest {
     }
   }
 
-  fun mockUri(): Uri {
+  private fun mockUri(): Uri {
     return Mockito.mock(Uri::class.java)
   }
 
-  fun mockContext(): Context {
+  private fun mockContext(): Context {
     return Mockito.mock(Context::class.java)
   }
 
@@ -134,7 +132,7 @@ class CreateRequestScreenTest {
           listProviderViewModel)
     }
 
-    composeTestRule.onNodeWithTag("screenTitle").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("requestBackground").assertIsDisplayed()
     composeTestRule.onNodeWithTag("screenTitle").assertIsDisplayed()
     composeTestRule.onNodeWithTag("screenTitle").assertTextEquals("Create a new request")
     composeTestRule.onNodeWithTag("requestSubmit").assertIsDisplayed()
@@ -396,7 +394,7 @@ class CreateRequestScreenTest {
   @Test
   fun multiStepDialog_stepOne() {
     var showDialog = true
-    var currentStep = 1
+    val currentStep = 1
 
     composeTestRule.setContent {
       MultiStepDialog(
@@ -419,9 +417,8 @@ class CreateRequestScreenTest {
   @Test
   fun multiStepDialog_stepTwo() {
     var showDialog = true
-    var currentStep = 1
     // Move to next step and verify
-    currentStep = 2
+    val currentStep = 2
     composeTestRule.setContent {
       MultiStepDialog(
           context = mockContext(),

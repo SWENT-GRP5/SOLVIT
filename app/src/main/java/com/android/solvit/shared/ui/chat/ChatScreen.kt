@@ -1,10 +1,12 @@
 package com.android.solvit.shared.ui.chat
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.pm.ActivityInfo
 import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -101,6 +103,7 @@ import com.android.solvit.shared.model.chat.ChatMessage
 import com.android.solvit.shared.model.chat.ChatViewModel
 import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.request.ServiceRequestViewModel
+import com.android.solvit.shared.model.utils.isInternetAvailable
 import com.android.solvit.shared.model.utils.loadBitmapFromUri
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
@@ -187,25 +190,32 @@ fun ChatScreen(
                   imageBitmap = null
                 }
               }
-            })
+            },
+            context = context)
       }) { paddingValues ->
-        LazyColumn(
-            modifier = Modifier.padding(paddingValues).imePadding().testTag("conversation")) {
-              if (request != null) {
-                // Display the request details
-                item { RequestDetails(request!!, serviceRequestViewModel, navigationActions) }
-              }
-              items(messages) { message ->
-                if (message.senderId == user?.uid) {
-                  // Item for messages authenticated user send
-                  SentMessage(message, true)
-                } else {
-                  // Item for messages authenticated user receive
-                  SentMessage(
-                      message, isSentByUser = false, showProfilePicture = true, receiverPicture)
-                }
+        Column(
+            modifier = Modifier.padding(paddingValues),
+        ) {
+          if (request != null) {
+            // Display the request details
+            RequestDetails(request!!, serviceRequestViewModel, navigationActions)
+          }
+
+          val listState = rememberLazyListState()
+          LaunchedEffect(messages, request) { listState.animateScrollToItem(messages.size) }
+          LazyColumn(state = listState, modifier = Modifier.imePadding().testTag("conversation")) {
+            items(messages) { message ->
+              if (message.senderId == user?.uid) {
+                // Item for messages authenticated user send
+                SentMessage(message, true)
+              } else {
+                // Item for messages authenticated user receive
+                SentMessage(
+                    message, isSentByUser = false, showProfilePicture = true, receiverPicture)
               }
             }
+          }
+        }
       }
 }
 
@@ -260,7 +270,13 @@ fun AiSolverWelcomeScreen(
                 .padding(innerPadding)
                 .testTag("AiGetStartedScreen"),
         contentAlignment = Alignment.TopCenter) {
-          if (isLoading) {
+          if (!isInternetAvailable(context)) {
+            Text(
+                text = "AI solver requires Internet Connection",
+                color = colorScheme.error,
+                style = Typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+                modifier = Modifier.testTag("noInternetConnection").align(Alignment.Center))
+          } else if (isLoading) {
             CircularProgressIndicator(modifier = Modifier.testTag("loadingIndicator"))
           } else {
             val screenHeight = maxHeight
@@ -280,7 +296,7 @@ fun AiSolverWelcomeScreen(
                                     SpanStyle(
                                         color = Black,
                                         fontSize = screenHeight.times(0.04f).value.sp)) {
-                                  append("Meet Your Personal ")
+                                  append("Your Personal ")
                                 }
                             withStyle(
                                 style =
@@ -291,7 +307,7 @@ fun AiSolverWelcomeScreen(
                                                 start = Offset.Zero,
                                                 end = Offset.Infinite),
                                         fontSize = screenHeight.times(0.04f).value.sp)) {
-                                  append("AI\n\nProblem Solver")
+                                  append("\n\nAI Problem Solver")
                                 }
                           },
                       textAlign = TextAlign.Center,
@@ -326,7 +342,7 @@ fun AiSolverWelcomeScreen(
                         } else {
                           AiSolverButton(
                               screenHeight = screenHeight,
-                              title = "Continue",
+                              title = "Resume Chat",
                               onClick = {
                                 navigationActions.navigateTo(Screen.AI_SOLVER_CHAT_SCREEN)
                               })
@@ -480,7 +496,8 @@ fun AiSolverScreen(
                     imageBitmap = null
                   }
                 }
-              })
+              },
+              context = context)
         } else {
           // In case the user should create a request we display a button so that he directly
           // navigate to the create Request Screen
@@ -765,7 +782,8 @@ fun MessageInputBar(
     onImageSelected: (Uri?) -> Unit,
     isSeeker: Boolean,
     isAiSolverScreen: Boolean,
-    onSendClickButton: (String, (String) -> Unit) -> Unit
+    onSendClickButton: (String, (String) -> Unit) -> Unit,
+    context: Context
 ) {
   var message by remember { mutableStateOf("") }
   var imageUri by remember { mutableStateOf<Uri?>(null) }
@@ -788,7 +806,7 @@ fun MessageInputBar(
               .imePadding()
               .testTag("SendMessageBar")) {
         if (!isAiSolverScreen) {
-          AssistantSuggestions(chatAssistantViewModel, isSeeker) {
+          AssistantSuggestions(chatAssistantViewModel, isSeeker, context) {
             chatAssistantViewModel.updateSelectedTones(emptyList())
             chatAssistantViewModel.generateMessage(it, isSeeker) { msg -> message = msg }
           }
@@ -843,15 +861,25 @@ fun MessageInputBar(
                   },
                   colors =
                       OutlinedTextFieldDefaults.colors(
-                          unfocusedBorderColor = colorScheme.surface,
-                          focusedBorderColor = colorScheme.surface,
+                          unfocusedBorderColor = colorScheme.background,
+                          focusedBorderColor = colorScheme.background,
                           focusedTextColor = colorScheme.onSurface),
                   maxLines = 5)
 
               // Optional AI Chat Assistant Button
               if (!isAiSolverScreen) {
                 IconButton(
-                    onClick = { showDialog = true },
+                    onClick = {
+                      if (isInternetAvailable(context)) {
+                        showDialog = true
+                      } else {
+                        Toast.makeText(
+                                context,
+                                "Chat Assistant requires Internet Connection",
+                                Toast.LENGTH_SHORT)
+                            .show()
+                      }
+                    },
                     modifier = Modifier.size(48.dp).testTag("aiButton")) {
                       Icon(
                           painter = painterResource(R.drawable.ai_message),
@@ -874,6 +902,13 @@ fun MessageInputBar(
               IconButton(
                   onClick = {
                     imageUri = null
+                    if (!isInternetAvailable(context)) {
+                      Toast.makeText(
+                              context,
+                              "Your messages will be sent when you are back online",
+                              Toast.LENGTH_SHORT)
+                          .show()
+                    }
                     onSendClickButton(message) { message = it }
                   },
                   modifier = Modifier.size(48.dp).testTag("sendMessageButton")) {
@@ -951,6 +986,7 @@ fun buildMessage(
 fun AssistantSuggestions(
     chatAssistantViewModel: ChatAssistantViewModel,
     isSeeker: Boolean,
+    context: Context,
     onSuggestionSelect: (String) -> Unit
 ) {
   val suggestions by chatAssistantViewModel.suggestions.collectAsStateWithLifecycle()
@@ -967,9 +1003,11 @@ fun AssistantSuggestions(
             contentDescription = "AI suggestions",
             Modifier.padding(horizontal = 8.dp),
             tint = colorScheme.onSurfaceVariant)
-        if (suggestions.isEmpty()) {
+        if (!isInternetAvailable(context)) {
+          Text("No Internet Connection", color = colorScheme.error, style = Typography.bodyLarge)
+        } else if (suggestions.isEmpty()) {
           Text(
-              "No suggestions available",
+              "Load Suggestions",
               color = colorScheme.onSurfaceVariant,
               style = Typography.bodyLarge)
         } else {
@@ -987,8 +1025,14 @@ fun AssistantSuggestions(
         }
         IconButton(
             onClick = {
-              chatAssistantViewModel.generateSuggestions(isSeeker) {
-                Log.e("ChatScreen", "Suggestions generated")
+              if (isInternetAvailable(context)) {
+                chatAssistantViewModel.generateSuggestions(isSeeker) {
+                  Log.e("ChatScreen", "Suggestions generated")
+                }
+              } else {
+                Toast.makeText(
+                        context, "Chat Assistant requires Internet Connection", Toast.LENGTH_SHORT)
+                    .show()
               }
             }) {
               Icon(
@@ -1033,15 +1077,15 @@ fun RequestDetails(
         Text(
             text = serviceRequest.title,
             modifier = Modifier.testTag("requestTitle"),
-            style = Typography.bodyLarge.copy(fontSize = 20.sp, fontWeight = FontWeight.ExtraBold))
+            style = Typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis)
         Text(
             text = serviceRequest.description,
             modifier = Modifier.testTag("requestDescription"),
-            style = Typography.bodyMedium)
-        Text(
-            text = serviceRequest.type.name,
-            modifier = Modifier.testTag("requestType"),
-            style = Typography.bodyMedium.copy(fontWeight = FontWeight.Bold))
+            style = Typography.bodyMedium,
+            maxLines = 4,
+            overflow = TextOverflow.Ellipsis)
       }
     }
   }

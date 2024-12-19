@@ -235,7 +235,7 @@ class ChatRepositoryFirestore(
     chatNode
         .orderByChild("users/${currentUserUid}")
         .equalTo(true)
-        .addListenerForSingleValueEvent(
+        .addValueEventListener(
             object : ValueEventListener {
               override fun onDataChange(p0: DataSnapshot) {
 
@@ -271,7 +271,7 @@ class ChatRepositoryFirestore(
               }
 
               override fun onCancelled(error: DatabaseError) {
-                TODO("Not yet implemented")
+                Log.e("listenForLastMessages", "Error: $error")
               }
             })
   }
@@ -375,7 +375,7 @@ class ChatRepositoryFirestore(
               }
 
               override fun onCancelled(error: DatabaseError) {
-                TODO("Not yet implemented")
+                Log.e("getLastMessageForChatRoom", "Error: $error")
               }
             })
   }

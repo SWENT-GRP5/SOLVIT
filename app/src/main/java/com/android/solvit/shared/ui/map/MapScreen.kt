@@ -14,6 +14,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -159,7 +160,9 @@ fun MapContent(
       properties =
           MapProperties(
               mapStyleOptions =
-                  MapStyleOptions.loadRawResourceStyle(LocalContext.current, R.raw.map_style)),
+                  MapStyleOptions.loadRawResourceStyle(
+                      LocalContext.current,
+                      if (isSystemInDarkTheme()) R.raw.map_style_dark else R.raw.map_style)),
       onMapLoaded = onMapLoaded) {
         markers.forEach { markerData -> MapMarker(markerData) }
 

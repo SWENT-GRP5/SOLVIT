@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -26,6 +27,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -73,10 +75,10 @@ fun EditPreferences(
               verticalArrangement = Arrangement.Top,
               horizontalAlignment = Alignment.CenterHorizontally) {
                 Image(
-                    painter = painterResource(id = R.drawable.edit_pref),
+                    painter = painterResource(id = R.drawable.pref),
                     contentDescription = "Edit Preferences Image",
                     modifier =
-                        Modifier.size(150.dp)
+                        Modifier.size(100.dp)
                             .align(Alignment.CenterHorizontally)
                             .testTag("preferencesIllustration"))
                 // User's existing content...
@@ -105,7 +107,7 @@ fun EditPreferences(
                         ))
                 Spacer(modifier = Modifier.height(8.dp))
 
-                SuggestionsGrid(
+                SuggestionsGrid2(
                     suggestions = selectedItems,
                     selectedItems = selectedItems.toSet(),
                     onSuggestionClick = { suggestion ->
@@ -137,10 +139,17 @@ fun EditPreferences(
           Button(
               onClick = { navigationActions.goBack() },
               modifier =
-                  Modifier.align(Alignment.BottomCenter) // Correct alignment here
-                      .height(60.dp)
-                      .testTag("updatePreferencesButton"),
-              colors = ButtonDefaults.buttonColors(colorScheme.primary)) {
+                  Modifier.align(Alignment.BottomCenter)
+                      .height(55.dp)
+                      .width(250.dp)
+                      .testTag("updatePreferencesButton")
+                      .clip(
+                          RoundedCornerShape(
+                              topStart = 15.dp,
+                              topEnd = 0.dp,
+                              bottomStart = 0.dp,
+                              bottomEnd = 0.dp)),
+              colors = ButtonDefaults.buttonColors(colorScheme.secondary)) {
                 Text(text = "Update Preferences", style = Typography.bodyLarge)
               }
         }
@@ -171,7 +180,7 @@ fun SuggestionsGrid2(
 @Composable
 fun SuggestionButton2(text: String, isSelected: Boolean, onClick: () -> Unit) {
   // Update color based on selection state
-  val backgroundColor = if (isSelected) colorScheme.secondary else colorScheme.background
+  val backgroundColor = if (isSelected) colorScheme.secondary else colorScheme.surfaceVariant
   val contentColor = if (isSelected) colorScheme.onSecondary else colorScheme.onBackground
 
   Surface(

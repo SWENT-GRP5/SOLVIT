@@ -100,7 +100,6 @@ class NotificationsRepositoryTest {
         matchingProvider,
         {
           // On success
-          println("Notification sent successfully")
         },
         { exception ->
           // On failure

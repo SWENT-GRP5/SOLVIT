@@ -68,6 +68,8 @@ import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.navigation.Screen
 import com.android.solvit.shared.ui.theme.SampleAppTheme
+import com.google.firebase.Firebase
+import com.google.firebase.database.database
 
 class MainActivity : ComponentActivity() {
 
@@ -99,6 +101,9 @@ class MainActivity : ComponentActivity() {
 
     // Request notification permission
     askNotificationPermission()
+
+    // Enable offline persistence for database
+    Firebase.database.setPersistenceEnabled(true)
 
     setContent {
       SampleAppTheme {
@@ -133,7 +138,6 @@ fun SolvitApp() {
   val notificationViewModel =
       viewModel<NotificationsViewModel>(factory = NotificationsViewModel.Factory)
   val providerViewModel = viewModel<ProviderViewModel>(factory = ProviderViewModel.Factory)
-
   val packagesAssistantViewModel =
       viewModel<PackagesAssistantViewModel>(factory = PackagesAssistantViewModel.Factory)
   if (!userRegistered.value) {
@@ -244,7 +248,8 @@ fun SeekerUI(
   NavHost(navController = navController, startDestination = Route.SEEKER_OVERVIEW) {
     // Overview
     composable(Route.SEEKER_OVERVIEW) {
-      ServicesScreen(navigationActions, seekerProfileViewModel, listProviderViewModel)
+      ServicesScreen(
+          navigationActions, seekerProfileViewModel, listProviderViewModel, authViewModel)
     }
 
     // Providers
@@ -263,7 +268,8 @@ fun SeekerUI(
           reviewViewModel,
           serviceRequestViewModel,
           authViewModel,
-          packageProposalViewModel)
+          packageProposalViewModel,
+          seekerProfileViewModel)
     }
 
     // Service Requests

@@ -1,9 +1,9 @@
 package com.android.solvit.seeker.ui.provider
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -68,6 +68,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.android.solvit.R
+import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
 import com.android.solvit.shared.model.authentication.AuthViewModel
 import com.android.solvit.shared.model.packages.PackageProposal
@@ -80,7 +81,10 @@ import com.android.solvit.shared.model.review.ReviewViewModel
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
+import com.android.solvit.shared.ui.theme.OnPrimary
+import com.android.solvit.shared.ui.theme.OnPrimaryContainerDark
 import com.android.solvit.shared.ui.theme.SelectedPackage
+import com.android.solvit.shared.ui.theme.SelectedPackageDark
 import com.android.solvit.shared.ui.theme.Typography
 import com.android.solvit.shared.ui.utils.TopAppBarInbox
 
@@ -93,6 +97,7 @@ import com.android.solvit.shared.ui.utils.TopAppBarInbox
  * @param requestViewModel ViewModel for service requests.
  * @param authViewModel ViewModel for user authentication.
  * @param packageProposalViewModel ViewModel for package proposals.
+ * @param seekerProfileViewModel ViewModel for seeker profile data.
  */
 @Composable
 fun ProviderInfoScreen(
@@ -103,7 +108,9 @@ fun ProviderInfoScreen(
         viewModel(factory = ServiceRequestViewModel.Factory),
     authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory),
     packageProposalViewModel: PackageProposalViewModel =
-        viewModel(factory = PackageProposalViewModel.Factory)
+        viewModel(factory = PackageProposalViewModel.Factory),
+    seekerProfileViewModel: SeekerProfileViewModel =
+        viewModel(factory = SeekerProfileViewModel.Factory)
 ) {
   val provider = providerViewModel.selectedProvider.collectAsStateWithLifecycle().value ?: return
   val reviews =
@@ -168,7 +175,7 @@ fun ProviderInfoScreen(
                     requestViewModel,
                     userId,
                     navigationActions,
-                )
+                    seekerProfileViewModel)
           }
         }
       },
@@ -201,7 +208,9 @@ fun PackageCard(
       elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
       colors =
           CardDefaults.cardColors(
-              containerColor = if (!selectedIndex) colorScheme.surface else SelectedPackage,
+              containerColor =
+                  if (!selectedIndex) colorScheme.surface
+                  else if (isSystemInDarkTheme()) SelectedPackageDark else SelectedPackage,
           )) {
         Box(modifier = Modifier.fillMaxSize()) {
           Column(
@@ -218,25 +227,19 @@ fun PackageCard(
                       modifier = Modifier.testTag("price"),
                       text = "CHF${packageProposal.price}",
                       style = Typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-                      color =
-                          if (!selectedIndex) colorScheme.onPrimaryContainer
-                          else colorScheme.onPrimaryContainer)
+                      color = colorScheme.onBackground)
                   Spacer(modifier = Modifier.width(8.dp)) // Increased space between price and unit
                   Text(
                       text = "/hour",
                       style = Typography.bodySmall,
-                      color =
-                          if (!selectedIndex) colorScheme.onPrimaryContainer
-                          else colorScheme.onPrimaryContainer)
+                      color = colorScheme.onBackground)
                 }
                 Spacer(modifier = Modifier.height(12.dp))
                 // Title of the Package
                 Text(
                     text = packageProposal.title,
                     style = Typography.titleMedium,
-                    color =
-                        if (!selectedIndex) colorScheme.onPrimaryContainer
-                        else colorScheme.onPrimaryContainer)
+                    color = colorScheme.onBackground)
                 Spacer(
                     modifier =
                         Modifier.height(12.dp)) // Increased space between title and description
@@ -244,7 +247,7 @@ fun PackageCard(
                 Text(
                     text = packageProposal.description,
                     style = Typography.bodyMedium,
-                    color = if (!selectedIndex) colorScheme.onSurface else colorScheme.onSurface)
+                    color = colorScheme.onSurface)
                 Spacer(
                     modifier =
                         Modifier.height(12.dp)) // Increased space between description and features
@@ -263,8 +266,7 @@ fun PackageCard(
                       Text(
                           text = feature,
                           style = Typography.bodyMedium,
-                          color =
-                              if (!selectedIndex) colorScheme.onSurface else colorScheme.onSurface)
+                          color = colorScheme.onSurface)
                     }
                   }
                 }
@@ -293,6 +295,7 @@ fun PackageCard(
         }
       }
 }
+
 /**
  * Screen displaying the list of packages offered by the provider.
  *
@@ -312,10 +315,14 @@ fun ProviderPackages(
     showDialog: MutableState<Boolean>,
     requestViewModel: ServiceRequestViewModel,
     userId: String,
-    navigationActions: NavigationActions
+    navigationActions: NavigationActions,
 ) {
   var selectedIndex by remember { mutableIntStateOf(-1) }
   var boxHeightPx by remember { mutableIntStateOf(0) }
+  val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+  val itemWidth = 260.dp
+  val startPadding = (screenWidth - itemWidth) / 2
+
   Box(
       modifier =
           Modifier.fillMaxSize() // Fills the entire available space
@@ -324,13 +331,15 @@ fun ProviderPackages(
               },
       contentAlignment = Alignment.Center // Centers the LazyRow within the Box
       ) {
+
         // Horizontal scrollable list
         LazyRow(
             modifier =
                 Modifier.fillMaxSize().testTag("packagesScrollableList").align(Alignment.Center),
             horizontalArrangement = Arrangement.spacedBy(20.dp), // Adjusted for spacing
             contentPadding =
-                PaddingValues(top = 40.dp, start = 12.dp, end = 12.dp), // Increased padding
+                PaddingValues(
+                    top = 40.dp, start = startPadding, end = startPadding), // Increased padding
         ) {
           items(packages.size) { index ->
             // If package is selected, we display it bigger
@@ -382,16 +391,36 @@ fun ProviderHeader(provider: Provider) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween) {
               Row(verticalAlignment = Alignment.CenterVertically) {
-                AsyncImage(
-                    model =
-                        if (provider.imageUrl != "") provider.imageUrl else R.drawable.default_pdp,
-                    contentDescription = "Profile Picture",
-                    contentScale = ContentScale.Crop,
-                    modifier =
-                        Modifier.size(128.dp)
-                            .border(2.dp, Color.Transparent, RoundedCornerShape(16.dp))
-                            .clip(RoundedCornerShape(16.dp))
-                            .testTag("providerImage"))
+                Box {
+                  AsyncImage(
+                      model =
+                          if (provider.imageUrl != "") provider.imageUrl
+                          else R.drawable.default_pdp,
+                      contentDescription = "Profile Picture",
+                      contentScale = ContentScale.Crop,
+                      modifier =
+                          Modifier.size(128.dp)
+                              .border(2.dp, Color.Transparent, RoundedCornerShape(16.dp))
+                              .clip(RoundedCornerShape(16.dp))
+                              .testTag("providerImage"))
+                  Box(
+                      modifier =
+                          Modifier.padding(4.dp)
+                              .size(30.dp)
+                              .clip(RoundedCornerShape(8.dp))
+                              .background(OnPrimary)
+                              .align(Alignment.TopStart),
+                      contentAlignment = Alignment.Center) {
+                        Icon(
+                            painter = painterResource(id = Services.getIcon(provider.service)),
+                            contentDescription = null,
+                            tint = Color.Unspecified,
+                            modifier =
+                                Modifier.size(25.dp)
+                                    .testTag(
+                                        Services.getIcon(provider.service).toString() + "Icon"))
+                      }
+                }
                 Spacer(modifier = Modifier.width(16.dp))
                 Column {
                   Text(
@@ -610,6 +639,7 @@ fun Rubric(modifier: Modifier = Modifier, content: @Composable ColumnScope.() ->
  * @param requestViewModel ViewModel for handling service requests.
  * @param userId Current user's ID.
  * @param navigationActions Navigation actions for navigating to different screens.
+ * @param seekerProfileViewModel ViewModel for seeker profile data.
  */
 @Composable
 fun ProviderReviews(
@@ -620,6 +650,7 @@ fun ProviderReviews(
     requestViewModel: ServiceRequestViewModel,
     userId: String,
     navigationActions: NavigationActions,
+    seekerProfileViewModel: SeekerProfileViewModel
 ) {
   Column(
       modifier =
@@ -679,7 +710,7 @@ fun ProviderReviews(
               modifier = Modifier.padding(16.dp),
               color = colorScheme.onSurfaceVariant)
         } else {
-          reviews.forEach { ReviewRow(it) }
+          reviews.forEach { ReviewRow(it, seekerProfileViewModel) }
         }
 
         if (showDialog.value) {
@@ -699,9 +730,12 @@ fun ProviderReviews(
  * Component to display a single review, including rating and comments.
  *
  * @param review The review object to display.
+ * @param seekerProfileViewModel ViewModel for seeker profile data.
  */
 @Composable
-fun ReviewRow(review: Review) {
+fun ReviewRow(review: Review, seekerProfileViewModel: SeekerProfileViewModel) {
+  val seekerProfile by seekerProfileViewModel.seekerProfileList.collectAsStateWithLifecycle()
+  val imageUrl = seekerProfile.find { it.uid == review.authorId }?.imageUrl ?: ""
   Column(
       Modifier.fillMaxWidth()
           .padding(top = 16.dp)
@@ -710,14 +744,17 @@ fun ReviewRow(review: Review) {
           .padding(4.dp)
           .testTag("reviewRow")) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-          Image(
-              painter = painterResource(id = R.drawable.default_pdp),
+          AsyncImage(
+              model = imageUrl.ifEmpty { R.drawable.default_pdp },
               contentDescription = "Profile Picture",
+              contentScale = ContentScale.Crop,
               modifier =
                   Modifier.size(64.dp)
                       .border(2.dp, Color.Transparent, RoundedCornerShape(16.dp))
                       .clip(RoundedCornerShape(16.dp))
                       .testTag("reviewerImage"))
+
+          Spacer(modifier = Modifier.width(16.dp))
 
           RatingStars(review.rating)
         }
@@ -764,14 +801,14 @@ fun BottomBar(showDialog: MutableState<Boolean>) {
         Button(
             modifier =
                 Modifier.padding(16.dp)
-                    .clip(RoundedCornerShape(16.dp))
+                    .clip(RoundedCornerShape(25.dp))
                     .background(colorScheme.primary)
                     .size(200.dp, 50.dp)
                     .testTag("bookNowButton"),
             colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
             onClick = { showDialog.value = true }) {
               Text(
-                  "Book Now",
+                  "Book now",
                   color = colorScheme.onPrimary,
                   fontSize = 24.sp,
                   fontWeight = FontWeight.Bold)
@@ -828,7 +865,9 @@ fun SelectRequestDialog(
                           Modifier.padding(bottom = 16.dp)
                               .testTag("dialog_title")
                               .align(Alignment.CenterHorizontally),
-                      color = colorScheme.onPrimaryContainer)
+                      color =
+                          if (isSystemInDarkTheme()) OnPrimaryContainerDark
+                          else colorScheme.onPrimaryContainer)
 
                   // LazyColumn to display requests
                   LazyColumn(
@@ -886,13 +925,17 @@ fun SelectRequestDialog(
                                             style = Typography.titleMedium,
                                             maxLines = 2,
                                             overflow = TextOverflow.Ellipsis,
-                                            color = colorScheme.onPrimaryContainer,
+                                            color =
+                                                if (isSystemInDarkTheme()) OnPrimaryContainerDark
+                                                else colorScheme.onPrimaryContainer,
                                         )
                                         Text(
                                             modifier = Modifier.testTag("request_description"),
                                             text = request.description,
                                             style = Typography.bodyMedium,
-                                            color = colorScheme.onPrimaryContainer,
+                                            color =
+                                                if (isSystemInDarkTheme()) OnPrimaryContainerDark
+                                                else colorScheme.onPrimaryContainer,
                                             maxLines = 2,
                                             overflow = TextOverflow.Ellipsis)
                                       }
