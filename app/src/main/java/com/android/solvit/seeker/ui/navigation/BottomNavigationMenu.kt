@@ -37,6 +37,16 @@ import com.android.solvit.shared.ui.navigation.Route
 import com.android.solvit.shared.ui.navigation.TopLevelDestination
 import com.android.solvit.shared.ui.navigation.TopLevelDestinations
 
+/**
+ * Composable function to display the bottom navigation menu with navigation items and a floating
+ * action button. The menu adapts based on the selected tab and provides actions to navigate through
+ * different sections.
+ *
+ * @param onTabSelect A lambda function to handle when a tab is selected.
+ * @param tabList A list of top-level navigation destinations that are used to generate the
+ *   navigation items.
+ * @param selectedItem The current selected tab's route.
+ */
 @SuppressLint("SourceLockedOrientationActivity")
 @Composable
 fun BottomNavigationMenu(
