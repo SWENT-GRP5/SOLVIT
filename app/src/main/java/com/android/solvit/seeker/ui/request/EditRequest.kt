@@ -24,6 +24,18 @@ import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.google.firebase.Timestamp
 import java.util.Calendar
 
+/**
+ * Composable function to edit an existing service request.
+ *
+ * This screen allows users to modify the details of a service request they created, including the
+ * title, description, service type, due date, location, and image. It also locks the screen
+ * orientation to portrait for consistency.
+ *
+ * @param navigationActions A navigation actions object to handle navigation.
+ * @param requestViewModel ViewModel for managing the service request.
+ * @param locationViewModel ViewModel for managing locations and location suggestions.
+ * @param authViewModel ViewModel for managing the authenticated user.
+ */
 @SuppressLint("SourceLockedOrientationActivity")
 @Composable
 fun EditRequestScreen(

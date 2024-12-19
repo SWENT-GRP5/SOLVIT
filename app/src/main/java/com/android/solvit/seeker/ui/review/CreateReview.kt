@@ -78,6 +78,17 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
+/**
+ * Composable screen for creating a review for a completed service request. This screen allows the
+ * user to leave a rating (1-5 stars) and a comment about the provider. It fetches the service
+ * request details and provider information and submits the review once the user is done.
+ *
+ * @param reviewViewModel The ViewModel used to manage and add reviews.
+ * @param serviceRequestViewModel The ViewModel used to manage the service request details.
+ * @param listProviderViewModel The ViewModel used to manage the list of providers.
+ * @param navigationActions The navigation actions used to handle screen transitions, including
+ *   navigation back.
+ */
 @SuppressLint("SourceLockedOrientationActivity")
 @Composable
 fun CreateReviewScreen(
@@ -185,6 +196,14 @@ fun CreateReviewScreen(
       }
 }
 
+/**
+ * Composable for displaying service request details, such as the title, description, price, meeting
+ * date, provider information, and location on a map.
+ *
+ * @param requestState The state holding the current service request data.
+ * @param listProviderViewModel The ViewModel used to fetch the provider list.
+ * @param navigationActions The navigation actions used to handle navigation.
+ */
 @Composable
 fun RequestBox(
     requestState: State<ServiceRequest?>,
@@ -247,6 +266,12 @@ fun RequestBox(
   }
 }
 
+/**
+ * Composable for displaying a map with a marker at a specific location. The map is centered on the
+ * given latitude and longitude with a zoom level of 13.
+ *
+ * @param location The location data containing latitude and longitude to set the map's center.
+ */
 @Composable
 fun MapCard(location: Location) {
   val mapPosition = rememberCameraPositionState {
@@ -264,6 +289,13 @@ fun MapCard(location: Location) {
   }
 }
 
+/**
+ * Composable for displaying a rating bar consisting of 5 stars. Each star can be selected by the
+ * user, and the rating value is updated accordingly.
+ *
+ * @param ratingState The state holding the current rating value. It is updated when a star is
+ *   clicked.
+ */
 @Composable
 fun RatingBar(
     ratingState: MutableIntState,
@@ -288,6 +320,16 @@ fun RatingBar(
       }
 }
 
+/**
+ * Composable for displaying an individual star icon in the rating bar. The icon's color changes
+ * depending on whether the star is selected or unselected.
+ *
+ * @param ratingState The state holding the current rating value. It is used to determine if the
+ *   star is selected.
+ * @param ratingValue The value of the star, ranging from 1 to 5.
+ * @param selectedColor The color used for the selected (filled) star.
+ * @param unselectedColor The color used for the unselected (empty) star.
+ */
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun StarIcon(

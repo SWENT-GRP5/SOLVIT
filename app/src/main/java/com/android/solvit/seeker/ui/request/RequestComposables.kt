@@ -76,6 +76,12 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+/**
+ * A composable that displays a text field for inputting a title for the request.
+ *
+ * @param title The current title value to be displayed in the text field.
+ * @param onTitleChange A callback function to update the title when the value changes.
+ */
 @Composable
 fun TitleInput(title: String, onTitleChange: (String) -> Unit) {
   OutlinedTextField(
@@ -92,6 +98,12 @@ fun TitleInput(title: String, onTitleChange: (String) -> Unit) {
               unfocusedBorderColor = colorScheme.surfaceVariant))
 }
 
+/**
+ * A composable that displays a text field for inputting a description for the request.
+ *
+ * @param description The current description value to be displayed in the text field.
+ * @param onDescriptionChange A callback function to update the description when the value changes.
+ */
 @Composable
 fun DescriptionInput(description: String, onDescriptionChange: (String) -> Unit) {
   OutlinedTextField(
@@ -108,6 +120,17 @@ fun DescriptionInput(description: String, onDescriptionChange: (String) -> Unit)
               unfocusedBorderColor = colorScheme.surfaceVariant))
 }
 
+/**
+ * A composable that displays a dropdown menu for selecting a service type.
+ *
+ * @param typeQuery The current query to filter the service types.
+ * @param onTypeQueryChange A callback function to update the type query when the value changes.
+ * @param showDropdownType A boolean flag to show or hide the dropdown menu.
+ * @param onShowDropdownTypeChange A callback function to toggle the visibility of the dropdown.
+ * @param filteredServiceTypes A list of filtered service types to display in the dropdown.
+ * @param onServiceTypeSelected A callback function to handle the selection of a service type.
+ * @param readOnly A flag to make the field read-only (default is false).
+ */
 @Composable
 fun ServiceTypeDropdown(
     typeQuery: String,
@@ -192,6 +215,25 @@ fun ServiceTypeDropdown(
   }
 }
 
+/**
+ * A composable that displays a dropdown menu for selecting a location address.
+ *
+ * @param locationQuery The current query to filter the location suggestions.
+ * @param onLocationQueryChange A callback function to update the location query when the value
+ *   changes.
+ * @param showDropdownLocation A boolean flag to show or hide the dropdown menu.
+ * @param onShowDropdownLocationChange A callback function to toggle the visibility of the dropdown.
+ * @param locationSuggestions A list of location suggestions to display in the dropdown.
+ * @param userLocations A list of previously used locations.
+ * @param onLocationSelected A callback function to handle the selection of a location.
+ * @param requestLocation The current location request.
+ * @param backgroundColor The background color for the dropdown (default is the theme's background
+ *   color).
+ * @param debounceDelay The debounce delay for API calls (default is 1001 milliseconds).
+ * @param isValueOk A flag indicating whether the location input is valid.
+ * @param errorMessage A custom error message to display when the location input is invalid.
+ * @param testTag The test tag for the dropdown menu.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LocationDropdown(
@@ -350,6 +392,12 @@ fun LocationDropdown(
   }
 }
 
+/**
+ * A composable that displays a date picker modal dialog to select a date.
+ *
+ * @param onDateSelected A callback function to handle the selected date.
+ * @param onDismiss A callback function to dismiss the date picker dialog.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DatePickerModal(onDateSelected: (Long?) -> Unit, onDismiss: () -> Unit) {
@@ -374,6 +422,13 @@ fun DatePickerModal(onDateSelected: (Long?) -> Unit, onDismiss: () -> Unit) {
       }
 }
 
+/**
+ * A composable that displays a date field with a trailing icon to open a date picker.
+ *
+ * @param modifier The modifier to apply to the text field.
+ * @param dueDate The current due date to display in the text field.
+ * @param onDateChange A callback function to handle the change in the selected date.
+ */
 @Composable
 fun DatePickerFieldToModal(
     modifier: Modifier = Modifier,
@@ -419,11 +474,25 @@ fun DatePickerFieldToModal(
   }
 }
 
+/**
+ * A helper function to convert a date in milliseconds to a formatted string (dd/MM/yyyy).
+ *
+ * @param millis The date in milliseconds.
+ * @return The formatted date string.
+ */
 fun convertMillisToDate(millis: Long): String {
   val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
   return formatter.format(Date(millis))
 }
 
+/**
+ * A composable that displays a button to select an image, and shows a preview of the selected
+ * image.
+ *
+ * @param selectedImageUri The URI of the currently selected image.
+ * @param imageUrl The URL of the image to display if no image is selected.
+ * @param onImageSelected A callback function to handle the image selection.
+ */
 @Composable
 fun ImagePicker(
     selectedImageUri: Uri?,
@@ -473,6 +542,17 @@ fun ImagePicker(
       }
 }
 
+/**
+ * A composable button that triggers the deletion of a service request when clicked. It also
+ * navigates back to the requests overview screen after the deletion is successful.
+ *
+ * @param request The service request to be deleted, containing its details such as `uid`.
+ * @param requestViewModel The view model responsible for handling service request actions, such as
+ *   deleting a request.
+ * @param navigationActions The navigation actions used to navigate between screens. The
+ *   `navigateAndSetBackStack` method is used to navigate to the requests overview screen after
+ *   deletion.
+ */
 @Composable
 fun DeleteButton(
     request: ServiceRequest,

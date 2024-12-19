@@ -15,6 +15,14 @@ import com.android.solvit.shared.ui.theme.Plumber
 import com.android.solvit.shared.ui.theme.Tutor
 import com.android.solvit.shared.ui.theme.Writer
 
+/**
+ * Data class representing a service list item. Each item contains a service type, an associated
+ * icon resource ID, and a color representing the service.
+ *
+ * @param service The type of service represented by this item (e.g., PLUMBER, ELECTRICIAN).
+ * @param icon The resource ID of the icon associated with this service.
+ * @param color The color associated with this service, typically used in UI for differentiation.
+ */
 data class ServicesListItem(val service: Services, val icon: Int, val color: Color)
 
 val SERVICES_LIST =

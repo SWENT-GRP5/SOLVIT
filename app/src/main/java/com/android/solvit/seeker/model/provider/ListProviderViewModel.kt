@@ -15,7 +15,14 @@ import kotlin.random.Random
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
+/**
+ * ViewModel to manage and filter the list of Providers, apply various filters, and handle CRUD
+ * operations on Providers in the repository.
+ */
 class ListProviderViewModel(private val repository: ProviderRepository) : ViewModel() {
+
+  // StateFlow variables for tracking the provider data and user selections.
+
   private val _providersList = MutableStateFlow<List<Provider>>(emptyList())
   val providersList: StateFlow<List<Provider>> = _providersList
 
@@ -43,6 +50,7 @@ class ListProviderViewModel(private val repository: ProviderRepository) : ViewMo
   private var activeFilters = mutableMapOf<String, (Provider) -> Boolean>()
 
   companion object {
+    // Factory for creating an instance of ListProviderViewModel.
     val Factory: ViewModelProvider.Factory =
         object : ViewModelProvider.Factory {
           @Suppress("UNCHECKED_CAST")
@@ -57,6 +65,7 @@ class ListProviderViewModel(private val repository: ProviderRepository) : ViewMo
   }
 
   init {
+    // Initialize the repository and listen for provider updates.
     repository.init { getProviders() }
     repository.addListenerOnProviders(
         onSuccess = {
@@ -68,6 +77,16 @@ class ListProviderViewModel(private val repository: ProviderRepository) : ViewMo
         })
   }
 
+  /**
+   * Filters providers based on a string field (like Language, Rating, Price) by applying the given
+   * filter conditions.
+   *
+   * @param iconPressed A boolean indicating if the filter icon was pressed.
+   * @param filterCondition The condition to check before applying the filter.
+   * @param filterAction The filter logic to be applied if the condition is true.
+   * @param defaultFilterAction The default filter logic to apply when no specific filter is set.
+   * @param filterField The field being filtered (e.g., "Language", "Rating").
+   */
   fun filterStringFields(
       iconPressed: Boolean,
       filterCondition: Boolean,
@@ -87,6 +106,12 @@ class ListProviderViewModel(private val repository: ProviderRepository) : ViewMo
     }
   }
 
+  /**
+   * Updates the selected languages for filtering providers.
+   *
+   * @param newLanguages The new set of languages selected by the user.
+   * @param languagePressed The language that was pressed by the user.
+   */
   fun updateSelectedLanguages(newLanguages: Set<Language>, languagePressed: Language) {
     _selectedLanguages.value = newLanguages
     filterStringFields(
@@ -99,6 +124,7 @@ class ListProviderViewModel(private val repository: ProviderRepository) : ViewMo
         filterField = "Language")
   }
 
+  /** Clears all the selected filter fields (languages, ratings, price range). */
   fun clearFilterFields() {
     _selectedLanguages.value = emptySet()
     _selectedRatings.value = emptySet()
@@ -106,6 +132,12 @@ class ListProviderViewModel(private val repository: ProviderRepository) : ViewMo
     _maxPrice.value = ""
   }
 
+  /**
+   * Updates the selected ratings for filtering providers.
+   *
+   * @param newRatings The new set of ratings selected by the user.
+   * @param ratingPressed The rating that was pressed by the user.
+   */
   fun updateSelectedRatings(newRatings: Set<Double>, ratingPressed: Double) {
     _selectedRatings.value = newRatings
 
@@ -117,6 +149,11 @@ class ListProviderViewModel(private val repository: ProviderRepository) : ViewMo
         filterField = "Rating")
   }
 
+  /**
+   * Updates the minimum price for filtering providers.
+   *
+   * @param price The minimum price value entered by the user.
+   */
   fun updateMinPrice(price: String) {
     _minPrice.value = price
     val minPriceValue = _minPrice.value.toDoubleOrNull()
@@ -129,6 +166,11 @@ class ListProviderViewModel(private val repository: ProviderRepository) : ViewMo
     }
   }
 
+  /**
+   * Updates the maximum price for filtering providers.
+   *
+   * @param price The maximum price value entered by the user.
+   */
   fun updateMaxPrice(price: String) {
     _maxPrice.value = price
     val maxPriceValue = _maxPrice.value!!.toDoubleOrNull()
@@ -141,10 +183,21 @@ class ListProviderViewModel(private val repository: ProviderRepository) : ViewMo
     }
   }
 
+  /**
+   * Generates a new unique identifier for a provider.
+   *
+   * @return A unique ID as a String.
+   */
   fun getNewUid(): String {
     return repository.getNewUid()
   }
 
+  /**
+   * Adds a new provider to the repository.
+   *
+   * @param provider The provider object to be added.
+   * @param imageUri The image URI for the provider (optional).
+   */
   fun addProvider(provider: Provider, imageUri: Uri?) {
     repository.addProvider(
         provider,
@@ -153,18 +206,29 @@ class ListProviderViewModel(private val repository: ProviderRepository) : ViewMo
         onFailure = { Log.e("add Provider", "failed to add Provider") })
   }
 
+  /**
+   * Deletes a provider from the repository.
+   *
+   * @param uid The unique identifier of the provider to be deleted.
+   */
   fun deleteProvider(
       uid: String,
   ) {
     repository.deleteProvider(uid, onSuccess = { getProviders() }, onFailure = {})
   }
 
+  /**
+   * Updates an existing provider in the repository.
+   *
+   * @param provider The provider object with updated details.
+   */
   fun updateProvider(
       provider: Provider,
   ) {
     repository.updateProvider(provider, onSuccess = { getProviders() }, onFailure = {})
   }
 
+  /** Fetches the list of providers from the repository, applying any filters that may be active. */
   fun getProviders() {
     repository.getProviders(
         _selectedService.value,
@@ -175,10 +239,22 @@ class ListProviderViewModel(private val repository: ProviderRepository) : ViewMo
         onFailure = { Log.e("getProviders", "failed to get Providers") })
   }
 
+  /**
+   * Fetches a provider by their unique identifier (UID).
+   *
+   * @param uid The UID of the provider to fetch.
+   * @return The Provider object, or null if not found.
+   */
   suspend fun fetchProviderById(uid: String): Provider? {
     return repository.returnProvider(uid)
   }
 
+  /**
+   * Filters the provider list based on a given filter function and filter field.
+   *
+   * @param filter The filtering logic to apply.
+   * @param filterField The field used for the filter (e.g., "Language", "Price").
+   */
   fun filterProviders(filter: (Provider) -> Boolean, filterField: String) {
 
     activeFilters[filterField] = filter
@@ -190,10 +266,20 @@ class ListProviderViewModel(private val repository: ProviderRepository) : ViewMo
     }
   }
 
+  /**
+   * Selects a service from the list of available services and updates the selected service.
+   *
+   * @param service The service to select. Can be null if the selection is cleared.
+   */
   fun selectService(service: Services?) {
     _selectedService.value = service
   }
 
+  /**
+   * Selects a provider from the list of available providers and updates the selected provider.
+   *
+   * @param provider The provider to select. Can be null if the selection is cleared.
+   */
   fun selectProvider(provider: Provider?) {
     _selectedProvider.value = provider
   }
@@ -202,11 +288,16 @@ class ListProviderViewModel(private val repository: ProviderRepository) : ViewMo
     _providersList.value = _providersListFiltered.value
   }
 
+  /**
+   * Refreshes the filters by fetching the updated list of providers from the repository and
+   * clearing any active filters.
+   */
   fun refreshFilters() {
     getProviders()
     activeFilters.clear()
   }
 
+  /** Clears the selected service, setting the selected service to null. */
   fun clearSelectedService() {
     _selectedService.value = null
   }
@@ -236,6 +327,12 @@ class ListProviderViewModel(private val repository: ProviderRepository) : ViewMo
     }
   }
 
+  /**
+   * Counts the number of providers who offer a specific service.
+   *
+   * @param service The service to filter providers by.
+   * @return The number of providers offering the given service.
+   */
   fun countProvidersByService(service: Services): Int {
     return _providersList.value.count { it.service == service }
   }

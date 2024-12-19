@@ -25,6 +25,17 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.shared.ui.theme.Typography
 
+/**
+ * Composable function to display a list of suggestions for the user to choose from. This allows the
+ * user to select preferences like services (e.g., plumbing, event planning) that they might like to
+ * use or provide.
+ *
+ * The function retrieves the user's current preferences and displays them in a grid of selectable
+ * items. The user can click an item to either add or remove it from their preferences.
+ *
+ * @param userId The unique identifier of the user whose preferences are being managed.
+ * @param viewModel The ViewModel instance managing the user's profile data and preferences.
+ */
 @Composable
 fun Preferences(userId: String, viewModel: SeekerProfileViewModel) {
   // State to track selected items
@@ -72,6 +83,14 @@ fun Preferences(userId: String, viewModel: SeekerProfileViewModel) {
       }
 }
 
+/**
+ * A Composable function to display the suggestions in a grid. The grid divides the suggestions into
+ * rows of two items each.
+ *
+ * @param suggestions A list of suggestion items to be displayed.
+ * @param selectedItems A set of currently selected items.
+ * @param onSuggestionClick Callback to handle when a suggestion is clicked.
+ */
 @Composable
 fun SuggestionsGrid(
     suggestions: List<String>,
@@ -93,6 +112,14 @@ fun SuggestionsGrid(
   }
 }
 
+/**
+ * A Composable function to display a button for each suggestion. The button's background color
+ * changes based on whether it is selected or not.
+ *
+ * @param text The text to display on the button.
+ * @param isSelected Boolean flag to indicate if the suggestion is selected.
+ * @param onClick Callback to handle the click event of the suggestion button.
+ */
 @Composable
 fun SuggestionButton(text: String, isSelected: Boolean, onClick: () -> Unit) {
   // Update color based on selection state
