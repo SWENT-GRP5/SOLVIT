@@ -111,12 +111,31 @@ private constructor(
   suspend fun sendServiceRequestAcceptedNotification(
       recipientUserId: String,
       requestId: String,
-      providerName: String
+      providerName: String,
+      providerProfilePicUrl: String? = null,
+      requestTitle: String
   ): Result<Unit> {
-    return sendNotification(
-        recipientUserId,
-        "Service Request Accepted",
-        "$providerName has accepted your service request",
-        mapOf("requestId" to requestId, "status" to "ACCEPTED"))
+    return try {
+      val notification =
+          mapOf(
+              "title" to providerName,
+              "body" to "has accepted your service request",
+              "imageUrl" to (providerProfilePicUrl ?: ""),
+              "requestTitle" to requestTitle)
+
+      val data =
+          mapOf(
+              "requestId" to requestId,
+              "status" to "ACCEPTED",
+              "notification" to gson.toJson(notification))
+
+      sendNotification(
+          recipientUserId,
+          "Service Request Accepted",
+          "$providerName has accepted your $requestTitle service request",
+          data)
+    } catch (e: Exception) {
+      Result.failure(e)
+    }
   }
 }

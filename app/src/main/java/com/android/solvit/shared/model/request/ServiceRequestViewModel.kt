@@ -293,18 +293,27 @@ open class ServiceRequestViewModel(
     saveServiceRequest(serviceRequest.copy(status = ServiceRequestStatus.PENDING))
   }
 
-  fun confirmRequest(serviceRequest: ServiceRequest, providerName: String) {
+  fun confirmRequest(
+      serviceRequest: ServiceRequest,
+      providerName: String,
+      profilePictureUrl: String
+  ) {
     try {
       val updatedRequest = serviceRequest.copy(status = ServiceRequestStatus.ACCEPTED)
       repository.saveServiceRequest(
           updatedRequest,
           onSuccess = {
             viewModelScope.launch {
+              // Get the provider's profile picture URL from the authentication state
+              val providerProfilePicUrl = profilePictureUrl
+
               notificationManager
                   ?.sendServiceRequestAcceptedNotification(
                       recipientUserId = serviceRequest.userId,
                       requestId = serviceRequest.uid,
-                      providerName = providerName)
+                      providerName = providerName,
+                      providerProfilePicUrl = providerProfilePicUrl,
+                      requestTitle = serviceRequest.title)
                   ?.onFailure { e ->
                     Log.e("FCM_DEBUG", "Failed to send acceptance notification", e)
                   }

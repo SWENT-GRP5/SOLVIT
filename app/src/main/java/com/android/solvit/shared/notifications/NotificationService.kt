@@ -1,15 +1,21 @@
 package com.android.solvit.shared.notifications
 
+import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
-import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.graphics.Color
+import android.graphics.drawable.BitmapDrawable
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import com.android.solvit.BuildConfig
+import androidx.core.content.ContextCompat
+import coil.imageLoader
+import coil.request.ImageRequest
+import coil.request.SuccessResult
 import com.android.solvit.MainActivity
 import com.android.solvit.R
 import com.google.firebase.auth.FirebaseAuth
@@ -53,27 +59,7 @@ open class NotificationService : FirebaseMessagingService() {
     notificationManager.createNotificationChannel(channel)
   }
 
-  private fun getPendingIntent(title: String): PendingIntent? {
-    if (BuildConfig.DEBUG) {
-      try {
-        // Use reflection to access the debug-only NotificationTestHelper
-        val helperClass =
-            Class.forName("com.android.solvit.shared.notifications.NotificationTestHelper")
-        val getTestPendingIntentMethod =
-            helperClass.getDeclaredMethod(
-                "getTestPendingIntent", Context::class.java, String::class.java)
-        val helperInstance = helperClass.getDeclaredField("INSTANCE").get(null)
-        val testPendingIntent =
-            getTestPendingIntentMethod.invoke(helperInstance, applicationContext, title)
-                as? PendingIntent
-        if (testPendingIntent != null) {
-          return testPendingIntent
-        }
-      } catch (e: Exception) {
-        Log.d(TAG, "Debug helper not found, using default intent", e)
-      }
-    }
-
+  private fun getPendingIntent(title: String): PendingIntent {
     val intent =
         Intent(applicationContext, MainActivity::class.java).apply {
           flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -85,43 +71,146 @@ open class NotificationService : FirebaseMessagingService() {
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
   }
 
-  protected open fun showNotification(title: String, message: String) {
+  protected open suspend fun showNotification(
+      title: String,
+      message: String,
+      imageUrl: String? = null,
+      requestTitle: String? = null
+  ) {
     try {
+      Log.d(TAG, "Showing notification - Title: $title, Message: $message, ImageUrl: $imageUrl")
+
+      // Create basic notification builder
+      val notificationMessage =
+          if (!requestTitle.isNullOrEmpty()) {
+            "$message: $requestTitle"
+          } else {
+            message
+          }
+
       val builder =
           NotificationCompat.Builder(applicationContext, CHANNEL_ID)
               .setSmallIcon(R.drawable.logosolvit_firstpage)
-              .setContentTitle(title)
-              .setContentText(message)
               .setPriority(NotificationCompat.PRIORITY_HIGH)
               .setAutoCancel(true)
+              .setContentTitle(title)
+              .setContentText(notificationMessage)
+              .setWhen(System.currentTimeMillis())
+              .setShowWhen(true)
 
-      val pendingIntent = getPendingIntent(title)
-      builder.setContentIntent(pendingIntent)
+      // Add provider picture if URL is provided
+      if (!imageUrl.isNullOrEmpty()) {
+        Log.d(TAG, "Attempting to load image from URL: $imageUrl")
+        CoroutineScope(Dispatchers.Main).launch {
+          try {
+            // Load a larger image for expanded state
+            val request =
+                ImageRequest.Builder(applicationContext)
+                    .data(imageUrl)
+                    .allowHardware(false)
+                    .size(256, 256) // Larger size for expanded view
+                    .build()
 
-      with(NotificationManagerCompat.from(applicationContext)) {
-        @Suppress("MissingPermission") notify(System.currentTimeMillis().toInt(), builder.build())
+            val result = applicationContext.imageLoader.execute(request) as? SuccessResult
+            val drawable = result?.drawable
+            if (drawable is BitmapDrawable) {
+              Log.d(TAG, "Successfully loaded image, creating notification")
+              val bitmap = drawable.bitmap
+
+              // Create a scaled down version for the large icon (collapsed state)
+              val smallBitmap = Bitmap.createScaledBitmap(bitmap, 128, 128, true)
+
+              // Use BigPictureStyle with the larger image
+              val bigPictureStyle =
+                  NotificationCompat.BigPictureStyle()
+                      .bigPicture(bitmap)
+                      .bigLargeIcon(null as Bitmap?) // Hide the small icon in expanded state
+                      .setBigContentTitle(title)
+                      .setSummaryText(
+                          notificationMessage) // Use summary text for better compatibility
+
+              builder
+                  .setLargeIcon(smallBitmap) // For collapsed state
+                  .setStyle(bigPictureStyle)
+
+              Log.d(TAG, "Applied big picture style to notification")
+
+              // Show the notification
+              val pendingIntent = getPendingIntent(title)
+              builder.setContentIntent(pendingIntent)
+
+              with(NotificationManagerCompat.from(applicationContext)) {
+                if (ContextCompat.checkSelfPermission(
+                    applicationContext, Manifest.permission.POST_NOTIFICATIONS) ==
+                    PackageManager.PERMISSION_GRANTED) {
+                  notify(System.currentTimeMillis().toInt(), builder.build())
+                  Log.d(TAG, "Successfully posted notification with image")
+                }
+              }
+            } else {
+              Log.e(
+                  TAG,
+                  "Failed to convert image to bitmap, drawable: ${drawable?.javaClass?.simpleName}")
+              showBasicNotification(builder, title, notificationMessage)
+            }
+          } catch (e: Exception) {
+            Log.e(TAG, "Error loading image for notification", e)
+            showBasicNotification(builder, title, notificationMessage)
+          }
+        }
+      } else {
+        Log.d(TAG, "No image URL provided, showing basic notification")
+        showBasicNotification(builder, title, notificationMessage)
       }
-    } catch (e: SecurityException) {
-      Log.e(TAG, "Security exception when showing notification", e)
     } catch (e: Exception) {
       Log.e(TAG, "Error showing notification", e)
     }
   }
 
+  private fun showBasicNotification(
+      builder: NotificationCompat.Builder,
+      title: String,
+      message: String
+  ) {
+    val pendingIntent = getPendingIntent(title)
+    builder.setContentIntent(pendingIntent)
+
+    with(NotificationManagerCompat.from(applicationContext)) {
+      if (ContextCompat.checkSelfPermission(
+          applicationContext, Manifest.permission.POST_NOTIFICATIONS) ==
+          PackageManager.PERMISSION_GRANTED) {
+        notify(System.currentTimeMillis().toInt(), builder.build())
+        Log.d(TAG, "Successfully posted basic notification")
+      }
+    }
+  }
+
   override fun onMessageReceived(message: RemoteMessage) {
     super.onMessageReceived(message)
+    Log.d(
+        TAG, "Received FCM message - Notification: ${message.notification}, Data: ${message.data}")
 
-    // Handle notification payload
-    message.notification?.let { notification ->
-      showNotification(notification.title ?: "New Message", notification.body ?: "")
-    }
-
-    // Handle data payload
+    // Handle data payload first as it contains our custom data
     if (message.data.isNotEmpty()) {
-      val title = message.data["title"] ?: "New Message"
-      val body = message.data["body"] ?: ""
+      Log.d(TAG, "Processing data payload")
+      val imageUrl = message.data["imageUrl"]
+      val requestTitle = message.data["requestTitle"]
+
+      // Get notification content from either the data payload or notification payload
+      val title = message.data["title"] ?: message.notification?.title ?: "New Message"
+      val body = message.data["body"] ?: message.notification?.body ?: ""
+
       if (body.isNotEmpty()) {
-        showNotification(title, body)
+        Log.d(TAG, "Showing notification with imageUrl: $imageUrl")
+        serviceScope.launch { showNotification(title, body, imageUrl, requestTitle) }
+      }
+    }
+    // Handle notification-only payload as fallback
+    else if (message.notification != null) {
+      Log.d(TAG, "Processing notification-only payload")
+      serviceScope.launch {
+        showNotification(
+            message.notification?.title ?: "New Message", message.notification?.body ?: "")
       }
     }
   }

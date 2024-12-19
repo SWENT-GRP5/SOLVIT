@@ -77,6 +77,7 @@ import kotlinx.coroutines.launch
  * @param serviceRequestViewModel ViewModel for managing service requests.
  * @param authViewModel ViewModel for managing authentication.
  * @param listProviderViewModel View model for list of providers
+ * @param providerViewModel ProviderViewModel
  */
 @SuppressLint("SuspiciousIndentation")
 @Composable
@@ -86,7 +87,8 @@ fun RequestsDashboardScreen(
         viewModel(factory = ServiceRequestViewModel.Factory),
     authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory),
     listProviderViewModel: ListProviderViewModel =
-        viewModel(factory = ListProviderViewModel.Factory)
+        viewModel(factory = ListProviderViewModel.Factory),
+    providerViewModel: ProviderViewModel = viewModel(factory = ProviderViewModel.Factory)
 ) {
   val user by authViewModel.user.collectAsStateWithLifecycle()
   // Selected tab index
@@ -121,7 +123,7 @@ fun RequestsDashboardScreen(
                   serviceRequestViewModel = serviceRequestViewModel,
                   navigationActions = navigationActions,
                   listProviderViewModel = listProviderViewModel,
-              )
+                  providerViewModel = providerViewModel)
             }
       })
 }
@@ -165,6 +167,7 @@ fun StatusTabs(selectedTab: Int, tabs: Array<ServiceRequestStatus>, onTabSelecte
  * @param selectedTab Index of the selected tab.
  * @param serviceRequestViewModel ViewModel for managing service requests.
  * @param navigationActions Actions for navigation.
+ * @param providerViewModel ProviderViewModel
  */
 @Composable
 fun JobSectionContent(
@@ -172,7 +175,8 @@ fun JobSectionContent(
     listProviderViewModel: ListProviderViewModel,
     providerId: String,
     serviceRequestViewModel: ServiceRequestViewModel,
-    navigationActions: NavigationActions
+    navigationActions: NavigationActions,
+    providerViewModel: ProviderViewModel
 ) {
   when (selectedTab) {
     0 ->
@@ -180,7 +184,7 @@ fun JobSectionContent(
             providerId = providerId,
             viewModel = serviceRequestViewModel,
             navigationActions = navigationActions,
-            providerViewModel = viewModel(factory = ProviderViewModel.Factory))
+            providerViewModel = providerViewModel)
     1 -> AcceptedJobSection(providerId, serviceRequestViewModel, navigationActions)
     2 ->
         ScheduledJobsSection(
@@ -268,7 +272,7 @@ fun PendingJobsSection(
     providerId: String,
     viewModel: ServiceRequestViewModel,
     navigationActions: NavigationActions,
-    providerViewModel: ProviderViewModel = viewModel(factory = ProviderViewModel.Factory)
+    providerViewModel: ProviderViewModel
 ) {
   val context = LocalContext.current
   val pendingRequests by viewModel.pendingRequests.collectAsStateWithLifecycle()
@@ -291,7 +295,7 @@ fun PendingJobsSection(
       },
       onConfirmRequest = { request ->
         provider?.let { p ->
-          viewModel.viewModelScope.launch { viewModel.confirmRequest(request, p.name) }
+          viewModel.viewModelScope.launch { viewModel.confirmRequest(request, p.name, p.imageUrl) }
         }
       },
       onChat = { Toast.makeText(context, "Chat Not yet Implemented", Toast.LENGTH_SHORT).show() })

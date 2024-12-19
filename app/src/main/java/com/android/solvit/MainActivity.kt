@@ -393,7 +393,11 @@ fun ProviderUI(
     // Jobs & Bookings
     composable(Route.JOBS) {
       RequestsDashboardScreen(
-          navigationActions, serviceRequestViewModel, authViewModel, listProviderViewModel)
+          navigationActions,
+          serviceRequestViewModel,
+          authViewModel,
+          listProviderViewModel,
+          providerViewModel)
     }
     composable(Route.BOOKING_DETAILS) {
       ServiceBookingScreen(

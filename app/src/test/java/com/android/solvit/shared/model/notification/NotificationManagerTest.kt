@@ -8,6 +8,7 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.functions.FirebaseFunctions
 import com.google.firebase.functions.HttpsCallableReference
 import com.google.firebase.functions.HttpsCallableResult
+import com.google.gson.Gson
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -36,6 +37,7 @@ class NotificationManagerTest {
   private val testUserId = "user123"
   private val testRecipientId = "recipient123"
   private val testToken = "test-token"
+  private val gson = Gson()
 
   @Before
   fun setup() = runTest {
@@ -125,24 +127,30 @@ class NotificationManagerTest {
         // Arrange
         val requestId = "request123"
         val providerName = "Test Provider"
+        val providerProfilePicUrl = "https://example.com/profile.jpg"
+        val requestTitle = "Plumbing Service"
         val expectedData =
             mapOf(
                 "recipientToken" to testToken,
                 "notification" to
-                    mapOf(
-                        "title" to "Service Request Accepted",
-                        "body" to "$providerName has accepted your service request"),
-                "data" to
-                    mapOf(
-                        "senderId" to testUserId,
-                        "recipientId" to testRecipientId,
-                        "requestId" to requestId,
-                        "status" to "ACCEPTED"))
+                    gson.toJson(
+                        mapOf(
+                            "title" to "Service Request Accepted",
+                            "body" to
+                                "$providerName has accepted your $requestTitle service request",
+                            "data" to
+                                mapOf(
+                                    "senderId" to testUserId,
+                                    "recipientId" to testRecipientId,
+                                    "requestId" to requestId,
+                                    "status" to "ACCEPTED",
+                                    "imageUrl" to providerProfilePicUrl,
+                                    "requestTitle" to requestTitle))))
 
         // Act
         val result =
             notificationManager.sendServiceRequestAcceptedNotification(
-                testRecipientId, requestId, providerName)
+                testRecipientId, requestId, providerName, providerProfilePicUrl, requestTitle)
 
         // Assert
         assertTrue(result.isSuccess)
