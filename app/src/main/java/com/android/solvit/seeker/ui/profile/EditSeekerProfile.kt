@@ -67,6 +67,22 @@ import com.android.solvit.shared.ui.utils.CustomOutlinedTextField
 import com.android.solvit.shared.ui.utils.TopAppBarInbox
 import com.android.solvit.shared.ui.utils.ValidationRegex
 
+/**
+ * Composable function to display and edit the Seeker's profile.
+ *
+ * This screen allows the Seeker to view and modify their profile information, including:
+ * - Full name
+ * - Username
+ * - Email
+ * - Phone number
+ * - Address (with location suggestions)
+ * - Profile picture URL
+ *
+ * @param viewModel The ViewModel used to manage the Seeker's profile data.
+ * @param navigationActions Actions to handle navigation between screens.
+ * @param locationViewModel The ViewModel used to manage location-related data and suggestions.
+ * @param authViewModel The ViewModel used to manage authentication-related tasks and user data.
+ */
 @SuppressLint("SourceLockedOrientationActivity")
 @Composable
 fun EditSeekerProfileScreen(
@@ -91,13 +107,16 @@ fun EditSeekerProfileScreen(
           initialValue = emptyList<Location?>())
   var selectedLocation by remember { mutableStateOf<Location?>(null) }
 
+  // Getting screen dimensions to adapt the UI for different screen sizes
   val configuration = LocalConfiguration.current
   val screenWidth = configuration.screenWidthDp.dp
   val screenHeight = configuration.screenHeightDp.dp
 
+  // Adjusting the padding and spacing based on screen size for better UX
   val horizontalPadding = if (screenWidth < 360.dp) 8.dp else 16.dp
   val verticalSpacing = if (screenHeight < 640.dp) 8.dp else 16.dp
 
+  // Fetching user data and the Seeker profile using ViewModel
   val user by authViewModel.user.collectAsStateWithLifecycle()
   val userProfile by viewModel.seekerProfile.collectAsStateWithLifecycle()
   user?.let { viewModel.getUserProfile(it.uid) }
@@ -257,7 +276,7 @@ fun EditSeekerProfileScreen(
       }
 }
 
-// Country Model and Dropdown Menu
+// Country Model and Dropdown Menu for selecting country codes
 data class Country(val name: String, val code: String, val flagResId: Int)
 
 val countries =
@@ -267,6 +286,23 @@ val countries =
         Country("France", "+33", R.drawable.france_flag),
         Country("Switzerland", "+41", R.drawable.switzerland_flag))
 
+/**
+ * Composable function to display a dropdown menu for selecting a country code and a phone number
+ * input field.
+ *
+ * This component consists of:
+ * - A country code field, which displays the selected country code and flag.
+ * - A dropdown menu to allow the user to select a different country code from a list.
+ * - A phone number field where the user can input their phone number.
+ *
+ * The country dropdown menu is triggered when the country code field is clicked. It includes a list
+ * of countries, each with a flag and the country name. The selected country code is displayed in
+ * the text field, and the user can select a new country code, which updates the text field with the
+ * new country code.
+ *
+ * @param screenWidth The screen width (in Dp) used to adjust the padding for different screen
+ *   sizes.
+ */
 @Composable
 fun CountryDropdownMenu(screenWidth: Dp) {
   var expanded by remember { mutableStateOf(false) }
