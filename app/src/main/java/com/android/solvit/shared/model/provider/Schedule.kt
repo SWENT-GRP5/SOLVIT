@@ -1,6 +1,5 @@
 package com.android.solvit.shared.model.provider
 
-import android.util.Log
 import com.google.firebase.Timestamp
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -315,7 +314,7 @@ data class Schedule(
       timeSlot.overlaps(
           TimeSlot(
               startHour = acceptedStart.hour,
-              startMinute = acceptedStart.minute, // Introduce a delay
+              startMinute = acceptedStart.minute,
               endHour = acceptedEnd.hour,
               endMinute = acceptedEnd.minute))
     }
@@ -354,7 +353,7 @@ data class Schedule(
     val oneHourSlots = mutableListOf<TimeSlot>()
     mergedSlots.forEach { slot ->
       var currentTime = slot.start
-      while (currentTime.plusHours(1) < slot.end) {
+      while (currentTime.plusHours(1) <= slot.end) {
         val timeSlot =
             TimeSlot(
                 startHour = currentTime.hour,
@@ -372,23 +371,22 @@ data class Schedule(
     // Remove any slots that overlap with OFF_TIME exceptions
     oneHourSlots.removeAll { slot -> offTimeSlots.any { offSlot -> slot.overlaps(offSlot) } }
 
-    Log.e("Schedule", "One hour slots: $oneHourSlots")
-
-    Log.e("Schedule", "Accepted time slots: $acceptedTimeSlots")
-
-    // Remove any slots that overlap with AcceptedTimeSlots
+    // Remove any slots that overlap with AcceptedTimeSlots for the given date
     oneHourSlots.removeAll { slot ->
       acceptedTimeSlots.any { accepted ->
-        val acceptedStart =
+        val acceptedDateTime =
             accepted.startTime.toDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
-        val acceptedEnd = acceptedStart.plusMinutes(accepted.duration.toLong())
-
-        slot.overlaps(
-            TimeSlot(
-                startHour = acceptedStart.hour,
-                startMinute = acceptedStart.minute, // Introduce a delay
-                endHour = acceptedEnd.hour,
-                endMinute = acceptedEnd.minute))
+        // Only consider accepted slots for the same date
+        if (acceptedDateTime.toLocalDate() == date) {
+          slot.overlaps(
+              TimeSlot(
+                  startHour = acceptedDateTime.hour,
+                  startMinute = acceptedDateTime.minute,
+                  endHour = acceptedDateTime.plusMinutes(accepted.duration.toLong()).hour,
+                  endMinute = acceptedDateTime.plusMinutes(accepted.duration.toLong()).minute))
+        } else {
+          false
+        }
       }
     }
 
