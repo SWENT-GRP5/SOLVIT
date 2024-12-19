@@ -10,22 +10,52 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.tasks.await
 
+/**
+ * UserRepositoryFirestore handles all Firebase Firestore and Firebase Storage operations for
+ * managing SeekerProfile data. It implements the UserRepository interface, providing functionality
+ * for adding, retrieving, updating, and deleting user profiles, as well as managing user
+ * preferences and locations.
+ *
+ * @param db The FirebaseFirestore instance for database operations.
+ * @param storage The FirebaseStorage instance for image uploads.
+ */
 open class UserRepositoryFirestore(
     private val db: FirebaseFirestore,
     private val storage: FirebaseStorage
 ) : UserRepository {
 
-  private val collectionPath = "user"
-  private val usersImagesPath = "usersImages/"
+  private val collectionPath = "user" // Path for the user collection in Firestore.
+  private val usersImagesPath =
+      "usersImages/" // Path for storing user profile images in Firebase Storage.
 
+  /**
+   * Initializes the repository. It currently triggers the [onSuccess] callback.
+   *
+   * @param onSuccess Callback invoked when initialization is complete.
+   */
   override fun init(onSuccess: () -> Unit) {
     onSuccess()
   }
 
+  /**
+   * Generates a new unique ID (UID) for a new user profile.
+   *
+   * @return A new Firestore document ID.
+   */
   override fun getNewUid(): String {
     return db.collection(collectionPath).document().id
   }
 
+  /**
+   * Adds a SeekerProfile to Firestore. If [imageUri] is provided, it uploads the image to Firebase
+   * Storage before saving the profile with the image URL. Otherwise, it saves the profile without
+   * an image.
+   *
+   * @param profile The SeekerProfile to add.
+   * @param imageUri The Uri of the profile image to upload (optional).
+   * @param onSuccess Callback invoked when the profile is successfully added.
+   * @param onFailure Callback invoked with the exception when adding the profile fails.
+   */
   override fun addUserProfile(
       profile: SeekerProfile,
       imageUri: Uri?,
@@ -52,6 +82,14 @@ open class UserRepositoryFirestore(
     }
   }
 
+  /**
+   * Fetches the user profile from Firestore based on the given [uid].
+   *
+   * @param uid The user ID of the profile to fetch.
+   * @param onSuccess Callback invoked with the SeekerProfile when the profile is successfully
+   *   retrieved.
+   * @param onFailure Callback invoked with the exception when fetching the profile fails.
+   */
   override fun getUserProfile(
       uid: String,
       onSuccess: (SeekerProfile) -> Unit,
@@ -77,6 +115,13 @@ open class UserRepositoryFirestore(
     }
   }
 
+  /**
+   * Suspended function to fetch the user profile using the user ID [uid]. Uses coroutines to make
+   * the function asynchronous.
+   *
+   * @param uid The user ID of the profile to fetch.
+   * @return The SeekerProfile if found, or null otherwise.
+   */
   override suspend fun returnSeekerById(uid: String): SeekerProfile? {
     return try {
       val document = db.collection(collectionPath).document(uid).get().await()
@@ -95,6 +140,12 @@ open class UserRepositoryFirestore(
     }
   }
 
+  /**
+   * Fetches all user profiles from Firestore and returns them as a list of SeekerProfile.
+   *
+   * @param onSuccess Callback invoked with the list of SeekerProfiles.
+   * @param onFailure Callback invoked with the exception if the operation fails.
+   */
   override fun getUsersProfile(
       onSuccess: (List<SeekerProfile>) -> Unit,
       onFailure: (Exception) -> Unit
@@ -113,6 +164,13 @@ open class UserRepositoryFirestore(
     }
   }
 
+  /**
+   * Updates an existing SeekerProfile in Firestore.
+   *
+   * @param profile The SeekerProfile to update.
+   * @param onSuccess Callback invoked when the update is successful.
+   * @param onFailure Callback invoked with the exception when the update fails.
+   */
   override fun updateUserProfile(
       profile: SeekerProfile,
       onSuccess: () -> Unit,
@@ -122,6 +180,13 @@ open class UserRepositoryFirestore(
         db.collection(collectionPath).document(profile.uid).set(profile), onSuccess, onFailure)
   }
 
+  /**
+   * Deletes a SeekerProfile from Firestore using the user ID [id].
+   *
+   * @param id The user ID of the profile to delete.
+   * @param onSuccess Callback invoked when the profile is successfully deleted.
+   * @param onFailure Callback invoked with the exception when the delete operation fails.
+   */
   override fun deleteUserProfile(
       id: String,
       onSuccess: () -> Unit,
@@ -144,6 +209,15 @@ open class UserRepositoryFirestore(
     return locations.toMutableList()
   }
 
+  /**
+   * Updates the cached locations for the user with ID [userId]. It adds [newLocation] to the
+   * existing locations and limits the list to a maximum of 2 locations.
+   *
+   * @param userId The ID of the user whose locations are being updated.
+   * @param newLocation The new location to add.
+   * @param onSuccess Callback invoked with the updated list of locations.
+   * @param onFailure Callback invoked with the exception when the update fails.
+   */
   override fun updateUserLocations(
       userId: String,
       newLocation: Location,
@@ -166,6 +240,13 @@ open class UserRepositoryFirestore(
     }
   }
 
+  /**
+   * Fetches the cached locations for a user with ID [userId].
+   *
+   * @param userId The ID of the user whose locations are being retrieved.
+   * @param onSuccess Callback invoked with the list of locations.
+   * @param onFailure Callback invoked with the exception when the operation fails.
+   */
   override fun getCachedLocation(
       userId: String,
       onSuccess: (List<Location>) -> Unit,
@@ -183,6 +264,16 @@ open class UserRepositoryFirestore(
     }
   }
 
+  /**
+   * Adds a new preference to the user's preference list in Firestore. It first retrieves the
+   * current list of preferences, adds the new preference if it's not already present, and then
+   * updates the user's document with the updated preferences list.
+   *
+   * @param userId The user ID to add the preference to.
+   * @param preference The new preference to add.
+   * @param onSuccess Callback invoked when the operation is successful.
+   * @param onFailure Callback invoked with the exception when the operation fails.
+   */
   override fun addUserPreference(
       userId: String,
       preference: String,
@@ -214,7 +305,15 @@ open class UserRepositoryFirestore(
     }
   }
 
-  // Delete a preference from the user's preferences
+  /**
+   * Deletes a specific preference from the user's preferences list in Firestore. It retrieves the
+   * user's current preferences, removes the specified preference, and updates the document.
+   *
+   * @param userId The user ID whose preference should be removed.
+   * @param preference The preference to remove.
+   * @param onSuccess Callback invoked when the operation is successful.
+   * @param onFailure Callback invoked with the exception when the operation fails.
+   */
   override fun deleteUserPreference(
       userId: String,
       preference: String,
@@ -242,7 +341,14 @@ open class UserRepositoryFirestore(
     }
   }
 
-  // Get the list of preferences for the user
+  /**
+   * Retrieves the list of preferences for a specific user from Firestore.
+   *
+   * @param userId The user ID whose preferences are to be retrieved.
+   * @param onSuccess Callback invoked with the list of preferences when the operation is
+   *   successful.
+   * @param onFailure Callback invoked with the exception when the operation fails.
+   */
   override fun getUserPreferences(
       userId: String,
       onSuccess: (List<String>) -> Unit,
@@ -259,6 +365,14 @@ open class UserRepositoryFirestore(
     }
   }
 
+  /**
+   * Executes a Firestore operation (e.g., add, update, delete) and handles the result with success
+   * and failure callbacks.
+   *
+   * @param task The Firestore task to be executed (e.g., document creation or update).
+   * @param onSuccess Callback invoked when the operation is successful.
+   * @param onFailure Callback invoked with the exception when the operation fails.
+   */
   private fun performFirestoreOperation(
       task: Task<Void>,
       onSuccess: () -> Unit,
@@ -276,6 +390,14 @@ open class UserRepositoryFirestore(
     }
   }
 
+  /**
+   * Converts a Firestore document into a SeekerProfile object. This method extracts all relevant
+   * fields such as user ID, name, username, image URL, email, phone, address (including latitude
+   * and longitude), and preferences to create a SeekerProfile.
+   *
+   * @param document The Firestore DocumentSnapshot to convert.
+   * @return A SeekerProfile object, or null if the document is missing required fields.
+   */
   fun documentToUser(document: DocumentSnapshot): SeekerProfile? {
     return try {
       Log.e("DocumentToUser", "")

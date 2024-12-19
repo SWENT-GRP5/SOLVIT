@@ -10,12 +10,16 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 
 class SearchServicesViewModel : ViewModel() {
+
+  // MutableStateFlow to track whether a search operation is in progress.
   private val _isSearching = MutableStateFlow(false)
   val isSearching = _isSearching.asStateFlow()
 
+  // MutableStateFlow to track the search text input by the user.
   private val _searchText = MutableStateFlow("")
   val searchText = _searchText.asStateFlow()
 
+  // MutableStateFlow to hold the full list of services.
   private val _servicesList = MutableStateFlow(SERVICES_LIST)
   val servicesList =
       searchText
@@ -32,10 +36,19 @@ class SearchServicesViewModel : ViewModel() {
               started = SharingStarted.WhileSubscribed(),
               initialValue = _servicesList.value)
 
+  /**
+   * Updates the search text with the user's input.
+   *
+   * @param text The search text input by the user.
+   */
   fun onSearchTextChange(text: String) {
     _searchText.value = text
   }
 
+  /**
+   * Toggles the search state (whether the search is active or not). If the search is being closed,
+   * clears the search text.
+   */
   fun onToggleSearch() {
     _isSearching.value = !_isSearching.value
     if (!_isSearching.value) {

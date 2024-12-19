@@ -34,6 +34,19 @@ import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.navigation.Route
 import com.google.firebase.Timestamp
 
+/**
+ * A composable function that displays the screen for creating a new service request. It handles
+ * input fields for title, description, location, service type, due date, and image selection, along
+ * with the logic for showing AI assistant and multi-step dialog for service request analysis. This
+ * function also handles form submission and navigation to the booking details page.
+ *
+ * @param navigationActions The navigation actions to navigate between screens.
+ * @param requestViewModel The ViewModel instance for handling service request data.
+ * @param locationViewModel The ViewModel instance for handling location data and suggestions.
+ * @param authViewModel The authentication ViewModel instance to access user data.
+ * @param notificationViewModel The ViewModel for managing notifications.
+ * @param listProviderViewModel The ViewModel for handling the list of providers.
+ */
 @SuppressLint(
     "UnusedMaterialScaffoldPaddingParameter",
     "UnusedMaterial3ScaffoldPaddingParameter",
