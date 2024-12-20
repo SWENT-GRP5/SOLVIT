@@ -36,6 +36,25 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.util.Locale
 
+/**
+ * A composable function that displays a time-based grid layout, often used in scheduling or
+ * calendar applications. It organizes the day into hourly rows and supports multiple columns
+ * representing different days or schedules. An optional current time indicator can be displayed.
+ *
+ * @param modifier Modifier for customizing the appearance and layout of the time grid.
+ * @param hourHeight The height of each hourly row in the grid. Default is 60.dp.
+ * @param currentTime The current time to be highlighted in the grid, if applicable.
+ * @param showCurrentTimeLine Whether to display a line and indicator for the current time. Default
+ *   is `false`.
+ * @param todayIndex Index of the current day column, used for highlighting the current time when
+ *   multiple columns are displayed.
+ * @param numberOfColumns Number of columns in the time grid, typically representing days or
+ *   schedules. Default is `1`.
+ * @param content A composable function invoked for each hour and column in the grid, receiving:
+ * - `hour: Int` - The current hour being displayed.
+ * - `dayIndex: Int` - The current column index.
+ * - `contentModifier: Modifier` - Modifier to customize the hour cell.
+ */
 @Composable
 fun TimeGrid(
     modifier: Modifier = Modifier,

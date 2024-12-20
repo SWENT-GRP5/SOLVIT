@@ -32,6 +32,29 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters
 import java.util.Locale
 
+/**
+ * A composable function that displays a week view in a calendar, showing service requests scheduled
+ * throughout the week with time slots. It includes a header displaying the current week range and
+ * individual weekday headers for better navigation.
+ *
+ * @param date A date representing the currently viewed week.
+ * @param onHeaderClick Callback invoked when the week header is clicked.
+ * @param timeSlots A map of scheduled service requests grouped by date.
+ * @param onServiceRequestClick Callback invoked when a service request is clicked.
+ * @param onDateSelected Callback invoked when a specific date in the week view is selected.
+ * @param modifier Modifier for customizing the appearance and layout of the week view.
+ *
+ * **Features:**
+ * - **Header:** Displays the current week range, clickable for custom actions.
+ * - **Weekday Headers:** Displays individual days of the week, highlighting the current day.
+ * - **Time Grid:**
+ *     - Displays a vertical timeline of 24 hours for each day.
+ *     - Shows scheduled service requests as time slots.
+ *     - Supports clicking service requests for more details or navigation.
+ *     - Highlights the current time if today is within the displayed week.
+ *
+ * This component supports day selection, time grid management, and date-specific callbacks.
+ */
 @Composable
 fun WeekView(
     date: LocalDate,

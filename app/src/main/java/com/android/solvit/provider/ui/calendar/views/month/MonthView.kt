@@ -26,6 +26,27 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters
 import java.util.Locale
 
+/**
+ * A composable function that displays a calendar month view with selectable dates, service request
+ * indicators, and a header showing the current month and year. The calendar dynamically adjusts to
+ * show all days of the current month, including leading and trailing dates for context.
+ *
+ * @param viewDate The date representing the currently viewed month.
+ * @param onDateSelected Callback invoked when a specific date is selected.
+ * @param onHeaderClick Callback invoked when the month header is clicked.
+ * @param timeSlots A map of scheduled service requests grouped by date.
+ * @param modifier Modifier for customizing the appearance and layout of the month view.
+ *
+ * **Features:**
+ * - **Header:** Displays the current month and year, clickable for month selection.
+ * - **Weekday Labels:** Displays labels for days of the week (Mon-Sun).
+ * - **Calendar Grid:**
+ *     - Shows all days of the current month, including leading and trailing days.
+ *     - Highlights the current day visually.
+ *     - Dimmed text for days outside the current month.
+ *     - Service request indicators for each day based on provided time slots.
+ * - **Date Selection:** The entire date cell is clickable, triggering the date selection callback.
+ */
 @Composable
 fun MonthView(
     viewDate: LocalDate,

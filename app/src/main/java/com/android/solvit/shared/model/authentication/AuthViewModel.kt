@@ -16,10 +16,26 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
+/**
+ * ViewModel responsible for managing authentication and user-related actions using Firebase
+ * Authentication and Firestore. It provides state management, user login, registration, and
+ * Firebase Cloud Messaging (FCM) token updates.
+ *
+ * @param authRepository The repository responsible for handling authentication-related tasks.
+ * @param fcmTokenManager The optional FCM token manager for managing push notifications.
+ */
 class AuthViewModel(
     private val authRepository: AuthRep,
     private val fcmTokenManager: FcmTokenManager? = null
 ) : ViewModel() {
+
+  /**
+   * **State Variables:**
+   * - **User Data:** Manages the current authenticated user.
+   * - **Email, Password, Role:** Manages login and registration input fields.
+   * - **Google Account:** Manages Google sign-in data.
+   * - **Registration Status:** Tracks whether the user has completed registration.
+   */
   private val _user = MutableStateFlow<User?>(null)
   val user: StateFlow<User?> = _user
 
@@ -41,6 +57,10 @@ class AuthViewModel(
   private val maxLocationsSize = 5
 
   companion object {
+    /**
+     * **Factory for Creating ViewModel Instances** Creates and provides instances of
+     * `AuthViewModel` with initialized dependencies.
+     */
     val Factory: ViewModelProvider.Factory =
         object : ViewModelProvider.Factory {
           @Suppress("UNCHECKED_CAST")
@@ -53,6 +73,7 @@ class AuthViewModel(
   }
 
   init {
+    // Initialize the user when the ViewModel is created
     authRepository.init { user ->
       _user.value = user
       if (user != null) {
@@ -66,6 +87,7 @@ class AuthViewModel(
     }
   }
 
+  /** Updates the FCM token associated with the current user. */
   private fun updateFcmToken() {
     fcmTokenManager?.let { manager ->
       viewModelScope.launch {
@@ -99,6 +121,11 @@ class AuthViewModel(
     }
   }
 
+  /**
+   * **Authentication Functions:**
+   * - Handles login, registration, and Google sign-in processes.
+   * - Updates state upon success or failure.
+   */
   fun setRole(role: String) {
     _role.value = role
   }
@@ -213,6 +240,10 @@ class AuthViewModel(
         { Log.e("AuthViewModel", "Error setting user name", it) })
   }
 
+  /**
+   * **User Location Management:**
+   * - Adds or removes saved user locations, ensuring the limit of 5 is maintained.
+   */
   fun addUserLocation(location: Location, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
     if (user.value == null) {
       Log.e("AuthViewModel", "User is null")
@@ -271,6 +302,10 @@ class AuthViewModel(
         })
   }
 
+  /**
+   * **Registration Completion:** Marks the registration as completed after the required data is
+   * provided.
+   */
   fun completeRegistration(onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
     if (user.value == null) {
       Log.e("AuthViewModel", "User is null")

@@ -6,6 +6,18 @@ import android.net.Uri
 import android.widget.Toast
 import com.android.solvit.shared.model.request.ServiceRequest
 
+/**
+ * Launches Google Maps for navigation to a single job's location based on the provided latitude and
+ * longitude.
+ *
+ * @param context The context used to start the map activity.
+ * @param jobLatitude The latitude of the job's location.
+ * @param jobLongitude The longitude of the job's location.
+ *
+ * **Behavior:**
+ * - Opens Google Maps with turn-by-turn navigation to the specified job location.
+ * - Shows a toast message if Google Maps is not installed or permissions are denied.
+ */
 fun navigateToSingleJob(context: Context, jobLatitude: Double, jobLongitude: Double) {
   val uri = Uri.parse("google.navigation:q=$jobLatitude,$jobLongitude")
   val mapIntent = Intent(Intent.ACTION_VIEW, uri)
@@ -21,6 +33,20 @@ fun navigateToSingleJob(context: Context, jobLatitude: Double, jobLongitude: Dou
   }
 }
 
+/**
+ * Launches Google Maps for navigation through multiple job locations, optimizing the route from the
+ * first job to the last.
+ *
+ * @param context The context used to start the map activity.
+ * @param requests A list of service requests, each containing a job's location.
+ *
+ * **Behavior:**
+ * - Sorts jobs by their due date for optimal routing.
+ * - Constructs a Google Maps URL with the last job as the destination and intermediate jobs as
+ *   waypoints.
+ * - Opens Google Maps with the optimal route or shows a toast if the app is not installed.
+ * - Displays a toast message if there are no jobs to navigate to.
+ */
 fun navigateToAllSortedJobs(context: Context, requests: List<ServiceRequest>) {
   if (requests.isEmpty()) {
     Toast.makeText(context, "No jobs available for navigation", Toast.LENGTH_SHORT).show()

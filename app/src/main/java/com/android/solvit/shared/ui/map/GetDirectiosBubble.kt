@@ -20,6 +20,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.android.solvit.shared.model.map.Location
 
+/**
+ * Displays a dialog bubble allowing the user to navigate to a specified location.
+ *
+ * @param location The target location containing latitude, longitude, and name.
+ * @param onDismiss Callback triggered when the dialog is dismissed.
+ */
 @Composable
 fun GetDirectionsBubble(location: Location, onDismiss: () -> Unit) {
   val context = LocalContext.current

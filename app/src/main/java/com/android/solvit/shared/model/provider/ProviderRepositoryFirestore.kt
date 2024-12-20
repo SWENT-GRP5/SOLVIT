@@ -67,10 +67,17 @@ class ProviderRepositoryFirestore(
     }
   }
 
+  /** Initializes the repository and triggers the success callback. */
   override fun init(onSuccess: () -> Unit) {
     onSuccess()
   }
 
+  /**
+   * Adds a real-time listener to the providers collection in Firestore.
+   *
+   * @param onSuccess Callback with the list of providers on successful data fetch.
+   * @param onFailure Callback with an exception if the operation fails.
+   */
   override fun addListenerOnProviders(
       onSuccess: (List<Provider>) -> Unit,
       onFailure: (Exception) -> Unit
@@ -91,6 +98,14 @@ class ProviderRepositoryFirestore(
     return db.collection(collectionPath).document().id
   }
 
+  /**
+   * Adds a provider to Firestore, uploading an image if provided.
+   *
+   * @param provider The provider data to be added.
+   * @param imageUri The optional image URI to upload.
+   * @param onSuccess Callback triggered on success.
+   * @param onFailure Callback triggered on failure.
+   */
   override fun addProvider(
       provider: Provider,
       imageUri: Uri?,
@@ -118,11 +133,25 @@ class ProviderRepositoryFirestore(
     }
   }
 
+  /**
+   * Deletes a provider by its unique Firestore document ID.
+   *
+   * @param uid The unique provider document ID.
+   * @param onSuccess Callback triggered on successful deletion.
+   * @param onFailure Callback triggered on failure.
+   */
   override fun deleteProvider(uid: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
     performFirestoreOperation(
         db.collection(collectionPath).document(uid).delete(), onSuccess, onFailure)
   }
 
+  /**
+   * Updates the provider's data in Firestore.
+   *
+   * @param provider The updated provider data.
+   * @param onSuccess Callback triggered on success.
+   * @param onFailure Callback triggered on failure.
+   */
   override fun updateProvider(
       provider: Provider,
       onSuccess: () -> Unit,
@@ -132,10 +161,22 @@ class ProviderRepositoryFirestore(
         db.collection(collectionPath).document(provider.uid).set(provider), onSuccess, onFailure)
   }
 
+  /**
+   * Applies the provided filter function to the provider data.
+   *
+   * @param filter The filter logic to apply.
+   */
   override fun filterProviders(filter: () -> Unit) {
     filter()
   }
 
+  /**
+   * Fetches providers based on the given service type.
+   *
+   * @param service The service type to filter by (optional).
+   * @param onSuccess Callback triggered with the list of matching providers.
+   * @param onFailure Callback triggered on failure.
+   */
   override fun getProviders(
       service: Services?,
       onSuccess: (List<Provider>) -> Unit,
@@ -168,6 +209,13 @@ class ProviderRepositoryFirestore(
     }
   }
 
+  /**
+   * Retrieves a specific provider by its unique Firestore user ID.
+   *
+   * @param userId The unique provider user ID.
+   * @param onSuccess Callback triggered with the retrieved provider.
+   * @param onFailure Callback triggered on failure.
+   */
   override fun getProvider(
       userId: String,
       onSuccess: (Provider?) -> Unit,
@@ -184,6 +232,12 @@ class ProviderRepositoryFirestore(
     }
   }
 
+  /**
+   * Fetches a specific provider as a suspend function for coroutines.
+   *
+   * @param uid The unique provider user ID.
+   * @return The provider if found, or null if not.
+   */
   override suspend fun returnProvider(uid: String): Provider? {
     return try {
       val doc = db.collection(collectionPath).document(uid).get().await()

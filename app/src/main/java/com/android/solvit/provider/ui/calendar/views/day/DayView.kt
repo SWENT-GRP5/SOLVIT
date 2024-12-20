@@ -30,6 +30,26 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
+/**
+ * A composable function that displays a detailed day view in a calendar, showing scheduled service
+ * requests as time slots. It highlights the current date and allows viewing and interacting with
+ * scheduled service requests.
+ *
+ * @param date The date to be displayed in the day view.
+ * @param onHeaderClick Callback invoked when the date header is clicked.
+ * @param timeSlots A map of service requests grouped by date.
+ * @param onServiceRequestClick Callback invoked when a service request is clicked.
+ * @param modifier Modifier for customizing the appearance and layout of the day view.
+ *
+ * **Features:**
+ * - **Header:** Displays the selected date in a bold, formatted style.
+ * - **Time Grid:** Shows a vertical timeline of 24 hours.
+ * - **Service Requests:** Displays service requests as time slots based on their scheduled time.
+ * - **Current Time Line:** Highlights the current time if the selected date is today.
+ *
+ * The component supports clicking the header to trigger additional actions like opening a date
+ * picker or navigating to another view.
+ */
 @Composable
 fun DayView(
     viewDate: LocalDate,
