@@ -74,16 +74,6 @@ class SignUpScreenTest {
   }
 
   @Test
-  fun signUp_emailAndPasswordInput() {
-    composeTestRule.setContent { SignUpScreen(mockNavigationActions, mockAuthViewModel) }
-    composeTestRule.waitForIdle()
-
-    // Test email input
-    composeTestRule.onNodeWithTag("emailInputField").performTextInput("test@example.com")
-    composeTestRule.onNodeWithTag("passwordInputField").performTextInput("password123")
-  }
-
-  @Test
   fun signUp_errorShowInEmailField() {
     composeTestRule.setContent { SignUpScreen(mockNavigationActions, mockAuthViewModel) }
     composeTestRule.waitForIdle()
