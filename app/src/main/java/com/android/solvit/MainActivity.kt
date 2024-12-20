@@ -31,8 +31,10 @@ import com.android.solvit.provider.ui.profile.ProviderProfileScreen
 import com.android.solvit.provider.ui.profile.ProviderRegistrationScreen
 import com.android.solvit.provider.ui.request.RequestsDashboardScreen
 import com.android.solvit.provider.ui.request.RequestsFeedScreen
+import com.android.solvit.seeker.model.SeekerBookingViewModel
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.seeker.model.provider.ListProviderViewModel
+import com.android.solvit.seeker.ui.booking.BookingCalendarScreen
 import com.android.solvit.seeker.ui.map.SeekerMapScreen
 import com.android.solvit.seeker.ui.profile.EditPreferences
 import com.android.solvit.seeker.ui.profile.EditSeekerProfileScreen
@@ -133,7 +135,13 @@ fun SolvitApp() {
       viewModel<ChatAssistantViewModel>(factory = ChatAssistantViewModel.Factory)
   val calendarViewModel =
       viewModel<ProviderCalendarViewModel>(
-          factory = ProviderCalendarViewModel.provideFactory(serviceRequestViewModel))
+          factory =
+              ProviderCalendarViewModel.provideFactory(authViewModel, serviceRequestViewModel))
+  val seekerBookingViewModel =
+      viewModel<SeekerBookingViewModel>(factory = SeekerBookingViewModel.Factory)
+
+  val navController = rememberNavController()
+  val navigationActions = NavigationActions(navController)
   val aiSolverViewModel = viewModel<AiSolverViewModel>(factory = AiSolverViewModel.Factory)
   val notificationViewModel =
       viewModel<NotificationsViewModel>(factory = NotificationsViewModel.Factory)
@@ -162,7 +170,8 @@ fun SolvitApp() {
               chatAssistantViewModel,
               notificationViewModel,
               aiSolverViewModel,
-              packageProposalViewModel)
+              packageProposalViewModel,
+              seekerBookingViewModel)
       "provider" ->
           ProviderUI(
               authViewModel,
@@ -239,7 +248,8 @@ fun SeekerUI(
     chatAssistantViewModel: ChatAssistantViewModel,
     notificationViewModel: NotificationsViewModel,
     aiSolverViewModel: AiSolverViewModel,
-    packageProposalViewModel: PackageProposalViewModel
+    packageProposalViewModel: PackageProposalViewModel,
+    seekerBookingViewModel: SeekerBookingViewModel
 ) {
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
@@ -284,7 +294,12 @@ fun SeekerUI(
           listProviderViewModel,
           serviceRequestViewModel,
           packageProposalViewModel,
-          chatViewModel)
+          chatViewModel,
+          seekerBookingViewModel)
+    }
+    composable(Route.BOOKING_CALENDAR) {
+      BookingCalendarScreen(
+          navigationActions = navigationActions, viewModel = seekerBookingViewModel)
     }
     composable(Route.CREATE_REQUEST) {
       CreateRequestScreen(

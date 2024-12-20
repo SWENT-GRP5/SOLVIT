@@ -3,16 +3,13 @@ package com.android.solvit.shared.model.provider
 import android.net.Uri
 import android.util.Log
 import com.android.solvit.shared.model.map.Location
-import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.service.Services
 import com.android.solvit.shared.model.utils.uploadImageToStorage
 import com.google.android.gms.tasks.Task
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.storage.FirebaseStorage
-import java.time.LocalDate
 import java.time.ZoneId
 import kotlinx.coroutines.tasks.await
 
@@ -97,98 +94,6 @@ class ProviderRepositoryFirestore(
     }
   }
 
-  /** Get time slot and date given the start time of service request */
-  fun getTimeSlotAndDate(startTime: Timestamp): Pair<TimeSlot, LocalDate> {
-    val startDateTime =
-        startTime.toDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
-
-    val startLocalTime = startDateTime.toLocalTime()
-    val startLocalDate = startDateTime.toLocalDate()
-
-    val endLocalTime = startLocalTime.plusMinutes(60)
-
-    val timeSlot =
-        TimeSlot(
-            startHour = startLocalTime.hour,
-            startMinute = startLocalTime.minute,
-            endHour = endLocalTime.hour,
-            endMinute = endLocalTime.minute)
-    return timeSlot to startLocalDate
-  }
-
-  /**
-   * Adds an accepted service request to the provider's schedule.
-   *
-   * @param request The service request being accepted.
-   */
-  override fun addAcceptedRequest(request: ServiceRequest) {
-    db.runTransaction { transaction ->
-      val providerId =
-          request.providerId
-              ?: throw IllegalStateException("Service request doesn't have a provider ID")
-      val scheduleRef =
-          db.collection(collectionPath)
-              .document(providerId)
-              .collection("schedules")
-              .document("current")
-
-      val schedule: Schedule =
-          transaction.get(scheduleRef).toObject(Schedule::class.java)
-              ?: throw IllegalStateException("Schedule not found for provider $providerId")
-
-      val newTimeSlot =
-          AcceptedTimeSlot(
-              requestId = request.uid,
-              startTime =
-                  request.meetingDate
-                      ?: throw IllegalStateException("Service request doesn't have a meeting date"))
-
-      val date = getTimeSlotAndDate(newTimeSlot.startTime)
-
-      if (!schedule.isTimeSlotAvailable(date.first, date.second)) {
-        throw FirebaseFirestoreException(
-            "Time slot no longer available", FirebaseFirestoreException.Code.ABORTED)
-      }
-      val updatedSchedule =
-          schedule.copy(acceptedTimeSlots = schedule.acceptedTimeSlots + newTimeSlot)
-      transaction.set(scheduleRef, updatedSchedule)
-    }
-  }
-
-  /**
-   * Removes an accepted service request from the provider's schedule.
-   *
-   * @param request The service request being removed.
-   */
-  override fun removeAcceptedRequest(request: ServiceRequest) {
-    db.runTransaction { transaction ->
-      val providerId =
-          request.providerId
-              ?: throw IllegalStateException("Service request doesn't have a provider ID")
-      val scheduleRef =
-          db.collection(collectionPath)
-              .document(providerId)
-              .collection("schedules")
-              .document("current")
-
-      val schedule =
-          transaction.get(scheduleRef).toObject(Schedule::class.java)
-              ?: throw IllegalStateException("Schedule not found for provider $providerId")
-
-      val updatedSchedule =
-          schedule.copy(
-              acceptedTimeSlots =
-                  schedule.acceptedTimeSlots.filterNot { it.requestId == request.uid })
-
-      transaction.set(scheduleRef, updatedSchedule)
-    }
-  }
-
-  /**
-   * Generates a new unique Firestore document ID for a provider.
-   *
-   * @return A new unique document ID.
-   */
   override fun getNewUid(): String {
     return db.collection(collectionPath).document().id
   }
@@ -391,9 +296,15 @@ class ProviderRepositoryFirestore(
     try {
       @Suppress("UNCHECKED_CAST")
       val regularHoursMap = (scheduleMap["regularHours"] as? Map<String, Any>) ?: mapOf()
-
       @Suppress("UNCHECKED_CAST")
       val exceptionsList = (scheduleMap["exceptions"] as? List<Map<String, Any>>) ?: listOf()
+      @Suppress("UNCHECKED_CAST")
+      val acceptedTimeSlotsList =
+          (scheduleMap["acceptedTimeSlots"] as? List<Map<String, Any>>) ?: listOf()
+
+      Log.d("ProviderRepositoryFirestore", "Converting regularHours: $regularHoursMap")
+      Log.d("ProviderRepositoryFirestore", "Converting exceptions: $exceptionsList")
+      Log.d("ProviderRepositoryFirestore", "Converting acceptedTimeSlots: $acceptedTimeSlotsList")
 
       val regularHours = mutableMapOf<String, MutableList<TimeSlot>>()
       for ((day, timeSlotsAny) in regularHoursMap) {
@@ -403,6 +314,7 @@ class ProviderRepositoryFirestore(
         }
         @Suppress("UNCHECKED_CAST") val timeSlotsList = timeSlotsAny as? List<Map<String, Any>>
         if (timeSlotsList == null) {
+          Log.w("ProviderRepositoryFirestore", "Invalid time slots list for day: $day")
           continue
         }
         val slots = convertTimeSlots(timeSlotsList)
@@ -416,17 +328,20 @@ class ProviderRepositoryFirestore(
         try {
           val timestamp = exceptionMap["timestamp"] as? Timestamp
           if (timestamp == null) {
+            Log.w("ProviderRepositoryFirestore", "Missing timestamp in exception: $exceptionMap")
             continue
           }
 
           @Suppress("UNCHECKED_CAST")
           val timeSlotsAnyList = exceptionMap["timeSlots"] as? List<Map<String, Any>>
           if (timeSlotsAnyList == null) {
+            Log.w("ProviderRepositoryFirestore", "Missing timeSlots in exception: $exceptionMap")
             continue
           }
 
           val typeString = exceptionMap["type"] as? String
           if (typeString == null) {
+            Log.w("ProviderRepositoryFirestore", "Missing type in exception: $exceptionMap")
             continue
           }
 
@@ -434,25 +349,57 @@ class ProviderRepositoryFirestore(
               try {
                 ExceptionType.valueOf(typeString)
               } catch (e: IllegalArgumentException) {
+                Log.w("ProviderRepositoryFirestore", "Invalid exception type: $typeString")
                 continue
               }
 
           val timeSlots = convertTimeSlots(timeSlotsAnyList)
           if (timeSlots.isEmpty()) {
+            Log.w("ProviderRepositoryFirestore", "No valid time slots in exception: $exceptionMap")
             continue
           }
 
           val date = timestamp.toDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
           exceptions.add(ScheduleException(date, timeSlots.toMutableList(), type))
         } catch (e: Exception) {
+          Log.e("ProviderRepositoryFirestore", "Error converting exception: ${e.message}")
           continue
         }
       }
 
-      return Schedule(regularHours, exceptions)
+      val acceptedTimeSlots = mutableListOf<AcceptedTimeSlot>()
+      for (acceptedTimeSlotMap in acceptedTimeSlotsList) {
+        try {
+          val requestId = acceptedTimeSlotMap["requestId"] as? String
+          if (requestId == null) {
+            Log.w(
+                "ProviderRepositoryFirestore",
+                "Missing requestId in accepted time slot: $acceptedTimeSlotMap")
+            continue
+          }
+
+          val startTime = acceptedTimeSlotMap["startTime"] as? Timestamp
+          if (startTime == null) {
+            Log.w(
+                "ProviderRepositoryFirestore",
+                "Missing startTime in accepted time slot: $acceptedTimeSlotMap")
+            continue
+          }
+
+          val duration = (acceptedTimeSlotMap["duration"] as? Number)?.toInt() ?: 60
+          acceptedTimeSlots.add(AcceptedTimeSlot(requestId, startTime, duration))
+        } catch (e: Exception) {
+          Log.e("ProviderRepositoryFirestore", "Error converting accepted time slot: ${e.message}")
+          continue
+        }
+      }
+
+      val schedule = Schedule(regularHours, exceptions, acceptedTimeSlots)
+      Log.d("ProviderRepositoryFirestore", "Successfully converted schedule: $schedule")
+      return schedule
     } catch (e: Exception) {
-      Log.e("ProviderRepositoryFirestore", "Error converting schedule: $e")
-      return Schedule(mutableMapOf(), mutableListOf())
+      Log.e("ProviderRepositoryFirestore", "Error converting schedule: ${e.message}")
+      return Schedule(mutableMapOf(), mutableListOf(), mutableListOf())
     }
   }
 }

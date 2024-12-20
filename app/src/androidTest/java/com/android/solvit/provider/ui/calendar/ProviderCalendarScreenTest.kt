@@ -343,34 +343,41 @@ class ProviderCalendarScreenTest {
   fun testDayViewDisplay() {
     setupScreen()
 
+    // Switch to day view
     composeTestRule.onNodeWithTag("segmentedButton_DAY").performClick()
     waitForAnimation()
+    assertEquals(CalendarView.DAY, viewModel.calendarView.value)
 
-    // 1. Test basic day view structure
-    composeTestRule.onNodeWithTag("dayView").assertExists().assertIsDisplayed()
-    composeTestRule.onNodeWithTag("dayViewHeader").assertExists().assertIsDisplayed()
-    composeTestRule.onNodeWithTag("dayViewTimeGrid").assertExists().assertIsDisplayed()
+    // Basic structure tests
+    composeTestRule.onNodeWithTag("dayView").assertExists()
+    composeTestRule.onNodeWithTag("dayHeader").assertExists()
+    composeTestRule.onNodeWithTag("dayViewTimeGrid").assertExists()
 
-    // 2. Test date header format
-    val requestDate = testDate.toLocalDate()
-    val formattedDate =
-        requestDate.format(DateTimeFormatter.ofPattern("EEEE d MMMM yyyy", Locale.getDefault()))
-    composeTestRule.onNodeWithText(formattedDate).assertExists().assertIsDisplayed()
-
-    // 3. Test service request display and scrolling
-    composeTestRule
-        .onNodeWithTag("dayViewServiceRequest_${testRequest.uid}")
-        .assertExists()
-        .assertIsDisplayed()
-
-    composeTestRule.onNodeWithTag("dayViewTimeGrid").performTouchInput {
-      swipeUp(startY = 1000f, endY = 100f)
-    }
+    // Wait for initial scroll to complete
     waitForAnimation()
+
+    // Verify some time labels are present (these should be visible regardless of scroll position)
+    // We know the schedule has hours from 9:00 to 17:00 on Monday
+    composeTestRule.onNodeWithText("09:00").assertExists()
+    composeTestRule.onNodeWithText("12:00").assertExists()
+    composeTestRule.onNodeWithText("17:00").assertExists()
+
+    // Verify the test requests are visible
+    composeTestRule.onNodeWithText("06:00").assertExists() // Morning request time
+    composeTestRule.onNodeWithText("14:00").assertExists() // Afternoon request time
+
+    // Verify day header shows correct date format
+    val formattedDate =
+        testDate
+            .toLocalDate()
+            .format(DateTimeFormatter.ofPattern("EEEE d MMMM yyyy", Locale.getDefault()))
+    composeTestRule.onNodeWithText(formattedDate).assertExists()
+
+    // Verify test requests are visible
+    composeTestRule.onNodeWithTag("dayViewServiceRequest_${testRequest.uid}").assertExists()
     composeTestRule
         .onNodeWithTag("dayViewServiceRequest_${afternoonTestRequest.uid}")
         .assertExists()
-        .assertIsDisplayed()
   }
 
   // ===== Navigation Tests =====

@@ -7,7 +7,6 @@ import android.icu.util.GregorianCalendar
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -48,7 +47,6 @@ import com.google.firebase.Timestamp
  * @param notificationViewModel The ViewModel for managing notifications.
  * @param listProviderViewModel The ViewModel for handling the list of providers.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint(
     "UnusedMaterialScaffoldPaddingParameter",
     "UnusedMaterial3ScaffoldPaddingParameter",
@@ -231,9 +229,11 @@ fun CreateRequestScreen(
               }
             } else {
               requestViewModel.saveServiceRequest(serviceRequest)
-              requestViewModel.selectRequest(serviceRequest)
-              navigationActions.navigateAndSetBackStack(
-                  Route.BOOKING_DETAILS, listOf(Route.REQUESTS_OVERVIEW))
+              requestViewModel.getServiceRequestById(serviceRequest.uid) { request ->
+                requestViewModel.selectRequest(request)
+                navigationActions.navigateAndSetBackStack(
+                    Route.BOOKING_DETAILS, listOf(Route.REQUESTS_OVERVIEW))
+              }
             }
             requestViewModel.unSelectProvider()
             notificationViewModel.sendNotifications(

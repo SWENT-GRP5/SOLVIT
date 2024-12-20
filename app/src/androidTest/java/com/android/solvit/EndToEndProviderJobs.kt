@@ -9,6 +9,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.test.core.app.ApplicationProvider
 import com.android.solvit.provider.model.ProviderCalendarViewModel
 import com.android.solvit.provider.model.profile.ProviderViewModel
+import com.android.solvit.seeker.model.SeekerBookingViewModel
 import com.android.solvit.seeker.model.profile.SeekerProfileViewModel
 import com.android.solvit.seeker.model.profile.UserRepository
 import com.android.solvit.seeker.model.profile.UserRepositoryFirestore
@@ -78,6 +79,7 @@ class EndToEndProviderJobs {
   private lateinit var calendarViewModel: ProviderCalendarViewModel
   private lateinit var packagesAssistantViewModel: PackagesAssistantViewModel
   private lateinit var aiSolverViewModel: AiSolverViewModel
+  private lateinit var seekerBookingViewModel: SeekerBookingViewModel
 
   private lateinit var chatRepository: ChatRepository
   private lateinit var notificationsViewModel: NotificationsViewModel
@@ -155,6 +157,7 @@ class EndToEndProviderJobs {
         ProviderCalendarViewModel(providerRepository, authViewModel, serviceRequestViewModel)
     packagesAssistantViewModel = PackagesAssistantViewModel()
     aiSolverViewModel = AiSolverViewModel()
+    seekerBookingViewModel = SeekerBookingViewModel(providerRepository, serviceRequestViewModel)
 
     `when`(locationRepository.search(ArgumentMatchers.anyString(), anyOrNull(), anyOrNull()))
         .thenAnswer { invocation ->
@@ -212,7 +215,8 @@ class EndToEndProviderJobs {
                   chatAssistantViewModel,
                   notificationsViewModel,
                   aiSolverViewModel,
-                  packageProposalViewModel)
+                  packageProposalViewModel,
+                  seekerBookingViewModel)
           "provider" ->
               ProviderUI(
                   authViewModel,

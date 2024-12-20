@@ -27,6 +27,7 @@ object Route {
   const val EDIT_REQUEST = "Edit_Request"
   const val REVIEW = "Review"
   const val AI_SOLVER = "Ai_Solver"
+  const val BOOKING_CALENDAR = "Booking Calendar"
 
   // Provider UI
   const val REQUESTS_FEED = "Requests_Feed"

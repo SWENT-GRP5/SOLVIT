@@ -344,6 +344,13 @@ open class ServiceRequestViewModel(
       repository.saveServiceRequest(
           updatedRequest,
           onSuccess = {
+            // Update the selected request immediately
+            _selectedRequest.value = updatedRequest
+
+            // Update all request lists
+            updateAllRequests()
+
+            // Send notification
             viewModelScope.launch {
               notificationManager
                   ?.sendServiceRequestAcceptedNotification(
@@ -354,7 +361,6 @@ open class ServiceRequestViewModel(
                     Log.e("FCM_DEBUG", "Failed to send acceptance notification", e)
                   }
             }
-            updateAllRequests()
           },
           onFailure = { e -> Log.e("ServiceRequestViewModel", "Error confirming request", e) })
     } catch (e: Exception) {

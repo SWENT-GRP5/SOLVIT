@@ -88,6 +88,7 @@ fun ProviderCalendarScreen(
   val calendarView by viewModel.calendarView.collectAsStateWithLifecycle()
   val timeSlots by viewModel.timeSlots.collectAsStateWithLifecycle()
   val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
+  val currentProvider by viewModel.currentProvider.collectAsStateWithLifecycle()
 
   var showDatePicker by remember { mutableStateOf(false) }
   var showBottomSheet by remember { mutableStateOf(false) }
@@ -132,16 +133,14 @@ fun ProviderCalendarScreen(
                   when (calendarView) {
                     CalendarView.DAY -> {
                       DayView(
-                          date = date,
-                          onHeaderClick = {
-                            shouldAnimate = false
-                            showDatePicker = true
-                          },
-                          timeSlots = timeSlots,
+                          viewDate = date,
+                          timeSlots = timeSlots[date] ?: emptyList(),
+                          onHeaderClick = { showDatePicker = true },
                           onServiceRequestClick = { request ->
                             viewModel.onServiceRequestClick(request)
                             navigationActions.navigateTo(Route.BOOKING_DETAILS)
                           },
+                          schedule = currentProvider.schedule,
                           modifier = Modifier.testTag("dayView"))
                     }
                     CalendarView.WEEK -> {
@@ -156,6 +155,7 @@ fun ProviderCalendarScreen(
                             viewModel.onServiceRequestClick(request)
                             navigationActions.navigateTo(Route.BOOKING_DETAILS)
                           },
+                          schedule = currentProvider.schedule,
                           onDateSelected = { selected ->
                             shouldAnimate = false
                             viewModel.onDateSelected(selected)

@@ -1,7 +1,6 @@
 package com.android.solvit.shared.model.provider
 
 import android.net.Uri
-import com.android.solvit.shared.model.request.ServiceRequest
 import com.android.solvit.shared.model.service.Services
 
 /** Interface defining repository operations related to service providers. */
@@ -90,20 +89,6 @@ interface ProviderRepository {
    * @param onFailure Callback invoked with an exception on failure.
    */
   fun getProvider(userId: String, onSuccess: (Provider?) -> Unit, onFailure: (Exception) -> Unit)
-
-  /**
-   * Adds a service request to the list of accepted requests.
-   *
-   * @param request The service request to add.
-   */
-  fun addAcceptedRequest(request: ServiceRequest)
-
-  /**
-   * Removes a service request from the list of accepted requests.
-   *
-   * @param request The service request to remove.
-   */
-  fun removeAcceptedRequest(request: ServiceRequest)
 
   /**
    * Retrieves a provider asynchronously by unique identifier.

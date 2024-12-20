@@ -783,24 +783,6 @@ class ProviderCalendarViewModelTest {
   }
 
   @Test
-  fun `addAcceptedRequest calls repository`() = runTest {
-    val mockRequest = mock<ServiceRequest>()
-
-    calendarViewModel.addAcceptedRequest(mockRequest)
-
-    verify(providerRepository).addAcceptedRequest(mockRequest)
-  }
-
-  @Test
-  fun `removeAcceptedRequest calls repository`() = runTest {
-    val mockRequest = mock<ServiceRequest>()
-
-    calendarViewModel.removeAcceptedRequest(mockRequest)
-
-    verify(providerRepository).removeAcceptedRequest(mockRequest)
-  }
-
-  @Test
   fun `startServiceRequestListener calls serviceRequestViewModel addListenerOnServiceRequests`() =
       runTest {
         calendarViewModel.startServiceRequestListener()
