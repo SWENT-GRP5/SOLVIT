@@ -59,7 +59,8 @@ open class NotificationService : FirebaseMessagingService() {
     notificationManager.createNotificationChannel(channel)
   }
 
-  private fun getPendingIntent(title: String): PendingIntent {
+  /** Creates a PendingIntent for the notification */
+  protected open fun getPendingIntent(title: String): PendingIntent {
     val intent =
         Intent(applicationContext, MainActivity::class.java).apply {
           flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK

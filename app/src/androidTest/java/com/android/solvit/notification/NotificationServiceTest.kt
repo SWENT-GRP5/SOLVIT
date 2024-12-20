@@ -3,7 +3,9 @@ package com.android.solvit.notification
 import android.Manifest
 import android.app.Notification
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Log
@@ -120,8 +122,26 @@ class NotificationServiceTest {
     }
 
     // Expose protected method for testing
-    public override fun showNotification(title: String, message: String) {
-      super.showNotification(title, message)
+    public override suspend fun showNotification(
+        title: String,
+        message: String,
+        imageUrl: String?,
+        requestTitle: String?
+    ) {
+      super.showNotification(title, message, imageUrl, requestTitle)
+    }
+
+    // Override getPendingIntent to use TestActivity in tests
+    override fun getPendingIntent(title: String): PendingIntent {
+      val intent =
+          Intent(applicationContext, TestActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+          }
+      return PendingIntent.getActivity(
+          applicationContext,
+          0,
+          intent,
+          PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
     }
   }
 
@@ -391,8 +411,9 @@ class NotificationServiceTest {
     verify(exactly = 0) { Log.d(any(), any()) }
   }
 
+  @OptIn(ExperimentalCoroutinesApi::class)
   @Test
-  fun showNotification_whenSecurityException_handlesError() {
+  fun showNotification_whenSecurityException_handlesError() = runTest {
     // Mock Log.e
     every { Log.e(any(), any(), any()) } returns 0
     every { Log.d(any(), any()) } returns 0 // Allow debug logs to pass through
@@ -408,19 +429,20 @@ class NotificationServiceTest {
         SecurityException("Test security exception")
 
     // This should not throw an exception due to error handling
-    service.onMessageReceived(
-        RemoteMessage.Builder("test@test.com")
-            .setData(mapOf("title" to "Test Title", "body" to "Test Body"))
-            .build())
+    service.showNotification("Test Title", "Test Body", null, null)
+
+    // Allow coroutines to complete
+    advanceUntilIdle()
 
     // Verify that error was logged with correct message
-    verify { Log.e(any(), "Security exception when showing notification", any()) }
+    verify { Log.e(TAG, "Error showing notification", any<SecurityException>()) }
 
     unmockkStatic(NotificationManagerCompat::class)
   }
 
+  @OptIn(ExperimentalCoroutinesApi::class)
   @Test
-  fun onMessageReceived_withNotificationPayload_showsNotification() {
+  fun onMessageReceived_withNotificationPayload_showsNotification() = runTest {
     val message =
         RemoteMessage.Builder("test@test.com")
             .setData(mapOf("title" to "Test Title", "body" to "Test Body"))
@@ -431,18 +453,53 @@ class NotificationServiceTest {
     assertNotificationShown("Test Title", "Test Body")
   }
 
-  private fun assertNotificationShown(title: String, body: String) {
-    device.openNotification()
+  @OptIn(ExperimentalCoroutinesApi::class)
+  @Test
+  fun onMessageReceived_withBothPayloads_prioritizesNotificationPayload() = runTest {
+    // Test with two separate messages to verify priority
+    val dataMessage =
+        RemoteMessage.Builder("test@test.com")
+            .setData(mapOf("title" to "Data Title", "body" to "Data Body"))
+            .build()
 
-    // Check if notification is shown with correct title and body
-    val titleShown = device.wait(Until.hasObject(By.text(title)), NOTIFICATION_TIMEOUT)
-    val bodyShown = device.wait(Until.hasObject(By.text(body)), UI_TIMEOUT)
+    // First verify data payload works
+    service.onMessageReceived(dataMessage)
+    assertNotificationShown("Data Title", "Data Body")
 
-    assertTrue("Notification title not shown: $title", titleShown != null)
-    assertTrue("Notification body not shown: $body", bodyShown != null)
+    clearSystemState()
 
-    // Close notification drawer
-    device.pressHome()
+    // Now verify direct notification shows correctly
+    service.showNotification("Notification Title", "Notification Body", null, null)
+    assertNotificationShown("Notification Title", "Notification Body")
+  }
+
+  @OptIn(ExperimentalCoroutinesApi::class)
+  @Test
+  fun showNotification_whenGenericException_handlesError() = runTest {
+    // Mock Log.e
+    every { Log.e(any(), any(), any()) } returns 0
+    every { Log.d(any(), any()) } returns 0 // Allow debug logs to pass through
+
+    // Create a service that throws generic Exception
+    service = TestNotificationService().apply { initialize(context) }
+
+    // Mock the NotificationManagerCompat to throw Exception
+    mockkStatic(NotificationManagerCompat::class)
+    val mockNotificationManager = mockk<NotificationManagerCompat>()
+    every { NotificationManagerCompat.from(any()) } returns mockNotificationManager
+    every { mockNotificationManager.notify(any(), any()) } throws
+        RuntimeException("Test generic exception")
+
+    // This should not throw an exception due to error handling
+    service.showNotification("Test Title", "Test Body", null, null)
+
+    // Allow coroutines to complete
+    advanceUntilIdle()
+
+    // Verify that error was logged
+    verify { Log.e(TAG, "Error showing notification", any()) }
+
+    unmockkStatic(NotificationManagerCompat::class)
   }
 
   @Test
@@ -528,34 +585,6 @@ class NotificationServiceTest {
   }
 
   @Test
-  fun showNotification_whenGenericException_handlesError() {
-    // Mock Log.e
-    every { Log.e(any(), any(), any()) } returns 0
-    every { Log.d(any(), any()) } returns 0 // Allow debug logs to pass through
-
-    // Create a service that throws generic Exception
-    service = TestNotificationService().apply { initialize(context) }
-
-    // Mock the NotificationManagerCompat to throw Exception
-    mockkStatic(NotificationManagerCompat::class)
-    val mockNotificationManager = mockk<NotificationManagerCompat>()
-    every { NotificationManagerCompat.from(any()) } returns mockNotificationManager
-    every { mockNotificationManager.notify(any(), any()) } throws
-        RuntimeException("Test generic exception")
-
-    // This should not throw an exception due to error handling
-    service.onMessageReceived(
-        RemoteMessage.Builder("test@test.com")
-            .setData(mapOf("title" to "Test Title", "body" to "Test Body"))
-            .build())
-
-    // Verify that error was logged
-    verify { Log.e(any(), "Error showing notification", any()) }
-
-    unmockkStatic(NotificationManagerCompat::class)
-  }
-
-  @Test
   fun getPendingIntent_returnsValidIntent() {
     // Create service
     service = TestNotificationService().apply { initialize(context) }
@@ -576,25 +605,6 @@ class NotificationServiceTest {
     val appLaunched =
         device.wait(Until.hasObject(By.pkg(context.packageName).depth(0)), NOTIFICATION_TIMEOUT)
     assertTrue("App should be launched when clicking notification", appLaunched)
-  }
-
-  @Test
-  fun onMessageReceived_withBothPayloads_prioritizesNotificationPayload() {
-    // Test with two separate messages to verify priority
-    val dataMessage =
-        RemoteMessage.Builder("test@test.com")
-            .setData(mapOf("title" to "Data Title", "body" to "Data Body"))
-            .build()
-
-    // First verify data payload works
-    service.onMessageReceived(dataMessage)
-    assertNotificationShown("Data Title", "Data Body")
-
-    clearSystemState()
-
-    // Now verify direct notification shows correctly
-    service.showNotification("Notification Title", "Notification Body")
-    assertNotificationShown("Notification Title", "Notification Body")
   }
 
   @Test
@@ -644,5 +654,19 @@ class NotificationServiceTest {
       Log.e(TAG, "Test failed", e)
       throw e
     }
+  }
+
+  private fun assertNotificationShown(title: String, body: String) {
+    device.openNotification()
+
+    // Check if notification is shown with correct title and body
+    val titleShown = device.wait(Until.hasObject(By.text(title)), NOTIFICATION_TIMEOUT)
+    val bodyShown = device.wait(Until.hasObject(By.text(body)), UI_TIMEOUT)
+
+    assertTrue("Notification title not shown: $title", titleShown != null)
+    assertTrue("Notification body not shown: $body", bodyShown != null)
+
+    // Close notification drawer
+    device.pressHome()
   }
 }
