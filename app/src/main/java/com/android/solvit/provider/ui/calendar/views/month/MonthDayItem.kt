@@ -26,6 +26,28 @@ import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
+/**
+ * A composable function that displays a calendar day item in a month view. It visually highlights
+ * the current day, indicates whether the date belongs to the current month, and shows service
+ * request statuses using status indicators.
+ *
+ * @param date The date to be displayed in the calendar item.
+ * @param isCurrentDay Indicates if the displayed date is the current day.
+ * @param isCurrentMonth Indicates if the displayed date belongs to the currently viewed month.
+ * @param onDateSelected Callback invoked when the calendar day item is clicked.
+ * @param timeSlots A list of service requests scheduled for the day.
+ * @param modifier Modifier for customizing the appearance and layout of the calendar item.
+ *
+ * **Features:**
+ * - **Visual Highlighting:**
+ *     - Current day: Highlighted with a primary background and bold text.
+ *     - Days outside the current month: Dimmed text to indicate inactive dates.
+ * - **Service Request Indicators:**
+ *     - Displays status indicators for service requests scheduled throughout the day.
+ *     - Separates morning and afternoon service requests into two rows for better visibility.
+ * - **Clickable:** The entire calendar day item is clickable, triggering the date selection
+ *   callback.
+ */
 @Composable
 fun MonthDayItem(
     date: LocalDate,
@@ -113,6 +135,18 @@ fun MonthDayItem(
       }
 }
 
+/**
+ * A utility function that calculates the status of service requests for a specific day. It sorts
+ * service requests by meeting time and maps each request to its corresponding time and status.
+ *
+ * @param requests A list of scheduled service requests.
+ * @return A list of pairs where each pair contains:
+ * - `LocalTime`: The time of the service request.
+ * - `ServiceRequestStatus`: The service request's status.
+ *
+ * The function supports calendar display components by providing a ready-to-use list of scheduled
+ * times and statuses for status indicators.
+ */
 fun calculateDayStatus(
     requests: List<ServiceRequest>
 ): List<Pair<LocalTime, ServiceRequestStatus>> {

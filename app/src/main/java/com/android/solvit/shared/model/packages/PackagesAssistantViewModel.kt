@@ -18,14 +18,23 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 
+/**
+ * ViewModel responsible for managing the generation and retrieval of service package proposals
+ * using a generative AI model.
+ *
+ * @property packageProposals StateFlow holding the list of currently generated package proposals.
+ * @property isLoading StateFlow indicating whether data is being loaded.
+ */
 class PackagesAssistantViewModel : ViewModel() {
+  // Holds generated package proposals
   private val _packageProposals = MutableStateFlow<List<PackageProposal>>(emptyList())
   val packageProposals: StateFlow<List<PackageProposal>> = _packageProposals
 
+  // Indicates whether the fetching process is ongoing
   private val _isLoading = MutableStateFlow(false)
   val isLoading: StateFlow<Boolean> = _isLoading
 
-  // Schema for the package proposals structured response
+  // Schema definition for validating the generated package proposals
   private val schema =
       Schema(
           name = "PackageProposals",
@@ -91,7 +100,7 @@ class PackagesAssistantViewModel : ViewModel() {
                                           description = "A bullet point of the package proposal"),
                               ))))
 
-  // Generative model for generating package proposals
+  // AI model configuration for generating package proposals
   private val model =
       GenerativeModel(
           modelName = "gemini-1.5-flash",
@@ -112,7 +121,16 @@ class PackagesAssistantViewModel : ViewModel() {
                   SafetySetting(HarmCategory.SEXUALLY_EXPLICIT, BlockThreshold.MEDIUM_AND_ABOVE),
                   SafetySetting(HarmCategory.DANGEROUS_CONTENT, BlockThreshold.MEDIUM_AND_ABOVE)))
 
-  // Fetch package proposals for a given service type
+  /**
+   * Fetch package proposals based on the service type, provider information, and additional
+   * context.
+   *
+   * @param type The type of service for which package proposals are needed.
+   * @param numberOfPackages The number of packages to generate.
+   * @param providerId The unique identifier of the provider requesting the packages.
+   * @param viewModel The ViewModel managing package proposal operations.
+   * @param providerQuery Additional context or requests from the provider.
+   */
   fun fetchPackageProposals(
       type: Services,
       numberOfPackages: Int,
@@ -147,6 +165,7 @@ class PackagesAssistantViewModel : ViewModel() {
         }
   }
 
+  /** Clear the currently loaded package proposals. */
   fun clearPackageProposals() {
     _packageProposals.value = emptyList()
   }

@@ -12,6 +12,20 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.android.solvit.shared.model.request.ServiceRequestStatus
 
+/**
+ * A composable function that displays a circular status indicator representing the status of a
+ * service request. The indicator's color changes dynamically based on the provided status.
+ *
+ * @param status The `ServiceRequestStatus` representing the current status of the service request.
+ * @param modifier Modifier for customizing the appearance and layout of the indicator.
+ *
+ * **Visual Representation:**
+ * - **Outer Circle:** Colored based on the request status using
+ *   `ServiceRequestStatus.getStatusColor()`.
+ * - **Inner Circle:** A smaller white circle centered inside the outer circle for visual emphasis.
+ *
+ * The component supports testing tags for easier UI automation and testing.
+ */
 @Composable
 fun StatusIndicator(status: ServiceRequestStatus, modifier: Modifier = Modifier) {
   Box(

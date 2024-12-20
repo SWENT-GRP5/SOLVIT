@@ -31,6 +31,25 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
+/**
+ * A composable function that displays a list of service requests as time slots in a bottom sheet
+ * layout. Each service request includes its scheduled time, title, and optional description. The
+ * list is sorted by meeting date in ascending order.
+ *
+ * @param timeSlots A list of `ServiceRequest` objects representing scheduled service requests.
+ * @param onServiceRequestClick Callback invoked when a service request item is clicked.
+ * @param modifier Modifier for customizing the appearance and layout of the bottom sheet.
+ *
+ * **Item Structure:**
+ * - **Time Range:** Displays the start and end times of the service request.
+ * - **Title:** The title of the service request, shown prominently.
+ * - **Description:** An optional description, truncated if too long.
+ * - **Status Indicator:** A visual indicator showing the service request's status.
+ *
+ * The function applies background and border colors based on the service request's status using
+ * `ServiceRequestStatus.getStatusColor()`. Items are clickable and provide visual feedback through
+ * custom colors and shape styles.
+ */
 @Composable
 fun BottomSheetTimeSlots(
     timeSlots: List<ServiceRequest>,
