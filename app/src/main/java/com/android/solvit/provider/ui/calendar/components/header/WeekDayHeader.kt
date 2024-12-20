@@ -17,6 +17,18 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
+/**
+ * A composable function that displays a single day's header within a weekly calendar view. It shows
+ * the abbreviated weekday name (e.g., "Mon") and the day of the month. The current day is visually
+ * highlighted with a primary color and bold text.
+ *
+ * @param date The date to be displayed in the header.
+ * @param today The current date used for highlighting the header if it matches `date`.
+ * @param onDateSelected Callback invoked when the header is clicked, passing the selected date.
+ * @param modifier Modifier for customizing the appearance and layout of the header.
+ *
+ * The header is clickable, enabling date selection, and updates the UI accordingly.
+ */
 @Composable
 fun WeekDayHeader(
     date: LocalDate,

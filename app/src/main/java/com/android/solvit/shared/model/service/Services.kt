@@ -13,6 +13,7 @@ import com.android.solvit.shared.ui.theme.Plumber
 import com.android.solvit.shared.ui.theme.Tutor
 import com.android.solvit.shared.ui.theme.Writer
 
+/** Enum class representing different service types available in the application. */
 enum class Services {
   PLUMBER,
   ELECTRICIAN,
@@ -27,10 +28,22 @@ enum class Services {
   OTHER;
 
   companion object {
+    /**
+     * Formats the enum value to a readable string with capitalized words.
+     *
+     * @param service The service type to format.
+     * @return A human-readable string representation of the service.
+     */
     fun format(service: Services): String {
       return service.name.lowercase().replaceFirstChar { it.uppercase() }.replace("_", " ")
     }
 
+    /**
+     * Retrieves the icon associated with the given service type.
+     *
+     * @param service The service type whose icon is required.
+     * @return The drawable resource ID of the icon.
+     */
     fun getIcon(service: Services): Int {
       return when (service) {
         PLUMBER -> R.drawable.ic_plumber
@@ -47,6 +60,12 @@ enum class Services {
       }
     }
 
+    /**
+     * Retrieves the color associated with the service type.
+     *
+     * @param service The service type whose color is needed.
+     * @return The color constant defined in the theme.
+     */
     fun getColor(service: Services): Color {
       return when (service) {
         PLUMBER -> Plumber
@@ -63,6 +82,12 @@ enum class Services {
       }
     }
 
+    /**
+     * Retrieves the profile image associated with the service type.
+     *
+     * @param service The service type whose profile image is required.
+     * @return The drawable resource ID of the profile image.
+     */
     fun getProfileImage(service: Services): Int {
       return when (service) {
         PLUMBER -> R.drawable.pr_plumber

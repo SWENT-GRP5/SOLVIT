@@ -45,6 +45,14 @@ import kotlinx.coroutines.delay
 
 val TONES_LIST = listOf("Formal", "Neutral", "Friendly", "Positive", "Negative", "Professional")
 
+/**
+ * Composable function displaying the Chat Assistant Dialog.
+ *
+ * @param chatAssistantViewModel ViewModel handling chat assistant actions.
+ * @param isSeeker Boolean indicating if the current user is a seeker.
+ * @param onDismiss Callback when the dialog is dismissed.
+ * @param onResponse Callback when a response is generated or translated.
+ */
 @Composable
 fun ChatAssistantDialog(
     chatAssistantViewModel: ChatAssistantViewModel,
@@ -161,6 +169,13 @@ fun ChatAssistantDialog(
   }
 }
 
+/**
+ * Composable function displaying a selectable tone item.
+ *
+ * @param tone The name of the tone being displayed.
+ * @param onSelect Callback when the tone is selected.
+ * @param onUnselect Callback when the tone is unselected.
+ */
 @Composable
 fun ToneItem(tone: String, onSelect: (String) -> Unit, onUnselect: (String) -> Unit) {
   var isSelected by remember { mutableStateOf(false) }
@@ -178,6 +193,12 @@ fun ToneItem(tone: String, onSelect: (String) -> Unit, onUnselect: (String) -> U
       color = if (isSelected) Color.Black else Color.Gray)
 }
 
+/**
+ * Composable function displaying language selection dropdowns.
+ *
+ * @param onSelectFrom Callback for the source language selection.
+ * @param onSelectTo Callback for the target language selection.
+ */
 @Composable
 fun LanguageSelection(onSelectFrom: (String) -> Unit, onSelectTo: (String) -> Unit) {
   Column(modifier = Modifier.testTag("languageSelection")) {
@@ -186,6 +207,12 @@ fun LanguageSelection(onSelectFrom: (String) -> Unit, onSelectTo: (String) -> Un
   }
 }
 
+/**
+ * Composable function for selecting a language from a dropdown list.
+ *
+ * @param onSelect Callback for the selected language.
+ * @param label Label for the dropdown field (e.g., "From", "To").
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LanguageSelection(onSelect: (String) -> Unit, label: String) {

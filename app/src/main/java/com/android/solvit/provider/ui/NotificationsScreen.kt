@@ -55,6 +55,22 @@ import com.google.maps.android.compose.rememberCameraPositionState
 import java.text.SimpleDateFormat
 import java.util.Locale
 
+/**
+ * A composable function that displays the notifications screen, listing service request
+ * notifications with date-based grouping and detailed notification dialogs for individual requests.
+ *
+ * @param viewModel The ViewModel managing notification data and interactions.
+ * @param providerId The unique identifier of the provider for fetching notifications.
+ * @param navigationActions Actions for navigating between screens.
+ *
+ * **Features:**
+ * - **Notifications List:** Displays notifications grouped by date, with clickable items for more
+ *   details.
+ * - **Empty State:** Shows an image and message when no notifications are available.
+ * - **Notification Dialog:** Displays service request details when a notification is clicked.
+ * - **Navigation Support:** Provides a back button for screen navigation.
+ * - **State Management:** Uses `collectAsStateWithLifecycle()` for reactive updates.
+ */
 @Composable
 fun NotificationScreen(
     viewModel: NotificationsViewModel,
@@ -142,6 +158,18 @@ fun NotificationScreen(
       }
 }
 
+/**
+ * A composable function that displays a single notification item with a clickable card layout.
+ *
+ * @param notification The notification data to be displayed.
+ * @param onClick Callback invoked when the notification is clicked.
+ * @param modifier Modifier for customizing the appearance and layout.
+ *
+ * **Features:**
+ * - **Title & Message:** Displays the notification's title and message.
+ * - **Clickable Card:** Allows interaction through clicks for more detailed views.
+ * - **Custom Styling:** Supports typography, padding, and elevation for enhanced UI presentation.
+ */
 @Composable
 fun NotificationItem(
     notification: Notification,
@@ -172,6 +200,23 @@ fun NotificationItem(
   }
 }
 
+/**
+ * Groups a list of notifications by their formatted date.
+ *
+ * @param notifications A list of notifications to be grouped.
+ * @return A map where keys are formatted date strings, and values are lists of notifications.
+ *
+ * **Example Output:**
+ *
+ * ```
+ * {
+ *   "March 14" -> [Notification1, Notification2],
+ *   "March 15" -> [Notification3]
+ * }
+ * ```
+ *
+ * This function supports efficient display of grouped notifications in the UI.
+ */
 fun groupNotificationsByDate(notifications: List<Notification>): Map<String, List<Notification>> {
   val dateFormat = SimpleDateFormat("MMMM dd", Locale.ENGLISH)
   return notifications.groupBy { notification ->
@@ -179,6 +224,20 @@ fun groupNotificationsByDate(notifications: List<Notification>): Map<String, Lis
   }
 }
 
+/**
+ * A composable function that displays a detailed service request dialog with various sections:
+ * title, description, deadline, and images. It supports expandable descriptions and a map preview.
+ *
+ * @param onDismiss Callback invoked when the dialog is dismissed.
+ * @param serviceRequest The service request to be displayed in the dialog.
+ *
+ * **Features:**
+ * - **Title & Description:** Displays the service request's title and expandable description.
+ * - **Images:** Shows service request images or placeholders if unavailable.
+ * - **Map Preview:** Displays a mini-map centered on the service request's location.
+ * - **Deadline:** Displays the formatted service request deadline with an icon.
+ * - **Notification Icon:** Positioned visually above the dialog.
+ */
 @Composable
 fun Notifications_Dialog(onDismiss: () -> Unit, serviceRequest: ServiceRequest) {
   Dialog(onDismissRequest = onDismiss) {

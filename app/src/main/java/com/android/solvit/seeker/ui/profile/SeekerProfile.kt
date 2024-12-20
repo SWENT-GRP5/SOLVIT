@@ -73,6 +73,15 @@ import com.android.solvit.shared.ui.navigation.Screen
 import com.android.solvit.shared.ui.theme.Typography
 import com.android.solvit.shared.ui.utils.TopAppBarInbox
 
+/**
+ * A composable function that displays the Seekers' Profile screen, which includes profile
+ * information, settings, and options to navigate to different sections. It locks the orientation to
+ * portrait mode.
+ *
+ * @param viewModel The ViewModel instance that provides seeker profile data.
+ * @param navigationActions The navigation actions that handle screen navigation.
+ * @param authViewModel The authentication ViewModel instance that manages user authentication data.
+ */
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter", "SourceLockedOrientationActivity")
 @Composable
 fun SeekerProfileScreen(
@@ -220,6 +229,15 @@ fun SeekerProfileScreen(
   }
 }
 
+/**
+ * A composable function that displays the profile information card containing the user's name,
+ * email, and profile picture, with an option to edit the profile.
+ *
+ * @param fullName The full name of the seeker.
+ * @param email The email address of the seeker.
+ * @param imageUrl The URL of the seeker's profile image.
+ * @param onEdit A callback function to navigate to the edit profile screen.
+ */
 @Composable
 fun ProfileInfoCard(
     fullName: String = "",
@@ -268,6 +286,17 @@ fun ProfileInfoCard(
       }
 }
 
+/**
+ * A composable function that represents an individual profile option item, such as "My Account",
+ * "Order History", etc., displayed as a clickable row with an icon and text.
+ *
+ * @param icon The icon representing the option.
+ * @param optionName The name of the option.
+ * @param subtitle An optional subtitle for the option.
+ * @param onClick A callback function to execute when the option is clicked.
+ * @param iconColor The color of the icon.
+ * @param modifier A modifier to apply to the layout of the item.
+ */
 @Composable
 fun ProfileOptionItem(
     icon: ImageVector,
@@ -317,6 +346,12 @@ fun ProfileOptionItem(
       }
 }
 
+/**
+ * A composable function that displays a card with options related to the app, such as "Help &
+ * Support" and "Read More on GitHub". It includes links to external web pages.
+ *
+ * @param context The context of the application.
+ */
 @Composable
 fun AboutAppCard(context: Context) {
   Card(
@@ -347,6 +382,13 @@ fun AboutAppCard(context: Context) {
       }
 }
 
+/**
+ * A composable function that displays a confirmation dialog asking the user if they want to log
+ * out. The dialog includes options to confirm or cancel the logout action.
+ *
+ * @param onLogout A callback function that executes the logout action.
+ * @param onDismiss A callback function that dismisses the dialog.
+ */
 @Composable
 fun LogoutDialog(onLogout: () -> Unit, onDismiss: () -> Unit) {
   AlertDialog(
@@ -382,6 +424,7 @@ fun LogoutDialog(onLogout: () -> Unit, onDismiss: () -> Unit) {
       modifier = Modifier.testTag("LogoutDialog"))
 }
 
+// Helper function to open a URL in the browser
 fun openWebPage(context: Context, url: String) {
   try {
     val webIntent =

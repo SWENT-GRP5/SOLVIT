@@ -48,6 +48,48 @@ import com.android.solvit.shared.ui.navigation.NavigationActions
 import com.android.solvit.shared.ui.theme.Typography
 import com.android.solvit.shared.ui.utils.TopAppBarInbox
 
+/**
+ * A composable screen for creating or editing a service request. The screen allows users to input
+ * the title, description, service type, location, and due date for a service request. Users can
+ * also select an image and submit the request. If editing an existing request, users can delete the
+ * request.
+ *
+ * This screen locks the orientation to portrait and provides a background image that changes based
+ * on the system theme (light or dark).
+ *
+ * @param navigationActions The navigation actions used to handle screen navigation, including going
+ *   back to the previous screen.
+ * @param screenTitle The title displayed in the top app bar.
+ * @param title The current title of the service request.
+ * @param onTitleChange A lambda function called when the title changes.
+ * @param description The current description of the service request.
+ * @param onDescriptionChange A lambda function called when the description changes.
+ * @param typeQuery The query for filtering service types.
+ * @param onTypeQueryChange A lambda function called when the service type query changes.
+ * @param showDropdownType A flag that determines whether the dropdown for service types is shown.
+ * @param onShowDropdownTypeChange A lambda function called when the visibility of the service type
+ *   dropdown changes.
+ * @param filteredServiceTypes A list of filtered service types based on the query.
+ * @param onServiceTypeSelected A lambda function called when a service type is selected.
+ * @param locationQuery The query for filtering locations.
+ * @param onLocationQueryChange A lambda function called when the location query changes.
+ * @param showDropdownLocation A flag that determines whether the dropdown for locations is shown.
+ * @param onShowDropdownLocationChange A lambda function called when the visibility of the location
+ *   dropdown changes.
+ * @param locationSuggestions A list of location suggestions based on the query.
+ * @param userLocations A list of locations associated with the user.
+ * @param onLocationSelected A lambda function called when a location is selected.
+ * @param selectedLocation The currently selected location.
+ * @param selectedRequest The existing service request being edited, if any.
+ * @param requestViewModel The view model responsible for handling service request operations.
+ * @param dueDate The current due date for the service request.
+ * @param onDueDateChange A lambda function called when the due date changes.
+ * @param selectedImageUri The URI of the selected image for the service request.
+ * @param imageUrl The URL of the image if it exists for the service request.
+ * @param onImageSelected A lambda function called when an image is selected or deselected.
+ * @param onSubmit A lambda function called when the submit button is clicked.
+ * @param submitButtonText The text displayed on the submit button.
+ */
 @SuppressLint("SourceLockedOrientationActivity")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

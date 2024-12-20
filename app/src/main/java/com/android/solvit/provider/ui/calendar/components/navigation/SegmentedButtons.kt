@@ -32,6 +32,17 @@ import com.android.solvit.shared.ui.theme.Typography
 import java.util.Locale
 import kotlin.math.roundToInt
 
+/**
+ * A composable function that displays segmented buttons for toggling between calendar views (e.g.,
+ * Day, Week, Month). The currently selected view is highlighted using a sliding indicator.
+ *
+ * @param currentView The currently selected calendar view.
+ * @param onViewChange Callback invoked when a different calendar view is selected.
+ * @param modifier Modifier for customizing the appearance and layout of the segmented buttons.
+ *
+ * This function uses animation to smoothly transition the selection indicator. Each button is
+ * styled to visually distinguish between selected and unselected states.
+ */
 @Composable
 fun SegmentedButtons(
     currentView: CalendarView,

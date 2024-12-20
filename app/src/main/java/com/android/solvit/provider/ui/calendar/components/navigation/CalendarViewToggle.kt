@@ -10,6 +10,18 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.android.solvit.provider.model.CalendarView
 
+/**
+ * A composable function that displays a toggle control for switching between different calendar
+ * views (e.g., Day, Week, Month). The currently selected view is highlighted, and changes are
+ * handled through a callback.
+ *
+ * @param currentView The currently selected calendar view.
+ * @param onViewChange Callback invoked when a new calendar view is selected.
+ * @param modifier Modifier for customizing the appearance and layout of the toggle control.
+ *
+ * This function uses a segmented button style for selecting between different views and provides
+ * accessibility through test tags for easy UI testing.
+ */
 @Composable
 fun CalendarViewToggle(
     currentView: CalendarView,

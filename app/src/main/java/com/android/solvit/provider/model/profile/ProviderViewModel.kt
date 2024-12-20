@@ -14,17 +14,33 @@ import com.google.firebase.storage.storage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
+/**
+ * ViewModel responsible for managing provider-related operations, including retrieving and updating
+ * provider data, calculating booking routes, and optimizing travel paths. It uses a backtracking
+ * algorithm to solve the Traveling Salesman Problem (TSP) for route optimization.
+ *
+ * @constructor Initializes the ViewModel with a given provider repository.
+ * @property repository Repository for provider data operations, including fetching and updating
+ *   provider details.
+ */
 class ProviderViewModel(private val repository: ProviderRepository) : ViewModel() {
+
+  /** Holds the current provider's details as a state flow. */
   private val _userProvider = MutableStateFlow<Provider?>(null)
+
+  /** Exposes the current provider's data as an immutable state flow. */
   val userProvider: StateFlow<Provider?> = _userProvider
 
-  // represent cost of route of provider to go to bookings
+  /**
+   * Stores the minimum cost of traveling through all booking locations. Used during route
+   * optimization.
+   */
   var minCost = Double.MAX_VALUE
 
-  // represent the best route given location of different bookings
+  /** Holds the best route order after solving the TSP problem. */
   val bestRoute = mutableListOf<Int>()
 
-  // create factory
+  /** Factory for creating instances of the ViewModel with default repository implementations. */
   companion object {
     val Factory: ViewModelProvider.Factory =
         object : ViewModelProvider.Factory {
@@ -38,6 +54,11 @@ class ProviderViewModel(private val repository: ProviderRepository) : ViewModel(
         }
   }
 
+  /**
+   * Retrieves provider information from the repository by its unique ID.
+   *
+   * @param uid The unique ID of the provider to fetch.
+   */
   fun getProvider(uid: String) {
     repository.getProvider(
         uid,
@@ -45,15 +66,33 @@ class ProviderViewModel(private val repository: ProviderRepository) : ViewModel(
         onFailure = { Log.e("ProviderViewModel", it.toString()) })
   }
 
+  /**
+   * Updates the provider's data in the repository and fetches the updated provider details.
+   *
+   * @param provider The updated provider information to be saved.
+   */
   fun updateProvider(provider: Provider) {
     repository.updateProvider(provider, onSuccess = { getProvider(provider.uid) }, onFailure = {})
   }
 
+  /**
+   * Calculates the Haversine distance between two geographical points.
+   *
+   * @param startLoc The starting location.
+   * @param destLoc The destination location.
+   * @return The calculated distance in kilometers.
+   */
   fun distanceTo(startLoc: Location, destLoc: Location): Double {
     return haversineDistance(
         startLoc.latitude, startLoc.longitude, destLoc.latitude, destLoc.longitude)
   }
 
+  /**
+   * Constructs a distance matrix for bookings, including the provider's current location.
+   *
+   * @param bookings A list of booking locations.
+   * @return A 2D array where distances[i][j] represents the distance from location i to j.
+   */
   fun distanceMatrix(bookings: List<Location>): Array<DoubleArray> {
     val startPoint = _userProvider.value?.location
 
@@ -68,6 +107,15 @@ class ProviderViewModel(private val repository: ProviderRepository) : ViewModel(
     return distances
   }
 
+  /**
+   * Solves the Traveling Salesman Problem (TSP) using backtracking to find the optimal route.
+   *
+   * @param distances A precomputed distance matrix.
+   * @param currentPosition The current location in the route.
+   * @param visited A Boolean array tracking visited locations.
+   * @param currentCost The accumulated cost of the current route.
+   * @param route The current route being evaluated.
+   */
   fun tspBackTracking(
       distances: Array<DoubleArray>,
       currentPosition: Int,
@@ -99,6 +147,12 @@ class ProviderViewModel(private val repository: ProviderRepository) : ViewModel(
     }
   }
 
+  /**
+   * Optimizes the booking route by computing the shortest path using TSP backtracking.
+   *
+   * @param location A list of booking locations to optimize.
+   * @return The optimized list of locations based on the shortest route.
+   */
   fun optimizeRouteBooking(location: List<Location>): List<Location> {
     val distances = distanceMatrix(location)
     val visited = BooleanArray(location.size + 1) { false }

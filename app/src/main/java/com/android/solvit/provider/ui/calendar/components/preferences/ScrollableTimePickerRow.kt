@@ -15,6 +15,22 @@ import androidx.compose.ui.unit.dp
 import java.time.LocalTime
 import kotlinx.coroutines.launch
 
+/**
+ * A composable function that displays a scrollable time picker row with hour and minute selectors.
+ * It allows users to select a specific time by scrolling through hours and minutes with snapping
+ * behavior.
+ *
+ * @param selectedTime The currently selected time as a `LocalTime` object.
+ * @param onTimeSelected Callback invoked when the user selects a new time.
+ * @param modifier Modifier for customizing the appearance and layout of the time picker row.
+ * @param testTagPrefix A prefix used for testing tags applied to components for UI testing.
+ *
+ * This function separates time selection into two columns:
+ * - **Hour Selector:** Scrolls through 0-23.
+ * - **Minute Selector:** Scrolls through 0-59 in steps of 5.
+ *
+ * Selected values are highlighted, and the picker snaps to the nearest value when scrolling stops.
+ */
 @Composable
 fun ScrollableTimePickerRow(
     selectedTime: LocalTime,
@@ -61,6 +77,20 @@ fun ScrollableTimePickerRow(
       }
 }
 
+/**
+ * A composable function representing a scrollable list of time values (hours or minutes). It
+ * supports snapping behavior and highlights the currently selected value.
+ *
+ * @param selectedTime The currently selected time value.
+ * @param range The range of selectable time values (e.g., 0-23 for hours, 0-59 for minutes).
+ * @param onValueSelected Callback invoked when a new time value is selected.
+ * @param isActive Indicates whether the column is actively being scrolled.
+ * @param onScrollStateChanged Callback triggered when the scroll state changes.
+ * @param testTag A unique test tag for UI testing.
+ *
+ * This function ensures that the selected value snaps into place when scrolling stops. It uses a
+ * lazy column with visual feedback for selection.
+ */
 @Composable
 private fun TimeColumn(
     selectedTime: Int,

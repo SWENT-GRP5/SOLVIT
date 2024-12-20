@@ -28,6 +28,19 @@ import java.time.LocalDate
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
+/**
+ * A composable function that provides a swipeable calendar interface. Users can swipe left or right
+ * to navigate between calendar views (Day, Week, or Month). The displayed date updates dynamically
+ * based on the swipe direction. Animations are applied during transitions if enabled.
+ *
+ * @param currentViewDate The initial or currently displayed date in the calendar.
+ * @param onViewDateChanged Callback invoked when the view date changes due to a swipe gesture.
+ * @param calendarView The type of calendar view to display (Day, Week, or Month).
+ * @param shouldAnimate Whether to animate date transitions during swipes. Default is `true`.
+ * @param modifier Modifier for customizing the container layout.
+ * @param content Composable content to display within the calendar container, receiving the updated
+ *   date as a parameter.
+ */
 @Composable
 fun SwipeableCalendarContainer(
     currentViewDate: LocalDate,
