@@ -116,18 +116,12 @@ private constructor(
       requestTitle: String
   ): Result<Unit> {
     return try {
-      val notification =
-          mapOf(
-              "title" to providerName,
-              "body" to "has accepted your service request",
-              "imageUrl" to (providerProfilePicUrl ?: ""),
-              "requestTitle" to requestTitle)
-
       val data =
           mapOf(
               "requestId" to requestId,
               "status" to "ACCEPTED",
-              "notification" to gson.toJson(notification))
+              "requestTitle" to requestTitle,
+              "imageUrl" to (providerProfilePicUrl ?: ""))
 
       sendNotification(
           recipientUserId,

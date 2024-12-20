@@ -129,23 +129,23 @@ class NotificationManagerTest {
         val providerName = "Test Provider"
         val providerProfilePicUrl = "https://example.com/profile.jpg"
         val requestTitle = "Plumbing Service"
+
+        val data =
+            mapOf(
+                "requestId" to requestId,
+                "status" to "ACCEPTED",
+                "requestTitle" to requestTitle,
+                "imageUrl" to providerProfilePicUrl)
+
         val expectedData =
             mapOf(
                 "recipientToken" to testToken,
                 "notification" to
-                    gson.toJson(
-                        mapOf(
-                            "title" to "Service Request Accepted",
-                            "body" to
-                                "$providerName has accepted your $requestTitle service request",
-                            "data" to
-                                mapOf(
-                                    "senderId" to testUserId,
-                                    "recipientId" to testRecipientId,
-                                    "requestId" to requestId,
-                                    "status" to "ACCEPTED",
-                                    "imageUrl" to providerProfilePicUrl,
-                                    "requestTitle" to requestTitle))))
+                    mapOf(
+                        "title" to "Service Request Accepted",
+                        "body" to "$providerName has accepted your $requestTitle service request"),
+                "data" to
+                    (data + mapOf("senderId" to testUserId, "recipientId" to testRecipientId)))
 
         // Act
         val result =
